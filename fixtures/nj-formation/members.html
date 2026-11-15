@@ -1,0 +1,27 @@
+<!doctype html><html><head><meta charset="utf-8"><title>NJ Business Formation - Members/Managers</title><link rel="stylesheet" href="style.css"><script src="_shell.js"></script></head>
+<body><h1>Business Formation</h1><h2>Members/Managers</h2>
+
+<p>At least one member is required. Up to 10.</p>
+<table id="rows"><thead><tr><th></th><th>Name</th><th>Address</th><th></th></tr></thead><tbody></tbody></table>
+<p><a class="btn" href="#" onclick="document.getElementById(&quot;m&quot;).classList.add(&quot;open&quot;); document.getElementById(&quot;MName&quot;).focus(); return false;">Add New Member</a></p>
+<p><a class="btn btn-primary" href="#" id="cont">Continue</a></p>
+<div class="modal" id="m"><div class="modal-body"><h3>Add New Member</h3>
+<form id="mf"><input type="submit" tabindex="-1" aria-hidden="true" style="position:absolute;left:-9999px;width:1px;height:1px">
+<div class="form-group"><label for="MName">Name <span class="required">*</span></label><input id="MName" required></div>
+<div class="form-group"><label for="MStreet1">Street Address 1 <span class="required">*</span></label><input id="MStreet1" required></div>
+<div class="form-group"><label for="MStreet2">Street Address 2</label><input id="MStreet2"></div>
+<div class="form-group"><label for="MCity">City <span class="required">*</span></label><input id="MCity" required></div>
+<div class="form-group"><label for="MState">State <span class="required">*</span></label><select id="MState" required><option value="">Select</option><option value="NJ">NJ</option><option value="NY">NY</option><option value="PA">PA</option></select></div>
+<div class="form-group"><label for="MZip">Zip <span class="required">*</span></label><input id="MZip" required></div>
+<!-- Quirk 1: the Add control is a label, not a button; scripted clicks do nothing. Enter in a field submits the form (posts ModalAddMember). -->
+<div class="form-group"><label class="btn btn-primary" onclick="return false">Add</label> <label class="btn" onclick="document.getElementById(&quot;m&quot;).classList.remove(&quot;open&quot;)">Close</label></div>
+</form></div></div>
+<script>
+const members = NJ.get("members", []);
+function render(){ const tb=document.querySelector("#rows tbody"); tb.innerHTML=""; for (const m of members) tb.insertAdjacentHTML("beforeend", `<tr><td>+</td><td>${m.name}</td><td>${m.street}, ${m.city} ${m.state} ${m.zip}</td><td><a href="#">Edit</a> <a href="#">Delete</a></td></tr>`); }
+render();
+document.getElementById("mf").addEventListener("submit", (e) => { e.preventDefault();
+  const g=(id)=>document.getElementById(id).value; members.push({name:g("MName"),street:g("MStreet1"),city:g("MCity"),state:g("MState"),zip:g("MZip")}); NJ.set("members", members); location.href="members.html?ModalAddMember=1"; });
+document.getElementById("cont").addEventListener("click", (e) => { e.preventDefault(); if (!members.length) { location.href = "members.html?bounced=1"; return; } NJ.go("other-provisions.html"); });
+</script>
+</body></html>

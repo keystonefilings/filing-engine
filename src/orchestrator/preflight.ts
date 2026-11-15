@@ -1,0 +1,103 @@
+import type { FilingRecord, ApprovalRecord } from "../store/types.js";
+import type { ClientCompanySettings, TenantSettings } from "../settings/schema.js";
+import type { SiteAdapter } from "../adapters/types.js";
+import type { Vault } from "../settings/vault.js";
+import { IRS_HOURS } from "../adapters/irs-ein/intents.js";
+import type { ApprovalService } from "../approvals/service.js";
+import { expectedFees, FeeUnknownError } from "../fees/table.js";
+
+export interface PreflightResult { ok: boolean; blockers: string[]; warnings: string[] }
+
+/** Decision 3: NY drawdown balance is read before approval and before the run. Implementation lands with walk C. */
+export interface BalanceProvider {
+  nyDrawdownBalanceUsd(accountRef: string): Promise<number | null>;
+}
+export const unknownBalanceProvider: BalanceProvider = { nyDrawdownBalanceUsd: async () => null };
+
+/** Minutes until the IRS assistant closes, or null when it is closed now. */
+export function irsWindowMinutesRemaining(now: Date = new Date()): number | null {
+  const parts = new Intl.DateTimeFormat("en-US", {
+    timeZone: IRS_HOURS.timeZone, hour12: false, weekday: "short", hour: "2-digit", minute: "2-digit",
+  }).formatToParts(now);
+  const get = (t: string) => parts.find((p) => p.type === t)?.value ?? "";
+  const dayIdx = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].indexOf(get("weekday"));
+  const hour = Number(get("hour")) % 24;
+  const minute = Number(get("minute"));
+  if (!IRS_HOURS.days.includes(dayIdx)) return null;
+  const nowMin = hour * 60 + minute;
+  const open = IRS_HOURS.openHour * 60, close = IRS_HOURS.closeHour * 60;
+  if (nowMin < open || nowMin >= close) return null;
+  return close - nowMin;
+}
+
+export async function preflight(input: {
+  filing: FilingRecord;
+  approval: ApprovalRecord | null;
+  tenant: TenantSettings;
+  client: ClientCompanySettings;
+  adapter: SiteAdapter | null;
+  einAdapter: SiteAdapter;
+  approvals: ApprovalService;
+  vault: Vault;
+  balances: BalanceProvider;
+  dryRun: boolean;
+  now?: Date;
+}): Promise<PreflightResult> {
+  const b: string[] = [], w: string[] = [];
+  const { filing, approval, tenant, client, adapter, dryRun } = input;
+  const req = filing.request;
+
+  if (!adapter) b.push(`no adapter wired for ${req.state}/${req.type} yet`);
+  else if (!adapter.complete && !dryRun) b.push(`${adapter.key} is not fully mapped; only dry runs are allowed`);
+
+  if (!dryRun) {
+    if (!approval) b.push("no approval on file");
+    else {
+      const v = input.approvals.verifyForRun(filing, approval, tenant, client);
+      if (!v.ok) b.push(v.reason);
+    }
+  }
+
+  const einMode = req.ein?.mode ?? client.einMode;
+  if (req.ein && einMode === "in_run") {
+    const remaining = irsWindowMinutesRemaining(input.now);
+    if (remaining === null) b.push("IRS EIN assistant is closed now (Mon-Fri 7am-10pm ET); in-run EIN cannot start");
+    else if (remaining < IRS_HOURS.minMinutesRemaining) b.push(`only ${remaining} minutes left in the IRS window; need ${IRS_HOURS.minMinutesRemaining}`);
+    if (!input.einAdapter.complete && !dryRun) b.push("IRS EIN adapter is not mapped yet (walk B); in-run EIN cannot run for real");
+    if (!req.ein.responsibleParty) b.push("in-run EIN requires a responsible party");
+  }
+
+  try {
+    if (req.type !== "ein_only") {
+      expectedFees(req.state, req.type, {
+        paymentMethod: req.state === "NJ" ? client.njStoredPaymentMethod : undefined,
+        certificateOfStanding: req.formation?.additionalCertificates.certificateOfStanding,
+        certifiedCopy: req.formation?.additionalCertificates.certifiedCopy,
+      });
+    }
+  } catch (e) {
+    if (e instanceof FeeUnknownError) (dryRun ? w : b).push(e.message);
+    else throw e;
+  }
+
+  if (adapter && !dryRun) {
+    const credKey = adapter.credentialKey({ filing, client, tenant });
+    if (credKey) {
+      const cred = await input.vault.getCredential(credKey);
+      if (!cred) b.push(`no credential in vault for ${credKey}`);
+    } else if (adapter.site === "NJ") {
+      b.push("NJ runs pay from the client's NJ account (decision 3) but no njAccountCredentialKey is set for this client");
+    }
+  }
+
+  if (req.state === "NY" && !dryRun) {
+    if (!client.nyDrawdownAccountRef) b.push("NY filings pay from a drawdown account (decision 3) but none is set for this client");
+    else {
+      const bal = await input.balances.nyDrawdownBalanceUsd(client.nyDrawdownAccountRef);
+      if (bal === null) b.push("NY drawdown balance could not be read; refusing to start (no drafts, payment is the last step)");
+      else if (approval && bal < approval.fees.reduce((s, f) => s + f.amountUsd, 0)) b.push(`NY drawdown balance $${bal} is below the approved fees`);
+    }
+  }
+
+  return { ok: b.length === 0, blockers: b, warnings: w };
+}

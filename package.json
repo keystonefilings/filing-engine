@@ -1,0 +1,33 @@
+{
+  "name": "keystone-filing-engine",
+  "version": "0.1.0",
+  "description": "API + webhook filing auto-fill engine for Keystone Filings",
+  "scripts": {
+    "dev": "tsx watch src/index.ts",
+    "start": "tsx src/index.ts",
+    "worker": "tsx src/worker.ts",
+    "fixtures": "tsx fixtures/serve.ts",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "fastify": "^5.12.8",
+    "pdf-lib": "^1.17.1",
+    "pg": "^8.23.1",
+    "zod": "^4.6.7",
+    "playwright": "1.63.0"
+  },
+  "devDependencies": {
+    "@types/node": "^26.6.6",
+    "@types/pg": "^8.23.1",
+    "tsx": "^4.23.15",
+    "typescript": "^7.0.2",
+    "vitest": "^5.1.0"
+  },
+  "private": true,
+  "type": "module"
+}

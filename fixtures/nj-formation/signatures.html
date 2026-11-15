@@ -1,0 +1,23 @@
+<!doctype html><html><head><meta charset="utf-8"><title>NJ Business Formation - Signatures</title><link rel="stylesheet" href="style.css"><script src="_shell.js"></script></head>
+<body><h1>Business Formation</h1><h2>Signatures</h2>
+
+<p>At least one signer is required. Check the signature box to accept the certificate and formally execute the filing.</p>
+<table id="srows"><thead><tr><th>Name</th><th>Title</th><th>Signature</th></tr></thead><tbody></tbody></table>
+<p><a class="btn" href="#" onclick="document.getElementById(&quot;s&quot;).classList.add(&quot;open&quot;); return false;">Add New Signer</a></p>
+<p><button class="btn btn-primary" id="scont" disabled>Continue</button></p>
+<div class="modal" id="s"><div class="modal-body"><h3>Add New Signer</h3>
+<div class="form-group"><label for="SName">Name <span class="required">*</span></label><input id="SName" required></div>
+<div class="form-group"><label for="STitle">Title <span class="required">*</span></label><select id="STitle" required><option value="">Select</option><option value="AR">Authorized Representative</option><option value="MM">Managing Member</option><option value="MB">Member</option></select></div>
+<!-- Quirk 2: Save has no accessible name (icon only). -->
+<div class="form-group"><button type="button" class="btn btn-primary" id="ssave" aria-hidden="false">&#10003;</button> <button type="button" class="btn" onclick="document.getElementById(&quot;s&quot;).classList.remove(&quot;open&quot;)">&#10005;</button></div>
+</div></div>
+<script>
+const signers = NJ.get("signers", []);
+function renderS(){ const tb=document.querySelector("#srows tbody"); tb.innerHTML=""; signers.forEach((s,i)=>tb.insertAdjacentHTML("beforeend", `<tr><td>${s.name}</td><td>${s.title}</td><td><input type="checkbox" id="sig${i}" aria-label="Signature of ${s.name}: I accept the certificate and intend to formally execute this filing"></td></tr>`)); gate(); }
+function gate(){ const boxes=[...document.querySelectorAll("#srows input[type=checkbox]")]; document.getElementById("scont").disabled = !boxes.length || !boxes.every(b=>b.checked); }
+document.addEventListener("change", gate);
+renderS();
+document.getElementById("ssave").onclick=()=>{ const sel=document.getElementById("STitle"); signers.push({name:document.getElementById("SName").value, title: sel.options[sel.selectedIndex].text}); NJ.set("signers", signers); location.href="signatures.html?ModalAddSigner=1"; };
+document.getElementById("scont").onclick=()=>NJ.go("review.html");
+</script>
+</body></html>

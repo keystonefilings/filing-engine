@@ -1,0 +1,16 @@
+<!doctype html><html><head><meta charset="utf-8"><title>NJ Business Formation - Registered Agent</title><link rel="stylesheet" href="style.css"><script src="_shell.js"></script></head>
+<body><h1>Business Formation</h1><h2>Registered Agent</h2>
+
+<form onsubmit="event.preventDefault(); NJ.go(&quot;members.html&quot;)">
+<fieldset><legend>Registered Agent <span class="required">*</span></legend>
+<label><input type="radio" name="AgentMode" value="enter" checked> Enter a Registered Agent/Office</label>
+<label><input type="radio" name="AgentMode" value="service"> Select a Registered Agent from the service company list</label></fieldset>
+<div class="form-group"><label for="AgentName">Name <span class="required">*</span></label><input id="AgentName" name="AgentName" required></div>
+<div class="form-group"><label for="AgentStreet1">Street 1 <span class="required">*</span></label><input id="AgentStreet1" name="AgentStreet1" required></div>
+<div class="form-group"><label for="AgentCity">City <span class="required">*</span></label><input id="AgentCity" name="AgentCity" required></div>
+<div class="form-group"><label for="AgentState">State <span class="required">*</span></label><select id="AgentState" name="AgentState" required><option value="NJ">NJ</option></select></div>
+<div class="form-group"><label for="AgentZip">Zip <span class="required">*</span></label><input id="AgentZip" name="AgentZip" required></div>
+<div class="form-group"><label><input type="checkbox" id="Designation" name="Designation" required> I hereby designate the above as Registered Agent (Registered Agent Designation)</label></div>
+<button type="submit" class="btn btn-primary">Continue</button>
+</form>
+</body></html>

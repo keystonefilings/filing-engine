@@ -1,0 +1,10 @@
+<!doctype html><html><head><meta charset="utf-8"><title>NJ Business Formation - Review</title><link rel="stylesheet" href="style.css"><script src="_shell.js"></script></head>
+<body><h1>Business Formation</h1><h2>Review</h2>
+
+<details open><summary>Business Information</summary><p id="bi"></p></details>
+<details><summary>Registered Agent</summary><p>as entered</p></details>
+<details><summary>Members/Managers</summary><p id="mm"></p></details>
+<details><summary>Signatures</summary><p id="sg"></p></details>
+<script>document.getElementById("bi").textContent=NJ.get("name","")+" LLC";document.getElementById("mm").textContent=NJ.get("members",[]).map(m=>m.name).join(", ");document.getElementById("sg").textContent=NJ.get("signers",[]).map(s=>s.name).join(", ");</script>
+<p><a class="btn btn-primary" href="#" onclick="event.preventDefault(); NJ.go(&quot;payment.html&quot;)">Continue</a> <a class="btn" href="business-name.html">Cancel</a></p>
+</body></html>
