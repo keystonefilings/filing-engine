@@ -1,9 +1,15 @@
-<!doctype html><html><head><meta charset="utf-8"><title>NJ Business Formation - Business Information - Business Data</title><link rel="stylesheet" href="style.css"><script src="_shell.js"></script></head>
-<body><h1>Business Formation</h1><h2>Business Information - Business Data</h2>
-
-<form onsubmit="event.preventDefault(); NJ.go(&quot;main-address.html&quot;)">
-<div class="form-group"><label for="Purpose">Business Purpose</label><textarea id="Purpose" name="Purpose"></textarea></div>
-<div class="form-group"><label for="EIN">EIN</label><input id="EIN" name="EIN" type="text" maxlength="9"><small>Optional. Federal Employer Identification Number.</small></div>
-<button type="submit" class="btn btn-primary">Continue</button>
-</form>
+<!doctype html><html><head><meta charset="utf-8"><title>State of NJ - Online Business Entity Filing</title><link rel="stylesheet" href="style.css"><script src="_shell.js"></script></head>
+<body><h1>Business Formation</h1>
+<nav><a href="#">Help</a> <a href="#">Retrieve Documents</a> <a href="#">New User</a> <a href="#">Login</a></nav>
+<p>You have chosen to file a <strong>NJ Domestic Limited Liability Company (LLC)</strong> named: <strong id="nm"></strong></p><script>document.getElementById("nm").textContent=NJ.get("name","").toUpperCase()+" "+NJ.get("designator","")</script>
+<h2>Business Data</h2>
+<form onsubmit="event.preventDefault(); NJ.set('ein', document.getElementById('FeinNumber').value); NJ.go('business-purpose.html')">
+<div class="form-group"><label for="FeinNumber">Employer Identification Number (optional) <a href="#">Need a EIN?</a></label>
+<input id="FeinNumber" name="FeinNumber" maxlength="9" type="text"> <input id="FeinLocation" name="FeinLocation" maxlength="3" type="text" value="000"></div>
+<div class="form-group"><label for="NaicsCode">NAICS Code (optional) <a href="#">Need NAICS code?</a></label><input id="NaicsCode" name="NaicsCode" maxlength="6" type="text"></div>
+<div class="form-group"><label for="Duration">Duration</label><input id="Duration" name="Duration" maxlength="12" type="text"></div>
+<div class="form-group"><label for="EffectiveDate">Effective Date</label><input id="effective-date-picker" name="EffectiveDate" type="text" value="11/17/2026"></div>
+<input type="submit" class="btn btn-success" value="Continue">
+</form><div id="timeoutModal" class="modal"><div class="modal-body"><h3>Session Timeout Warning</h3>
+<p>Your session will expire soon.</p><input type="button" class="btn btn-success timeoutPrevent" value="Continue"> <input type="button" class="btn" value="Exit"></div></div>
 </body></html>

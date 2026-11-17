@@ -10,7 +10,11 @@ describe("fees (decision 5)", () => {
     expect(expectedFees("NJ", "formation", { paymentMethod: "credit_card" })).toEqual([
       { label: "Formation filing fee", amountUsd: 100 }, { label: "Service fee (credit_card)", amountUsd: 3.5 },
     ]);
-    expect(() => expectedFees("NJ", "standing_certificate")).toThrow(FeeUnknownError);
+    expect(expectedFees("NJ", "standing_certificate", { paymentMethod: "echeck" })).toEqual([
+      { label: expect.stringContaining("Standing Certificate"), amountUsd: 25 }, { label: "Service fee (echeck)", amountUsd: 1 },
+    ]);
+    expect(() => expectedFees("NJ", "standing_certificate", { paymentMethod: "stored_echeck" })).toThrow(FeeUnknownError);
+    expect(() => expectedFees("NJ", "alternate_name")).toThrow(FeeUnknownError);
     expect(() => expectedFees("NJ", "formation", { paymentMethod: "stored_card" })).toThrow(FeeUnknownError);
   });
   it("checks the live page against approved lines and cap", () => {
@@ -58,11 +62,16 @@ describe("webhooks", () => {
 });
 
 describe("pre-flight", () => {
-  it("knows the IRS window in Eastern time", () => {
-    expect(irsWindowMinutesRemaining(new Date("2026-11-14T15:00:00Z"))).toBeNull(); // Saturday
-    expect(irsWindowMinutesRemaining(new Date("2026-11-16T15:00:00Z"))).toBe(12 * 60); // Mon 10:00 ET
-    expect(irsWindowMinutesRemaining(new Date("2026-11-17T02:45:00Z"))).toBe(15); // Mon 21:45 ET
-    expect(irsWindowMinutesRemaining(new Date("2026-11-17T11:30:00Z"))).toBeNull(); // Tue 06:30 ET
+  it("knows the published IRS windows in Eastern time", () => {
+    expect(irsWindowMinutesRemaining(new Date("2026-11-14T15:00:00Z"))).toBe(11 * 60); // Sat 10:00 ET, closes 21:00
+    expect(irsWindowMinutesRemaining(new Date("2026-11-15T02:30:00Z"))).toBeNull(); // Sat 21:30 ET
+    expect(irsWindowMinutesRemaining(new Date("2026-11-15T15:00:00Z"))).toBeNull(); // Sun 10:00 ET
+    expect(irsWindowMinutesRemaining(new Date("2026-11-15T23:00:00Z"))).toBe(6 * 60); // Sun 18:00 ET
+    expect(irsWindowMinutesRemaining(new Date("2026-11-16T05:30:00Z"))).toBeNull(); // Mon 00:30 ET: Sunday closes at midnight
+    expect(irsWindowMinutesRemaining(new Date("2026-11-16T15:00:00Z"))).toBe(15 * 60); // Mon 10:00 ET, closes 1:00
+    expect(irsWindowMinutesRemaining(new Date("2026-11-17T05:30:00Z"))).toBe(30); // Tue 00:30 ET, Monday window runs to 1:00
+    expect(irsWindowMinutesRemaining(new Date("2026-11-17T06:30:00Z"))).toBeNull(); // Tue 01:30 ET
+    expect(irsWindowMinutesRemaining(new Date("2026-11-21T05:15:00Z"))).toBe(45); // Sat 00:15 ET, Friday window runs to 1:00
   });
   it("serializes per key", async () => {
     const lim = new ConcurrencyLimiter({ "site:NJ": 1 });

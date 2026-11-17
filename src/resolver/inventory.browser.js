@@ -36,6 +36,30 @@
       }
       const ph = el.getAttribute("placeholder");
       if (ph) return { label: ph.trim(), source: "placeholder" };
+      // Control inside a data table with no label of its own (NJ signer row checkbox):
+      // use the column header, plus the row's first text cell to tell rows apart.
+      const cell = el.closest("td");
+      if (cell) {
+        const row = cell.parentElement;
+        const table = cell.closest("table");
+        const idx = Array.from(row.children).indexOf(cell);
+        const headRow = table && table.querySelector("thead tr");
+        const th = headRow ? headRow.children[idx] : null;
+        if (th && txt(th)) {
+          const rowText = Array.from(row.children).map(txt).filter(Boolean)[0] || "";
+          return { label: rowText ? `${txt(th)}: ${rowText}` : txt(th), source: "table-header" };
+        }
+      }
+      // Checkbox/radio whose description is plain text beside it (NJ notification boxes).
+      if (el.type === "checkbox" || el.type === "radio") {
+        const parent = el.parentElement;
+        if (parent) {
+          const clone = parent.cloneNode(true);
+          clone.querySelectorAll("input,select,textarea,button,.modal").forEach((x) => x.remove());
+          const t = txt(clone);
+          if (t && t.length <= 500) return { label: t.slice(0, 200), source: "sibling-text" };
+        }
+      }
       // nearest preceding text inside the same form-group-ish container
       let node = el;
       for (let depth = 0; node && depth < 4; depth++) {
@@ -55,9 +79,12 @@
       if (el.hasAttribute("required")) return { required: true, source: "required-attr" };
       if (el.getAttribute("aria-required") === "true") return { required: true, source: "aria-required" };
       if (/\*\s*$/.test(label) || /^\*/.test(label)) return { required: true, source: "asterisk" };
-      if (/\brequired\b/i.test(label)) return { required: true, source: "label-text" };
-      const group = el.closest(".form-group, .field, fieldset, .t-Form-fieldContainer, tr, li, div");
-      if (group && group.querySelector(".required, .is-required, .t-Form-required, abbr[title*='equired']")) {
+      // "(required)" or a trailing "required" counts; "is not required" in help text does not.
+      if (!/\bnot required\b/i.test(label) && /\(required\)|\brequired\s*$/i.test(label)) return { required: true, source: "label-text" };
+      // Marker elements only inside this field's own label, never anywhere in a surrounding container.
+      const id = el.getAttribute("id");
+      const own = [id ? document.querySelector(`label[for="${CSS.escape(id)}"]`) : null, el.closest("label")].filter(Boolean);
+      if (own.some((l) => l.querySelector(".required, .is-required, .t-Form-required, abbr[title*='equired']"))) {
         return { required: true, source: "marker-element" };
       }
       return { required: false };

@@ -233,7 +233,8 @@ export class RunExecutor {
         const hit = buttons.find((b) => (label instanceof RegExp ? label.test(b.label.trim()) : labelScore(label, b.label) >= 0.8));
         if (!hit) {
           // Links styled as buttons (NJ wizard uses <a class="btn">).
-          const link = page.getByRole("link", { name: label }).first();
+          // Links, and links given role="button" (NJ "Add New Member"), are not form controls.
+          const link = page.getByRole("link", { name: label }).or(page.getByRole("button", { name: label })).first();
           if (await link.count()) { await link.click(); return; }
           throw new Error(`button ${String(label)} not found on ${screen.screenKey}`);
         }

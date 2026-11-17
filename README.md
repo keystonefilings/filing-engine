@@ -23,7 +23,7 @@ npm run dev          # API on :8080 with in-process worker (dry-run default)
 npm run fixtures     # NJ wizard replica on :4310
 npm test
 ```
-Point the NJ adapter at the replica with `NJ_FORMATION_URL=http://127.0.0.1:4310/nj-formation/business-name.html`.
+Point the NJ adapter at the replica with `NJ_FORMATION_URL=http://127.0.0.1:4310/nj-formation/welcome.html`.
 
 ## Safety defaults
 - `DRY_RUN_DEFAULT=true`: every run stops before the irreversible click and records a `dry_run_stop` submit intent.

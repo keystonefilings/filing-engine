@@ -14,20 +14,20 @@ export interface BalanceProvider {
 }
 export const unknownBalanceProvider: BalanceProvider = { nyDrawdownBalanceUsd: async () => null };
 
-/** Minutes until the IRS assistant closes, or null when it is closed now. */
+/** Minutes until the IRS assistant closes, or null when it is closed now (published per-day windows). */
 export function irsWindowMinutesRemaining(now: Date = new Date()): number | null {
   const parts = new Intl.DateTimeFormat("en-US", {
     timeZone: IRS_HOURS.timeZone, hour12: false, weekday: "short", hour: "2-digit", minute: "2-digit",
   }).formatToParts(now);
   const get = (t: string) => parts.find((p) => p.type === t)?.value ?? "";
-  const dayIdx = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].indexOf(get("weekday"));
-  const hour = Number(get("hour")) % 24;
-  const minute = Number(get("minute"));
-  if (!IRS_HOURS.days.includes(dayIdx)) return null;
-  const nowMin = hour * 60 + minute;
-  const open = IRS_HOURS.openHour * 60, close = IRS_HOURS.closeHour * 60;
-  if (nowMin < open || nowMin >= close) return null;
-  return close - nowMin;
+  const day = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].indexOf(get("weekday"));
+  const nowMin = (Number(get("hour")) % 24) * 60 + Number(get("minute"));
+  const [open, close] = IRS_HOURS.windows[day]!;
+  if (nowMin >= open && nowMin < close) return close - nowMin;
+  // Yesterday's window may run past midnight (weekdays close at 1:00 a.m.).
+  const [, prevClose] = IRS_HOURS.windows[(day + 6) % 7]!;
+  if (prevClose > 1440 && nowMin + 1440 < prevClose) return prevClose - (nowMin + 1440);
+  return null;
 }
 
 export async function preflight(input: {
@@ -61,7 +61,7 @@ export async function preflight(input: {
   const einMode = req.ein?.mode ?? client.einMode;
   if (req.ein && einMode === "in_run") {
     const remaining = irsWindowMinutesRemaining(input.now);
-    if (remaining === null) b.push("IRS EIN assistant is closed now (Mon-Fri 7am-10pm ET); in-run EIN cannot start");
+    if (remaining === null) b.push("IRS EIN assistant is closed now (Mon-Fri 6am-1am, Sat 6am-9pm, Sun 6pm-midnight ET); in-run EIN cannot start");
     else if (remaining < IRS_HOURS.minMinutesRemaining) b.push(`only ${remaining} minutes left in the IRS window; need ${IRS_HOURS.minMinutesRemaining}`);
     if (!input.einAdapter.complete && !dryRun) b.push("IRS EIN adapter is not mapped yet (walk B); in-run EIN cannot run for real");
     if (!req.ein.responsibleParty) b.push("in-run EIN requires a responsible party");

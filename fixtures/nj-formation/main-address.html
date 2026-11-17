@@ -1,12 +1,15 @@
-<!doctype html><html><head><meta charset="utf-8"><title>NJ Business Formation - Business Information - Main Business Address</title><link rel="stylesheet" href="style.css"><script src="_shell.js"></script></head>
-<body><h1>Business Formation</h1><h2>Business Information - Main Business Address</h2>
-
-<form onsubmit="event.preventDefault(); NJ.go(&quot;registered-agent.html&quot;)">
-<div class="form-group"><label for="Street1">Street Address 1 <span class="required">*</span></label><input id="Street1" name="Street1" required></div>
-<div class="form-group"><label for="Street2">Street Address 2</label><input id="Street2" name="Street2"></div>
-<div class="form-group"><label for="City">City <span class="required">*</span></label><input id="City" name="City" required></div>
-<div class="form-group"><label for="State">State <span class="required">*</span></label><select id="State" name="State" required><option value="">Select</option><option value="NJ">NJ</option><option value="NY">NY</option><option value="PA">PA</option></select></div>
-<div class="form-group"><label for="Zip">Zip <span class="required">*</span></label><input id="Zip" name="Zip" required></div>
-<button type="submit" class="btn btn-primary">Continue</button>
-</form>
+<!doctype html><html><head><meta charset="utf-8"><title>State of NJ - Online Business Entity Filing</title><link rel="stylesheet" href="style.css"><script src="_shell.js"></script></head>
+<body><h1>Business Formation</h1>
+<nav><a href="#">Help</a> <a href="#">Retrieve Documents</a> <a href="#">New User</a> <a href="#">Login</a></nav>
+<p>You have chosen to file a <strong>NJ Domestic Limited Liability Company (LLC)</strong> named: <strong id="nm"></strong></p><script>document.getElementById("nm").textContent=NJ.get("name","").toUpperCase()+" "+NJ.get("designator","")</script>
+<h2>Main Business Address</h2>
+<form onsubmit="event.preventDefault(); NJ.go('registered-agent.html')">
+<div class="form-group"><label for="BusinessAddressLine1">Address Line 1</label><input id="BusinessAddressLine1" name="BusinessAddressLine1" type="text"></div>
+<div class="form-group"><label for="BusinessAddressLine2">Address Line 2</label><input id="BusinessAddressLine2" name="BusinessAddressLine2" type="text"></div>
+<div class="form-group"><label for="City">City</label><input id="City" name="City" type="text"></div>
+<div class="form-group"><label for="State">State</label><select id="State" name="State"><option value="">-- Select One --</option><option>New York</option><option>New Jersey</option><option>Pennsylvania</option><option>Delaware</option></select></div>
+<div class="form-group"><label for="Zip">Zip Code</label><input id="Zip" name="Zip" maxlength="5" type="text"> - <input id="ZipPlus" name="ZipPlus" maxlength="4" type="text"></div>
+<input type="submit" class="btn btn-success" value="Continue" name="continuebtn">
+</form><div id="timeoutModal" class="modal"><div class="modal-body"><h3>Session Timeout Warning</h3>
+<p>Your session will expire soon.</p><input type="button" class="btn btn-success timeoutPrevent" value="Continue"> <input type="button" class="btn" value="Exit"></div></div>
 </body></html>

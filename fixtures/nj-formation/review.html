@@ -1,10 +1,13 @@
-<!doctype html><html><head><meta charset="utf-8"><title>NJ Business Formation - Review</title><link rel="stylesheet" href="style.css"><script src="_shell.js"></script></head>
-<body><h1>Business Formation</h1><h2>Review</h2>
-
-<details open><summary>Business Information</summary><p id="bi"></p></details>
+<!doctype html><html><head><meta charset="utf-8"><title>State of NJ - Online Business Entity Filing</title><link rel="stylesheet" href="style.css"><script src="_shell.js"></script></head>
+<body><h1>Business Formation</h1>
+<nav><a href="#">Help</a> <a href="#">Retrieve Documents</a> <a href="#">New User</a> <a href="#">Login</a></nav>
+<p>You have chosen to file a <strong>NJ Domestic Limited Liability Company (LLC)</strong> named: <strong id="nm"></strong></p><script>document.getElementById("nm").textContent=NJ.get("name","").toUpperCase()+" "+NJ.get("designator","")</script>
+<h2>Review</h2>
+<details><summary>Business Information</summary><p>Business Name: <span id="bn"></span></p></details>
 <details><summary>Registered Agent</summary><p>as entered</p></details>
-<details><summary>Members/Managers</summary><p id="mm"></p></details>
+<details><summary>Members / Managers</summary><p id="mm"></p></details>
 <details><summary>Signatures</summary><p id="sg"></p></details>
-<script>document.getElementById("bi").textContent=NJ.get("name","")+" LLC";document.getElementById("mm").textContent=NJ.get("members",[]).map(m=>m.name).join(", ");document.getElementById("sg").textContent=NJ.get("signers",[]).map(s=>s.name).join(", ");</script>
-<p><a class="btn btn-primary" href="#" onclick="event.preventDefault(); NJ.go(&quot;payment.html&quot;)">Continue</a> <a class="btn" href="business-name.html">Cancel</a></p>
+<script>document.getElementById("bn").textContent=NJ.get("name","").toUpperCase();document.getElementById("mm").textContent=NJ.get("members",[]).map(m=>m.name).join(", ");document.getElementById("sg").textContent=NJ.get("signers",[]).map(s=>s.name).join(", ");</script>
+<form onsubmit="event.preventDefault(); NJ.go('payment.html')"><input type="submit" class="btn btn-success" value="Continue"></form><div id="timeoutModal" class="modal"><div class="modal-body"><h3>Session Timeout Warning</h3>
+<p>Your session will expire soon.</p><input type="button" class="btn btn-success timeoutPrevent" value="Continue"> <input type="button" class="btn" value="Exit"></div></div>
 </body></html>

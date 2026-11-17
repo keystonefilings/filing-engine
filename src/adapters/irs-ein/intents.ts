@@ -42,5 +42,25 @@ export const IRS_SCREENS = {
   summary: { screenKey: "irs.summary", title: "Summary", intents: [] },
 } satisfies Record<string, ScreenIntents>;
 
-/** IRS online EIN assistant availability, Eastern time. Verify on walk B. */
-export const IRS_HOURS = { timeZone: "America/New_York", openHour: 7, closeHour: 22, days: [1, 2, 3, 4, 5], minMinutesRemaining: 45 };
+/**
+ * IRS online EIN assistant availability, Eastern Time, as published on irs.gov
+ * ("Get an employer identification number", captured 2026-11-17):
+ *   Mon-Fri 6:00 a.m. - 1:00 a.m. (next day), Sat 6:00 a.m. - 9:00 p.m., Sun 6:00 p.m. - 12:00 a.m.
+ * Windows are minutes from local midnight of the opening day; a close past 1440 runs into the next day.
+ * The session expires after 15 minutes of inactivity; 1 EIN per responsible party per day.
+ */
+export const IRS_HOURS = {
+  timeZone: "America/New_York",
+  /** index 0 = Sunday */
+  windows: [
+    [18 * 60, 24 * 60], // Sun
+    [6 * 60, 25 * 60], // Mon
+    [6 * 60, 25 * 60], // Tue
+    [6 * 60, 25 * 60], // Wed
+    [6 * 60, 25 * 60], // Thu
+    [6 * 60, 25 * 60], // Fri
+    [6 * 60, 21 * 60], // Sat
+  ] as [number, number][],
+  inactivityTimeoutMinutes: 15,
+  minMinutesRemaining: 45,
+};

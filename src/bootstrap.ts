@@ -27,7 +27,7 @@ export async function bootstrap(opts: { withExecutor: boolean }) {
   const queue = new InMemoryQueue();
   const vault = new EnvVault();
   const drift = new DriftReviewService(store);
-  const harness = new BrowserHarness({ chromiumPath: config.chromiumPath, profileDir: config.browserProfileDir });
+  const harness = new BrowserHarness({ chromiumPath: config.chromiumPath, proxyServer: config.browserProxy, profileDir: config.browserProfileDir });
   const executor = opts.withExecutor ? new RunExecutor({ store, artifacts, harness, drift, vault }) : undefined;
   const limiter = new ConcurrencyLimiter({
     "site:IRS": config.siteConcurrency.IRS, "site:NY": config.siteConcurrency.NY, "site:NJ": config.siteConcurrency.NJ,

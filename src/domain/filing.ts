@@ -27,6 +27,8 @@ export const Person = z.object({
   name: z.string().min(1),
   address: Address.optional(),
   title: z.string().optional(),
+  /** NJ registered agent notification email (optional on the NJ agent screen). */
+  email: z.string().email().optional(),
 });
 export type Person = z.infer<typeof Person>;
 
@@ -88,7 +90,11 @@ export const FormationDetails = z.object({
   effectiveDate: z.enum(["upon_filing", "specific"]).default("upon_filing"),
   effectiveDateValue: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional(),
   dissolutionDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional(),
-  mainBusinessAddress: Address,
+  /** Optional in NJ (walk 2026-11-17: Continue accepts it empty); needed for an EIN application. */
+  mainBusinessAddress: Address.optional(),
+  /** NJ Business Data screen, optional. */
+  naicsCode: z.string().regex(/^\d{2,6}$/).optional(),
+  duration: z.string().max(12).optional(),
   serviceOfProcess: z
     .object({
       mode: z.enum(["manual", "service_company"]),

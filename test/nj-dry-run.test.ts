@@ -14,7 +14,7 @@ let w: ReturnType<typeof wire>;
 
 beforeAll(async () => {
   fx = await startFixtureServer();
-  process.env.NJ_FORMATION_URL = `${fx.url}/nj-formation/business-name.html`;
+  process.env.NJ_FORMATION_URL = `${fx.url}/nj-formation/welcome.html`;
   harness = new BrowserHarness({ chromiumPath: process.env.PW_CHROMIUM_PATH ?? null, profileDir: "var/test-profiles" });
   store = await seededStore();
   const artifacts = new FsArtifactStore("var/test-artifacts");
@@ -38,7 +38,7 @@ describe("NJ formation dry run over the fixture wizard", () => {
     expect(run.status).toBe("completed");
     expect(run.error).toContain('dry run stopped before "Pay Now"');
     const screens = run.steps.map((s) => s.screenKey);
-    for (const k of ["nj.business_name", "nj.designator", "nj.business_data", "nj.main_address", "nj.registered_agent", "nj.members", "nj.signatures", "nj.review", "nj.payment"]) {
+    for (const k of ["nj.welcome", "nj.business_name", "nj.designator", "nj.business_data", "nj.business_purpose", "nj.main_address", "nj.registered_agent", "nj.registered_agent_info", "nj.members", "nj.additional_information", "nj.signatures", "nj.review", "nj.payment"]) {
       expect(screens).toContain(k);
     }
     expect(run.steps.some((s) => s.note?.startsWith("member added"))).toBe(true);

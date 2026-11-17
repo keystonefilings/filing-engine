@@ -70,12 +70,17 @@ export function validateFiling(req: FilingRequest): ValidationIssue[] {
       }
       if (!f.registeredAgent?.address) err("formation.registeredAgent", "NJ requires a registered agent with address");
       else if (f.registeredAgent.address.state !== "NJ") err("formation.registeredAgent.address.state", "NJ registered agent must be in NJ");
+      if (f.purpose && f.purpose.length > 300) err("formation.purpose", "NJ business purpose is limited to 300 characters");
+      if (f.otherProvisions.length) err("formation.otherProvisions", "NJ Other Provisions entry is not mapped yet (Add New Provision dialog not walked)");
     }
   }
 
   if (req.ein && req.ein.mode !== "none") {
     const rp = req.ein.responsibleParty;
     if (!rp) err("ein.responsibleParty", "responsible party is required for an EIN application");
+    if (!req.formation?.mainBusinessAddress) {
+      err("formation.mainBusinessAddress", "an EIN application needs the LLC's address");
+    }
     if (!req.ein.ss4AuthorizationArtifactId) {
       err("ein.ss4AuthorizationArtifactId", "signed Form SS-4 third-party designee authorization is required");
     }

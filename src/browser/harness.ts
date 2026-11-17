@@ -4,6 +4,8 @@ import type { Browser, BrowserContext, Page } from "playwright";
 
 export interface HarnessOptions {
   chromiumPath?: string | null;
+  /** Outbound proxy for the browser (decision 4: the static-IP proxy, or this session's agent proxy). */
+  proxyServer?: string | null;
   profileDir: string;
   headless?: boolean;
 }
@@ -28,6 +30,7 @@ export class BrowserHarness {
     return {
       headless: this.opts.headless ?? true,
       ...(this.opts.chromiumPath ? { executablePath: this.opts.chromiumPath } : {}),
+      ...(this.opts.proxyServer ? { proxy: { server: this.opts.proxyServer } } : {}),
     };
   }
 

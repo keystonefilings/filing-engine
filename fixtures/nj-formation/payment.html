@@ -1,25 +1,29 @@
-<!doctype html><html><head><meta charset="utf-8"><title>NJ Business Formation - Payment</title><link rel="stylesheet" href="style.css"><script src="_shell.js"></script></head>
-<body><h1>Business Formation</h1><h2>Payment</h2>
-
-<form onsubmit="event.preventDefault(); NJ.go(&quot;submitted.html&quot;)">
-<h3>Additional Certificates</h3>
-<div class="form-group"><label><input type="checkbox" checked disabled> Official Authenticated Formation Document</label></div>
-<div class="form-group"><label><input type="checkbox" id="CoS" name="CoS"> Certificate of Standing ($50.00)</label></div>
-<div class="form-group"><label><input type="checkbox" id="CC" name="CC"> Certified Copy ($25.00)</label></div>
-<h3>Contact Information</h3>
-<div class="form-group"><label for="FirstName">First Name <span class="required">*</span></label><input id="FirstName" required></div>
-<div class="form-group"><label for="LastName">Last Name <span class="required">*</span></label><input id="LastName" required></div>
-<div class="form-group"><label for="Phone">Phone <span class="required">*</span></label><input id="Phone" type="tel" required></div>
-<div class="form-group"><label for="Email">Email <span class="required">*</span></label><input id="Email" type="email" required></div>
-<div class="form-group"><label for="Email2">Confirm Email <span class="required">*</span></label><input id="Email2" type="email" required></div>
-<fieldset><legend>Select Payment Type <span class="required">*</span></legend>
-<label><input type="radio" name="PayType" value="CC" required> Credit Card</label>
-<label><input type="radio" name="PayType" value="EC"> E-Check</label></fieldset>
-<h3>Fees</h3>
-<table><tr><td>Formation filing fee</td><td>$100.00</td></tr><tr><td>Credit card service fee</td><td>$3.50</td></tr><tr><td><strong>Total</strong></td><td><strong>$103.50</strong></td></tr></table>
-<div class="form-group"><label><input type="checkbox" id="AR" checked> Send me Annual Report reminders</label></div>
-<div class="form-group"><label><input type="checkbox" id="CW" checked> Enroll in CorpWatch Alerts</label></div>
-<p><small>Payments are processed by NICUSA-NJ. Service fees apply in addition to statutory fees.</small></p>
-<button type="submit" class="btn btn-primary">Pay Now</button> <a class="btn" href="business-name.html">Cancel</a>
-</form>
+<!doctype html><html><head><meta charset="utf-8"><title>State of NJ - Online Business Entity Filing</title><link rel="stylesheet" href="style.css"><script src="_shell.js"></script></head>
+<body><h1>Business Formation</h1>
+<nav><a href="#">Help</a> <a href="#">Retrieve Documents</a> <a href="#">New User</a> <a href="#">Login</a></nav>
+<h2>Additional Certificates and Certified Copies</h2>
+<form onsubmit="event.preventDefault(); NJ.go('submitted.html')">
+<fieldset><h3>Select Documents</h3>
+<div class="checkbox"><input type="checkbox" id="OAFD" checked disabled><label for="OAFD">Official Authenticated Formation Document</label></div>
+<div class="checkbox"><input type="checkbox" id="WantsShort" name="WantsShort"><label for="WantsShort">Certificate of Standing (optional)</label></div>
+<div class="checkbox"><input type="checkbox" id="WantsCertified" name="WantsCertified"><label for="WantsCertified">Certified Copy (optional)</label></div></fieldset>
+<fieldset><h3>Contact Information</h3>
+<div class="form-group"><label for="FirstName">First Name*</label><input id="FirstName" name="FirstName" type="text"></div>
+<div class="form-group"><label for="LastName">Last Name*</label><input id="LastName" name="LastName" type="text"></div>
+<div class="form-group"><label for="PhoneNumber">Phone Number*</label><input id="PhoneNumber" name="PhoneNumber" type="text"></div>
+<div class="form-group"><label for="Email">Email Address*</label><input id="Email" name="Email" type="text"></div>
+<div class="form-group"><label for="ConfirmEmail">Confirm Email Address*</label><input id="ConfirmEmail" name="ConfirmEmail" type="text"></div></fieldset>
+<fieldset><h3>Payment</h3><div style="display:inline"><label for="PaymentType">Select Payment Type*</label>
+<select id="ddlPayment" name="PaymentType"><option value="">-- Select One --</option><option value="CreditCard">Credit Card</option><option value="ECheck">E-Check</option></select></div>
+<h3>Disclaimer</h3><p>NICUSA-NJ will process your payment through a secure payment gateway.</p>
+<table><tr><th>Service</th><th>New Jersey Statutory Fee</th><th>Credit Card Service Fee</th><th>eCheck Service Fee</th></tr>
+<tr><td>Formation</td><td>$100</td><td>$3.50</td><td>$1</td></tr>
+<tr><td>Certificate of Standing</td><td>$50</td><td>$2.00</td><td>$1</td></tr>
+<tr><td>Certified Copy</td><td>$25</td><td>$2.00</td><td>$1</td></tr></table></fieldset>
+<div class="form-actions"><label>Get Free Text/Email Notifications for:</label>
+<div style="display:inline"><div class="checkbox"><input checked type="checkbox" id="Gov2GoAnnualReports" name="Gov2GoAnnualReports" value="true"> Reminders for your Annual Reports Filing(s) so that you never miss an Annual Report deadline. Click or tap <a href="#">here</a> for more information.</div></div>
+<div style="display:inline"><div class="checkbox"><input checked type="checkbox" id="Gov2GoCorpWatch" name="Gov2GoCorpWatch" value="true"> CorpWatch Alerts to notify me when any charter document filing is performed for my business. Click or tap <a href="#">here</a> for more information.</div></div></div>
+<input type="submit" class="btn btn-success" value="Pay Now"> <a class="btn btn-danger" href="welcome.html">Cancel</a>
+</form><div id="timeoutModal" class="modal"><div class="modal-body"><h3>Session Timeout Warning</h3>
+<p>Your session will expire soon.</p><input type="button" class="btn btn-success timeoutPrevent" value="Continue"> <input type="button" class="btn" value="Exit"></div></div>
 </body></html>

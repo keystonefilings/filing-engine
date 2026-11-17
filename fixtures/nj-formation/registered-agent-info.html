@@ -1,0 +1,20 @@
+<!doctype html><html><head><meta charset="utf-8"><title>State of NJ - Online Business Entity Filing</title><link rel="stylesheet" href="style.css"><script src="_shell.js"></script></head>
+<body><h1>Business Formation</h1>
+<nav><a href="#">Help</a> <a href="#">Retrieve Documents</a> <a href="#">New User</a> <a href="#">Login</a></nav>
+<p>You have chosen to file a <strong>NJ Domestic Limited Liability Company (LLC)</strong> named: <strong id="nm"></strong></p><script>document.getElementById("nm").textContent=NJ.get("name","").toUpperCase()+" "+NJ.get("designator","")</script>
+<h2>Registered Agent Information</h2>
+<form onsubmit="event.preventDefault(); if(!document.getElementById('Attested').checked){alert('attest');return;} NJ.go('members.html')">
+<fieldset><h3>Registered Agent Details</h3><ul>
+<li><label for="RegisteredAgentName">Registered Agent Name *</label><input id="RegisteredAgentName" name="RegisteredAgentName" type="text"></li>
+<li><label for="RegisteredAgentEmail">Registered Agent Email</label><input id="RegisteredAgentEmail" name="RegisteredAgentEmail" type="text"></li>
+<li><label for="OfficeAddress1">Office Address 1 *</label><input id="OfficeAddress1" name="OfficeAddress1" type="text"></li>
+<li><label for="OfficeAddress2">Office Address 2</label><input id="OfficeAddress2" name="OfficeAddress2" type="text"></li>
+<li><label for="OfficeCity">Office City *</label><input id="OfficeCity" name="OfficeCity" type="text"></li>
+<li><label for="OfficeState">Office State *</label><input id="OfficeState" name="OfficeState" type="text" readonly value="New Jersey"></li>
+<li><label for="OfficeZip">Office Zip Code *</label><input id="OfficeZip" name="OfficeZip" maxlength="5" type="text"> - <input id="OfficeZipPlus" name="OfficeZipPlus" maxlength="4" type="text"></li>
+<li><p><input id="Attested" name="Attested" type="checkbox" value="true"> I attest that the Registered Agent information entered is correct for this business and that the above listed Registered Agent is aware of and has accepted the responsibility of acting as the Registered Agent for this business.*</p></li>
+</ul></fieldset>
+<input type="submit" class="btn btn-success" value="Continue">
+</form><div id="timeoutModal" class="modal"><div class="modal-body"><h3>Session Timeout Warning</h3>
+<p>Your session will expire soon.</p><input type="button" class="btn btn-success timeoutPrevent" value="Continue"> <input type="button" class="btn" value="Exit"></div></div>
+</body></html>

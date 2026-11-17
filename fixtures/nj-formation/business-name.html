@@ -1,11 +1,13 @@
-<!doctype html><html><head><meta charset="utf-8"><title>NJ Business Formation - Business Information - Business Name</title><link rel="stylesheet" href="style.css"><script src="_shell.js"></script></head>
-<body><h1>Business Formation</h1><h2>Business Information - Business Name</h2>
-
-<form id="f" onsubmit="event.preventDefault(); NJ.set(&quot;name&quot;, document.getElementById(&quot;BusinessName&quot;).value); NJ.go(&quot;designator.html&quot;)">
-<div class="form-group"><label for="EntityType">Business Entity Type <span class="required">*</span></label>
-<select id="EntityType" name="EntityType" required><option value="">Select</option><option value="DLLC">Domestic Limited Liability Company</option><option value="DP">Domestic Profit Corporation</option><option value="FLLC">Foreign Limited Liability Company</option></select></div>
-<div class="form-group"><label for="BusinessName">Business Name <span class="required">*</span></label>
-<input id="BusinessName" name="BusinessName" type="text" required><small>Do not include the designator (LLC) here.</small></div>
-<button type="submit" class="btn btn-primary">Continue</button> <a class="btn" href="business-name.html">Cancel</a>
-</form>
+<!doctype html><html><head><meta charset="utf-8"><title>State of NJ - Online Business Entity Filing</title><link rel="stylesheet" href="style.css"><script src="_shell.js"></script></head>
+<body><h1>Business Formation</h1>
+<nav><a href="#">Help</a> <a href="#">Retrieve Documents</a> <a href="#">New User</a> <a href="#">Login</a></nav>
+<h2>Business Name</h2><p>Required Fields [ * ]</p>
+<form onsubmit="event.preventDefault(); NJ.set('name', document.getElementById('BusinessName').value); NJ.go('designator.html')">
+<div class="form-group"><label for="BusinessType">What type of business would you like to form? *</label>
+<select id="BusinessType" name="BusinessType"><option value="">-- Select One --</option><option value="DP">NJ Domestic For-Profit Corporation (DP)</option><option value="LLC">NJ Domestic Limited Liability Company (LLC)</option><option value="FLC">NJ Foreign Limited Liability Company (FLC)</option></select></div>
+<div class="form-group"><label for="BusinessName">Business Name *</label><input id="BusinessName" name="BusinessName" type="text">
+<p>DO NOT enter a designator such as Corp., Ltd., LLC, Etc.</p></div>
+<input type="submit" class="btn btn-success" value="Continue">
+</form><div id="timeoutModal" class="modal"><div class="modal-body"><h3>Session Timeout Warning</h3>
+<p>Your session will expire soon.</p><input type="button" class="btn btn-success timeoutPrevent" value="Continue"> <input type="button" class="btn" value="Exit"></div></div>
 </body></html>

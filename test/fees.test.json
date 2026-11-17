@@ -29,7 +29,19 @@
         }
       }
     },
-    "standing_certificate": null,
+    "standing_certificate": {
+      "statutory": {
+        "label": "Business Entity Standing Certificate (per certificate; Short Form, Long Form w/Filing History or Long Form w/Officers)",
+        "amountUsd": 25
+      },
+      "serviceFee": {
+        "credit_card": 2.0,
+        "echeck": 1.0,
+        "stored_card": null,
+        "stored_echeck": null
+      },
+      "_source": "Business Records Service cart, 2026-11-17: $25.00 statutory + $2.00 card / $1.00 eCheck portal admin fee per certificate"
+    },
     "alternate_name": null,
     "amendment": null
   },

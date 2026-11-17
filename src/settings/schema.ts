@@ -39,6 +39,8 @@ export const ClientCompanySettings = z.object({
   /** Decision 3: NY pays from a prepaid drawdown (DD) account. */
   nyDrawdownAccountRef: z.string().optional(),
   registeredAgent: Person.optional(),
+  /** NJ Registered Agent Number, if the agent has one (NJ offers it as an alternative to manual entry; path not walked yet). */
+  njRegisteredAgentNumber: z.string().regex(/^\d{1,20}$/).optional(),
   defaultMember: Person.optional(),
   defaultSigner: Person.optional(),
   filingContact: z

@@ -26,6 +26,8 @@ export const config = {
   artifactDir: path.resolve(env("ARTIFACT_DIR", "./var/artifacts")),
   workerEnabled: env("WORKER_ENABLED", "true") === "true",
   chromiumPath: process.env.PW_CHROMIUM_PATH || null,
+  /** Decision 4: route the browser through the fixed-IP proxy when the worker is not itself on that IP. */
+  browserProxy: process.env.BROWSER_PROXY || null,
   browserProfileDir: path.resolve(env("BROWSER_PROFILE_DIR", "./var/profiles")),
   dryRunDefault: env("DRY_RUN_DEFAULT", "true") === "true",
   siteConcurrency: {

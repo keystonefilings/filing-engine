@@ -1,0 +1,13 @@
+<!doctype html><html><head><meta charset="utf-8"><title>State of NJ - Online Business Entity Filing</title><link rel="stylesheet" href="style.css"><script src="_shell.js"></script></head>
+<body><h1>Business Formation</h1>
+<nav><a href="#">Help</a> <a href="#">Retrieve Documents</a> <a href="#">New User</a> <a href="#">Login</a></nav>
+<p>You have chosen to file a <strong>NJ Domestic Limited Liability Company (LLC)</strong> named: <strong id="nm"></strong></p><script>document.getElementById("nm").textContent=NJ.get("name","").toUpperCase()+" "+NJ.get("designator","")</script>
+<h2>Business Data</h2><p>Please enter a business purpose of up to 300 characters.</p>
+<form onsubmit="event.preventDefault(); NJ.go('main-address.html')">
+<div class="form-group"><label for="BusinessPurpose">Business Purpose</label><textarea id="BusinessPurpose" name="BusinessPurpose" maxlength="300"></textarea></div>
+<div class="form-group"><p>You may upload a description of your business purpose if you wish. The upload is not required.</p><input type="file" name="file">
+<input type="submit" name="Upload" value="Upload" class="btn btn-success" onclick="event.preventDefault()"></div>
+<input type="submit" class="btn btn-success" value="Continue" name="continue">
+</form><div id="timeoutModal" class="modal"><div class="modal-body"><h3>Session Timeout Warning</h3>
+<p>Your session will expire soon.</p><input type="button" class="btn btn-success timeoutPrevent" value="Continue"> <input type="button" class="btn" value="Exit"></div></div>
+</body></html>

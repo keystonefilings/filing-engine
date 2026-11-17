@@ -456,3 +456,27 @@ Not built yet (needs the walks or later phases): IRS adapter body, NY screen 2 b
 login/MFA + inbox for receipts, NY drawdown balance reader, NJ standing/amendments/alt-name
 adapters, NY paper-upload + PDF generation, pg-boss queue, production secrets manager,
 email delivery of approval links (webhook carries the link today).
+
+## J. Walks of Nov 17 (cloud session)
+
+Full record: `docs/walks/2026-11-17.md`. Summary:
+- NJ signed-out formation walked end to end to Payment and cancelled; the engine's own
+  dry run then filled all 13 live screens and stopped before Pay Now.
+- NJ standing certificates walked to the cart: $25 per certificate, +$2 card / +$1 eCheck.
+- IRS EIN assistant and NY DOS both refuse the cloud IP. Decision 4 (fixed IP) now
+  covers NY as well as the IRS.
+- IRS published hours differ from the plan: Mon-Fri 6am-1am, Sat 6am-9pm, Sun 6pm-midnight.
+- Pay Now hands off to the NICUSA gateway, which is unmapped; NJ adapter is dry-run only
+  until walk A (signed in) maps it.
+- Open items closed: NJ signer Title list (LLC: Authorized Representative only); NJ
+  standing-certificate fees.
+- New questions: Q1 shared NJ business payment account instead of client logins;
+  Q2 Keystone's NJ Registered Agent Number.
+
+Still needed from a person:
+- Walk A signed in (needs a client NJ login, or the Keystone business account per Q1),
+  through Pay Now onto the gateway page, stopping before any card/stored-method confirm.
+- Walk B (IRS) and walk C (NY) from the fixed IP, which does not exist yet.
+- NY service-company login: entered on the fixed-IP machine as VAULT_NYGOV_USERNAME,
+  VAULT_NYGOV_PASSWORD and (if the account uses an authenticator app) VAULT_NYGOV_TOTP_SEED.
+  Never pasted into chat.

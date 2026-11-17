@@ -1,19 +1,72 @@
 {
-  "_note": "Decision 5: seeded from the Nov 14 walk; standing-certificate and stored-method service fees are read on the signed-in real-entity walk. Live prices are checked against this table every run and a mismatch halts before payment.",
+  "_note": "Decision 5 fee table. Live prices are checked against it every run and a mismatch halts before payment. NJ formation and standing-certificate prices confirmed on the signed-out walk of 2026-11-17. Stored-method service fees (signed-in client account) stay null until walk A; a null blocks real filings.",
   "NJ": {
     "formation": {
-      "statutory": { "label": "Formation filing fee", "amountUsd": 100 },
-      "serviceFee": { "credit_card": 3.5, "echeck": 1.0, "stored_card": null, "stored_echeck": null },
-      "certificate_of_standing": { "label": "Certificate of Standing", "amountUsd": 50, "serviceFee": { "credit_card": 2.0, "echeck": 1.0 } },
-      "certified_copy": { "label": "Certified Copy", "amountUsd": 25, "serviceFee": { "credit_card": 2.0, "echeck": 1.0 } }
+      "statutory": {
+        "label": "Formation filing fee",
+        "amountUsd": 100
+      },
+      "serviceFee": {
+        "credit_card": 3.5,
+        "echeck": 1.0,
+        "stored_card": null,
+        "stored_echeck": null
+      },
+      "certificate_of_standing": {
+        "label": "Certificate of Standing",
+        "amountUsd": 50,
+        "serviceFee": {
+          "credit_card": 2.0,
+          "echeck": 1.0
+        }
+      },
+      "certified_copy": {
+        "label": "Certified Copy",
+        "amountUsd": 25,
+        "serviceFee": {
+          "credit_card": 2.0,
+          "echeck": 1.0
+        }
+      },
+      "_source": "Formation Payment screen, 2026-11-17: Formation $100 + $3.50 card / $1 eCheck; at formation time Certificate of Standing $50 (+$2.00/$1), Certified Copy $25 (+$2.00/$1)"
     },
-    "standing_certificate": null,
+    "standing_certificate": {
+      "statutory": {
+        "label": "Business Entity Standing Certificate (per certificate; Short Form, Long Form w/Filing History or Long Form w/Officers)",
+        "amountUsd": 25
+      },
+      "serviceFee": {
+        "credit_card": 2.0,
+        "echeck": 1.0,
+        "stored_card": null,
+        "stored_echeck": null
+      },
+      "_source": "Business Records Service cart, 2026-11-17: $25.00 statutory + $2.00 card / $1.00 eCheck portal admin fee per certificate"
+    },
     "alternate_name": null,
     "amendment": null
   },
   "NY": {
-    "formation": { "statutory": { "label": "Articles of Organization filing fee", "amountUsd": 200 }, "_note": "payment area unmapped until walk C" },
-    "amendment_name_change": { "statutory": { "label": "Certificate of Amendment (name change) fee", "amountUsd": 60 } }
+    "formation": {
+      "statutory": {
+        "label": "Articles of Organization filing fee",
+        "amountUsd": 200
+      },
+      "_note": "payment area unmapped until walk C"
+    },
+    "amendment_name_change": {
+      "statutory": {
+        "label": "Certificate of Amendment (name change) fee",
+        "amountUsd": 60
+      }
+    }
   },
-  "IRS": { "ein": { "statutory": { "label": "EIN application", "amountUsd": 0 } } }
+  "IRS": {
+    "ein": {
+      "statutory": {
+        "label": "EIN application",
+        "amountUsd": 0
+      }
+    }
+  }
 }

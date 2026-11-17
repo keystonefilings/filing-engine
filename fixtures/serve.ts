@@ -15,7 +15,7 @@ export function startFixtureServer(port = 0): Promise<{ url: string; close: () =
   let variant: string | null = null;
   const server = http.createServer(async (req, res) => {
     const url = new URL(req.url ?? "/", "http://x");
-    let p = url.pathname === "/" ? "/nj-formation/business-name.html" : url.pathname;
+    let p = url.pathname === "/" ? "/nj-formation/welcome.html" : url.pathname;
     if (variant && p.endsWith(".html")) {
       const alt = p.replace(/\.html$/, `-${variant}.html`);
       try { await stat(path.join(ROOT, alt)); p = alt; } catch { /* no variant for this page */ }
@@ -41,5 +41,5 @@ export function startFixtureServer(port = 0): Promise<{ url: string; close: () =
 }
 
 if (process.argv[1] && fileURLToPath(import.meta.url) === path.resolve(process.argv[1])) {
-  startFixtureServer(Number(process.env.FIXTURE_PORT ?? 4310)).then((s) => console.log(`fixtures at ${s.url}/nj-formation/business-name.html`));
+  startFixtureServer(Number(process.env.FIXTURE_PORT ?? 4310)).then((s) => console.log(`fixtures at ${s.url}/nj-formation/welcome.html`));
 }

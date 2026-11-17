@@ -52,10 +52,25 @@ export function diffSnapshots(prev: PageSnapshot, cur: PageSnapshot): DriftDiff 
       if (added.length || removed.length) diff.optionsChanged.push({ label: c.label, kind: c.kind, added, removed });
     }
   }
-  const pp = new Map(prev.prices.map((p) => [p.label, p.amountUsd]));
-  const cp = new Map(cur.prices.map((p) => [p.label, p.amountUsd]));
-  for (const [l, a] of cp) if (pp.get(l) !== a) diff.pricesChanged.push({ label: l, from: pp.get(l), to: a });
-  for (const [l, a] of pp) if (!cp.has(l)) diff.pricesChanged.push({ label: l, from: a, to: undefined });
+  // Prices compare as multisets per label: NJ's fee table repeats one label ("Formation")
+  // for the statutory fee and each service fee, so a plain label->amount map would collapse them.
+  const byLabel = (items: PriceItem[]) => {
+    const m = new Map<string, number[]>();
+    for (const p of items) m.set(p.label, [...(m.get(p.label) ?? []), p.amountUsd].sort((a, b) => a - b));
+    return m;
+  };
+  const pp = byLabel(prev.prices);
+  const cp = byLabel(cur.prices);
+  for (const label of new Set([...pp.keys(), ...cp.keys()])) {
+    const before = [...(pp.get(label) ?? [])];
+    const after = [...(cp.get(label) ?? [])];
+    for (const a of [...after]) {
+      const i = before.indexOf(a);
+      if (i >= 0) { before.splice(i, 1); after.splice(after.indexOf(a), 1); }
+    }
+    const n = Math.max(before.length, after.length);
+    for (let i = 0; i < n; i++) diff.pricesChanged.push({ label, from: before[i], to: after[i] });
+  }
 
   diff.substantive =
     diff.added.length + diff.removed.length + diff.requiredChanged.length + diff.optionsChanged.length + diff.pricesChanged.length > 0;
