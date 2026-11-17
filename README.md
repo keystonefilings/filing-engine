@@ -12,7 +12,8 @@ API + webhook service whose worker drives government filing sites live. See `doc
 - `src/fees` fee table (`config/fees.json`) and live fee check (decision 5)
 - `src/orchestrator` queue, per-site/per-account concurrency, pre-flight, run executor, filing service
 - `src/browser` Playwright harness, step recorder, submit guard (dry run) and error types
-- `src/adapters` per-site screen sequences expressed as field intents, never selectors: `nj-formation` (complete), `ny-formation` (screen 2 bottom pending walk C), `irs-ein` (pending walk B)
+- `src/adapters` per-site screen sequences expressed as field intents, never selectors: `nj-formation` and `nj-standing` (live dry runs pass; real runs wait for the NICUSA gateway walk), `ny-formation` (screen 2 bottom pending walk C), `irs-ein` (pending walk B)
+- `tools/` walk recorder and site check
 - `src/api` Fastify routes; `src/index.ts` cloud tier; `src/worker.ts` fixed-IP worker tier
 - `fixtures/` wizard replicas for development and tests; `db/schema.sql` Postgres schema
 
@@ -24,6 +25,11 @@ npm run fixtures     # NJ wizard replica on :4310
 npm test
 ```
 Point the NJ adapter at the replica with `NJ_FORMATION_URL=http://127.0.0.1:4310/nj-formation/welcome.html`.
+
+## Fixed-IP machine and walks
+- `docs/fixed-ip-machine.md`: install on the machine that files for the IRS and NY; `npm run probe-sites` checks which sites accept it.
+- `docs/walks/HOW-TO-RUN-THE-WALKS.md`: `npm run walk -- <name> --url <start>` records a person-driven walk and blocks Pay/Submit.
+- `docs/walks/2026-11-17.md`: what the Nov 17 walks found.
 
 ## Safety defaults
 - `DRY_RUN_DEFAULT=true`: every run stops before the irreversible click and records a `dry_run_stop` submit intent.

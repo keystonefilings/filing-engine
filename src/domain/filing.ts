@@ -117,6 +117,15 @@ export const FormationDetails = z.object({
     .prefault({}),
 });
 
+/** NJ Business Records Service standing certificate (walk 2026-11-17). One certificate per filing. */
+export const StandingCertificateDetails = z.object({
+  /** Exact business name as on the state record (search is by name; the row must match exactly). */
+  entityName: z.string().min(1),
+  /** NJ Entity ID; required when several records share the name, checked against the result row. */
+  entityId: z.string().regex(/^\d{10}$/).optional(),
+  form: z.enum(["short", "long_filing_history", "long_officers"]).default("short"),
+});
+
 export const Contact = z.object({
   firstName: z.string().min(1),
   lastName: z.string().min(1),
@@ -131,6 +140,7 @@ export const FilingRequest = z.object({
   type: FilingType,
   state: FilingState,
   formation: FormationDetails.optional(),
+  standing: StandingCertificateDetails.optional(),
   ein: EinRequest.optional(),
   contact: Contact,
   approvalRecipients: z.array(ApprovalRecipient).optional(),

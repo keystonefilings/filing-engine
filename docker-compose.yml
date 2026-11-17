@@ -1,0 +1,32 @@
+# All-in-one deployment for the fixed-IP machine (decision 4): Postgres, API, worker.
+# Later, the API can move to the cloud and point at the same DATABASE_URL; the worker stays here.
+services:
+  db:
+    image: postgres:17
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: filing
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD in .env}
+      POSTGRES_DB: filing
+    volumes: [ "pgdata:/var/lib/postgresql/data" ]
+  api:
+    build: .
+    command: ["npx", "tsx", "src/index.ts"]
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      DATABASE_URL: postgres://filing:${POSTGRES_PASSWORD}@db:5432/filing
+      WORKER_ENABLED: "false"
+    ports: [ "127.0.0.1:8080:8080" ]   # publish through an HTTPS reverse proxy, never directly
+    depends_on: [ db ]
+  worker:
+    build: .
+    command: ["npx", "tsx", "src/worker.ts"]
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      DATABASE_URL: postgres://filing:${POSTGRES_PASSWORD}@db:5432/filing
+      WORKER_ID: fixed-ip-1
+    volumes: [ "profiles:/app/var/profiles", "artifacts:/app/var/artifacts" ]
+    depends_on: [ db ]
+volumes: { pgdata: {}, profiles: {}, artifacts: {} }

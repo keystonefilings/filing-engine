@@ -4,8 +4,10 @@ import { chromium, type Browser, type Page } from "playwright";
 import { collectInventory } from "../src/resolver/inventory.js";
 import { matchIntents } from "../src/resolver/match.js";
 import { snapshotFromInventory } from "../src/resolver/drift.js";
+import { checkLiveFees, expectedFees } from "../src/fees/table.js";
 import { NJ_NAME_AVAILABLE, NJ_SCREENS } from "../src/adapters/nj-formation/intents.js";
-import type { ScreenIntents } from "../src/resolver/types.js";
+import { structuralInventory, type ScreenIntents } from "../src/resolver/types.js";
+import { NJ_STANDING_FORM_COLUMN, NJ_STANDING_SCREENS } from "../src/adapters/nj-standing/intents.js";
 
 /**
  * The NJ intents checked against the real pages captured on the live walk of 2026-11-17
@@ -94,5 +96,53 @@ describe("NJ intents against live captures (2026-11-17)", () => {
     expect(amounts).toEqual([1, 1, 1, 2, 2, 3.5, 25, 50, 100]);
     // Repeated labels must survive into the drift snapshot (multiset, not a map).
     expect(snapshotFromInventory("NJ", "nj.payment", inv).prices).toHaveLength(9);
+  });
+});
+
+describe("NJ standing-certificate intents against live captures (2026-11-17)", () => {
+  const SDIR = new URL("./captures/nj-standing-2026-11-17/", import.meta.url);
+  async function loadS(file: string) {
+    const html = readFileSync(new URL(file, SDIR), "utf8").replace("</head>", "<style>.hide{display:none}</style></head>");
+    await page.setContent(html, { waitUntil: "domcontentloaded" });
+    return collectInventory(page);
+  }
+  const SCASES: [string, ScreenIntents][] = [
+    ["01-search.html", NJ_STANDING_SCREENS.searchType],
+    ["02-name-input.html", NJ_STANDING_SCREENS.searchName],
+    ["04-results.html", NJ_STANDING_SCREENS.results],
+    ["05-cart.html", NJ_STANDING_SCREENS.cart],
+  ];
+  for (const [file, screen] of SCASES) {
+    it(`${screen.screenKey}: every intent matches and no structural field is unaccounted for`, async () => {
+      const inv = structuralInventory(await loadS(file), screen);
+      const m = matchIntents(screen.intents, inv, {}, screen.knownUnused ?? []);
+      expect(m.unmatchedIntents.map((i) => i.key)).toEqual([]);
+      expect(m.unmatchedFields.map((f) => f.label)).toEqual([]);
+    });
+  }
+
+  it("result rows are addressable by form column and exact entity name", async () => {
+    const inv = await loadS("04-results.html");
+    const short = inv.fields.filter((f) => f.kind === "checkbox" && f.label.startsWith(NJ_STANDING_FORM_COLUMN.short));
+    expect(short.map((f) => f.label.slice(f.label.indexOf(":") + 1).trim())).toEqual([
+      "PRUDENTIAL FINANCIAL HOME MORTGAGE, LLC", "PRUDENTIAL FINANCIAL SERVICES, INC.", "PRUDENTIAL FINANCIAL, INC.",
+    ]);
+    // Rows change with every search; the drift snapshot must not see them.
+    const snap = snapshotFromInventory("NJ", "nj.standing.results", structuralInventory(inv, NJ_STANDING_SCREENS.results));
+    expect(snap.fields.some((f) => f.kind === "checkbox")).toBe(false);
+  });
+});
+
+describe("fee check against the live NJ cart (2026-11-17)", () => {
+  it("reads Cart Total, not a header line that contains the word Total", async () => {
+    const html = readFileSync(new URL("./captures/nj-standing-2026-11-17/06-cart-card.html", import.meta.url), "utf8");
+    await page.setContent(html, { waitUntil: "domcontentloaded" });
+    const inv = await collectInventory(page);
+    const expected = expectedFees("NJ", "standing_certificate", { paymentMethod: "credit_card" });
+    const ok = checkLiveFees(expected, inv.prices, 30);
+    expect(ok.liveTotal).toBe(27);
+    expect(ok.ok).toBe(true);
+    // Same page against an eCheck approval: must stop.
+    expect(checkLiveFees(expectedFees("NJ", "standing_certificate", { paymentMethod: "echeck" }), inv.prices).ok).toBe(false);
   });
 });

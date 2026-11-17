@@ -52,7 +52,8 @@ export class FilingService {
   feesFor(req: FilingRequestT, client: { njStoredPaymentMethod?: string }): FeeLine[] {
     if (req.type === "ein_only") return [{ label: "EIN application", amountUsd: 0 }];
     return expectedFees(req.state, req.type, {
-      paymentMethod: req.state === "NJ" ? client.njStoredPaymentMethod : undefined,
+      // NJ adapters pick Credit Card unless the client's stored method is an eCheck.
+      paymentMethod: req.state === "NJ" ? (client.njStoredPaymentMethod ?? "credit_card") : undefined,
       certificateOfStanding: req.formation?.additionalCertificates.certificateOfStanding,
       certifiedCopy: req.formation?.additionalCertificates.certifiedCopy,
     });
@@ -154,6 +155,14 @@ export class FilingService {
     const store = this.d.store;
     const filing = await store.getFiling(filingId);
     if (!filing) return;
+    const dryRequested = filing.request.dryRun ?? this.d.dryRunDefault;
+    // Only a queued filing runs for real. A dry run may start from any pre-submission state,
+    // but never over a run in progress or a filing that may already be at the state.
+    const NEVER = new Set(["running", "needs_reconciliation", "ein_filed", "submitted", "accepted", "completed", "aborted"]);
+    if (NEVER.has(filing.status) || (!dryRequested && filing.status !== "queued")) {
+      await this.emit("filing.blocked", filing, { blockers: [`filing is ${filing.status}; run request ignored`] });
+      return;
+    }
     const tenant = await store.getTenant(filing.tenantId);
     const client = await store.getClientCompany(filing.clientCompanyId);
     if (!tenant || !client) return;
@@ -246,6 +255,27 @@ export class FilingService {
       await this.d.queue.enqueue({ kind: "run_filing", filingId: f.id });
     }
     return halt;
+  }
+
+  /**
+   * On worker start, after reconcileOpenIntents: a filing still "running" lost its worker.
+   * With no open submit intent nothing reached the state (no drafts exist), so it is marked
+   * failed and reported; a person re-queues it. Nothing is re-run automatically.
+   */
+  async recoverInterruptedRuns(): Promise<string[]> {
+    const out: string[] = [];
+    for (const f of await this.d.store.listFilings()) {
+      if (f.status !== "running" && f.status !== "ein_filed") continue;
+      const f2 = await this.d.store.updateFiling(f.id, {
+        status: f.status === "ein_filed" ? "needs_reconciliation" : "failed",
+        lastError: f.status === "ein_filed"
+          ? "worker stopped after the EIN was issued and before the state filing; reconcile by hand"
+          : "worker stopped mid-run before any submission; safe to re-queue",
+      });
+      await this.emit(f2.status === "failed" ? "filing.failed" : "filing.needs_reconciliation", f2, { stage: "worker_restart", error: f2.lastError });
+      out.push(f.id);
+    }
+    return out;
   }
 
   /** On worker start: any submit intent without an outcome is a possible double-submit. Never re-run; flag it. */

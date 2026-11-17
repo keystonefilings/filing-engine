@@ -4,9 +4,13 @@ import { bootstrap } from "./bootstrap.js";
 const sys = await bootstrap({ withExecutor: true });
 const flagged = await sys.service.reconcileOpenIntents();
 if (flagged.length) console.warn("filings needing reconciliation:", flagged);
+const interrupted = await sys.service.recoverInterruptedRuns();
+if (interrupted.length) console.warn("filings interrupted by a worker stop:", interrupted);
+const workerId = process.env.WORKER_ID ?? `worker-${process.pid}`;
 console.log("worker started");
 for (;;) {
-  const job = await sys.queue.dequeue();
+  const job = await sys.queue.dequeue(workerId);
   if (!job) { await new Promise((r) => setTimeout(r, 2_000)); continue; }
   if (job.kind === "run_filing" && job.filingId) await sys.service.runFiling(job.filingId).catch((e) => console.error("run failed", e));
+  await sys.queue.complete(job.id);
 }

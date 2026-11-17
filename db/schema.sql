@@ -81,5 +81,11 @@ create table if not exists jobs (
   kind text not null,
   filing_id uuid,
   enqueued_at timestamptz not null default now(),
-  taken_at timestamptz
+  taken_at timestamptz,
+  taken_by text,
+  done_at timestamptz
 );
+-- Columns added after the first schema version (idempotent for existing databases).
+alter table jobs add column if not exists taken_by text;
+alter table jobs add column if not exists done_at timestamptz;
+create index if not exists jobs_open_idx on jobs (id) where taken_at is null;

@@ -70,7 +70,7 @@ export async function preflight(input: {
   try {
     if (req.type !== "ein_only") {
       expectedFees(req.state, req.type, {
-        paymentMethod: req.state === "NJ" ? client.njStoredPaymentMethod : undefined,
+        paymentMethod: req.state === "NJ" ? (client.njStoredPaymentMethod ?? "credit_card") : undefined,
         certificateOfStanding: req.formation?.additionalCertificates.certificateOfStanding,
         certifiedCopy: req.formation?.additionalCertificates.certifiedCopy,
       });

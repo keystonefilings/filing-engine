@@ -62,6 +62,12 @@ export interface ScreenIntents {
   intents: FieldIntent[];
   /** Labels of fields on this screen we know about and deliberately leave alone (pre-checked boxes etc.). */
   knownUnused?: string[];
+  /**
+   * Label patterns (regex source) for fields that differ on every run by design, such as
+   * one checkbox per search result. They are left out of the drift snapshot and of the
+   * unmatched-field list; everything else on the screen is still checked.
+   */
+  dynamicFields?: string[];
 }
 
 export function normalizeLabel(s: string): string {
@@ -79,4 +85,11 @@ export function kindsCompatible(want: FieldKind[] | undefined, have: FieldKind):
   if (!want || want.length === 0) return true;
   if (want.includes(have)) return true;
   return want.some((w) => TEXT_LIKE.has(w)) && TEXT_LIKE.has(have);
+}
+
+/** The inventory without the screen's per-run fields (see ScreenIntents.dynamicFields). */
+export function structuralInventory(inv: PageInventory, screen: Pick<ScreenIntents, "dynamicFields">): PageInventory {
+  const dyn = (screen.dynamicFields ?? []).map((r) => new RegExp(r, "i"));
+  if (!dyn.length) return inv;
+  return { ...inv, fields: inv.fields.filter((f) => !dyn.some((r) => r.test(f.label))) };
 }

@@ -7,7 +7,7 @@ import { NameUnavailable } from "../adapters/types.js";
 import { collectInventory } from "../resolver/inventory.js";
 import { matchIntents } from "../resolver/match.js";
 import { diffSnapshots, snapshotFromInventory } from "../resolver/drift.js";
-import { normalizeLabel, type FieldDescriptor, type PageInventory, type ScreenIntents } from "../resolver/types.js";
+import { normalizeLabel, structuralInventory, type FieldDescriptor, type PageInventory, type ScreenIntents } from "../resolver/types.js";
 import { BotChallenge, DriftHalt, DryRunStop, FeeMismatch } from "../browser/guard.js";
 import { BrowserHarness, detectChallenge } from "../browser/harness.js";
 import { StepRecorder } from "../browser/recorder.js";
@@ -165,7 +165,7 @@ export class RunExecutor {
       await recorder.record(page, screen.screenKey, `bot challenge: ${challenge}`);
       throw new BotChallenge(input.adapter.site, challenge);
     }
-    const inventory = await collectInventory(page);
+    const inventory = structuralInventory(await collectInventory(page), screen);
     const current = snapshotFromInventory(input.adapter.site, screen.screenKey, inventory);
     const previous = await this.deps.store.getApprovedSnapshot(input.adapter.site, screen.screenKey);
     const overrides = await this.deps.store.getIntentOverrides(input.adapter.site, screen.screenKey);
@@ -260,14 +260,34 @@ export class RunExecutor {
 }
 
 /**
- * Government wizards navigate or post back to the same URL after a click. Arm the
- * navigation listener before acting, then wait for the DOM to be ready again. A click
- * that navigates nowhere (NJ bouncing back) just times out quietly; verify() catches it.
+ * Runs an action that may change the page and waits until it has. Government sites do
+ * this two ways: a full navigation (NJ formation, MVC), or an ASP.NET partial postback
+ * that fetches in the background and rewrites the page in place without navigating (NJ
+ * business records; measured 2026-11-17). Settled means: the main frame navigated and its
+ * DOM is ready; or the requests the action started have all finished and the page has
+ * been quiet briefly; or nothing started within the grace period (a no-op click).
  */
-export async function actAndSettle(page: Page, action: () => Promise<void>, timeoutMs = 4000): Promise<void> {
-  const nav = page.waitForEvent("framenavigated", { timeout: timeoutMs }).catch(() => null);
-  await action();
-  await nav;
+export async function actAndSettle(page: Page, action: () => Promise<void>, timeoutMs = 30_000, graceMs = 1500, quietMs = 500): Promise<void> {
+  const main = page.mainFrame();
+  let navigated = false, started = 0, inflight = 0, lastActivity = Date.now();
+  const tracked = (r: import("playwright").Request) =>
+    r.frame() === main && ["document", "xhr", "fetch"].includes(r.resourceType());
+  const onReq = (r: import("playwright").Request) => { if (tracked(r)) { started++; inflight++; lastActivity = Date.now(); } };
+  const onDone = (r: import("playwright").Request) => { if (tracked(r)) { inflight = Math.max(0, inflight - 1); lastActivity = Date.now(); } };
+  const onNav = (f: import("playwright").Frame) => { if (f === main) navigated = true; };
+  page.on("request", onReq); page.on("requestfinished", onDone); page.on("requestfailed", onDone); page.on("framenavigated", onNav);
+  const t0 = Date.now();
+  try {
+    await action();
+    while (Date.now() - t0 < timeoutMs) {
+      if (navigated) break;
+      if (started === 0 && Date.now() - t0 > graceMs) break;
+      if (started > 0 && inflight === 0 && Date.now() - lastActivity > quietMs) break;
+      await page.waitForTimeout(100);
+    }
+  } finally {
+    page.off("request", onReq); page.off("requestfinished", onDone); page.off("requestfailed", onDone); page.off("framenavigated", onNav);
+  }
   await page.waitForLoadState("domcontentloaded").catch(() => {});
 }
 

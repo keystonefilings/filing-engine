@@ -43,7 +43,8 @@
         const row = cell.parentElement;
         const table = cell.closest("table");
         const idx = Array.from(row.children).indexOf(cell);
-        const headRow = table && table.querySelector("thead tr");
+        // A <thead> row, or (ASP.NET GridView) the first row made of <th> cells.
+        const headRow = table && (table.querySelector("thead tr") || Array.from(table.querySelectorAll("tr")).find((r) => r !== row && r.querySelector("th")));
         const th = headRow ? headRow.children[idx] : null;
         if (th && txt(th)) {
           const rowText = Array.from(row.children).map(txt).filter(Boolean)[0] || "";

@@ -19,6 +19,9 @@ export class PostgresStore implements Store {
 
   async close(): Promise<void> { await this.pool.end(); }
 
+  /** The pool, so the job queue can share it (one database for store and queue). */
+  get connectionPool(): pg.Pool { return this.pool; }
+
   private async doc<T>(sql: string, params: unknown[]): Promise<T | null> {
     const r = await this.pool.query(sql, params);
     return r.rows[0] ? (r.rows[0].doc as T) : null;

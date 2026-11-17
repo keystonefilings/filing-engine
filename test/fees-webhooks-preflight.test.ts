@@ -4,6 +4,7 @@ import { WebhookDispatcher, verifySignature, BACKOFF_MS } from "../src/webhooks/
 import { MemoryStore } from "../src/store/memory.js";
 import { irsWindowMinutesRemaining } from "../src/orchestrator/preflight.js";
 import { ConcurrencyLimiter } from "../src/orchestrator/locks.js";
+import { TenantSettings } from "../src/settings/schema.js";
 
 describe("fees (decision 5)", () => {
   it("builds expected lines and refuses unknown entries", () => {
@@ -33,11 +34,12 @@ describe("fees (decision 5)", () => {
 describe("webhooks", () => {
   it("signs, retries with backoff, dead-letters", async () => {
     const store = new MemoryStore();
+    const ep = { url: "https://hooks.example.test/x", secret: "s3cret-s3cret-s3cret" };
+    await store.putTenant(TenantSettings.parse({ tenantId: "t", name: "T", webhookEndpoints: [ep] }));
     let clock = new Date("2026-11-16T10:00:00Z");
     const calls: { url: string; headers: Record<string, string>; body: string }[] = [];
     let status = 500;
     const d = new WebhookDispatcher(store, async (url, init) => { calls.push({ url, headers: init.headers, body: init.body }); return { status }; }, () => clock);
-    const ep = { url: "https://hooks.example.test/x", secret: "s3cret-s3cret-s3cret" };
     await d.emit("filing.started", { tenantId: "t", filingId: "f" }, { a: 1 }, [ep]);
     await d.processDue();
     expect(calls).toHaveLength(1);
@@ -58,6 +60,21 @@ describe("webhooks", () => {
     await d.emit("filing.failed", { tenantId: "t", filingId: "g" }, {}, [ep]);
     for (let i = 0; i <= BACKOFF_MS.length; i++) { await d.processDue(); clock = new Date(clock.getTime() + 86_400_000); }
     expect((await store.listDeliveries("g"))[0]!.status).toBe("dead");
+
+    // A fresh dispatcher (restart, or another process) still signs with the tenant's secret.
+    status = 200;
+    const fresh = new WebhookDispatcher(store, async (url, init) => { calls.push({ url, headers: init.headers, body: init.body }); return { status }; }, () => clock);
+    await d.emit("filing.completed", { tenantId: "t", filingId: "h" }, {}, [ep]);
+    await fresh.processDue();
+    const last = calls[calls.length - 1]!;
+    expect(verifySignature(ep.secret, last.headers["x-keystone-signature"]!, last.body, 300, clock.getTime())).toBe(true);
+
+    // Endpoint removed from settings: dead-lettered, never sent unsigned.
+    await d.emit("filing.completed", { tenantId: "t", filingId: "i" }, {}, [{ url: "https://gone.example.test", secret: "x".repeat(20) }]);
+    const before = calls.length;
+    await fresh.processDue();
+    expect(calls.length).toBe(before);
+    expect((await store.listDeliveries("i"))[0]!.status).toBe("dead");
   });
 });
 

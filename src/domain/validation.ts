@@ -89,8 +89,11 @@ export function validateFiling(req: FilingRequest): ValidationIssue[] {
     }
   }
 
-  if (req.type === "standing_certificate" && req.formation) {
-    warn("formation", "standing certificate requests do not use formation details");
+  if (req.type === "standing_certificate") {
+    if (req.formation) warn("formation", "standing certificate requests do not use formation details");
+    if (req.state === "NY") err("state", "NY Certificate of Status is a written request, not an online filing; it goes through the paper-upload engine (build order 7)");
+    else if (!req.standing) err("standing", "standing certificate details are required (entityName, form)");
+    if (req.ein && req.ein.mode !== "none") err("ein", "an EIN is not part of a standing certificate request");
   }
 
   return issues;

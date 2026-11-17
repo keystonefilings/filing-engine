@@ -16,9 +16,16 @@ const app = buildServer({
 setInterval(() => void sys.webhooks.processDue(), 15_000).unref();
 if (config.workerEnabled) {
   await sys.service.reconcileOpenIntents();
+  await sys.service.recoverInterruptedRuns();
+  let busy = false;
   setInterval(async () => {
-    const job = await sys.queue.dequeue();
-    if (job?.kind === "run_filing" && job.filingId) await sys.service.runFiling(job.filingId).catch((e) => console.error("run failed", e));
+    if (busy) return;
+    busy = true;
+    try {
+      const job = await sys.queue.dequeue("api-inprocess");
+      if (job?.kind === "run_filing" && job.filingId) await sys.service.runFiling(job.filingId).catch((e) => console.error("run failed", e));
+      if (job) await sys.queue.complete(job.id);
+    } finally { busy = false; }
   }, 2_000).unref();
 }
 

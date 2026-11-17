@@ -25,7 +25,6 @@ export function verifySignature(secret: string, header: string, body: string, to
 export type FetchLike = (url: string, init: { method: string; headers: Record<string, string>; body: string }) => Promise<{ status: number }>;
 
 export class WebhookDispatcher {
-  private readonly secrets = new Map<string, string>();
   constructor(
     private readonly store: Store,
     private readonly fetchImpl: FetchLike = (url, init) => fetch(url, init).then((r) => ({ status: r.status })),
@@ -42,7 +41,6 @@ export class WebhookDispatcher {
     const event: WebhookEvent = { id: randomUUID(), type, ...ctx, occurredAt: this.now().toISOString(), data };
     for (const ep of endpoints) {
       if (ep.events && ep.events.length && !ep.events.includes(type)) continue;
-      this.secrets.set(ep.url, ep.secret);
       await this.store.createDelivery({
         id: randomUUID(), event, url: ep.url, attempts: 0, nextAttemptAt: event.occurredAt, status: "pending",
       });
@@ -58,15 +56,28 @@ export class WebhookDispatcher {
     return stats;
   }
 
+  /** The signing secret is read from the tenant's settings at delivery time, so retries
+   *  after a restart, or from another process, are signed the same way. */
+  private async secretFor(d: WebhookDeliveryRecord): Promise<string | null> {
+    const tenant = await this.store.getTenant(d.event.tenantId);
+    return tenant?.webhookEndpoints.find((e) => e.url === d.url)?.secret ?? null;
+  }
+
   private async attempt(d: WebhookDeliveryRecord, stats: { delivered: number; failed: number; dead: number }) {
-    const secret = this.secrets.get(d.url);
+    const secret = await this.secretFor(d);
+    if (!secret) {
+      // Endpoint removed from settings since the event was queued: never send unsigned.
+      await this.store.updateDelivery(d.id, { attempts: d.attempts, status: "dead", lastError: "endpoint no longer configured for tenant" });
+      stats.dead++;
+      return;
+    }
     const body = JSON.stringify(d.event);
     const ts = String(Math.floor(this.now().getTime() / 1000));
     const headers: Record<string, string> = {
       "content-type": "application/json",
       "x-keystone-event": d.event.type,
       "x-keystone-delivery": d.id,
-      "x-keystone-signature": `t=${ts},v1=${signPayload(secret ?? "", ts, body)}`,
+      "x-keystone-signature": `t=${ts},v1=${signPayload(secret, ts, body)}`,
     };
     let status = 0, error: string | undefined;
     try {
@@ -92,7 +103,4 @@ export class WebhookDispatcher {
     });
     stats.failed++;
   }
-
-  /** Re-registers secrets after a restart (endpoints live in tenant settings). */
-  registerEndpoint(ep: WebhookEndpoint): void { this.secrets.set(ep.url, ep.secret); }
 }

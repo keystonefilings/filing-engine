@@ -9,7 +9,9 @@
     "fixtures": "tsx fixtures/serve.ts",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "walk": "tsx tools/walk-recorder.ts",
+    "probe-sites": "tsx tools/probe-sites.ts"
   },
   "keywords": [],
   "author": "",
@@ -18,12 +20,13 @@
     "fastify": "^5.12.8",
     "pdf-lib": "^1.17.1",
     "pg": "^8.23.1",
-    "zod": "^4.6.7",
-    "playwright": "1.63.0"
+    "playwright": "1.63.0",
+    "zod": "^4.6.7"
   },
   "devDependencies": {
     "@types/node": "^26.6.6",
     "@types/pg": "^8.23.1",
+    "embedded-postgres": "17.11.0-beta.19",
     "tsx": "^4.23.15",
     "typescript": "^7.0.2",
     "vitest": "^5.1.0"

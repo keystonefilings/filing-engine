@@ -69,7 +69,10 @@ export function checkLiveFees(expected: FeeLine[], live: PriceItem[], capUsd?: n
   const missing = expected.filter((e) => !liveAmounts.includes(e.amountUsd));
   const expectedAmounts = new Set(expected.map((e) => e.amountUsd));
   const expectedTotal = totalUsd(expected);
-  const totalLine = live.find((p) => /total/.test(normalizeLabel(p.label)));
+  // Only a line labelled as a total ("Total", "Cart Total"); table headers that merely contain
+  // the word (NJ cart: "Description Statutory Fee Portal Admin Fee Total ...") do not count.
+  const totals = live.filter((p) => /(^|\s)((cart|grand|order|amount) )?total( due)?$/.test(normalizeLabel(p.label)));
+  const totalLine = totals.length ? totals.reduce((a, b) => (b.amountUsd > a.amountUsd ? b : a)) : undefined;
   const liveTotal = totalLine?.amountUsd;
   const unexpected = live.filter(
     (p) => !expectedAmounts.has(p.amountUsd) && p.amountUsd !== liveTotal && p.amountUsd !== expectedTotal && p.amountUsd > 0,

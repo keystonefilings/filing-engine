@@ -480,3 +480,16 @@ Still needed from a person:
 - NY service-company login: entered on the fixed-IP machine as VAULT_NYGOV_USERNAME,
   VAULT_NYGOV_PASSWORD and (if the account uses an authenticator app) VAULT_NYGOV_TOTP_SEED.
   Never pasted into chat.
+
+## K. Built after the Nov 17 walks
+
+- NJ standing-certificate adapter (search, exact row by name + Entity ID, cart, fee check);
+  live dry run passes in 13 s and stops before Pay Now.
+- Engine: waits correctly for ASP.NET partial postbacks (they never navigate); fee check
+  reads only real total lines; webhook secrets read from tenant settings at send time
+  (retries after a restart are signed); Postgres job queue (two workers never take the same
+  job); a worker restart settles interrupted runs instead of re-running them; per-run fields
+  (search results) excluded from drift.
+- Tools: walk recorder (blocks pay/submit, masks SSN/password/card/bank fields) and site check.
+- Deployment: Dockerfile, docker-compose (db + api + worker), `docs/fixed-ip-machine.md`.
+- Tests: 52, including Postgres against a real database and the recorder's guards.
