@@ -1,6 +1,6 @@
 # Keystone filing engine
 
-API + webhook service whose worker drives government filing sites live. See `../plan-review.md` for the plan, decisions and walk checklists.
+API + webhook service whose worker drives government filing sites live. See `docs/plan-review.md` for the plan, decisions and walk checklists, and `docs/filing-auto-fill-mapping.md` for the field map from the Nov 14 walk.
 
 ## Layout
 - `src/domain` canonical filing request, name model (NJ: base name + designator; NY/IRS: full name), per-state validation, lifecycle states, webhook event catalog
