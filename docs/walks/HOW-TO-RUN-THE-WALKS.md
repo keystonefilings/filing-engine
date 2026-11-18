@@ -21,7 +21,7 @@ folder and send it, or commit it on a branch.
 Use test names and fictitious people everywhere except where a step says otherwise.
 The detailed screen checklists are in `docs/plan-review.md`, section H.
 
-## Walk A: NJ signed in (client account, or the Keystone business account, see Q1)
+## Walk A: NJ signed in with Keystone's company-wide NJ login
 
 ```bash
 npm run walk -- nj-signed-in --url https://my.nj.gov/aui/Login --allow "Pay Now"
@@ -30,9 +30,9 @@ npm run walk -- nj-signed-in --url https://my.nj.gov/aui/Login --allow "Pay Now"
 1. Sign in yourself. Note any second-factor step.
 2. Open Business Formation, run a test LLC to Payment exactly as on Nov 17.
 3. On Payment: does a stored payment method or the business account appear?
-4. Click **Pay Now** (allowed for this walk only) to see the NICUSA gateway page.
-   The recorder still blocks the gateway's own pay/submit buttons. Stop there; capture;
-   close the window.
+4. Click **Pay Now** to see the NICUSA gateway page. `--allow` lets it through once
+   only; every later pay/submit button, including another "Pay Now" on the gateway, is
+   blocked. Stop there; capture; close the window.
 5. Business Records, Standing Certificates: one certificate into the cart for a public
    record, choose each payment type, note the fees, then Remove it.
 

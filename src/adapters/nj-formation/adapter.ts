@@ -1,6 +1,7 @@
 import { renderName } from "../../domain/name.js";
 import { splitZip, stateName, toUsDate } from "../../domain/usStates.js";
 import type { ScreenStep, SiteAdapter, StepContext } from "../types.js";
+import { njAccount } from "../../settings/accounts.js";
 import { NameUnavailable } from "../types.js";
 import { NJ_NAME_AVAILABLE, NJ_SCREENS } from "./intents.js";
 
@@ -228,7 +229,7 @@ const payment: ScreenStep = {
     await ctx.set("contactEmail", r.contact.email);
     await ctx.set("contactEmailConfirm", r.contact.email);
     // Signed out the dropdown offers Credit Card / E-Check; the signed-in stored-method behaviour is unwalked (decision 3).
-    await ctx.set("paymentType", ctx.client.njStoredPaymentMethod === "stored_echeck" ? "E-Check" : "Credit Card");
+    await ctx.set("paymentType", njAccount(ctx.tenant, ctx.client).paymentTypeLabel);
     const understand = ctx.page.getByRole("button", { name: /^I Understand$/i });
     if (await understand.isVisible().catch(() => false)) await understand.click(); // e-check disclaimer modal
     const d = ctx.client.checkboxDefaults;
@@ -245,8 +246,8 @@ export const njFormationAdapter: SiteAdapter = {
   key: "nj-formation",
   complete: false,
   entryUrl: () => process.env.NJ_FORMATION_URL ?? "https://www.njportal.com/DOR/BusinessFormation/Home/Welcome",
-  profileKey: (ctx) => (ctx.client.njAccountCredentialKey ? `nj:${ctx.client.clientCompanyId}` : null),
-  credentialKey: (ctx) => ctx.client.njAccountCredentialKey ?? null,
+  profileKey: (ctx) => njAccount(ctx.tenant, ctx.client).profileKey,
+  credentialKey: (ctx) => njAccount(ctx.tenant, ctx.client).credentialKey,
   steps: [welcome, businessName, designator, businessData, businessPurpose, mainAddress, registeredAgent, registeredAgentInfo, members, additionalInformation, signatures, review, payment],
   async collectArtifacts(ctx) {
     // Unreached until the gateway is mapped. NJ documents are later retrievable with the

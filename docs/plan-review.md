@@ -493,3 +493,27 @@ Still needed from a person:
 - Tools: walk recorder (blocks pay/submit, masks SSN/password/card/bank fields) and site check.
 - Deployment: Dockerfile, docker-compose (db + api + worker), `docs/fixed-ip-machine.md`.
 - Tests: 52, including Postgres against a real database and the recorder's guards.
+
+## L. Nov 18
+
+- **NJ standing certificates are priced by entity type** (user report, verified live per
+  record): LLC/FLC $50, DP/FR/NP/LP $25, plus $2 card / $1 eCheck. Requests now state the
+  entity type; the adapter stops if the record's Type column differs; unpriced types
+  (PA, LLP, LF, FLP, NF, NV) are refused until walked. eCheck needs Keystone's bank to
+  allow debits from NJ Originator ID 1522077581.
+- **Decision 3 revised: Keystone has company-wide logins in NJ and NY.** NJ runs sign in
+  with Keystone's NJ account and pay with its stored method; NY uses the ny.gov
+  service-company login and Keystone's drawdown account. A firm uses its own NJ login /
+  NY drawdown account only if its onboarding answer G1 is "the firm's own account".
+  Client NJ credentials are no longer needed by default.
+- **Firm onboarding questionnaire** (`docs/firm-onboarding.md`), applied to every filing:
+  registered agent, service of process, organizer/incorporator, signer, filer, members,
+  management, addresses, county, purpose, designator, EIN, extras, contact, approvers,
+  fees. A value sent with a filing always wins; a setting with nothing behind it refuses
+  the filing with the question number. Provenance of each filled value is stored.
+- **ChatGPT runbook** for the human-driven walks (`docs/walks/CHATGPT-WALK-INSTRUCTIONS.md`)
+  with a fixed report format.
+- **Recorder:** an allowed button (Pay Now) passes once per recording; a payment gateway
+  button with the same label is blocked.
+- Open: the "new LLC as its own registered agent" option is implemented as "a member of
+  the new LLC with an NJ address"; confirm whether NJ accepts the entity itself.

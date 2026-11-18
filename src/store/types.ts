@@ -20,6 +20,8 @@ export interface FilingRecord {
   ein?: string;
   lastError?: string;
   artifacts: { id: string; kind: string; label: string }[];
+  /** Field path -> source ("filing", "keystone", "firm", "intake", ...) from the firm's onboarding answers. */
+  appliedPolicies?: Record<string, string>;
 }
 
 export interface ApprovalRecord {

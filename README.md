@@ -29,7 +29,9 @@ Point the NJ adapter at the replica with `NJ_FORMATION_URL=http://127.0.0.1:4310
 ## Fixed-IP machine and walks
 - `docs/fixed-ip-machine.md`: install on the machine that files for the IRS and NY; `npm run probe-sites` checks which sites accept it.
 - `docs/walks/HOW-TO-RUN-THE-WALKS.md`: `npm run walk -- <name> --url <start>` records a person-driven walk and blocks Pay/Submit.
+- `docs/walks/CHATGPT-WALK-INSTRUCTIONS.md`: hand this to an assistant helping on a person's computer; it ends with a fixed report format.
 - `docs/walks/2026-11-17.md`: what the Nov 17 walks found.
+- `docs/firm-onboarding.md`: the questions every new firm answers; they become `policies` on the firm's record and fill each filing.
 
 ## Safety defaults
 - `DRY_RUN_DEFAULT=true`: every run stops before the irreversible click and records a `dry_run_stop` submit intent.

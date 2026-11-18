@@ -5,6 +5,10 @@
  *
  *   npm run walk -- <walk-name> --url <start url> [--allow "Pay Now"] [--proxy http://host:port]
  *
+ * --allow lets a named button through ONCE per recording. Every later click on a button
+ * with that label is blocked again: a payment gateway's own final button may carry the
+ * same label ("Pay Now") and must never get through.
+ *
  * Output: walks/<YYYY-MM-DD>/<walk-name>/NN-<page>.{png,html,json,txt}
  * Sensitive inputs (SSN/ITIN, passwords, card and bank numbers) are masked in screenshots
  * and their values are never written to the HTML or JSON.
@@ -45,6 +49,7 @@ function guardScript(args: { block: string; allow: string[]; sensitive: string }
     const label = labelOf(el);
     if (!label || label.length > 60) return false;
     return block.test(label) && !allow.includes(label.toLowerCase());
+    // Allowed labels are not "blocked" here; the click handler routes them through the one-use grant.
   };
   const banner = (label: string) => {
     let b = document.getElementById("__walk_banner");
@@ -57,16 +62,38 @@ function guardScript(args: { block: string; allow: string[]; sensitive: string }
     b.textContent = `Blocked by the walk recorder: "${label}". Walks stop before anything is submitted or paid.`;
     setTimeout(() => b?.remove(), 6000);
   };
+  type Passable = Element & { __walkPass?: boolean };
   const clickable = (t: EventTarget | null) => (t as Element | null)?.closest?.("button, input[type=submit], input[type=button], input[type=image], a, [role=button]") ?? null;
+  // Looked up at click time: the recorder attaches it after this script is registered.
+  const consume = () => (window as unknown as { __walkConsumeAllow?: (l: string) => Promise<boolean> }).__walkConsumeAllow;
   document.addEventListener("click", (ev) => {
-    const el = clickable(ev.target);
+    const el = clickable(ev.target) as Passable | null;
+    if (el?.__walkPass) {
+      // Re-dispatched after the recorder granted its one allowed use; the flag also lets the
+      // resulting form submit through, then it is cleared.
+      setTimeout(() => { delete el.__walkPass; }, 0);
+      (window as unknown as { __walkClicked?: () => void }).__walkClicked?.();
+      return;
+    }
     if (el && isBlocked(el)) { ev.preventDefault(); ev.stopImmediatePropagation(); banner(labelOf(el)); return; }
+    const label = el ? labelOf(el) : "";
+    if (el && label && block.test(label) && allow.includes(label.toLowerCase())) {
+      // Allowed label: hold the click and ask the recorder whether its single use is still available.
+      ev.preventDefault(); ev.stopImmediatePropagation();
+      const fn = consume();
+      void (fn ? fn(label) : Promise.resolve(false)).then((ok) => {
+        if (ok) { el.__walkPass = true; (el as HTMLElement).click(); } else banner(`${label} (already used once in this recording)`);
+      });
+      return;
+    }
     (window as unknown as { __walkClicked?: () => void }).__walkClicked?.();
   }, true);
   document.addEventListener("submit", (ev) => {
     const form = ev.target as HTMLFormElement;
-    const submitter = (ev as SubmitEvent).submitter ?? form.querySelector("button[type=submit], button:not([type]), input[type=submit]");
-    if (submitter && isBlocked(submitter)) { ev.preventDefault(); ev.stopImmediatePropagation(); banner(labelOf(submitter)); }
+    const submitter = ((ev as SubmitEvent).submitter ?? form.querySelector("button[type=submit], button:not([type]), input[type=submit]")) as Passable | null;
+    if (submitter?.__walkPass) return;
+    const label = submitter ? labelOf(submitter) : "";
+    if (submitter && label && block.test(label) && label.length <= 60) { ev.preventDefault(); ev.stopImmediatePropagation(); banner(label); }
   }, true);
   const mask = () => {
     for (const el of Array.from(document.querySelectorAll<HTMLInputElement>("input"))) {
@@ -134,6 +161,16 @@ export async function startRecorder(o: RecorderOptions) {
     await page.exposeFunction("__walkClicked", () => { setTimeout(() => void capture(page, "after click"), 1200); }).catch(() => {});
     page.on("load", () => void capture(page, "page load"));
   };
+  // One use per allowed label for the whole recording, kept on this side so page loads cannot reset it.
+  const remaining = new Map((o.allow ?? []).map((a) => [a.trim().toLowerCase(), 1]));
+  await context.exposeFunction("__walkConsumeAllow", (label: string) => {
+    const k = label.trim().toLowerCase();
+    const n = remaining.get(k) ?? 0;
+    if (n <= 0) return false;
+    remaining.set(k, n - 1);
+    console.log(`allowed once: "${label}" (no further uses in this recording)`);
+    return true;
+  });
   context.on("page", (p) => void watch(p));
   const page = context.pages()[0] ?? (await context.newPage());
   await watch(page);
@@ -162,7 +199,7 @@ if (process.argv[1] && fileURLToPath(import.meta.url) === path.resolve(process.a
   }
   const r = await startRecorder({ walk: a.walk, url: a.url, allow: a.allow, proxy: a.proxy, headless: a.headless });
   console.log(`Recording "${a.walk}" into ${r.outDir}`);
-  console.log(`Blocked: buttons like Pay / Submit / Purchase${a.allow.length ? ` (allowed: ${a.allow.join(", ")})` : ""}.`);
+  console.log(`Blocked: buttons like Pay / Submit / Purchase${a.allow.length ? ` (allowed once each: ${a.allow.join(", ")})` : ""}.`);
   console.log("Press Enter to capture the current screen; type q and Enter to finish.");
   const rl = readline.createInterface({ input: process.stdin });
   rl.on("line", async (line) => {

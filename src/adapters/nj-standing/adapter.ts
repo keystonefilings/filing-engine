@@ -1,4 +1,5 @@
 import type { ScreenStep, SiteAdapter, StepContext } from "../types.js";
+import { njAccount } from "../../settings/accounts.js";
 import { NJ_STANDING_FORM_COLUMN, NJ_STANDING_SCREENS } from "./intents.js";
 
 /**
@@ -55,6 +56,15 @@ const results: ScreenStep = {
         if (rowText.includes(s.entityId)) pick.push(f);
       }
     }
+    // The record's Type column must match the requested type: it decides the approved price.
+    const typed = [];
+    for (const f of pick) {
+      const cells = await ctx.page.locator(`[data-ke-ref="${f.ref}"]`).locator("xpath=ancestor::tr[1]/td").allInnerTexts();
+      const type = cells.map((c) => c.trim()).filter(Boolean).at(-2);
+      if (type === s.entityType) typed.push(f);
+      else if (pick.length === 1) throw new Error(`record "${s.entityName}" is type ${type ?? "unknown"}, the request says ${s.entityType}; the approved price would be wrong`);
+    }
+    pick = typed;
     if (pick.length === 0) throw new Error(`no result row exactly named "${s.entityName}"${s.entityId ? ` with Entity ID ${s.entityId}` : ""}`);
     if (pick.length > 1) throw new Error(`${pick.length} records are named "${s.entityName}"; give the Entity ID to choose one`);
     await ctx.actAndSettle(() => ctx.page.locator(`[data-ke-ref="${pick[0]!.ref}"]`).check());
@@ -71,9 +81,15 @@ const cart: ScreenStep = {
     const text = await ctx.page.locator("body").innerText();
     const m = /Cart \((\d+)\)/.exec(text);
     if (!m || m[1] !== "1") throw new Error(`cart should hold exactly 1 certificate, shows ${m ? m[1] : "none"}`);
-    const method = ctx.client.njStoredPaymentMethod === "stored_echeck" ? "E-Check" : "Credit Card";
+    const method = njAccount(ctx.tenant, ctx.client).paymentTypeLabel;
     // Choosing a type posts back and adds the portal admin fee lines the fee check needs.
     await ctx.actAndSettle(() => ctx.set("paymentType", method));
+    // E-Check opens a notice (bank must allow debits from NJ's Originator ID) that blocks the page.
+    const understand = ctx.page.getByRole("button", { name: /^I Understand$/i });
+    if (await understand.isVisible().catch(() => false)) {
+      await ctx.note("e-check notice acknowledged");
+      await understand.click();
+    }
   },
   async advance(ctx) {
     await ctx.submit("Pay Now", () => ctx.clickButton(/^pay now$/i));
@@ -85,7 +101,7 @@ export const njStandingAdapter: SiteAdapter = {
   key: "nj-standing",
   complete: false,
   entryUrl: () => process.env.NJ_STANDING_URL ?? "https://www.njportal.com/dor/businessrecords/EntityDocs/StandingCerts.aspx",
-  profileKey: (ctx) => (ctx.client.njAccountCredentialKey ? `nj:${ctx.client.clientCompanyId}` : null),
-  credentialKey: (ctx) => ctx.client.njAccountCredentialKey ?? null,
+  profileKey: (ctx) => njAccount(ctx.tenant, ctx.client).profileKey,
+  credentialKey: (ctx) => njAccount(ctx.tenant, ctx.client).credentialKey,
   steps: [searchType, searchName, results, cart],
 };

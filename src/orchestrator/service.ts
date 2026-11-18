@@ -14,6 +14,9 @@ import type { RunExecutor } from "./run.js";
 import type { Vault } from "../settings/vault.js";
 import type { DriftDecisionInput, DriftReviewService } from "../drift-review/service.js";
 import { ConcurrencyLimiter } from "./locks.js";
+import { njAccount } from "../settings/accounts.js";
+import { applyPolicies } from "../settings/policies.js";
+import type { ClientCompanySettings, TenantSettings } from "../settings/schema.js";
 
 export interface FilingServiceDeps {
   store: Store;
@@ -49,47 +52,50 @@ export class FilingService {
     return this.d.store.updateFiling(filing.id, { ...patch, status: to });
   }
 
-  feesFor(req: FilingRequestT, client: { njStoredPaymentMethod?: string }): FeeLine[] {
+  feesFor(req: FilingRequestT, tenant: TenantSettings, client: ClientCompanySettings): FeeLine[] {
     if (req.type === "ein_only") return [{ label: "EIN application", amountUsd: 0 }];
     return expectedFees(req.state, req.type, {
-      // NJ adapters pick Credit Card unless the client's stored method is an eCheck.
-      paymentMethod: req.state === "NJ" ? (client.njStoredPaymentMethod ?? "credit_card") : undefined,
+      // The method the NJ adapters will pick on the account the run signs in with.
+      paymentMethod: req.state === "NJ" ? njAccount(tenant, client).feeMethod : undefined,
       certificateOfStanding: req.formation?.additionalCertificates.certificateOfStanding,
       certifiedCopy: req.formation?.additionalCertificates.certifiedCopy,
+      entityType: req.standing?.entityType,
     });
   }
 
   /** POST /v1/filings: validate, store, create the approval, emit awaiting_approval. Idempotent per tenant+key. */
   async createFiling(raw: unknown): Promise<{ filing: FilingRecord; approvalLink?: string; issues: ValidationIssue[]; existing: boolean }> {
-    const parsed = FilingRequest.safeParse(raw);
-    if (!parsed.success) {
-      throw new ValidationFailed(parsed.error.issues.map((i) => ({ path: i.path.join("."), message: i.message, severity: "error" as const })));
+    const r0 = (raw ?? {}) as Record<string, unknown>;
+    const tenant = typeof r0.tenantId === "string" ? await this.d.store.getTenant(r0.tenantId) : null;
+    const client = typeof r0.clientCompanyId === "string" ? await this.d.store.getClientCompany(r0.clientCompanyId) : null;
+    if (typeof r0.tenantId === "string" && typeof r0.idempotencyKey === "string") {
+      const existing = await this.d.store.findFilingByIdempotency(r0.tenantId, r0.idempotencyKey);
+      if (existing) {
+        const a = existing.currentApprovalId ? await this.d.store.getApproval(existing.currentApprovalId) : null;
+        return { filing: existing, approvalLink: a && a.status === "pending" ? this.d.approvals.linkFor(a) : undefined, issues: [], existing: true };
+      }
     }
-    const req = parsed.data;
-    const existing = await this.d.store.findFilingByIdempotency(req.tenantId, req.idempotencyKey);
-    if (existing) {
-      const a = existing.currentApprovalId ? await this.d.store.getApproval(existing.currentApprovalId) : null;
-      return { filing: existing, approvalLink: a && a.status === "pending" ? this.d.approvals.linkFor(a) : undefined, issues: [], existing: true };
-    }
-    const tenant = await this.d.store.getTenant(req.tenantId);
-    const client = await this.d.store.getClientCompany(req.clientCompanyId);
     if (!tenant) throw new ValidationFailed([{ path: "tenantId", message: "unknown tenant", severity: "error" }]);
     if (!client || client.tenantId !== tenant.tenantId) throw new ValidationFailed([{ path: "clientCompanyId", message: "unknown client company for this tenant", severity: "error" }]);
 
-    // Apply client defaults (requirement 7) before validation so the approved payload is complete.
-    if (req.ein && !req.ein.mode) req.ein.mode = client.einMode;
-    if (req.formation) {
-      req.formation.registeredAgent ??= client.registeredAgent;
-      if (!req.formation.members.length && client.defaultMember) req.formation.members = [client.defaultMember];
-      if (!req.formation.signers.length && client.defaultSigner) req.formation.signers = [client.defaultSigner];
-      req.formation.county ??= client.countyDefault;
+    // The firm's onboarding answers fill what the filing left out (docs/firm-onboarding.md).
+    const applied = applyPolicies(raw, tenant, client);
+    const parsed = FilingRequest.safeParse(applied.request);
+    if (!parsed.success) {
+      throw new ValidationFailed([
+        ...applied.issues,
+        ...parsed.error.issues.map((i) => ({ path: i.path.join("."), message: i.message, severity: "error" as const })),
+      ]);
     }
+    const req = parsed.data;
+    if (req.ein && !req.ein.mode) req.ein.mode = client.einMode; // decision 1
 
-    const issues = validateFiling(req);
+    const issues = [...applied.issues, ...validateFiling(req)];
     const now = new Date().toISOString();
     const filing: FilingRecord = {
       id: randomUUID(), tenantId: req.tenantId, clientCompanyId: req.clientCompanyId, idempotencyKey: req.idempotencyKey,
       status: "created", request: req, payloadHash: this.d.approvals.payloadHash(req), createdAt: now, updatedAt: now, artifacts: [],
+      appliedPolicies: applied.provenance,
     };
     await this.d.store.createFiling(filing);
     if (hasErrors(issues)) {
@@ -99,7 +105,7 @@ export class FilingService {
     }
     let fees: FeeLine[];
     try {
-      fees = this.feesFor(req, client);
+      fees = this.feesFor(req, tenant, client);
     } catch (e) {
       if (!(e instanceof FeeUnknownError)) throw e;
       const f = await this.transition(filing, "invalid", { lastError: e.message });
@@ -187,7 +193,7 @@ export class FilingService {
     try {
       const running = filing.status === "queued" ? await this.transition(filing, "running") : await store.updateFiling(filing.id, { status: "running" });
       await this.emit("filing.started", running, { dryRun, site: adapter.site, warnings: pf.warnings });
-      const fees = (() => { try { return this.feesFor(filing.request, client); } catch { return []; } })();
+      const fees = (() => { try { return this.feesFor(filing.request, tenant, client); } catch { return []; } })();
       const outcome = await this.d.executor.execute({
         filing: running, approval, tenant, client, adapter, einAdapter: irsEinAdapter, dryRun, expectedFees: approval?.fees ?? fees,
       });
@@ -247,7 +253,7 @@ export class FilingService {
     if (halt.requiresClientReapproval) {
       const tenant = (await this.d.store.getTenant(filing.tenantId))!;
       const client = (await this.d.store.getClientCompany(filing.clientCompanyId))!;
-      const approval = await this.d.approvals.create(filing, tenant, client, this.feesFor(filing.request, client));
+      const approval = await this.d.approvals.create(filing, tenant, client, this.feesFor(filing.request, tenant, client));
       const f = await this.transition(filing, "awaiting_approval", { currentApprovalId: approval.id });
       await this.emit("filing.awaiting_approval", f, { approvalLink: this.d.approvals.linkFor(approval), reason: "form changed: new required field", expiresAt: approval.expiresAt });
     } else {

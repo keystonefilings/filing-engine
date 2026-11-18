@@ -30,9 +30,31 @@
       }
     },
     "standing_certificate": {
-      "statutory": {
-        "label": "Business Entity Standing Certificate (per certificate; Short Form, Long Form w/Filing History or Long Form w/Officers)",
-        "amountUsd": 25
+      "byEntityType": {
+        "LLC": {
+          "label": "Business Entity Standing Certificate (domestic LLC)",
+          "amountUsd": 50
+        },
+        "FLC": {
+          "label": "Business Entity Standing Certificate (foreign LLC)",
+          "amountUsd": 50
+        },
+        "DP": {
+          "label": "Business Entity Standing Certificate (domestic for-profit corporation)",
+          "amountUsd": 25
+        },
+        "FR": {
+          "label": "Business Entity Standing Certificate (foreign for-profit corporation)",
+          "amountUsd": 25
+        },
+        "NP": {
+          "label": "Business Entity Standing Certificate (domestic non-profit corporation)",
+          "amountUsd": 25
+        },
+        "LP": {
+          "label": "Business Entity Standing Certificate (domestic limited partnership)",
+          "amountUsd": 25
+        }
       },
       "serviceFee": {
         "credit_card": 2.0,
@@ -40,7 +62,7 @@
         "stored_card": null,
         "stored_echeck": null
       },
-      "_source": "Business Records Service cart, 2026-11-17: $25.00 statutory + $2.00 card / $1.00 eCheck portal admin fee per certificate"
+      "_source": "Business Records Service cart, verified per record on 2026-11-18: LLC/FLC $50, DP/FR/NP/LP $25; portal admin fee $2 card / $1 eCheck per certificate, all types. Same price for Short and Long forms (2026-11-17, DP). Types not listed (PA, LLP, LF, FLP, NF, NV) are unpriced and refused until walked."
     },
     "alternate_name": null,
     "amendment": null

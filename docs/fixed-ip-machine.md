@@ -23,12 +23,16 @@ cp .env.example .env    # then edit .env on this machine
 ```
 
 In `.env`, set at least `POSTGRES_PASSWORD`, `API_KEYS`, `APPROVAL_SIGNING_SECRET`,
-`PUBLIC_BASE_URL` (the https address approval links will use), and the NY login:
+`PUBLIC_BASE_URL` (the https address approval links will use), and Keystone's
+company-wide NJ and NY logins:
 
 ```
+VAULT_NJ_KEYSTONE_USERNAME=...
+VAULT_NJ_KEYSTONE_PASSWORD=...
+VAULT_NJ_KEYSTONE_TOTP_SEED=...   # only if the account uses an authenticator app
 VAULT_NYGOV_USERNAME=...
 VAULT_NYGOV_PASSWORD=...
-VAULT_NYGOV_TOTP_SEED=...   # only if the ny.gov account uses an authenticator app
+VAULT_NYGOV_TOTP_SEED=...         # only if the ny.gov account uses an authenticator app
 ```
 
 Type these on the machine. Do not send them by chat or email, and do not commit `.env`.

@@ -19,13 +19,20 @@ export class FeeUnknownError extends Error {}
 export function expectedFees(
   state: "NY" | "NJ",
   type: string,
-  opts: { paymentMethod?: string; certificateOfStanding?: boolean; certifiedCopy?: boolean } = {},
+  opts: { paymentMethod?: string; certificateOfStanding?: boolean; certifiedCopy?: boolean; entityType?: string } = {},
   table: FeeTable = loadFeeTable(),
 ): FeeLine[] {
   const entry = table[state]?.[type] as Record<string, any> | null | undefined;
   if (!entry) throw new FeeUnknownError(`No fee table entry for ${state}/${type}; read it on the walk first`);
   const lines: FeeLine[] = [];
   if (entry.statutory) lines.push({ label: entry.statutory.label, amountUsd: entry.statutory.amountUsd });
+  if (entry.byEntityType) {
+    // Price depends on the entity's type (NJ standing certificate: LLC $50, corporation $25).
+    if (!opts.entityType) throw new FeeUnknownError(`${state}/${type} is priced by entity type; the request must give it`);
+    const byType = entry.byEntityType[opts.entityType];
+    if (!byType) throw new FeeUnknownError(`${state}/${type} price for entity type ${opts.entityType} has not been verified yet`);
+    lines.push({ label: byType.label, amountUsd: byType.amountUsd });
+  }
   const method = opts.paymentMethod;
   const svc = method ? entry.serviceFee?.[method] : undefined;
   if (method && entry.serviceFee && (svc === null || svc === undefined)) {

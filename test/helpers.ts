@@ -21,13 +21,13 @@ export async function seededStore() {
   }));
   await store.putClientCompany(ClientCompanySettings.parse({
     clientCompanyId: "acme-cpa", tenantId: "keystone", name: "Acme CPA",
-    einMode: "in_run", njAccountCredentialKey: "NJ_ACME", njStoredPaymentMethod: "stored_card",
+    einMode: "in_run", njAccountCredentialKey: "NJ_ACME", njStoredPaymentMethod: "stored_card", policies: { stateFees: "firm_account" },
     registeredAgent: { name: "Acme Agents Inc", address: { street1: "9 Agent Way", city: "Newark", state: "NJ", zip: "07102" } },
     defaultSigner: { name: "Jordan Lee", title: "Authorized Representative" },
   }));
   await store.putClientCompany(ClientCompanySettings.parse({
     clientCompanyId: "beta-llc", tenantId: "keystone", name: "Beta LLC Owners",
-    einMode: "after_acceptance", njAccountCredentialKey: "NJ_BETA", njStoredPaymentMethod: "stored_echeck",
+    einMode: "after_acceptance", njAccountCredentialKey: "NJ_BETA", njStoredPaymentMethod: "stored_echeck", policies: { stateFees: "firm_account" },
   }));
   return store;
 }

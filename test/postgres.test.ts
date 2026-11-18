@@ -38,7 +38,7 @@ beforeAll(async () => {
   queue = new PgQueue(store.connectionPool);
   await store.putTenant(TenantSettings.parse({ tenantId: "keystone", name: "Keystone", webhookEndpoints: [{ url: "https://hooks.example.test/f", secret: "endpoint-secret-0123456789" }] }));
   await store.putClientCompany(ClientCompanySettings.parse({
-    clientCompanyId: "acme-cpa", tenantId: "keystone", name: "Acme", einMode: "in_run", njStoredPaymentMethod: "stored_card",
+    clientCompanyId: "acme-cpa", tenantId: "keystone", name: "Acme", einMode: "in_run", njStoredPaymentMethod: "stored_card", policies: { stateFees: "firm_account" },
     registeredAgent: { name: "Acme Agents Inc", address: { street1: "9 Agent Way", city: "Newark", state: "NJ", zip: "07102" } },
   }));
   const approvals = new ApprovalService({ store, signingSecret: SECRET, publicBaseUrl: "http://api.test", defaultTtlHours: 24 });

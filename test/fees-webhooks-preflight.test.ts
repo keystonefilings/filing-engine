@@ -11,10 +11,13 @@ describe("fees (decision 5)", () => {
     expect(expectedFees("NJ", "formation", { paymentMethod: "credit_card" })).toEqual([
       { label: "Formation filing fee", amountUsd: 100 }, { label: "Service fee (credit_card)", amountUsd: 3.5 },
     ]);
-    expect(expectedFees("NJ", "standing_certificate", { paymentMethod: "echeck" })).toEqual([
-      { label: expect.stringContaining("Standing Certificate"), amountUsd: 25 }, { label: "Service fee (echeck)", amountUsd: 1 },
-    ]);
-    expect(() => expectedFees("NJ", "standing_certificate", { paymentMethod: "stored_echeck" })).toThrow(FeeUnknownError);
+    // NJ standing certificates are priced by entity type (verified 2026-11-18).
+    expect(expectedFees("NJ", "standing_certificate", { paymentMethod: "echeck", entityType: "LLC" }).map((l) => l.amountUsd)).toEqual([50, 1]);
+    expect(expectedFees("NJ", "standing_certificate", { paymentMethod: "credit_card", entityType: "FLC" }).map((l) => l.amountUsd)).toEqual([50, 2]);
+    expect(expectedFees("NJ", "standing_certificate", { paymentMethod: "credit_card", entityType: "DP" }).map((l) => l.amountUsd)).toEqual([25, 2]);
+    expect(() => expectedFees("NJ", "standing_certificate", { paymentMethod: "credit_card" })).toThrow(/entity type/);
+    expect(() => expectedFees("NJ", "standing_certificate", { paymentMethod: "credit_card", entityType: "LLP" })).toThrow(/not been verified/);
+    expect(() => expectedFees("NJ", "standing_certificate", { paymentMethod: "stored_echeck", entityType: "LLC" })).toThrow(FeeUnknownError);
     expect(() => expectedFees("NJ", "alternate_name")).toThrow(FeeUnknownError);
     expect(() => expectedFees("NJ", "formation", { paymentMethod: "stored_card" })).toThrow(FeeUnknownError);
   });

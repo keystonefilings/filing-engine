@@ -50,7 +50,7 @@ describe("walk recorder", () => {
     expect(all).toContain("Select Payment Type");
   });
 
-  it("lets an explicitly allowed button through", async () => {
+  it("lets an explicitly allowed button through once, then blocks the same label again", async () => {
     const r = await startRecorder({
       walk: "fixture-allow", url: `${fx.url}/nj-formation/payment.html`, outRoot: out, headless: true,
       profileDir: path.join(out, "profile2"), date: "test", allow: ["Pay Now"],
@@ -58,6 +58,12 @@ describe("walk recorder", () => {
     try {
       await r.page.click("input[value='Pay Now']");
       await r.page.waitForURL(/submitted\.html/, { timeout: 5000 });
+      // A second "Pay Now" (as a payment gateway's own button might be labelled) is blocked.
+      await r.page.goto(`${fx.url}/nj-formation/payment.html`);
+      await r.page.click("input[value='Pay Now']");
+      await r.page.waitForTimeout(1500);
+      expect(r.page.url()).toContain("payment.html");
+      expect(await r.page.locator("#__walk_banner").innerText()).toContain("already used once");
     } finally {
       await r.stop();
     }

@@ -118,12 +118,17 @@ export const FormationDetails = z.object({
 });
 
 /** NJ Business Records Service standing certificate (walk 2026-11-17). One certificate per filing. */
+/** NJ entity type codes as the Business Records results grid shows them. */
+export const NjEntityType = z.enum(["DP", "PA", "LLC", "LP", "LLP", "NP", "NV", "FR", "FLC", "LF", "FLP", "NF"]);
+
 export const StandingCertificateDetails = z.object({
   /** Exact business name as on the state record (search is by name; the row must match exactly). */
   entityName: z.string().min(1),
   /** NJ Entity ID; required when several records share the name, checked against the result row. */
   entityId: z.string().regex(/^\d{10}$/).optional(),
   form: z.enum(["short", "long_filing_history", "long_officers"]).default("short"),
+  /** Decides the price (LLC/FLC $50, corporations/LP $25); checked against the record's Type column. */
+  entityType: NjEntityType,
 });
 
 export const Contact = z.object({
@@ -143,6 +148,8 @@ export const FilingRequest = z.object({
   standing: StandingCertificateDetails.optional(),
   ein: EinRequest.optional(),
   contact: Contact,
+  /** Keystone intake answers for this entity (shape: settings/policies.ts FilingIntake). */
+  intake: z.record(z.string(), z.unknown()).optional(),
   approvalRecipients: z.array(ApprovalRecipient).optional(),
   dryRun: z.boolean().optional(),
   /** Caller-side maximum charge the client approves (fee cap, decision 5). */

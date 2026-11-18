@@ -138,11 +138,13 @@ describe("fee check against the live NJ cart (2026-11-17)", () => {
     const html = readFileSync(new URL("./captures/nj-standing-2026-11-17/06-cart-card.html", import.meta.url), "utf8");
     await page.setContent(html, { waitUntil: "domcontentloaded" });
     const inv = await collectInventory(page);
-    const expected = expectedFees("NJ", "standing_certificate", { paymentMethod: "credit_card" });
+    const expected = expectedFees("NJ", "standing_certificate", { paymentMethod: "credit_card", entityType: "DP" });
     const ok = checkLiveFees(expected, inv.prices, 30);
     expect(ok.liveTotal).toBe(27);
     expect(ok.ok).toBe(true);
     // Same page against an eCheck approval: must stop.
-    expect(checkLiveFees(expectedFees("NJ", "standing_certificate", { paymentMethod: "echeck" }), inv.prices).ok).toBe(false);
+    expect(checkLiveFees(expectedFees("NJ", "standing_certificate", { paymentMethod: "echeck", entityType: "DP" }), inv.prices).ok).toBe(false);
+    // An LLC approval ($50) against this corporation's cart ($25) must stop too.
+    expect(checkLiveFees(expectedFees("NJ", "standing_certificate", { paymentMethod: "credit_card", entityType: "LLC" }), inv.prices).ok).toBe(false);
   });
 });

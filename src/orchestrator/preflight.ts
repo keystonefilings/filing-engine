@@ -5,6 +5,7 @@ import type { Vault } from "../settings/vault.js";
 import { IRS_HOURS } from "../adapters/irs-ein/intents.js";
 import type { ApprovalService } from "../approvals/service.js";
 import { expectedFees, FeeUnknownError } from "../fees/table.js";
+import { njAccount, nyDrawdownAccount } from "../settings/accounts.js";
 
 export interface PreflightResult { ok: boolean; blockers: string[]; warnings: string[] }
 
@@ -70,9 +71,10 @@ export async function preflight(input: {
   try {
     if (req.type !== "ein_only") {
       expectedFees(req.state, req.type, {
-        paymentMethod: req.state === "NJ" ? (client.njStoredPaymentMethod ?? "credit_card") : undefined,
+        paymentMethod: req.state === "NJ" ? njAccount(tenant, client).feeMethod : undefined,
         certificateOfStanding: req.formation?.additionalCertificates.certificateOfStanding,
         certifiedCopy: req.formation?.additionalCertificates.certifiedCopy,
+        entityType: req.standing?.entityType,
       });
     }
   } catch (e) {
@@ -86,14 +88,15 @@ export async function preflight(input: {
       const cred = await input.vault.getCredential(credKey);
       if (!cred) b.push(`no credential in vault for ${credKey}`);
     } else if (adapter.site === "NJ") {
-      b.push("NJ runs pay from the client's NJ account (decision 3) but no njAccountCredentialKey is set for this client");
+      b.push("NJ runs sign in with Keystone's company-wide NJ account (or a client override) but neither tenant nor client has an NJ login set");
     }
   }
 
   if (req.state === "NY" && !dryRun) {
-    if (!client.nyDrawdownAccountRef) b.push("NY filings pay from a drawdown account (decision 3) but none is set for this client");
+    const dd = nyDrawdownAccount(tenant, client);
+    if (!dd) b.push("NY filings pay from a drawdown account (decision 3) but neither Keystone nor this client has one set");
     else {
-      const bal = await input.balances.nyDrawdownBalanceUsd(client.nyDrawdownAccountRef);
+      const bal = await input.balances.nyDrawdownBalanceUsd(dd);
       if (bal === null) b.push("NY drawdown balance could not be read; refusing to start (no drafts, payment is the last step)");
       else if (approval && bal < approval.fees.reduce((s, f) => s + f.amountUsd, 0)) b.push(`NY drawdown balance $${bal} is below the approved fees`);
     }
