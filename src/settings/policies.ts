@@ -3,19 +3,21 @@ import { Address, Contact, Person, ResponsibleParty } from "../domain/filing.js"
 import type { ClientCompanySettings, TenantSettings } from "./schema.js";
 
 /**
- * Firm onboarding answers (docs/firm-onboarding.md). Question IDs in comments.
+ * Customer-firm onboarding answers (docs/onboarding/customer-firm.md). Question IDs in comments.
+ * Levels: the platform -> a filing service company (tenant) -> its customer firms (CPA, title,
+ * payroll company) -> the entity being filed. "service_company" = the tenant's own details,
+ * "firm" = the customer firm's, "client"/"intake" = the entity's owner / intake answers.
  * "per_entity" = no default: the filing itself must carry the value.
- * "intake"     = from Keystone's intake answers for that entity (request.intake).
  */
 export const FirmPolicies = z.object({
   approver: z.enum(["firm", "client", "per_entity"]).optional(), // B1
-  njRegisteredAgent: z.enum(["keystone", "firm", "entity_member", "per_entity", "intake"]).default("per_entity"), // C1
-  nySopAddress: z.enum(["keystone", "firm", "entity_address", "per_entity", "intake"]).default("per_entity"), // C3
-  nyNoticeEmail: z.enum(["keystone", "firm", "client"]).default("firm"), // C4
-  nyRegisteredAgent: z.enum(["none", "keystone", "firm", "per_entity"]).default("none"), // C5
-  organizer: z.enum(["keystone", "firm", "client", "per_entity", "intake"]).default("per_entity"), // D1
-  njSigner: z.enum(["same_as_organizer", "keystone", "firm", "client", "per_entity"]).default("same_as_organizer"), // D2
-  nyFiler: z.enum(["keystone", "firm", "per_entity"]).default("keystone"), // D3
+  njRegisteredAgent: z.enum(["service_company", "firm", "new_entity", "entity_member", "per_entity", "intake"]).default("per_entity"), // C1
+  nySopAddress: z.enum(["service_company", "firm", "entity_address", "per_entity", "intake"]).default("per_entity"), // C3
+  nyNoticeEmail: z.enum(["service_company", "firm", "client"]).default("firm"), // C4
+  nyRegisteredAgent: z.enum(["none", "service_company", "firm", "per_entity"]).default("none"), // C5
+  organizer: z.enum(["service_company", "firm", "client", "per_entity", "intake"]).default("per_entity"), // D1
+  njSigner: z.enum(["same_as_organizer", "service_company", "firm", "client", "per_entity"]).default("same_as_organizer"), // D2
+  nyFiler: z.enum(["service_company", "firm", "per_entity"]).default("service_company"), // D3
   njMembers: z.enum(["intake", "per_entity"]).default("per_entity"), // E1
   nyManagement: z.enum(["member_managed", "manager_managed", "intake", "per_entity"]).default("per_entity"), // E2
   mainAddress: z.enum(["firm", "intake", "per_entity", "omit"]).default("per_entity"), // E3
@@ -26,20 +28,32 @@ export const FirmPolicies = z.object({
   designator: z.string().default("LLC"), // E7 ("per_entity" = must be given)
   nameUnavailable: z.enum(["stop", "alternates"]).default("stop"), // E8 (stored; alternates not built)
   einResponsibleParty: z.enum(["intake", "per_entity"]).default("intake"), // F2
-  ss4Collection: z.enum(["keystone_esign", "firm_uploads"]).optional(), // F3 (stored)
+  ss4Collection: z.enum(["service_company_esign", "firm_uploads"]).optional(), // F3 (stored)
   closingMonth: z.number().int().min(1).max(12).default(12), // F4
-  stateFees: z.enum(["keystone_bills", "firm_account"]).default("keystone_bills"), // G1
+  stateFees: z.enum(["service_company_account", "own_account"]).default("service_company_account"), // G1
   billing: z.enum(["per_filing", "monthly", "prepaid"]).optional(), // G2 (stored)
   njExtraCertificates: z.enum(["none", "standing", "certified", "both", "per_entity"]).default("none"), // G3
-  filingContact: z.enum(["keystone", "firm", "client"]).default("firm"), // G5
+  filingContact: z.enum(["service_company", "firm", "client"]).default("firm"), // G5
   standingDefaultForm: z.enum(["short", "long_filing_history", "long_officers"]).default("short"), // G6
   documentsTo: z.enum(["firm", "client", "both"]).optional(), // H1 (stored)
-  nyPublication: z.enum(["keystone_service", "firm_handles", "reminder_only"]).optional(), // H2 (stored)
-  annualReports: z.enum(["keystone_reminds", "firm_handles"]).optional(), // H3 (stored)
+  nyPublication: z.enum(["service_company", "firm_handles", "reminder_only"]).optional(), // H2 (stored)
+  annualReports: z.enum(["service_company_reminds", "firm_handles"]).optional(), // H3 (stored)
 });
 export type FirmPolicies = z.infer<typeof FirmPolicies>;
 
-/** Keystone's intake answers for one entity, sent with the filing. */
+/**
+ * Stored answers: only the questions actually answered (no defaults filled in), so that a
+ * service company's defaults apply to everything its customer left unanswered.
+ */
+export const FirmPolicyAnswers = z.object(
+  Object.fromEntries(Object.entries(FirmPolicies.shape).map(([k, v]) => [
+    k, ((v as z.ZodType) instanceof z.ZodDefault ? (v as unknown as z.ZodDefault<z.ZodType>).unwrap() : (v as z.ZodType)).optional(),
+  ])) as { [K in keyof typeof FirmPolicies.shape]: z.ZodOptional<z.ZodType<z.infer<typeof FirmPolicies>[K]>> },
+);
+export type FirmPolicyAnswers = z.infer<typeof FirmPolicyAnswers>;
+export const POLICY_KEYS = Object.keys(FirmPolicies.shape) as (keyof FirmPolicies)[];
+
+/** The service company's intake answers for one entity, sent with the filing. */
 export const FilingIntake = z.object({
   owners: z.array(Person).default([]),
   contact: Contact.optional(),
@@ -70,9 +84,18 @@ type Obj = Record<string, any>; // raw request before schema parsing
  * Applies the firm's onboarding answers to a raw filing request, before it is parsed.
  * Only fields the filing left out are filled: a value sent with the filing always wins.
  */
+/**
+ * The answers in force for a customer firm: the service company's defaults, overlaid by the
+ * firm's own answers, except for questions the service company has locked.
+ */
+export function effectivePolicies(tenant: TenantSettings, client: ClientCompanySettings): FirmPolicies {
+  const own = Object.fromEntries(Object.entries(client.policies ?? {}).filter(([k, v]) => v !== undefined && !tenant.lockedCustomerPolicies.includes(k)));
+  return FirmPolicies.parse({ ...tenant.customerPolicyDefaults, ...own });
+}
+
 export function applyPolicies(raw: unknown, tenant: TenantSettings, client: ClientCompanySettings): PolicyResult {
   const req: Obj = structuredClone((raw ?? {}) as Obj);
-  const p = client.policies;
+  const p = effectivePolicies(tenant, client);
   const issues: PolicyIssue[] = [];
   const provenance: Record<string, string> = {};
   const intakeParsed = FilingIntake.safeParse(req.intake ?? {});
@@ -93,7 +116,7 @@ export function applyPolicies(raw: unknown, tenant: TenantSettings, client: Clie
   const pick = <T>(choice: string, table: Record<string, T | undefined>): T | undefined => table[choice];
 
   // G5 filing contact (NJ payment page; state emails).
-  fill(req, "contact", "contact", "G5", p.filingContact, pick(p.filingContact, { keystone: tenant.contact, firm: client.filingContact, client: intake.contact }), "the filing contact");
+  fill(req, "contact", "contact", "G5", p.filingContact, pick(p.filingContact, { service_company: tenant.contact, firm: client.filingContact, client: intake.contact }), "the filing contact");
 
   // B1 approvers.
   if (p.approver && !req.approvalRecipients) {
@@ -118,17 +141,17 @@ export function applyPolicies(raw: unknown, tenant: TenantSettings, client: Clie
     if (p.mainAddress === "firm" || p.mainAddress === "intake") fill(f, "mainBusinessAddress", "formation.mainBusinessAddress", "E3", p.mainAddress, pick(p.mainAddress, { firm: client.mainBusinessAddress, intake: intake.principalAddress }), "the main business address");
 
     // D1 organizer (NY uses it directly; NJ signer may follow it).
-    const organizerValue = pick(p.organizer, { keystone: tenant.organizer, firm: client.organizer, client: owner, intake: intake.organizer });
+    const organizerValue = pick(p.organizer, { service_company: tenant.organizer, firm: client.organizer, client: owner, intake: intake.organizer });
     if (state === "NY") {
       fill(f, "organizer", "formation.organizer", "D1", p.organizer, organizerValue, "the organizer");
-      fill(f, "filer", "formation.filer", "D3", p.nyFiler, pick(p.nyFiler, { keystone: tenant.filer, firm: client.filer }), "the filer");
+      fill(f, "filer", "formation.filer", "D3", p.nyFiler, pick(p.nyFiler, { service_company: tenant.filer, firm: client.filer }), "the filer");
       fill(f, "managementStructure", "formation.managementStructure", "E2", p.nyManagement,
         p.nyManagement === "member_managed" || p.nyManagement === "manager_managed" ? p.nyManagement : intake.managementStructure, "the management structure");
       fill(f, "county", "formation.county", "E4", p.county, pick(p.county, { firm_default: client.countyDefault, intake: intake.county }), "the county");
       // C3 service of process + C4 notice email.
-      const noticeEmail = pick(p.nyNoticeEmail, { keystone: tenant.contact?.email ?? tenant.noticeEmail, firm: client.noticeEmail ?? client.filingContact?.email, client: intake.contact?.email });
+      const noticeEmail = pick(p.nyNoticeEmail, { service_company: tenant.contact?.email ?? tenant.noticeEmail, firm: client.noticeEmail ?? client.filingContact?.email, client: intake.contact?.email });
       const sopPerson = pick(p.nySopAddress, {
-        keystone: tenant.serviceOfProcess, firm: client.serviceOfProcess, intake: intake.serviceOfProcess,
+        service_company: tenant.serviceOfProcess, firm: client.serviceOfProcess, intake: intake.serviceOfProcess,
         entity_address: (f.mainBusinessAddress ?? intake.principalAddress) && f.name?.baseName
           ? { name: `${f.name.baseName} ${f.name.designator ?? p.designator}`.trim(), address: f.mainBusinessAddress ?? intake.principalAddress } : undefined,
       });
@@ -137,8 +160,8 @@ export function applyPolicies(raw: unknown, tenant: TenantSettings, client: Clie
         f.serviceOfProcess.noticeEmail = noticeEmail; provenance["formation.serviceOfProcess.noticeEmail"] = p.nyNoticeEmail;
       }
       // C5 optional NY registered agent.
-      if (p.nyRegisteredAgent === "keystone" || p.nyRegisteredAgent === "firm" || p.nyRegisteredAgent === "per_entity") {
-        fill(f, "registeredAgent", "formation.registeredAgent", "C5", p.nyRegisteredAgent, pick(p.nyRegisteredAgent, { keystone: tenant.registeredAgent, firm: client.registeredAgent }), "the NY registered agent");
+      if (p.nyRegisteredAgent === "service_company" || p.nyRegisteredAgent === "firm" || p.nyRegisteredAgent === "per_entity") {
+        fill(f, "registeredAgent", "formation.registeredAgent", "C5", p.nyRegisteredAgent, pick(p.nyRegisteredAgent, { service_company: tenant.registeredAgent, firm: client.registeredAgent }), "the NY registered agent");
       }
     }
 
@@ -149,13 +172,19 @@ export function applyPolicies(raw: unknown, tenant: TenantSettings, client: Clie
       const members: Obj[] = Array.isArray(f.members) && f.members.length ? f.members : intake.owners;
       const njMember = members.find((m) => m?.address?.state === "NJ");
       fill(f, "registeredAgent", "formation.registeredAgent", "C1", p.njRegisteredAgent, pick(p.njRegisteredAgent, {
-        keystone: tenant.registeredAgent, firm: client.registeredAgent, intake: intake.registeredAgent,
+        service_company: tenant.registeredAgent, firm: client.registeredAgent, intake: intake.registeredAgent,
         entity_member: intake.registeredAgent ?? (njMember ? { name: njMember.name, address: njMember.address } : undefined),
+        // The new LLC as its own agent (NJ accepts this, confirmed 2026-11-18), at its NJ address.
+        new_entity: (() => {
+          const addr = f.mainBusinessAddress ?? intake.principalAddress;
+          if (!addr || addr.state !== "NJ" || !f.name?.baseName) return undefined;
+          return { name: `${f.name.baseName} ${f.name.designator ?? p.designator}`.trim(), address: addr };
+        })(),
       }), "the registered agent");
       // D2 signer(s).
       const signerChoice = p.njSigner === "same_as_organizer" ? p.organizer : p.njSigner;
       const signer = p.njSigner === "same_as_organizer" ? organizerValue
-        : pick(p.njSigner, { keystone: tenant.signer ?? tenant.organizer, firm: client.defaultSigner ?? client.organizer, client: owner });
+        : pick(p.njSigner, { service_company: tenant.signer ?? tenant.organizer, firm: client.defaultSigner ?? client.organizer, client: owner });
       fill(f, "signers", "formation.signers", "D2", signerChoice, signer ? [{ ...signer, title: "Authorized Representative" }] : undefined, "the signer");
       // G3 extras.
       if (f.additionalCertificates === undefined) {

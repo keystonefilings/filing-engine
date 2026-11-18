@@ -1,5 +1,8 @@
 # The fixed-IP machine (decision 4)
 
+One per filing service company in Scope 1 (each subscriber files from its own address);
+Keystone's is the first.
+
 From the cloud on 2026-11-17 the IRS EIN assistant answered "Access Denied" and NY DOS
 closed every connection. Both filings therefore run from one machine with a fixed,
 non-data-center-looking US address. NJ works from anywhere.
@@ -23,16 +26,18 @@ cp .env.example .env    # then edit .env on this machine
 ```
 
 In `.env`, set at least `POSTGRES_PASSWORD`, `API_KEYS`, `APPROVAL_SIGNING_SECRET`,
-`PUBLIC_BASE_URL` (the https address approval links will use), and Keystone's
-company-wide NJ and NY logins:
+`PUBLIC_BASE_URL` (the https address approval links will use), `WORKER_TENANTS` (the
+service company this machine files for, e.g. `keystone`), and that company's NJ and NY
+logins, scoped by its tenant id:
 
 ```
-VAULT_NJ_KEYSTONE_USERNAME=...
-VAULT_NJ_KEYSTONE_PASSWORD=...
-VAULT_NJ_KEYSTONE_TOTP_SEED=...   # only if the account uses an authenticator app
-VAULT_NYGOV_USERNAME=...
-VAULT_NYGOV_PASSWORD=...
-VAULT_NYGOV_TOTP_SEED=...         # only if the ny.gov account uses an authenticator app
+WORKER_TENANTS=keystone
+VAULT_KEYSTONE_NJ_USERNAME=...
+VAULT_KEYSTONE_NJ_PASSWORD=...
+VAULT_KEYSTONE_NJ_TOTP_SEED=...      # only if the account uses an authenticator app
+VAULT_KEYSTONE_NYGOV_USERNAME=...
+VAULT_KEYSTONE_NYGOV_PASSWORD=...
+VAULT_KEYSTONE_NYGOV_TOTP_SEED=...   # only if the ny.gov account uses an authenticator app
 ```
 
 Type these on the machine. Do not send them by chat or email, and do not commit `.env`.

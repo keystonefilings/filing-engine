@@ -41,7 +41,7 @@ export class BrowserHarness {
     return this.browser.newContext({ viewport: { width: 1280, height: 1600 }, acceptDownloads: true });
   }
 
-  /** Persistent context keyed by profile (e.g. "ny:keystone", "nj:client-123"). */
+  /** Persistent context keyed by profile (e.g. "ny:<tenant>", "nj:<tenant>" or "nj:<firm>"). */
   async persistentContext(profileKey: string): Promise<BrowserContext> {
     const pw = await this.playwright();
     const dir = path.join(this.opts.profileDir, profileKey.replace(/[^a-z0-9:_-]/gi, "_"));

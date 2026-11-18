@@ -88,13 +88,13 @@ export async function preflight(input: {
       const cred = await input.vault.getCredential(credKey);
       if (!cred) b.push(`no credential in vault for ${credKey}`);
     } else if (adapter.site === "NJ") {
-      b.push("NJ runs sign in with Keystone's company-wide NJ account (or a client override) but neither tenant nor client has an NJ login set");
+      b.push("no NJ login for this run: the service company has none set, or the firm pays with its own account (G1) and has none set");
     }
   }
 
   if (req.state === "NY" && !dryRun) {
     const dd = nyDrawdownAccount(tenant, client);
-    if (!dd) b.push("NY filings pay from a drawdown account (decision 3) but neither Keystone nor this client has one set");
+    if (!dd) b.push("NY filings pay from a drawdown account, but the account in force (service company's, or the firm's per G1) is not set");
     else {
       const bal = await input.balances.nyDrawdownBalanceUsd(dd);
       if (bal === null) b.push("NY drawdown balance could not be read; refusing to start (no drafts, payment is the last step)");

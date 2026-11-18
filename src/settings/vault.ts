@@ -13,6 +13,10 @@ export interface Vault {
   getCredential(key: string): Promise<Credential | null>;
 }
 
+/**
+ * Development vault: reads VAULT_<KEY>_USERNAME / _PASSWORD / _TOTP_SEED, where KEY is the
+ * scoped key upper-cased with non-alphanumerics as "_" ("keystone/NYGOV" -> VAULT_KEYSTONE_NYGOV_...).
+ */
 export class EnvVault implements Vault {
   constructor(private readonly env: NodeJS.ProcessEnv = process.env) {}
   async getCredential(key: string): Promise<Credential | null> {

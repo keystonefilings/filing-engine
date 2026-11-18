@@ -506,7 +506,7 @@ Still needed from a person:
   service-company login and Keystone's drawdown account. A firm uses its own NJ login /
   NY drawdown account only if its onboarding answer G1 is "the firm's own account".
   Client NJ credentials are no longer needed by default.
-- **Firm onboarding questionnaire** (`docs/firm-onboarding.md`), applied to every filing:
+- **Firm onboarding questionnaire** (now `docs/onboarding/customer-firm.md`, see M), applied to every filing:
   registered agent, service of process, organizer/incorporator, signer, filer, members,
   management, addresses, county, purpose, designator, EIN, extras, contact, approvers,
   fees. A value sent with a filing always wins; a setting with nothing behind it refuses
@@ -517,3 +517,22 @@ Still needed from a person:
   button with the same label is blocked.
 - Open: the "new LLC as its own registered agent" option is implemented as "a member of
   the new LLC with an NJ address"; confirm whether NJ accepts the entity itself.
+
+## M. Scope clarified (Nov 18)
+
+Two products on one engine (`docs/scope.md`):
+- **Scope 1:** an enterprise platform sold by subscription to filing service companies.
+  Each subscriber is independent: its own state logins, registered agent service, people,
+  channels (website/API, Slack, WhatsApp, email, SMS), customers, defaults and locks.
+  Keystone is one subscriber. Questionnaire: `docs/onboarding/service-company.md`.
+- **Scope 2:** Keystone's front end for CPAs, title companies and payroll companies, each
+  choosing its own state logins or Keystone's accounts (question G1). Questionnaire:
+  `docs/onboarding/customer-firm.md` (used by every subscriber's customers).
+
+Engine changes: "Keystone" options renamed "service company"; customer answers stored as
+answered-only, overlaid on the subscriber's defaults, with locks; vault keys scoped per
+subscriber and per firm; jobs carry the subscriber and a subscriber's worker claims only
+its own (`WORKER_TENANTS`); approval pages branded per subscriber; drift review is
+platform work (adapters are shared); channel settings stored (delivery not built).
+NJ accepts the new LLC as its own registered agent: answer C1 `new_entity`, NJ address required.
+Open: webhook header names `X-Keystone-*` if the platform is sold under another name.

@@ -66,7 +66,7 @@ export const EinRequest = z.object({
 });
 
 export const ApprovalRecipient = z.object({
-  channel: z.enum(["email", "webhook"]),
+  channel: z.enum(["email", "webhook", "slack", "whatsapp", "sms"]),
   address: z.string().min(3),
   name: z.string().optional(),
 });
@@ -148,7 +148,7 @@ export const FilingRequest = z.object({
   standing: StandingCertificateDetails.optional(),
   ein: EinRequest.optional(),
   contact: Contact,
-  /** Keystone intake answers for this entity (shape: settings/policies.ts FilingIntake). */
+  /** The service company's intake answers for this entity (shape: settings/policies.ts FilingIntake). */
   intake: z.record(z.string(), z.unknown()).optional(),
   approvalRecipients: z.array(ApprovalRecipient).optional(),
   dryRun: z.boolean().optional(),

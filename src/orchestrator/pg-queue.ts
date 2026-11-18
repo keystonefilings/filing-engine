@@ -11,18 +11,20 @@ export class PgQueue implements JobQueue {
 
   async enqueue(job: Omit<Job, "id" | "enqueuedAt">): Promise<Job> {
     const r = await this.pool.query(
-      `insert into jobs (kind, filing_id) values ($1, $2) returning id, kind, filing_id, enqueued_at`,
-      [job.kind, job.filingId ?? null],
+      `insert into jobs (kind, filing_id, tenant_id) values ($1, $2, $3) returning id, kind, filing_id, tenant_id, enqueued_at`,
+      [job.kind, job.filingId ?? null, job.tenantId ?? null],
     );
     return toJob(r.rows[0]);
   }
 
-  async dequeue(workerId = "worker"): Promise<Job | null> {
+  async dequeue(workerId = "worker", tenants?: string[]): Promise<Job | null> {
     const r = await this.pool.query(
       `update jobs set taken_at = now(), taken_by = $1
-         where id = (select id from jobs where taken_at is null order by id for update skip locked limit 1)
-       returning id, kind, filing_id, enqueued_at`,
-      [workerId],
+         where id = (select id from jobs where taken_at is null
+                       and ($2::text[] is null or tenant_id = any($2::text[]))
+                     order by id for update skip locked limit 1)
+       returning id, kind, filing_id, tenant_id, enqueued_at`,
+      [workerId, tenants?.length ? tenants : null],
     );
     return r.rows[0] ? toJob(r.rows[0]) : null;
   }
@@ -37,6 +39,6 @@ export class PgQueue implements JobQueue {
   }
 }
 
-function toJob(row: { id: string | number; kind: Job["kind"]; filing_id: string | null; enqueued_at: Date }): Job {
-  return { id: String(row.id), kind: row.kind, filingId: row.filing_id ?? undefined, enqueuedAt: new Date(row.enqueued_at).toISOString() };
+function toJob(row: { id: string | number; kind: Job["kind"]; filing_id: string | null; tenant_id: string | null; enqueued_at: Date }): Job {
+  return { id: String(row.id), kind: row.kind, filingId: row.filing_id ?? undefined, tenantId: row.tenant_id ?? undefined, enqueuedAt: new Date(row.enqueued_at).toISOString() };
 }

@@ -1,5 +1,6 @@
 import { hasLlcIndicator, renderName } from "../../domain/name.js";
 import type { ScreenStep, SiteAdapter, StepContext } from "../types.js";
+import { tenantVaultKey } from "../../settings/accounts.js";
 import { NY_SCREENS } from "./intents.js";
 
 function formation(ctx: StepContext) {
@@ -74,6 +75,6 @@ export const nyFormationAdapter: SiteAdapter = {
   complete: false,
   entryUrl: () => process.env.NY_FORMATION_URL ?? "https://filings.dos.ny.gov/ords/r/corpanc/efiling/1",
   profileKey: (ctx) => `ny:${ctx.tenant.tenantId}`,
-  credentialKey: (ctx) => ctx.tenant.nyGovCredentialKey,
+  credentialKey: (ctx) => tenantVaultKey(ctx.tenant, ctx.tenant.nyGovCredentialKey),
   steps: [entityName, filing],
 };

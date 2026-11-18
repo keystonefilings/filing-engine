@@ -38,7 +38,7 @@ beforeAll(async () => {
   queue = new PgQueue(store.connectionPool);
   await store.putTenant(TenantSettings.parse({ tenantId: "keystone", name: "Keystone", webhookEndpoints: [{ url: "https://hooks.example.test/f", secret: "endpoint-secret-0123456789" }] }));
   await store.putClientCompany(ClientCompanySettings.parse({
-    clientCompanyId: "acme-cpa", tenantId: "keystone", name: "Acme", einMode: "in_run", njStoredPaymentMethod: "stored_card", policies: { stateFees: "firm_account" },
+    clientCompanyId: "acme-cpa", tenantId: "keystone", name: "Acme", einMode: "in_run", njStoredPaymentMethod: "stored_card", policies: { stateFees: "own_account" },
     registeredAgent: { name: "Acme Agents Inc", address: { street1: "9 Agent Way", city: "Newark", state: "NJ", zip: "07102" } },
   }));
   const approvals = new ApprovalService({ store, signingSecret: SECRET, publicBaseUrl: "http://api.test", defaultTtlHours: 24 });
@@ -76,6 +76,14 @@ describe("Postgres store + queue", () => {
     expect(idem.existing).toBe(true);
     const types = (await store.listDeliveries(filing.id)).map((d) => d.event.type);
     expect(types).toEqual(["filing.validated", "filing.awaiting_approval", "filing.approved"]);
+  });
+
+  it("a service company's own worker claims only its own tenant's jobs", async () => {
+    await queue.enqueue({ kind: "run_filing", filingId: crypto.randomUUID(), tenantId: "otherco" });
+    expect(await queue.dequeue("keystone-vm", ["keystone"])).toBeNull();
+    const j = await queue.dequeue("otherco-vm", ["otherco"]);
+    expect(j?.tenantId).toBe("otherco");
+    await queue.complete(j!.id);
   });
 
   it("settles filings a dead worker left behind, without re-running them", async () => {

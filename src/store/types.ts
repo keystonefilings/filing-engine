@@ -20,7 +20,7 @@ export interface FilingRecord {
   ein?: string;
   lastError?: string;
   artifacts: { id: string; kind: string; label: string }[];
-  /** Field path -> source ("filing", "keystone", "firm", "intake", ...) from the firm's onboarding answers. */
+  /** Field path -> source ("filing", "service_company", "firm", "intake", ...) from the onboarding answers. */
   appliedPolicies?: Record<string, string>;
 }
 

@@ -117,7 +117,9 @@ export function buildServer(deps: ApiDeps): FastifyInstance {
     if (!found.ok) return reply.code(410).type("text/html").send(`<p>This approval link is ${found.reason.replace("_", " ")}.</p>`);
     const a = found.approval;
     const f = await deps.store.getFiling(a.filingId);
+    const tenant = await deps.store.getTenant(a.tenantId);
     const html = renderReviewPage({
+      brandName: tenant?.branding.displayName ?? tenant?.name, supportEmail: tenant?.branding.supportEmail,
       filingId: a.filingId,
       filingTitle: f ? `${f.request.state} ${f.request.type.replace("_", " ")}${f.request.formation ? `: ${f.request.formation.name.baseName} ${f.request.formation.name.designator}` : ""}` : "Filing",
       payload: a.shownPayload, fees: a.fees, feeCapUsd: a.feeCapUsd, expiresAt: a.expiresAt,
@@ -139,7 +141,7 @@ export function buildServer(deps: ApiDeps): FastifyInstance {
       : "<p>Thank you. Your change request is recorded; you will receive a new link once the filing is updated.</p>");
   });
 
-  // ---- Drift reviews (Keystone staff, decision 6) ----
+  // ---- Drift reviews (platform staff, decision 6): the platform maintains the site adapters for all tenants ----
   app.get("/v1/drift-reviews", async (req) => {
     const status = (req.query as { status?: "pending" | "accepted" | "corrected" | "rejected" }).status;
     return { halts: await deps.store.listDriftHalts(status) };

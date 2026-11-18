@@ -78,7 +78,7 @@ export class FilingService {
     if (!tenant) throw new ValidationFailed([{ path: "tenantId", message: "unknown tenant", severity: "error" }]);
     if (!client || client.tenantId !== tenant.tenantId) throw new ValidationFailed([{ path: "clientCompanyId", message: "unknown client company for this tenant", severity: "error" }]);
 
-    // The firm's onboarding answers fill what the filing left out (docs/firm-onboarding.md).
+    // The firm's onboarding answers fill what the filing left out (docs/onboarding/customer-firm.md).
     const applied = applyPolicies(raw, tenant, client);
     const parsed = FilingRequest.safeParse(applied.request);
     if (!parsed.success) {
@@ -144,7 +144,7 @@ export class FilingService {
     const filing = await this.d.store.getFiling(filingId);
     if (!filing) throw new Error("filing not found");
     const f = await this.transition(filing, "queued");
-    await this.d.queue.enqueue({ kind: "run_filing", filingId: f.id });
+    await this.d.queue.enqueue({ kind: "run_filing", filingId: f.id, tenantId: f.tenantId });
   }
 
   /** Dry run from any pre-approval state: executes to the last screen and stops before the irreversible click. */
@@ -152,7 +152,7 @@ export class FilingService {
     const filing = await this.d.store.getFiling(filingId);
     if (!filing) throw new Error("filing not found");
     await this.d.store.updateFiling(filing.id, { request: { ...filing.request, dryRun: true } });
-    await this.d.queue.enqueue({ kind: "run_filing", filingId: filing.id });
+    await this.d.queue.enqueue({ kind: "run_filing", filingId: filing.id, tenantId: filing.tenantId });
   }
 
   /** Worker entry point. Pre-flight, then one browser pass, then webhooks for the outcome. */
@@ -258,7 +258,7 @@ export class FilingService {
       await this.emit("filing.awaiting_approval", f, { approvalLink: this.d.approvals.linkFor(approval), reason: "form changed: new required field", expiresAt: approval.expiresAt });
     } else {
       const f = await this.transition(filing, "queued");
-      await this.d.queue.enqueue({ kind: "run_filing", filingId: f.id });
+      await this.d.queue.enqueue({ kind: "run_filing", filingId: f.id, tenantId: f.tenantId });
     }
     return halt;
   }

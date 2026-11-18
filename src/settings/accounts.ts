@@ -1,9 +1,11 @@
 import type { ClientCompanySettings, TenantSettings } from "./schema.js";
+import { effectivePolicies } from "./policies.js";
 
 /**
- * Which state account a run signs in with and how it pays. Keystone has company-wide
- * logins in NJ and NY (2026-11-18), so the tenant's account is the default; a client
- * company may override with its own NJ account.
+ * Which state account a run signs in with and how it pays. The service company's own
+ * accounts are the default; a customer firm uses its own only when its answer G1 is
+ * "own_account". Vault keys are scoped per tenant (and per firm) so one tenant's logins
+ * can never be used for another's filings.
  */
 export interface NjAccount {
   credentialKey: string | null;
@@ -18,8 +20,10 @@ export interface NjAccount {
 
 export function njAccount(tenant: TenantSettings, client: ClientCompanySettings): NjAccount {
   // Onboarding G1: only a firm that chose "its own account" pays through its own NJ login.
-  const useClient = client.policies.stateFees === "firm_account";
-  const credentialKey = useClient ? client.njAccountCredentialKey ?? null : tenant.njAccountCredentialKey ?? null;
+  const useClient = effectivePolicies(tenant, client).stateFees === "own_account";
+  const credentialKey = useClient
+    ? (client.njAccountCredentialKey ? firmVaultKey(tenant, client, client.njAccountCredentialKey) : null)
+    : (tenant.njAccountCredentialKey ? tenantVaultKey(tenant, tenant.njAccountCredentialKey) : null);
   const storedMethod = useClient ? client.njStoredPaymentMethod : tenant.njStoredPaymentMethod;
   return {
     credentialKey,
@@ -31,7 +35,15 @@ export function njAccount(tenant: TenantSettings, client: ClientCompanySettings)
   };
 }
 
-/** NY drawdown account: the firm's own when its G1 answer is "its own account", else Keystone's. */
+/** NY drawdown account: the firm's own when its G1 answer is "own_account", else the service company's. */
 export function nyDrawdownAccount(tenant: TenantSettings, client: ClientCompanySettings): string | null {
-  return client.policies.stateFees === "firm_account" ? client.nyDrawdownAccountRef ?? null : tenant.nyDrawdownAccountRef ?? null;
+  return effectivePolicies(tenant, client).stateFees === "own_account" ? client.nyDrawdownAccountRef ?? null : tenant.nyDrawdownAccountRef ?? null;
+}
+
+/** Vault keys are namespaced so tenants (and firms) can never read each other's logins. */
+export function tenantVaultKey(tenant: TenantSettings, key: string): string {
+  return `${tenant.tenantId}/${key}`;
+}
+export function firmVaultKey(tenant: TenantSettings, client: ClientCompanySettings, key: string): string {
+  return `${tenant.tenantId}/${client.clientCompanyId}/${key}`;
 }
