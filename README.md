@@ -33,6 +33,7 @@ Point the NJ adapter at the replica with `NJ_FORMATION_URL=http://127.0.0.1:4310
 - `docs/walks/2026-11-17.md`: what the Nov 17 walks found.
 - `docs/scope.md`: the two products (Scope 1 platform for filing service companies; Scope 2 Keystone's front end for CPAs, title and payroll companies) and the four levels.
 - `docs/onboarding/service-company.md`: what a filing service company answers when it subscribes (its accounts, people, channels, defaults and locks for its customers).
+- `site/landing.html`: the platform landing page (published as a private Claude page; editable design in the Figma file "Filing Engine — Landing page"). It is page content only: the publisher adds the html/head/body wrapper.
 - `docs/onboarding/customer-firm.md`: what each customer firm answers; becomes `policies` on its record and fills each filing.
 
 ## Safety defaults

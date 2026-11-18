@@ -1,0 +1,519 @@
+<title>Filing Engine</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&family=Source+Serif+4:opsz,wght@8..60,500;8..60,600&display=swap">
+<style>
+/* Layout: a public registry. Cool paper, ink-blue authority, brass only for stamps and seals.
+   Wide 12-column bands; the run trace is the hero's evidence; form-field labels mark sections. */
+:root {
+  --paper: #f4f6f9;
+  --surface: #ffffff;
+  --ink: #0e1a2b;
+  --ink-2: #4a586f;
+  --ink-3: #6f7c91;
+  --line: #d8dee7;
+  --tint: #e8edf6;
+  --brand: #1d3c8c;
+  --brand-hover: #16306f;
+  --brand-ink: #ffffff;
+  --brass: #87661c;
+  --ok: #1d7448;
+  --halt: #a3341f;
+  --shadow: 0 1px 0 rgba(14, 26, 43, .04), 0 12px 32px -18px rgba(14, 26, 43, .28);
+  --code-bg: #0d1626; --code-fg: #dfe6f2; --code-key: #9fb8ff; --code-str: #e4c983; --code-dim: #7d8aa1;
+  --display: "Source Serif 4", "Iowan Old Style", Georgia, serif;
+  --sans: "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+  --wrap: 1180px;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --paper: #0a111e; --surface: #101a2c; --ink: #e6ebf3; --ink-2: #a6b2c6; --ink-3: #7f8ca3;
+    --line: #22304a; --tint: #152138; --brand: #8eaeff; --brand-hover: #b0c6ff; --brand-ink: #0a111e;
+    --brass: #d8b968; --ok: #5fc58f; --halt: #f08a72;
+    --shadow: 0 1px 0 rgba(0, 0, 0, .3), 0 16px 40px -20px rgba(0, 0, 0, .7);
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --paper: #0a111e; --surface: #101a2c; --ink: #e6ebf3; --ink-2: #a6b2c6; --ink-3: #7f8ca3;
+  --line: #22304a; --tint: #152138; --brand: #8eaeff; --brand-hover: #b0c6ff; --brand-ink: #0a111e;
+  --brass: #d8b968; --ok: #5fc58f; --halt: #f08a72;
+  --shadow: 0 1px 0 rgba(0, 0, 0, .3), 0 16px 40px -20px rgba(0, 0, 0, .7);
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+body {
+  background: var(--paper); color: var(--ink);
+  font: 16px/1.6 var(--sans);
+  -webkit-font-smoothing: antialiased;
+}
+a { color: var(--brand); text-underline-offset: 3px; }
+a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible { outline: 2px solid var(--brand); outline-offset: 3px; border-radius: 4px; }
+.band { padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+.wrap { max-width: var(--wrap); margin-inline: auto; }
+h1, h2, h3 { font-family: var(--display); font-weight: 600; letter-spacing: -0.01em; text-wrap: balance; margin: 0; }
+h1 { font-size: clamp(2.1rem, 3.7vw, 3.15rem); line-height: 1.08; }
+h2 { font-size: clamp(1.7rem, 3vw, 2.4rem); line-height: 1.12; }
+h3 { font-family: var(--sans); font-size: 1.05rem; font-weight: 600; letter-spacing: 0; line-height: 1.35; }
+p { margin: 0; }
+.lede { font-size: 1.14rem; color: var(--ink-2); max-width: 60ch; }
+.field-label {
+  display: inline-flex; align-items: center; gap: 10px;
+  font: 500 .72rem/1 var(--mono); letter-spacing: .12em; text-transform: uppercase; color: var(--ink-3);
+}
+.field-label::before { content: ""; width: 18px; height: 1px; background: var(--brass); }
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+  min-height: 46px; padding: 0 22px; border-radius: 6px; border: 1px solid transparent;
+  font: 600 .95rem/1 var(--sans); text-decoration: none; cursor: pointer;
+  transition: background-color .15s, border-color .15s, color .15s;
+}
+.btn-primary { background: var(--brand); color: var(--brand-ink); }
+.btn-primary:hover { background: var(--brand-hover); }
+.btn-quiet { background: transparent; color: var(--ink); border-color: var(--line); }
+.btn-quiet:hover { border-color: var(--ink-3); }
+
+/* Header */
+.top { border-bottom: 1px solid var(--line); background: var(--surface); }
+.top .wrap { display: flex; align-items: center; justify-content: space-between; gap: 24px; min-height: 68px; flex-wrap: wrap; }
+.mark { display: inline-flex; align-items: center; gap: 12px; color: var(--ink); text-decoration: none; }
+.mark-name { font: 600 1.12rem/1 var(--display); letter-spacing: .01em; }
+.seal { width: 30px; height: 30px; flex: none; }
+.nav { display: flex; gap: 26px; flex-wrap: wrap; }
+.nav a { color: var(--ink-2); text-decoration: none; font-size: .92rem; }
+.nav a:hover { color: var(--ink); }
+@media (max-width: 860px) { .nav { display: none; } }
+
+/* Hero */
+.hero { padding-block: clamp(48px, 7vw, 92px) clamp(48px, 6vw, 80px); }
+.hero .wrap { display: grid; grid-template-columns: minmax(0, 1.02fr) minmax(0, .98fr); gap: clamp(32px, 5vw, 64px); align-items: center; }
+.hero-copy { display: grid; gap: 22px; }
+.hero-actions { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 6px; }
+.hero-note { font-size: .86rem; color: var(--ink-3); }
+@media (max-width: 960px) { .hero .wrap { grid-template-columns: minmax(0, 1fr); } }
+
+/* Run trace */
+.trace {
+  position: relative; background: var(--surface); border: 1px solid var(--line); border-radius: 10px;
+  box-shadow: var(--shadow); overflow: hidden; min-width: 0;
+}
+.trace-head {
+  display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap;
+  padding: 14px 18px; border-bottom: 1px solid var(--line); background: var(--tint);
+  font: 500 .74rem/1.3 var(--mono); letter-spacing: .04em; color: var(--ink-2);
+}
+.trace-head strong { color: var(--ink); font-weight: 500; }
+.pill { display: inline-flex; align-items: center; gap: 6px; padding: 3px 8px; border-radius: 999px; border: 1px solid var(--line); font: 500 .68rem/1.2 var(--mono); letter-spacing: .06em; text-transform: uppercase; white-space: nowrap; }
+.pill-dry { color: var(--brass); border-color: color-mix(in srgb, var(--brass) 45%, transparent); }
+.trace ol { list-style: none; margin: 0; padding: 6px 0; font: .82rem/1.45 var(--mono); }
+.trace li { position: relative; display: grid; grid-template-columns: 52px minmax(0, 1fr) auto; gap: 12px; align-items: baseline; padding: 6px 18px; }
+.trace li:nth-child(even) { background: color-mix(in srgb, var(--tint) 45%, transparent); }
+.t { color: var(--ink-3); font-variant-numeric: tabular-nums; }
+.s { color: var(--ink); min-width: 0; overflow-wrap: anywhere; }
+.s small { display: block; color: var(--ink-3); font-size: .74rem; }
+.ok { color: var(--ok); }
+.halt { color: var(--halt); }
+.trace li.scan::after {
+  content: ""; position: absolute; inset: 0; border-left: 2px solid var(--brand);
+  background: color-mix(in srgb, var(--brand) 7%, transparent);
+}
+.trace-foot { display: flex; justify-content: space-between; align-items: center; gap: 16px; flex-wrap: wrap; padding: 14px 18px 18px; border-top: 1px dashed var(--line); font-size: .8rem; color: var(--ink-3); }
+.stamp {
+  display: inline-block; transform: rotate(-4deg); padding: 7px 12px; border: 2px solid var(--brass); border-radius: 4px;
+  color: var(--brass); font: 600 .74rem/1.2 var(--mono); letter-spacing: .14em; text-transform: uppercase;
+  box-shadow: inset 0 0 0 2px color-mix(in srgb, var(--brass) 18%, transparent);
+}
+
+/* Principles strip */
+.principles { border-block: 1px solid var(--line); background: var(--surface); }
+.principles .wrap { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); }
+.principle { padding: 26px 22px; display: grid; gap: 6px; border-left: 1px solid var(--line); }
+.principle:first-child { border-left: 0; padding-left: 0; }
+.principle b { font: 600 .98rem/1.35 var(--sans); }
+.principle span { color: var(--ink-2); font-size: .9rem; line-height: 1.5; }
+@media (max-width: 900px) {
+  .principles .wrap { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .principle { border-left: 0; padding-left: 0; border-top: 1px solid var(--line); }
+  .principle:nth-child(-n+2) { border-top: 0; }
+}
+@media (max-width: 520px) { .principles .wrap { grid-template-columns: minmax(0, 1fr); } .principle:nth-child(2) { border-top: 1px solid var(--line); } }
+
+/* Sections */
+section.block { padding-block: clamp(56px, 7vw, 88px); }
+.section-head { display: grid; gap: 14px; max-width: 760px; margin-bottom: clamp(32px, 4vw, 48px); }
+.alt { background: var(--surface); border-block: 1px solid var(--line); }
+
+/* Process */
+.steps { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 0; counter-reset: step; border-top: 2px solid var(--ink); }
+.step { padding: 20px 18px 0 0; display: grid; gap: 8px; align-content: start; counter-increment: step; }
+.step::before { content: counter(step, decimal-leading-zero); font: 500 .76rem/1 var(--mono); color: var(--brass); letter-spacing: .08em; }
+.step p { color: var(--ink-2); font-size: .9rem; line-height: 1.55; }
+@media (max-width: 1000px) { .steps { grid-template-columns: repeat(3, minmax(0, 1fr)); row-gap: 28px; } }
+@media (max-width: 560px) { .steps { grid-template-columns: minmax(0, 1fr); } }
+
+/* Controls */
+.controls { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px; }
+.control { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 26px; display: grid; gap: 14px; align-content: start; min-width: 0; }
+.alt .control { background: var(--paper); }
+.control > p { color: var(--ink-2); font-size: .95rem; }
+.exhibit { border: 1px solid var(--line); border-radius: 8px; background: var(--surface); font: .8rem/1.5 var(--mono); overflow-x: auto; }
+.alt .exhibit { background: var(--surface); }
+.exhibit-head { display: flex; justify-content: space-between; gap: 10px; padding: 9px 14px; border-bottom: 1px solid var(--line); color: var(--ink-3); font-size: .72rem; letter-spacing: .06em; text-transform: uppercase; }
+.exhibit-body { padding: 10px 14px; display: grid; gap: 4px; }
+.row { display: flex; justify-content: space-between; gap: 16px; }
+.row > span:first-child { color: var(--ink-2); }
+.add { color: var(--halt); }
+@media (max-width: 860px) { .controls { grid-template-columns: minmax(0, 1fr); } }
+
+/* Tenancy */
+.tenancy { display: grid; grid-template-columns: minmax(0, .9fr) minmax(0, 1.1fr); gap: clamp(32px, 5vw, 64px); align-items: start; }
+.levels { display: grid; gap: 0; border: 1px solid var(--line); border-radius: 10px; overflow: hidden; background: var(--surface); }
+.level { display: grid; grid-template-columns: 150px minmax(0, 1fr); gap: 16px; padding: 18px 20px; border-top: 1px solid var(--line); }
+.level:first-child { border-top: 0; }
+.level dt { font: 500 .74rem/1.5 var(--mono); letter-spacing: .08em; text-transform: uppercase; color: var(--brass); }
+.level dd { margin: 0; color: var(--ink-2); font-size: .93rem; }
+.level dd b { color: var(--ink); font-weight: 600; }
+.checks { list-style: none; padding: 0; margin: 0; display: grid; gap: 14px; }
+.checks li { display: grid; grid-template-columns: 22px minmax(0, 1fr); gap: 12px; color: var(--ink-2); }
+.checks li b { color: var(--ink); font-weight: 600; }
+.tick { width: 22px; height: 22px; margin-top: 2px; }
+@media (max-width: 900px) { .tenancy { grid-template-columns: minmax(0, 1fr); } }
+@media (max-width: 520px) { .level { grid-template-columns: minmax(0, 1fr); gap: 4px; } }
+
+/* Integrations */
+.integrate { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 20px; }
+.code { margin: 0; background: var(--code-bg); color: var(--code-fg); border-radius: 10px; padding: 20px 22px; font: .8rem/1.6 var(--mono); overflow-x: auto; border: 1px solid var(--line); min-width: 0; }
+.code .k { color: var(--code-key); } .code .str { color: var(--code-str); } .code .c { color: var(--code-dim); }
+.channels { display: grid; gap: 10px; align-content: start; }
+.channel { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 14px 16px; border: 1px solid var(--line); border-radius: 8px; background: var(--surface); }
+.channel b { font-weight: 600; }
+.channel span { color: var(--ink-2); font-size: .88rem; }
+.status { font: 500 .68rem/1.2 var(--mono); letter-spacing: .08em; text-transform: uppercase; padding: 4px 8px; border-radius: 999px; white-space: nowrap; border: 1px solid var(--line); color: var(--ink-3); }
+.status.live { color: var(--ok); border-color: color-mix(in srgb, var(--ok) 45%, transparent); }
+.status.map { color: var(--brass); border-color: color-mix(in srgb, var(--brass) 45%, transparent); }
+@media (max-width: 860px) { .integrate { grid-template-columns: minmax(0, 1fr); } }
+
+/* Coverage */
+.table-wrap { overflow-x: auto; border: 1px solid var(--line); border-radius: 10px; background: var(--surface); }
+table { width: 100%; border-collapse: collapse; min-width: 640px; }
+th, td { text-align: left; padding: 15px 20px; border-top: 1px solid var(--line); vertical-align: top; }
+thead th { border-top: 0; font: 500 .72rem/1.3 var(--mono); letter-spacing: .1em; text-transform: uppercase; color: var(--ink-3); background: var(--tint); }
+td:first-child { font-weight: 600; }
+td { color: var(--ink-2); font-size: .94rem; }
+.table-note { margin-top: 14px; font-size: .86rem; color: var(--ink-3); max-width: 80ch; }
+
+/* Security */
+.sec { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 28px 36px; }
+.sec div { display: grid; gap: 8px; padding-top: 18px; border-top: 1px solid var(--line); }
+.sec p { color: var(--ink-2); font-size: .93rem; }
+@media (max-width: 900px) { .sec { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 560px) { .sec { grid-template-columns: minmax(0, 1fr); } }
+
+/* Briefing */
+.brief { background: var(--brand); color: var(--brand-ink); }
+.brief .wrap { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: clamp(32px, 5vw, 64px); align-items: start; }
+.brief h2 { color: var(--brand-ink); }
+.brief .lede { color: color-mix(in srgb, var(--brand-ink) 82%, transparent); }
+.brief .field-label { color: color-mix(in srgb, var(--brand-ink) 75%, transparent); }
+form { display: grid; gap: 14px; background: var(--surface); color: var(--ink); border-radius: 10px; padding: 26px; box-shadow: var(--shadow); }
+.form-row { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 14px; }
+label { display: grid; gap: 6px; font-size: .84rem; font-weight: 500; color: var(--ink-2); }
+input, select { width: 100%; min-height: 44px; padding: 0 12px; border: 1px solid var(--line); border-radius: 6px; background: var(--paper); color: var(--ink); font: 400 .95rem var(--sans); }
+.form-msg { font-size: .86rem; color: var(--ink-2); min-height: 1.4em; }
+@media (max-width: 860px) { .brief .wrap { grid-template-columns: minmax(0, 1fr); } }
+@media (max-width: 520px) { .form-row { grid-template-columns: minmax(0, 1fr); } }
+
+footer { padding-block: 36px; border-top: 1px solid var(--line); color: var(--ink-3); font-size: .86rem; }
+footer .wrap { display: flex; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
+
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+</style>
+
+<header class="top band">
+  <div class="wrap">
+    <a class="mark" href="#top" aria-label="Filing Engine home">
+      <svg class="seal" viewBox="0 0 32 32" aria-hidden="true">
+        <circle cx="16" cy="16" r="14.5" fill="none" stroke="var(--brass)" stroke-width="1.5"/>
+        <circle cx="16" cy="16" r="11" fill="none" stroke="var(--brass)" stroke-width="0.75" stroke-dasharray="1.5 1.5"/>
+        <path d="M11 9.5h7.5l3.5 3.5V22.5H11z" fill="var(--brand)"/>
+        <path d="M18.5 9.5V13H22" fill="none" stroke="var(--surface)" stroke-width="1"/>
+        <path d="M13.5 16h6M13.5 18.5h6M13.5 21h3.5" stroke="var(--surface)" stroke-width="1"/>
+      </svg>
+      <span class="mark-name">Filing Engine</span>
+    </a>
+    <nav class="nav" aria-label="Sections">
+      <a href="#process">How it works</a>
+      <a href="#controls">Controls</a>
+      <a href="#companies">For service companies</a>
+      <a href="#coverage">Coverage</a>
+      <a href="#security">Security</a>
+    </nav>
+    <a class="btn btn-primary" href="#briefing">Request a briefing</a>
+  </div>
+</header>
+
+<main id="top">
+  <section class="hero band">
+    <div class="wrap">
+      <div class="hero-copy">
+        <span class="field-label">For filing service companies</span>
+        <h1>State filings, done on the government sites. Approved before they leave.</h1>
+        <p class="lede">Filing Engine fills formation, EIN and certificate filings on the live state and IRS websites, under your logins and your brand. It reads every form fresh, checks every fee, and submits nothing until your client approves the exact data.</p>
+        <div class="hero-actions">
+          <a class="btn btn-primary" href="#briefing">Request a briefing</a>
+          <a class="btn btn-quiet" href="#controls">See the controls</a>
+        </div>
+        <p class="hero-note">Starting with New Jersey, New York and the IRS.</p>
+      </div>
+
+      <figure class="trace" aria-label="Run trace from a dry run on the New Jersey portal" style="margin:0">
+        <div class="trace-head">
+          <span><strong>NJ · Domestic LLC formation</strong> · njportal.com</span>
+          <span class="pill pill-dry">Dry run</span>
+        </div>
+        <ol>
+          <li class="scan"><span class="t">00.0s</span><span class="s">Welcome</span><span class="ok">read</span></li>
+          <li><span class="t">02.1s</span><span class="s">Business name<small>Type: NJ Domestic Limited Liability Company</small></span><span class="ok">filled</span></li>
+          <li><span class="t">04.0s</span><span class="s">Designator<small>Name check: available</small></span><span class="ok">passed</span></li>
+          <li><span class="t">05.2s</span><span class="s">Business data · purpose · main address</span><span class="ok">filled</span></li>
+          <li><span class="t">10.4s</span><span class="s">Registered agent<small>Office address, attestation</small></span><span class="ok">filled</span></li>
+          <li><span class="t">15.9s</span><span class="s">Members / managers<small>1 member added</small></span><span class="ok">filled</span></li>
+          <li><span class="t">24.6s</span><span class="s">Signatures<small>Signer added, signature box checked</small></span><span class="ok">filled</span></li>
+          <li><span class="t">26.0s</span><span class="s">Review</span><span class="ok">matched</span></li>
+          <li><span class="t">28.3s</span><span class="s">Payment<small>Fee check: $100.00 + $3.50 matches the approval</small></span><span class="ok">verified</span></li>
+          <li><span class="t">28.9s</span><span class="s">Pay Now</span><span class="halt">held</span></li>
+        </ol>
+        <div class="trace-foot">
+          <span>13 live screens, test entry, nothing filed.</span>
+          <span class="stamp">Stopped before Pay Now</span>
+        </div>
+      </figure>
+    </div>
+  </section>
+
+  <div class="principles band">
+    <div class="wrap">
+      <div class="principle"><b>Approval first</b><span>Your client approves the exact data through a signed link before any run starts.</span></div>
+      <div class="principle"><b>Live forms, every run</b><span>Fields are matched by their labels on the page as it is today.</span></div>
+      <div class="principle"><b>Stops on change</b><span>A changed form halts the run before submission and proposes the fix.</span></div>
+      <div class="principle"><b>Yours alone</b><span>Your logins, your agent service and your customers stay in your account.</span></div>
+    </div>
+  </div>
+
+  <section class="block band" id="process">
+    <div class="wrap">
+      <div class="section-head">
+        <span class="field-label">How a filing runs</span>
+        <h2>One pass from intake to filed documents.</h2>
+        <p class="lede">State sites keep no drafts, so every filing is a single run from the first screen to the last. Everything is checked before it starts.</p>
+      </div>
+      <div class="steps">
+        <div class="step"><h3>Intake</h3><p>Your system or your customer's sends the entity details. Your onboarding answers fill the rest: agent, organizer, signer, addresses.</p></div>
+        <div class="step"><h3>Approval</h3><p>The client receives a link with every value and the fees. Approving binds those exact values to the run.</p></div>
+        <div class="step"><h3>Pre-flight</h3><p>Site hours, logins, account balance and fee table are checked before a browser opens.</p></div>
+        <div class="step"><h3>Run</h3><p>The engine reads each screen live, fills it by label and keeps a screenshot and page copy of every step.</p></div>
+        <div class="step"><h3>EIN in the same pass</h3><p>After the name check passes, the EIN is filed and its letter saved, then entered into the state form.</p></div>
+        <div class="step"><h3>Filed</h3><p>Documents are stored, and signed webhooks report each stage to your systems.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="block band alt" id="controls">
+    <div class="wrap">
+      <div class="section-head">
+        <span class="field-label">Controls</span>
+        <h2>Built for filings that cannot be taken back.</h2>
+        <p class="lede">A government submission is final. Every control below exists to stop a wrong filing before it happens, and to prove what happened after.</p>
+      </div>
+      <div class="controls">
+        <article class="control">
+          <h3>Halts when a state changes a form</h3>
+          <p>Each screen is compared with its last approved structure: fields, required marks, options and prices. Any difference stops the run before submission. Your reviewer sees the change and a proposed mapping, and accepts or corrects it.</p>
+          <div class="exhibit" role="img" aria-label="Example of a detected form change">
+            <div class="exhibit-head"><span>Example · NJ payment screen</span><span>Run halted</span></div>
+            <div class="exhibit-body">
+              <div class="row"><span>First Name *</span><span>unchanged</span></div>
+              <div class="row"><span>Phone Number *</span><span>unchanged</span></div>
+              <div class="row add"><span>+ Daytime Phone *</span><span>new, required</span></div>
+              <div class="row"><span>Outcome</span><span>client re-approval</span></div>
+            </div>
+          </div>
+        </article>
+        <article class="control">
+          <h3>Checks the price before paying</h3>
+          <p>Fees are quoted at approval from a verified fee table and read again on the payment screen. NJ charges $50 for an LLC standing certificate and $25 for a corporation's, so the engine also confirms the entity type on the state record.</p>
+          <div class="exhibit" role="img" aria-label="Example fee checks">
+            <div class="exhibit-head"><span>NJ standing certificate · by card</span><span>Fee check</span></div>
+            <div class="exhibit-body">
+              <div class="row"><span>LLC record, approved $52.00</span><span class="ok">page $52.00 · match</span></div>
+              <div class="row"><span>Corporation record, approved $27.00</span><span class="ok">page $27.00 · match</span></div>
+              <div class="row"><span>LLC record requested as corporation</span><span class="halt">stopped</span></div>
+            </div>
+          </div>
+        </article>
+        <article class="control">
+          <h3>Never submits twice</h3>
+          <p>A record is written before the final click. If a machine stops mid-run, that filing is flagged for reconciliation and never re-run on its own. Nothing else ever runs over a filing that may already be at the state.</p>
+        </article>
+        <article class="control">
+          <h3>Shows where every value came from</h3>
+          <p>Each filled field records its source: the filing itself, your intake, the customer's onboarding answers or your company defaults. Every screen of every run keeps a screenshot and a copy of the page.</p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section class="block band" id="companies">
+    <div class="wrap tenancy">
+      <div class="section-head" style="margin-bottom:0">
+        <span class="field-label">For service companies</span>
+        <h2>Your company, your accounts, your customers' rules.</h2>
+        <p class="lede">Each subscriber runs independently. Your customers (CPAs, title companies, payroll companies) sign up under your brand and answer the questions you choose to ask them.</p>
+        <ul class="checks" style="margin-top:12px">
+          <li><svg class="tick" viewBox="0 0 22 22" aria-hidden="true"><circle cx="11" cy="11" r="10" fill="none" stroke="var(--ok)" stroke-width="1.5"/><path d="M6.5 11.5l3 3 6-6.5" fill="none" stroke="var(--ok)" stroke-width="1.7"/></svg><span><b>Your state logins.</b> Stored under your account only, never shared with another subscriber.</span></li>
+          <li><svg class="tick" viewBox="0 0 22 22" aria-hidden="true"><circle cx="11" cy="11" r="10" fill="none" stroke="var(--ok)" stroke-width="1.5"/><path d="M6.5 11.5l3 3 6-6.5" fill="none" stroke="var(--ok)" stroke-width="1.7"/></svg><span><b>Your services on the forms.</b> Your registered agent service, organizer, signer and filer.</span></li>
+          <li><svg class="tick" viewBox="0 0 22 22" aria-hidden="true"><circle cx="11" cy="11" r="10" fill="none" stroke="var(--ok)" stroke-width="1.5"/><path d="M6.5 11.5l3 3 6-6.5" fill="none" stroke="var(--ok)" stroke-width="1.7"/></svg><span><b>Defaults and locks.</b> Set the answer for any customer question, or lock it for all of them.</span></li>
+          <li><svg class="tick" viewBox="0 0 22 22" aria-hidden="true"><circle cx="11" cy="11" r="10" fill="none" stroke="var(--ok)" stroke-width="1.5"/><path d="M6.5 11.5l3 3 6-6.5" fill="none" stroke="var(--ok)" stroke-width="1.7"/></svg><span><b>Your brand.</b> Approval pages carry your name and your support contact.</span></li>
+          <li><svg class="tick" viewBox="0 0 22 22" aria-hidden="true"><circle cx="11" cy="11" r="10" fill="none" stroke="var(--ok)" stroke-width="1.5"/><path d="M6.5 11.5l3 3 6-6.5" fill="none" stroke="var(--ok)" stroke-width="1.7"/></svg><span><b>Your own fixed address.</b> Government sites refuse many cloud addresses, so your filings run from a machine on your own IP.</span></li>
+        </ul>
+      </div>
+      <dl class="levels" aria-label="Who decides what">
+        <div class="level"><dt>Your company</dt><dd><b>Accounts and services.</b> NJ and ny.gov logins, NY drawdown account, registered agent service, people who sign and file, defaults for your customers.</dd></div>
+        <div class="level"><dt>Your customer</dt><dd><b>Their rules.</b> Who is the registered agent, who organizes and signs, who approves, which state accounts their filings use: yours, or their own.</dd></div>
+        <div class="level"><dt>The entity</dt><dd><b>The facts.</b> Name, owners, addresses and the responsible party, from your intake.</dd></div>
+        <div class="level"><dt>Each filing</dt><dd><b>Final say.</b> A value sent with a filing always overrides a default. A missing answer stops the filing and names the question.</dd></div>
+      </dl>
+    </div>
+  </section>
+
+  <section class="block band alt" id="integrations">
+    <div class="wrap">
+      <div class="section-head">
+        <span class="field-label">Integrations</span>
+        <h2>Plugs into the systems your team already uses.</h2>
+        <p class="lede">Start filings from your website or back office through the API. Status reaches your systems as signed webhooks, from the approval request to the filed documents.</p>
+      </div>
+      <div class="integrate">
+        <pre class="code" aria-label="Example webhook event"><span class="c">// POST to your endpoint, signed with your secret</span>
+{
+  <span class="k">"type"</span>: <span class="str">"filing.awaiting_approval"</span>,
+  <span class="k">"filingId"</span>: <span class="str">"f8c1…"</span>,
+  <span class="k">"data"</span>: {
+    <span class="k">"approvalLink"</span>: <span class="str">"https://…/approve/…"</span>,
+    <span class="k">"expiresAt"</span>: <span class="str">"2026-11-25T15:00:00Z"</span>,
+    <span class="k">"fees"</span>: [
+      { <span class="k">"label"</span>: <span class="str">"Formation filing fee"</span>, <span class="k">"amountUsd"</span>: 100 },
+      { <span class="k">"label"</span>: <span class="str">"Service fee (credit card)"</span>, <span class="k">"amountUsd"</span>: 3.5 }
+    ],
+    <span class="k">"einInRun"</span>: true
+  }
+}</pre>
+        <div class="channels">
+          <div class="channel"><div><b>API and webhooks</b><br><span>Your website, CRM or practice software</span></div><span class="status live">Available</span></div>
+          <div class="channel"><div><b>Email</b><br><span>Approval links and status to staff and clients</span></div><span class="status">In development</span></div>
+          <div class="channel"><div><b>Slack</b><br><span>Approvals and alerts in your team's channels</span></div><span class="status">In development</span></div>
+          <div class="channel"><div><b>WhatsApp and SMS</b><br><span>Approval links where clients answer fastest</span></div><span class="status">In development</span></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="block band" id="coverage">
+    <div class="wrap">
+      <div class="section-head">
+        <span class="field-label">Coverage</span>
+        <h2>Where the engine files today, and what is next.</h2>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th scope="col">Filing</th><th scope="col">Where</th><th scope="col">Status</th></tr></thead>
+          <tbody>
+            <tr><td>LLC formation</td><td>New Jersey</td><td><span class="status live">Verified on the live site</span></td></tr>
+            <tr><td>Standing certificate</td><td>New Jersey</td><td><span class="status live">Verified on the live site</span></td></tr>
+            <tr><td>EIN application, with confirmation letter</td><td>IRS</td><td><span class="status map">Mapping</span></td></tr>
+            <tr><td>Articles of Organization (LLC)</td><td>New York</td><td><span class="status map">Mapping</span></td></tr>
+            <tr><td>Name-change amendment</td><td>New York</td><td><span class="status">Planned</span></td></tr>
+            <tr><td>Alternate name, charter amendments</td><td>New Jersey</td><td><span class="status">Planned</span></td></tr>
+            <tr><td>Paper filings by upload: certificate of status, assumed name, foreign qualification, dissolution</td><td>New York</td><td><span class="status">Planned</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="table-note">Verified means the engine completed every screen on the live government site with a test entry and stopped before payment. Each filing type is switched to live submission only after its payment step has been mapped.</p>
+    </div>
+  </section>
+
+  <section class="block band alt" id="security">
+    <div class="wrap">
+      <div class="section-head">
+        <span class="field-label">Security</span>
+        <h2>Sensitive data stays where it belongs.</h2>
+      </div>
+      <div class="sec">
+        <div><h3>Masked SSNs</h3><p>Social Security numbers are masked on approval pages, in API responses and in recorded screens.</p></div>
+        <div><h3>Secrets in a vault</h3><p>State logins live in a vault under your account, never in settings, chat or email, and are read only when a run starts.</p></div>
+        <div><h3>Single-use approval links</h3><p>Signed, expiring links, bound to the exact data shown. An optional one-time code adds a second check.</p></div>
+        <div><h3>Signed webhooks</h3><p>Every event carries a timestamped signature, with retries and a dead-letter record.</p></div>
+        <div><h3>Dry-run mode</h3><p>New sites and new customers can run every screen and stop before submission until you switch them live.</p></div>
+        <div><h3>Separate subscribers</h3><p>Logins, jobs, customers and documents are kept per company. One subscriber's machine only runs its own filings.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="block band brief" id="briefing">
+    <div class="wrap">
+      <div class="section-head" style="margin-bottom:0">
+        <span class="field-label">Briefing</span>
+        <h2>See a live run on your own filings.</h2>
+        <p class="lede">A 30-minute session: a dry run on the New Jersey portal, the approval flow your clients would see, and how your accounts and customers would be set up.</p>
+      </div>
+      <form id="brief-form" novalidate>
+        <div class="form-row">
+          <label for="bf-name">Name<input id="bf-name" name="name" autocomplete="name" required></label>
+          <label for="bf-company">Company<input id="bf-company" name="company" autocomplete="organization" required></label>
+        </div>
+        <label for="bf-email">Work email<input id="bf-email" name="email" type="email" autocomplete="email" required></label>
+        <div class="form-row">
+          <label for="bf-states">States you file in<select id="bf-states" name="states"><option>New Jersey</option><option>New York</option><option>New Jersey and New York</option><option>Other states too</option></select></label>
+          <label for="bf-volume">Filings per month<select id="bf-volume" name="volume"><option>Under 50</option><option>50 to 250</option><option>250 to 1,000</option><option>Over 1,000</option></select></label>
+        </div>
+        <button class="btn btn-primary" type="submit">Request a briefing</button>
+        <p class="form-msg" id="bf-msg" role="status"></p>
+      </form>
+    </div>
+  </section>
+</main>
+
+<footer class="band">
+  <div class="wrap">
+    <span>Filing Engine · state filing automation for filing service companies</span>
+    <span>New Jersey · New York · IRS</span>
+  </div>
+</footer>
+
+<script>
+  // Scan highlight moves down the trace one row at a time (rows are always visible).
+  (function () {
+    var rows = document.querySelectorAll(".trace li");
+    if (!rows.length || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    var i = 0;
+    setInterval(function () {
+      rows.forEach(function (r) { r.classList.remove("scan"); });
+      i = (i + 1) % rows.length;
+      rows[i].classList.add("scan");
+    }, 900);
+  })();
+
+  // The form is not connected to anything yet: say so instead of pretending to send.
+  document.getElementById("brief-form").addEventListener("submit", function (e) {
+    e.preventDefault();
+    var form = e.currentTarget, msg = document.getElementById("bf-msg");
+    var missing = Array.prototype.filter.call(form.querySelectorAll("[required]"), function (el) { return !el.value.trim(); });
+    var email = document.getElementById("bf-email");
+    if (missing.length) { msg.textContent = "Please fill in " + missing.map(function (el) { return el.parentElement.firstChild.textContent.trim().toLowerCase(); }).join(", ") + "."; missing[0].focus(); return; }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.value.trim())) { msg.textContent = "Please enter a valid work email."; email.focus(); return; }
+    msg.textContent = "Thanks. This page is a draft and the form is not connected yet, so nothing was sent.";
+  });
+</script>
