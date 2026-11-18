@@ -553,3 +553,32 @@ fixed-IP machine, like the IRS and NY. Declined to build challenge-evasion tooli
 - Missouri uses one logged-in account for formation, good standing, annual reports and
   fictitious names.
 - probe-sites and the walk guide (Walk D) cover Missouri; env templates carry the MO login.
+
+## O. NY DOS and IRS EIN mapped from a live walk (Nov 18)
+
+From Keystone's signed-in NY service-company account and the live IRS EIN Assistant
+(docs/walks/ny-irs-2026-11-18.md). Replaces the NY and IRS placeholders with verified
+field maps. Both adapters stay complete:false (dry-run only): the NY filing-to-checkout
+transition and the IRS Submit/designee screens were not reached.
+
+- IRS EIN: real interview stages (Legal Structure, LLC members/location, Reason,
+  Identity, Designee, Addresses, Mailing, Additional Details, Regulated activities,
+  Employees, Business activity, Review, Assignment). Start URL sa.www4.irs.gov/applyein.
+  EinRequest enriched (applicantRole default third-party designee, physical vs formation
+  state, county, trade name, reason, four regulated flags, employee branch, 15 business
+  activity categories, mailing address, notice delivery). Validation: SS-4 required for a
+  designee; formation state and business activity required; regulated and employee answers
+  flagged to come from intake. Hours and one-per-day already modeled.
+- NY DOS: LLC Articles field map corrected to the verified R/O/C flags (service of
+  process and the optional clauses are conditional; organizer, signature, filer required).
+  NY E-Submission upload envelope ("Filing Information") mapped: route, proposed name,
+  submitter, email, customer reference, upload, Level Of Service tiers (Routine $0 /
+  24h $25 / Same day $75 / 2h $150), plain copy $5 / certified $10 / status $25.
+  Fees: NY formation $200, copy $5, certified copy $10, status certificate $25, expedite
+  tiers. Drawdown enabled on the account (checkout controls V).
+- NY E-Submission upload catalogs (37 domestic + 10 foreign entity types) and the
+  amend-record filing lists are in the walk doc for the paper-upload build order.
+
+Remaining live verification (from the walk): NY filing-to-checkout, distribution/payment,
+drawdown balance, final action and receipt; IRS designee screens, international mailing,
+address suggestion, and the post-submit assignment/download on an authorized filing.

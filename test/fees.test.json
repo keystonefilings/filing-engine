@@ -73,13 +73,39 @@
         "label": "Articles of Organization filing fee",
         "amountUsd": 200
       },
-      "_note": "payment area unmapped until walk C"
+      "_source": "NY DOS, verified on the E-Submission LLC Articles fee summary (2026-11-18): base $200. Native online checkout total V.",
+      "_paymentNote": "drawdown (DD) account enabled on Keystone's service-company account; card also offered. Checkout controls V."
     },
     "amendment_name_change": {
       "statutory": {
         "label": "Certificate of Amendment (name change) fee",
         "amountUsd": 60
       }
+    },
+    "copy": {
+      "statutory": {
+        "label": "Plain copy of a filed document",
+        "amountUsd": 5
+      }
+    },
+    "certified_copy": {
+      "statutory": {
+        "label": "Certified copy of a filed document",
+        "amountUsd": 10
+      }
+    },
+    "status_certificate": {
+      "statutory": {
+        "label": "Certificate of Status (short or long form)",
+        "amountUsd": 25
+      }
+    },
+    "expedite": {
+      "routine": 0,
+      "24_hour": 25,
+      "same_day": 75,
+      "2_hour": 150,
+      "_note": "E-Submission Level Of Service tiers"
     }
   },
   "IRS": {

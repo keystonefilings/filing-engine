@@ -55,12 +55,44 @@ export const ResponsibleParty = z.object({
   phone: z.string().min(7),
 });
 
+/** IRS EIN interview answers, from the live owner-route walk (docs/walks/ny-irs-2026-11-18.md). */
 export const EinRequest = z.object({
   mode: EinMode,
+  /** Who submits the interview: an owner/member, or Keystone as the authorized third-party designee. */
+  applicantRole: z.enum(["owner", "third_party_designee"]).default("third_party_designee"),
   responsibleParty: ResponsibleParty.optional(),
   memberCount: z.number().int().positive().optional(),
+  reason: z.enum(["new_business", "hired_employees", "banking", "changed_organization", "purchased_business"]).default("new_business"),
+  /** Physical business location (Addresses stage); distinct from the formation state. */
+  physicalState: UsState.optional(),
+  /** State where the Articles are filed (Additional Details stage). */
+  formationState: UsState.optional(),
+  county: z.string().optional(),
+  tradeName: z.string().optional(),
+  /** Start date; the UI collects month + year. */
   startDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional(),
   closingMonth: z.number().int().min(1).max(12).default(12),
+  /** Four regulated-activity Yes/No answers (all required in the interview). */
+  regulated: z.object({
+    highwayVehicle: z.boolean(),
+    wagering: z.boolean(),
+    form720: z.boolean(),
+    alcoholTobaccoFirearms: z.boolean(),
+  }).optional(),
+  /** W-2 employees expected in the next 12 months, and the branch it opens. */
+  employees: z.object({
+    expected: z.boolean(),
+    firstWages: z.string().regex(/^\d{4}-\d{2}$/).optional(),
+    agriculturalCount: z.number().int().nonnegative().optional(),
+    otherCount: z.number().int().nonnegative().optional(),
+    lowAnnualLiability: z.boolean().optional(),
+  }).optional(),
+  /** Principal business activity: one of the 15 categories, plus a detail/description. */
+  businessActivity: z.object({ category: z.string().min(1), detail: z.string().optional() }).optional(),
+  /** Separate mailing address (P.O. box / international allowed). */
+  mailingAddress: Address.optional(),
+  /** CP 575 delivery: digital this session (rule 2) or by mail. */
+  noticeDelivery: z.enum(["digital", "mail"]).default("digital"),
   /** Signed Form SS-4 third-party designee authorization, stored as an artifact id. */
   ss4AuthorizationArtifactId: z.string().optional(),
 });

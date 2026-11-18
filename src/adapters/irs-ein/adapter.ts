@@ -9,7 +9,7 @@ export const irsEinAdapter: SiteAdapter = {
   site: "IRS",
   key: "irs-ein",
   complete: false,
-  entryUrl: () => process.env.IRS_EIN_URL ?? "https://sa.www4.irs.gov/modiein/individual/index.jsp",
+  entryUrl: () => process.env.IRS_EIN_URL ?? "https://sa.www4.irs.gov/applyein/",
   profileKey: () => null, // always a fresh context
   credentialKey: () => null,
   steps: Object.values(IRS_SCREENS).map((screen) => ({

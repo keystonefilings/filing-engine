@@ -15,7 +15,7 @@ afterAll(() => app.close());
 
 describe("API", () => {
   it("creates a filing, serves the masked approval page, records approval", async () => {
-    const req = njFormationRequest({ ein: { mode: "in_run", closingMonth: 12, responsibleParty: { name: "Sam Rivera", ssn: "123-45-6789", title: "Member", address: { street1: "22 River Rd", city: "Hoboken", state: "NJ", zip: "07030" }, phone: "2015550100" }, ss4AuthorizationArtifactId: "art-1" } });
+    const req = njFormationRequest({ ein: { mode: "in_run", closingMonth: 12, responsibleParty: { name: "Sam Rivera", ssn: "123-45-6789", title: "Member", address: { street1: "22 River Rd", city: "Hoboken", state: "NJ", zip: "07030" }, phone: "2015550100" }, formationState: "NJ", businessActivity: { category: "Other", detail: "Consulting" }, ss4AuthorizationArtifactId: "art-1" } as never });
     const unauth = await app.inject({ method: "POST", url: "/v1/filings", payload: req });
     expect(unauth.statusCode).toBe(401);
     const res = await app.inject({ method: "POST", url: "/v1/filings", headers: { "x-api-key": "k1" }, payload: req });

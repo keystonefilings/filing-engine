@@ -95,11 +95,17 @@ export function validateFiling(req: FilingRequest): ValidationIssue[] {
     if (!req.formation?.mainBusinessAddress) {
       err("formation.mainBusinessAddress", "an EIN application needs the LLC's address");
     }
-    if (!req.ein.ss4AuthorizationArtifactId) {
-      err("ein.ss4AuthorizationArtifactId", "signed Form SS-4 third-party designee authorization is required");
+    if (req.ein.applicantRole === "third_party_designee" && !req.ein.ss4AuthorizationArtifactId) {
+      err("ein.ss4AuthorizationArtifactId", "a third-party designee EIN application needs a signed Form SS-4 authorization");
     }
-    if (req.ein.memberCount === undefined && req.formation) {
-      // derive silently; informational
+    // Additional Details stage (live owner-route walk): the LLC's identity is required.
+    if (!req.ein.formationState) err("ein.formationState", "the EIN interview needs the state where the Articles are filed");
+    if (!req.ein.businessActivity?.category) err("ein.businessActivity", "the EIN interview needs a principal business activity category");
+    // These are required in the live UI and must come from intake before the run; flag when absent.
+    if (!req.ein.regulated) warn("ein.regulated", "the four regulated-activity answers are required on the live form; supply them from intake");
+    if (!req.ein.employees) warn("ein.employees", "the W-2 employees question is required on the live form; supply it from intake");
+    if (req.ein.physicalState === undefined && req.formation?.mainBusinessAddress) {
+      // physical state can derive from the main address; informational
     }
   }
 

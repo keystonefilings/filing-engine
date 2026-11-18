@@ -54,18 +54,26 @@ const filing: ScreenStep = {
     } else {
       await ctx.set("sopMode", sop.serviceCompany!);
     }
-    await ctx.set("managementStructure", f.managementStructure === "manager_managed" ? "manager" : "member");
-    await ctx.set("effectiveDateMode", f.effectiveDate === "specific" ? "specif" : "filing");
+    if (f.managementStructure) { await ctx.set("managementClause", true); await ctx.set("managementStructure", f.managementStructure === "manager_managed" ? "manager" : "member"); }
+    if (f.effectiveDate === "specific") await ctx.set("effectiveDateMode", "specif"); else await ctx.set("effectiveDateMode", "filing");
     if (f.effectiveDate === "specific" && f.effectiveDateValue) await ctx.set("effectiveDate", f.effectiveDateValue);
     await ctx.set("organizerName", organizer.name);
-    await ctx.set("organizerAddress", `${organizer.address.street1}, ${organizer.address.city}, ${organizer.address.state} ${organizer.address.zip}`);
+    await ctx.set("organizerAddress1", organizer.address.street1);
+    await ctx.set("organizerCity", organizer.address.city);
+    await ctx.set("organizerState", organizer.address.state);
+    await ctx.set("organizerZip", organizer.address.zip);
     await ctx.set("signature", organizer.name);
     await ctx.set("filerName", filer.name);
-    await ctx.set("filerAddress", `${filer.address.street1}, ${filer.address.city}, ${filer.address.state} ${filer.address.zip}`);
+    await ctx.set("filerAddress1", filer.address.street1);
+    await ctx.set("filerCity", filer.address.city);
+    await ctx.set("filerState", filer.address.state);
+    await ctx.set("filerZip", filer.address.zip);
     void r;
   },
   async advance() {
-    throw new Error("NY screen 2 bottom (certification, payment, submit) is unmapped: walk C pending");
+    // The long Filing form is mapped (2026-11-18); the filing-to-checkout transition,
+    // distribution email, drawdown/card selection and final button are not yet walked.
+    throw new Error("NY checkout (fee, distribution email, drawdown/card, final button) is not mapped yet; see docs/walks/ny-irs-2026-11-18.md");
   },
 };
 
