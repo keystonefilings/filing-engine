@@ -3,8 +3,8 @@
 One per filing service company in Scope 1 (each subscriber files from its own address);
 Keystone's is the first.
 
-From the cloud on 2026-11-17 the IRS EIN assistant answered "Access Denied" and NY DOS
-closed every connection. Both filings therefore run from one machine with a fixed,
+From the cloud the IRS EIN assistant answered "Access Denied", NY DOS closed every
+connection, and Missouri (bsd.sos.mo.gov) returned a Cloudflare bot challenge. Both filings therefore run from one machine with a fixed,
 non-data-center-looking US address. NJ works from anywhere.
 
 ## 1. Pick the machine
@@ -35,6 +35,9 @@ WORKER_TENANTS=keystone
 VAULT_KEYSTONE_NJ_USERNAME=...
 VAULT_KEYSTONE_NJ_PASSWORD=...
 VAULT_KEYSTONE_NJ_TOTP_SEED=...      # only if the account uses an authenticator app
+VAULT_KEYSTONE_MO_USERNAME=...
+VAULT_KEYSTONE_MO_PASSWORD=...
+VAULT_KEYSTONE_MO_TOTP_SEED=...     # only if the account uses an authenticator app
 VAULT_KEYSTONE_NYGOV_USERNAME=...
 VAULT_KEYSTONE_NYGOV_PASSWORD=...
 VAULT_KEYSTONE_NYGOV_TOTP_SEED=...   # only if the ny.gov account uses an authenticator app

@@ -5,7 +5,7 @@ import type { Vault } from "../settings/vault.js";
 import { IRS_HOURS } from "../adapters/irs-ein/intents.js";
 import type { ApprovalService } from "../approvals/service.js";
 import { expectedFees, FeeUnknownError } from "../fees/table.js";
-import { njAccount, nyDrawdownAccount } from "../settings/accounts.js";
+import { njAccount, moAccount, nyDrawdownAccount } from "../settings/accounts.js";
 
 export interface PreflightResult { ok: boolean; blockers: string[]; warnings: string[] }
 
@@ -71,7 +71,7 @@ export async function preflight(input: {
   try {
     if (req.type !== "ein_only") {
       expectedFees(req.state, req.type, {
-        paymentMethod: req.state === "NJ" ? njAccount(tenant, client).feeMethod : undefined,
+        paymentMethod: req.state === "NJ" ? njAccount(tenant, client).feeMethod : req.state === "MO" ? moAccount(tenant, client).feeMethod : undefined,
         certificateOfStanding: req.formation?.additionalCertificates.certificateOfStanding,
         certifiedCopy: req.formation?.additionalCertificates.certifiedCopy,
         entityType: req.standing?.entityType,
@@ -89,6 +89,8 @@ export async function preflight(input: {
       if (!cred) b.push(`no credential in vault for ${credKey}`);
     } else if (adapter.site === "NJ") {
       b.push("no NJ login for this run: the service company has none set, or the firm pays with its own account (G1) and has none set");
+    } else if (adapter.site === "MO") {
+      b.push("no Missouri login for this run: the service company has none set, or the firm pays with its own account (G1) and has none set");
     }
   }
 

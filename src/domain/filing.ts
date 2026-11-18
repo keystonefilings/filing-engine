@@ -8,10 +8,10 @@ import { z } from "zod";
  */
 
 export const UsState = z.string().regex(/^[A-Z]{2}$/, "two-letter state code");
-export const FilingState = z.enum(["NY", "NJ"]);
+export const FilingState = z.enum(["NY", "NJ", "MO"]);
 export type FilingState = z.infer<typeof FilingState>;
 
-export const Site = z.enum(["NY", "NJ", "IRS"]);
+export const Site = z.enum(["NY", "NJ", "MO", "IRS"]);
 export type Site = z.infer<typeof Site>;
 
 export const Address = z.object({
@@ -109,6 +109,12 @@ export const FormationDetails = z.object({
   organizer: Person.optional(), // NY
   filer: Person.optional(), // NY
   otherProvisions: z.array(z.string()).max(10).default([]), // NJ
+  /** MO online LLC organizers (1-5; 6+ needs a paper filing). */
+  organizers: z.array(Person).max(5).default([]),
+  /** MO: signer of the online filing ("signor"); falls back to signers[0]. */
+  moSigner: Person.optional(),
+  /** MO: Series LLC (uploads LLC 1A). Not mapped for online upload yet; refused if true. */
+  seriesLlc: z.boolean().optional(),
   additionalCertificates: z
     .object({
       certificateOfStanding: z.boolean().default(false),
@@ -127,8 +133,8 @@ export const StandingCertificateDetails = z.object({
   /** NJ Entity ID; required when several records share the name, checked against the result row. */
   entityId: z.string().regex(/^\d{10}$/).optional(),
   form: z.enum(["short", "long_filing_history", "long_officers"]).default("short"),
-  /** Decides the price (LLC/FLC $50, corporations/LP $25); checked against the record's Type column. */
-  entityType: NjEntityType,
+  /** NJ only: decides the price (LLC/FLC $50, corporations/LP $25); checked against the record's Type column. MO good standing is a flat $10. */
+  entityType: NjEntityType.optional(),
 });
 
 export const Contact = z.object({

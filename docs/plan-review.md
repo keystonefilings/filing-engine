@@ -536,3 +536,20 @@ its own (`WORKER_TENANTS`); approval pages branded per subscriber; drift review 
 platform work (adapters are shared); channel settings stored (delivery not built).
 NJ accepts the new LLC as its own registered agent: answer C1 `new_entity`, NJ address required.
 Open: webhook header names `X-Keystone-*` if the platform is sold under another name.
+
+## N. Missouri added (Nov 18)
+
+Missouri mapped from the state's published step-by-step guides and fee schedule
+(docs/walks/missouri-2026-11-18.md); the live wizard (bsd.sos.mo.gov) is behind a
+Cloudflare bot challenge that refuses data-center IPs, so the live walk runs from the
+fixed-IP machine, like the IRS and NY. Declined to build challenge-evasion tooling.
+
+- Engine: "MO" added to the state model; mo-formation adapter + intents (complete:false,
+  dry-run only until the walk); fee table MO formation $50 online / $105 paper, good
+  standing $10 flat, amendment $25; validation (MO name indicator, Missouri registered
+  agent, management, purpose, 1-5 organizers, principal office, signer; Series LLC
+  refused); moAccount (login required, card/eCheck at the cart, no drawdown); scoped
+  vault key <tenant>/MO; moPaymentMethod setting.
+- Missouri uses one logged-in account for formation, good standing, annual reports and
+  fictitious names.
+- probe-sites and the walk guide (Walk D) cover Missouri; env templates carry the MO login.

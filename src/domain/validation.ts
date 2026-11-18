@@ -73,6 +73,20 @@ export function validateFiling(req: FilingRequest): ValidationIssue[] {
       if (f.purpose && f.purpose.length > 300) err("formation.purpose", "NJ business purpose is limited to 300 characters");
       if (f.otherProvisions.length) err("formation.otherProvisions", "NJ Other Provisions entry is not mapped yet (Add New Provision dialog not walked)");
     }
+
+    if (req.state === "MO") {
+      if (!hasLlcIndicator(legal)) err("formation.name", "MO requires an LLC indicator in the name");
+      if (!f.managementStructure) err("formation.managementStructure", "MO requires the management structure (member or manager managed)");
+      if (!f.purpose) err("formation.purpose", "MO requires a stated purpose");
+      if (!f.registeredAgent?.address) err("formation.registeredAgent", "MO requires a registered agent with an address");
+      else if (f.registeredAgent.address.state !== "MO") err("formation.registeredAgent.address.state", "MO registered agent must have a Missouri address");
+      const organizers = f.organizers.length ? f.organizers : f.members;
+      if (organizers.length < 1) err("formation.organizers", "MO requires at least one organizer");
+      if (organizers.length > 5) err("formation.organizers", "MO online filing allows at most 5 organizers; 6 or more needs a paper filing");
+      if (!f.mainBusinessAddress) err("formation.mainBusinessAddress", "MO requires the principal office address");
+      if (!f.moSigner && !f.signers.length) err("formation.moSigner", "MO requires a signer");
+      if (f.seriesLlc) err("formation.seriesLlc", "MO Series LLC needs an LLC 1A upload, which is not mapped yet");
+    }
   }
 
   if (req.ein && req.ein.mode !== "none") {
@@ -93,6 +107,7 @@ export function validateFiling(req: FilingRequest): ValidationIssue[] {
     if (req.formation) warn("formation", "standing certificate requests do not use formation details");
     if (req.state === "NY") err("state", "NY Certificate of Status is a written request, not an online filing; it goes through the paper-upload engine (build order 7)");
     else if (!req.standing) err("standing", "standing certificate details are required (entityName, form)");
+    else if (req.state === "NJ" && !req.standing.entityType) err("standing.entityType", "NJ standing certificates are priced by entity type, so the entity type is required");
     if (req.ein && req.ein.mode !== "none") err("ein", "an EIN is not part of a standing certificate request");
   }
 

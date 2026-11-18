@@ -90,5 +90,40 @@
         "amountUsd": 0
       }
     }
+  },
+  "MO": {
+    "formation": {
+      "statutory": {
+        "label": "Articles of Organization filing fee (online)",
+        "amountUsd": 50
+      },
+      "serviceFee": {
+        "credit_card": 0,
+        "echeck": 0
+      },
+      "_source": "MO SOS Schedule of Fees (fees.pdf, 2026-11-18): domestic LLC online $50.00, paper $105.00. Online system charges no separate portal surcharge in the guide; confirm at checkout on the fixed-IP walk.",
+      "_paper": 105
+    },
+    "standing_certificate": {
+      "statutory": {
+        "label": "Certificate of Good Standing",
+        "amountUsd": 10
+      },
+      "serviceFee": {
+        "credit_card": 0,
+        "echeck": 0
+      },
+      "_source": "MO SOS Schedule of Fees: Certificate of Good Standing $10.00, flat for all entity types"
+    },
+    "amendment": {
+      "statutory": {
+        "label": "Amendment to Limited Liability Company",
+        "amountUsd": 25
+      },
+      "serviceFee": {
+        "credit_card": 0,
+        "echeck": 0
+      }
+    }
   }
 }

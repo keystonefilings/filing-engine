@@ -61,3 +61,31 @@ Sign in yourself, start a Domestic LLC with a test name ending in LLC, fill scre
 scroll to the bottom. Open each radio group and dropdown so its options are captured.
 Find the drawdown account choice and balance. The final button is blocked. Also open
 the name-change amendment entry screen and the account page that shows the DD balance.
+
+## Walk D: Missouri LLC formation and good standing
+
+From the fixed-IP machine or the office (bsd.sos.mo.gov blocks data-center IPs with a
+Cloudflare challenge), signed in with the service company's Missouri account.
+
+```bash
+npm run walk -- mo-formation --url https://bsd.sos.mo.gov/
+```
+
+1. Sign in. Note any second sign-in step (do not write the code).
+2. From the dashboard choose "Create LLC". Pick "Limited Liability Company", Domestic,
+   Begin.
+3. Fill with the section 7 test data (use a Missouri registered agent and principal
+   address). Open every dropdown and radio group and save each: duration, management,
+   and the payment type at the cart.
+4. Go through registered agent, organizers (add one), principal office, review
+   (acknowledge box), signor (agreement box), to the shopping cart.
+5. On the cart, open the payment type options and record every fee line exactly. Does
+   the cart add a card or eCheck surcharge on top of $50?
+6. Do not pay. The recorder blocks the payment button. Capture the cart and stop.
+7. Then record good standing:
+   ```bash
+   npm run walk -- mo-standing --url https://bsd.sos.mo.gov/
+   ```
+   Dashboard "Order Good Standing", search a real Missouri entity, select it, Order
+   Copies/Certificates, add to cart, open the payment options, record the $10 line and
+   any surcharge, then stop before paying.

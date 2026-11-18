@@ -25,6 +25,10 @@ export const TenantSettings = z.object({
   defaultApprovers: z.array(ApprovalRecipient).default([]),
   /** Vault key for the ny.gov service-company login (username/password/totp). Company-wide. */
   nyGovCredentialKey: z.string().default("NYGOV"),
+  /** The service company's own Missouri SOS online-filing login (vault key, scoped to this tenant). */
+  moAccountCredentialKey: z.string().optional(),
+  /** Payment method chosen at the Missouri checkout: credit_card or echeck. */
+  moPaymentMethod: z.enum(["credit_card", "echeck"]).default("credit_card"),
   /** The service company's own NJ login (vault key, scoped to this tenant). Default for its customers' NJ runs. */
   njAccountCredentialKey: z.string().optional(),
   /** Payment method stored on the company-wide NJ account (walk A confirms how it appears). */
@@ -60,7 +64,7 @@ export const ClientCompanySettings = z.object({
   tenantId: z.string().min(1),
   name: z.string().min(1),
   /** Default filing state for this client ("state selector", requirement 7). */
-  defaultState: z.enum(["NY", "NJ"]).optional(),
+  defaultState: z.enum(["NY", "NJ", "MO"]).optional(),
   /** Decision 1: per-client-company EIN timing. */
   einMode: EinMode.default("in_run"),
   /** Decision 2: who may approve through the link; default is the named signer/organizer. */
@@ -69,6 +73,8 @@ export const ClientCompanySettings = z.object({
   requireOneTimeCode: z.boolean().default(false),
   /** This firm's own NJ login (vault key, scoped to tenant + firm); used only when answer G1 is "own_account". */
   njAccountCredentialKey: z.string().optional(),
+  /** This firm's own Missouri login; used only when answer G1 is "own_account". */
+  moAccountCredentialKey: z.string().optional(),
   njStoredPaymentMethod: z.enum(["stored_card", "stored_echeck"]).optional(),
   /** This firm's own NY drawdown account; used only when answer G1 is "own_account". */
   nyDrawdownAccountRef: z.string().optional(),

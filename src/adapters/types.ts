@@ -55,7 +55,7 @@ export interface ScreenStep {
 }
 
 export interface SiteAdapter {
-  site: "NY" | "NJ" | "IRS";
+  site: "NY" | "NJ" | "MO" | "IRS";
   key: string;
   /** False until the walk that maps the remaining screens is done; incomplete adapters only dry-run. */
   complete: boolean;

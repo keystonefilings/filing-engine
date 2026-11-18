@@ -35,6 +35,34 @@ export function njAccount(tenant: TenantSettings, client: ClientCompanySettings)
   };
 }
 
+/**
+ * Missouri SOS online filing account: the service company's own, or the firm's when its
+ * answer G1 is "own_account". Missouri pays by credit card or eCheck at the cart; there is
+ * no stored drawdown, so the fee method comes from the account owner's moPaymentMethod.
+ */
+export interface MoAccount {
+  credentialKey: string | null;
+  profileKey: string | null;
+  feeMethod: "credit_card" | "echeck";
+  paymentTypeLabel: "Credit Card" | "Electronic Check";
+  owner: "client" | "tenant" | "none";
+}
+
+export function moAccount(tenant: TenantSettings, client: ClientCompanySettings): MoAccount {
+  const useClient = effectivePolicies(tenant, client).stateFees === "own_account";
+  const credentialKey = useClient
+    ? (client.moAccountCredentialKey ? firmVaultKey(tenant, client, client.moAccountCredentialKey) : null)
+    : (tenant.moAccountCredentialKey ? tenantVaultKey(tenant, tenant.moAccountCredentialKey) : null);
+  const feeMethod = tenant.moPaymentMethod;
+  return {
+    credentialKey,
+    profileKey: credentialKey ? (useClient ? `mo:${client.clientCompanyId}` : `mo:${tenant.tenantId}`) : null,
+    feeMethod,
+    paymentTypeLabel: feeMethod === "echeck" ? "Electronic Check" : "Credit Card",
+    owner: !credentialKey ? "none" : useClient ? "client" : "tenant",
+  };
+}
+
 /** NY drawdown account: the firm's own when its G1 answer is "own_account", else the service company's. */
 export function nyDrawdownAccount(tenant: TenantSettings, client: ClientCompanySettings): string | null {
   return effectivePolicies(tenant, client).stateFees === "own_account" ? client.nyDrawdownAccountRef ?? null : tenant.nyDrawdownAccountRef ?? null;

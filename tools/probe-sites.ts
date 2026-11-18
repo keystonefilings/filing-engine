@@ -16,13 +16,14 @@ export const SITES = [
   { key: "IRS EIN assistant", url: "https://sa.www4.irs.gov/modiein/individual/index.jsp", expect: /EIN|Employer Identification/i },
   { key: "NY DOS ecorp", url: "https://filings.dos.ny.gov/ords/r/corpanc/ecorp/ecorphome", expect: /.+/ },
   { key: "NY DOS public inquiry", url: "https://apps.dos.ny.gov/publicInquiry/", expect: /.+/ },
+  { key: "MO online filing", url: "https://bsd.sos.mo.gov/", expect: /.+/ },
 ];
 
 export function classify(status: number | null, title: string, body: string, error?: string): "ok" | "blocked" | "error" {
   if (error) return /EMPTY_RESPONSE|CONNECTION_(RESET|CLOSED|REFUSED)|TUNNEL/i.test(error) ? "blocked" : "error";
   // A proxy in front of the browser reports a site that closes without answering as 502/504.
   if ((status === 502 || status === 504) && !title && !body.trim()) return "blocked";
-  if (status === 403 || /access denied|request blocked|unusual traffic|pardon our interruption/i.test(title + " " + body.slice(0, 2000))) return "blocked";
+  if (status === 403 || /access denied|request blocked|unusual traffic|pardon our interruption|just a moment|performing security verification|verify you are (not a bot|human)/i.test(title + " " + body.slice(0, 2000))) return "blocked";
   return status && status < 400 ? "ok" : "error";
 }
 
