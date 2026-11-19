@@ -1,524 +1,701 @@
-<title>Filing Engine</title>
+<title>Filing Engine | Corporate Filing Automation</title>
+<meta name="description" content="Filing Engine connects filing service companies to government filing portals, with client approvals, fee checks and signed status updates.">
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&family=Source+Serif+4:opsz,wght@8..60,500;8..60,600&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400..700&amp;display=swap">
 <style>
-/* Layout: a public registry. Cool paper, ink-blue authority, brass only for stamps and seals.
-   Wide 12-column bands; the run trace is the hero's evidence; form-field labels mark sections. */
-:root {
-  --paper: #f4f6f9;
-  --surface: #ffffff;
-  --ink: #0e1a2b;
-  --ink-2: #4a586f;
-  --ink-3: #6f7c91;
-  --line: #d8dee7;
-  --tint: #e8edf6;
-  --brand: #1d3c8c;
-  --brand-hover: #16306f;
-  --brand-ink: #ffffff;
-  --brass: #87661c;
-  --ok: #1d7448;
-  --halt: #a3341f;
-  --shadow: 0 1px 0 rgba(14, 26, 43, .04), 0 12px 32px -18px rgba(14, 26, 43, .28);
-  --code-bg: #0d1626; --code-fg: #dfe6f2; --code-key: #9fb8ff; --code-str: #e4c983; --code-dim: #7d8aa1;
-  --display: "Source Serif 4", "Iowan Old Style", Georgia, serif;
-  --sans: "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
-  --mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
-  --wrap: 1180px;
-}
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) {
-    --paper: #0a111e; --surface: #101a2c; --ink: #e6ebf3; --ink-2: #a6b2c6; --ink-3: #7f8ca3;
-    --line: #22304a; --tint: #152138; --brand: #8eaeff; --brand-hover: #b0c6ff; --brand-ink: #0a111e;
-    --brass: #d8b968; --ok: #5fc58f; --halt: #f08a72;
-    --shadow: 0 1px 0 rgba(0, 0, 0, .3), 0 16px 40px -20px rgba(0, 0, 0, .7);
-    color-scheme: dark;
+  body { margin: 0; }
+
+  .fe-page {
+    --paper: #f7f8f4;
+    --white: #fff;
+    --ink: #14241d;
+    --muted: #4e6056;
+    --green: #24523c;
+    --forest: #102a20;
+    --line: #d7dfd5;
+    --sage: #e8efe4;
+    --gutter: clamp(1.25rem, 3.35vw, 3rem);
+    --mono: ui-monospace, "SFMono-Regular", Consolas, monospace;
+    background: var(--paper);
+    color: var(--ink);
+    color-scheme: light;
+    font: 400 1rem/1.6 Inter, "Helvetica Neue", Arial, sans-serif;
+    -webkit-font-smoothing: antialiased;
   }
-}
-:root[data-theme="dark"] {
-  --paper: #0a111e; --surface: #101a2c; --ink: #e6ebf3; --ink-2: #a6b2c6; --ink-3: #7f8ca3;
-  --line: #22304a; --tint: #152138; --brand: #8eaeff; --brand-hover: #b0c6ff; --brand-ink: #0a111e;
-  --brass: #d8b968; --ok: #5fc58f; --halt: #f08a72;
-  --shadow: 0 1px 0 rgba(0, 0, 0, .3), 0 16px 40px -20px rgba(0, 0, 0, .7);
-  color-scheme: dark;
-}
 
-* { box-sizing: border-box; }
-body {
-  background: var(--paper); color: var(--ink);
-  font: 16px/1.6 var(--sans);
-  -webkit-font-smoothing: antialiased;
-}
-a { color: var(--brand); text-underline-offset: 3px; }
-a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible { outline: 2px solid var(--brand); outline-offset: 3px; border-radius: 4px; }
-.band { padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
-.wrap { max-width: var(--wrap); margin-inline: auto; }
-h1, h2, h3 { font-family: var(--display); font-weight: 600; letter-spacing: -0.01em; text-wrap: balance; margin: 0; }
-h1 { font-size: clamp(2.1rem, 3.7vw, 3.15rem); line-height: 1.08; }
-h2 { font-size: clamp(1.7rem, 3vw, 2.4rem); line-height: 1.12; }
-h3 { font-family: var(--sans); font-size: 1.05rem; font-weight: 600; letter-spacing: 0; line-height: 1.35; }
-p { margin: 0; }
-.lede { font-size: 1.14rem; color: var(--ink-2); max-width: 60ch; }
-.field-label {
-  display: inline-flex; align-items: center; gap: 10px;
-  font: 500 .72rem/1 var(--mono); letter-spacing: .12em; text-transform: uppercase; color: var(--ink-3);
-}
-.field-label::before { content: ""; width: 18px; height: 1px; background: var(--brass); }
-.btn {
-  display: inline-flex; align-items: center; justify-content: center; gap: 8px;
-  min-height: 46px; padding: 0 22px; border-radius: 6px; border: 1px solid transparent;
-  font: 600 .95rem/1 var(--sans); text-decoration: none; cursor: pointer;
-  transition: background-color .15s, border-color .15s, color .15s;
-}
-.btn-primary { background: var(--brand); color: var(--brand-ink); }
-.btn-primary:hover { background: var(--brand-hover); }
-.btn-quiet { background: transparent; color: var(--ink); border-color: var(--line); }
-.btn-quiet:hover { border-color: var(--ink-3); }
+  .fe-page *, .fe-page *::before, .fe-page *::after { box-sizing: border-box; }
+  .fe-page :is(h1, h2, h3, p, figure, dl, dd, pre) { margin: 0; }
+  .fe-page :is(h1, h2, h3) { font-weight: 650; }
+  .fe-page h1 {
+    font-size: clamp(2.85rem, 4.5vw, 4.4rem);
+    letter-spacing: -.07em;
+    line-height: 1.04;
+  }
 
-/* Header */
-.top { border-bottom: 1px solid var(--line); background: var(--surface); }
-.top .wrap { display: flex; align-items: center; justify-content: space-between; gap: 24px; min-height: 68px; flex-wrap: wrap; }
-.mark { display: inline-flex; align-items: center; gap: 12px; color: var(--ink); text-decoration: none; }
-.mark-name { font: 600 1.12rem/1 var(--display); letter-spacing: .01em; }
-.seal { width: 30px; height: 30px; flex: none; }
-.nav { display: flex; gap: 26px; flex-wrap: wrap; }
-.nav a { color: var(--ink-2); text-decoration: none; font-size: .92rem; }
-.nav a:hover { color: var(--ink); }
-@media (max-width: 860px) { .nav { display: none; } }
+  .fe-page h2 {
+    font-size: clamp(2rem, 3.45vw, 3.25rem);
+    letter-spacing: -.058em;
+    line-height: 1.11;
+    text-wrap: balance;
+  }
 
-/* Hero */
-.hero { padding-block: clamp(48px, 7vw, 92px) clamp(48px, 6vw, 80px); }
-.hero .wrap { display: grid; grid-template-columns: minmax(0, 1.02fr) minmax(0, .98fr); gap: clamp(32px, 5vw, 64px); align-items: center; }
-.hero-copy { display: grid; gap: 22px; }
-.hero-actions { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 6px; }
-.hero-note { font-size: .86rem; color: var(--ink-3); }
-@media (max-width: 960px) { .hero .wrap { grid-template-columns: minmax(0, 1fr); } }
+  .fe-page h3 { font-size: 1.075rem; letter-spacing: -.022em; line-height: 1.35; }
+  .fe-page a { color: inherit; text-underline-offset: .24em; }
+  .fe-page :is(a, button, input, select):focus-visible {
+    outline: 2px solid currentColor;
+    outline-offset: 4px;
+  }
 
-/* Run trace */
-.trace {
-  position: relative; background: var(--surface); border: 1px solid var(--line); border-radius: 10px;
-  box-shadow: var(--shadow); overflow: hidden; min-width: 0;
-}
-.trace-head {
-  display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap;
-  padding: 14px 18px; border-bottom: 1px solid var(--line); background: var(--tint);
-  font: 500 .74rem/1.3 var(--mono); letter-spacing: .04em; color: var(--ink-2);
-}
-.trace-head strong { color: var(--ink); font-weight: 500; }
-.pill { display: inline-flex; align-items: center; gap: 6px; padding: 3px 8px; border-radius: 999px; border: 1px solid var(--line); font: 500 .68rem/1.2 var(--mono); letter-spacing: .06em; text-transform: uppercase; white-space: nowrap; }
-.pill-dry { color: var(--brass); border-color: color-mix(in srgb, var(--brass) 45%, transparent); }
-.trace ol { list-style: none; margin: 0; padding: 6px 0; font: .82rem/1.45 var(--mono); }
-.trace li { position: relative; display: grid; grid-template-columns: 52px minmax(0, 1fr) auto; gap: 12px; align-items: baseline; padding: 6px 18px; }
-.trace li:nth-child(even) { background: color-mix(in srgb, var(--tint) 45%, transparent); }
-.t { color: var(--ink-3); font-variant-numeric: tabular-nums; }
-.s { color: var(--ink); min-width: 0; overflow-wrap: anywhere; }
-.s small { display: block; color: var(--ink-3); font-size: .74rem; }
-.ok { color: var(--ok); }
-.halt { color: var(--halt); }
-.trace li.scan::after {
-  content: ""; position: absolute; inset: 0; border-left: 2px solid var(--brand);
-  background: color-mix(in srgb, var(--brand) 7%, transparent);
-}
-.trace-foot { display: flex; justify-content: space-between; align-items: center; gap: 16px; flex-wrap: wrap; padding: 14px 18px 18px; border-top: 1px dashed var(--line); font-size: .8rem; color: var(--ink-3); }
-.stamp {
-  display: inline-block; transform: rotate(-4deg); padding: 7px 12px; border: 2px solid var(--brass); border-radius: 4px;
-  color: var(--brass); font: 600 .74rem/1.2 var(--mono); letter-spacing: .14em; text-transform: uppercase;
-  box-shadow: inset 0 0 0 2px color-mix(in srgb, var(--brass) 18%, transparent);
-}
+  .fe-container {
+    max-width: 83rem;
+    margin-inline: auto;
+    padding-inline: max(var(--gutter), env(safe-area-inset-left, 0px))
+      max(var(--gutter), env(safe-area-inset-right, 0px));
+  }
 
-/* Principles strip */
-.principles { border-block: 1px solid var(--line); background: var(--surface); }
-.principles .wrap { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); }
-.principle { padding: 26px 22px; display: grid; gap: 6px; border-left: 1px solid var(--line); }
-.principle:first-child { border-left: 0; padding-left: 0; }
-.principle b { font: 600 .98rem/1.35 var(--sans); }
-.principle span { color: var(--ink-2); font-size: .9rem; line-height: 1.5; }
-@media (max-width: 900px) {
-  .principles .wrap { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-  .principle { border-left: 0; padding-left: 0; border-top: 1px solid var(--line); }
-  .principle:nth-child(-n+2) { border-top: 0; }
-}
-@media (max-width: 520px) { .principles .wrap { grid-template-columns: minmax(0, 1fr); } .principle:nth-child(2) { border-top: 1px solid var(--line); } }
+  .fe-section { padding-block: clamp(3.75rem, 7vw, 6.75rem); }
+  .fe-section :is(p, dd) { color: var(--muted); }
+  .fe-kicker {
+    display: block;
+    color: var(--green);
+    font-size: .8125rem;
+    font-weight: 650;
+    letter-spacing: .085em;
+    line-height: 1.4;
+    text-transform: uppercase;
+  }
 
-/* Sections */
-section.block { padding-block: clamp(56px, 7vw, 88px); }
-.section-head { display: grid; gap: 14px; max-width: 760px; margin-bottom: clamp(32px, 4vw, 48px); }
-.alt { background: var(--surface); border-block: 1px solid var(--line); }
+  .fe-kicker + h2 { margin-top: .7rem; }
+  .fe-heading { max-width: 39rem; margin-bottom: clamp(1.85rem, 4vw, 3rem); }
+  .fe-page .fe-button {
+    display: inline-flex;
+    min-height: 3.125rem;
+    align-items: center;
+    justify-content: center;
+    padding: .65rem 1.15rem;
+    border: 1px solid transparent;
+    border-radius: .375rem;
+    background: var(--forest);
+    color: var(--white);
+    cursor: pointer;
+    font: 630 .9375rem/1.3 Inter, "Helvetica Neue", Arial, sans-serif;
+    text-align: center;
+    text-decoration: none;
+  }
 
-/* Process */
-.steps { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 0; counter-reset: step; border-top: 2px solid var(--ink); }
-.step { padding: 20px 18px 0 0; display: grid; gap: 8px; align-content: start; counter-increment: step; }
-.step::before { content: counter(step, decimal-leading-zero); font: 500 .76rem/1 var(--mono); color: var(--brass); letter-spacing: .08em; }
-.step p { color: var(--ink-2); font-size: .9rem; line-height: 1.55; }
-@media (max-width: 1000px) { .steps { grid-template-columns: repeat(3, minmax(0, 1fr)); row-gap: 28px; } }
-@media (max-width: 560px) { .steps { grid-template-columns: minmax(0, 1fr); } }
+  .fe-page .fe-button:hover { background: var(--green); }
+  .fe-page .fe-button:focus-visible { outline-color: var(--green); }
+  .fe-page .fe-button-secondary { border-color: #bdc9be; background: transparent; color: var(--ink); }
+  .fe-page .fe-button-secondary:hover { border-color: var(--green); background: var(--sage); }
 
-/* Controls */
-.controls { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px; }
-.control { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 26px; display: grid; gap: 14px; align-content: start; min-width: 0; }
-.alt .control { background: var(--paper); }
-.control > p { color: var(--ink-2); font-size: .95rem; }
-.exhibit { border: 1px solid var(--line); border-radius: 8px; background: var(--surface); font: .8rem/1.5 var(--mono); overflow-x: auto; }
-.alt .exhibit { background: var(--surface); }
-.exhibit-head { display: flex; justify-content: space-between; gap: 10px; padding: 9px 14px; border-bottom: 1px solid var(--line); color: var(--ink-3); font-size: .72rem; letter-spacing: .06em; text-transform: uppercase; }
-.exhibit-body { padding: 10px 14px; display: grid; gap: 4px; }
-.row { display: flex; justify-content: space-between; gap: 16px; }
-.row > span:first-child { color: var(--ink-2); }
-.add { color: var(--halt); }
-@media (max-width: 860px) { .controls { grid-template-columns: minmax(0, 1fr); } }
+  .fe-header { border-bottom: 1px solid var(--line); }
+  .fe-header-inner {
+    display: flex;
+    min-height: 4.5rem;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1.25rem;
+  }
 
-/* Tenancy */
-.tenancy { display: grid; grid-template-columns: minmax(0, .9fr) minmax(0, 1.1fr); gap: clamp(32px, 5vw, 64px); align-items: start; }
-.levels { display: grid; gap: 0; border: 1px solid var(--line); border-radius: 10px; overflow: hidden; background: var(--surface); }
-.level { display: grid; grid-template-columns: 150px minmax(0, 1fr); gap: 16px; padding: 18px 20px; border-top: 1px solid var(--line); }
-.level:first-child { border-top: 0; }
-.level dt { font: 500 .74rem/1.5 var(--mono); letter-spacing: .08em; text-transform: uppercase; color: var(--brass); }
-.level dd { margin: 0; color: var(--ink-2); font-size: .93rem; }
-.level dd b { color: var(--ink); font-weight: 600; }
-.checks { list-style: none; padding: 0; margin: 0; display: grid; gap: 14px; }
-.checks li { display: grid; grid-template-columns: 22px minmax(0, 1fr); gap: 12px; color: var(--ink-2); }
-.checks li b { color: var(--ink); font-weight: 600; }
-.tick { width: 22px; height: 22px; margin-top: 2px; }
-@media (max-width: 900px) { .tenancy { grid-template-columns: minmax(0, 1fr); } }
-@media (max-width: 520px) { .level { grid-template-columns: minmax(0, 1fr); gap: 4px; } }
+  .fe-wordmark {
+    display: inline-flex;
+    flex: none;
+    align-items: center;
+    gap: .7rem;
+    font-size: 1.125rem;
+    font-weight: 700;
+    letter-spacing: -.044em;
+    text-decoration: none;
+  }
 
-/* Integrations */
-.integrate { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 20px; }
-.code { margin: 0; background: var(--code-bg); color: var(--code-fg); border-radius: 10px; padding: 20px 22px; font: .8rem/1.6 var(--mono); overflow-x: auto; border: 1px solid var(--line); min-width: 0; }
-.code .k { color: var(--code-key); } .code .str { color: var(--code-str); } .code .c { color: var(--code-dim); }
-.channels { display: grid; gap: 10px; align-content: start; }
-.channel { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 14px 16px; border: 1px solid var(--line); border-radius: 8px; background: var(--surface); }
-.channel b { font-weight: 600; }
-.channel span { color: var(--ink-2); font-size: .88rem; }
-.status { font: 500 .68rem/1.2 var(--mono); letter-spacing: .08em; text-transform: uppercase; padding: 4px 8px; border-radius: 999px; white-space: nowrap; border: 1px solid var(--line); color: var(--ink-3); }
-.status.live { color: var(--ok); border-color: color-mix(in srgb, var(--ok) 45%, transparent); }
-.status.map { color: var(--brass); border-color: color-mix(in srgb, var(--brass) 45%, transparent); }
-@media (max-width: 860px) { .integrate { grid-template-columns: minmax(0, 1fr); } }
+  .fe-symbol {
+    position: relative;
+    display: block;
+    width: 2.125rem;
+    height: 2.125rem;
+    border-radius: .375rem;
+    background: var(--forest);
+  }
 
-/* Coverage */
-.table-wrap { overflow-x: auto; border: 1px solid var(--line); border-radius: 10px; background: var(--surface); }
-table { width: 100%; border-collapse: collapse; min-width: 640px; }
-th, td { text-align: left; padding: 15px 20px; border-top: 1px solid var(--line); vertical-align: top; }
-thead th { border-top: 0; font: 500 .72rem/1.3 var(--mono); letter-spacing: .1em; text-transform: uppercase; color: var(--ink-3); background: var(--tint); }
-td:first-child { font-weight: 600; }
-td { color: var(--ink-2); font-size: .94rem; }
-.table-note { margin-top: 14px; font-size: .86rem; color: var(--ink-3); max-width: 80ch; }
+  .fe-symbol::before, .fe-symbol::after {
+    position: absolute;
+    width: .82rem;
+    height: .82rem;
+    border: 1px solid #d7efc9;
+    border-radius: 1px;
+    content: "";
+    transform: rotate(-12deg) skewX(5deg);
+  }
 
-/* Security */
-.sec { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 28px 36px; }
-.sec div { display: grid; gap: 8px; padding-top: 18px; border-top: 1px solid var(--line); }
-.sec p { color: var(--ink-2); font-size: .93rem; }
-@media (max-width: 900px) { .sec { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
-@media (max-width: 560px) { .sec { grid-template-columns: minmax(0, 1fr); } }
+  .fe-symbol::before { top: .78rem; left: .58rem; opacity: .75; }
+  .fe-symbol::after { top: .52rem; left: .72rem; background: #d7efc9; }
+  .fe-nav { display: flex; flex-wrap: wrap; align-items: center; gap: clamp(1rem, 2.5vw, 2.2rem); }
+  .fe-nav a { color: var(--muted); font-size: .9375rem; font-weight: 550; text-decoration: none; }
+  .fe-nav a:hover { color: var(--forest); text-decoration: underline; }
+  .fe-header .fe-button { min-height: 2.65rem; padding-inline: .875rem; font-size: .875rem; }
 
-/* Briefing */
-.brief { background: var(--brand); color: var(--brand-ink); }
-.brief .wrap { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: clamp(32px, 5vw, 64px); align-items: start; }
-.brief h2 { color: var(--brand-ink); }
-.brief .lede { color: color-mix(in srgb, var(--brand-ink) 82%, transparent); }
-.brief .field-label { color: color-mix(in srgb, var(--brand-ink) 75%, transparent); }
-form { display: grid; gap: 14px; background: var(--surface); color: var(--ink); border-radius: 10px; padding: 26px; box-shadow: var(--shadow); }
-.form-row { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 14px; }
-label { display: grid; gap: 6px; font-size: .84rem; font-weight: 500; color: var(--ink-2); }
-input, select { width: 100%; min-height: 44px; padding: 0 12px; border: 1px solid var(--line); border-radius: 6px; background: var(--paper); color: var(--ink); font: 400 .95rem var(--sans); }
-.form-msg { font-size: .86rem; color: var(--ink-2); min-height: 1.4em; }
-@media (max-width: 860px) { .brief .wrap { grid-template-columns: minmax(0, 1fr); } }
-@media (max-width: 520px) { .form-row { grid-template-columns: minmax(0, 1fr); } }
+  .fe-hero { padding-block: clamp(3rem, 5.8vw, 5.5rem) clamp(3.5rem, 6vw, 5.75rem); }
+  .fe-hero-inner {
+    display: grid;
+    grid-template-columns: minmax(0, .91fr) minmax(0, 1fr);
+    align-items: center;
+    gap: clamp(1.8rem, 4vw, 4rem);
+  }
 
-footer { padding-block: 36px; border-top: 1px solid var(--line); color: var(--ink-3); font-size: .86rem; }
-footer .wrap { display: flex; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
+  .fe-hero h1 { margin-top: 1rem; }
+  .fe-hero h1 span { display: block; color: var(--green); }
+  .fe-hero-copy > p {
+    max-width: 29rem;
+    margin-top: 1.5rem;
+    color: var(--muted);
+    font-size: clamp(1.0625rem, 1.5vw, 1.1875rem);
+    line-height: 1.6;
+  }
 
-@media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+  .fe-actions { display: flex; flex-wrap: wrap; gap: .65rem; margin-top: 1.85rem; }
+  .fe-hero-art {
+    position: relative;
+    display: flex;
+    min-height: 23rem;
+    aspect-ratio: 1.26;
+    align-items: flex-end;
+    overflow: hidden;
+    padding: clamp(.9rem, 2.1vw, 1.6rem);
+    border: 1px solid #244637;
+    border-radius: .75rem;
+    background: var(--forest);
+  }
+
+  .fe-hero-art img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+  }
+
+  .fe-run {
+    position: relative;
+    width: min(100%, 21rem);
+    padding: .85rem 1rem;
+    border: 1px solid #edf3e8;
+    border-radius: .5rem;
+    background: #f9fbf6;
+    box-shadow: 0 .9rem 2rem #06180f3b;
+  }
+
+  .fe-run-heading { display: flex; align-items: center; justify-content: space-between; gap: .5rem; }
+  .fe-run-heading strong { font-size: .9375rem; font-weight: 650; line-height: 1.35; }
+  .fe-run p { margin-top: .55rem; padding-top: .55rem; border-top: 1px solid var(--line); color: var(--muted); font-size: .875rem; }
+
+  .fe-ready, .fe-stage {
+    display: inline-flex;
+    align-items: center;
+    gap: .45rem;
+    color: var(--muted);
+    font-size: .875rem;
+    font-weight: 550;
+    line-height: 1.35;
+  }
+
+  .fe-ready { flex: none; padding: .26rem .5rem; border-radius: .25rem; background: var(--sage); color: var(--green); font-size: .75rem; }
+  .fe-ready::before, .fe-stage-verified::before { width: .4rem; height: .4rem; flex: none; border-radius: 50%; background: #38754d; content: ""; }
+
+  .fe-process { border-block: 1px solid var(--line); background: var(--white); }
+  .fe-workflow {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: clamp(1rem, 2.7vw, 2.3rem);
+    padding: 0;
+    margin: 0;
+    list-style: none;
+    counter-reset: workflow;
+  }
+
+  .fe-workflow li {
+    padding-top: 1.1rem;
+    border-top: 1px solid #b8c9b8;
+    counter-increment: workflow;
+  }
+
+  .fe-workflow li::before {
+    display: grid;
+    width: 2rem;
+    height: 2rem;
+    place-items: center;
+    margin-bottom: .9rem;
+    border-radius: .25rem;
+    background: var(--sage);
+    color: var(--green);
+    content: counter(workflow, decimal-leading-zero);
+    font: 600 .8125rem/1 var(--mono);
+  }
+
+  .fe-workflow p, .fe-company-grid p { margin-top: .48rem; }
+  .fe-split {
+    display: grid;
+    grid-template-columns: minmax(0, .96fr) minmax(0, 1fr);
+    align-items: start;
+    gap: clamp(2rem, 6vw, 6.75rem);
+  }
+
+  .fe-controls { background: var(--sage); }
+  .fe-control-list { display: grid; gap: 1.1rem; padding: 0; margin: 1.6rem 0 0; list-style: none; }
+  .fe-control-list li { padding-top: 1rem; border-top: 1px solid #c7d5c5; }
+  .fe-control-list p { margin-top: .35rem; }
+  .fe-review {
+    align-self: center;
+    overflow: hidden;
+    border: 1px solid #c1cec0;
+    border-radius: .65rem;
+    background: var(--white);
+    box-shadow: 0 1rem 2.5rem -1.55rem #142f2440;
+  }
+
+  .fe-review-head, .fe-review-foot { padding: 1.2rem clamp(.95rem, 2.4vw, 1.65rem); }
+  .fe-review-head { border-bottom: 1px solid var(--line); }
+  .fe-review-head strong { display: block; margin-top: .35rem; font-size: 1.25rem; letter-spacing: -.035em; }
+  .fe-review-row {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: .8rem;
+    padding: .95rem clamp(.95rem, 2.4vw, 1.65rem);
+    border-bottom: 1px solid var(--line);
+    font-size: .9375rem;
+  }
+
+  .fe-review-row :is(dt, dd) { min-width: 0; overflow-wrap: anywhere; }
+  .fe-review-row dd { text-align: right; }
+  .fe-review-change { background: #f7f2e5; }
+  .fe-review-change dd { color: #694b17; font-weight: 600; }
+  .fe-review-foot { background: #f9faf6; }
+  .fe-review-foot p { margin-top: .25rem; font-size: .9375rem; }
+
+  .fe-company { background: var(--white); }
+  .fe-company-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1.65rem clamp(1.3rem, 3.1vw, 2.5rem);
+  }
+
+  .fe-company-grid article { padding-top: 1rem; border-top: 1px solid var(--line); }
+
+  .fe-integration { background: var(--forest); color: var(--white); }
+  .fe-integration .fe-split { align-items: center; }
+  .fe-integration .fe-kicker { color: #c0dda9; }
+  .fe-integration p { max-width: 31rem; margin-top: 1rem; color: #d1ded2; }
+  .fe-code {
+    min-width: 0;
+    border: 1px solid #3c5b49;
+    border-radius: .6rem;
+    background: #0c2118;
+  }
+
+  .fe-code figcaption {
+    padding: .775rem 1.15rem;
+    border-bottom: 1px solid #3c5b49;
+    color: #d1ded2;
+    font-size: .875rem;
+    font-weight: 550;
+  }
+
+  .fe-code pre {
+    padding: 1rem 1.15rem;
+    color: #d9e5d9;
+    font: .875rem/1.75 var(--mono);
+    overflow-wrap: anywhere;
+    white-space: pre-wrap;
+  }
+
+  .fe-code code { font: inherit; }
+  .fe-code .fe-key { color: #f0f5ee; }
+  .fe-code .fe-value { color: #c6e4af; }
+
+  .fe-coverage { background: var(--paper); }
+  .fe-coverage-table {
+    overflow: hidden;
+    border: 1px solid var(--line);
+    border-radius: .6rem;
+    background: var(--white);
+  }
+
+  .fe-coverage table { width: 100%; border-collapse: collapse; text-align: left; }
+  .fe-coverage th, .fe-coverage td {
+    padding: .875rem clamp(.55rem, 2.2vw, 1.45rem);
+    border-bottom: 1px solid var(--line);
+    font-size: .9375rem;
+    line-height: 1.4;
+    vertical-align: top;
+  }
+
+  .fe-coverage thead th { background: var(--sage); color: #364d40; font-size: .875rem; font-weight: 650; }
+  .fe-coverage th:first-child { width: 20%; }
+  .fe-coverage th:last-child { width: 25%; }
+  .fe-coverage tbody th { font-weight: 650; }
+  .fe-coverage tr:last-child > * { border-bottom: 0; }
+  .fe-coverage .fe-stage-verified { color: var(--green); font-weight: 650; }
+  .fe-coverage p.fe-coverage-note { max-width: 54rem; margin-top: 1rem; font-size: .9375rem; }
+
+  .fe-briefing { border-top: 1px solid var(--line); background: var(--sage); }
+  .fe-briefing .fe-split { align-items: center; }
+  .fe-briefing-copy p { max-width: 28rem; margin-top: 1rem; }
+  .fe-form {
+    display: grid;
+    gap: .95rem;
+    padding: clamp(1.1rem, 3vw, 2rem);
+    border: 1px solid #c9d7c8;
+    border-radius: .65rem;
+    background: var(--white);
+  }
+
+  .fe-form-row { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .9rem; }
+  .fe-form label { display: grid; gap: .35rem; color: var(--ink); font-size: .875rem; font-weight: 600; }
+  .fe-form :is(input, select) {
+    width: 100%;
+    min-height: 2.9rem;
+    padding: .6rem .65rem;
+    border: 1px solid #aebfb0;
+    border-radius: .3rem;
+    background: #fbfcf9;
+    color: var(--ink);
+    font: 400 1rem/1.3 Inter, "Helvetica Neue", Arial, sans-serif;
+  }
+
+  .fe-form select {
+    appearance: none;
+    padding-right: 1.8rem;
+    background-image: linear-gradient(45deg, transparent 50%, #4e6056 50%),
+      linear-gradient(135deg, #4e6056 50%, transparent 50%);
+    background-position: right .99rem center, right .69rem center;
+    background-size: .3rem .3rem;
+    background-repeat: no-repeat;
+  }
+
+  .fe-form .fe-button { justify-self: start; }
+  .fe-form p { font-size: .875rem; }
+  .fe-form [role="status"] { color: var(--ink); font-weight: 550; }
+  .fe-form [role="status"]:not(:empty) { margin-top: .35rem; }
+
+  .fe-footer { border-top: 1px solid var(--line); }
+  .fe-footer-inner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: .65rem 1.5rem;
+    padding-block: 1.35rem;
+  }
+
+  .fe-footer p { color: var(--muted); font-size: .875rem; }
+
+  @media (max-width: 57rem) {
+    .fe-hero-inner { grid-template-columns: 1fr; }
+    .fe-hero h1 { font-size: clamp(2.85rem, 7.6vw, 4.4rem); }
+    .fe-hero-art { min-height: 0; max-height: 30rem; }
+    .fe-workflow { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1.4rem; }
+  }
+
+  @media (max-width: 45rem) {
+    .fe-header-inner { min-height: 0; flex-wrap: wrap; gap: .45rem .8rem; padding-top: .75rem; }
+    .fe-nav { order: 1; width: 100%; gap: .45rem clamp(.8rem, 4vw, 1.45rem); }
+    .fe-nav a { padding-block: .55rem .72rem; font-size: .875rem; }
+    .fe-split { grid-template-columns: 1fr; }
+  }
+
+  @media (max-width: 29rem) {
+    .fe-header .fe-button { padding-inline: .65rem; font-size: .8125rem; }
+    .fe-hero h1 { letter-spacing: -.06em; }
+    .fe-hero-art { aspect-ratio: 1.15; }
+    .fe-actions .fe-button { flex: 1 1 auto; }
+    .fe-company-grid, .fe-form-row { grid-template-columns: 1fr; }
+    .fe-review-row { font-size: .875rem; }
+    .fe-coverage :is(th, td, .fe-stage) { font-size: .8125rem; }
+    .fe-coverage :is(th, td) { padding-inline: .375rem; overflow-wrap: anywhere; }
+    .fe-coverage th:first-child { width: 29%; }
+    .fe-coverage th:last-child { width: 28%; }
+  }
+
+  @media (max-width: 23rem) {
+    .fe-workflow { grid-template-columns: 1fr; }
+  }
 </style>
 
-<header class="top band">
-  <div class="wrap">
-    <a class="mark" href="#top" aria-label="Filing Engine home">
-      <svg class="seal" viewBox="0 0 32 32" aria-hidden="true">
-        <circle cx="16" cy="16" r="14.5" fill="none" stroke="var(--brass)" stroke-width="1.5"/>
-        <circle cx="16" cy="16" r="11" fill="none" stroke="var(--brass)" stroke-width="0.75" stroke-dasharray="1.5 1.5"/>
-        <path d="M11 9.5h7.5l3.5 3.5V22.5H11z" fill="var(--brand)"/>
-        <path d="M18.5 9.5V13H22" fill="none" stroke="var(--surface)" stroke-width="1"/>
-        <path d="M13.5 16h6M13.5 18.5h6M13.5 21h3.5" stroke="var(--surface)" stroke-width="1"/>
-      </svg>
-      <span class="mark-name">Filing Engine</span>
-    </a>
-    <nav class="nav" aria-label="Sections">
-      <a href="#process">How it works</a>
-      <a href="#controls">Controls</a>
-      <a href="#companies">For service companies</a>
-      <a href="#coverage">Coverage</a>
-      <a href="#security">Security</a>
-    </nav>
-    <a class="btn btn-primary" href="#briefing">Request a briefing</a>
-  </div>
-</header>
+<div class="fe-page" id="top">
+  <header class="fe-header">
+    <div class="fe-container fe-header-inner">
+      <a class="fe-wordmark" href="#top"><span class="fe-symbol" aria-hidden="true"></span>Filing Engine</a>
+      <nav class="fe-nav" aria-label="Main navigation">
+        <a href="#process">Workflow</a>
+        <a href="#controls">Controls</a>
+        <a href="#integrations">Integration</a>
+        <a href="#coverage">Coverage</a>
+      </nav>
+      <a class="fe-button" href="#briefing">Request a briefing</a>
+    </div>
+  </header>
 
-<main id="top">
-  <section class="hero band">
-    <div class="wrap">
-      <div class="hero-copy">
-        <span class="field-label">For filing service companies</span>
-        <h1>State filings, done on the government sites. Approved before they leave.</h1>
-        <p class="lede">Filing Engine fills formation, EIN and certificate filings on the live state and IRS websites, under your logins and your brand. It reads every form fresh, checks every fee, and submits nothing until your client approves the exact data.</p>
-        <div class="hero-actions">
-          <a class="btn btn-primary" href="#briefing">Request a briefing</a>
-          <a class="btn btn-quiet" href="#controls">See the controls</a>
+  <main>
+    <section class="fe-hero" aria-labelledby="fe-title">
+      <div class="fe-container fe-hero-inner">
+        <div class="fe-hero-copy">
+          <span class="fe-kicker">For filing service companies</span>
+          <h1 id="fe-title">Corporate filings, <span>under your control</span></h1>
+          <p>Connect your intake system to government filing portals. Get client approval on the exact filing details and fees, then bring status updates and documents back into your systems.</p>
+          <div class="fe-actions">
+            <a class="fe-button" href="#briefing">Request a briefing</a>
+            <a class="fe-button fe-button-secondary" href="#process">See how it works</a>
+          </div>
         </div>
-        <p class="hero-note">Starting with New Jersey, New York, Florida, Missouri and the IRS.</p>
+
+        <figure class="fe-hero-art">
+          <!-- Embed the optimized WebP so the landing page can be published as a single HTML fragment. -->
+          <img src="data:image/webp;base64,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" alt="" width="1200" height="900" fetchpriority="high">
+          <figcaption class="fe-run">
+            <div class="fe-run-heading">
+              <strong>New Jersey LLC formation</strong>
+              <span class="fe-ready">Dry run</span>
+            </div>
+            <p>13 portal screens completed. Stopped before payment.</p>
+          </figcaption>
+        </figure>
       </div>
+    </section>
 
-      <figure class="trace" aria-label="Run trace from a dry run on the New Jersey portal" style="margin:0">
-        <div class="trace-head">
-          <span><strong>NJ · Domestic LLC formation</strong> · njportal.com</span>
-          <span class="pill pill-dry">Dry run</span>
+    <section class="fe-section fe-process" id="process" aria-labelledby="fe-process-title">
+      <div class="fe-container">
+        <div class="fe-heading">
+          <span class="fe-kicker">Workflow</span>
+          <h2 id="fe-process-title">From intake to filing records</h2>
         </div>
-        <ol>
-          <li class="scan"><span class="t">00.0s</span><span class="s">Welcome</span><span class="ok">read</span></li>
-          <li><span class="t">02.1s</span><span class="s">Business name<small>Type: NJ Domestic Limited Liability Company</small></span><span class="ok">filled</span></li>
-          <li><span class="t">04.0s</span><span class="s">Designator<small>Name check: available</small></span><span class="ok">passed</span></li>
-          <li><span class="t">05.2s</span><span class="s">Business data · purpose · main address</span><span class="ok">filled</span></li>
-          <li><span class="t">10.4s</span><span class="s">Registered agent<small>Office address, attestation</small></span><span class="ok">filled</span></li>
-          <li><span class="t">15.9s</span><span class="s">Members / managers<small>1 member added</small></span><span class="ok">filled</span></li>
-          <li><span class="t">24.6s</span><span class="s">Signatures<small>Signer added, signature box checked</small></span><span class="ok">filled</span></li>
-          <li><span class="t">26.0s</span><span class="s">Review</span><span class="ok">matched</span></li>
-          <li><span class="t">28.3s</span><span class="s">Payment<small>Fee check: $100.00 + $3.50 matches the approval</small></span><span class="ok">verified</span></li>
-          <li><span class="t">28.9s</span><span class="s">Pay Now</span><span class="halt">held</span></li>
+        <ol class="fe-workflow" role="list">
+          <li>
+            <h3>Accept the order</h3>
+            <p>Send entity details through the API. Apply the registered agent, signer and other defaults you set for that client.</p>
+          </li>
+          <li>
+            <h3>Collect approval</h3>
+            <p>Send a review link under your brand. The designated approver confirms the filing details and fees.</p>
+          </li>
+          <li>
+            <h3>Run on the portal</h3>
+            <p>Match fields against the live government form and check charges against the approved amount before payment.</p>
+          </li>
+          <li>
+            <h3>Return the record</h3>
+            <p>Receive status updates in your system, with references to filing documents when the agency makes them available.</p>
+          </li>
         </ol>
-        <div class="trace-foot">
-          <span>13 live screens, test entry, nothing filed.</span>
-          <span class="stamp">Stopped before Pay Now</span>
+      </div>
+    </section>
+
+    <section class="fe-section fe-controls" id="controls" aria-labelledby="fe-controls-title">
+      <div class="fe-container fe-split">
+        <div>
+          <span class="fe-kicker">Filing controls</span>
+          <h2 id="fe-controls-title">Review exceptions before submission</h2>
+          <ul class="fe-control-list" role="list">
+            <li>
+              <h3>Pause on form changes</h3>
+              <p>If a required field or option changes, the engine pauses the run for review.</p>
+            </li>
+            <li>
+              <h3>Keep charges within approval</h3>
+              <p>If the portal fee falls outside the approved amount, the filing stops before payment.</p>
+            </li>
+            <li>
+              <h3>Confirm the outcome before retrying</h3>
+              <p>If a run is interrupted at submission, it goes to reconciliation for someone to confirm the outcome.</p>
+            </li>
+          </ul>
         </div>
-      </figure>
-    </div>
-  </section>
 
-  <div class="principles band">
-    <div class="wrap">
-      <div class="principle"><b>Approval first</b><span>Your client approves the exact data through a signed link before any run starts.</span></div>
-      <div class="principle"><b>Live forms, every run</b><span>Fields are matched by their labels on the page as it is today.</span></div>
-      <div class="principle"><b>Stops on change</b><span>A changed form halts the run before submission and proposes the fix.</span></div>
-      <div class="principle"><b>Yours alone</b><span>Your logins, your agent service and your customers stay in your account.</span></div>
-    </div>
-  </div>
-
-  <section class="block band" id="process">
-    <div class="wrap">
-      <div class="section-head">
-        <span class="field-label">How a filing runs</span>
-        <h2>One pass from intake to filed documents.</h2>
-        <p class="lede">State sites keep no drafts, so every filing is a single run from the first screen to the last. Everything is checked before it starts.</p>
-      </div>
-      <div class="steps">
-        <div class="step"><h3>Intake</h3><p>Your system or your customer's sends the entity details. Your onboarding answers fill the rest: agent, organizer, signer, addresses.</p></div>
-        <div class="step"><h3>Approval</h3><p>The client receives a link with every value and the fees. Approving binds those exact values to the run.</p></div>
-        <div class="step"><h3>Pre-flight</h3><p>Site hours, logins, account balance and fee table are checked before a browser opens.</p></div>
-        <div class="step"><h3>Run</h3><p>The engine reads each screen live, fills it by label and keeps a screenshot and page copy of every step.</p></div>
-        <div class="step"><h3>EIN in the same pass</h3><p>After the name check passes, the EIN is filed and its letter saved, then entered into the state form.</p></div>
-        <div class="step"><h3>Filed</h3><p>Documents are stored, and signed webhooks report each stage to your systems.</p></div>
-      </div>
-    </div>
-  </section>
-
-  <section class="block band alt" id="controls">
-    <div class="wrap">
-      <div class="section-head">
-        <span class="field-label">Controls</span>
-        <h2>Built for filings that cannot be taken back.</h2>
-        <p class="lede">A government submission is final. Every control below exists to stop a wrong filing before it happens, and to prove what happened after.</p>
-      </div>
-      <div class="controls">
-        <article class="control">
-          <h3>Halts when a state changes a form</h3>
-          <p>Each screen is compared with its last approved structure: fields, required marks, options and prices. Any difference stops the run before submission. Your reviewer sees the change and a proposed mapping, and accepts or corrects it.</p>
-          <div class="exhibit" role="img" aria-label="Example of a detected form change">
-            <div class="exhibit-head"><span>Example · NJ payment screen</span><span>Run halted</span></div>
-            <div class="exhibit-body">
-              <div class="row"><span>First Name *</span><span>unchanged</span></div>
-              <div class="row"><span>Phone Number *</span><span>unchanged</span></div>
-              <div class="row add"><span>+ Daytime Phone *</span><span>new, required</span></div>
-              <div class="row"><span>Outcome</span><span>client re-approval</span></div>
+        <figure class="fe-review">
+          <figcaption class="fe-review-head">
+            <span class="fe-kicker">Example exception</span>
+            <strong>Portal form change</strong>
+          </figcaption>
+          <dl>
+            <div class="fe-review-row">
+              <dt>First name</dt>
+              <dd>Matches approved fields</dd>
             </div>
-          </div>
-        </article>
-        <article class="control">
-          <h3>Checks the price before paying</h3>
-          <p>Fees are quoted at approval from a verified fee table and read again on the payment screen. NJ charges $50 for an LLC standing certificate and $25 for a corporation's, so the engine also confirms the entity type on the state record.</p>
-          <div class="exhibit" role="img" aria-label="Example fee checks">
-            <div class="exhibit-head"><span>NJ standing certificate · by card</span><span>Fee check</span></div>
-            <div class="exhibit-body">
-              <div class="row"><span>LLC record, approved $52.00</span><span class="ok">page $52.00 · match</span></div>
-              <div class="row"><span>Corporation record, approved $27.00</span><span class="ok">page $27.00 · match</span></div>
-              <div class="row"><span>LLC record requested as corporation</span><span class="halt">stopped</span></div>
+            <div class="fe-review-row">
+              <dt>Phone number</dt>
+              <dd>Matches approved fields</dd>
             </div>
+            <div class="fe-review-row fe-review-change">
+              <dt>Daytime phone</dt>
+              <dd>New required field</dd>
+            </div>
+          </dl>
+          <div class="fe-review-foot">
+            <strong>Submission paused</strong>
+            <p>A reviewer checks the change before the filing can proceed.</p>
           </div>
-        </article>
-        <article class="control">
-          <h3>Never submits twice</h3>
-          <p>A record is written before the final click. If a machine stops mid-run, that filing is flagged for reconciliation and never re-run on its own. Nothing else ever runs over a filing that may already be at the state.</p>
-        </article>
-        <article class="control">
-          <h3>Shows where every value came from</h3>
-          <p>Each filled field records its source: the filing itself, your intake, the customer's onboarding answers or your company defaults. Every screen of every run keeps a screenshot and a copy of the page.</p>
-        </article>
+        </figure>
       </div>
-    </div>
-  </section>
+    </section>
 
-  <section class="block band" id="companies">
-    <div class="wrap tenancy">
-      <div class="section-head" style="margin-bottom:0">
-        <span class="field-label">For service companies</span>
-        <h2>Your company, your accounts, your customers' rules.</h2>
-        <p class="lede">Each subscriber runs independently. Your customers (CPAs, title companies, payroll companies) sign up under your brand and answer the questions you choose to ask them.</p>
-        <ul class="checks" style="margin-top:12px">
-          <li><svg class="tick" viewBox="0 0 22 22" aria-hidden="true"><circle cx="11" cy="11" r="10" fill="none" stroke="var(--ok)" stroke-width="1.5"/><path d="M6.5 11.5l3 3 6-6.5" fill="none" stroke="var(--ok)" stroke-width="1.7"/></svg><span><b>Your state logins.</b> Stored under your account only, never shared with another subscriber.</span></li>
-          <li><svg class="tick" viewBox="0 0 22 22" aria-hidden="true"><circle cx="11" cy="11" r="10" fill="none" stroke="var(--ok)" stroke-width="1.5"/><path d="M6.5 11.5l3 3 6-6.5" fill="none" stroke="var(--ok)" stroke-width="1.7"/></svg><span><b>Your services on the forms.</b> Your registered agent service, organizer, signer and filer.</span></li>
-          <li><svg class="tick" viewBox="0 0 22 22" aria-hidden="true"><circle cx="11" cy="11" r="10" fill="none" stroke="var(--ok)" stroke-width="1.5"/><path d="M6.5 11.5l3 3 6-6.5" fill="none" stroke="var(--ok)" stroke-width="1.7"/></svg><span><b>Defaults and locks.</b> Set the answer for any customer question, or lock it for all of them.</span></li>
-          <li><svg class="tick" viewBox="0 0 22 22" aria-hidden="true"><circle cx="11" cy="11" r="10" fill="none" stroke="var(--ok)" stroke-width="1.5"/><path d="M6.5 11.5l3 3 6-6.5" fill="none" stroke="var(--ok)" stroke-width="1.7"/></svg><span><b>Your brand.</b> Approval pages carry your name and your support contact.</span></li>
-          <li><svg class="tick" viewBox="0 0 22 22" aria-hidden="true"><circle cx="11" cy="11" r="10" fill="none" stroke="var(--ok)" stroke-width="1.5"/><path d="M6.5 11.5l3 3 6-6.5" fill="none" stroke="var(--ok)" stroke-width="1.7"/></svg><span><b>Your own fixed address.</b> Government sites refuse many cloud addresses, so your filings run from a machine on your own IP.</span></li>
-        </ul>
-      </div>
-      <dl class="levels" aria-label="Who decides what">
-        <div class="level"><dt>Your company</dt><dd><b>Accounts and services.</b> NJ and ny.gov logins, NY drawdown account, registered agent service, people who sign and file, defaults for your customers.</dd></div>
-        <div class="level"><dt>Your customer</dt><dd><b>Their rules.</b> Who is the registered agent, who organizes and signs, who approves, which state accounts their filings use: yours, or their own.</dd></div>
-        <div class="level"><dt>The entity</dt><dd><b>The facts.</b> Name, owners, addresses and the responsible party, from your intake.</dd></div>
-        <div class="level"><dt>Each filing</dt><dd><b>Final say.</b> A value sent with a filing always overrides a default. A missing answer stops the filing and names the question.</dd></div>
-      </dl>
-    </div>
-  </section>
+    <section class="fe-section fe-company" id="companies" aria-labelledby="fe-company-title">
+      <div class="fe-container fe-split">
+        <div>
+          <span class="fe-kicker">Subscriber setup</span>
+          <h2 id="fe-company-title">Operate under your own brand and accounts</h2>
+        </div>
 
-  <section class="block band alt" id="integrations">
-    <div class="wrap">
-      <div class="section-head">
-        <span class="field-label">Integrations</span>
-        <h2>Plugs into the systems your team already uses.</h2>
-        <p class="lede">Start filings from your website or back office through the API. Status reaches your systems as signed webhooks, from the approval request to the filed documents.</p>
+        <div class="fe-company-grid" id="security">
+          <article>
+            <h3>Company-specific workspace</h3>
+            <p>Your filing jobs and documents are scoped to your company. The worker retrieves portal credentials from a company-specific vault when a run starts.</p>
+          </article>
+          <article>
+            <h3>Client-specific rules</h3>
+            <p>Set defaults for each firm you serve and lock answers that need to stay consistent across its filings.</p>
+          </article>
+          <article>
+            <h3>Branded approvals</h3>
+            <p>Review pages display your name and support contact. Links are single-use and expire. Social Security numbers are masked on the page.</p>
+          </article>
+          <article>
+            <h3>Filing history</h3>
+            <p>Review recorded portal steps and trace whether a value came from intake, client settings or a company default.</p>
+          </article>
+        </div>
       </div>
-      <div class="integrate">
-        <pre class="code" aria-label="Example webhook event"><span class="c">// POST to your endpoint, signed with your secret</span>
-{
-  <span class="k">"type"</span>: <span class="str">"filing.awaiting_approval"</span>,
-  <span class="k">"filingId"</span>: <span class="str">"f8c1…"</span>,
-  <span class="k">"data"</span>: {
-    <span class="k">"approvalLink"</span>: <span class="str">"https://…/approve/…"</span>,
-    <span class="k">"expiresAt"</span>: <span class="str">"2026-11-25T15:00:00Z"</span>,
-    <span class="k">"fees"</span>: [
-      { <span class="k">"label"</span>: <span class="str">"Formation filing fee"</span>, <span class="k">"amountUsd"</span>: 100 },
-      { <span class="k">"label"</span>: <span class="str">"Service fee (credit card)"</span>, <span class="k">"amountUsd"</span>: 3.5 }
-    ],
-    <span class="k">"einInRun"</span>: true
+    </section>
+
+    <section class="fe-section fe-integration" id="integrations" aria-labelledby="fe-integration-title">
+      <div class="fe-container fe-split">
+        <div>
+          <span class="fe-kicker">API and webhooks</span>
+          <h2 id="fe-integration-title">Connect to the systems you already use</h2>
+          <p>Create filing requests from your website, CRM or back office. Signed webhooks report approval, exceptions and filing results to your system, with delivery retries when your endpoint is unavailable.</p>
+        </div>
+
+        <figure class="fe-code">
+          <figcaption>Example approval webhook</figcaption>
+          <pre><code>{
+  <span class="fe-key">"type"</span>: <span class="fe-value">"filing.awaiting_approval"</span>,
+  <span class="fe-key">"filingId"</span>: <span class="fe-value">"filing_123"</span>,
+  <span class="fe-key">"data"</span>: {
+    <span class="fe-key">"approvalLink"</span>: <span class="fe-value">"https://example.com/approve/…"</span>,
+    <span class="fe-key">"expiresAt"</span>: <span class="fe-value">"2026-11-25T15:00:00Z"</span>
   }
-}</pre>
-        <div class="channels">
-          <div class="channel"><div><b>API and webhooks</b><br><span>Your website, CRM or practice software</span></div><span class="status live">Available</span></div>
-          <div class="channel"><div><b>Email</b><br><span>Approval links and status to staff and clients</span></div><span class="status">In development</span></div>
-          <div class="channel"><div><b>Slack</b><br><span>Approvals and alerts in your team's channels</span></div><span class="status">In development</span></div>
-          <div class="channel"><div><b>WhatsApp and SMS</b><br><span>Approval links where clients answer fastest</span></div><span class="status">In development</span></div>
+}</code></pre>
+        </figure>
+      </div>
+    </section>
+
+    <section class="fe-section fe-coverage" id="coverage" aria-labelledby="fe-coverage-title">
+      <div class="fe-container">
+        <div class="fe-heading">
+          <span class="fe-kicker">Pilot coverage</span>
+          <h2 id="fe-coverage-title">Filing workflows by jurisdiction</h2>
         </div>
-      </div>
-    </div>
-  </section>
 
-  <section class="block band" id="coverage">
-    <div class="wrap">
-      <div class="section-head">
-        <span class="field-label">Coverage</span>
-        <h2>Where the engine files today, and what is next.</h2>
-      </div>
-      <div class="table-wrap">
-        <table>
-          <thead><tr><th scope="col">Filing</th><th scope="col">Where</th><th scope="col">Status</th></tr></thead>
-          <tbody>
-            <tr><td>LLC formation</td><td>New Jersey</td><td><span class="status live">Verified on the live site</span></td></tr>
-            <tr><td>Standing certificate</td><td>New Jersey</td><td><span class="status live">Verified on the live site</span></td></tr>
-            <tr><td>LLC formation</td><td>Florida</td><td><span class="status live">Verified on the live site</span></td></tr>
-            <tr><td>Profit corporation formation</td><td>Florida</td><td><span class="status live">Verified on the live site</span></td></tr>
-            <tr><td>Limited partnership formation</td><td>Florida</td><td><span class="status live">Verified on the live site</span></td></tr>
-            <tr><td>LLC formation</td><td>Missouri</td><td><span class="status map">Mapped from the state guide</span></td></tr>
-            <tr><td>Certificate of good standing</td><td>Missouri</td><td><span class="status map">Mapped from the state guide</span></td></tr>
-            <tr><td>EIN application, with confirmation letter</td><td>IRS</td><td><span class="status map">Mapped from a live walk</span></td></tr>
-            <tr><td>Articles of Organization (LLC)</td><td>New York</td><td><span class="status map">Mapped from a live walk</span></td></tr>
-            <tr><td>Name-change amendment</td><td>New York</td><td><span class="status">Planned</span></td></tr>
-            <tr><td>Alternate name, charter amendments</td><td>New Jersey</td><td><span class="status">Planned</span></td></tr>
-            <tr><td>Paper filings by upload: certificate of status, assumed name, foreign qualification, dissolution</td><td>New York</td><td><span class="status">Planned</span></td></tr>
-          </tbody>
-        </table>
-      </div>
-      <p class="table-note">Verified means the engine completed every screen on the live government site with a test entry and stopped before payment. Each filing type is switched to live submission only after its payment step has been mapped.</p>
-    </div>
-  </section>
-
-  <section class="block band alt" id="security">
-    <div class="wrap">
-      <div class="section-head">
-        <span class="field-label">Security</span>
-        <h2>Sensitive data stays where it belongs.</h2>
-      </div>
-      <div class="sec">
-        <div><h3>Masked SSNs</h3><p>Social Security numbers are masked on approval pages, in API responses and in recorded screens.</p></div>
-        <div><h3>Secrets in a vault</h3><p>State logins live in a vault under your account, never in settings, chat or email, and are read only when a run starts.</p></div>
-        <div><h3>Single-use approval links</h3><p>Signed, expiring links, bound to the exact data shown. An optional one-time code adds a second check.</p></div>
-        <div><h3>Signed webhooks</h3><p>Every event carries a timestamped signature, with retries and a dead-letter record.</p></div>
-        <div><h3>Dry-run mode</h3><p>New sites and new customers can run every screen and stop before submission until you switch them live.</p></div>
-        <div><h3>Separate subscribers</h3><p>Logins, jobs, customers and documents are kept per company. One subscriber's machine only runs its own filings.</p></div>
-      </div>
-    </div>
-  </section>
-
-  <section class="block band brief" id="briefing">
-    <div class="wrap">
-      <div class="section-head" style="margin-bottom:0">
-        <span class="field-label">Briefing</span>
-        <h2>See a live run on your own filings.</h2>
-        <p class="lede">A 30-minute session: a dry run on the New Jersey portal, the approval flow your clients would see, and how your accounts and customers would be set up.</p>
-      </div>
-      <form id="brief-form" novalidate>
-        <div class="form-row">
-          <label for="bf-name">Name<input id="bf-name" name="name" autocomplete="name" required></label>
-          <label for="bf-company">Company<input id="bf-company" name="company" autocomplete="organization" required></label>
+        <div class="fe-coverage-table">
+          <table aria-labelledby="fe-coverage-title" aria-describedby="fe-coverage-note">
+            <thead>
+              <tr><th scope="col">Jurisdiction</th><th scope="col">Workflow</th><th scope="col">Current stage</th></tr>
+            </thead>
+            <tbody>
+              <tr><th scope="row">New Jersey</th><td>Domestic LLC formation</td><td><span class="fe-stage fe-stage-verified">Verified dry run</span></td></tr>
+              <tr><th scope="row">Florida</th><td>LLC, profit corporation and limited partnership formation</td><td><span class="fe-stage fe-stage-verified">Verified dry run</span></td></tr>
+              <tr><th scope="row">New Jersey</th><td>Standing certificate</td><td><span class="fe-stage">Portal mapped</span></td></tr>
+              <tr><th scope="row">New York</th><td>Domestic LLC formation</td><td><span class="fe-stage">Portal mapped</span></td></tr>
+              <tr><th scope="row">IRS</th><td>EIN application, owner flow</td><td><span class="fe-stage">Portal mapped</span></td></tr>
+              <tr><th scope="row">Missouri</th><td>LLC formation and good standing certificate</td><td><span class="fe-stage">Guide mapped</span></td></tr>
+              <tr><th scope="row">New York and New Jersey</th><td>Employer registration</td><td><span class="fe-stage">In development</span></td></tr>
+              <tr><th scope="row">New York and New Jersey</th><td>Entity amendments</td><td><span class="fe-stage">Planned</span></td></tr>
+              <tr><th scope="row">New York</th><td>Document upload filings</td><td><span class="fe-stage">Planned</span></td></tr>
+            </tbody>
+          </table>
         </div>
-        <label for="bf-email">Work email<input id="bf-email" name="email" type="email" autocomplete="email" required></label>
-        <div class="form-row">
-          <label for="bf-states">States you file in<select id="bf-states" name="states"><option>New Jersey</option><option>New York</option><option>New Jersey and New York</option><option>Other states too</option></select></label>
-          <label for="bf-volume">Filings per month<select id="bf-volume" name="volume"><option>Under 50</option><option>50 to 250</option><option>250 to 1,000</option><option>Over 1,000</option></select></label>
-        </div>
-        <button class="btn btn-primary" type="submit">Request a briefing</button>
-        <p class="form-msg" id="bf-msg" role="status"></p>
-      </form>
-    </div>
-  </section>
-</main>
 
-<footer class="band">
-  <div class="wrap">
-    <span>Filing Engine · state filing automation for filing service companies</span>
-    <span>New Jersey · New York · IRS</span>
-  </div>
-</footer>
+        <p class="fe-coverage-note" id="fe-coverage-note">A verified dry run reached the payment screen on the live portal using test data. Production submission for these workflows is pending.</p>
+      </div>
+    </section>
+
+    <section class="fe-section fe-briefing" id="briefing" aria-labelledby="fe-briefing-title">
+      <div class="fe-container fe-split">
+        <div class="fe-briefing-copy">
+          <span class="fe-kicker">Enterprise briefing</span>
+          <h2 id="fe-briefing-title">See how Filing Engine would fit your operation</h2>
+          <p>Walk through a New Jersey formation dry run, see the approval experience and discuss the filing types and integrations your team needs.</p>
+        </div>
+
+        <form class="fe-form" id="brief-form" aria-labelledby="fe-briefing-title" aria-describedby="fe-briefing-note" novalidate>
+          <div class="fe-form-row">
+            <label for="bf-name">Name<input id="bf-name" name="name" autocomplete="name" required></label>
+            <label for="bf-company">Company<input id="bf-company" name="company" autocomplete="organization" required></label>
+          </div>
+          <label for="bf-email">Work email<input id="bf-email" name="email" type="email" autocomplete="email" required></label>
+          <div class="fe-form-row">
+            <label for="bf-states">Primary jurisdiction
+              <select id="bf-states" name="states">
+                <option value="">Select jurisdiction</option>
+                <option>New Jersey</option>
+                <option>New York</option>
+                <option>Florida</option>
+                <option>Missouri</option>
+                <option>Multiple jurisdictions</option>
+                <option>Other</option>
+              </select>
+            </label>
+            <label for="bf-volume">Monthly filing volume
+              <select id="bf-volume" name="volume">
+                <option value="">Select volume</option>
+                <option>Under 50</option>
+                <option>50–249</option>
+                <option>250–999</option>
+                <option>1,000 or more</option>
+              </select>
+            </label>
+          </div>
+          <button class="fe-button" type="submit">Request a briefing</button>
+          <div>
+            <p id="fe-briefing-note">Form preview. Briefing delivery is pending.</p>
+            <p id="bf-msg" role="status"></p>
+          </div>
+        </form>
+      </div>
+    </section>
+  </main>
+
+  <footer class="fe-footer">
+    <div class="fe-container fe-footer-inner">
+      <a class="fe-wordmark" href="#top"><span class="fe-symbol" aria-hidden="true"></span>Filing Engine</a>
+      <p>Corporate filing automation for filing service companies.</p>
+    </div>
+  </footer>
+</div>
 
 <script>
-  // Scan highlight moves down the trace one row at a time (rows are always visible).
-  (function () {
-    var rows = document.querySelectorAll(".trace li");
-    if (!rows.length || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
-    var i = 0;
-    setInterval(function () {
-      rows.forEach(function (r) { r.classList.remove("scan"); });
-      i = (i + 1) % rows.length;
-      rows[i].classList.add("scan");
-    }, 900);
-  })();
+  document.getElementById("brief-form").addEventListener("submit", function (event) {
+    event.preventDefault();
 
-  // The form is not connected to anything yet: say so instead of pretending to send.
-  document.getElementById("brief-form").addEventListener("submit", function (e) {
-    e.preventDefault();
-    var form = e.currentTarget, msg = document.getElementById("bf-msg");
-    var missing = Array.prototype.filter.call(form.querySelectorAll("[required]"), function (el) { return !el.value.trim(); });
-    var email = document.getElementById("bf-email");
-    if (missing.length) { msg.textContent = "Please fill in " + missing.map(function (el) { return el.parentElement.firstChild.textContent.trim().toLowerCase(); }).join(", ") + "."; missing[0].focus(); return; }
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.value.trim())) { msg.textContent = "Please enter a valid work email."; email.focus(); return; }
-    msg.textContent = "Thanks. This page is a draft and the form is not connected yet, so nothing was sent.";
+    var form = event.currentTarget;
+    var message = document.getElementById("bf-msg");
+    var fields = Array.from(form.querySelectorAll("[required]"));
+    var missing = fields.filter(function (field) { return !field.value.trim(); });
+
+    if (missing.length) {
+      var labels = missing.map(function (field) { return field.labels[0].firstChild.textContent.trim().toLowerCase(); });
+      message.textContent = "Please fill in " + labels.join(", ") + ".";
+      missing[0].focus();
+      return;
+    }
+
+    var email = form.elements.email;
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.value.trim())) {
+      message.textContent = "Please enter a valid work email.";
+      email.focus();
+      return;
+    }
+
+    message.textContent = "Your details passed validation. Briefing delivery is pending.";
   });
 </script>
