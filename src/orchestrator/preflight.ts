@@ -69,7 +69,7 @@ export async function preflight(input: {
   }
 
   try {
-    if (req.type !== "ein_only") {
+    if (req.type !== "ein_only" && req.type !== "payroll_registration") {
       expectedFees(req.state, req.type, {
         paymentMethod: req.state === "NJ" ? njAccount(tenant, client).feeMethod : req.state === "MO" ? moAccount(tenant, client).feeMethod : req.state === "FL" ? flAccount(tenant, client).feeMethod : undefined,
         certificateOfStanding: req.formation?.additionalCertificates.certificateOfStanding,
@@ -88,9 +88,9 @@ export async function preflight(input: {
     if (credKey) {
       const cred = await input.vault.getCredential(credKey);
       if (!cred) b.push(`no credential in vault for ${credKey}`);
-    } else if (adapter.site === "NJ") {
+    } else if (adapter.site === "NJ" && req.type !== "payroll_registration") {
       b.push("no NJ login for this run: the service company has none set, or the firm pays with its own account (G1) and has none set");
-    } else if (adapter.site === "MO") {
+    } else if (adapter.site === "MO" && req.type !== "payroll_registration") {
       b.push("no Missouri login for this run: the service company has none set, or the firm pays with its own account (G1) and has none set");
     }
   }
@@ -103,7 +103,7 @@ export async function preflight(input: {
     // Card payment is entered at the human tap; no stored card needed (decision 3).
   }
 
-  if (req.state === "NY" && !dryRun) {
+  if (req.state === "NY" && req.type !== "payroll_registration" && !dryRun) {
     const dd = nyDrawdownAccount(tenant, client);
     if (!dd) b.push("NY filings pay from a drawdown account, but the account in force (service company's, or the firm's per G1) is not set");
     else {

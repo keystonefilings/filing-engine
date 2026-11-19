@@ -1,18 +1,30 @@
 import { SENSITIVE_PATHS } from "../domain/filing.js";
 
-/** Returns a deep copy with sensitive values masked (SSN -> ***-**-1234). */
+const maskSsn = (v: string): string => `***-**-${v.replace(/\D/g, "").slice(-4)}`;
+
+/** Masks the value at `segs`, where a segment ending in "[]" is an array wildcard. */
+function maskAt(node: unknown, segs: string[]): void {
+  if (node === null || typeof node !== "object") return;
+  const head = segs[0]!;
+  const rest = segs.slice(1);
+  const isArray = head.endsWith("[]");
+  const key = isArray ? head.slice(0, -2) : head;
+  const child = (node as Record<string, unknown>)[key];
+  if (isArray) {
+    if (Array.isArray(child)) for (const el of child) maskAt(el, rest);
+    return;
+  }
+  if (rest.length === 0) {
+    if (typeof child === "string") (node as Record<string, string>)[key] = maskSsn(child);
+    return;
+  }
+  maskAt(child, rest);
+}
+
+/** Returns a deep copy with sensitive values masked (SSN -> ***-**-1234), array wildcards supported. */
 export function maskSensitive<T>(payload: T): T {
   const copy = JSON.parse(JSON.stringify(payload)) as T;
-  for (const path of SENSITIVE_PATHS) {
-    const segs = path.split(".");
-    let cur: unknown = copy;
-    for (let i = 0; i < segs.length - 1 && cur; i++) cur = (cur as Record<string, unknown>)[segs[i]!];
-    const last = segs[segs.length - 1]!;
-    if (cur && typeof cur === "object" && typeof (cur as Record<string, unknown>)[last] === "string") {
-      const v = (cur as Record<string, string>)[last]!;
-      (cur as Record<string, string>)[last] = `***-**-${v.replace(/\D/g, "").slice(-4)}`;
-    }
-  }
+  for (const path of SENSITIVE_PATHS) maskAt(copy, path.split("."));
   return copy;
 }
 

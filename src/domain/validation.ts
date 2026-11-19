@@ -140,6 +140,29 @@ export function validateFiling(req: FilingRequest): ValidationIssue[] {
     if (req.ein && req.ein.mode !== "none") err("ein", "an EIN is not part of a standing certificate request");
   }
 
+  if (req.type === "payroll_registration") {
+    if (req.state !== "NY" && req.state !== "NJ") err("state", "payroll registration is mapped for NY (NYS-100) and NJ (NJ-REG) only");
+    if (req.formation) warn("formation", "payroll registration requests do not use formation details");
+    const p = req.payroll;
+    if (!p) err("payroll", "payroll registration details are required");
+    else {
+      // The FEIN is a prerequisite for payroll registration (the entity already exists); not filed in-run here.
+      const hasEin = !!p.fein || p.feinAppliedFor === true;
+      if (p.owners.length < 1) err("payroll.owners", "at least one owner / partner / member / officer is required (name, SSN, title)");
+      if (req.state === "NY") {
+        if (!hasEin) err("payroll.fein", "NYS-100 requires the FEIN (attach CP 575); supply it or mark feinAppliedFor");
+        if (!p.dateFirstOperations) err("payroll.dateFirstOperations", "NYS-100 Part B requires the date of first operations in New York State");
+        if (p.employerType === "business" && !p.ownershipType) warn("payroll.ownershipType", "NYS-100 Part A asks the legal entity type");
+      }
+      if (req.state === "NJ") {
+        const hasId = hasEin || p.owners.some((o) => !!o.ssn);
+        if (!hasId) err("payroll.fein", "NJ-REG requires a FEIN, an owner SSN, or feinAppliedFor");
+        if (!p.beginDate) err("payroll.beginDate", "NJ-REG requires the business beginning date");
+        if (!p.ownershipType) warn("payroll.ownershipType", "NJ-REG requires the type of ownership");
+      }
+    }
+  }
+
   return issues;
 }
 

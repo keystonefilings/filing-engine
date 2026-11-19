@@ -5,6 +5,8 @@ import { irsEinAdapter } from "./irs-ein/adapter.js";
 import { njStandingAdapter } from "./nj-standing/adapter.js";
 import { moFormationAdapter } from "./mo-formation/adapter.js";
 import { flFormationAdapter, flProfitCorpAdapter, flLimitedPartnershipAdapter, flAdapterFor } from "./fl-formation/adapter.js";
+import { nyPayrollAdapter } from "./ny-payroll/adapter.js";
+import { njPayrollAdapter } from "./nj-payroll/adapter.js";
 import type { FilingRequest } from "../domain/filing.js";
 
 export const ADAPTERS: Record<string, SiteAdapter> = {
@@ -16,6 +18,8 @@ export const ADAPTERS: Record<string, SiteAdapter> = {
   [flFormationAdapter.key]: flFormationAdapter,
   [flProfitCorpAdapter.key]: flProfitCorpAdapter,
   [flLimitedPartnershipAdapter.key]: flLimitedPartnershipAdapter,
+  [nyPayrollAdapter.key]: nyPayrollAdapter,
+  [njPayrollAdapter.key]: njPayrollAdapter,
 };
 
 /** Picks the state adapter for a filing; null when the filing type is not wired yet. */
@@ -27,7 +31,12 @@ export function adapterFor(req: FilingRequest): SiteAdapter | null {
     return nyFormationAdapter;
   }
   if (req.type === "standing_certificate" && req.state === "NJ") return njStandingAdapter;
+  if (req.type === "payroll_registration") {
+    if (req.state === "NY") return nyPayrollAdapter;
+    if (req.state === "NJ") return njPayrollAdapter;
+    return null; // MO/FL payroll not mapped
+  }
   return null; // alternate_name, amendment, paper_upload: build order 5-7
 }
 
-export { irsEinAdapter, moFormationAdapter, flFormationAdapter, flProfitCorpAdapter, flLimitedPartnershipAdapter };
+export { irsEinAdapter, moFormationAdapter, flFormationAdapter, flProfitCorpAdapter, flLimitedPartnershipAdapter, nyPayrollAdapter, njPayrollAdapter };

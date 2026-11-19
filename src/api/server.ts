@@ -3,7 +3,7 @@ import { z } from "zod";
 import type { FilingService } from "../orchestrator/service.js";
 import { ValidationFailed } from "../orchestrator/service.js";
 import type { ApprovalService } from "../approvals/service.js";
-import { renderReviewPage } from "../approvals/render.js";
+import { renderReviewPage, maskSensitive } from "../approvals/render.js";
 import type { Store, FilingRecord } from "../store/types.js";
 import type { ArtifactStore } from "../artifacts/store.js";
 import { TenantSettings, ClientCompanySettings } from "../settings/schema.js";
@@ -264,9 +264,7 @@ export function buildServer(deps: ApiDeps): FastifyInstance {
   return app;
 }
 
-/** Strips the SSN from API responses; the approval page shows it masked. */
+/** Strips every sensitive value (EIN responsible-party SSN, payroll owner SSNs) from API responses. */
 function publicFiling(f: import("../store/types.js").FilingRecord) {
-  const request = JSON.parse(JSON.stringify(f.request)) as typeof f.request;
-  if (request.ein?.responsibleParty) request.ein.responsibleParty.ssn = `***-**-${request.ein.responsibleParty.ssn.replace(/\D/g, "").slice(-4)}`;
-  return { ...f, request };
+  return { ...f, request: maskSensitive(f.request) };
 }

@@ -58,6 +58,7 @@ export class FilingService {
 
   feesFor(req: FilingRequestT, tenant: TenantSettings, client: ClientCompanySettings): FeeLine[] {
     if (req.type === "ein_only") return [{ label: "EIN application", amountUsd: 0 }];
+    if (req.type === "payroll_registration") return [{ label: `${req.state} payroll / employer registration (no fee)`, amountUsd: 0 }];
     return expectedFees(req.state, req.type, {
       // The method the NJ adapters will pick on the account the run signs in with.
       paymentMethod: req.state === "NJ" ? njAccount(tenant, client).feeMethod : req.state === "MO" ? moAccount(tenant, client).feeMethod : req.state === "FL" ? flAccount(tenant, client).feeMethod : undefined,

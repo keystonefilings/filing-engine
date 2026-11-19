@@ -143,3 +143,112 @@ None displayed on any screen reached (prices array empty on all dumps). Review/c
 
 ## Hard stop
 Never clicked anything on a Review screen or any submit-type control; none reached.
+
+---
+
+## Authoritative field map from the NJ-REG form (REG-3, 03/2026) — fetched 2026-11-19
+The deeper screens the live walk could not pass (behind the Entity ID registry gate) are
+mapped here from the official NJ-REG Business Registration Application and its page 6-8
+instructions, fetched this session from https://www.nj.gov/treasury/revenue/pdf/Legacy-Reg-Form.pdf
+(pages 10-12 are the form; "NO FEE REQUIRED"). The njportal online wizard collects the same
+data across its stepper (Business Identification/Data/Address -> Ownership -> Classification ->
+Employment & Tax -> Contact -> Review); exact online field names/sequence still need the
+fixed-IP walk with a real Entity ID, so the adapter stays complete:false.
+
+```ts
+export const NJ_REG_FORM = {
+  registration: { // NJ-REG page 10, "Registration Detail" + "Business Detail"
+    screenKey: "nj.reg.registration",
+    title: "Business Registration Application",
+    intents: [
+      { key: "reason", labels: ["Please indicate the reason for your filing", "Original application for a new business", "Moved previously registered business", "Amended application", "Application for an additional location", "Applying for a Business Registration Certificate", "Withholding for Employee(s) residing in NJ"], kinds: ["checkbox", "radio"], required: true },
+      { key: "amendReason", labels: ["Reason(s) for amending application"], kinds: ["text"], required: false, note: "C: when reason = Amended" },
+      { key: "fein", labels: ["FEIN #"], kinds: ["text"], required: false, note: "FEIN OR owner SSN; checkbox 'Applied for'. From our EIN sub-run when einMode=in_run" },
+      { key: "feinAppliedFor", labels: ["Check Box if “Applied for”"], kinds: ["checkbox"], required: false },
+      { key: "ownerSSN", labels: ["Social Security # of Owner"], kinds: ["text"], required: false, note: "SENSITIVE; C: sole proprietor without FEIN" },
+      { key: "legalName", labels: ["Name"], kinds: ["text"], required: true, note: "entity name for Corp/LLC/LLP/LP/Non-Profit, else owner/partners" },
+      { key: "tradeName", labels: ["Trade Name"], kinds: ["text"], required: false },
+      { key: "businessStreet", labels: ["Business Location", "Street"], kinds: ["text"], required: true, note: "no PO box; 9-digit zip" },
+      { key: "businessCity", labels: ["City"], kinds: ["text"], required: true },
+      { key: "businessState", labels: ["State"], kinds: ["select", "text"], required: true },
+      { key: "businessZip", labels: ["Zip Code"], kinds: ["text"], required: true },
+      { key: "mailingName", labels: ["Mailing Name and Address", "Name"], kinds: ["text"], required: false, note: "C: if different from business location" },
+      { key: "mailingStreet", labels: ["Street"], kinds: ["text"], required: false },
+      { key: "beginDate", labels: ["Beginning date for this business"], kinds: ["date", "text"], required: true, note: "mm/dd/yyyy" },
+      { key: "ownershipType", labels: ["Type of ownership", "NJ Corporation", "Sole Proprietor", "Partnership", "Out-of-State Corporation", "LLP", "Limited Partnership", "LLC (1065 Filer)", "LLC (1120 Filer)", "LLC (Single Member)", "S Corporation", "Domestic (Household Employer)", "Other"], kinds: ["radio", "checkbox"], required: true },
+      { key: "njBusinessCode", labels: ["New Jersey Business Code"], kinds: ["text", "select"], required: true, note: "Table A; completing it avoids Certificate-of-Authority delays" },
+      { key: "countyMunicipalityCode", labels: ["County/Municipality Code"], kinds: ["text", "select"], required: true, note: "Table B" },
+      { key: "county", labels: ["County"], kinds: ["text", "select"], required: true, note: "NJ only" },
+      { key: "seasonal", labels: ["Will this business be SEASONAL?"], kinds: ["radio"], required: false, note: "Yes/No; if Yes, which months" },
+      { key: "incorporationDate", labels: ["Date of Incorporation"], kinds: ["date", "text"], required: false, note: "C: entity (Item C)" },
+      { key: "stateOfIncorporation", labels: ["State of Incorporation"], kinds: ["select", "text"], required: false, note: "C: entity" },
+      { key: "fiscalMonth", labels: ["Fiscal Month"], kinds: ["text", "select"], required: false, note: "C: entity" },
+      { key: "njBusinessNumber", labels: ["NJ Business/Corp.#"], kinds: ["text"], required: false, note: "C: entity; the Entity ID the online flow gates on" },
+      { key: "isSubsidiary", labels: ["Is this a Subsidiary of another corporation?"], kinds: ["radio"], required: false, note: "C: entity; if Yes, parent name + Federal ID" },
+      { key: "sicCode", labels: ["Standard Industrial Code"], kinds: ["text"], required: false },
+      { key: "naics", labels: ["NAICS"], kinds: ["text", "select"], required: false, note: "Table C" },
+      // P. Owners/partners/responsible officers (repeating; 4 rows + rider)
+      { key: "ownerName", labels: ["Name", "Last Name, First, MI"], kinds: ["text"], required: true, note: "repeating" },
+      { key: "ownerSSNRow", labels: ["Social Security Number"], kinds: ["text"], required: true, note: "SENSITIVE; repeating per owner" },
+      { key: "ownerTitle", labels: ["Title"], kinds: ["text"], required: true },
+      { key: "ownerAddress", labels: ["Home Address"], kinds: ["text"], required: true },
+      { key: "ownerPercent", labels: ["Percent of Ownership"], kinds: ["text", "number"], required: false },
+    ],
+  },
+  employmentTax: { // NJ-REG page 11, "Each Question Must Be Answered Completely" (Q1-10)
+    screenKey: "nj.reg.employment_tax",
+    title: "Employment & Tax Information",
+    intents: [
+      { key: "payingWagesNext6Mo", labels: ["Have you or will you be paying wages, salaries or commissions to employees working in New Jersey within the next 6 months?"], kinds: ["radio"], required: true, note: "Yes/No; the core payroll trigger" },
+      { key: "firstWageDate", labels: ["Give date of first wage or salary payment"], kinds: ["date", "text"], required: false, note: "C: when payingWages=Yes (UI/disability)" },
+      { key: "firstHireDate", labels: ["Give date of hiring first NJ employee"], kinds: ["date", "text"], required: false, note: "C" },
+      { key: "payrollExceeds1000Date", labels: ["Date cumulative gross payroll exceeds $1,000"], kinds: ["date", "text"], required: false, note: "C" },
+      { key: "wagesToNJResidentsOutside", labels: ["Will you be paying wages, salaries or commissions to New Jersey residents working outside New Jersey?"], kinds: ["radio"], required: false },
+      { key: "payerOfPension", labels: ["Will you be the payer of pension or annuity income to New Jersey residents?"], kinds: ["radio"], required: false },
+      { key: "gamesOfChance", labels: ["Will you be holding legalized games of chance"], kinds: ["radio"], required: false },
+      { key: "isPEO", labels: ["Is this business a PEO (Employee Leasing Company)?"], kinds: ["radio"], required: false },
+      { key: "acquired", labels: ["Did you acquire", "Substantially all the assets", "Trade or business", "Employees"], kinds: ["checkbox", "radio"], required: false, note: "Q2; if Yes: whole/part, acquired unit name, NJ Employer ID, address, date, % (assets/trade/employees)" },
+      { key: "sameInterests", labels: ["Are the predecessor and successor units owned or controlled by the same interests?"], kinds: ["radio"], required: false },
+      { key: "agriculturalEmployment", labels: ["Is your employment agricultural?"], kinds: ["radio"], required: false },
+      { key: "householdEmployment", labels: ["Is your employment household?"], kinds: ["radio"], required: false, note: "if Yes, date quarter gross cash wages totaled $1,000+" },
+      { key: "is501c3", labels: ["Are you a 501(c)(3) organization?"], kinds: ["radio"], required: false, note: "if Yes, use REG-1E" },
+      { key: "subjectToFUTA", labels: ["Were you subject to the Federal Unemployment Tax Act (FUTA) in the current or preceding year?"], kinds: ["radio"], required: false, note: "if Yes, indicate year" },
+      { key: "claimUIExemption", labels: ["Does this employing unit claim exemption from liability for contributions under the Unemployment Compensation Law"], kinds: ["radio"], required: false },
+      { key: "businessType", labels: ["Type of business", "Manufacturer", "Service", "Wholesale", "Construction", "Retail", "Government"], kinds: ["checkbox", "radio"], required: true, note: "Q9; + principal product/service and type of activity (NJ only)" },
+      { key: "multipleFacilities", labels: ["Do you have more than one employing facility in New Jersey?"], kinds: ["radio"], required: false, note: "Q10; + NJ Work Locations table (address, county, NAICS, product/service, %, #workers)" },
+    ],
+  },
+  salesAndOtherTaxes: { // NJ-REG page 12, Q11-23 (sales/use + special taxes) + Q24 contact
+    screenKey: "nj.reg.sales_other_taxes",
+    title: "Sales Tax & Other Registrations",
+    intents: [
+      { key: "collectSalesTax", labels: ["Will you collect New Jersey Sales Tax and/or pay Use Tax?"], kinds: ["radio"], required: true, note: "Q11a; if Yes, exact date of first sale" },
+      { key: "exemptPurchases", labels: ["Will you need to make exempt purchases"], kinds: ["radio"], required: false },
+      { key: "sellCigarettes", labels: ["Do you intend to sell cigarettes?"], kinds: ["radio"], required: false, note: "Q12 (CM-100)" },
+      { key: "tobaccoDistributor", labels: ["Are you a distributor or wholesaler of tobacco or nicotine products"], kinds: ["radio"], required: false, note: "Q13" },
+      { key: "litterProducts", labels: ["Are you a manufacturer, wholesaler, distributor or retailer of “litter-generating products”?"], kinds: ["radio"], required: false, note: "Q14" },
+      { key: "sanitaryLandfill", labels: ["Are you an owner or operator of a sanitary landfill facility in New Jersey?"], kinds: ["radio"], required: false, note: "Q15" },
+      { key: "petroleumStorage", labels: ["Do you operate a facility that has the total combined capacity to store 200,000 gallons or more of petroleum products?"], kinds: ["radio"], required: false, note: "Q16-17" },
+      { key: "publicContractor", labels: ["Will you be providing goods and services as a direct contractor or subcontractor to the State"], kinds: ["radio"], required: false, note: "Q18" },
+      { key: "rentMotorVehicles", labels: ["Will you be engaged in the business of renting motor vehicles"], kinds: ["radio"], required: false, note: "Q19" },
+      { key: "transientAccommodations", labels: ["Is your business a hotel, motel, bed & breakfast"], kinds: ["radio"], required: false, note: "Q20" },
+      { key: "millvilleDistrict", labels: ["Will this business be operating in the Sports and Entertainments District of Millville"], kinds: ["radio"], required: false, note: "Q21" },
+      { key: "motorVehicleTires", labels: ["Do you make retail sales of new motor vehicle tires, or sell or lease motor vehicles?"], kinds: ["radio"], required: false, note: "Q22" },
+      { key: "telecom", labels: ["Do you sell voice grade access telecommunications"], kinds: ["radio"], required: false, note: "Q23" },
+      // Q24 contact + signature
+      { key: "contactPerson", labels: ["Contact Information", "Person"], kinds: ["text"], required: true },
+      { key: "contactTitle", labels: ["Title"], kinds: ["text"], required: true },
+      { key: "contactPhone", labels: ["Daytime Phone"], kinds: ["tel", "text"], required: true },
+      { key: "contactEmail", labels: ["E-mail Address"], kinds: ["email", "text"], required: true },
+      { key: "signature", labels: ["Signature of Owner, Partner or Officer"], kinds: ["text", "signature"], required: true },
+      { key: "signatureDate", labels: ["Date"], kinds: ["date", "text"], required: true },
+    ],
+  },
+} satisfies Record<string, ScreenIntents>;
+```
+
+Notes:
+- **No fee** to file NJ-REG. Sole proprietors/partnerships with no employees "STOP HERE" after Q24; employers continue to the New Hire Reporting form (packet p.29).
+- SSNs appear in Registration B (owner SSN) and Part P / Q-rows (owners/officers) — sensitive; mask everywhere and never store in reusable defaults.
+- `njBusinessNumber` (Entity ID) is what the online flow's first screen gates on, so the online path needs a real, already-formed entity in the registry.
+- Form fetched: https://www.nj.gov/treasury/revenue/pdf/Legacy-Reg-Form.pdf (REG-3 03/2026; also contains the Taxes of NJ overview and NJ-REG page 6-8 instructions).

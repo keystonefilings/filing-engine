@@ -110,6 +110,7 @@ export const FilingType = z.enum([
   "alternate_name",
   "amendment",
   "paper_upload",
+  "payroll_registration",
 ]);
 export type FilingType = z.infer<typeof FilingType>;
 
@@ -199,6 +200,71 @@ export const Contact = z.object({
   email: z.string().email(),
 });
 
+/**
+ * Payroll / employer registration (NY NYS-100, NJ NJ-REG). One registration covers
+ * Unemployment Insurance + withholding + wage reporting. No filing fee in either state.
+ * Field maps: docs/walks/nys-100-payroll-2026-11-19.md, docs/walks/nj-reg-payroll-2026-11-19.md.
+ * SSNs on the owners/officers are sensitive (masked, never stored as reusable defaults).
+ */
+export const PayrollOwner = z.object({
+  name: z.string().min(1),
+  ssn: z.string().regex(/^\d{3}-?\d{2}-?\d{4}$/, "SSN must be 9 digits").describe("sensitive").optional(),
+  title: z.string().min(1),
+  address: Address.optional(),
+  percentOwnership: z.number().min(0).max(100).optional(),
+});
+
+export const PayrollRegistrationDetails = z.object({
+  reason: z.enum(["new_business", "additional_location", "amended", "moved", "registration_certificate", "withholding_only"]).default("new_business"),
+  legalName: z.string().min(1),
+  tradeName: z.string().optional(),
+  /** FEIN, or feinAppliedFor; NY requires the FEIN (attach CP 575), NJ allows the owner SSN instead. */
+  fein: z.string().regex(/^\d{2}-?\d{7}$/, "FEIN must be 9 digits").optional(),
+  feinAppliedFor: z.boolean().optional(),
+  /** NY Part A1 employer type; NJ infers from ownership type. */
+  employerType: z.enum(["business", "household"]).default("business"),
+  /** State-specific ownership/legal-entity vocabulary, mapped to the site's options by the adapter. */
+  ownershipType: z.string().optional(),
+  businessAddress: Address,
+  mailingAddress: Address.optional(),
+  booksRecordsAddress: Address.optional(),
+  entity: z.object({
+    incorporationDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional(),
+    stateOfIncorporation: UsState.optional(),
+    fiscalMonth: z.number().int().min(1).max(12).optional(),
+    /** NJ Entity ID / Business-Corp number — the online NJ-REG flow gates on this. */
+    njBusinessNumber: z.string().optional(),
+  }).optional(),
+  owners: z.array(PayrollOwner).max(10).default([]),
+  naics: z.string().regex(/^\d{2,6}$/).optional(),
+  njBusinessCode: z.string().optional(),
+  countyMunicipalityCode: z.string().optional(),
+  county: z.string().optional(),
+  businessActivity: z.string().optional(),
+  /** Liability dates/flags. */
+  beginDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional(),
+  dateFirstOperations: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional(),
+  dateFirstWithholding: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional(),
+  payingWages: z.boolean().optional(),
+  firstWageDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional(),
+  registeringForUI: z.boolean().optional(),
+  withholdingOnly: z.boolean().optional(),
+  uiLiabilityQuarter: z.enum(["Q1", "Q2", "Q3", "Q4"]).optional(),
+  uiLiabilityYear: z.number().int().optional(),
+  coveredEmployees: z.number().int().nonnegative().optional(),
+  workLocations: z.array(z.object({
+    address: Address,
+    employees: z.number().int().nonnegative().optional(),
+    activity: z.string().optional(),
+  })).max(20).default([]),
+  /** Falls back to the request-level contact when absent. */
+  contact: Contact.optional(),
+  signer: Person.optional(),
+  /** The long state-specific tail (NJ sales/tobacco/petroleum questions, NY branches): answered keys only. */
+  stateAnswers: z.record(z.string(), z.unknown()).optional(),
+});
+export type PayrollRegistrationDetails = z.infer<typeof PayrollRegistrationDetails>;
+
 export const FilingRequest = z.object({
   tenantId: z.string().min(1),
   clientCompanyId: z.string().min(1),
@@ -207,6 +273,7 @@ export const FilingRequest = z.object({
   state: FilingState,
   formation: FormationDetails.optional(),
   standing: StandingCertificateDetails.optional(),
+  payroll: PayrollRegistrationDetails.optional(),
   ein: EinRequest.optional(),
   contact: Contact,
   /** The service company's intake answers for this entity (shape: settings/policies.ts FilingIntake). */
@@ -218,5 +285,6 @@ export const FilingRequest = z.object({
 });
 export type FilingRequest = z.infer<typeof FilingRequest>;
 
-/** Paths in the payload that are sensitive and must be masked when shown or logged. */
-export const SENSITIVE_PATHS = ["ein.responsibleParty.ssn"];
+/** Paths in the payload that are sensitive and must be masked when shown or logged.
+ *  `[]` is an array wildcard (every element). */
+export const SENSITIVE_PATHS = ["ein.responsibleParty.ssn", "payroll.owners[].ssn"];
