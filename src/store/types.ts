@@ -144,6 +144,24 @@ export interface ReviewGateRecord {
   reason?: string;
 }
 
+/** One outbound human message produced by the comms layer for a filing event. */
+export interface MessageRecord {
+  id: string;
+  filingId: string;
+  tenantId: string;
+  eventType: string;
+  audience: "client" | "admin";
+  channel: string;
+  address: string;
+  subject: string;
+  body: string;
+  link?: string;
+  screenshotArtifactId?: string;
+  status: "sent" | "failed" | "skipped";
+  createdAt: string;
+  error?: string;
+}
+
 export interface WebhookDeliveryRecord {
   id: string;
   event: WebhookEvent;
@@ -203,4 +221,7 @@ export interface Store {
   updateDelivery(id: string, patch: Partial<WebhookDeliveryRecord>): Promise<WebhookDeliveryRecord>;
   listDueDeliveries(now: string): Promise<WebhookDeliveryRecord[]>;
   listDeliveries(filingId?: string): Promise<WebhookDeliveryRecord[]>;
+  // comms (outbound messages)
+  createMessage(m: MessageRecord): Promise<MessageRecord>;
+  listMessages(filingId?: string): Promise<MessageRecord[]>;
 }

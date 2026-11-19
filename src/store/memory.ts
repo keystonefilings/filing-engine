@@ -1,5 +1,5 @@
 import type {
-  ApprovalRecord, DriftHaltRecord, FilingRecord, NameResolutionRecord, ReviewGateRecord, RunRecord, Store, SubmitIntentRecord, WebhookDeliveryRecord,
+  ApprovalRecord, DriftHaltRecord, FilingRecord, MessageRecord, NameResolutionRecord, ReviewGateRecord, RunRecord, Store, SubmitIntentRecord, WebhookDeliveryRecord,
 } from "./types.js";
 import type { ClientCompanySettings, TenantSettings } from "../settings/schema.js";
 import type { PageSnapshot } from "../resolver/types.js";
@@ -24,6 +24,7 @@ export class MemoryStore implements Store {
   tenants = new Map<string, TenantSettings>();
   clients = new Map<string, ClientCompanySettings>();
   deliveries = new Map<string, WebhookDeliveryRecord>();
+  messages = new Map<string, MessageRecord>();
   nameResolutions = new Map<string, NameResolutionRecord>();
   reviewGates = new Map<string, ReviewGateRecord>();
 
@@ -89,5 +90,10 @@ export class MemoryStore implements Store {
   }
   async listDeliveries(filingId?: string) {
     return [...this.deliveries.values()].filter((d) => !filingId || d.event.filingId === filingId);
+  }
+
+  async createMessage(m: MessageRecord) { this.messages.set(m.id, m); return m; }
+  async listMessages(filingId?: string) {
+    return [...this.messages.values()].filter((m) => !filingId || m.filingId === filingId);
   }
 }

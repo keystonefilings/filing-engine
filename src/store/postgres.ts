@@ -2,7 +2,7 @@ import pg from "pg";
 import { readFileSync } from "node:fs";
 import path from "node:path";
 import type {
-  ApprovalRecord, DriftHaltRecord, FilingRecord, NameResolutionRecord, ReviewGateRecord, RunRecord, Store, SubmitIntentRecord, WebhookDeliveryRecord,
+  ApprovalRecord, DriftHaltRecord, FilingRecord, MessageRecord, NameResolutionRecord, ReviewGateRecord, RunRecord, Store, SubmitIntentRecord, WebhookDeliveryRecord,
 } from "./types.js";
 import type { ClientCompanySettings, TenantSettings } from "../settings/schema.js";
 import type { PageSnapshot } from "../resolver/types.js";
@@ -190,5 +190,15 @@ export class PostgresStore implements Store {
     return filingId
       ? this.docs<WebhookDeliveryRecord>(`select doc from webhook_deliveries where filing_id=$1`, [filingId])
       : this.docs<WebhookDeliveryRecord>(`select doc from webhook_deliveries`, []);
+  }
+
+  async createMessage(m: MessageRecord) {
+    await this.pool.query(`insert into messages (id, filing_id, status, doc) values ($1,$2,$3,$4)`, [m.id, m.filingId, m.status, m]);
+    return m;
+  }
+  async listMessages(filingId?: string) {
+    return filingId
+      ? this.docs<MessageRecord>(`select doc from messages where filing_id=$1 order by created_at desc`, [filingId])
+      : this.docs<MessageRecord>(`select doc from messages order by created_at desc`, []);
   }
 }

@@ -80,6 +80,14 @@ create table if not exists review_gates (
   doc jsonb not null
 );
 
+create table if not exists messages (
+  id uuid primary key,
+  filing_id uuid not null references filings (id),
+  status text not null,
+  doc jsonb not null,
+  created_at timestamptz not null default now()
+);
+
 create table if not exists tenants (id text primary key, doc jsonb not null);
 create table if not exists client_companies (id text primary key, tenant_id text not null, doc jsonb not null);
 

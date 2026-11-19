@@ -18,6 +18,7 @@ import type { NameDecision, NameResolutionService } from "../name-resolution/ser
 import type { ReviewGateDecision, ReviewGateService } from "../review-gate/service.js";
 import type { RegisteredAgentService } from "../registered-agents/service.js";
 import type { ResolvedRegisteredAgent } from "../registered-agents/types.js";
+import type { Notifier } from "../comms/notifier.js";
 import { ConcurrencyLimiter } from "./locks.js";
 import { njAccount, moAccount, flAccount } from "../settings/accounts.js";
 import { applyPolicies } from "../settings/policies.js";
@@ -33,6 +34,7 @@ export interface FilingServiceDeps {
   nameResolution?: NameResolutionService; // beta: AI name-unavailability flow
   reviewGate?: ReviewGateService;         // beta: stop at the review screen for admin review
   registeredAgents?: RegisteredAgentService; // resolve/procure the registered agent
+  notifier?: Notifier; // outbound communication layer (reports back / asks)
   executor?: RunExecutor; // absent on the API tier
   balances?: BalanceProvider;
   limiter?: ConcurrencyLimiter;
@@ -52,7 +54,9 @@ export class FilingService {
 
   private async emit(type: EventType, filing: FilingRecord, data: Record<string, unknown> = {}, runId?: string) {
     const tenant = await this.d.store.getTenant(filing.tenantId);
-    return this.d.webhooks.emit(type, { tenantId: filing.tenantId, filingId: filing.id, runId }, data, tenant?.webhookEndpoints ?? []);
+    const event = await this.d.webhooks.emit(type, { tenantId: filing.tenantId, filingId: filing.id, runId }, data, tenant?.webhookEndpoints ?? []);
+    if (this.d.notifier) await this.d.notifier.notify(event, filing, tenant ?? undefined);
+    return event;
   }
 
   private async transition(filing: FilingRecord, to: FilingStatus, patch: Partial<FilingRecord> = {}): Promise<FilingRecord> {

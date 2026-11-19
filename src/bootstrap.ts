@@ -14,6 +14,8 @@ import { ConcurrencyLimiter } from "./orchestrator/locks.js";
 import { NameResolutionService, DEFAULT_NAME_RESOLUTION_CONFIG } from "./name-resolution/service.js";
 import { ReviewGateService } from "./review-gate/service.js";
 import { RegisteredAgentService } from "./registered-agents/service.js";
+import { Notifier } from "./comms/notifier.js";
+import { LogChannelSender } from "./comms/senders.js";
 import { StaticNameGenerator, AnthropicNameGenerator, type NameCandidateGenerator } from "./name-resolution/generator.js";
 import type { NameCheckerRegistry } from "./name-resolution/checker.js";
 
@@ -50,11 +52,14 @@ export async function bootstrap(opts: { withExecutor: boolean }) {
   const reviewGate = new ReviewGateService({ store, signingSecret: config.approvalSigningSecret, publicBaseUrl: config.publicBaseUrl, ttlHours: config.approvalTtlHours });
   // Registered-agent resolution: client's own agent, the filing company's per-state agent, or a third-party provider.
   const registeredAgents = new RegisteredAgentService({ vault });
+  // Outbound communication: real channel senders (email/Slack/SMS) plug in per tenant with
+  // their own vault credentials; until then every message is recorded via the log sender.
+  const notifier = new Notifier({ store, senders: {}, defaultSender: new LogChannelSender("email"), publicBaseUrl: config.publicBaseUrl });
   const harness = new BrowserHarness({ chromiumPath: config.chromiumPath, proxyServer: config.browserProxy, profileDir: config.browserProfileDir });
   const executor = opts.withExecutor ? new RunExecutor({ store, artifacts, harness, drift, vault, reviewGate, registeredAgents }) : undefined;
   const limiter = new ConcurrencyLimiter({
     "site:IRS": config.siteConcurrency.IRS, "site:NY": config.siteConcurrency.NY, "site:NJ": config.siteConcurrency.NJ,
   });
-  const service = new FilingService({ store, approvals, webhooks, queue, vault, drift, nameResolution, reviewGate, registeredAgents, executor, limiter, dryRunDefault: config.dryRunDefault });
-  return { store, artifacts, approvals, webhooks, queue, vault, drift, nameResolution, reviewGate, registeredAgents, harness, executor, service };
+  const service = new FilingService({ store, approvals, webhooks, queue, vault, drift, nameResolution, reviewGate, registeredAgents, notifier, executor, limiter, dryRunDefault: config.dryRunDefault });
+  return { store, artifacts, approvals, webhooks, queue, vault, drift, nameResolution, reviewGate, registeredAgents, notifier, harness, executor, service };
 }

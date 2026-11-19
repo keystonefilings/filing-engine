@@ -109,6 +109,13 @@ export function buildServer(deps: ApiDeps): FastifyInstance {
     return { deliveries: await deps.store.listDeliveries(f.id) };
   });
 
+  app.get("/v1/filings/:id/messages", async (req, reply) => {
+    const tenantId = tenantOf(req);
+    const f = await deps.store.getFiling((req.params as { id: string }).id);
+    if (!f || f.tenantId !== tenantId) return reply.code(404).send({ error: "not found" });
+    return { messages: await deps.store.listMessages(f.id) };
+  });
+
   app.get("/v1/artifacts/:id", async (req, reply) => {
     const tenantId = tenantOf(req);
     if (!tenantId) return reply.code(401).send({ error: "invalid api key" });
