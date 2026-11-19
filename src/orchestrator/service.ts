@@ -14,7 +14,7 @@ import type { RunExecutor } from "./run.js";
 import type { Vault } from "../settings/vault.js";
 import type { DriftDecisionInput, DriftReviewService } from "../drift-review/service.js";
 import { ConcurrencyLimiter } from "./locks.js";
-import { njAccount, moAccount } from "../settings/accounts.js";
+import { njAccount, moAccount, flAccount } from "../settings/accounts.js";
 import { applyPolicies } from "../settings/policies.js";
 import type { ClientCompanySettings, TenantSettings } from "../settings/schema.js";
 
@@ -56,7 +56,7 @@ export class FilingService {
     if (req.type === "ein_only") return [{ label: "EIN application", amountUsd: 0 }];
     return expectedFees(req.state, req.type, {
       // The method the NJ adapters will pick on the account the run signs in with.
-      paymentMethod: req.state === "NJ" ? njAccount(tenant, client).feeMethod : req.state === "MO" ? moAccount(tenant, client).feeMethod : undefined,
+      paymentMethod: req.state === "NJ" ? njAccount(tenant, client).feeMethod : req.state === "MO" ? moAccount(tenant, client).feeMethod : req.state === "FL" ? flAccount(tenant, client).feeMethod : undefined,
       certificateOfStanding: req.formation?.additionalCertificates.certificateOfStanding,
       certifiedCopy: req.formation?.additionalCertificates.certifiedCopy,
       entityType: req.standing?.entityType,

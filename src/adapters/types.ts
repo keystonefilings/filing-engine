@@ -21,6 +21,8 @@ export interface StepContext {
   credential: Credential | null;
   /** Fill the field matched to this intent. Throws if the intent was not matched and is required. */
   set(intentKey: string, value: string | boolean): Promise<void>;
+  /** Fill the live field whose HTML name attribute equals `name` (for repeated fields a label cannot tell apart). */
+  setByName(name: string, value: string | boolean): Promise<void>;
   /** The live field an intent resolved to, if any. */
   field(intentKey: string): FieldDescriptor | undefined;
   /** Re-read the page (after a modal opened) and match the given intents; returns a scoped setter. */
@@ -55,7 +57,7 @@ export interface ScreenStep {
 }
 
 export interface SiteAdapter {
-  site: "NY" | "NJ" | "MO" | "IRS";
+  site: "NY" | "NJ" | "MO" | "FL" | "IRS";
   key: string;
   /** False until the walk that maps the remaining screens is done; incomplete adapters only dry-run. */
   complete: boolean;

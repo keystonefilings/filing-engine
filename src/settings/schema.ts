@@ -29,6 +29,10 @@ export const TenantSettings = z.object({
   moAccountCredentialKey: z.string().optional(),
   /** Payment method chosen at the Missouri checkout: credit_card or echeck. */
   moPaymentMethod: z.enum(["credit_card", "echeck"]).default("credit_card"),
+  /** Florida needs no login to file; the prepaid Sunbiz E-file account (vault key) pays at checkout. */
+  flSunbizAccountCredentialKey: z.string().optional(),
+  /** Florida checkout: credit_card, or the prepaid Sunbiz E-file account. */
+  flPaymentMethod: z.enum(["credit_card", "sunbiz_account"]).default("credit_card"),
   /** The service company's own NJ login (vault key, scoped to this tenant). Default for its customers' NJ runs. */
   njAccountCredentialKey: z.string().optional(),
   /** Payment method stored on the company-wide NJ account (walk A confirms how it appears). */
@@ -64,7 +68,7 @@ export const ClientCompanySettings = z.object({
   tenantId: z.string().min(1),
   name: z.string().min(1),
   /** Default filing state for this client ("state selector", requirement 7). */
-  defaultState: z.enum(["NY", "NJ", "MO"]).optional(),
+  defaultState: z.enum(["NY", "NJ", "MO", "FL"]).optional(),
   /** Decision 1: per-client-company EIN timing. */
   einMode: EinMode.default("in_run"),
   /** Decision 2: who may approve through the link; default is the named signer/organizer. */
@@ -75,6 +79,8 @@ export const ClientCompanySettings = z.object({
   njAccountCredentialKey: z.string().optional(),
   /** This firm's own Missouri login; used only when answer G1 is "own_account". */
   moAccountCredentialKey: z.string().optional(),
+  /** This firm's own Florida Sunbiz E-file account; used only when answer G1 is "own_account". */
+  flSunbizAccountCredentialKey: z.string().optional(),
   njStoredPaymentMethod: z.enum(["stored_card", "stored_echeck"]).optional(),
   /** This firm's own NY drawdown account; used only when answer G1 is "own_account". */
   nyDrawdownAccountRef: z.string().optional(),

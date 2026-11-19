@@ -68,6 +68,33 @@ export function nyDrawdownAccount(tenant: TenantSettings, client: ClientCompanyS
   return effectivePolicies(tenant, client).stateFees === "own_account" ? client.nyDrawdownAccountRef ?? null : tenant.nyDrawdownAccountRef ?? null;
 }
 
+/**
+ * Florida Sunbiz filing: the form needs no login (anonymous), so there is no persistent
+ * profile. Payment is a credit card entered at the tap, or the service company's prepaid
+ * Sunbiz E-file account (a firm's own under answer G1 = own_account).
+ */
+export interface FlAccount {
+  paymentMethod: "credit_card" | "sunbiz_account";
+  accountCredentialKey: string | null;
+  feeMethod: "credit_card" | "sunbiz_account";
+  owner: "client" | "tenant" | "none";
+}
+
+export function flAccount(tenant: TenantSettings, client: ClientCompanySettings): FlAccount {
+  const method = tenant.flPaymentMethod;
+  if (method !== "sunbiz_account") return { paymentMethod: "credit_card", accountCredentialKey: null, feeMethod: "credit_card", owner: "none" };
+  const useClient = effectivePolicies(tenant, client).stateFees === "own_account";
+  const accountCredentialKey = useClient
+    ? (client.flSunbizAccountCredentialKey ? firmVaultKey(tenant, client, client.flSunbizAccountCredentialKey) : null)
+    : (tenant.flSunbizAccountCredentialKey ? tenantVaultKey(tenant, tenant.flSunbizAccountCredentialKey) : null);
+  return {
+    paymentMethod: "sunbiz_account",
+    accountCredentialKey,
+    feeMethod: "sunbiz_account",
+    owner: !accountCredentialKey ? "none" : useClient ? "client" : "tenant",
+  };
+}
+
 /** Vault keys are namespaced so tenants (and firms) can never read each other's logins. */
 export function tenantVaultKey(tenant: TenantSettings, key: string): string {
   return `${tenant.tenantId}/${key}`;

@@ -24,6 +24,7 @@ export function renderName(name: EntityName, site: Site): { nameField: string; d
       return { nameField: name.baseName.trim(), designator };
     case "NY":
     case "MO":
+    case "FL":
     case "IRS":
       return { nameField: full };
   }

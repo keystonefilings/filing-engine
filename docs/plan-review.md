@@ -582,3 +582,23 @@ transition and the IRS Submit/designee screens were not reached.
 Remaining live verification (from the walk): NY filing-to-checkout, distribution/payment,
 drawdown balance, final action and receipt; IRS designee screens, international mailing,
 address suggestion, and the post-submit assignment/download on an authorized filing.
+
+## P. Florida added, walked live (Nov 19)
+
+Florida (Sunbiz) added with the same coverage level as NY and NJ: domestic LLC formation
+walked end to end to the payment page, and the engine's adapter dry-run against the live
+site passed all five screens (docs/walks/florida-2026-11-19.md). No login is needed to
+file; payment is a credit card at the tap or the prepaid Sunbiz E-file account (Florida's
+drawdown equivalent). complete:false, dry-run only, until a verified real filing.
+
+- Engine: "FL" state; fl-formation adapter + intents from the live walk (disclaimer ->
+  one long form -> review -> summary -> payment). Fees: LLC $125 (+$5 status, +$30
+  certified copy), profit corp $70, LP $1000. Validation: name indicator, principal
+  address, Florida registered agent, 240-char purpose, <=6 authorized persons; in-run EIN
+  refused (FL examiner review is not instant -> EIN after acceptance).
+- Settings: flPaymentMethod (credit_card / sunbiz_account), flSunbizAccountCredentialKey.
+- New setByName step-context helper for FL's repeated authorized-person fields.
+- "Try all types": profit corporation and limited partnership formation forms + fees
+  confirmed; annual report, certificate of status, reinstatement and dissolution are
+  existing-entity flows on services.sunbiz.org, documented for the next walk.
+- Tests: 102.

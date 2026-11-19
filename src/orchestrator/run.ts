@@ -240,6 +240,12 @@ export class RunExecutor {
         }
         await page.locator(`[data-ke-ref="${hit.ref}"]`).click();
       },
+      setByName: async (name, value) => {
+        const inventory = await collectInventory(page);
+        const f = inventory.fields.find((x) => x.name === name && x.visible);
+        if (!f) throw new Error(`no live field named "${name}" on ${screen.screenKey}`);
+        await fillField(page, f, value);
+      },
       note: async (text) => { await recorder.record(page, screen.screenKey, text); },
       actAndSettle: (action) => actAndSettle(page, action),
       submit: async (action, click) => {

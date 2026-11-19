@@ -87,9 +87,22 @@ export function validateFiling(req: FilingRequest): ValidationIssue[] {
       if (!f.moSigner && !f.signers.length) err("formation.moSigner", "MO requires a signer");
       if (f.seriesLlc) err("formation.seriesLlc", "MO Series LLC needs an LLC 1A upload, which is not mapped yet");
     }
+
+    if (req.state === "FL") {
+      if (!hasLlcIndicator(legal)) err("formation.name", "FL requires an LLC indicator in the name");
+      if (!f.mainBusinessAddress) err("formation.mainBusinessAddress", "FL requires the principal place of business address");
+      const agent = f.registeredAgent;
+      if (!agent?.address) err("formation.registeredAgent", "FL requires a registered agent with an address");
+      else if (agent.address.state !== "FL") err("formation.registeredAgent.address.state", "FL registered agent must have a Florida address");
+      if (f.purpose && f.purpose.length > 240) err("formation.purpose", "FL purpose is limited to 240 characters");
+      if (f.authorizedPersons.length > 6) err("formation.authorizedPersons", "FL online filing lists at most 6 authorized persons");
+    }
   }
 
   if (req.ein && req.ein.mode !== "none") {
+    if (req.state === "FL" && req.ein.mode === "in_run") {
+      err("ein.mode", "Florida filings are reviewed by a document examiner (not instant); apply for the EIN after the state accepts the filing (mode after_acceptance)");
+    }
     const rp = req.ein.responsibleParty;
     if (!rp) err("ein.responsibleParty", "responsible party is required for an EIN application");
     if (!req.formation?.mainBusinessAddress) {

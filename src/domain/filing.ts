@@ -8,10 +8,10 @@ import { z } from "zod";
  */
 
 export const UsState = z.string().regex(/^[A-Z]{2}$/, "two-letter state code");
-export const FilingState = z.enum(["NY", "NJ", "MO"]);
+export const FilingState = z.enum(["NY", "NJ", "MO", "FL"]);
 export type FilingState = z.infer<typeof FilingState>;
 
-export const Site = z.enum(["NY", "NJ", "MO", "IRS"]);
+export const Site = z.enum(["NY", "NJ", "MO", "FL", "IRS"]);
 export type Site = z.infer<typeof Site>;
 
 export const Address = z.object({
@@ -147,6 +147,13 @@ export const FormationDetails = z.object({
   moSigner: Person.optional(),
   /** MO: Series LLC (uploads LLC 1A). Not mapped for online upload yet; refused if true. */
   seriesLlc: z.boolean().optional(),
+  /** FL authorized persons to manage the LLC (optional, up to 6): title code + name/entity + address. */
+  authorizedPersons: z.array(z.object({
+    title: z.enum(["MGR", "AMBR", "AP", "AR"]).default("MGR"),
+    name: z.string().optional(),
+    entityName: z.string().optional(),
+    address: Address.optional(),
+  })).max(6).default([]),
   additionalCertificates: z
     .object({
       certificateOfStanding: z.boolean().default(false),

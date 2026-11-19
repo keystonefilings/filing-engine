@@ -12,7 +12,7 @@ API + webhook service whose worker drives government filing sites live. See `doc
 - `src/fees` fee table (`config/fees.json`) and live fee check (decision 5)
 - `src/orchestrator` queue, per-site/per-account concurrency, pre-flight, run executor, filing service
 - `src/browser` Playwright harness, step recorder, submit guard (dry run) and error types
-- `src/adapters` per-site screen sequences expressed as field intents, never selectors: `nj-formation` and `nj-standing` (live dry runs pass; real runs wait for the NICUSA gateway walk), `ny-formation` (screen 2 bottom pending walk C), `irs-ein` (pending walk B)
+- `src/adapters` per-site screen sequences expressed as field intents, never selectors: `nj-formation`, `nj-standing`, `fl-formation` (live dry runs pass; real runs wait for the final payment walk), `ny-formation` and `irs-ein` (mapped from the Nov 18 walk), `mo-formation` (from the state guide)
 - `tools/` walk recorder and site check
 - `src/api` Fastify routes; `src/index.ts` cloud tier; `src/worker.ts` fixed-IP worker tier
 - `fixtures/` wizard replicas for development and tests; `db/schema.sql` Postgres schema

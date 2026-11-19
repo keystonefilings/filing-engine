@@ -17,7 +17,7 @@ export class FeeUnknownError extends Error {}
 
 /** Expected charges for a filing, or FeeUnknownError when the table has no entry yet. */
 export function expectedFees(
-  state: "NY" | "NJ" | "MO",
+  state: "NY" | "NJ" | "MO" | "FL",
   type: string,
   opts: { paymentMethod?: string; certificateOfStanding?: boolean; certifiedCopy?: boolean; entityType?: string } = {},
   table: FeeTable = loadFeeTable(),

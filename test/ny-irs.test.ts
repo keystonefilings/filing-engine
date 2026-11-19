@@ -68,9 +68,9 @@ describe("NY DOS map (from the 2026-11-18 walk)", () => {
   });
 
   it("prices NY copies, certified copies, status certificates and formation", () => {
-    expect(expectedFees("NY", "copy")[0].amountUsd).toBe(5);
-    expect(expectedFees("NY", "certified_copy")[0].amountUsd).toBe(10);
-    expect(expectedFees("NY", "status_certificate")[0].amountUsd).toBe(25);
-    expect(expectedFees("NY", "formation")[0].amountUsd).toBe(200);
+    expect(expectedFees("NY", "copy")[0]!.amountUsd).toBe(5);
+    expect(expectedFees("NY", "certified_copy")[0]!.amountUsd).toBe(10);
+    expect(expectedFees("NY", "status_certificate")[0]!.amountUsd).toBe(25);
+    expect(expectedFees("NY", "formation")[0]!.amountUsd).toBe(200);
   });
 });

@@ -17,6 +17,7 @@ export const SITES = [
   { key: "NY DOS ecorp", url: "https://filings.dos.ny.gov/ords/r/corpanc/ecorp/ecorphome", expect: /.+/ },
   { key: "NY DOS public inquiry", url: "https://apps.dos.ny.gov/publicInquiry/", expect: /.+/ },
   { key: "MO online filing", url: "https://bsd.sos.mo.gov/", expect: /.+/ },
+  { key: "FL Sunbiz filing", url: "https://efile.sunbiz.org/llc_file.html", expect: /Articles of Organization/i },
 ];
 
 export function classify(status: number | null, title: string, body: string, error?: string): "ok" | "blocked" | "error" {
