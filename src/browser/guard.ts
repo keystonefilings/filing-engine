@@ -36,3 +36,21 @@ export class ReviewGateHalt extends Error {
     super(`review gate halt on ${screenKey}: awaiting admin review (${recordId})`);
   }
 }
+
+/**
+ * Thrown when an irreversible click returned but the adapter could not read evidence that
+ * the portal took the filing (no confirmation number, receipt or assigned EIN). The submit
+ * intent stays open, so the filing goes to needs_reconciliation and is never re-run.
+ */
+export class SubmissionUnconfirmed extends Error {
+  constructor(public readonly adapterKey: string, public readonly detail: string) {
+    super(`submission not confirmed on ${adapterKey}: ${detail}`);
+  }
+}
+
+/** Thrown when this worker no longer holds the filing's run lease (another worker may own it now). */
+export class LeaseLost extends Error {
+  constructor(public readonly filingId: string) {
+    super(`run lease for filing ${filingId} was lost; stopping before any irreversible click`);
+  }
+}

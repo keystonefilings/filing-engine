@@ -62,6 +62,11 @@ export interface RunRecord {
   error?: string;
 }
 
+/**
+ * Written before an irreversible click. It stays open (no outcome) through the click and
+ * is closed as "submitted" only once the adapter has read evidence that the portal took the
+ * filing (a confirmation number, an assigned EIN). An open intent is never re-run.
+ */
 export interface SubmitIntentRecord {
   id: string;
   runId: string;
@@ -69,8 +74,17 @@ export interface SubmitIntentRecord {
   site: string;
   payloadHash: string;
   createdAt: string;
+  /** When the irreversible click returned. Not proof of submission. */
+  clickedAt?: string;
   outcome?: "submitted" | "failed" | "dry_run_stop";
   outcomeAt?: string;
+  /** What the adapter read to confirm the submission. */
+  evidence?: { reference?: string; detail: string };
+}
+
+/** Thrown when a client company id already belongs to another tenant. */
+export class ClientCompanyOwnershipError extends Error {
+  constructor(public readonly clientCompanyId: string) { super(`client company ${clientCompanyId} belongs to another tenant`); }
 }
 
 export interface DriftHaltRecord {
@@ -180,6 +194,8 @@ export interface Store {
   findFilingByIdempotency(tenantId: string, key: string): Promise<FilingRecord | null>;
   updateFiling(id: string, patch: Partial<FilingRecord>): Promise<FilingRecord>;
   listFilings(tenantId?: string): Promise<FilingRecord[]>;
+  /** Filings in any of these statuses, optionally only for these tenants (recovery scans). */
+  listFilingsByStatus(statuses: FilingStatus[], tenants?: string[]): Promise<FilingRecord[]>;
   // approvals
   createApproval(a: ApprovalRecord): Promise<ApprovalRecord>;
   getApproval(id: string): Promise<ApprovalRecord | null>;
@@ -215,7 +231,16 @@ export interface Store {
   getTenant(id: string): Promise<TenantSettings | null>;
   putTenant(t: TenantSettings): Promise<void>;
   getClientCompany(id: string): Promise<ClientCompanySettings | null>;
+  /** Creates or updates; throws ClientCompanyOwnershipError if the id belongs to another tenant. */
   putClientCompany(c: ClientCompanySettings): Promise<void>;
+  // run leases: the worker running a filing holds and renews one; recovery skips live leases
+  /** Takes the filing's lease unless another unexpired one holds it. Returns the lease token, or null. */
+  acquireRunLease(filingId: string, workerId: string, ttlMs: number): Promise<string | null>;
+  /** Extends a lease this token still holds. False when it lapsed and was taken, or was released. */
+  renewRunLease(filingId: string, token: string, ttlMs: number): Promise<boolean>;
+  releaseRunLease(filingId: string, token: string): Promise<void>;
+  /** True while an unexpired lease holds the filing (some worker is still renewing it). */
+  hasLiveRunLease(filingId: string): Promise<boolean>;
   // webhooks
   createDelivery(d: WebhookDeliveryRecord): Promise<WebhookDeliveryRecord>;
   updateDelivery(id: string, patch: Partial<WebhookDeliveryRecord>): Promise<WebhookDeliveryRecord>;

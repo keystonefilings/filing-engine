@@ -20,6 +20,7 @@ import type { RegisteredAgentService } from "../registered-agents/service.js";
 import type { ResolvedRegisteredAgent } from "../registered-agents/types.js";
 import type { Notifier } from "../comms/notifier.js";
 import { ConcurrencyLimiter } from "./locks.js";
+import { LeaseLost } from "../browser/guard.js";
 import { njAccount, moAccount, flAccount } from "../settings/accounts.js";
 import { applyPolicies } from "../settings/policies.js";
 import type { ClientCompanySettings, TenantSettings } from "../settings/schema.js";
@@ -41,7 +42,14 @@ export interface FilingServiceDeps {
   dryRunDefault: boolean;
   /** Clock for pre-flight checks (IRS hours); injectable for tests. */
   now?: () => Date;
+  /** This process's worker identity, recorded on the run leases it holds. */
+  workerId?: string;
+  /** How long a run lease lasts without renewal (renewed every quarter of this). Default 2 minutes. */
+  leaseTtlMs?: number;
 }
+
+/** Which filings a recovery pass may touch: a service company's own worker passes its tenants. */
+export interface RecoveryScope { tenants?: string[] }
 
 export class ValidationFailed extends Error {
   constructor(public readonly issues: ValidationIssue[]) { super("filing failed validation"); }
@@ -231,21 +239,57 @@ export class FilingService {
     await this.d.queue.enqueue({ kind: "run_filing", filingId: f.id, tenantId: f.tenantId });
   }
 
-  /** Dry run from any pre-approval state: executes to the last screen and stops before the irreversible click. */
+  /**
+   * Dry run from any pre-approval state: executes to the last screen and stops before the
+   * irreversible click. Preview mode rides on the queued job; the approved request is untouched.
+   */
   async enqueueDryRun(filingId: string): Promise<void> {
     const filing = await this.d.store.getFiling(filingId);
     if (!filing) throw new Error("filing not found");
-    await this.d.store.updateFiling(filing.id, { request: { ...filing.request, dryRun: true } });
-    await this.d.queue.enqueue({ kind: "run_filing", filingId: filing.id, tenantId: filing.tenantId });
+    await this.d.queue.enqueue({ kind: "run_filing", filingId: filing.id, tenantId: filing.tenantId, dryRun: true });
   }
 
-  /** Worker entry point. Pre-flight, then one browser pass, then webhooks for the outcome. */
-  async runFiling(filingId: string): Promise<void> {
+  private get leaseTtlMs(): number { return this.d.leaseTtlMs ?? 120_000; }
+  private get workerId(): string { return this.d.workerId ?? `worker-${process.pid}`; }
+
+  /**
+   * Worker entry point. Holds the filing's run lease for the whole pass (renewed in the
+   * background) so no other worker's recovery touches it while this one is alive.
+   * opts.dryRun (from the job) can only force a preview, never make a run live.
+   */
+  async runFiling(filingId: string, opts: { dryRun?: boolean } = {}): Promise<void> {
     if (!this.d.executor) throw new Error("this process has no executor (API tier)");
     const store = this.d.store;
+    const token = await store.acquireRunLease(filingId, this.workerId, this.leaseTtlMs);
+    if (!token) {
+      const f = await store.getFiling(filingId);
+      if (f) await this.emit("filing.blocked", f, { blockers: ["another worker holds this filing's run lease; run request ignored"] });
+      return;
+    }
+    let lost = false;
+    const renew = async () => {
+      if (lost) return false;
+      const ok = await store.renewRunLease(filingId, token, this.leaseTtlMs).catch(() => false);
+      if (!ok) lost = true;
+      return ok;
+    };
+    const timer = setInterval(() => void renew(), Math.max(1_000, Math.floor(this.leaseTtlMs / 4)));
+    timer.unref?.();
+    const assertLease = async () => { if (!(await renew())) throw new LeaseLost(filingId); };
+    try {
+      await this.runLeased(filingId, opts, assertLease);
+    } finally {
+      clearInterval(timer);
+      await store.releaseRunLease(filingId, token).catch(() => {});
+    }
+  }
+
+  private async runLeased(filingId: string, opts: { dryRun?: boolean }, assertLease: () => Promise<void>): Promise<void> {
+    const store = this.d.store;
+    const executor = this.d.executor!;
     const filing = await store.getFiling(filingId);
     if (!filing) return;
-    const dryRequested = filing.request.dryRun ?? this.d.dryRunDefault;
+    const dryRequested = opts.dryRun === true || (filing.request.dryRun ?? this.d.dryRunDefault);
     // Only a queued filing runs for real. A dry run may start from any pre-submission state,
     // but never over a run in progress or a filing that may already be at the state.
     const NEVER = new Set(["running", "needs_reconciliation", "ein_filed", "submitted", "accepted", "completed", "aborted"]);
@@ -257,7 +301,7 @@ export class FilingService {
     const client = await store.getClientCompany(filing.clientCompanyId);
     if (!tenant || !client) return;
     const approval = filing.currentApprovalId ? await store.getApproval(filing.currentApprovalId) : null;
-    const dryRun = filing.request.dryRun ?? this.d.dryRunDefault;
+    const dryRun = dryRequested;
     const adapter = adapterFor(filing.request);
     const priorStatus = filing.status;
 
@@ -278,9 +322,9 @@ export class FilingService {
       const running = filing.status === "queued" ? await this.transition(filing, "running") : await store.updateFiling(filing.id, { status: "running" });
       await this.emit("filing.started", running, { dryRun, site: adapter.site, warnings: pf.warnings });
       const fees = (() => { try { return this.feesFor(filing.request, tenant, client); } catch { return []; } })();
-      const outcome = await this.d.executor.execute({
+      const outcome = await executor.execute({
         filing: running, approval, tenant, client, adapter, einAdapter: irsEinAdapter, dryRun, expectedFees: approval?.fees ?? fees,
-        reviewGateApproved: !!running.reviewGate,
+        reviewGateApproved: !!running.reviewGate, assertLease,
       });
       const latest = (await store.getFiling(filing.id))!;
       switch (outcome.kind) {
@@ -299,7 +343,10 @@ export class FilingService {
         case "dry_run_stop": {
           // Dry runs leave the filing where it was; the run record carries the evidence.
           const f = await store.updateFiling(latest.id, { status: dryRunReturnStatus(priorStatus), currentRunId: outcome.run.id, lastError: undefined });
-          await this.emit("filing.step", f, { dryRun: true, stoppedBefore: outcome.stoppedBefore, steps: outcome.run.steps.length, ein: outcome.ein }, outcome.run.id);
+          await this.emit("filing.step", f, {
+            dryRun: true, stoppedBefore: outcome.stoppedBefore, steps: outcome.run.steps.length,
+            ...(outcome.einPlaceholder ? { einPlaceholder: true } : { ein: outcome.ein }),
+          }, outcome.run.id);
           break;
         }
         case "drift_halt": {
@@ -455,14 +502,17 @@ export class FilingService {
   }
 
   /**
-   * On worker start, after reconcileOpenIntents: a filing still "running" lost its worker.
+   * Periodically on each worker, after reconcileOpenIntents: a filing still "running" whose run
+   * lease lapsed lost its worker (a live worker renews its lease, so its runs are never touched).
    * With no open submit intent nothing reached the state (no drafts exist), so it is marked
    * failed and reported; a person re-queues it. Nothing is re-run automatically.
    */
-  async recoverInterruptedRuns(): Promise<string[]> {
+  async recoverInterruptedRuns(scope: RecoveryScope = {}): Promise<string[]> {
     const out: string[] = [];
-    for (const f of await this.d.store.listFilings()) {
-      if (f.status !== "running" && f.status !== "ein_filed") continue;
+    for (const f of await this.d.store.listFilingsByStatus(["running", "ein_filed"], scope.tenants)) {
+      if (await this.d.store.hasLiveRunLease(f.id)) continue; // its worker is still alive
+      const fresh = await this.d.store.getFiling(f.id);
+      if (!fresh || (fresh.status !== "running" && fresh.status !== "ein_filed")) continue; // settled meanwhile
       const f2 = await this.d.store.updateFiling(f.id, {
         status: f.status === "ein_filed" ? "needs_reconciliation" : "failed",
         lastError: f.status === "ein_filed"
@@ -475,12 +525,18 @@ export class FilingService {
     return out;
   }
 
-  /** On worker start: any submit intent without an outcome is a possible double-submit. Never re-run; flag it. */
-  async reconcileOpenIntents(): Promise<string[]> {
+  /**
+   * Periodically on each worker: a submit intent without an outcome whose run lease lapsed is a
+   * possible double-submit. Never re-run; flag it. An intent under a live lease belongs to a
+   * worker that is between the click and reading the confirmation, and is left alone.
+   */
+  async reconcileOpenIntents(scope: RecoveryScope = {}): Promise<string[]> {
     const flagged: string[] = [];
     for (const intent of await this.d.store.listOpenSubmitIntents()) {
       const filing = await this.d.store.getFiling(intent.filingId);
       if (!filing || filing.status === "needs_reconciliation") continue;
+      if (scope.tenants?.length && !scope.tenants.includes(filing.tenantId)) continue;
+      if (await this.d.store.hasLiveRunLease(filing.id)) continue;
       const f = await this.d.store.updateFiling(filing.id, { status: "needs_reconciliation", lastError: `submit intent ${intent.id} has no recorded outcome` });
       await this.emit("filing.needs_reconciliation", f, { submitIntentId: intent.id, site: intent.site });
       flagged.push(filing.id);

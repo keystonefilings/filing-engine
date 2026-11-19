@@ -20,7 +20,7 @@ import { StaticNameGenerator, AnthropicNameGenerator, type NameCandidateGenerato
 import type { NameCheckerRegistry } from "./name-resolution/checker.js";
 
 /** Wires one process. The API tier runs without an executor; the worker tier with one. */
-export async function bootstrap(opts: { withExecutor: boolean }) {
+export async function bootstrap(opts: { withExecutor: boolean; workerId?: string }) {
   let store: Store = new MemoryStore();
   let queue: JobQueue = new InMemoryQueue();
   if (config.databaseUrl) {
@@ -60,6 +60,6 @@ export async function bootstrap(opts: { withExecutor: boolean }) {
   const limiter = new ConcurrencyLimiter({
     "site:IRS": config.siteConcurrency.IRS, "site:NY": config.siteConcurrency.NY, "site:NJ": config.siteConcurrency.NJ,
   });
-  const service = new FilingService({ store, approvals, webhooks, queue, vault, drift, nameResolution, reviewGate, registeredAgents, notifier, executor, limiter, dryRunDefault: config.dryRunDefault });
+  const service = new FilingService({ store, approvals, webhooks, queue, vault, drift, nameResolution, reviewGate, registeredAgents, notifier, executor, limiter, dryRunDefault: config.dryRunDefault, workerId: opts.workerId });
   return { store, artifacts, approvals, webhooks, queue, vault, drift, nameResolution, reviewGate, registeredAgents, notifier, harness, executor, service };
 }

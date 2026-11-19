@@ -32,6 +32,35 @@ describe("fees (decision 5)", () => {
     expect(overCap.ok).toBe(false);
     expect(overCap.reason).toContain("cap");
   });
+
+  it("refuses a surcharge the approval does not cover when no total reconciles it", () => {
+    const exp = [{ label: "Filing fee", amountUsd: 100 }];
+    // The reviewed case: $100 approved, $100 cap, page shows the fee plus a $20 surcharge, no total line.
+    const surcharge = checkLiveFees(exp, [{ label: "Filing fee", amountUsd: 100 }, { label: "Processing surcharge", amountUsd: 20 }], 100);
+    expect(surcharge.ok).toBe(false);
+    expect(surcharge.reason).toContain("no payable total shown");
+    expect(surcharge.unexpected.map((u) => u.amountUsd)).toEqual([20]);
+    // A total line that matches the approval verifies the charge even with other amounts shown.
+    const withTotal = checkLiveFees(exp, [{ label: "Filing fee", amountUsd: 100 }, { label: "Subtotal", amountUsd: 100 }, { label: "Total", amountUsd: 100 }], 100);
+    expect(withTotal).toMatchObject({ ok: true, verifiedBy: "total" });
+    // ...and a total that includes the surcharge does not.
+    expect(checkLiveFees(exp, [{ label: "Filing fee", amountUsd: 100 }, { label: "Surcharge", amountUsd: 20 }, { label: "Total", amountUsd: 120 }], 150).ok).toBe(false);
+  });
+
+  it("without a total, reconciles charge lines one-for-one and applies the cap to the approved total", () => {
+    const exp = [{ label: "Filing fee", amountUsd: 100 }, { label: "Service fee", amountUsd: 3.5 }];
+    expect(checkLiveFees(exp, [{ label: "Filing fee", amountUsd: 100 }, { label: "Service fee", amountUsd: 3.5 }], 110)).toMatchObject({ ok: true, verifiedBy: "lines" });
+    // A second $3.50 charge is not covered by the single approved $3.50 line.
+    const doubled = checkLiveFees(exp, [{ label: "Filing fee", amountUsd: 100 }, { label: "Service fee", amountUsd: 3.5 }, { label: "Convenience fee", amountUsd: 3.5 }], 110);
+    expect(doubled.ok).toBe(false);
+    // Reconciled lines over the cap still fail; the cap no longer needs a total line to apply.
+    const overCap = checkLiveFees(exp, [{ label: "Filing fee", amountUsd: 100 }, { label: "Service fee", amountUsd: 3.5 }], 100);
+    expect(overCap.ok).toBe(false);
+    expect(overCap.reason).toContain("cap");
+    // A price list with every approved line on it is "listed", which is not the same as verified.
+    const priceList = checkLiveFees(exp, [{ label: "Formation", amountUsd: 100 }, { label: "Service fee", amountUsd: 3.5 }, { label: "Certified copy", amountUsd: 25 }]);
+    expect(priceList).toMatchObject({ ok: false, linesListed: true });
+  });
 });
 
 describe("webhooks", () => {

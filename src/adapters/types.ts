@@ -46,6 +46,13 @@ export interface ScreenStep {
   nameCheckGate?: boolean;
   /** Fee check runs on this screen before any submit (decision 5). */
   paymentScreen?: boolean;
+  /**
+   * What the payment screen shows. "cart" (default): the charge lines and/or a payable total,
+   * which must reconcile with the approval. "price_list": a schedule of prices for every option
+   * and no payable total (NJ formation); the approved lines must be listed, but the charge
+   * cannot be verified there, so only dry runs may continue past it.
+   */
+  feeDisplay?: "cart" | "price_list";
   /** Where the final irreversible click happens (rule 6: only after approval; dry runs stop here). */
   submitScreen?: boolean;
   /** The review/summary screen. In beta, with the tenant's review gate on, the engine
@@ -73,8 +80,29 @@ export interface SiteAdapter {
   /** Vault key for the login this run uses, or null. */
   credentialKey(ctx: Pick<StepContext, "filing" | "client" | "tenant">): string | null;
   steps: ScreenStep[];
+  /**
+   * After the irreversible click: read evidence that the portal took the filing (confirmation
+   * number, receipt, assigned EIN). Return null when it is not there. Until this returns
+   * evidence the submit intent stays open; an adapter without it can never complete a live run.
+   */
+  confirmSubmission?(ctx: StepContext): Promise<SubmissionEvidence | null>;
   /** After submit: download CP 575, formation documents, receipts. */
   collectArtifacts?(ctx: StepContext): Promise<{ kind: string; label: string; contentType: string; body: Buffer }[]>;
+}
+
+export interface SubmissionEvidence {
+  /** Confirmation number, EIN, or other reference the portal issued. */
+  reference?: string;
+  /** What was read, for the run record. */
+  detail: string;
+}
+
+/** The value a dry run carries in place of an EIN it never applied for. Never stored, never reused. */
+export const PLACEHOLDER_EIN = "00-0000000";
+
+/** An EIN the IRS actually issued for this filing (not missing, not the dry-run placeholder). */
+export function isIssuedEin(ein: string | undefined | null): ein is string {
+  return !!ein && ein !== PLACEHOLDER_EIN;
 }
 
 export class NameUnavailable extends Error {

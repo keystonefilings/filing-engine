@@ -1,4 +1,8 @@
-export interface Job { id: string; kind: "run_filing" | "deliver_webhooks" | "reconcile"; filingId?: string; tenantId?: string; enqueuedAt: string }
+export interface Job {
+  id: string; kind: "run_filing" | "deliver_webhooks" | "reconcile"; filingId?: string; tenantId?: string; enqueuedAt: string;
+  /** A preview: run to the last screen and stop before the irreversible click. Never makes a run live. */
+  dryRun?: boolean;
+}
 
 /**
  * Queue boundary. A claimed job is never handed out again: a worker that dies mid-run

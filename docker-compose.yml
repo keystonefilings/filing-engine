@@ -18,6 +18,9 @@ services:
       DATABASE_URL: postgres://filing:${POSTGRES_PASSWORD}@db:5432/filing
       WORKER_ENABLED: "false"
     ports: [ "127.0.0.1:8080:8080" ]   # publish through an HTTPS reverse proxy, never directly
+    # The worker writes screenshots and filing documents; the API serves them. Same volume,
+    # read-only here. An API on another machine needs shared object storage instead.
+    volumes: [ "artifacts:/app/var/artifacts:ro" ]
     depends_on: [ db ]
   worker:
     build: .

@@ -1,11 +1,14 @@
 import pg from "pg";
 import { readFileSync } from "node:fs";
 import path from "node:path";
-import type {
-  ApprovalRecord, DriftHaltRecord, FilingRecord, MessageRecord, NameResolutionRecord, ReviewGateRecord, RunRecord, Store, SubmitIntentRecord, WebhookDeliveryRecord,
+import { randomUUID } from "node:crypto";
+import {
+  ClientCompanyOwnershipError,
+  type ApprovalRecord, type DriftHaltRecord, type FilingRecord, type MessageRecord, type NameResolutionRecord, type ReviewGateRecord, type RunRecord, type Store, type SubmitIntentRecord, type WebhookDeliveryRecord,
 } from "./types.js";
 import type { ClientCompanySettings, TenantSettings } from "../settings/schema.js";
 import type { PageSnapshot } from "../resolver/types.js";
+import type { FilingStatus } from "../domain/states.js";
 
 /** JSONB-document Postgres store. Schema: db/schema.sql (applied on connect). */
 export class PostgresStore implements Store {
@@ -53,6 +56,12 @@ export class PostgresStore implements Store {
     return tenantId
       ? this.docs<FilingRecord>(`select doc from filings where tenant_id=$1 order by created_at desc`, [tenantId])
       : this.docs<FilingRecord>(`select doc from filings order by created_at desc`, []);
+  }
+  async listFilingsByStatus(statuses: FilingStatus[], tenants?: string[]) {
+    return this.docs<FilingRecord>(
+      `select doc from filings where status = any($1::text[]) and ($2::text[] is null or tenant_id = any($2::text[])) order by created_at`,
+      [statuses, tenants?.length ? tenants : null],
+    );
   }
 
   async createApproval(a: ApprovalRecord) {
@@ -133,7 +142,41 @@ export class PostgresStore implements Store {
   }
   async getClientCompany(id: string) { return this.doc<ClientCompanySettings>(`select doc from client_companies where id=$1`, [id]); }
   async putClientCompany(c: ClientCompanySettings) {
-    await this.pool.query(`insert into client_companies (id, tenant_id, doc) values ($1,$2,$3) on conflict (id) do update set doc=excluded.doc, tenant_id=excluded.tenant_id`, [c.clientCompanyId, c.tenantId, c]);
+    // Never move a company to another tenant: the update applies only to the owner's row.
+    const r = await this.pool.query(
+      `insert into client_companies (id, tenant_id, doc) values ($1,$2,$3)
+       on conflict (id) do update set doc=excluded.doc where client_companies.tenant_id = excluded.tenant_id`,
+      [c.clientCompanyId, c.tenantId, c],
+    );
+    if (r.rowCount === 0) throw new ClientCompanyOwnershipError(c.clientCompanyId);
+  }
+
+  // Lease expiry uses the database clock, so workers on different machines agree on it.
+  async acquireRunLease(filingId: string, workerId: string, ttlMs: number) {
+    const token = randomUUID();
+    const r = await this.pool.query(
+      `insert into run_leases (filing_id, worker_id, token, acquired_at, expires_at)
+         values ($1, $2, $3, now(), now() + $4 * interval '1 millisecond')
+       on conflict (filing_id) do update
+         set worker_id = excluded.worker_id, token = excluded.token, acquired_at = excluded.acquired_at, expires_at = excluded.expires_at
+         where run_leases.expires_at <= now()`,
+      [filingId, workerId, token, ttlMs],
+    );
+    return r.rowCount === 1 ? token : null;
+  }
+  async renewRunLease(filingId: string, token: string, ttlMs: number) {
+    const r = await this.pool.query(
+      `update run_leases set expires_at = now() + $3 * interval '1 millisecond' where filing_id = $1 and token = $2 and expires_at > now()`,
+      [filingId, token, ttlMs],
+    );
+    return r.rowCount === 1;
+  }
+  async releaseRunLease(filingId: string, token: string) {
+    await this.pool.query(`delete from run_leases where filing_id = $1 and token = $2`, [filingId, token]);
+  }
+  async hasLiveRunLease(filingId: string) {
+    const r = await this.pool.query(`select 1 from run_leases where filing_id = $1 and expires_at > now()`, [filingId]);
+    return (r.rowCount ?? 0) > 0;
   }
 
   async createNameResolution(r: NameResolutionRecord) {

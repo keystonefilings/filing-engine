@@ -11,6 +11,7 @@ import { InMemoryVault } from "../src/settings/vault.js";
 import { DriftReviewService } from "../src/drift-review/service.js";
 import { FilingService } from "../src/orchestrator/service.js";
 import { TenantSettings, ClientCompanySettings } from "../src/settings/schema.js";
+import { ClientCompanyOwnershipError } from "../src/store/types.js";
 import { njFormationRequest, SECRET } from "./helpers.js";
 
 /**
@@ -103,5 +104,47 @@ describe("Postgres store + queue", () => {
     await store.createSubmitIntent({ id: crypto.randomUUID(), runId: crypto.randomUUID(), filingId: filing.id, site: "NJ", payloadHash: filing.payloadHash, createdAt: new Date().toISOString() });
     expect(await service.reconcileOpenIntents()).toEqual([filing.id]);
     expect((await store.getFiling(filing.id))!.status).toBe("needs_reconciliation");
+  });
+
+  it("leaves a filing alone while its run lease is live", async () => {
+    const { filing } = await service.createFiling(njFormationRequest());
+    await store.updateFiling(filing.id, { status: "running" });
+    await store.createSubmitIntent({ id: crypto.randomUUID(), runId: crypto.randomUUID(), filingId: filing.id, site: "NJ", payloadHash: filing.payloadHash, createdAt: new Date().toISOString() });
+    const token = (await store.acquireRunLease(filing.id, "vm-1", 60_000))!;
+    expect(token).toBeTruthy();
+    expect(await store.acquireRunLease(filing.id, "vm-2", 60_000)).toBeNull(); // held
+    expect(await service.reconcileOpenIntents()).not.toContain(filing.id);
+    expect(await service.recoverInterruptedRuns()).not.toContain(filing.id);
+    expect((await store.getFiling(filing.id))!.status).toBe("running");
+    expect(await store.renewRunLease(filing.id, token, 60_000)).toBe(true);
+    expect(await store.renewRunLease(filing.id, "not-the-token", 60_000)).toBe(false);
+    await store.releaseRunLease(filing.id, token);
+    expect(await store.hasLiveRunLease(filing.id)).toBe(false);
+    expect(await service.reconcileOpenIntents()).toContain(filing.id);
+  });
+
+  it("an expired lease can be taken over and no longer renews for its old holder", async () => {
+    const id = crypto.randomUUID();
+    const old = (await store.acquireRunLease(id, "vm-1", 1))!;
+    await new Promise((r) => setTimeout(r, 20));
+    expect(await store.hasLiveRunLease(id)).toBe(false);
+    const next = await store.acquireRunLease(id, "vm-2", 60_000);
+    expect(next).toBeTruthy();
+    expect(await store.renewRunLease(id, old, 60_000)).toBe(false);
+  });
+
+  it("never moves a client company to another tenant", async () => {
+    await expect(store.putClientCompany(ClientCompanySettings.parse({ clientCompanyId: "acme-cpa", tenantId: "otherco", name: "Hijack", einMode: "after_acceptance" })))
+      .rejects.toBeInstanceOf(ClientCompanyOwnershipError);
+    expect((await store.getClientCompany("acme-cpa"))!.tenantId).toBe("keystone");
+  });
+
+  it("carries the preview flag on the job", async () => {
+    await queue.enqueue({ kind: "run_filing", filingId: crypto.randomUUID(), tenantId: "previewco", dryRun: true });
+    await queue.enqueue({ kind: "run_filing", filingId: crypto.randomUUID(), tenantId: "previewco" });
+    const a = (await queue.dequeue("vm", ["previewco"]))!;
+    const b = (await queue.dequeue("vm", ["previewco"]))!;
+    expect(a.dryRun).toBe(true);
+    expect(b.dryRun).toBeUndefined();
   });
 });

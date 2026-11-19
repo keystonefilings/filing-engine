@@ -317,6 +317,11 @@ export const irsEinAdapter: SiteAdapter = {
   profileKey: () => null, // always a fresh context
   credentialKey: () => null,
   steps: [start, legalStructure, llcMembers, reason, identity, designee, address, details, regulatory, employees, activity, review, assignment],
+  async confirmSubmission(ctx) {
+    // Evidence is the EIN printed on the assignment page itself, not a value carried in memory.
+    const m = /\b(\d{2}-\d{7})\b/.exec(await ctx.page.locator("body").innerText());
+    return m ? { reference: m[1]!, detail: "EIN shown on the IRS assignment page" } : null;
+  },
   async collectArtifacts(ctx) {
     const out: { kind: string; label: string; contentType: string; body: Buffer }[] = [];
     // The official notice, when digital delivery offers it this session.
