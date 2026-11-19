@@ -14,7 +14,29 @@ export const TenantSettings = z.object({
   organizer: Person.optional(),
   filer: Person.optional(),
   signer: Person.optional(),
+  /** Legacy single registered agent; the per-state provisioning below supersedes it. */
   registeredAgent: Person.optional(),
+  /**
+   * Enterprise registered-agent provisioning. When a client asks the filing company to
+   * provide the agent, this decides how:
+   *  - selfByState: the filing company IS the agent, with a per-state name/address (case 2)
+   *  - thirdParty: the filing company orders the agent from a provider, e.g. Registered
+   *    Agents, Inc., which quotes pricing across states (case 3)
+   *  - defaultProvisioning / perStateProvisioning: which of the two to use (per state).
+   */
+  registeredAgentProvisioning: z.object({
+    defaultProvisioning: z.enum(["self", "third_party"]).optional(),
+    selfByState: z.record(
+      z.string().regex(/^[A-Z]{2}$/),
+      z.object({ name: z.string().min(1), address: Address, email: z.string().email().optional() }),
+    ).default({}),
+    thirdParty: z.object({
+      provider: z.string().min(1),
+      apiCredentialKey: z.string().min(1),
+      cachedPricing: z.record(z.string().regex(/^[A-Z]{2}$/), z.number().nonnegative()).optional(),
+    }).optional(),
+    perStateProvisioning: z.record(z.string().regex(/^[A-Z]{2}$/), z.enum(["self", "third_party", "none"])).optional(),
+  }).optional(),
   serviceOfProcess: Person.optional(),
   contact: Contact.optional(),
   noticeEmail: z.string().email().optional(),
@@ -101,6 +123,8 @@ export const ClientCompanySettings = z.object({
   /** This firm's own NY drawdown account; used only when answer G1 is "own_account". */
   nyDrawdownAccountRef: z.string().optional(),
   registeredAgent: Person.optional(),
+  /** This firm's default registered-agent choice for its filings: none, bring its own, or let the filing company provide it. */
+  registeredAgentChoice: z.enum(["none", "client_provided", "filing_company"]).optional(),
   /** The firm's own details, used wherever its answer is "this firm" (docs/onboarding/customer-firm.md). */
   organizer: Person.optional(),
   filer: Person.optional(),

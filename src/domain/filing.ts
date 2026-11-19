@@ -137,6 +137,9 @@ export const FormationDetails = z.object({
     })
     .optional(), // NY
   registeredAgent: Person.optional(),
+  /** Per-filing registered-agent choice: none, the client's own agent (registeredAgent above),
+   *  or the filing company provides it (self or third-party, decided by tenant provisioning). */
+  registeredAgentChoice: z.enum(["none", "client_provided", "filing_company"]).optional(),
   members: z.array(Person).max(10).default([]),
   signers: z.array(Person).max(10).default([]),
   organizer: Person.optional(), // NY

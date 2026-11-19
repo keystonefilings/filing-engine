@@ -13,6 +13,7 @@ import { BrowserHarness } from "./browser/harness.js";
 import { ConcurrencyLimiter } from "./orchestrator/locks.js";
 import { NameResolutionService, DEFAULT_NAME_RESOLUTION_CONFIG } from "./name-resolution/service.js";
 import { ReviewGateService } from "./review-gate/service.js";
+import { RegisteredAgentService } from "./registered-agents/service.js";
 import { StaticNameGenerator, AnthropicNameGenerator, type NameCandidateGenerator } from "./name-resolution/generator.js";
 import type { NameCheckerRegistry } from "./name-resolution/checker.js";
 
@@ -47,11 +48,13 @@ export async function bootstrap(opts: { withExecutor: boolean }) {
     config: { ...DEFAULT_NAME_RESOLUTION_CONFIG, ttlHours: config.approvalTtlHours },
   });
   const reviewGate = new ReviewGateService({ store, signingSecret: config.approvalSigningSecret, publicBaseUrl: config.publicBaseUrl, ttlHours: config.approvalTtlHours });
+  // Registered-agent resolution: client's own agent, the filing company's per-state agent, or a third-party provider.
+  const registeredAgents = new RegisteredAgentService({ vault });
   const harness = new BrowserHarness({ chromiumPath: config.chromiumPath, proxyServer: config.browserProxy, profileDir: config.browserProfileDir });
   const executor = opts.withExecutor ? new RunExecutor({ store, artifacts, harness, drift, vault, reviewGate }) : undefined;
   const limiter = new ConcurrencyLimiter({
     "site:IRS": config.siteConcurrency.IRS, "site:NY": config.siteConcurrency.NY, "site:NJ": config.siteConcurrency.NJ,
   });
   const service = new FilingService({ store, approvals, webhooks, queue, vault, drift, nameResolution, reviewGate, executor, limiter, dryRunDefault: config.dryRunDefault });
-  return { store, artifacts, approvals, webhooks, queue, vault, drift, nameResolution, reviewGate, harness, executor, service };
+  return { store, artifacts, approvals, webhooks, queue, vault, drift, nameResolution, reviewGate, registeredAgents, harness, executor, service };
 }
