@@ -1,5 +1,5 @@
 <title>Filing Engine | Corporate Filing Automation</title>
-<meta name="description" content="Filing Engine connects filing service companies to government filing portals, with client approvals, fee checks and signed status updates.">
+<meta name="description" content="Handle more corporate filings with less manual work. Filing Engine fills government forms from your intake data and returns filing updates and documents to your systems.">
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -429,8 +429,8 @@
       <a class="fe-wordmark" href="#top"><span class="fe-symbol" aria-hidden="true"></span>Filing Engine</a>
       <nav class="fe-nav" aria-label="Main navigation">
         <a href="#process">Workflow</a>
-        <a href="#controls">Controls</a>
         <a href="#integrations">Integration</a>
+        <a href="#controls">Controls</a>
         <a href="#coverage">Coverage</a>
       </nav>
       <a class="fe-button" href="#briefing">Request a briefing</a>
@@ -442,8 +442,8 @@
       <div class="fe-container fe-hero-inner">
         <div class="fe-hero-copy">
           <span class="fe-kicker">For filing service companies</span>
-          <h1 id="fe-title">Corporate filings, <span>under your control</span></h1>
-          <p>Connect your intake system to government filing portals. Get client approval on the exact filing details and fees, then bring status updates and documents back into your systems.</p>
+          <h1 id="fe-title">Handle more filings <span>with less manual work</span></h1>
+          <p>Filing Engine fills government forms using the information you already collect. Track progress and retrieve available filing documents from the systems your team uses every day.</p>
           <div class="fe-actions">
             <a class="fe-button" href="#briefing">Request a briefing</a>
             <a class="fe-button fe-button-secondary" href="#process">See how it works</a>
@@ -458,7 +458,7 @@
               <strong>New Jersey LLC formation</strong>
               <span class="fe-ready">Dry run</span>
             </div>
-            <p>13 portal screens completed. Stopped before payment.</p>
+            <p>The engine completed 13 screens on the live portal.</p>
           </figcaption>
         </figure>
       </div>
@@ -468,26 +468,76 @@
       <div class="fe-container">
         <div class="fe-heading">
           <span class="fe-kicker">Workflow</span>
-          <h2 id="fe-process-title">From intake to filing records</h2>
+          <h2 id="fe-process-title">Fewer handoffs from intake to filing</h2>
         </div>
         <ol class="fe-workflow" role="list">
           <li>
-            <h3>Accept the order</h3>
-            <p>Send entity details through the API. Apply the registered agent, signer and other defaults you set for that client.</p>
+            <h3>Reuse intake data</h3>
+            <p>Send the entity details from your intake system. Saved client settings fill in recurring information like the signer and registered agent.</p>
           </li>
           <li>
-            <h3>Collect approval</h3>
-            <p>Send a review link under your brand. The designated approver confirms the filing details and fees.</p>
+            <h3>Review in one place</h3>
+            <p>The designated approver can check the filing details and fees on a single page.</p>
           </li>
           <li>
-            <h3>Run on the portal</h3>
-            <p>Match fields against the live government form and check charges against the approved amount before payment.</p>
+            <h3>Automate portal entry</h3>
+            <p>The engine reads the current government form and enters the approved information for you.</p>
           </li>
           <li>
-            <h3>Return the record</h3>
-            <p>Receive status updates in your system, with references to filing documents when the agency makes them available.</p>
+            <h3>Track each filing</h3>
+            <p>See where each filing stands, whether it needs attention and which documents are available.</p>
           </li>
         </ol>
+      </div>
+    </section>
+
+    <section class="fe-section fe-company" id="companies" aria-labelledby="fe-company-title">
+      <div class="fe-container fe-split">
+        <div>
+          <span class="fe-kicker">For filing operations</span>
+          <h2 id="fe-company-title">Standardize work across your client base</h2>
+        </div>
+
+        <div class="fe-company-grid">
+          <article>
+            <h3>Set up each client once</h3>
+            <p>Set defaults for each firm you serve. Lock the answers that need to stay consistent from one filing to the next.</p>
+          </article>
+          <article>
+            <h3>Use your existing filing accounts</h3>
+            <p>Work with the government accounts, registered agent arrangements and authorized signers your business already uses.</p>
+          </article>
+          <article>
+            <h3>Keep the experience under your brand</h3>
+            <p>Clients review filing requests on pages that carry your company name and support contact.</p>
+          </article>
+          <article>
+            <h3>Give staff a shared filing record</h3>
+            <p>When a client has a question, your team can see the steps the engine took and where each filing detail came from.</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="fe-section fe-integration" id="integrations" aria-labelledby="fe-integration-title">
+      <div class="fe-container fe-split">
+        <div>
+          <span class="fe-kicker">API and webhooks</span>
+          <h2 id="fe-integration-title">Put filing updates where your team works</h2>
+          <p>Start orders from your website, CRM or back office. Signed webhooks send progress and document references back to your system, with delivery retries when your endpoint is unavailable.</p>
+        </div>
+
+        <figure class="fe-code">
+          <figcaption>Example approval webhook</figcaption>
+          <pre><code>{
+  <span class="fe-key">"type"</span>: <span class="fe-value">"filing.awaiting_approval"</span>,
+  <span class="fe-key">"filingId"</span>: <span class="fe-value">"filing_123"</span>,
+  <span class="fe-key">"data"</span>: {
+    <span class="fe-key">"approvalLink"</span>: <span class="fe-value">"https://example.com/approve/…"</span>,
+    <span class="fe-key">"expiresAt"</span>: <span class="fe-value">"2026-11-25T15:00:00Z"</span>
+  }
+}</code></pre>
+        </figure>
       </div>
     </section>
 
@@ -508,6 +558,10 @@
             <li>
               <h3>Confirm the outcome before retrying</h3>
               <p>If a run is interrupted at submission, it goes to reconciliation for someone to confirm the outcome.</p>
+            </li>
+            <li id="security">
+              <h3>Protect client and account information</h3>
+              <p>Portal credentials are scoped to your company. Review links are single-use and expire. Approval pages mask Social Security numbers.</p>
             </li>
           </ul>
         </div>
@@ -535,56 +589,6 @@
             <strong>Submission paused</strong>
             <p>A reviewer checks the change before the filing can proceed.</p>
           </div>
-        </figure>
-      </div>
-    </section>
-
-    <section class="fe-section fe-company" id="companies" aria-labelledby="fe-company-title">
-      <div class="fe-container fe-split">
-        <div>
-          <span class="fe-kicker">Subscriber setup</span>
-          <h2 id="fe-company-title">Operate under your own brand and accounts</h2>
-        </div>
-
-        <div class="fe-company-grid" id="security">
-          <article>
-            <h3>Company-specific workspace</h3>
-            <p>Your filing jobs and documents are scoped to your company. The worker retrieves portal credentials from a company-specific vault when a run starts.</p>
-          </article>
-          <article>
-            <h3>Client-specific rules</h3>
-            <p>Set defaults for each firm you serve and lock answers that need to stay consistent across its filings.</p>
-          </article>
-          <article>
-            <h3>Branded approvals</h3>
-            <p>Review pages display your name and support contact. Links are single-use and expire. Social Security numbers are masked on the page.</p>
-          </article>
-          <article>
-            <h3>Filing history</h3>
-            <p>Review recorded portal steps and trace whether a value came from intake, client settings or a company default.</p>
-          </article>
-        </div>
-      </div>
-    </section>
-
-    <section class="fe-section fe-integration" id="integrations" aria-labelledby="fe-integration-title">
-      <div class="fe-container fe-split">
-        <div>
-          <span class="fe-kicker">API and webhooks</span>
-          <h2 id="fe-integration-title">Connect to the systems you already use</h2>
-          <p>Create filing requests from your website, CRM or back office. Signed webhooks report approval, exceptions and filing results to your system, with delivery retries when your endpoint is unavailable.</p>
-        </div>
-
-        <figure class="fe-code">
-          <figcaption>Example approval webhook</figcaption>
-          <pre><code>{
-  <span class="fe-key">"type"</span>: <span class="fe-value">"filing.awaiting_approval"</span>,
-  <span class="fe-key">"filingId"</span>: <span class="fe-value">"filing_123"</span>,
-  <span class="fe-key">"data"</span>: {
-    <span class="fe-key">"approvalLink"</span>: <span class="fe-value">"https://example.com/approve/…"</span>,
-    <span class="fe-key">"expiresAt"</span>: <span class="fe-value">"2026-11-25T15:00:00Z"</span>
-  }
-}</code></pre>
         </figure>
       </div>
     </section>
@@ -623,8 +627,8 @@
       <div class="fe-container fe-split">
         <div class="fe-briefing-copy">
           <span class="fe-kicker">Enterprise briefing</span>
-          <h2 id="fe-briefing-title">See how Filing Engine would fit your operation</h2>
-          <p>Walk through a New Jersey formation dry run, see the approval experience and discuss the filing types and integrations your team needs.</p>
+          <h2 id="fe-briefing-title">See what your team could automate</h2>
+          <p>Walk through a New Jersey formation dry run and discuss your filing volume, the orders your team handles most often and the systems you use today.</p>
         </div>
 
         <form class="fe-form" id="brief-form" aria-labelledby="fe-briefing-title" aria-describedby="fe-briefing-note" novalidate>
