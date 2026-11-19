@@ -154,6 +154,22 @@ export const FormationDetails = z.object({
     entityName: z.string().optional(),
     address: Address.optional(),
   })).max(6).default([]),
+  /** FL formation entity type (Sunbiz): LLC (default), profit corporation, or limited partnership. */
+  floridaEntityType: z.enum(["llc", "profit_corporation", "limited_partnership"]).default("llc"),
+  /** FL profit corporation: number of authorized shares (required). */
+  stockShares: z.number().int().positive().optional(),
+  /** FL profit corporation incorporator (name + address); its name is the incorporator signature. */
+  incorporator: Person.optional(),
+  /** FL limited partnership general partners (at least one, each signs). */
+  generalPartners: z.array(z.object({
+    name: z.string().optional(),
+    entityName: z.string().optional(),
+    documentNumber: z.string().optional(),
+    address: Address.optional(),
+    signature: z.string().min(1),
+  })).max(6).default([]),
+  /** FL limited partnership: elect limited liability limited partnership (LLLP) status. */
+  isLLLP: z.boolean().optional(),
   additionalCertificates: z
     .object({
       certificateOfStanding: z.boolean().default(false),

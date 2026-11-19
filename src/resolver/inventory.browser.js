@@ -159,8 +159,8 @@
     }
 
     // Prices: "$100.00" with the nearest row/label text.
-    const priceRe = /\$\s?(\d{1,3}(?:,\d{3})*(?:\.\d{2})?)/g;
-    const priceStrip = /\$\s?(\d{1,3}(?:,\d{3})*(?:\.\d{2})?)/g; // separate instance: replace() resets lastIndex
+    const priceRe = /\$\s?(\d[\d,]*(?:\.\d{2})?)/g;
+    const priceStrip = /\$\s?(\d[\d,]*(?:\.\d{2})?)/g; // separate instance: replace() resets lastIndex
     const seen = new Set();
     for (const el of Array.from(document.querySelectorAll("td,li,p,span,div,label,dd"))) {
       if (el.children.length > 3) continue;

@@ -598,7 +598,11 @@ drawdown equivalent). complete:false, dry-run only, until a verified real filing
   refused (FL examiner review is not instant -> EIN after acceptance).
 - Settings: flPaymentMethod (credit_card / sunbiz_account), flSunbizAccountCredentialKey.
 - New setByName step-context helper for FL's repeated authorized-person fields.
-- "Try all types": profit corporation and limited partnership formation forms + fees
-  confirmed; annual report, certificate of status, reinstatement and dissolution are
-  existing-entity flows on services.sunbiz.org, documented for the next walk.
-- Tests: 102.
+- "Try all types": profit corporation ($70) and limited partnership ($1000) each walked
+  to payment and built out as full adapters (fl-profit-corporation, fl-limited-partnership),
+  routed by floridaEntityType; all three FL entity types pass a live dry run. Annual
+  report, certificate of status, reinstatement and dissolution are existing-entity flows
+  on services.sunbiz.org, documented for the next walk.
+- Fix: the page price reader now parses amounts written without a thousands separator
+  ("$1000.00"), which FL uses.
+- Tests: 106.

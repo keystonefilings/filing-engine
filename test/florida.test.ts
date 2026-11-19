@@ -82,3 +82,38 @@ describe("Florida filing creation", () => {
     expect(approvalLink).toBeDefined();
   });
 });
+
+describe("Florida profit corporation and limited partnership", () => {
+  const FL_ADDR2 = { street1: "200 Ocean Dr", city: "Tampa", state: "FL", zip: "33602" };
+  const FL_RA = { name: "Tessa Agentsson", address: { street1: "1 Capitol Way", city: "Tallahassee", state: "FL", zip: "32301" } };
+  const base = (floridaEntityType: string, extra: Record<string, unknown>) => ({
+    tenantId: "keystone", clientCompanyId: "acme-cpa", idempotencyKey: `fl-${floridaEntityType}-${Math.random()}`,
+    type: "formation", state: "FL",
+    formation: { name: { baseName: "Palm Coast Industries", designator: floridaEntityType === "limited_partnership" ? "LP" : "Inc" }, floridaEntityType, mainBusinessAddress: FL_ADDR2, registeredAgent: FL_RA, ...extra },
+    contact: { firstName: "Test", lastName: "Filer", phone: "8135550100", email: "t@example.test" },
+  });
+
+  it("routes to the profit-corporation adapter and prices it at $70", () => {
+    const req = FilingRequest.parse(base("profit_corporation", { stockShares: 1000, incorporator: { name: "Test Incorporator", address: FL_ADDR2 } }));
+    expect(adapterFor(req)!.key).toBe("fl-profit-corporation");
+    expect(expectedFees("FL", "formation", { paymentMethod: "credit_card", floridaEntityType: "profit_corporation" })[0]!.amountUsd).toBe(70);
+    expect(hasErrors(validateFiling(req))).toBe(false);
+  });
+  it("requires stock shares and an incorporator for a profit corporation", () => {
+    const paths = validateFiling(FilingRequest.parse(base("profit_corporation", {}))).map((i) => i.path);
+    expect(paths).toContain("formation.stockShares");
+    expect(paths).toContain("formation.incorporator");
+  });
+  it("routes to the limited-partnership adapter, prices it at $1000, requires a general partner", () => {
+    const ok = FilingRequest.parse(base("limited_partnership", { generalPartners: [{ name: "Gene Partnerton", address: FL_ADDR2, signature: "Gene Partnerton" }] }));
+    expect(adapterFor(ok)!.key).toBe("fl-limited-partnership");
+    expect(expectedFees("FL", "formation", { paymentMethod: "credit_card", floridaEntityType: "limited_partnership" })[0]!.amountUsd).toBe(1000);
+    expect(hasErrors(validateFiling(ok))).toBe(false);
+    const missing = FilingRequest.parse(base("limited_partnership", {}));
+    expect(validateFiling(missing).map((i) => i.path)).toContain("formation.generalPartners");
+  });
+  it("adds the Certificate of Status and Certified Copy at the right per-type amounts", () => {
+    const corp = expectedFees("FL", "formation", { paymentMethod: "credit_card", floridaEntityType: "profit_corporation", certificateOfStanding: true, certifiedCopy: true });
+    expect(corp.reduce((s, l) => s + l.amountUsd, 0)).toBe(70 + 8.75 + 52.5);
+  });
+});

@@ -112,3 +112,43 @@ export const FL_ENTITY_TYPES = {
   profit_corp: { url: "https://efile.sunbiz.org/profit_file.html", feeKey: "profit_corp", label: "Articles of Incorporation (Profit Corporation)" },
   limited_partnership: { url: "https://efile.sunbiz.org/lp_file.html", feeKey: "limited_partnership", label: "Certificate of Limited Partnership" },
 } as const;
+
+/**
+ * FL Profit Corporation — Articles of Incorporation (efile.sunbiz.org/profit_file.html),
+ * walked to payment 2026-11-19. Shares the disclaimer/review/summary/payment screens with
+ * the LLC; only the form differs (corporate name, stock shares, incorporator, officers).
+ */
+export const FL_CORP_FORM = {
+  screenKey: "fl.corp.form",
+  title: "Articles of Incorporation (Profit Corporation)",
+  intents: [
+    { key: "corporateName", labels: ["Corporate Name"], kinds: ["text" as const], required: true, note: "must contain Inc/Corp/etc." },
+    { key: "stockShares", labels: ["Corporate Stock Shares"], kinds: ["text" as const], required: true },
+    { key: "princStreet1", labels: ["Address"], kinds: ["text" as const], required: true },
+    { key: "princCity", labels: ["City,"], kinds: ["text" as const], required: true },
+    { key: "raSignature", labels: ["Registered Agent Signature"], kinds: ["text" as const], required: true },
+    { key: "incorporatorName", labels: ["Name"], kinds: ["text" as const], required: true },
+    { key: "incorporatorSignature", labels: ["Electronic Signature of Incorporator"], kinds: ["text" as const], required: true },
+    { key: "purposeFlag", labels: ["Corporate purpose is", "Any and all lawful"], kinds: ["checkbox" as const], required: false },
+    { key: "correspondenceEmail", labels: ["E-mail Address"], kinds: ["text" as const, "email" as const], required: true },
+  ],
+  knownUnused: ["Continue", "reset", "(Maximum of 240 characters.)", "Certificate of Status", "Certified Copy"],
+} satisfies ScreenIntents;
+
+/**
+ * FL Limited Partnership — Certificate (efile.sunbiz.org/lp_file.html), walked to payment
+ * 2026-11-19. General partners each sign; an optional LLLP election.
+ */
+export const FL_LP_FORM = {
+  screenKey: "fl.lp.form",
+  title: "Certificate of Limited Partnership",
+  intents: [
+    { key: "partnershipName", labels: ["Limited Partnership Name"], kinds: ["text" as const], required: true },
+    { key: "lllpFlag", labels: ["check box if limited partnership", "limited liability limited partnership"], kinds: ["checkbox" as const], required: false },
+    { key: "princStreet1", labels: ["Address"], kinds: ["text" as const], required: true },
+    { key: "princCity", labels: ["City,"], kinds: ["text" as const], required: true },
+    { key: "raSignature", labels: ["Registered Agent Signature"], kinds: ["text" as const], required: true },
+    { key: "correspondenceEmail", labels: ["E-mail Address"], kinds: ["text" as const, "email" as const], required: true },
+  ],
+  knownUnused: ["Continue", "reset", "Certificate of Status", "Certified Copy"],
+} satisfies ScreenIntents;

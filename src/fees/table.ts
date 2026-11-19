@@ -19,12 +19,24 @@ export class FeeUnknownError extends Error {}
 export function expectedFees(
   state: "NY" | "NJ" | "MO" | "FL",
   type: string,
-  opts: { paymentMethod?: string; certificateOfStanding?: boolean; certifiedCopy?: boolean; entityType?: string } = {},
+  opts: { paymentMethod?: string; certificateOfStanding?: boolean; certifiedCopy?: boolean; entityType?: string; floridaEntityType?: string } = {},
   table: FeeTable = loadFeeTable(),
 ): FeeLine[] {
   const entry = table[state]?.[type] as Record<string, any> | null | undefined;
   if (!entry) throw new FeeUnknownError(`No fee table entry for ${state}/${type}; read it on the walk first`);
   const lines: FeeLine[] = [];
+  // Florida formation is priced by entity type (LLC $125, profit corp $70, LP $1000).
+  const flEntity = state === "FL" && type === "formation" && opts.floridaEntityType && opts.floridaEntityType !== "llc"
+    ? (entry.entityFees as Record<string, any> | undefined)?.[opts.floridaEntityType]
+    : undefined;
+  if (flEntity) {
+    lines.push({ label: `${flEntity._source ? "" : ""}Florida ${opts.floridaEntityType!.replace(/_/g, " ")} filing fee`, amountUsd: flEntity.statutory });
+    const svc2 = opts.paymentMethod ? entry.serviceFee?.[opts.paymentMethod] : undefined;
+    if (typeof svc2 === "number" && svc2 > 0) lines.push({ label: `Service fee (${opts.paymentMethod})`, amountUsd: svc2 });
+    if (opts.certificateOfStanding && typeof flEntity.certificate_of_status === "number") lines.push({ label: "Certificate of Status", amountUsd: flEntity.certificate_of_status });
+    if (opts.certifiedCopy && typeof flEntity.certified_copy === "number") lines.push({ label: "Certified Copy", amountUsd: flEntity.certified_copy });
+    return lines;
+  }
   if (entry.statutory) lines.push({ label: entry.statutory.label, amountUsd: entry.statutory.amountUsd });
   if (entry.byEntityType) {
     // Price depends on the entity's type (NJ standing certificate: LLC $50, corporation $25).

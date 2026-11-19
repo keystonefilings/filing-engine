@@ -1,0 +1,13 @@
+Payment Page
+Document Tracking #:	400485984584
+The charge amount for your Corporate filing is:	$1000.00
+When your payment approval is received, we will process your filing request. When your document is filed, an e-mail confirmation will be sent to the address entered on the form.
+Please select one of the payment options listed below.
+If you press the "Credit Card Payment" button from this screen, you will be sent to the payment screen to be charged for this filing.
+Sunbiz E-file account number	
+Password	
+E-mail Address	
+If you enter an account number and password and press the "Sunbiz E-file Account Payment" button from this screen, your account will be charged.
+Florida Department of State, Division of Corporations
+Florida Department of State
+Division of Corporations

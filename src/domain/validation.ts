@@ -89,13 +89,23 @@ export function validateFiling(req: FilingRequest): ValidationIssue[] {
     }
 
     if (req.state === "FL") {
-      if (!hasLlcIndicator(legal)) err("formation.name", "FL requires an LLC indicator in the name");
+      const flType = f.floridaEntityType;
       if (!f.mainBusinessAddress) err("formation.mainBusinessAddress", "FL requires the principal place of business address");
       const agent = f.registeredAgent;
       if (!agent?.address) err("formation.registeredAgent", "FL requires a registered agent with an address");
       else if (agent.address.state !== "FL") err("formation.registeredAgent.address.state", "FL registered agent must have a Florida address");
       if (f.purpose && f.purpose.length > 240) err("formation.purpose", "FL purpose is limited to 240 characters");
-      if (f.authorizedPersons.length > 6) err("formation.authorizedPersons", "FL online filing lists at most 6 authorized persons");
+      if (flType === "llc") {
+        if (!hasLlcIndicator(legal)) err("formation.name", "FL requires an LLC indicator in the name");
+        if (f.authorizedPersons.length > 6) err("formation.authorizedPersons", "FL online filing lists at most 6 authorized persons");
+      } else if (flType === "profit_corporation") {
+        if (!f.stockShares) err("formation.stockShares", "FL profit corporation requires the number of authorized shares");
+        if (!f.incorporator?.address) err("formation.incorporator", "FL profit corporation requires an incorporator with an address");
+        if (f.authorizedPersons.length > 6) err("formation.authorizedPersons", "FL online filing lists at most 6 officers/directors");
+      } else if (flType === "limited_partnership") {
+        if (f.generalPartners.length < 1) err("formation.generalPartners", "FL limited partnership requires at least one general partner");
+        if (f.generalPartners.length > 6) err("formation.generalPartners", "FL online filing lists at most 6 general partners");
+      }
     }
   }
 

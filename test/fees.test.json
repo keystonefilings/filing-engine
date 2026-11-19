@@ -172,17 +172,17 @@
       },
       "_source": "efile.sunbiz.org/llc_file.html live form (2026-11-19): required $125 ($100 filing + $25 RA designation); Certificate of Status +$5, Certified Copy +$30.",
       "entityFees": {
-        "profit_corp": {
-          "statutory": 70,
-          "certificate_of_status": 8.75,
-          "certified_copy": 52.5,
-          "_source": "profit_file.html: $70"
-        },
         "limited_partnership": {
           "statutory": 1000,
           "certificate_of_status": 8.75,
           "certified_copy": 52.5,
           "_source": "lp_file.html: $1000"
+        },
+        "profit_corporation": {
+          "statutory": 70,
+          "certificate_of_status": 8.75,
+          "certified_copy": 52.5,
+          "_source": "profit_file.html: $70"
         }
       }
     },

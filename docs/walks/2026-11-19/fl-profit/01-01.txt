@@ -1,0 +1,109 @@
+
+Florida Profit Filing
+Filing Information
+If an effective date is required for this filing, enter here	//	(MM/DD/YYYY)	What is an effective date?
+ Required Filing Fees: $70.00
+Certificate of Status	 $8.75 (Optional)	What is a certificate of status?
+Certified Copy	 $8.75 (Optional)	What is a certified copy?
+Corporate Name	
+	(Name must include suffix such as "Corp", "Inc.", "Incorporated", etc.)
+Corporate Stock Shares		What are corporate stock shares?
+	(Cannot be zero)
+Principal Place of Business	  (The principal address must be a street address)
+Address	
+Suite, Apt. #, etc.	
+City, State	, 
+Zip Code & Country	 
+Mailing Address
+If your corporate mailing address is the same as the principal address above, please check the box below. Otherwise, enter your corporate mailing address.
+ Mailing address same as principal address
+Address	
+Suite, Apt. #, etc.	
+City, State	, 
+Zip Code & Country	 
+Name And Address of Registered Agent		What is a registered agent?
+Name	,	,	,	
+	Last Name	First Name	Initial	Title (Sr., Jr., etc.)
+- OR -
+Business to serve as RA	 (Must be different from entity name being filed)
+Address	 (PO Box not acceptable)
+Suite, Apt. #, etc.	
+City, State	, FL
+Zip Code & Country	 US
+The Registered Agent must type their name in the 'Registered Agent Signature' block below. RA signature MUST be an individual name. If the RA is a business entity, an individual must sign on the entity's behalf. Do not enter the name of the entity you are attempting to file as Registered Agent. A business entity cannot serve as its own RA.	
+Registered Agent Signature	
+This signature must be that of the individual "signing" this document electronically or be made with the full knowledge and permission of the individual, otherwise it constitutes forgery under s. 831.06, F.S.
+Notice of Annual Report
+This corporation must file an Annual Report with the Division of Corporations between January 1st and May 1st of every year to maintain "active" status. The corporation's first annual report will be due between January 1st and May 1st of the calendar year following the year the corporation is formed and must be filed online. The fee to file a Corporation Annual Report is $150. A $400 late fee is applied if the report is filed after May 1st. Reminder notices to file the Annual Report will be sent to the e-mail address you provide in these articles. File early to avoid the late fee.
+Incorporator Name And Address
+Name	
+Address	
+Suite, Apt.#, etc.	
+City, State & Zip Code	
+Electronic Signature of Incorporator	
+I am the incorporator submitting these Articles of Incorporation and affirm that the facts stated herein are true. I am aware that false information submitted in a document to the Department of State constitutes a third degree felony as provided for in s. 817.155, F.S. I acknowledge that I have read the above "Notice of Annual Report" statement and understand the requirement to file an annual report between January 1st and May 1st in the calendar year following formation of this corporation and every year thereafter to maintain "active" status.
+Corporate Purpose
+	Corporate purpose is 'Any and all lawful business'.
+(Do not check this box if a "Professional Association". You must list specific purpose below.)
+(Maximum of 240 characters.)
+ characters remaining
+Correspondence Name And E-mail Address		Why do you need my e-mail address?
+Please enter your e-mail address carefully and verify that it is correct. This is the address correspondence pertaining to this filing and future annual report notices will be sent.
+Name	
+E-mail Address	
+Re-enter E-mail Address	
+Officer/Director Name And Address
+List the name and address of each officer/director now. This information is required to open most bank accounts and to obtain workers' comp exemption. Once this document is filed, any changes will require an amendment, which cannot be filed online, and cost an additional $35.00 filing fee.
+Title	 (P, VP, etc...)
+Name	,	,	,	
+	Last Name	First Name	Initial	Title (Sr., Jr., etc.)
+- OR -
+Business Name to serve as Officer	
+Street Address	
+City, State	, 
+Zip Code & Country	 
+Title	 (P, VP, etc...)
+Name	,	,	,	
+	Last Name	First Name	Initial	Title (Sr., Jr., etc.)
+- OR -
+Business Name to serve as Officer	
+Street Address	
+City, State	, 
+Zip Code & Country	 
+Title	 (P, VP, etc...)
+Name	,	,	,	
+	Last Name	First Name	Initial	Title (Sr., Jr., etc.)
+- OR -
+Business Name to serve as Officer	
+Street Address	
+City, State	, 
+Zip Code & Country	 
+Title	 (P, VP, etc...)
+Name	,	,	,	
+	Last Name	First Name	Initial	Title (Sr., Jr., etc.)
+- OR -
+Business Name to serve as Officer	
+Street Address	
+City, State	, 
+Zip Code & Country	 
+Title	 (P, VP, etc...)
+Name	,	,	,	
+	Last Name	First Name	Initial	Title (Sr., Jr., etc.)
+- OR -
+Business Name to serve as Officer	
+Street Address	
+City, State	, 
+Zip Code & Country	 
+Title	 (P, VP, etc...)
+Name	,	,	,	
+	Last Name	First Name	Initial	Title (Sr., Jr., etc.)
+- OR -
+Business Name to serve as Officer	
+Street Address	
+City, State	, 
+Zip Code & Country	 
+Please review the filing for accuracy. If you need to make corrections, do so at this time. The filing information will be added/edited exactly as you have entered it. Once you have submitted the information, your filing cannot be updated, removed, cancelled or refunded.
+	
+Florida Department of State, Division of Corporations
+Florida Department of State
+Division of Corporations

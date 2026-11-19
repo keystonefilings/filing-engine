@@ -60,6 +60,7 @@ export class FilingService {
       certificateOfStanding: req.formation?.additionalCertificates.certificateOfStanding,
       certifiedCopy: req.formation?.additionalCertificates.certifiedCopy,
       entityType: req.standing?.entityType,
+      floridaEntityType: req.formation?.floridaEntityType,
     });
   }
 
