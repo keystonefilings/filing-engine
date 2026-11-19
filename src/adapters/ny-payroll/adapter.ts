@@ -67,6 +67,7 @@ const requiredAddresses: ScreenStep = {
 
 const businessInformation: ScreenStep = {
   screen: NY_PAYROLL_SCREENS.businessInformation,
+  sensitive: true, // owner/officer SSNs
   async fill(ctx) {
     const p = payroll(ctx);
     const first = p.owners[0];

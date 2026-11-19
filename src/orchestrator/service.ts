@@ -39,6 +39,8 @@ export interface FilingServiceDeps {
   balances?: BalanceProvider;
   limiter?: ConcurrencyLimiter;
   dryRunDefault: boolean;
+  /** Clock for pre-flight checks (IRS hours); injectable for tests. */
+  now?: () => Date;
 }
 
 export class ValidationFailed extends Error {
@@ -261,7 +263,7 @@ export class FilingService {
 
     const pf = await preflight({
       filing, approval, tenant, client, adapter, einAdapter: irsEinAdapter, approvals: this.d.approvals, vault: this.d.vault,
-      balances: this.d.balances ?? unknownBalanceProvider, dryRun,
+      balances: this.d.balances ?? unknownBalanceProvider, dryRun, now: this.d.now?.(),
     });
     if (!pf.ok || !adapter) {
       const f = filing.status === "queued" || filing.status === "approved" ? await this.transition(filing, "blocked", { lastError: pf.blockers.join("; ") }) : await store.updateFiling(filing.id, { lastError: pf.blockers.join("; ") });
@@ -286,8 +288,9 @@ export class FilingService {
           const f = await this.transition(latest, "submitted", { currentRunId: outcome.run.id, ein: outcome.ein ?? latest.ein });
           if (outcome.ein) await this.emit("filing.ein_filed", f, { ein: outcome.ein }, outcome.run.id);
           await this.emit("filing.submitted", f, { site: adapter.site, artifacts: f.artifacts }, outcome.run.id);
-          // NJ returns documents at once; NY waits for the receipt email (inbox module, build order 3).
-          if (adapter.site === "NJ") {
+          // NJ returns documents at once and the IRS assigns the EIN on the spot; NY waits for the
+          // receipt email (inbox module, build order 3).
+          if (adapter.site === "NJ" || adapter.site === "IRS") {
             const done = await this.transition(await this.transition(f, "accepted"), "completed");
             await this.emit("filing.completed", done, { artifacts: done.artifacts, ein: done.ein }, outcome.run.id);
           }

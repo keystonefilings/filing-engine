@@ -51,6 +51,9 @@ export interface ScreenStep {
   /** The review/summary screen. In beta, with the tenant's review gate on, the engine
    *  screenshots this screen and stops for admin review before proceeding to submit. */
   reviewScreen?: boolean;
+  /** The screen shows or takes an SSN/ITIN: its screenshots are masked and its DOM snapshots
+   *  stripped of values, so the number never lands in an artifact. */
+  sensitive?: boolean;
   /** Whether this screen is expected right now; optional screens (e.g. MFA) return false to be skipped. */
   present?(ctx: StepContext): Promise<boolean>;
   fill(ctx: StepContext): Promise<void>;

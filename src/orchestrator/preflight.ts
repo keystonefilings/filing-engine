@@ -60,11 +60,12 @@ export async function preflight(input: {
   }
 
   const einMode = req.ein?.mode ?? client.einMode;
-  if (req.ein && einMode === "in_run") {
+  // The IRS interview runs for an EIN-only filing, or inside a formation run with an in-run EIN.
+  if (req.ein && (req.type === "ein_only" || einMode === "in_run")) {
     const remaining = irsWindowMinutesRemaining(input.now);
     if (remaining === null) b.push("IRS EIN assistant is closed now (Mon-Fri 6am-1am, Sat 6am-9pm, Sun 6pm-midnight ET); in-run EIN cannot start");
     else if (remaining < IRS_HOURS.minMinutesRemaining) b.push(`only ${remaining} minutes left in the IRS window; need ${IRS_HOURS.minMinutesRemaining}`);
-    if (!input.einAdapter.complete && !dryRun) b.push("IRS EIN adapter is not mapped yet (walk B); in-run EIN cannot run for real");
+    if (req.type !== "ein_only" && !input.einAdapter.complete && !dryRun) b.push("IRS EIN adapter is not verified live yet; in-run EIN cannot run for real");
     if (!req.ein.responsibleParty) b.push("in-run EIN requires a responsible party");
   }
 
@@ -95,7 +96,9 @@ export async function preflight(input: {
     }
   }
 
-  if (req.state === "FL" && !dryRun) {
+  // State payment checks apply only to filings that pay the state (not EIN or payroll registration).
+  const paysState = req.type !== "ein_only" && req.type !== "payroll_registration";
+  if (req.state === "FL" && paysState && !dryRun) {
     const acct = flAccount(tenant, client);
     if (acct.paymentMethod === "sunbiz_account" && !acct.accountCredentialKey) {
       b.push("FL is set to pay by the prepaid Sunbiz E-file account, but no account is on file (service company's, or the firm's per G1)");
@@ -103,7 +106,7 @@ export async function preflight(input: {
     // Card payment is entered at the human tap; no stored card needed (decision 3).
   }
 
-  if (req.state === "NY" && req.type !== "payroll_registration" && !dryRun) {
+  if (req.state === "NY" && paysState && !dryRun) {
     const dd = nyDrawdownAccount(tenant, client);
     if (!dd) b.push("NY filings pay from a drawdown account, but the account in force (service company's, or the firm's per G1) is not set");
     else {

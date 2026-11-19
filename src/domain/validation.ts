@@ -27,6 +27,11 @@ export function validateFiling(req: FilingRequest): ValidationIssue[] {
   if (req.type === "formation" || req.type === "ein_only") {
     if (!req.formation) err("formation", "formation details are required");
   }
+  if (req.type === "ein_only") {
+    // The LLC already exists; its details identify it to the IRS. State formation rules below do not apply.
+    if (!req.ein || req.ein.mode === "none") err("ein", "an EIN-only filing needs the EIN request (ein)");
+    else if (!req.ein.startDate) err("ein.startDate", "an EIN-only filing needs the LLC start date");
+  }
 
   if (req.formation) {
     const f = req.formation;
@@ -39,7 +44,7 @@ export function validateFiling(req: FilingRequest): ValidationIssue[] {
       err("formation.name.baseName", "baseName must not contain the designator; put it in designator");
     }
 
-    if (req.state === "NY") {
+    if (req.type === "formation" && req.state === "NY") {
       if (!hasLlcIndicator(legal)) err("formation.name", "NY requires an LLC type indicator in the name");
       if (!f.county) err("formation.county", "NY requires the county");
       if (!f.serviceOfProcess) err("formation.serviceOfProcess", "NY requires service of process details");
@@ -62,7 +67,7 @@ export function validateFiling(req: FilingRequest): ValidationIssue[] {
       }
     }
 
-    if (req.state === "NJ") {
+    if (req.type === "formation" && req.state === "NJ") {
       if (f.members.length < 1) err("formation.members", "NJ requires at least one member");
       if (f.signers.length < 1) err("formation.signers", "NJ requires at least one signer");
       for (const [i, m] of f.members.entries()) {
@@ -77,7 +82,7 @@ export function validateFiling(req: FilingRequest): ValidationIssue[] {
       if (f.otherProvisions.length) err("formation.otherProvisions", "NJ Other Provisions entry is not mapped yet (Add New Provision dialog not walked)");
     }
 
-    if (req.state === "MO") {
+    if (req.type === "formation" && req.state === "MO") {
       if (!hasLlcIndicator(legal)) err("formation.name", "MO requires an LLC indicator in the name");
       if (!f.managementStructure) err("formation.managementStructure", "MO requires the management structure (member or manager managed)");
       if (!f.purpose) err("formation.purpose", "MO requires a stated purpose");
@@ -91,7 +96,7 @@ export function validateFiling(req: FilingRequest): ValidationIssue[] {
       if (f.seriesLlc) err("formation.seriesLlc", "MO Series LLC needs an LLC 1A upload, which is not mapped yet");
     }
 
-    if (req.state === "FL") {
+    if (req.type === "formation" && req.state === "FL") {
       const flType = f.floridaEntityType;
       if (!f.mainBusinessAddress) err("formation.mainBusinessAddress", "FL requires the principal place of business address");
       const agent = f.registeredAgent;
@@ -113,7 +118,7 @@ export function validateFiling(req: FilingRequest): ValidationIssue[] {
   }
 
   if (req.ein && req.ein.mode !== "none") {
-    if (req.state === "FL" && req.ein.mode === "in_run") {
+    if (req.type === "formation" && req.state === "FL" && req.ein.mode === "in_run") {
       err("ein.mode", "Florida filings are reviewed by a document examiner (not instant); apply for the EIN after the state accepts the filing (mode after_acceptance)");
     }
     const rp = req.ein.responsibleParty;
@@ -130,6 +135,7 @@ export function validateFiling(req: FilingRequest): ValidationIssue[] {
     // These are required in the live UI and must come from intake before the run; flag when absent.
     if (!req.ein.regulated) warn("ein.regulated", "the four regulated-activity answers are required on the live form; supply them from intake");
     if (!req.ein.employees) warn("ein.employees", "the W-2 employees question is required on the live form; supply it from intake");
+    if (!req.ein.county && !req.formation?.county) warn("ein.county", "the EIN interview asks for the physical county; supply it from intake");
     if (req.ein.physicalState === undefined && req.formation?.mainBusinessAddress) {
       // physical state can derive from the main address; informational
     }

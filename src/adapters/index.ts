@@ -30,6 +30,7 @@ export function adapterFor(req: FilingRequest): SiteAdapter | null {
     if (req.state === "FL") return flAdapterFor(req.formation?.floridaEntityType ?? "llc");
     return nyFormationAdapter;
   }
+  if (req.type === "ein_only") return irsEinAdapter; // any formation state: the IRS interview is the whole filing
   if (req.type === "standing_certificate" && req.state === "NJ") return njStandingAdapter;
   if (req.type === "payroll_registration") {
     if (req.state === "NY") return nyPayrollAdapter;

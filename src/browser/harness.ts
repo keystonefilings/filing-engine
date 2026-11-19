@@ -1,61 +1,80 @@
 import path from "node:path";
 import { mkdir } from "node:fs/promises";
 import type { Browser, BrowserContext, Page } from "playwright";
+import { parseProxy, routeFor, type ProxyRoute } from "./egress.js";
 
 export interface HarnessOptions {
   chromiumPath?: string | null;
-  /** Outbound proxy for the browser (decision 4: the static-IP proxy, or this session's agent proxy). */
+  /** Default outbound proxy URL for every site (optional; see egress.ts). */
   proxyServer?: string | null;
+  /** Per-site routes; a site listed here overrides the default (null = direct). */
+  siteProxies?: Record<string, ProxyRoute | null>;
   profileDir: string;
   headless?: boolean;
 }
 
 /**
- * Owns browser contexts. A persistent context per (site, account) keeps cookies and
- * the ny.gov / client NJ sessions on the fixed-IP worker; the IRS gets a fresh
- * context every run. Secrets are never written to the profile directory by us.
+ * Owns browser contexts. A persistent context per (site, account) keeps cookies and the
+ * ny.gov / client NJ sessions; the IRS gets a fresh context every run. Each context goes out
+ * the network route configured for its site (egress.ts): one shared browser per distinct
+ * route, so a direct NJ run and a proxied IRS run never share a network path. Secrets are
+ * never written to the profile directory by us.
  */
 export class BrowserHarness {
-  private browser: Browser | null = null;
+  private readonly browsers = new Map<string, Browser>();
   private pw: typeof import("playwright") | null = null;
+  private readonly defaultRoute: ProxyRoute | null;
 
-  constructor(private readonly opts: HarnessOptions) {}
+  constructor(private readonly opts: HarnessOptions) {
+    this.defaultRoute = opts.proxyServer ? parseProxy(opts.proxyServer) : null;
+  }
+
+  /** The network route a site's browser uses (null = direct). */
+  routeFor(site?: string): ProxyRoute | null {
+    return routeFor(site, this.defaultRoute, this.opts.siteProxies ?? {});
+  }
 
   private async playwright() {
     if (!this.pw) this.pw = await import("playwright");
     return this.pw;
   }
 
-  private launchOptions() {
+  private launchOptions(route: ProxyRoute | null) {
     return {
       headless: this.opts.headless ?? true,
       ...(this.opts.chromiumPath ? { executablePath: this.opts.chromiumPath } : {}),
-      ...(this.opts.proxyServer ? { proxy: { server: this.opts.proxyServer } } : {}),
+      ...(route ? { proxy: route } : {}),
     };
   }
 
-  /** Ephemeral context (IRS, NJ signed-out walks, fixtures). */
-  async ephemeralContext(): Promise<BrowserContext> {
+  /** Ephemeral context (IRS, NJ signed-out walks, fixtures), out the site's route. */
+  async ephemeralContext(site?: string): Promise<BrowserContext> {
     const pw = await this.playwright();
-    if (!this.browser) this.browser = await pw.chromium.launch(this.launchOptions());
-    return this.browser.newContext({ viewport: { width: 1280, height: 1600 }, acceptDownloads: true });
+    const route = this.routeFor(site);
+    const key = route ? `${route.server}|${route.username ?? ""}` : "direct";
+    let browser = this.browsers.get(key);
+    if (!browser) {
+      browser = await pw.chromium.launch(this.launchOptions(route));
+      this.browsers.set(key, browser);
+    }
+    return browser.newContext({ viewport: { width: 1280, height: 1600 }, acceptDownloads: true });
   }
 
-  /** Persistent context keyed by profile (e.g. "ny:<tenant>", "nj:<tenant>" or "nj:<firm>"). */
-  async persistentContext(profileKey: string): Promise<BrowserContext> {
+  /** Persistent context keyed by profile (e.g. "ny:<tenant>", "nj:<tenant>" or "nj:<firm>"), out the site's route. */
+  async persistentContext(profileKey: string, site?: string): Promise<BrowserContext> {
     const pw = await this.playwright();
     const dir = path.join(this.opts.profileDir, profileKey.replace(/[^a-z0-9:_-]/gi, "_"));
     await mkdir(dir, { recursive: true });
     return pw.chromium.launchPersistentContext(dir, {
-      ...this.launchOptions(),
+      ...this.launchOptions(this.routeFor(site)),
       viewport: { width: 1280, height: 1600 },
       acceptDownloads: true,
     });
   }
 
   async close(): Promise<void> {
-    await this.browser?.close();
-    this.browser = null;
+    for (const b of this.browsers.values()) await b.close().catch(() => {});
+    this.browsers.clear();
   }
 }
 

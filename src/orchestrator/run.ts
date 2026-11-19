@@ -69,9 +69,13 @@ export class RunExecutor {
       id: randomUUID(), filingId: input.filing.id, approvalId: input.approval?.id ?? "dry-run", site: input.adapter.site,
       dryRun: input.dryRun, status: "running", startedAt: new Date().toISOString(), steps: [],
     });
-    const recorder = new StepRecorder(this.deps.artifacts, store, { filingId: input.filing.id, runId: run.id });
+    // Screens that show or take an SSN/ITIN (state adapter and the in-run IRS sub-run) are recorded masked.
+    const sensitive = new Set([...input.adapter.steps, ...(input.einAdapter?.steps ?? [])].filter((s) => s.sensitive).map((s) => s.screen.screenKey));
+    const recorder = new StepRecorder(this.deps.artifacts, store, { filingId: input.filing.id, runId: run.id }, sensitive);
     const profileKey = input.adapter.profileKey(input);
-    const context: BrowserContext = profileKey ? await this.deps.harness.persistentContext(profileKey) : await this.deps.harness.ephemeralContext();
+    // Each site's browser goes out the network route configured for it (browser/egress.ts).
+    const site = input.adapter.site;
+    const context: BrowserContext = profileKey ? await this.deps.harness.persistentContext(profileKey, site) : await this.deps.harness.ephemeralContext(site);
     const credKey = input.adapter.credentialKey(input);
     const credential = credKey ? await this.deps.vault.getCredential(credKey) : null;
     const values: StepContext["values"] = {};
@@ -98,7 +102,7 @@ export class RunExecutor {
         await recorder.record(page, step.screen.screenKey, "filled");
         if (step.reviewScreen && this.deps.reviewGate && input.tenant.betaReviewGate && !input.dryRun && !input.reviewGateApproved) {
           stage = "review_gate";
-          const screenshotArtifactId = await this.captureReviewShot(page, input, run);
+          const screenshotArtifactId = await this.captureReviewShot(page, input, run, recorder, step.screen.screenKey);
           const rec = await this.deps.reviewGate.recordHalt({
             runId: run.id, filingId: input.filing.id, tenantId: input.filing.tenantId,
             site: input.adapter.site, screenKey: step.screen.screenKey, screenshotArtifactId,
@@ -170,15 +174,16 @@ export class RunExecutor {
       if (input.dryRun) { await recorder.noteOnly("irs.skipped", "dry run: IRS adapter not mapped (walk B); placeholder EIN used"); return "00-0000000"; }
       throw new Error("IRS EIN adapter not mapped (walk B); run stopped before the state filing per rule 4");
     }
-    const context = await this.deps.harness.ephemeralContext();
+    const context = await this.deps.harness.ephemeralContext(ein.site);
+    const einInput: RunInput = { ...input, adapter: ein };
     try {
       const page = await context.newPage();
       await page.goto(ein.entryUrl(input), { waitUntil: "domcontentloaded" });
       const values: StepContext["values"] = {};
       for (const step of ein.steps) {
-        const ctx = await this.stepContext(page, step.screen, input, values, null, recorder, parentRun);
+        const ctx = await this.stepContext(page, step.screen, einInput, values, null, recorder, parentRun);
         if (step.present && !(await step.present(ctx))) continue;
-        await this.driftCheck(page, step.screen, { ...input, adapter: ein }, parentRun, recorder);
+        await this.driftCheck(page, step.screen, einInput, parentRun, recorder);
         await step.fill(ctx);
         await recorder.record(page, step.screen.screenKey, "filled");
         await actAndSettle(page, () => step.advance(ctx));
@@ -188,7 +193,7 @@ export class RunExecutor {
       const m = /\b(\d{2}-\d{7})\b/.exec(text);
       if (!m) throw new Error("EIN not found on the IRS confirmation page");
       if (ein.collectArtifacts) {
-        const ctx = await this.stepContext(page, { screenKey: "irs.artifacts", title: "CP 575", intents: [] }, input, values, null, recorder, parentRun);
+        const ctx = await this.stepContext(page, { screenKey: "irs.artifacts", title: "CP 575", intents: [] }, einInput, values, null, recorder, parentRun);
         for (const a of await ein.collectArtifacts(ctx)) {
           const meta = await this.deps.artifacts.put({ filingId: input.filing.id, runId: parentRun.id, kind: "cp575", label: a.label, contentType: a.contentType }, a.body);
           const f = await this.deps.store.getFiling(input.filing.id);
@@ -246,9 +251,9 @@ export class RunExecutor {
   }
 
   /** Beta review-gate: capture the review screen as an artifact for the admin to inspect. */
-  private async captureReviewShot(page: Page, input: RunInput, run: RunRecord): Promise<string | undefined> {
+  private async captureReviewShot(page: Page, input: RunInput, run: RunRecord, recorder: StepRecorder, screenKey: string): Promise<string | undefined> {
     try {
-      const buf = await page.screenshot({ fullPage: true });
+      const buf = await recorder.screenshot(page, screenKey); // masked when the review screen shows an SSN/ITIN
       const meta = await this.deps.artifacts.put(
         { filingId: input.filing.id, runId: run.id, kind: "screenshot", label: "beta review gate", contentType: "image/png" },
         buf,

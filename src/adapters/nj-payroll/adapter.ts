@@ -33,6 +33,7 @@ const identification: ScreenStep = {
 
 const registration: ScreenStep = {
   screen: NJ_PAYROLL_SCREENS.registration,
+  sensitive: true, // owner SSNs
   async fill(ctx) {
     const p = payroll(ctx);
     await ctx.set("reason", "Original application for a new business");

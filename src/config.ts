@@ -1,4 +1,5 @@
 import path from "node:path";
+import { parseSiteProxies } from "./browser/egress.js";
 
 function env(name: string, fallback?: string): string {
   const v = process.env[name];
@@ -26,8 +27,11 @@ export const config = {
   artifactDir: path.resolve(env("ARTIFACT_DIR", "./var/artifacts")),
   workerEnabled: env("WORKER_ENABLED", "true") === "true",
   chromiumPath: process.env.PW_CHROMIUM_PATH || null,
-  /** Decision 4: route the browser through the fixed-IP proxy when the worker is not itself on that IP. */
+  /** Default network route for the browser (see browser/egress.ts); unset = direct. */
   browserProxy: process.env.BROWSER_PROXY || null,
+  /** Per-portal routes, e.g. "IRS=http://office:3128,NY=http://office:3128,NJ=direct". Only the
+   *  portals that refuse the worker's own network need one (npm run probe-sites shows which). */
+  siteProxies: parseSiteProxies(process.env.SITE_PROXIES),
   browserProfileDir: path.resolve(env("BROWSER_PROFILE_DIR", "./var/profiles")),
   dryRunDefault: env("DRY_RUN_DEFAULT", "true") === "true",
   /** Name-resolution AI generator (the only LLM in a filing). No key -> deterministic static generator. */

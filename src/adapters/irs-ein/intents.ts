@@ -15,6 +15,11 @@ import type { ScreenIntents } from "../../resolver/types.js";
  * adapter stays complete:false. SSN/ITIN is entered only from a protected source and
  * never recorded in traces, screenshots or webhooks.
  */
+/** Landing page before Legal Structure, when the assistant shows one ("Begin Application"). */
+export const IRS_START: ScreenIntents = { screenKey: "irs.start", title: "EIN Assistant start", intents: [] };
+
+/** Radio groups are matched by their question text (legend), so each radio intent lists the
+ *  question wording first and the option wording after it. */
 export const IRS_SCREENS = {
   legalStructure: { screenKey: "irs.legal_structure", title: "Legal Structure", intents: [
     { key: "legalStructure", labels: ["Limited Liability Company (LLC)", "LLC", "Legal structure", "Legal entity type"], kinds: ["radio"], required: true, note: "LLC and corporation are distinct choices" },
@@ -25,7 +30,7 @@ export const IRS_SCREENS = {
     { key: "spouses", labels: ["owned by spouses", "community property"], kinds: ["radio"], required: false, note: "C: only for a qualifying two-member LLC in a community-property location (published)" },
   ] },
   reason: { screenKey: "irs.reason", title: "Reason for applying", intents: [
-    { key: "reason", labels: ["Started a new business", "Hired employees", "Banking purposes", "Changed type of organization", "Purchased active business"], kinds: ["radio"], required: true },
+    { key: "reason", labels: ["Why is the LLC requesting an EIN", "Reason for applying", "Started a new business", "Hired employees", "Banking purposes", "Changed type of organization", "Purchased active business"], kinds: ["radio"], required: true },
   ] },
   identity: { screenKey: "irs.identity", title: "Identity: responsible party", intents: [
     { key: "rpFirstName", labels: ["First name"], kinds: ["text"], required: true },
@@ -33,7 +38,7 @@ export const IRS_SCREENS = {
     { key: "rpLastName", labels: ["Last name"], kinds: ["text"], required: true },
     { key: "rpSuffix", labels: ["Suffix"], kinds: ["select"], required: false, note: "DDS, MD, PHD, Jr, Sr, I-VI" },
     { key: "rpSsn", labels: ["SSN", "ITIN", "SSN/ITIN", "Social Security Number"], kinds: ["text", "password"], required: true, note: "SENSITIVE: protected source only; never recorded" },
-    { key: "applicantRole", labels: ["I am the owner, member, or managing member", "I am a third party applying for an EIN on behalf of this LLC"], kinds: ["radio"], required: true },
+    { key: "applicantRole", labels: ["Your role", "Role", "I am the owner, member, or managing member", "I am a third party applying for an EIN on behalf of this LLC"], kinds: ["radio"], required: true },
   ] },
   designee: { screenKey: "irs.designee", title: "Third-party designee", intents: [
     { key: "designeeFirstName", labels: ["Designee first name", "First name"], kinds: ["text"], required: true },
@@ -87,7 +92,7 @@ export const IRS_SCREENS = {
     { key: "activityDetail", labels: ["type of", "describe", "activity"], kinds: ["radio", "select", "text"], required: false, note: "C per category" },
   ] },
   review: { screenKey: "irs.review", title: "Review and Submit", intents: [
-    { key: "noticeDelivery", labels: ["Receive letter digitally in the next step", "Receive letter by mail"], kinds: ["radio"], required: true, note: "digital = CP 575 downloadable this session (rule 2)" },
+    { key: "noticeDelivery", labels: ["How would you like to receive your EIN Confirmation Letter", "Confirmation letter", "Receive letter digitally in the next step", "Receive letter by mail"], kinds: ["radio"], required: true, note: "digital = CP 575 downloadable this session (rule 2)" },
   ] },
   assignment: { screenKey: "irs.assignment", title: "EIN Assignment", intents: [] },
 } satisfies Record<string, ScreenIntents>;

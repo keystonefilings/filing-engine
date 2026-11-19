@@ -1,20 +1,45 @@
-# The fixed-IP machine (decision 4)
+# The filing worker and its network (decision 4, revised 2026-11-19)
 
-One per filing service company in Scope 1 (each subscriber files from its own address);
-Keystone's is the first.
+The worker runs the browser in the background: it opens Chromium when it picks up a filing,
+with no laptop or open tab needed. One worker per filing service company in Scope 1 (each
+subscriber files from its own setup); Keystone's is the first.
 
-From the cloud the IRS EIN assistant answered "Access Denied", NY DOS closed every
-connection, and Missouri (bsd.sos.mo.gov) returned a Cloudflare bot challenge. Both filings therefore run from one machine with a fixed,
-non-data-center-looking US address. NJ works from anywhere.
+**What matters is not a static address.** Government portals block well-known cloud
+data-center networks. A static IP rented from a cloud provider is blocked the same way, so
+don't buy one on that basis. What matters per portal is whether it serves the worker's network.
+From our cloud container (checked 2026-11-17, -18 and -19):
+
+| Portal | From a cloud data-center network |
+|---|---|
+| NJ (formation, records, sign-in) | served |
+| FL Sunbiz filing | served |
+| IRS EIN assistant | refused: "Access Denied" (Akamai) |
+| NY DOS | refused: connection closed |
+| Missouri | refused: Cloudflare challenge |
+
+A different hosted browser reached the IRS Identity screen, so this depends on whose network
+the worker is on. Test before paying for anything. NY additionally needs Keystone's logged-in
+service-company session. A stable address helps that account look consistent, but isn't required.
+
+**Per-portal routing.** Run the worker wherever is convenient. Send only the portals that refuse
+its network out a route they serve (an office line, or a host whose network passes the check):
+
+```
+SITE_PROXIES=IRS=http://office:3128,NY=http://office:3128,MO=http://office:3128
+```
+
+Every other site goes direct. `npm run probe-sites` shows each portal through the route it
+would use, so it is the go/no-go check for any machine or route.
 
 ## 1. Pick the machine
 
-Either works; the site check (step 3) decides.
+Either works; the site check (step 3) decides, and the two can be combined.
 
-- **A small always-on computer at the office** on the office internet line. Most likely
-  to pass the IRS and NY, since it is an ordinary business connection.
-- **A small cloud VM with a static IP.** Cheaper to run, but cloud addresses are what the
-  IRS and NY refused here. Try it with step 3 before committing to it.
+- **A hosted worker (cloud VM or container).** Simplest to run, and NJ and FL work from it
+  today. No static IP needed. If the probe says the IRS, NY or Missouri refuse it, route just
+  those portals through the office line with `SITE_PROXIES`.
+- **A small always-on computer at the office** on the office internet line. An ordinary
+  business connection, so it is the likeliest to pass the IRS and NY on its own.
 
 Needs: Docker, 2 CPU, 4 GB RAM, 20 GB disk, US location.
 
@@ -52,8 +77,9 @@ npm ci
 npm run probe-sites
 ```
 
-Every line should say `ok`. If the IRS or NY says `blocked`, this machine cannot file
-there; try the other option in step 1.
+Every line should say `ok`. The probe ends by naming any portal that isn't reachable on its
+current route. Give just those portals a route that works (`SITE_PROXIES`, see above), or run
+the worker on the other option in step 1, and run the probe again.
 
 ## 4. Run
 
