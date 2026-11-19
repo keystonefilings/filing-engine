@@ -31,6 +31,9 @@ export function validateFiling(req: FilingRequest): ValidationIssue[] {
   if (req.formation) {
     const f = req.formation;
     const legal = fullLegalName(f.name);
+    // When the filing defers the registered agent to the filing company (or needs none),
+    // the agent is resolved from tenant provisioning, not the request; don't require it here.
+    const raFromTenant = f.registeredAgentChoice === "filing_company" || f.registeredAgentChoice === "none";
 
     if (/\b(llc|l\.l\.c\.)\b/i.test(f.name.baseName)) {
       err("formation.name.baseName", "baseName must not contain the designator; put it in designator");
@@ -68,8 +71,8 @@ export function validateFiling(req: FilingRequest): ValidationIssue[] {
       for (const [i, s] of f.signers.entries()) {
         if (!s.title) err(`formation.signers[${i}].title`, "NJ signer title is required");
       }
-      if (!f.registeredAgent?.address) err("formation.registeredAgent", "NJ requires a registered agent with address");
-      else if (f.registeredAgent.address.state !== "NJ") err("formation.registeredAgent.address.state", "NJ registered agent must be in NJ");
+      if (!raFromTenant && !f.registeredAgent?.address) err("formation.registeredAgent", "NJ requires a registered agent with address");
+      else if (f.registeredAgent?.address && f.registeredAgent.address.state !== "NJ") err("formation.registeredAgent.address.state", "NJ registered agent must be in NJ");
       if (f.purpose && f.purpose.length > 300) err("formation.purpose", "NJ business purpose is limited to 300 characters");
       if (f.otherProvisions.length) err("formation.otherProvisions", "NJ Other Provisions entry is not mapped yet (Add New Provision dialog not walked)");
     }
@@ -78,8 +81,8 @@ export function validateFiling(req: FilingRequest): ValidationIssue[] {
       if (!hasLlcIndicator(legal)) err("formation.name", "MO requires an LLC indicator in the name");
       if (!f.managementStructure) err("formation.managementStructure", "MO requires the management structure (member or manager managed)");
       if (!f.purpose) err("formation.purpose", "MO requires a stated purpose");
-      if (!f.registeredAgent?.address) err("formation.registeredAgent", "MO requires a registered agent with an address");
-      else if (f.registeredAgent.address.state !== "MO") err("formation.registeredAgent.address.state", "MO registered agent must have a Missouri address");
+      if (!raFromTenant && !f.registeredAgent?.address) err("formation.registeredAgent", "MO requires a registered agent with an address");
+      else if (f.registeredAgent?.address && f.registeredAgent.address.state !== "MO") err("formation.registeredAgent.address.state", "MO registered agent must have a Missouri address");
       const organizers = f.organizers.length ? f.organizers : f.members;
       if (organizers.length < 1) err("formation.organizers", "MO requires at least one organizer");
       if (organizers.length > 5) err("formation.organizers", "MO online filing allows at most 5 organizers; 6 or more needs a paper filing");
@@ -92,8 +95,8 @@ export function validateFiling(req: FilingRequest): ValidationIssue[] {
       const flType = f.floridaEntityType;
       if (!f.mainBusinessAddress) err("formation.mainBusinessAddress", "FL requires the principal place of business address");
       const agent = f.registeredAgent;
-      if (!agent?.address) err("formation.registeredAgent", "FL requires a registered agent with an address");
-      else if (agent.address.state !== "FL") err("formation.registeredAgent.address.state", "FL registered agent must have a Florida address");
+      if (!raFromTenant && !agent?.address) err("formation.registeredAgent", "FL requires a registered agent with an address");
+      else if (agent?.address && agent.address.state !== "FL") err("formation.registeredAgent.address.state", "FL registered agent must have a Florida address");
       if (f.purpose && f.purpose.length > 240) err("formation.purpose", "FL purpose is limited to 240 characters");
       if (flType === "llc") {
         if (!hasLlcIndicator(legal)) err("formation.name", "FL requires an LLC indicator in the name");

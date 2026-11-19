@@ -15,6 +15,8 @@ import type { Vault } from "../settings/vault.js";
 import type { DriftDecisionInput, DriftReviewService } from "../drift-review/service.js";
 import type { NameDecision, NameResolutionService } from "../name-resolution/service.js";
 import type { ReviewGateDecision, ReviewGateService } from "../review-gate/service.js";
+import type { RegisteredAgentService } from "../registered-agents/service.js";
+import type { ResolvedRegisteredAgent } from "../registered-agents/types.js";
 import { ConcurrencyLimiter } from "./locks.js";
 import { njAccount, moAccount, flAccount } from "../settings/accounts.js";
 import { applyPolicies } from "../settings/policies.js";
@@ -29,6 +31,7 @@ export interface FilingServiceDeps {
   drift: DriftReviewService;
   nameResolution?: NameResolutionService; // beta: AI name-unavailability flow
   reviewGate?: ReviewGateService;         // beta: stop at the review screen for admin review
+  registeredAgents?: RegisteredAgentService; // resolve/procure the registered agent
   executor?: RunExecutor; // absent on the API tier
   balances?: BalanceProvider;
   limiter?: ConcurrencyLimiter;
@@ -118,6 +121,22 @@ export class FilingService {
       await this.emit("filing.invalid", f, { issues: [{ path: "fees", message: e.message, severity: "error" }] });
       return { filing: f, issues: [{ path: "fees", message: e.message, severity: "error" }], existing: false };
     }
+    // Resolve the registered agent (formation only). A misconfiguration or an unfulfillable
+    // choice is a validation error. The third-party cost is surfaced to the client but kept
+    // out of the live-checked state fees (it is not shown on the government filing site).
+    let raResolution: ResolvedRegisteredAgent | undefined;
+    if (this.d.registeredAgents && req.type === "formation") {
+      try {
+        raResolution = await this.d.registeredAgents.resolve(req, tenant, client);
+      } catch (e) {
+        const message = (e as Error).message;
+        const invalid = [{ path: "registeredAgent", message, severity: "error" as const }];
+        const fi = await this.transition(filing, "invalid", { lastError: message });
+        await this.emit("filing.invalid", fi, { issues: invalid });
+        return { filing: fi, issues: invalid, existing: false };
+      }
+      await this.d.store.updateFiling(filing.id, { registeredAgentResolution: raResolution });
+    }
     await this.emit("filing.validated", filing, { warnings: issues });
     const approval = await this.d.approvals.create(filing, tenant, client, fees);
     const f = await this.transition(filing, "awaiting_approval", { currentApprovalId: approval.id });
@@ -125,6 +144,7 @@ export class FilingService {
     await this.emit("filing.awaiting_approval", f, {
       approvalLink: link, expiresAt: approval.expiresAt, recipients: approval.recipients, fees, feeCapUsd: approval.feeCapUsd,
       einInRun: !!req.ein && req.ein.mode === "in_run",
+      registeredAgent: raResolution ? { source: raResolution.source, provider: raResolution.provider, costUsd: raResolution.costUsd, pending: raResolution.pendingProcurement ?? false } : undefined,
     });
     return { filing: f, approvalLink: link, issues, existing: false };
   }

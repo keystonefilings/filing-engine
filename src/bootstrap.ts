@@ -51,10 +51,10 @@ export async function bootstrap(opts: { withExecutor: boolean }) {
   // Registered-agent resolution: client's own agent, the filing company's per-state agent, or a third-party provider.
   const registeredAgents = new RegisteredAgentService({ vault });
   const harness = new BrowserHarness({ chromiumPath: config.chromiumPath, proxyServer: config.browserProxy, profileDir: config.browserProfileDir });
-  const executor = opts.withExecutor ? new RunExecutor({ store, artifacts, harness, drift, vault, reviewGate }) : undefined;
+  const executor = opts.withExecutor ? new RunExecutor({ store, artifacts, harness, drift, vault, reviewGate, registeredAgents }) : undefined;
   const limiter = new ConcurrencyLimiter({
     "site:IRS": config.siteConcurrency.IRS, "site:NY": config.siteConcurrency.NY, "site:NJ": config.siteConcurrency.NJ,
   });
-  const service = new FilingService({ store, approvals, webhooks, queue, vault, drift, nameResolution, reviewGate, executor, limiter, dryRunDefault: config.dryRunDefault });
+  const service = new FilingService({ store, approvals, webhooks, queue, vault, drift, nameResolution, reviewGate, registeredAgents, executor, limiter, dryRunDefault: config.dryRunDefault });
   return { store, artifacts, approvals, webhooks, queue, vault, drift, nameResolution, reviewGate, registeredAgents, harness, executor, service };
 }

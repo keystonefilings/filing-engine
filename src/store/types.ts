@@ -4,6 +4,7 @@ import type { SettingsSnapshot } from "../settings/snapshot.js";
 import type { ClientCompanySettings, TenantSettings } from "../settings/schema.js";
 import type { WebhookEvent } from "../domain/events.js";
 import type { PageSnapshot } from "../resolver/types.js";
+import type { ResolvedRegisteredAgent } from "../registered-agents/types.js";
 
 export interface FilingRecord {
   id: string;
@@ -24,6 +25,8 @@ export interface FilingRecord {
   appliedPolicies?: Record<string, string>;
   /** Set when a beta review-gate was approved; the re-queued run proceeds past the gate. */
   reviewGate?: { approvedAt: string; approvedBy: string; recordId: string };
+  /** Resolved registered agent (client/self/third-party); a third-party agent is ordered at run time. */
+  registeredAgentResolution?: ResolvedRegisteredAgent;
 }
 
 export interface ApprovalRecord {

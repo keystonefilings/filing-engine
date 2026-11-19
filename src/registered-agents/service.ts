@@ -2,7 +2,7 @@ import type { FilingRequest } from "../domain/filing.js";
 import type { ClientCompanySettings, TenantSettings } from "../settings/schema.js";
 import type { Vault } from "../settings/vault.js";
 import type { RegisteredAgentProvider } from "./provider.js";
-import { RegisteredAgentsIncProvider } from "./provider.js";
+import { StaticRegisteredAgentProvider, ConfigurableHttpAgentProvider } from "./provider.js";
 import type { RegisteredAgentChoice, RegisteredAgentDetails, ResolvedRegisteredAgent } from "./types.js";
 
 /**
@@ -13,8 +13,10 @@ export const STATES_REQUIRING_AGENT = new Set(["NJ", "FL", "MO"]);
 
 export interface RegisteredAgentDeps {
   vault: Vault;
-  /** Extra providers by id (tests inject a static provider; "registered_agents_inc" is built in). */
+  /** Code-level provider plugins by id, for exotic APIs a declarative config can't express. */
   providers?: Record<string, RegisteredAgentProvider>;
+  /** Injected for the configurable HTTP provider (tests pass a fake). */
+  fetchImpl?: typeof fetch;
 }
 
 export class RegisteredAgentService {
@@ -27,15 +29,28 @@ export class RegisteredAgentService {
     return f?.registeredAgentChoice ?? client.registeredAgentChoice ?? "filing_company";
   }
 
-  /** Builds the tenant's third-party provider (from vault for the built-in one, or an injected one). */
+  /** Builds the tenant's third-party provider from its config — no provider is hardcoded. */
   async providerFor(tenant: TenantSettings): Promise<RegisteredAgentProvider | null> {
     const tp = tenant.registeredAgentProvisioning?.thirdParty;
     if (!tp) return null;
+    // A code-level plugin injected per deployment (exotic APIs) takes precedence.
     if (this.deps.providers?.[tp.provider]) return this.deps.providers[tp.provider]!;
-    if (tp.provider === "registered_agents_inc") {
-      const cred = await this.deps.vault.getCredential(tp.apiCredentialKey);
-      return new RegisteredAgentsIncProvider({ apiKey: cred?.password ?? cred?.username ?? "", cachedPricing: tp.cachedPricing });
+    // Static per-state agent table (a flat arrangement, no live API).
+    if (tp.agents && Object.keys(tp.agents).length) {
+      const table: Record<string, { agent: RegisteredAgentDetails; amountUsd: number }> = {};
+      for (const [st, a] of Object.entries(tp.agents)) {
+        table[st] = { agent: { name: a.name, address: a.address, email: a.email }, amountUsd: tp.cachedPricing?.[st] ?? 0 };
+      }
+      return new StaticRegisteredAgentProvider(tp.provider, table, tp.cachedPricing);
     }
+    // A declaratively configured HTTP API adapter (any provider), credential from the vault.
+    if (tp.http) {
+      const cred = tp.apiCredentialKey ? await this.deps.vault.getCredential(tp.apiCredentialKey) : null;
+      const secret = cred?.password ?? cred?.username ?? null;
+      return new ConfigurableHttpAgentProvider(tp.provider, tp.http, secret, tp.cachedPricing, this.deps.fetchImpl);
+    }
+    // Quote-only (cachedPricing with no agents/http): quotes work; procure() will report it cannot order.
+    if (tp.cachedPricing) return new StaticRegisteredAgentProvider(tp.provider, {}, tp.cachedPricing);
     return null;
   }
 

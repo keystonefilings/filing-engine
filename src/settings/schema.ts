@@ -31,9 +31,44 @@ export const TenantSettings = z.object({
       z.object({ name: z.string().min(1), address: Address, email: z.string().email().optional() }),
     ).default({}),
     thirdParty: z.object({
+      /** A label/id for this tenant's provider (e.g. "registered_agents_inc", "northwest"). */
       provider: z.string().min(1),
-      apiCredentialKey: z.string().min(1),
+      /** Vault key for the provider's API credential (omit for a static/flat arrangement). */
+      apiCredentialKey: z.string().optional(),
+      /** Per-state pricing used for quotes before/without a live pricing call. */
       cachedPricing: z.record(z.string().regex(/^[A-Z]{2}$/), z.number().nonnegative()).optional(),
+      /** (a) Static per-state agents: a flat arrangement with no live API. */
+      agents: z.record(
+        z.string().regex(/^[A-Z]{2}$/),
+        z.object({ name: z.string().min(1), address: Address, email: z.string().email().optional() }),
+      ).optional(),
+      /** (b) A declaratively configured HTTP API adapter — any provider. */
+      http: z.object({
+        baseUrl: z.string().url(),
+        authHeader: z.string().optional(),
+        authPrefix: z.string().optional(),
+        pricing: z.object({
+          method: z.enum(["GET", "POST"]).optional(),
+          path: z.string().min(1),
+          body: z.string().optional(),
+          amountPath: z.string().min(1),
+          amountInCents: z.boolean().optional(),
+        }).optional(),
+        order: z.object({
+          method: z.enum(["GET", "POST"]).optional(),
+          path: z.string().min(1),
+          body: z.string().optional(),
+          agentNamePath: z.string().min(1),
+          agentStreet1Path: z.string().min(1),
+          agentStreet2Path: z.string().optional(),
+          agentCityPath: z.string().min(1),
+          agentStatePath: z.string().min(1),
+          agentZipPath: z.string().min(1),
+          refPath: z.string().min(1),
+          amountPath: z.string().optional(),
+          amountInCents: z.boolean().optional(),
+        }).optional(),
+      }).optional(),
     }).optional(),
     perStateProvisioning: z.record(z.string().regex(/^[A-Z]{2}$/), z.enum(["self", "third_party", "none"])).optional(),
   }).optional(),

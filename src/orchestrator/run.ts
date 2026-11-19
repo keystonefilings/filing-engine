@@ -14,6 +14,7 @@ import { StepRecorder } from "../browser/recorder.js";
 import type { ArtifactStore } from "../artifacts/store.js";
 import { buildProposal, DriftReviewService } from "../drift-review/service.js";
 import type { ReviewGateService } from "../review-gate/service.js";
+import type { RegisteredAgentService } from "../registered-agents/service.js";
 import { checkLiveFees, type FeeLine } from "../fees/table.js";
 import type { Vault } from "../settings/vault.js";
 import { labelScore } from "../resolver/match.js";
@@ -26,6 +27,8 @@ export interface RunDeps {
   vault: Vault;
   /** Beta review-gate (optional): when set and the tenant has it on, the run stops at the review screen. */
   reviewGate?: ReviewGateService;
+  /** Resolve/procure a third-party registered agent at run time (optional). */
+  registeredAgents?: RegisteredAgentService;
   /** First observation of a screen: halt for review (strict) or auto-approve the snapshot (bootstrap/fixtures). */
   firstObservationPolicy?: "halt" | "accept";
 }
@@ -77,6 +80,15 @@ export class RunExecutor {
     try {
       const page = await context.newPage();
       await page.goto(input.adapter.entryUrl(input), { waitUntil: "domcontentloaded" });
+      // Third-party registered agent: order it now (irreversible) so the assigned agent is
+      // known before the form asks for it. Dry runs never order one.
+      if (this.deps.registeredAgents && !input.dryRun && input.filing.registeredAgentResolution?.pendingProcurement) {
+        stage = "registered_agent";
+        const procured = await this.deps.registeredAgents.procure(input.filing.request, input.tenant);
+        input.filing.registeredAgentResolution = procured; // keep the step context in sync
+        await store.updateFiling(input.filing.id, { registeredAgentResolution: procured });
+        await recorder.noteOnly("registered_agent", `third-party registered agent ordered: ${procured.procurementRef ?? "ok"}`);
+      }
       for (const step of input.adapter.steps) {
         stage = step.screen.screenKey;
         const ctx = await this.stepContext(page, step.screen, input, values, credential, recorder, run);

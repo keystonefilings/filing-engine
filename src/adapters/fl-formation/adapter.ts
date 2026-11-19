@@ -35,7 +35,7 @@ async function fillPrincipalAndAgent(ctx: StepContext) {
   await ctx.setByName("princ_zip", a.zip);
   await ctx.setByName("princ_cntry", "US");
   await ctx.setByName("same_addr_flag", true);
-  const agent = f.registeredAgent ?? ctx.client.registeredAgent;
+  const agent = ctx.filing.registeredAgentResolution?.agent ?? f.registeredAgent ?? ctx.client.registeredAgent;
   if (!agent?.address) throw new Error("FL requires a registered agent with a Florida address");
   if (agent.address.state !== "FL") throw new Error("FL registered agent must have a Florida address");
   const [first, last] = splitName(agent.name);

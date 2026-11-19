@@ -159,8 +159,8 @@ export function applyPolicies(raw: unknown, tenant: TenantSettings, client: Clie
       if (f.serviceOfProcess && typeof f.serviceOfProcess === "object" && !f.serviceOfProcess.noticeEmail && noticeEmail) {
         f.serviceOfProcess.noticeEmail = noticeEmail; provenance["formation.serviceOfProcess.noticeEmail"] = p.nyNoticeEmail;
       }
-      // C5 optional NY registered agent.
-      if (p.nyRegisteredAgent === "service_company" || p.nyRegisteredAgent === "firm" || p.nyRegisteredAgent === "per_entity") {
+      // C5 optional NY registered agent. Skipped when the filing uses registeredAgentChoice.
+      if (f.registeredAgentChoice === undefined && (p.nyRegisteredAgent === "service_company" || p.nyRegisteredAgent === "firm" || p.nyRegisteredAgent === "per_entity")) {
         fill(f, "registeredAgent", "formation.registeredAgent", "C5", p.nyRegisteredAgent, pick(p.nyRegisteredAgent, { service_company: tenant.registeredAgent, firm: client.registeredAgent }), "the NY registered agent");
       }
     }
@@ -168,19 +168,22 @@ export function applyPolicies(raw: unknown, tenant: TenantSettings, client: Clie
     if (state === "NJ") {
       // E1 members.
       fill(f, "members", "formation.members", "E1", p.njMembers, p.njMembers === "intake" ? intake.owners : undefined, "the members/managers list");
-      // C1 registered agent.
-      const members: Obj[] = Array.isArray(f.members) && f.members.length ? f.members : intake.owners;
-      const njMember = members.find((m) => m?.address?.state === "NJ");
-      fill(f, "registeredAgent", "formation.registeredAgent", "C1", p.njRegisteredAgent, pick(p.njRegisteredAgent, {
-        service_company: tenant.registeredAgent, firm: client.registeredAgent, intake: intake.registeredAgent,
-        entity_member: intake.registeredAgent ?? (njMember ? { name: njMember.name, address: njMember.address } : undefined),
-        // The new LLC as its own agent (NJ accepts this, confirmed 2026-11-18), at its NJ address.
-        new_entity: (() => {
-          const addr = f.mainBusinessAddress ?? intake.principalAddress;
-          if (!addr || addr.state !== "NJ" || !f.name?.baseName) return undefined;
-          return { name: `${f.name.baseName} ${f.name.designator ?? p.designator}`.trim(), address: addr };
-        })(),
-      }), "the registered agent");
+      // C1 registered agent. Skipped when the filing uses the new registeredAgentChoice model
+      // (then RegisteredAgentService resolves it from tenant provisioning or a third party).
+      if (f.registeredAgentChoice === undefined) {
+        const members: Obj[] = Array.isArray(f.members) && f.members.length ? f.members : intake.owners;
+        const njMember = members.find((m) => m?.address?.state === "NJ");
+        fill(f, "registeredAgent", "formation.registeredAgent", "C1", p.njRegisteredAgent, pick(p.njRegisteredAgent, {
+          service_company: tenant.registeredAgent, firm: client.registeredAgent, intake: intake.registeredAgent,
+          entity_member: intake.registeredAgent ?? (njMember ? { name: njMember.name, address: njMember.address } : undefined),
+          // The new LLC as its own agent (NJ accepts this, confirmed 2026-11-18), at its NJ address.
+          new_entity: (() => {
+            const addr = f.mainBusinessAddress ?? intake.principalAddress;
+            if (!addr || addr.state !== "NJ" || !f.name?.baseName) return undefined;
+            return { name: `${f.name.baseName} ${f.name.designator ?? p.designator}`.trim(), address: addr };
+          })(),
+        }), "the registered agent");
+      }
       // D2 signer(s).
       const signerChoice = p.njSigner === "same_as_organizer" ? p.organizer : p.njSigner;
       const signer = p.njSigner === "same_as_organizer" ? organizerValue

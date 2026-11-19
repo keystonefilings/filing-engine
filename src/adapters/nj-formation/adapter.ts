@@ -114,7 +114,7 @@ const registeredAgent: ScreenStep = {
 const registeredAgentInfo: ScreenStep = {
   screen: NJ_SCREENS.registeredAgentInfo,
   async fill(ctx) {
-    const agent = formation(ctx).registeredAgent ?? ctx.client.registeredAgent;
+    const agent = ctx.filing.registeredAgentResolution?.agent ?? formation(ctx).registeredAgent ?? ctx.client.registeredAgent;
     if (!agent?.address) throw new Error("registered agent missing");
     const z = splitZip(agent.address.zip);
     await ctx.set("agentName", agent.name);
