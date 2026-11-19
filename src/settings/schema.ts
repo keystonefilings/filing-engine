@@ -43,6 +43,22 @@ export const TenantSettings = z.object({
   customerPolicyDefaults: FirmPolicyAnswers.prefault({}),
   /** Questions the service company answers for all its customers (customers cannot change them). */
   lockedCustomerPolicies: z.array(z.string()).default([]),
+  /**
+   * Beta review-gate: the live forms have no save, so a real run must finish in one pass.
+   * In beta the engine stops at the review screen, screenshots it, and sends it to an admin
+   * to approve before submission. Off in production (the run goes straight through).
+   */
+  betaReviewGate: z.boolean().default(false),
+  /** Name-unavailability flow: generate alternatives, admin picks an available one. */
+  nameResolution: z.object({
+    enabled: z.boolean().default(true),
+    maxOptions: z.number().int().min(1).max(10).default(5),
+    maxBatches: z.number().int().min(1).max(10).default(3),
+    /** AI model id for the generator; unset uses the configured default (or the static generator). */
+    model: z.string().optional(),
+  }).prefault({}),
+  /** Where admin-only beta prompts go (name options, review-gate): the filing company's staff, never the end client. */
+  adminChannels: z.array(ApprovalRecipient).default([]),
   /** Branding on approval pages and messages. */
   branding: z.object({ displayName: z.string().optional(), logoUrl: z.string().url().optional(), supportEmail: z.string().email().optional() }).prefault({}),
   /**

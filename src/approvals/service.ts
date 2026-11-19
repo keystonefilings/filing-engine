@@ -75,6 +75,40 @@ export class ApprovalService {
     return `${this.deps.publicBaseUrl}/approve/${approval.token}`;
   }
 
+  /**
+   * Admin re-authorization after a name resolution (beta): the end client approved the
+   * filing and its fees; only the (unavailable) name changed, resolved by the filing
+   * company's admin. This records a pre-approved approval bound to the new payload hash so
+   * the re-run's verifyForRun passes, with the admin — not the client — as the authority.
+   * Fees are unchanged by a name change.
+   */
+  async adminReauthorize(filing: FilingRecord, tenant: TenantSettings, client: ClientCompanySettings, fees: FeeLine[], by: string): Promise<ApprovalRecord> {
+    if (filing.currentApprovalId) {
+      const prev = await this.deps.store.getApproval(filing.currentApprovalId);
+      if (prev && prev.status === "pending") await this.deps.store.updateApproval(prev.id, { status: "superseded" });
+    }
+    const id = randomUUID();
+    const now = this.now();
+    const approval: ApprovalRecord = {
+      id, filingId: filing.id, tenantId: filing.tenantId,
+      payloadHash: this.payloadHash(filing.request),
+      settingsSnapshot: takeSettingsSnapshot(tenant, client),
+      shownPayload: maskSensitive(filing.request),
+      fees, feeCapUsd: filing.request.feeCapUsd,
+      recipients: [{ channel: "webhook", address: by, name: "admin (name resolution)" }],
+      token: mintToken(this.deps.signingSecret, id),
+      status: "approved",
+      createdAt: now.toISOString(),
+      expiresAt: new Date(now.getTime() + (client.approvalTtlHours ?? this.deps.defaultTtlHours) * 3_600_000).toISOString(),
+      decidedAt: now.toISOString(),
+      decidedVia: { recipient: by },
+      comment: `name resolved by admin ${by}`,
+    };
+    await this.deps.store.createApproval(approval);
+    await this.deps.store.updateFiling(filing.id, { currentApprovalId: id });
+    return approval;
+  }
+
   async lookup(token: string): Promise<ApprovalDecision> {
     const v = verifyToken(this.deps.signingSecret, token);
     if (!v) return { ok: false, reason: "invalid_token" };

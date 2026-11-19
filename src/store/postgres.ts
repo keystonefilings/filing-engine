@@ -2,7 +2,7 @@ import pg from "pg";
 import { readFileSync } from "node:fs";
 import path from "node:path";
 import type {
-  ApprovalRecord, DriftHaltRecord, FilingRecord, RunRecord, Store, SubmitIntentRecord, WebhookDeliveryRecord,
+  ApprovalRecord, DriftHaltRecord, FilingRecord, NameResolutionRecord, ReviewGateRecord, RunRecord, Store, SubmitIntentRecord, WebhookDeliveryRecord,
 } from "./types.js";
 import type { ClientCompanySettings, TenantSettings } from "../settings/schema.js";
 import type { PageSnapshot } from "../resolver/types.js";
@@ -134,6 +134,42 @@ export class PostgresStore implements Store {
   async getClientCompany(id: string) { return this.doc<ClientCompanySettings>(`select doc from client_companies where id=$1`, [id]); }
   async putClientCompany(c: ClientCompanySettings) {
     await this.pool.query(`insert into client_companies (id, tenant_id, doc) values ($1,$2,$3) on conflict (id) do update set doc=excluded.doc, tenant_id=excluded.tenant_id`, [c.clientCompanyId, c.tenantId, c]);
+  }
+
+  async createNameResolution(r: NameResolutionRecord) {
+    await this.pool.query(`insert into name_resolutions (id, filing_id, status, token, doc) values ($1,$2,$3,$4,$5)`, [r.id, r.filingId, r.status, r.token, r]);
+    return r;
+  }
+  async getNameResolution(id: string) { return this.doc<NameResolutionRecord>(`select doc from name_resolutions where id=$1`, [id]); }
+  async updateNameResolution(id: string, patch: Partial<NameResolutionRecord>) {
+    const cur = await this.getNameResolution(id);
+    if (!cur) throw new Error(`name resolution ${id} not found`);
+    const next = { ...cur, ...patch, id };
+    await this.pool.query(`update name_resolutions set status=$2, doc=$3 where id=$1`, [id, next.status, next]);
+    return next;
+  }
+  async listNameResolutions(status?: NameResolutionRecord["status"]) {
+    return status
+      ? this.docs<NameResolutionRecord>(`select doc from name_resolutions where status=$1`, [status])
+      : this.docs<NameResolutionRecord>(`select doc from name_resolutions`, []);
+  }
+
+  async createReviewGate(r: ReviewGateRecord) {
+    await this.pool.query(`insert into review_gates (id, filing_id, status, token, doc) values ($1,$2,$3,$4,$5)`, [r.id, r.filingId, r.status, r.token, r]);
+    return r;
+  }
+  async getReviewGate(id: string) { return this.doc<ReviewGateRecord>(`select doc from review_gates where id=$1`, [id]); }
+  async updateReviewGate(id: string, patch: Partial<ReviewGateRecord>) {
+    const cur = await this.getReviewGate(id);
+    if (!cur) throw new Error(`review gate ${id} not found`);
+    const next = { ...cur, ...patch, id };
+    await this.pool.query(`update review_gates set status=$2, doc=$3 where id=$1`, [id, next.status, next]);
+    return next;
+  }
+  async listReviewGates(status?: ReviewGateRecord["status"]) {
+    return status
+      ? this.docs<ReviewGateRecord>(`select doc from review_gates where status=$1`, [status])
+      : this.docs<ReviewGateRecord>(`select doc from review_gates`, []);
   }
 
   async createDelivery(d: WebhookDeliveryRecord) {

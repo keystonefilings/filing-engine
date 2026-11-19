@@ -10,6 +10,7 @@ import { config } from "./config.js";
 const sys = await bootstrap({ withExecutor: config.workerEnabled });
 const app = buildServer({
   service: sys.service, approvals: sys.approvals, store: sys.store, artifacts: sys.artifacts, publicBaseUrl: config.publicBaseUrl,
+  nameResolution: sys.nameResolution, reviewGate: sys.reviewGate,
   apiKeys: Object.fromEntries((process.env.API_KEYS ?? "dev-key:keystone").split(",").map((p) => p.split(":") as [string, string])),
 });
 

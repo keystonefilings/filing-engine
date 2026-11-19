@@ -48,6 +48,9 @@ export interface ScreenStep {
   paymentScreen?: boolean;
   /** Where the final irreversible click happens (rule 6: only after approval; dry runs stop here). */
   submitScreen?: boolean;
+  /** The review/summary screen. In beta, with the tenant's review gate on, the engine
+   *  screenshots this screen and stops for admin review before proceeding to submit. */
+  reviewScreen?: boolean;
   /** Whether this screen is expected right now; optional screens (e.g. MFA) return false to be skipped. */
   present?(ctx: StepContext): Promise<boolean>;
   fill(ctx: StepContext): Promise<void>;

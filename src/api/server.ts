@@ -4,10 +4,14 @@ import type { FilingService } from "../orchestrator/service.js";
 import { ValidationFailed } from "../orchestrator/service.js";
 import type { ApprovalService } from "../approvals/service.js";
 import { renderReviewPage } from "../approvals/render.js";
-import type { Store } from "../store/types.js";
+import type { Store, FilingRecord } from "../store/types.js";
 import type { ArtifactStore } from "../artifacts/store.js";
 import { TenantSettings, ClientCompanySettings } from "../settings/schema.js";
 import { EVENT_TYPES } from "../domain/events.js";
+import type { NameResolutionService, NameDecision } from "../name-resolution/service.js";
+import type { ReviewGateService, ReviewGateDecision } from "../review-gate/service.js";
+import { renderNameResolutionPage } from "../name-resolution/render.js";
+import { renderReviewGatePage } from "../review-gate/render.js";
 
 export interface ApiDeps {
   service: FilingService;
@@ -15,8 +19,17 @@ export interface ApiDeps {
   store: Store;
   artifacts: ArtifactStore;
   publicBaseUrl: string;
+  /** Beta admin flows; absent on tiers that do not run them. */
+  nameResolution?: NameResolutionService;
+  reviewGate?: ReviewGateService;
   /** Caller API keys: key -> tenantId. Production: hashed keys in the database. */
   apiKeys: Record<string, string>;
+}
+
+function filingTitle(f: FilingRecord | null): string {
+  if (!f) return "Filing";
+  const n = f.request.formation ? `: ${f.request.formation.name.baseName} ${f.request.formation.name.designator}` : "";
+  return `${f.request.state} ${f.request.type.replace(/_/g, " ")}${n}`;
 }
 
 const DriftDecisionBody = z.discriminatedUnion("action", [
@@ -158,6 +171,94 @@ export function buildServer(deps: ApiDeps): FastifyInstance {
     } catch (e) {
       return reply.code(409).send({ error: (e as Error).message });
     }
+  });
+
+  // ---- Name resolution (admin link, filing company only; beta) ----
+  app.get("/admin/name-resolution/:token", async (req, reply) => {
+    if (!deps.nameResolution) return reply.code(404).send({ error: "not enabled" });
+    const token = (req.params as { token: string }).token;
+    const rec = await deps.nameResolution.lookup(token);
+    if (!rec) return reply.code(410).type("text/html").send("<p>This link is invalid or has expired.</p>");
+    if (rec.status !== "awaiting_admin") return reply.code(410).type("text/html").send(`<p>This name request was already ${rec.status === "resolved" ? "resolved" : "closed"}.</p>`);
+    const f = await deps.store.getFiling(rec.filingId);
+    const tenant = await deps.store.getTenant(rec.tenantId);
+    return reply.type("text/html").send(renderNameResolutionPage({
+      brandName: tenant?.branding.displayName ?? tenant?.name, supportEmail: tenant?.branding.supportEmail,
+      filingTitle: filingTitle(f), record: rec, postUrl: `${deps.publicBaseUrl}/admin/name-resolution/${token}`,
+    }));
+  });
+  app.post("/admin/name-resolution/:token", async (req, reply) => {
+    if (!deps.nameResolution) return reply.code(404).send({ error: "not enabled" });
+    const token = (req.params as { token: string }).token;
+    const body = (req.body ?? {}) as Record<string, string>;
+    const decidedBy = body.decidedBy || "admin via link";
+    let decision: NameDecision;
+    switch (body.decision) {
+      case "pick": decision = { action: "pick", option: body.option ?? "", decidedBy }; break;
+      case "custom": decision = { action: "custom", baseName: body.baseName ?? "", designator: body.designator, decidedBy }; break;
+      case "regenerate": decision = { action: "regenerate", decidedBy }; break;
+      case "abort": decision = { action: "abort", reason: body.reason ?? "", decidedBy }; break;
+      default: return reply.code(400).type("text/html").send("<p>Unrecognized action.</p>");
+    }
+    const r = await deps.service.onNameResolutionDecision(token, decision);
+    if (!r.ok) return reply.code(410).type("text/html").send(`<p>Could not record your choice: ${r.reason.replace(/_/g, " ")}.</p>`);
+    const msg = r.outcome === "resolved" ? "The name is set and the filing will proceed."
+      : r.outcome === "aborted" ? "The filing has been cancelled."
+      : r.outcome === "still_unavailable" ? "That name is also taken. Open the link again to choose another."
+      : "More options were generated. Open the link again to choose.";
+    return reply.type("text/html").send(`<p>${msg}</p>`);
+  });
+
+  // ---- Review gate (admin link, filing company only; beta) ----
+  app.get("/admin/review/:token", async (req, reply) => {
+    if (!deps.reviewGate) return reply.code(404).send({ error: "not enabled" });
+    const token = (req.params as { token: string }).token;
+    const rec = await deps.reviewGate.lookup(token);
+    if (!rec) return reply.code(410).type("text/html").send("<p>This link is invalid or has expired.</p>");
+    if (rec.status !== "pending") return reply.code(410).type("text/html").send(`<p>This review was already ${rec.status}.</p>`);
+    const f = await deps.store.getFiling(rec.filingId);
+    const tenant = await deps.store.getTenant(rec.tenantId);
+    return reply.type("text/html").send(renderReviewGatePage({
+      brandName: tenant?.branding.displayName ?? tenant?.name, supportEmail: tenant?.branding.supportEmail,
+      filingTitle: filingTitle(f), record: rec, postUrl: `${deps.publicBaseUrl}/admin/review/${token}`,
+      screenshotUrl: rec.screenshotArtifactId ? `${deps.publicBaseUrl}/admin/review/${token}/screenshot` : undefined,
+    }));
+  });
+  app.get("/admin/review/:token/screenshot", async (req, reply) => {
+    if (!deps.reviewGate) return reply.code(404).send({ error: "not enabled" });
+    const rec = await deps.reviewGate.lookup((req.params as { token: string }).token);
+    if (!rec?.screenshotArtifactId) return reply.code(404).send({ error: "not found" });
+    const a = await deps.artifacts.get(rec.screenshotArtifactId);
+    if (!a) return reply.code(404).send({ error: "not found" });
+    return reply.header("content-type", a.meta.contentType).send(a.body);
+  });
+  app.post("/admin/review/:token", async (req, reply) => {
+    if (!deps.reviewGate) return reply.code(404).send({ error: "not enabled" });
+    const token = (req.params as { token: string }).token;
+    const body = (req.body ?? {}) as Record<string, string>;
+    const decidedBy = body.decidedBy || "admin via link";
+    const decision: ReviewGateDecision = body.decision === "approve"
+      ? { action: "approve", decidedBy }
+      : { action: "reject", decidedBy, reason: body.reason ?? "" };
+    const r = await deps.service.onReviewGateDecision(token, decision);
+    if (!r.ok) return reply.code(410).type("text/html").send(`<p>Could not record your decision: ${r.reason.replace(/_/g, " ")}.</p>`);
+    return reply.type("text/html").send(r.outcome === "approved"
+      ? "<p>Approved. The filing will now run through to submission.</p>"
+      : "<p>Rejected. The filing has been aborted; nothing was submitted.</p>");
+  });
+
+  // ---- Beta flows, JSON for dashboards (tenant-scoped) ----
+  app.get("/v1/name-resolutions", async (req, reply) => {
+    const tenantId = tenantOf(req);
+    if (!tenantId) return reply.code(401).send({ error: "invalid api key" });
+    const all = await deps.store.listNameResolutions((req.query as { status?: "awaiting_admin" | "resolved" | "aborted" }).status);
+    return { resolutions: all.filter((r) => r.tenantId === tenantId) };
+  });
+  app.get("/v1/review-gates", async (req, reply) => {
+    const tenantId = tenantOf(req);
+    if (!tenantId) return reply.code(401).send({ error: "invalid api key" });
+    const all = await deps.store.listReviewGates((req.query as { status?: "pending" | "approved" | "rejected" }).status);
+    return { reviewGates: all.filter((r) => r.tenantId === tenantId) };
   });
 
   return app;

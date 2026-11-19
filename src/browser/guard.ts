@@ -25,3 +25,14 @@ export class BotChallenge extends Error {
     super(`bot challenge on ${site}: ${detail}`);
   }
 }
+
+/**
+ * Thrown in beta when a run reaches the review screen with the tenant's review gate on:
+ * the engine screenshots the page and stops so an admin can review before the filing is
+ * submitted. On approval the filing is re-queued and runs past the gate in one pass.
+ */
+export class ReviewGateHalt extends Error {
+  constructor(public readonly screenKey: string, public readonly recordId: string) {
+    super(`review gate halt on ${screenKey}: awaiting admin review (${recordId})`);
+  }
+}

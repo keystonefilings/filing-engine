@@ -8,11 +8,12 @@ import { collectInventory } from "../resolver/inventory.js";
 import { matchIntents } from "../resolver/match.js";
 import { diffSnapshots, snapshotFromInventory } from "../resolver/drift.js";
 import { normalizeLabel, structuralInventory, type FieldDescriptor, type PageInventory, type ScreenIntents } from "../resolver/types.js";
-import { BotChallenge, DriftHalt, DryRunStop, FeeMismatch } from "../browser/guard.js";
+import { BotChallenge, DriftHalt, DryRunStop, FeeMismatch, ReviewGateHalt } from "../browser/guard.js";
 import { BrowserHarness, detectChallenge } from "../browser/harness.js";
 import { StepRecorder } from "../browser/recorder.js";
 import type { ArtifactStore } from "../artifacts/store.js";
 import { buildProposal, DriftReviewService } from "../drift-review/service.js";
+import type { ReviewGateService } from "../review-gate/service.js";
 import { checkLiveFees, type FeeLine } from "../fees/table.js";
 import type { Vault } from "../settings/vault.js";
 import { labelScore } from "../resolver/match.js";
@@ -23,6 +24,8 @@ export interface RunDeps {
   harness: BrowserHarness;
   drift: DriftReviewService;
   vault: Vault;
+  /** Beta review-gate (optional): when set and the tenant has it on, the run stops at the review screen. */
+  reviewGate?: ReviewGateService;
   /** First observation of a screen: halt for review (strict) or auto-approve the snapshot (bootstrap/fixtures). */
   firstObservationPolicy?: "halt" | "accept";
 }
@@ -36,12 +39,16 @@ export interface RunInput {
   einAdapter?: SiteAdapter;
   dryRun: boolean;
   expectedFees: FeeLine[];
+  /** Set on the re-run after an admin approved the beta review-gate: proceed past the gate. */
+  reviewGateApproved?: boolean;
 }
 
 export type RunOutcome =
   | { kind: "submitted"; run: RunRecord; ein?: string }
   | { kind: "dry_run_stop"; run: RunRecord; stoppedBefore: string; ein?: string }
   | { kind: "drift_halt"; run: RunRecord; haltId: string; requiresClientReapproval: boolean }
+  | { kind: "name_unavailable"; run: RunRecord; requestedName: { baseName: string; designator: string; name: string }; purpose?: string; site: string }
+  | { kind: "review_gate"; run: RunRecord; recordId: string; screenKey: string; screenshotArtifactId?: string }
   | { kind: "failed"; run: RunRecord; stage: string; error: string }
   | { kind: "needs_reconciliation"; run: RunRecord; error: string };
 
@@ -65,6 +72,7 @@ export class RunExecutor {
     const credKey = input.adapter.credentialKey(input);
     const credential = credKey ? await this.deps.vault.getCredential(credKey) : null;
     const values: StepContext["values"] = {};
+    if (input.filing.ein) values.ein = input.filing.ein; // reuse an EIN already filed; never file a second one
     let stage = "open";
     try {
       const page = await context.newPage();
@@ -76,10 +84,20 @@ export class RunExecutor {
         await this.driftCheck(page, step.screen, input, run, recorder);
         await step.fill(ctx);
         await recorder.record(page, step.screen.screenKey, "filled");
+        if (step.reviewScreen && this.deps.reviewGate && input.tenant.betaReviewGate && !input.dryRun && !input.reviewGateApproved) {
+          stage = "review_gate";
+          const screenshotArtifactId = await this.captureReviewShot(page, input, run);
+          const rec = await this.deps.reviewGate.recordHalt({
+            runId: run.id, filingId: input.filing.id, tenantId: input.filing.tenantId,
+            site: input.adapter.site, screenKey: step.screen.screenKey, screenshotArtifactId,
+          });
+          await recorder.record(page, step.screen.screenKey, "review gate halt");
+          throw new ReviewGateHalt(step.screen.screenKey, rec.id);
+        }
         if (step.paymentScreen) await this.feeCheck(page, step.screen, input, run, recorder);
         await actAndSettle(page, () => step.advance(ctx));
         if (step.verify) await step.verify(ctx);
-        if (step.nameCheckGate && input.einAdapter && input.filing.request.ein && (input.filing.request.ein.mode ?? input.client.einMode) === "in_run") {
+        if (step.nameCheckGate && input.einAdapter && input.filing.request.ein && !input.filing.ein && (input.filing.request.ein.mode ?? input.client.einMode) === "in_run") {
           stage = "ein";
           values.ein = await this.einSubRun(input, run, recorder);
           await store.updateFiling(input.filing.id, { ein: values.ein });
@@ -108,13 +126,25 @@ export class RunExecutor {
         const done = await store.updateRun(run.id, { status: "halted_drift", endedAt: new Date().toISOString(), error: err.message });
         return { kind: "drift_halt", run: done, haltId: err.haltId, requiresClientReapproval: halt?.requiresClientReapproval ?? false };
       }
+      if (err instanceof ReviewGateHalt) {
+        const done = await store.updateRun(run.id, { status: "halted_review", endedAt: new Date().toISOString(), error: err.message });
+        return { kind: "review_gate", run: done, recordId: err.recordId, screenKey: err.screenKey };
+      }
+      if (err instanceof NameUnavailable) {
+        const fm = input.filing.request.formation;
+        const requestedName = fm
+          ? { baseName: fm.name.baseName, designator: fm.name.designator, name: `${fm.name.baseName} ${fm.name.designator}` }
+          : { baseName: err.name, designator: "", name: err.name };
+        const done = await store.updateRun(run.id, { status: "halted_name", endedAt: new Date().toISOString(), error: err.message });
+        return { kind: "name_unavailable", run: done, requestedName, purpose: fm?.purpose, site: input.adapter.site };
+      }
       const open = (await store.listOpenSubmitIntents()).find((i) => i.runId === run.id);
       if (open) {
         const done = await store.updateRun(run.id, { status: "needs_reconciliation", endedAt: new Date().toISOString(), error: err.message });
         return { kind: "needs_reconciliation", run: done, error: err.message };
       }
       const done = await store.updateRun(run.id, { status: "failed", endedAt: new Date().toISOString(), error: `${stage}: ${err.message}` });
-      const kindStage = err instanceof NameUnavailable ? "name_unavailable" : err instanceof FeeMismatch ? "fee_mismatch" : err instanceof BotChallenge ? "bot_challenge" : stage;
+      const kindStage = err instanceof FeeMismatch ? "fee_mismatch" : err instanceof BotChallenge ? "bot_challenge" : stage;
       return { kind: "failed", run: done, stage: kindStage, error: err.message };
     } finally {
       await context.close().catch(() => {});
@@ -201,6 +231,22 @@ export class RunExecutor {
     const check = checkLiveFees(input.expectedFees, inventory.prices, input.filing.request.feeCapUsd);
     await recorder.record(page, screen.screenKey, `fee check: ${check.ok ? "ok" : check.reason}`);
     if (!check.ok) throw new FeeMismatch(screen.screenKey, check.reason ?? "mismatch");
+  }
+
+  /** Beta review-gate: capture the review screen as an artifact for the admin to inspect. */
+  private async captureReviewShot(page: Page, input: RunInput, run: RunRecord): Promise<string | undefined> {
+    try {
+      const buf = await page.screenshot({ fullPage: true });
+      const meta = await this.deps.artifacts.put(
+        { filingId: input.filing.id, runId: run.id, kind: "screenshot", label: "beta review gate", contentType: "image/png" },
+        buf,
+      );
+      const f = await this.deps.store.getFiling(input.filing.id);
+      await this.deps.store.updateFiling(input.filing.id, { artifacts: [...(f?.artifacts ?? []), { id: meta.id, kind: "screenshot", label: "beta review gate" }] });
+      return meta.id;
+    } catch {
+      return undefined;
+    }
   }
 
   private async stepContext(page: Page, screen: ScreenIntents, input: RunInput, values: StepContext["values"], credential: StepContext["credential"], recorder: StepRecorder, run: RunRecord): Promise<StepContext> {

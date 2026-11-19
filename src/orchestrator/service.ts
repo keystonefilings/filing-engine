@@ -13,6 +13,8 @@ import type { JobQueue } from "./queue.js";
 import type { RunExecutor } from "./run.js";
 import type { Vault } from "../settings/vault.js";
 import type { DriftDecisionInput, DriftReviewService } from "../drift-review/service.js";
+import type { NameDecision, NameResolutionService } from "../name-resolution/service.js";
+import type { ReviewGateDecision, ReviewGateService } from "../review-gate/service.js";
 import { ConcurrencyLimiter } from "./locks.js";
 import { njAccount, moAccount, flAccount } from "../settings/accounts.js";
 import { applyPolicies } from "../settings/policies.js";
@@ -25,6 +27,8 @@ export interface FilingServiceDeps {
   queue: JobQueue;
   vault: Vault;
   drift: DriftReviewService;
+  nameResolution?: NameResolutionService; // beta: AI name-unavailability flow
+  reviewGate?: ReviewGateService;         // beta: stop at the review screen for admin review
   executor?: RunExecutor; // absent on the API tier
   balances?: BalanceProvider;
   limiter?: ConcurrencyLimiter;
@@ -197,6 +201,7 @@ export class FilingService {
       const fees = (() => { try { return this.feesFor(filing.request, tenant, client); } catch { return []; } })();
       const outcome = await this.d.executor.execute({
         filing: running, approval, tenant, client, adapter, einAdapter: irsEinAdapter, dryRun, expectedFees: approval?.fees ?? fees,
+        reviewGateApproved: !!running.reviewGate,
       });
       const latest = (await store.getFiling(filing.id))!;
       switch (outcome.kind) {
@@ -220,6 +225,39 @@ export class FilingService {
         case "drift_halt": {
           const f = await this.transition(latest, "awaiting_drift_review", { currentRunId: outcome.run.id, lastError: outcome.run.error });
           await this.emit("filing.drift_halted", f, { haltId: outcome.haltId, requiresClientReapproval: outcome.requiresClientReapproval }, outcome.run.id);
+          break;
+        }
+        case "name_unavailable": {
+          // A dry run previews only; name resolution runs for real runs.
+          if (!dryRun && this.d.nameResolution && (tenant.nameResolution?.enabled ?? true) && latest.request.formation) {
+            const rec = await this.d.nameResolution.open({
+              filing: latest, site: outcome.site, state: latest.request.state,
+              requested: { baseName: outcome.requestedName.baseName, designator: outcome.requestedName.designator },
+              purpose: outcome.purpose, runId: outcome.run.id,
+            });
+            const f = await this.transition(latest, "awaiting_name_resolution", { currentRunId: outcome.run.id, lastError: `name unavailable: ${outcome.requestedName.name}` });
+            await this.emit("filing.name_unavailable", f, { requestedName: outcome.requestedName.name, site: outcome.site }, outcome.run.id);
+            await this.emit("filing.name_options_ready", f, {
+              resolutionId: rec.id, adminLink: this.d.nameResolution.linkFor(rec),
+              options: rec.options.map((o) => ({ name: o.name, available: o.available })),
+              availabilityVerified: rec.availabilityVerified, recipients: tenant.adminChannels,
+            }, outcome.run.id);
+          } else {
+            const err = outcome.run.error ?? `name unavailable: ${outcome.requestedName.name}`;
+            const f = await this.transition(latest, "failed", { currentRunId: outcome.run.id, lastError: err });
+            await this.emit("filing.failed", f, { stage: "name_unavailable", error: err }, outcome.run.id);
+          }
+          break;
+        }
+        case "review_gate": {
+          const f = await this.transition(latest, "awaiting_review_gate", { currentRunId: outcome.run.id });
+          const rec = this.d.reviewGate ? await this.d.store.getReviewGate(outcome.recordId) : null;
+          await this.emit("filing.review_gate", f, {
+            reviewGateId: outcome.recordId, screenKey: outcome.screenKey,
+            screenshotArtifactId: rec?.screenshotArtifactId,
+            adminLink: rec && this.d.reviewGate ? this.d.reviewGate.linkFor(rec) : undefined,
+            recipients: tenant.adminChannels,
+          }, outcome.run.id);
           break;
         }
         case "needs_reconciliation": {
@@ -262,6 +300,78 @@ export class FilingService {
       await this.d.queue.enqueue({ kind: "run_filing", filingId: f.id, tenantId: f.tenantId });
     }
     return halt;
+  }
+
+  /**
+   * Beta name-resolution decision. A pick (or a verified custom name) applies the new name,
+   * re-authorizes the filing as the admin (fees unchanged; the client never re-approves)
+   * and re-queues the run. An abort ends the filing. Regenerate / still-unavailable just
+   * refresh the options.
+   */
+  async onNameResolutionDecision(token: string, decision: NameDecision) {
+    if (!this.d.nameResolution) return { ok: false as const, reason: "not_found" as const };
+    const result = await this.d.nameResolution.decide(token, decision);
+    if (!result.ok) return result;
+    const rec = result.record;
+    const filing = await this.d.store.getFiling(rec.filingId);
+    if (!filing) return { ok: false as const, reason: "not_found" as const };
+
+    if (result.outcome === "resolved" && rec.chosen) {
+      const tenant = (await this.d.store.getTenant(filing.tenantId))!;
+      const client = (await this.d.store.getClientCompany(filing.clientCompanyId))!;
+      const req = JSON.parse(JSON.stringify(filing.request)) as typeof filing.request;
+      if (req.formation) { req.formation.name.baseName = rec.chosen.baseName; req.formation.name.designator = rec.chosen.designator; }
+      const updated = await this.d.store.updateFiling(filing.id, { request: req, payloadHash: this.d.approvals.payloadHash(req) });
+      let fees: FeeLine[];
+      try { fees = this.feesFor(req, tenant, client); }
+      catch { const prior = filing.currentApprovalId ? await this.d.store.getApproval(filing.currentApprovalId) : null; fees = prior?.fees ?? []; }
+      await this.d.approvals.adminReauthorize(updated, tenant, client, fees, rec.decidedBy ?? "admin");
+      const reloaded = (await this.d.store.getFiling(filing.id))!;
+      if (reloaded.status === "awaiting_name_resolution") {
+        const q = await this.transition(reloaded, "queued");
+        await this.emit("filing.name_resolved", q, { resolutionId: rec.id, chosenName: rec.chosen.name, by: rec.decidedBy });
+        await this.d.queue.enqueue({ kind: "run_filing", filingId: q.id, tenantId: q.tenantId });
+      }
+    } else if (result.outcome === "aborted") {
+      if (filing.status === "awaiting_name_resolution") {
+        const f = await this.transition(filing, "aborted", { lastError: `name resolution aborted: ${rec.reason ?? ""}` });
+        await this.emit("filing.aborted", f, { resolutionId: rec.id, reason: rec.reason });
+      }
+    } else {
+      await this.emit("filing.name_options_ready", filing, {
+        resolutionId: rec.id, adminLink: this.d.nameResolution.linkFor(rec),
+        options: rec.options.map((o) => ({ name: o.name, available: o.available })),
+        availabilityVerified: rec.availabilityVerified, outcome: result.outcome,
+      });
+    }
+    return result;
+  }
+
+  /**
+   * Beta review-gate decision. Approve marks the gate passed and re-queues the run (it then
+   * goes straight through to submission); reject aborts the filing. Nothing was submitted.
+   */
+  async onReviewGateDecision(token: string, decision: ReviewGateDecision) {
+    if (!this.d.reviewGate) return { ok: false as const, reason: "not_found" as const };
+    const result = await this.d.reviewGate.decide(token, decision);
+    if (!result.ok) return result;
+    const rec = result.record;
+    const filing = await this.d.store.getFiling(rec.filingId);
+    if (!filing) return { ok: false as const, reason: "not_found" as const };
+    if (result.outcome === "approved") {
+      if (filing.status === "awaiting_review_gate") {
+        const marked = await this.d.store.updateFiling(filing.id, {
+          reviewGate: { approvedAt: rec.decidedAt ?? new Date().toISOString(), approvedBy: rec.decidedBy ?? "admin", recordId: rec.id },
+        });
+        const q = await this.transition(marked, "queued");
+        await this.emit("filing.review_gate_resolved", q, { reviewGateId: rec.id, status: "approved", by: rec.decidedBy });
+        await this.d.queue.enqueue({ kind: "run_filing", filingId: q.id, tenantId: q.tenantId });
+      }
+    } else if (filing.status === "awaiting_review_gate") {
+      const f = await this.transition(filing, "aborted", { lastError: `review gate rejected: ${rec.reason ?? ""}` });
+      await this.emit("filing.aborted", f, { reviewGateId: rec.id, reason: rec.reason });
+    }
+    return result;
   }
 
   /**

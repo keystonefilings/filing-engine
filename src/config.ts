@@ -30,6 +30,9 @@ export const config = {
   browserProxy: process.env.BROWSER_PROXY || null,
   browserProfileDir: path.resolve(env("BROWSER_PROFILE_DIR", "./var/profiles")),
   dryRunDefault: env("DRY_RUN_DEFAULT", "true") === "true",
+  /** Name-resolution AI generator (the only LLM in a filing). No key -> deterministic static generator. */
+  anthropicApiKey: process.env.ANTHROPIC_API_KEY || null,
+  nameGeneratorModel: env("NAME_GENERATOR_MODEL", "claude-haiku-5-5"),
   siteConcurrency: {
     IRS: envInt("SITE_CONCURRENCY_IRS", 1),
     NY: envInt("SITE_CONCURRENCY_NY", 1),

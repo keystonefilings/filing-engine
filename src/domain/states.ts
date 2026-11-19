@@ -13,6 +13,8 @@ export type FilingStatus =
   | "queued"
   | "running"
   | "awaiting_drift_review"
+  | "awaiting_name_resolution" // name taken; admin picks an available alternative (beta/AI flow)
+  | "awaiting_review_gate"     // beta: stopped at the review screen for admin review before submit
   | "ein_filed"
   | "submitted"          // final click done, site accepted the submission
   | "accepted"           // state confirmed the filing (NJ: documents; NY: receipt email)
@@ -30,9 +32,11 @@ const TRANSITIONS: Record<FilingStatus, FilingStatus[]> = {
   approved: ["queued", "blocked", "awaiting_approval"],
   blocked: ["queued", "aborted", "awaiting_approval"],
   queued: ["running", "blocked", "aborted"],
-  running: ["awaiting_drift_review", "ein_filed", "submitted", "failed", "aborted", "needs_reconciliation", "blocked"],
+  running: ["awaiting_drift_review", "awaiting_name_resolution", "awaiting_review_gate", "ein_filed", "submitted", "failed", "aborted", "needs_reconciliation", "blocked"],
   awaiting_drift_review: ["queued", "awaiting_approval", "aborted"],
-  ein_filed: ["submitted", "failed", "needs_reconciliation", "awaiting_drift_review"],
+  awaiting_name_resolution: ["queued", "aborted"],
+  awaiting_review_gate: ["queued", "aborted"],
+  ein_filed: ["submitted", "failed", "needs_reconciliation", "awaiting_drift_review", "awaiting_review_gate"],
   submitted: ["accepted", "rejected", "completed"],
   accepted: ["completed"],
   rejected: ["created"],

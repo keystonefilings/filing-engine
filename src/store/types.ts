@@ -22,6 +22,8 @@ export interface FilingRecord {
   artifacts: { id: string; kind: string; label: string }[];
   /** Field path -> source ("filing", "service_company", "firm", "intake", ...) from the onboarding answers. */
   appliedPolicies?: Record<string, string>;
+  /** Set when a beta review-gate was approved; the re-queued run proceeds past the gate. */
+  reviewGate?: { approvedAt: string; approvedBy: string; recordId: string };
 }
 
 export interface ApprovalRecord {
@@ -50,7 +52,7 @@ export interface RunRecord {
   approvalId: string;
   site: string;
   dryRun: boolean;
-  status: "running" | "halted_drift" | "submitted" | "completed" | "failed" | "aborted" | "needs_reconciliation";
+  status: "running" | "halted_drift" | "halted_name" | "halted_review" | "submitted" | "completed" | "failed" | "aborted" | "needs_reconciliation";
   startedAt: string;
   endedAt?: string;
   steps: { screenKey: string; at: string; artifactIds: string[]; note?: string }[];
@@ -84,6 +86,59 @@ export interface DriftHaltRecord {
   decidedAt?: string;
   decidedBy?: string;
   resolution?: unknown;
+}
+
+/** One name-resolution flow for a filing whose chosen name was unavailable (beta/AI). */
+export interface NameOption {
+  baseName: string;
+  designator: string;
+  /** Rendered full name (baseName + designator) as shown to the admin and checked. */
+  name: string;
+  available: boolean;
+  source: "ai" | "custom";
+  checkedAt?: string;
+  detail?: string;
+}
+
+export interface NameResolutionRecord {
+  id: string;
+  filingId: string;
+  tenantId: string;
+  runId?: string;
+  site: string;
+  requested: { baseName: string; designator: string; name: string };
+  purpose?: string;
+  status: "awaiting_admin" | "resolved" | "aborted";
+  /** False when no availability checker is wired for the state: options are unverified. */
+  availabilityVerified: boolean;
+  options: NameOption[];
+  /** Every availability check made (AI candidates and admin custom entries). */
+  attempts: { name: string; available: boolean; source: "ai" | "custom"; at: string; by?: string }[];
+  chosen?: { baseName: string; designator: string; name: string; source: "ai_option" | "custom" };
+  token: string;
+  createdAt: string;
+  expiresAt: string;
+  decidedAt?: string;
+  decidedBy?: string;
+  reason?: string;
+}
+
+/** One beta review-gate stop for a run: the review screen awaiting admin approval. */
+export interface ReviewGateRecord {
+  id: string;
+  filingId: string;
+  tenantId: string;
+  runId: string;
+  site: string;
+  screenKey: string;
+  screenshotArtifactId?: string;
+  status: "pending" | "approved" | "rejected";
+  token: string;
+  createdAt: string;
+  expiresAt: string;
+  decidedAt?: string;
+  decidedBy?: string;
+  reason?: string;
 }
 
 export interface WebhookDeliveryRecord {
@@ -125,6 +180,16 @@ export interface Store {
   putApprovedSnapshot(site: string, screenKey: string, snap: PageSnapshot): Promise<void>;
   getIntentOverrides(site: string, screenKey: string): Promise<Record<string, string[]>>;
   putIntentOverrides(site: string, screenKey: string, overrides: Record<string, string[]>): Promise<void>;
+  // name resolution (beta)
+  createNameResolution(r: NameResolutionRecord): Promise<NameResolutionRecord>;
+  getNameResolution(id: string): Promise<NameResolutionRecord | null>;
+  updateNameResolution(id: string, patch: Partial<NameResolutionRecord>): Promise<NameResolutionRecord>;
+  listNameResolutions(status?: NameResolutionRecord["status"]): Promise<NameResolutionRecord[]>;
+  // review gate (beta)
+  createReviewGate(r: ReviewGateRecord): Promise<ReviewGateRecord>;
+  getReviewGate(id: string): Promise<ReviewGateRecord | null>;
+  updateReviewGate(id: string, patch: Partial<ReviewGateRecord>): Promise<ReviewGateRecord>;
+  listReviewGates(status?: ReviewGateRecord["status"]): Promise<ReviewGateRecord[]>;
   // settings
   getTenant(id: string): Promise<TenantSettings | null>;
   putTenant(t: TenantSettings): Promise<void>;

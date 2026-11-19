@@ -64,6 +64,22 @@ create table if not exists intent_overrides (
   primary key (site, screen_key)
 );
 
+create table if not exists name_resolutions (
+  id uuid primary key,
+  filing_id uuid not null references filings (id),
+  status text not null,
+  token text not null,
+  doc jsonb not null
+);
+
+create table if not exists review_gates (
+  id uuid primary key,
+  filing_id uuid not null references filings (id),
+  status text not null,
+  token text not null,
+  doc jsonb not null
+);
+
 create table if not exists tenants (id text primary key, doc jsonb not null);
 create table if not exists client_companies (id text primary key, tenant_id text not null, doc jsonb not null);
 

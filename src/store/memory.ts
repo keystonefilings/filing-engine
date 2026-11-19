@@ -1,5 +1,5 @@
 import type {
-  ApprovalRecord, DriftHaltRecord, FilingRecord, RunRecord, Store, SubmitIntentRecord, WebhookDeliveryRecord,
+  ApprovalRecord, DriftHaltRecord, FilingRecord, NameResolutionRecord, ReviewGateRecord, RunRecord, Store, SubmitIntentRecord, WebhookDeliveryRecord,
 } from "./types.js";
 import type { ClientCompanySettings, TenantSettings } from "../settings/schema.js";
 import type { PageSnapshot } from "../resolver/types.js";
@@ -24,6 +24,8 @@ export class MemoryStore implements Store {
   tenants = new Map<string, TenantSettings>();
   clients = new Map<string, ClientCompanySettings>();
   deliveries = new Map<string, WebhookDeliveryRecord>();
+  nameResolutions = new Map<string, NameResolutionRecord>();
+  reviewGates = new Map<string, ReviewGateRecord>();
 
   async createFiling(f: FilingRecord) { this.filings.set(f.id, f); return f; }
   async getFiling(id: string) { return this.filings.get(id) ?? null; }
@@ -65,6 +67,20 @@ export class MemoryStore implements Store {
   async putTenant(t: TenantSettings) { this.tenants.set(t.tenantId, t); }
   async getClientCompany(id: string) { return this.clients.get(id) ?? null; }
   async putClientCompany(c: ClientCompanySettings) { this.clients.set(c.clientCompanyId, c); }
+
+  async createNameResolution(r: NameResolutionRecord) { this.nameResolutions.set(r.id, r); return r; }
+  async getNameResolution(id: string) { return this.nameResolutions.get(id) ?? null; }
+  async updateNameResolution(id: string, patch: Partial<NameResolutionRecord>) { return patchInto(this.nameResolutions, id, patch, "name resolution"); }
+  async listNameResolutions(status?: NameResolutionRecord["status"]) {
+    return [...this.nameResolutions.values()].filter((r) => !status || r.status === status);
+  }
+
+  async createReviewGate(r: ReviewGateRecord) { this.reviewGates.set(r.id, r); return r; }
+  async getReviewGate(id: string) { return this.reviewGates.get(id) ?? null; }
+  async updateReviewGate(id: string, patch: Partial<ReviewGateRecord>) { return patchInto(this.reviewGates, id, patch, "review gate"); }
+  async listReviewGates(status?: ReviewGateRecord["status"]) {
+    return [...this.reviewGates.values()].filter((r) => !status || r.status === status);
+  }
 
   async createDelivery(d: WebhookDeliveryRecord) { this.deliveries.set(d.id, d); return d; }
   async updateDelivery(id: string, patch: Partial<WebhookDeliveryRecord>) { return patchInto(this.deliveries, id, patch, "delivery"); }

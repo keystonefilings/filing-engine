@@ -69,6 +69,7 @@ const disclaimer: ScreenStep = {
 };
 const review: ScreenStep = {
   screen: FL_SCREENS.review,
+  reviewScreen: true, // beta review-gate stops here for admin review before the summary/payment
   async fill(ctx) { await ctx.note("review page reached"); },
   async advance(ctx) { await ctx.actAndSettle(() => ctx.clickButton(/^continue$/i)); },
 };
