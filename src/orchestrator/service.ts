@@ -1,6 +1,7 @@
 import { randomUUID } from "node:crypto";
 import { FilingRequest, type FilingRequest as FilingRequestT } from "../domain/filing.js";
 import { hasErrors, validateFiling, type ValidationIssue } from "../domain/validation.js";
+import { checkCompleteness, type CompletenessConfig } from "../domain/completeness.js";
 import { assertTransition, type FilingStatus } from "../domain/states.js";
 import type { EventType } from "../domain/events.js";
 import type { FilingRecord, Store } from "../store/types.js";
@@ -112,6 +113,25 @@ export class FilingService {
       await this.emit("filing.invalid", f, { issues });
       return { filing: f, issues, existing: false };
     }
+    // Pre-flight completeness: verify the filing has every piece of info it needs before it proceeds.
+    const completeness = checkCompleteness(req, this.completenessConfig(tenant, client));
+    if (!completeness.complete) {
+      const f = await this.transition(filing, "awaiting_information", { lastError: `missing: ${completeness.missing.map((m) => m.label).join(", ")}` });
+      await this.emit("filing.information_required", f, { missing: completeness.missing });
+      return { filing: f, issues, existing: false };
+    }
+    return this.finalizeFiling(filing, tenant, client, issues);
+  }
+
+  private completenessConfig(tenant: TenantSettings, client: ClientCompanySettings): CompletenessConfig {
+    const t = tenant.completeness ?? { strictOptional: false, overrides: {} };
+    const c = client.completeness;
+    return { strictOptional: c?.strictOptional ?? t.strictOptional, overrides: { ...t.overrides, ...(c?.overrides ?? {}) } };
+  }
+
+  /** Fees + registered-agent resolution + approval. Shared by createFiling and supplyInformation. */
+  private async finalizeFiling(filing: FilingRecord, tenant: TenantSettings, client: ClientCompanySettings, issues: ValidationIssue[]): Promise<{ filing: FilingRecord; approvalLink?: string; issues: ValidationIssue[]; existing: boolean }> {
+    const req = filing.request;
     let fees: FeeLine[];
     try {
       fees = this.feesFor(req, tenant, client);
@@ -147,6 +167,38 @@ export class FilingService {
       registeredAgent: raResolution ? { source: raResolution.source, provider: raResolution.provider, costUsd: raResolution.costUsd, pending: raResolution.pendingProcurement ?? false } : undefined,
     });
     return { filing: f, approvalLink: link, issues, existing: false };
+  }
+
+  /** Supply missing info for a filing in awaiting_information; re-check and proceed to approval when complete. */
+  async supplyInformation(filingId: string, partial: Record<string, unknown>) {
+    const filing = await this.d.store.getFiling(filingId);
+    if (!filing) return { ok: false as const, reason: "not_found" as const };
+    if (filing.status !== "awaiting_information") return { ok: false as const, reason: "not_awaiting_information" as const };
+    const tenant = await this.d.store.getTenant(filing.tenantId);
+    const client = await this.d.store.getClientCompany(filing.clientCompanyId);
+    if (!tenant || !client) return { ok: false as const, reason: "not_found" as const };
+    const merged = deepMerge(filing.request as unknown as Record<string, unknown>, partial);
+    const applied = applyPolicies({ ...merged, tenantId: filing.tenantId, clientCompanyId: filing.clientCompanyId }, tenant, client);
+    const parsed = FilingRequest.safeParse(applied.request);
+    if (!parsed.success) {
+      return { ok: false as const, reason: "invalid" as const, issues: parsed.error.issues.map((i) => ({ path: i.path.join("."), message: i.message, severity: "error" as const })) };
+    }
+    const req = parsed.data;
+    if (req.ein && !req.ein.mode) req.ein.mode = client.einMode;
+    const issues = [...applied.issues, ...validateFiling(req)];
+    const updated = await this.d.store.updateFiling(filing.id, { request: req, payloadHash: this.d.approvals.payloadHash(req), appliedPolicies: applied.provenance });
+    if (hasErrors(issues)) {
+      const f = await this.transition(updated, "invalid", { lastError: issues.filter((i) => i.severity === "error").map((i) => `${i.path}: ${i.message}`).join("; ") });
+      await this.emit("filing.invalid", f, { issues });
+      return { ok: false as const, reason: "invalid" as const, issues };
+    }
+    const completeness = checkCompleteness(req, this.completenessConfig(tenant, client));
+    if (!completeness.complete) {
+      await this.emit("filing.information_required", updated, { missing: completeness.missing });
+      return { ok: true as const, complete: false as const, missing: completeness.missing };
+    }
+    const result = await this.finalizeFiling(updated, tenant, client, issues);
+    return { ok: true as const, complete: true as const, filing: result.filing, approvalLink: result.approvalLink };
   }
 
   /** Link decision (decision 2). Approve -> queued for a run; request changes -> back to the caller. */
@@ -432,4 +484,16 @@ export class FilingService {
 
 function dryRunReturnStatus(prior: FilingStatus): FilingStatus {
   return prior === "running" || prior === "queued" ? "approved" : prior;
+}
+
+/** Deep-merges supplied info into a request: nested objects merge, arrays/scalars replace. */
+function deepMerge(base: Record<string, unknown>, patch: Record<string, unknown>): Record<string, unknown> {
+  const out: Record<string, unknown> = { ...base };
+  for (const [k, v] of Object.entries(patch)) {
+    const existing = out[k];
+    out[k] = v && typeof v === "object" && !Array.isArray(v) && existing && typeof existing === "object" && !Array.isArray(existing)
+      ? deepMerge(existing as Record<string, unknown>, v as Record<string, unknown>)
+      : v;
+  }
+  return out;
 }

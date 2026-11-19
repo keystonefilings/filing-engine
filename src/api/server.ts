@@ -91,6 +91,17 @@ export function buildServer(deps: ApiDeps): FastifyInstance {
     return reply.code(202).send({ queued: true, dryRun: true });
   });
 
+  // Supply missing info for a filing in awaiting_information (completeness check).
+  app.post("/v1/filings/:id/information", async (req, reply) => {
+    const tenantId = tenantOf(req);
+    const f = await deps.store.getFiling((req.params as { id: string }).id);
+    if (!f || f.tenantId !== tenantId) return reply.code(404).send({ error: "not found" });
+    const r = await deps.service.supplyInformation(f.id, (req.body ?? {}) as Record<string, unknown>);
+    if (!r.ok) return reply.code(r.reason === "not_awaiting_information" ? 409 : r.reason === "not_found" ? 404 : 422).send({ error: r.reason, issues: (r as { issues?: unknown }).issues });
+    if (!r.complete) return reply.code(200).send({ complete: false, missing: r.missing });
+    return reply.code(200).send({ complete: true, filing: publicFiling(r.filing!), approvalLink: r.approvalLink });
+  });
+
   app.get("/v1/filings/:id/deliveries", async (req, reply) => {
     const tenantId = tenantOf(req);
     const f = await deps.store.getFiling((req.params as { id: string }).id);

@@ -101,6 +101,15 @@ export const TenantSettings = z.object({
   /** Questions the service company answers for all its customers (customers cannot change them). */
   lockedCustomerPolicies: z.array(z.string()).default([]),
   /**
+   * Pre-flight completeness: verify a filing has every piece of info it needs before it runs.
+   * strictOptional makes optional fields required unless marked not_needed; overrides force a
+   * field required or skip it. A customer firm's own completeness (below) is overlaid on this.
+   */
+  completeness: z.object({
+    strictOptional: z.boolean().default(false),
+    overrides: z.record(z.string(), z.enum(["required", "not_needed"])).default({}),
+  }).prefault({}),
+  /**
    * Beta review-gate: the live forms have no save, so a real run must finish in one pass.
    * In beta the engine stops at the review screen, screenshots it, and sends it to an admin
    * to approve before submission. Off in production (the run goes straight through).
@@ -160,6 +169,11 @@ export const ClientCompanySettings = z.object({
   registeredAgent: Person.optional(),
   /** This firm's default registered-agent choice for its filings: none, bring its own, or let the filing company provide it. */
   registeredAgentChoice: z.enum(["none", "client_provided", "filing_company"]).optional(),
+  /** This firm's completeness config, overlaid on the service company's (same shape). */
+  completeness: z.object({
+    strictOptional: z.boolean().optional(),
+    overrides: z.record(z.string(), z.enum(["required", "not_needed"])).optional(),
+  }).optional(),
   /** The firm's own details, used wherever its answer is "this firm" (docs/onboarding/customer-firm.md). */
   organizer: Person.optional(),
   filer: Person.optional(),

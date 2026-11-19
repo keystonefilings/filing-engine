@@ -6,6 +6,7 @@
 export type FilingStatus =
   | "created"
   | "invalid"
+  | "awaiting_information"  // pre-flight completeness check found missing required info
   | "awaiting_approval"
   | "changes_requested"
   | "approved"
@@ -25,8 +26,9 @@ export type FilingStatus =
   | "needs_reconciliation"; // submit intent recorded, outcome unknown; never auto re-run
 
 const TRANSITIONS: Record<FilingStatus, FilingStatus[]> = {
-  created: ["invalid", "awaiting_approval"],
+  created: ["invalid", "awaiting_approval", "awaiting_information"],
   invalid: ["created"],
+  awaiting_information: ["awaiting_approval", "invalid", "aborted"],
   awaiting_approval: ["approved", "changes_requested", "aborted"],
   changes_requested: ["awaiting_approval", "aborted"],
   approved: ["queued", "blocked", "awaiting_approval"],
