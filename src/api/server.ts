@@ -1,4 +1,5 @@
 import Fastify, { type FastifyInstance } from "fastify";
+import { keyMatches } from "./keys.js";
 import { z } from "zod";
 import type { FilingService } from "../orchestrator/service.js";
 import { ValidationFailed } from "../orchestrator/service.js";
@@ -24,6 +25,8 @@ export interface ApiDeps {
   reviewGate?: ReviewGateService;
   /** Caller API keys: key -> tenantId. Production: hashed keys in the database. */
   apiKeys: Record<string, string>;
+  /** Platform staff keys (header x-staff-key): drift reviews and any tenant's settings. None = those routes stay closed. */
+  staffKeys?: string[];
 }
 
 function filingTitle(f: FilingRecord | null): string {
@@ -48,8 +51,10 @@ export function buildServer(deps: ApiDeps): FastifyInstance {
 
   const tenantOf = (req: { headers: Record<string, unknown> }): string | null => {
     const key = String(req.headers["x-api-key"] ?? "");
-    return deps.apiKeys[key] ?? null;
+    return Object.prototype.hasOwnProperty.call(deps.apiKeys, key) ? deps.apiKeys[key]! : null;
   };
+  const isStaff = (req: { headers: Record<string, unknown> }): boolean => keyMatches(String(req.headers["x-staff-key"] ?? ""), deps.staffKeys ?? []);
+  const STAFF_ONLY = { error: "platform staff key required" };
 
   app.get("/healthz", async () => ({ ok: true }));
   app.get("/v1/events", async () => ({ events: EVENT_TYPES }));
@@ -128,7 +133,11 @@ export function buildServer(deps: ApiDeps): FastifyInstance {
 
   // ---- Settings ----
   app.put("/v1/tenants/:id", async (req, reply) => {
-    const parsed = TenantSettings.safeParse({ ...(req.body as object), tenantId: (req.params as { id: string }).id });
+    // A filing company changes its own settings; only platform staff touch another's (or create one).
+    const id = (req.params as { id: string }).id;
+    const caller = tenantOf(req);
+    if (!isStaff(req) && caller !== id) return reply.code(caller ? 403 : 401).send({ error: caller ? "tenant mismatch" : "invalid api key" });
+    const parsed = TenantSettings.safeParse({ ...(req.body as object), tenantId: id });
     if (!parsed.success) return reply.code(422).send({ error: parsed.error.issues });
     await deps.store.putTenant(parsed.data);
     return { ok: true };
@@ -173,15 +182,18 @@ export function buildServer(deps: ApiDeps): FastifyInstance {
   });
 
   // ---- Drift reviews (platform staff, decision 6): the platform maintains the site adapters for all tenants ----
-  app.get("/v1/drift-reviews", async (req) => {
+  app.get("/v1/drift-reviews", async (req, reply) => {
+    if (!isStaff(req)) return reply.code(401).send(STAFF_ONLY);
     const status = (req.query as { status?: "pending" | "accepted" | "corrected" | "rejected" }).status;
     return { halts: await deps.store.listDriftHalts(status) };
   });
   app.get("/v1/drift-reviews/:id", async (req, reply) => {
+    if (!isStaff(req)) return reply.code(401).send(STAFF_ONLY);
     const h = await deps.store.getDriftHalt((req.params as { id: string }).id);
     return h ? h : reply.code(404).send({ error: "not found" });
   });
   app.post("/v1/drift-reviews/:id/decision", async (req, reply) => {
+    if (!isStaff(req)) return reply.code(401).send(STAFF_ONLY);
     const parsed = DriftDecisionBody.safeParse(req.body);
     if (!parsed.success) return reply.code(422).send({ error: parsed.error.issues });
     try {

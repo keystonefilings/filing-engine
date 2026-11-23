@@ -79,6 +79,10 @@ export async function createSteelSession(opts: SteelOptions = {}): Promise<Steel
     method: "POST",
     headers: { ...headers, "content-type": "application/json" },
     body: JSON.stringify(sessionBody(opts)),
+  }).catch((e: Error & { cause?: { code?: unknown } }) => {
+    // The worker's network never reached Steel (DNS, firewall, outage): say so plainly.
+    const code = typeof e.cause?.code === "string" && /^[A-Z_]{1,40}$/.test(e.cause.code) ? ` (${e.cause.code})` : "";
+    throw new Error(`Steel API unreachable from this worker${code}`);
   });
   // Status and Steel's error code only: never echo a response body that could carry request details.
   if (!res.ok) throw new Error(`Steel session create failed: HTTP ${res.status}${await errorCode(res)}`);

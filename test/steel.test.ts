@@ -61,6 +61,11 @@ describe("Steel sessions", () => {
     await expect(createSteelSession({ fetchImpl: f2 })).rejects.toThrow(/^Steel session create failed: HTTP 400 \(session_timeout_exceeded\)$/);
   });
 
+  it("says plainly when the worker cannot reach Steel at all", async () => {
+    const down = (async () => { throw Object.assign(new TypeError("fetch failed"), { cause: { code: "ENOTFOUND" } }); }) as unknown as typeof fetch;
+    await expect(createSteelSession({ apiKey: "k", fetchImpl: down })).rejects.toThrow(/^Steel API unreachable from this worker \(ENOTFOUND\)$/);
+  });
+
   it("redacts the key, raw and URL-encoded", () => {
     const key = "sk/te+st=";
     const line = `connect failed: wss://connect.steel.dev/?sessionId=s&apiKey=${encodeURIComponent(key)} (key ${key})`;

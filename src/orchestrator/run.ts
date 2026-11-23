@@ -75,13 +75,17 @@ export class RunExecutor {
     const profileKey = input.adapter.profileKey(input);
     // Each site's browser goes out the network route configured for it (browser/egress.ts).
     const site = input.adapter.site;
-    const context: BrowserContext = profileKey ? await this.deps.harness.persistentContext(profileKey, site) : await this.deps.harness.ephemeralContext(site);
-    const credKey = input.adapter.credentialKey(input);
-    const credential = credKey ? await this.deps.vault.getCredential(credKey) : null;
     const values: StepContext["values"] = {};
     if (input.filing.ein) values.ein = input.filing.ein; // reuse an EIN already filed; never file a second one
-    let stage = "open";
+    let stage = "browser";
+    let context: BrowserContext | undefined;
     try {
+      // Inside the try: a browser that cannot be opened (a Steel session refused, a launch that
+      // fails) ends this run as failed and is reported, instead of leaving the filing "running".
+      context = profileKey ? await this.deps.harness.persistentContext(profileKey, site) : await this.deps.harness.ephemeralContext(site);
+      const credKey = input.adapter.credentialKey(input);
+      const credential = credKey ? await this.deps.vault.getCredential(credKey) : null;
+      stage = "open";
       const page = await context.newPage();
       await page.goto(input.adapter.entryUrl(input), { waitUntil: "domcontentloaded" });
       // Third-party registered agent: order it now (irreversible) so the assigned agent is
@@ -163,7 +167,7 @@ export class RunExecutor {
       const kindStage = err instanceof FeeMismatch ? "fee_mismatch" : err instanceof BotChallenge ? "bot_challenge" : stage;
       return { kind: "failed", run: done, stage: kindStage, error: err.message };
     } finally {
-      await this.deps.harness.closeContext(context); // a Steel context also ends its session
+      if (context) await this.deps.harness.closeContext(context); // a Steel context also ends its session
     }
   }
 

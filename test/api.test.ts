@@ -5,10 +5,11 @@ import { seededStore, wire, njFormationRequest } from "./helpers.js";
 import type { FastifyInstance } from "fastify";
 
 let app: FastifyInstance;
+const STAFF = "staff-key-0123456789abcdefghij";
 beforeAll(async () => {
   const store = await seededStore();
   const w = wire(store);
-  app = buildServer({ service: w.service, approvals: w.approvals, store, artifacts: new FsArtifactStore("var/test-artifacts"), publicBaseUrl: "http://api.test", apiKeys: { k1: "keystone" } });
+  app = buildServer({ service: w.service, approvals: w.approvals, store, artifacts: new FsArtifactStore("var/test-artifacts"), publicBaseUrl: "http://api.test", apiKeys: { k1: "keystone", k2: "other-co" }, staffKeys: [STAFF] });
   await app.ready();
 });
 afterAll(() => app.close());
@@ -46,5 +47,29 @@ describe("API", () => {
     const res = await app.inject({ method: "POST", url: "/v1/filings", headers: { "x-api-key": "k1" }, payload: { type: "formation" } });
     expect(res.statusCode).toBe(422);
     expect(res.json().issues.length).toBeGreaterThan(0);
+  });
+
+  it("lets a filing company change only its own settings", async () => {
+    const put = (id: string, headers: Record<string, string>) => app.inject({ method: "PUT", url: `/v1/tenants/${id}`, headers, payload: { name: "Keystone Filings" } });
+    expect((await put("keystone", {})).statusCode).toBe(401);
+    expect((await put("keystone", { "x-api-key": "k1" })).statusCode).toBe(200);
+    expect((await put("keystone", { "x-api-key": "k2" })).statusCode).toBe(403); // another company's key
+    expect((await put("new-co", { "x-api-key": "k1" })).statusCode).toBe(403);
+    expect((await put("new-co", { "x-staff-key": STAFF })).statusCode).toBe(200); // staff create tenants
+    expect((await put("keystone", { "x-staff-key": "wrong" })).statusCode).toBe(401);
+  });
+
+  it("keeps drift reviews to platform staff", async () => {
+    for (const [method, url] of [["GET", "/v1/drift-reviews"], ["GET", "/v1/drift-reviews/x"], ["POST", "/v1/drift-reviews/x/decision"]] as const) {
+      expect((await app.inject({ method, url })).statusCode).toBe(401);
+      expect((await app.inject({ method, url, headers: { "x-api-key": "k1" } })).statusCode).toBe(401); // a tenant key is not enough
+    }
+    expect((await app.inject({ method: "GET", url: "/v1/drift-reviews", headers: { "x-staff-key": STAFF } })).statusCode).toBe(200);
+  });
+
+  it("does not treat built-in object names as API keys", async () => {
+    for (const key of ["constructor", "__proto__", "toString"]) {
+      expect((await app.inject({ method: "GET", url: "/v1/filings", headers: { "x-api-key": key } })).statusCode).toBe(401);
+    }
   });
 });

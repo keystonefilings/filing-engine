@@ -18,6 +18,7 @@ type Call = { method: string; path: string; key: string | undefined; body?: Reco
 const calls: Call[] = [];
 const files = new Map<string, Buffer>();
 let n = 0; // fake session numbers, from 1 in each test
+let refuse: { status: number; code: string } | null = null; // the fake Steel API refuses new sessions
 let api: Server;
 let apiUrl = "";
 let remote: Browser;
@@ -53,6 +54,7 @@ beforeAll(async () => {
       calls.push({ method: req.method ?? "", path: url.pathname, key: req.headers["steel-api-key"] as string | undefined, ...(body ? { body } : {}) });
       const json = (v: unknown) => { res.setHeader("content-type", "application/json"); res.end(JSON.stringify(v)); };
       const m = /^\/v1\/sessions\/([^/]+)(\/.*)?$/.exec(url.pathname);
+      if (req.method === "POST" && url.pathname === "/v1/sessions" && refuse) { res.statusCode = refuse.status; return json({ error: "Bad Request", code: refuse.code, message: "Requested 'timeout' exceeds the maximum" }); }
       if (req.method === "POST" && url.pathname === "/v1/sessions") return json({ id: `sess_${++n}`, debugUrl: "https://live.example.test/s", ...(body?.profileId ? { profileId: body.profileId } : {}) });
       if (m && m[2] === "/release") return json({ success: true });
       if (m && m[2] === "/files") return json({ data: [...files].map(([path, b]) => ({ path, size: b.length, lastModified: "2026-11-23T00:00:00Z" })) });
@@ -78,7 +80,7 @@ afterAll(async () => {
   await fx?.close();
   delete process.env.IRS_EIN_URL;
 });
-beforeEach(() => { calls.length = 0; files.clear(); n = 0; });
+beforeEach(() => { calls.length = 0; files.clear(); n = 0; refuse = null; });
 
 describe("sites routed to Steel", () => {
   it("runs the IRS interview in a fresh plain Steel session and ends the session after", async () => {
@@ -150,5 +152,25 @@ describe("sites routed to Steel", () => {
     expect((await readDownload(dl)).toString()).toBe("%PDF-real");
     await harness.close(); // releases the session still open
     expect(released()).toEqual(["sess_1"]);
+  });
+
+  it("fails the run and reports it when Steel refuses the session (the filing is not left running)", async () => {
+    refuse = { status: 400, code: "session_timeout_exceeded" };
+    const harness = steelHarness();
+    const store = await seededStore();
+    const executor = new RunExecutor({ store, artifacts: new FsArtifactStore("var/test-artifacts"), harness, drift: new DriftReviewService(store), vault: { getCredential: async () => null }, firstObservationPolicy: "accept" });
+    const w = wire(store, { executor, now: () => OPEN });
+    const { filing, approvalLink } = await w.service.createFiling(einOnlyRequest());
+    await w.service.onApprovalDecision(approvalLink!.split("/approve/")[1]!, "approve", {});
+    await w.service.runFiling(filing.id);
+
+    const f = (await store.getFiling(filing.id))!;
+    expect(f.status).toBe("failed");
+    expect(f.lastError).toBe("Steel session create failed: HTTP 400 (session_timeout_exceeded)");
+    const run = (await store.getRun(f.currentRunId!))!;
+    expect(run.status).toBe("failed");
+    expect(run.error).toMatch(/^browser: Steel session create failed/);
+    expect(released()).toEqual([]); // no session was opened
+    await harness.close();
   });
 });

@@ -54,7 +54,10 @@ cp .env.example .env    # then edit .env on this machine
 In `.env`, set at least `POSTGRES_PASSWORD`, `API_KEYS`, `APPROVAL_SIGNING_SECRET`,
 `PUBLIC_BASE_URL` (the https address approval links will use), `WORKER_TENANTS` (the
 service company this machine files for, e.g. `keystone`), and that company's NJ and NY
-logins, scoped by its tenant id:
+logins, scoped by its tenant id. Generate every key and secret with `openssl rand -hex 32`:
+the API and worker refuse to start in production while one is missing, short or still a
+`change-me` placeholder. `PLATFORM_STAFF_KEYS` opens the drift-review routes (header
+`x-staff-key`); leave it empty until someone reviews site changes.
 
 ```
 WORKER_TENANTS=keystone

@@ -1,6 +1,7 @@
 import { bootstrap } from "./bootstrap.js";
 import { buildServer } from "./api/server.js";
 import { config } from "./config.js";
+import { parseApiKeys, parseStaffKeys } from "./api/keys.js";
 
 /**
  * Cloud tier: API + approval pages + webhook delivery. With WORKER_ENABLED=true the
@@ -11,7 +12,8 @@ const sys = await bootstrap({ withExecutor: config.workerEnabled });
 const app = buildServer({
   service: sys.service, approvals: sys.approvals, store: sys.store, artifacts: sys.artifacts, publicBaseUrl: config.publicBaseUrl,
   nameResolution: sys.nameResolution, reviewGate: sys.reviewGate,
-  apiKeys: Object.fromEntries((process.env.API_KEYS ?? "dev-key:keystone").split(",").map((p) => p.split(":") as [string, string])),
+  apiKeys: parseApiKeys(process.env.API_KEYS, config.production),
+  staffKeys: parseStaffKeys(process.env.PLATFORM_STAFF_KEYS, config.production),
 });
 
 setInterval(() => void sys.webhooks.processDue(), 15_000).unref();

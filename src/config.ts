@@ -1,5 +1,9 @@
 import path from "node:path";
 import { parseSiteProxies, parseSteelProfiles } from "./browser/egress.js";
+import { signingSecretFrom } from "./api/keys.js";
+
+/** The Docker image sets NODE_ENV=production: no development defaults for keys or secrets there. */
+const production = process.env.NODE_ENV === "production";
 
 function env(name: string, fallback?: string): string {
   const v = process.env[name];
@@ -19,9 +23,10 @@ function envInt(name: string, fallback: number): number {
 }
 
 export const config = {
+  production,
   port: envInt("PORT", 8080),
   publicBaseUrl: env("PUBLIC_BASE_URL", "http://localhost:8080"),
-  approvalSigningSecret: env("APPROVAL_SIGNING_SECRET", "dev-only-secret-not-for-production"),
+  approvalSigningSecret: signingSecretFrom(process.env.APPROVAL_SIGNING_SECRET, production),
   approvalTtlHours: envInt("APPROVAL_TTL_HOURS", 168),
   databaseUrl: process.env.DATABASE_URL || null,
   artifactDir: path.resolve(env("ARTIFACT_DIR", "./var/artifacts")),
