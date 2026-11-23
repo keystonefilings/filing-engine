@@ -1,15 +1,10 @@
 import { bootstrap } from "./bootstrap.js";
 import { config } from "./config.js";
-import { ADAPTERS } from "./adapters/index.js";
-import { browserSetupProblems } from "./browser/setup-check.js";
+import { exitOnStartupProblems } from "./startup-check.js";
 import { startWorkerHttp, WorkerLoop } from "./orchestrator/worker-loop.js";
 
-// Refuse to start on browser settings that would fail every run on some site.
-const problems = browserSetupProblems({
-  sites: Object.values(ADAPTERS).map((a) => a.site), browserProxy: config.browserProxy, siteProxies: config.siteProxies,
-  steelOnly: config.browsersSteelOnly, production: config.production, steelKeySet: !!config.steel.apiKey,
-});
-if (problems.length) { for (const p of problems) console.error(`worker not started: ${p}`); process.exit(1); }
+// Refuse to start on settings that would lose data or fail every run on some site.
+exitOnStartupProblems("worker");
 
 /** Worker tier (fixed-IP VM, decision 4): outbound-only; pulls jobs, drives browsers, uploads artifacts. */
 const sys = await bootstrap({ withExecutor: true });

@@ -16,8 +16,14 @@ describe("production keys and secrets", () => {
     try { parseApiKeys("short:other", true); } catch (e) { expect((e as Error).message).not.toContain("short"); }
     expect(parseApiKeys(`${STRONG}:keystone`, true)).toEqual({ [STRONG]: "keystone" });
     expect(() => parseApiKeys("nokey", false)).toThrow(/entry 1 must look like key:tenantId/);
-    expect(() => parseStaffKeys("change-me", true)).toThrow(/PLATFORM_STAFF_KEYS entry 1/);
-    expect(parseStaffKeys(undefined, true)).toEqual([]);
+    expect(() => parseStaffKeys("change-me-staff-key-0123456789:ops", true)).toThrow(/STAFF_API_KEYS entry 1: use a random key/);
+    expect(() => parseStaffKeys(STRONG, true)).toThrow(/STAFF_API_KEYS entry 1 must look like key:identity/);
+    expect(parseStaffKeys(`${STRONG}:ops@keystone`, true)).toEqual({ [STRONG]: "ops@keystone" });
+  });
+
+  it("require staff keys in production, where nothing can be configured without them", () => {
+    expect(() => parseStaffKeys(undefined, true)).toThrow(/STAFF_API_KEYS must be set in production/);
+    expect(parseStaffKeys(undefined, false)).toEqual({});
   });
 
   it("require a real approval signing secret in production", () => {

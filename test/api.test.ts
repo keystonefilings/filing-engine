@@ -9,7 +9,7 @@ const STAFF = "staff-key-0123456789abcdefghij";
 beforeAll(async () => {
   const store = await seededStore();
   const w = wire(store);
-  app = buildServer({ service: w.service, approvals: w.approvals, store, artifacts: new FsArtifactStore("var/test-artifacts"), publicBaseUrl: "http://api.test", apiKeys: { k1: "keystone", k2: "other-co" }, staffKeys: [STAFF] });
+  app = buildServer({ service: w.service, approvals: w.approvals, store, artifacts: new FsArtifactStore("var/test-artifacts"), publicBaseUrl: "http://api.test", apiKeys: { k1: "keystone", k2: "other-co" }, staffKeys: { [STAFF]: "ops@keystone" } });
   await app.ready();
 });
 afterAll(() => app.close());
@@ -49,22 +49,25 @@ describe("API", () => {
     expect(res.json().issues.length).toBeGreaterThan(0);
   });
 
-  it("lets a filing company change only its own settings", async () => {
+  it("lets only platform staff change tenant settings (they carry webhooks, approvers and vault keys)", async () => {
     const put = (id: string, headers: Record<string, string>) => app.inject({ method: "PUT", url: `/v1/tenants/${id}`, headers, payload: { name: "Keystone Filings" } });
     expect((await put("keystone", {})).statusCode).toBe(401);
-    expect((await put("keystone", { "x-api-key": "k1" })).statusCode).toBe(200);
-    expect((await put("keystone", { "x-api-key": "k2" })).statusCode).toBe(403); // another company's key
-    expect((await put("new-co", { "x-api-key": "k1" })).statusCode).toBe(403);
-    expect((await put("new-co", { "x-staff-key": STAFF })).statusCode).toBe(200); // staff create tenants
-    expect((await put("keystone", { "x-staff-key": "wrong" })).statusCode).toBe(401);
+    expect((await put("keystone", { "x-api-key": "k1" })).statusCode).toBe(403); // even the tenant's own key
+    expect((await put("new-co", { "x-api-key": "k2" })).statusCode).toBe(403);
+    expect((await put("keystone", { "x-api-key": "wrong" })).statusCode).toBe(401);
+    expect((await put("keystone", { "x-api-key": STAFF })).statusCode).toBe(200);
+    expect((await put("new-co", { "x-api-key": STAFF })).statusCode).toBe(200); // staff create tenants
   });
 
-  it("keeps drift reviews to platform staff", async () => {
+  it("keeps drift reviews to platform staff and takes the reviewer from the key", async () => {
     for (const [method, url] of [["GET", "/v1/drift-reviews"], ["GET", "/v1/drift-reviews/x"], ["POST", "/v1/drift-reviews/x/decision"]] as const) {
       expect((await app.inject({ method, url })).statusCode).toBe(401);
-      expect((await app.inject({ method, url, headers: { "x-api-key": "k1" } })).statusCode).toBe(401); // a tenant key is not enough
+      expect((await app.inject({ method, url, headers: { "x-api-key": "k1" } })).statusCode).toBe(403); // a tenant key is not enough
     }
-    expect((await app.inject({ method: "GET", url: "/v1/drift-reviews", headers: { "x-staff-key": STAFF } })).statusCode).toBe(200);
+    expect((await app.inject({ method: "GET", url: "/v1/drift-reviews", headers: { "x-api-key": STAFF } })).statusCode).toBe(200);
+    // No decidedBy in the body: it is the staff identity. Unknown halt -> 409, not a validation error.
+    const r = await app.inject({ method: "POST", url: "/v1/drift-reviews/nope/decision", headers: { "x-api-key": STAFF }, payload: { action: "accept" } });
+    expect(r.statusCode).toBe(409);
   });
 
   it("does not treat built-in object names as API keys", async () => {

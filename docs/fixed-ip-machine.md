@@ -79,8 +79,9 @@ In `.env`, set at least `POSTGRES_PASSWORD`, `API_KEYS`, `APPROVAL_SIGNING_SECRE
 service company this machine files for, e.g. `keystone`), and that company's NJ and NY
 logins, scoped by its tenant id. Generate every key and secret with `openssl rand -hex 32`:
 the API and worker refuse to start in production while one is missing, short or still a
-`change-me` placeholder. `PLATFORM_STAFF_KEYS` opens the drift-review routes (header
-`x-staff-key`); leave it empty until someone reviews site changes.
+`change-me` placeholder. `STAFF_API_KEYS` (`key:identity`, sent in `x-api-key`) is for
+platform staff: only staff create or change tenant settings and decide drift reviews, and the
+identity is recorded as the reviewer.
 
 ```
 WORKER_TENANTS=keystone
