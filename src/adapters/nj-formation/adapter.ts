@@ -4,6 +4,7 @@ import type { ScreenStep, SiteAdapter, StepContext } from "../types.js";
 import { njAccount } from "../../settings/accounts.js";
 import { NameUnavailable } from "../types.js";
 import { NJ_NAME_AVAILABLE, NJ_SCREENS } from "./intents.js";
+import { readDownload } from "../../browser/harness.js";
 
 /**
  * NJ Domestic LLC formation, rebuilt from the live walk of 2026-11-17.
@@ -258,10 +259,9 @@ export const njFormationAdapter: SiteAdapter = {
     for (let i = 0; i < n; i++) {
       const [dl] = await Promise.all([ctx.page.waitForEvent("download", { timeout: 15_000 }).catch(() => null), links.nth(i).click()]);
       if (!dl) continue;
-      const path = await dl.path();
-      if (!path) continue;
-      const { readFile } = await import("node:fs/promises");
-      out.push({ kind: "formation_document", label: dl.suggestedFilename(), contentType: "application/pdf", body: await readFile(path) });
+      const body = await readDownload(dl).catch(() => null);
+      if (!body) continue;
+      out.push({ kind: "formation_document", label: dl.suggestedFilename(), contentType: "application/pdf", body });
     }
     return out;
   },

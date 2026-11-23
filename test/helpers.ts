@@ -62,3 +62,28 @@ export function wire(store: MemoryStore, extra: { executor?: ConstructorParamete
   const service = new FilingService({ store, approvals, webhooks, queue, vault, drift, executor: extra.executor, dryRunDefault: true, now: extra.now });
   return { approvals, webhooks, queue, vault, drift, service };
 }
+
+/** A complete ein_only request (IRS interview, owner route); SSN is the test value 123-45-6789. */
+export function einOnlyRequest(over: Record<string, unknown> = {}): Record<string, unknown> {
+  return {
+    tenantId: "keystone", clientCompanyId: "acme-cpa", idempotencyKey: `idem-${Math.random().toString(36).slice(2)}`,
+    type: "ein_only", state: "NY",
+    formation: {
+      entityType: "LLC", name: { baseName: "Blue Harbor Consulting", designator: "LLC" }, county: "Kings",
+      effectiveDate: "upon_filing", mainBusinessAddress: { street1: "22 River Rd", city: "Brooklyn", state: "NY", zip: "11201" },
+      members: [{ name: "Sam Rivera" }], additionalCertificates: {},
+    },
+    ein: {
+      mode: "in_run", applicantRole: "owner",
+      responsibleParty: { name: "Sam Rivera", ssn: "123-45-6789", title: "Member", address: { street1: "22 River Rd", city: "Brooklyn", state: "NY", zip: "11201" }, phone: "2125550100" },
+      reason: "new_business", physicalState: "NY", formationState: "NY", county: "Kings", startDate: "2026-11-01",
+      regulated: { highwayVehicle: false, wagering: false, form720: false, alcoholTobaccoFirearms: false },
+      employees: { expected: true, firstWages: "2027-01", agriculturalCount: 0, otherCount: 2, lowAnnualLiability: true },
+      businessActivity: { category: "Real Estate", detail: "Manage real estate for others" },
+      mailingAddress: { street1: "PO Box 100", city: "Jersey City", state: "NJ", zip: "07302" },
+      noticeDelivery: "digital",
+    },
+    contact: { firstName: "Sam", lastName: "Rivera", phone: "2125550100", email: "sam@example.test" },
+    ...over,
+  };
+}

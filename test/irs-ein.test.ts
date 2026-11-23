@@ -1,6 +1,6 @@
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { startFixtureServer } from "../fixtures/serve.js";
-import { seededStore, wire } from "./helpers.js";
+import { einOnlyRequest, seededStore, wire } from "./helpers.js";
 import { RunExecutor } from "../src/orchestrator/run.js";
 import { BrowserHarness } from "../src/browser/harness.js";
 import { FsArtifactStore } from "../src/artifacts/store.js";
@@ -18,29 +18,7 @@ const SSN_DIGITS = "123456789";
 const OPEN = new Date("2026-11-17T17:00:00Z");   // Tuesday 12:00 ET: assistant open
 const CLOSED = new Date("2026-11-22T15:00:00Z"); // Sunday 10:00 ET: assistant closed until 6 p.m.
 
-function einOnly(over: Record<string, unknown> = {}): Record<string, unknown> {
-  return {
-    tenantId: "keystone", clientCompanyId: "acme-cpa", idempotencyKey: `idem-${Math.random().toString(36).slice(2)}`,
-    type: "ein_only", state: "NY",
-    formation: {
-      entityType: "LLC", name: { baseName: "Blue Harbor Consulting", designator: "LLC" }, county: "Kings",
-      effectiveDate: "upon_filing", mainBusinessAddress: { street1: "22 River Rd", city: "Brooklyn", state: "NY", zip: "11201" },
-      members: [{ name: "Sam Rivera" }], additionalCertificates: {},
-    },
-    ein: {
-      mode: "in_run", applicantRole: "owner",
-      responsibleParty: { name: "Sam Rivera", ssn: SSN, title: "Member", address: { street1: "22 River Rd", city: "Brooklyn", state: "NY", zip: "11201" }, phone: "2125550100" },
-      reason: "new_business", physicalState: "NY", formationState: "NY", county: "Kings", startDate: "2026-11-01",
-      regulated: { highwayVehicle: false, wagering: false, form720: false, alcoholTobaccoFirearms: false },
-      employees: { expected: true, firstWages: "2027-01", agriculturalCount: 0, otherCount: 2, lowAnnualLiability: true },
-      businessActivity: { category: "Real Estate", detail: "Manage real estate for others" },
-      mailingAddress: { street1: "PO Box 100", city: "Jersey City", state: "NJ", zip: "07302" },
-      noticeDelivery: "digital",
-    },
-    contact: { firstName: "Sam", lastName: "Rivera", phone: "2125550100", email: "sam@example.test" },
-    ...over,
-  };
-}
+const einOnly = einOnlyRequest;
 
 let fx: Awaited<ReturnType<typeof startFixtureServer>>;
 let harness: BrowserHarness;

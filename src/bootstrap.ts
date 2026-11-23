@@ -55,7 +55,7 @@ export async function bootstrap(opts: { withExecutor: boolean }) {
   // Outbound communication: real channel senders (email/Slack/SMS) plug in per tenant with
   // their own vault credentials; until then every message is recorded via the log sender.
   const notifier = new Notifier({ store, senders: {}, defaultSender: new LogChannelSender("email"), publicBaseUrl: config.publicBaseUrl });
-  const harness = new BrowserHarness({ chromiumPath: config.chromiumPath, proxyServer: config.browserProxy, siteProxies: config.siteProxies, profileDir: config.browserProfileDir });
+  const harness = new BrowserHarness({ chromiumPath: config.chromiumPath, proxyServer: config.browserProxy, siteProxies: config.siteProxies, steel: config.steel, profileDir: config.browserProfileDir });
   const executor = opts.withExecutor ? new RunExecutor({ store, artifacts, harness, drift, vault, reviewGate, registeredAgents }) : undefined;
   const limiter = new ConcurrencyLimiter({
     "site:IRS": config.siteConcurrency.IRS, "site:NY": config.siteConcurrency.NY, "site:NJ": config.siteConcurrency.NJ,

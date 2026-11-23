@@ -72,3 +72,16 @@ describe("FilingService + Notifier", () => {
     expect(msgs.some((m) => m.eventType === "filing.awaiting_approval" && m.audience === "client" && m.link)).toBe(true);
   });
 });
+
+import { renderMessage } from "../src/comms/render.js";
+
+describe("bot-check stops", () => {
+  it("tell the admin nothing was submitted and what to do, instead of a bare failure", () => {
+    const m = renderMessage(ev("filing.failed", { stage: "bot_challenge", error: "bot challenge on MO: just a moment" }), filing())!;
+    expect(m.audience).toBe("admin");
+    expect(m.subject).toMatch(/^Portal bot check:/);
+    expect(m.body).toContain("Nothing was submitted");
+    expect(m.body).toContain("bot challenge on MO: just a moment");
+    expect(renderMessage(ev("filing.failed", { stage: "payment", error: "card declined" }), filing())!.subject).toMatch(/^Failed:/);
+  });
+});

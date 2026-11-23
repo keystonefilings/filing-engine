@@ -163,7 +163,7 @@ export class RunExecutor {
       const kindStage = err instanceof FeeMismatch ? "fee_mismatch" : err instanceof BotChallenge ? "bot_challenge" : stage;
       return { kind: "failed", run: done, stage: kindStage, error: err.message };
     } finally {
-      await context.close().catch(() => {});
+      await this.deps.harness.closeContext(context); // a Steel context also ends its session
     }
   }
 
@@ -202,7 +202,7 @@ export class RunExecutor {
       }
       return m[1]!;
     } finally {
-      await context.close().catch(() => {});
+      await this.deps.harness.closeContext(context); // a Steel context also ends its session
     }
   }
 

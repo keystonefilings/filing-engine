@@ -1,12 +1,13 @@
 /**
  * Run on the machine that will file to see which government portals serve it, each through
- * the network route it would actually use (BROWSER_PROXY / SITE_PROXIES, see
- * src/browser/egress.ts). Read-only: it loads each entry page and nothing else.
+ * the route a filing run would actually use: the worker's own browser harness and config
+ * (BROWSER_PROXY / SITE_PROXIES / STEEL_*, see src/browser/egress.ts and src/config.ts).
+ * Read-only: it loads each entry page and nothing else.
  *
  *   npm run probe-sites
- *   SITE_PROXIES="IRS=http://office:3128,NY=http://office:3128" npm run probe-sites
- *   STEEL_API_KEY=... npm run probe-sites -- --steel      every site through one plain Steel
- *                                                         cloud browser (src/browser/steel.ts)
+ *   SITE_PROXIES="IRS=steel,NY=steel,MO=http://office:3128" npm run probe-sites
+ *   npm run probe-sites -- --steel        every site through Steel (needs STEEL_API_KEY); each
+ *                                         site gets its own plain session, as a run would
  *
  * From the cloud container (2026-11-17 through 2026-11-19): NJ and FL served; the IRS EIN
  * assistant answered "Access Denied" (Akamai), NY DOS closed the connection, Missouri served a
@@ -20,9 +21,11 @@
  */
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import type { Browser, Page } from "playwright";
-import { describeRoute, parseProxy, parseSiteProxies, routeFor } from "../src/browser/egress.js";
-import { createSteelSession, redact } from "../src/browser/steel.js";
+import type { BrowserContext, Page } from "playwright";
+import { describeRoute } from "../src/browser/egress.js";
+import { BrowserHarness } from "../src/browser/harness.js";
+import { redact } from "../src/browser/steel.js";
+import { config } from "../src/config.js";
 
 export const SITES = [
   { key: "NJ formation", site: "NJ", url: "https://www.njportal.com/DOR/BusinessFormation/Home/Welcome", expect: /Business Formation/i },
@@ -60,68 +63,21 @@ export function classify(status: number | null, title: string, body: string, err
   return expect && !expect.test(`${title} ${body}`) ? "error" : "ok";
 }
 
-interface Opener { open(site: string): Promise<Page>; label(site: string): string; close(): Promise<void> }
-
-/** This machine's browser, out each site's configured route (BROWSER_PROXY / SITE_PROXIES). */
-async function localOpener(): Promise<Opener> {
-  const { chromium } = await import("playwright");
-  const defaultRoute = process.env.BROWSER_PROXY ? parseProxy(process.env.BROWSER_PROXY) : null;
-  const siteProxies = parseSiteProxies(process.env.SITE_PROXIES);
-  const browsers = new Map<string, Browser>();
-  return {
-    async open(site) {
-      const route = routeFor(site, defaultRoute, siteProxies);
-      const key = route ? `${route.server}|${route.username ?? ""}` : "direct";
-      let browser = browsers.get(key);
-      if (!browser) { browser = await chromium.launch(route ? { proxy: route } : {}); browsers.set(key, browser); }
-      return browser.newPage();
-    },
-    label: (site) => describeRoute(routeFor(site, defaultRoute, siteProxies)),
-    async close() { for (const b of browsers.values()) await b.close(); },
-  };
-}
-
-/** One plain Steel session (no residential proxy, no CAPTCHA solving) for every site. */
-async function steelOpener(): Promise<Opener> {
-  const { chromium } = await import("playwright");
-  const session = await createSteelSession({ apiKey: process.env.STEEL_API_KEY, apiUrl: process.env.STEEL_API_URL, connectUrl: process.env.STEEL_CONNECT_URL });
-  try {
-    const browser = await chromium.connectOverCDP(session.connectUrl, { headers: session.headers });
-    const context = browser.contexts()[0] ?? (await browser.newContext());
-    const ip = await context.newPage();
-    try {
-      await ip.goto("https://api.ipify.org?format=json", { timeout: 30_000 });
-      console.log(`Steel session ${session.id}: portals see ${(await ip.locator("body").innerText()).trim()}\n`);
-    } catch { console.log(`Steel session ${session.id}: could not read its public IP\n`); }
-    await ip.close();
-    return {
-      open: () => context.newPage(),
-      label: () => "steel (us-east)",
-      async close() { await browser.close().catch(() => {}); await session.release(); },
-    };
-  } catch (e) {
-    await session.release();
-    throw e;
-  }
-}
-
 async function main() {
   const steel = process.argv.includes("--steel");
-  const secret = process.env.STEEL_API_KEY;
-  const say = (line: string) => console.log(redact(line, secret));
-  let opener: Opener;
-  try {
-    opener = steel ? await steelOpener() : await localOpener();
-  } catch (e) {
-    say(`Could not start the ${steel ? "Steel" : "local"} browser: ${(e as Error).message.split("\n")[0]}`);
-    process.exit(2);
-  }
+  const say = (line: string) => console.log(redact(line, config.steel.apiKey));
+  // The worker's own harness: each site goes out exactly the way a filing run would send it.
+  const harness = new BrowserHarness({
+    chromiumPath: config.chromiumPath, profileDir: config.browserProfileDir, steel: config.steel,
+    proxyServer: steel ? "steel" : config.browserProxy, siteProxies: steel ? {} : config.siteProxies,
+  });
   const failedSites = new Set<string>();
   for (const s of SITES) {
     let status: number | null = null, title = "", body = "", error: string | undefined;
-    let page: Page | undefined;
+    let context: BrowserContext | undefined;
     try {
-      page = await opener.open(s.site);
+      context = await harness.ephemeralContext(s.site);
+      const page: Page = await context.newPage();
       const r = await page.goto(s.url, { timeout: 30_000, waitUntil: "domcontentloaded" });
       status = r?.status() ?? null;
       title = await page.title();
@@ -134,20 +90,18 @@ async function main() {
         status = 200; // the check page itself answered; what matters is what replaced it
       }
     } catch (e) { error = (e as Error).message.split("\n")[0]; }
-    await page?.close().catch(() => {});
+    if (context) await harness.closeContext(context); // a Steel site's session ends here
     const verdict = classify(status, title, body, error, s.expect);
     if (verdict !== "ok") failedSites.add(s.site);
-    say(`${verdict.padEnd(8)} ${s.key.padEnd(26)} ${opener.label(s.site).padEnd(28)} ${status ?? "-"}  ${error ?? (title.slice(0, 60) || "(blank page)")}`);
+    say(`${verdict.padEnd(8)} ${s.key.padEnd(26)} ${describeRoute(harness.routeFor(s.site)).padEnd(28)} ${status ?? "-"}  ${error ?? (title.slice(0, 60) || "(blank page)")}`);
     if (verdict !== "ok" && !error && body.trim()) say(`         page text: ${body.replace(/\s+/g, " ").trim().slice(0, 160)}`);
   }
-  await opener.close();
+  await harness.close();
   if (!failedSites.size) {
-    say(`\nEvery portal is reachable ${steel ? "through Steel" : "on its configured route"}.`);
+    say(`\nEvery portal is reachable on its configured route.`);
     process.exit(0);
   }
-  say(steel
-    ? `\nNot reachable through Steel's network: ${[...failedSites].join(", ")}.`
-    : `\nNot reachable on their current route: ${[...failedSites].join(", ")}. Give those sites a route their portals serve (SITE_PROXIES) and run this again.`);
+  say(`\nNot reachable on their current route: ${[...failedSites].join(", ")}. Give those sites a route their portals serve (SITE_PROXIES: a proxy URL or steel) and run this again.`);
   process.exit(1);
 }
 
