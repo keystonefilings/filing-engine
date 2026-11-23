@@ -82,6 +82,29 @@ The text after the staff key's colon is the name recorded on drift-review decisi
 holds the key. Keep both files until step 6, then move the keys to a password manager (and the
 caller key to wherever keystonefilings.com keeps its secrets) and delete the files.
 
+**On Windows PowerShell 5.1** (no `openssl`; flyctl as `.\flyctl` in its folder), one block
+generates and stages the four generated secrets, saving the caller and staff keys in the home
+folder encrypted with Windows DPAPI (readable only by the same Windows account on that PC):
+
+```powershell
+& {
+  $rng = [Security.Cryptography.RandomNumberGenerator]::Create()
+  function New-Hex { $b = New-Object byte[] 32; $rng.GetBytes($b); -join ($b | ForEach-Object { $_.ToString('x2') }) }
+  $api = New-Hex; $staff = New-Hex
+  ConvertTo-SecureString $api -AsPlainText -Force | ConvertFrom-SecureString | Set-Content "$HOME\fe-api-key.dpapi"
+  ConvertTo-SecureString $staff -AsPlainText -Force | ConvertFrom-SecureString | Set-Content "$HOME\fe-staff-key.dpapi"
+  .\flyctl secrets set --stage --app keystone-filing-engine "API_KEYS=$($api):keystone" "STAFF_API_KEYS=$($staff):ops@keystone" "APPROVAL_SIGNING_SECRET=$(New-Hex)" "WORKER_WAKE_TOKEN=$(New-Hex)"
+  if ($LASTEXITCODE -eq 0) { 'Done: 4 secrets staged. Keys saved encrypted in your home folder.' } else { 'flyctl failed: run this block again.' }
+}
+```
+
+To copy a saved key to the clipboard for a password manager without showing it (then clear the
+clipboard with `Set-Clipboard -Value ' '`, and delete the entry from clipboard history if it is on):
+
+```powershell
+Set-Clipboard ([Runtime.InteropServices.Marshal]::PtrToStringBSTR([Runtime.InteropServices.Marshal]::SecureStringToBSTR((Get-Content "$HOME\fe-staff-key.dpapi" | ConvertTo-SecureString))))
+```
+
 ## 4. Deploy
 
 ```bash
