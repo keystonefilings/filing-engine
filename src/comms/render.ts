@@ -45,6 +45,10 @@ export function renderMessage(event: WebhookEvent, filing: FilingRecord): Render
     case "filing.drift_halted":
       return { audience: "admin", subject: `Site changed — review needed: ${t}`, body: "A government site changed and the filing is paused for a human to review the proposed mapping." };
     case "filing.failed":
+      if (str("stage") === "bot_challenge") {
+        // Nothing was submitted; the engine does not solve or get around a portal's bot check.
+        return { audience: "admin", subject: `Portal bot check: ${t}`, body: `The state portal showed a bot check that did not clear on its own (${str("error") ?? "bot challenge"}). Nothing was submitted. File this one by hand, or route this portal through a connection it serves (SITE_PROXIES), then run it again.` };
+      }
       return { audience: "admin", subject: `Failed: ${t}`, body: `The filing failed${str("error") ? `: ${str("error")}` : "."}` };
     case "filing.blocked":
       return { audience: "admin", subject: `Blocked: ${t}`, body: `The filing is blocked${Array.isArray(d.blockers) ? `: ${(d.blockers as string[]).join("; ")}` : "."}` };

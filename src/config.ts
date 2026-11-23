@@ -1,5 +1,9 @@
 import path from "node:path";
-import { parseSiteProxies } from "./browser/egress.js";
+import { parseSiteProxies, parseSteelProfiles } from "./browser/egress.js";
+import { signingSecretFrom } from "./api/keys.js";
+
+/** The Docker image sets NODE_ENV=production: no development defaults for keys or secrets there. */
+const production = process.env.NODE_ENV === "production";
 
 function env(name: string, fallback?: string): string {
   const v = process.env[name];
@@ -19,20 +23,49 @@ function envInt(name: string, fallback: number): number {
 }
 
 export const config = {
+  production,
   port: envInt("PORT", 8080),
   publicBaseUrl: env("PUBLIC_BASE_URL", "http://localhost:8080"),
-  approvalSigningSecret: env("APPROVAL_SIGNING_SECRET", "dev-only-secret-not-for-production"),
+  approvalSigningSecret: signingSecretFrom(process.env.APPROVAL_SIGNING_SECRET, production),
   approvalTtlHours: envInt("APPROVAL_TTL_HOURS", 168),
   databaseUrl: process.env.DATABASE_URL || null,
   artifactDir: path.resolve(env("ARTIFACT_DIR", "./var/artifacts")),
+  /** Object storage for artifacts, shared by an API and a worker on different machines (Fly.io).
+   *  Fly Tigris (fly storage create) sets BUCKET_NAME and the AWS_* variables; unset = ARTIFACT_DIR. */
+  artifactBucket: process.env.ARTIFACT_BUCKET || process.env.BUCKET_NAME || null,
+  artifactS3: {
+    endpoint: process.env.AWS_ENDPOINT_URL_S3 || undefined,
+    region: process.env.AWS_REGION || undefined,
+    forcePathStyle: process.env.ARTIFACT_S3_PATH_STYLE === "true",
+  },
+  /** API side: the worker's wake endpoint (POST), called after a filing is queued. Unset = no wake. */
+  workerWakeUrl: process.env.WORKER_WAKE_URL || null,
+  /** Shared by the API (sends it) and the worker (checks it). */
+  workerWakeToken: process.env.WORKER_WAKE_TOKEN || null,
+  /** Worker side: the port for /healthz and /wake (unset = no HTTP listener), and how long it waits between checks when idle. */
+  workerPort: process.env.WORKER_PORT ? envInt("WORKER_PORT", 8081) : null,
+  workerIdlePollMs: envInt("WORKER_IDLE_POLL_MS", 2_000),
   workerEnabled: env("WORKER_ENABLED", "true") === "true",
   chromiumPath: process.env.PW_CHROMIUM_PATH || null,
-  /** Default network route for the browser (see browser/egress.ts); unset = direct. */
+  /** Default network route for the browser (see browser/egress.ts): a proxy URL or "steel"; unset = direct. */
   browserProxy: process.env.BROWSER_PROXY || null,
-  /** Per-portal routes, e.g. "IRS=http://office:3128,NY=http://office:3128,NJ=direct". Only the
+  /** Per-portal routes, e.g. "IRS=steel,NY=steel,MO=http://office:3128,NJ=direct". Only the
    *  portals that refuse the worker's own network need one (npm run probe-sites shows which). */
   siteProxies: parseSiteProxies(process.env.SITE_PROXIES),
+  /** Steel hosted browsers, for sites routed "steel" (browser/steel.ts). The key comes from the
+   *  deployment's secret store, never a committed file. */
+  steel: {
+    apiKey: process.env.STEEL_API_KEY || null,
+    apiUrl: process.env.STEEL_API_URL || undefined,
+    connectUrl: process.env.STEEL_CONNECT_URL || undefined,
+    /** Saved sign-ins by profile key, e.g. "nygov=<profile id>" (npm run steel-login). */
+    profiles: parseSteelProfiles(process.env.STEEL_PROFILES),
+    /** Hard cap per run; Keystone's Steel plan allows at most 15 minutes. */
+    timeoutMs: envInt("STEEL_SESSION_TIMEOUT_MS", 15 * 60_000),
+  },
   browserProfileDir: path.resolve(env("BROWSER_PROFILE_DIR", "./var/profiles")),
+  /** "steel-only": this image ships no local browser (Dockerfile target "steel"); every site must route to Steel. */
+  browsersSteelOnly: process.env.BROWSERS === "steel-only",
   dryRunDefault: env("DRY_RUN_DEFAULT", "true") === "true",
   /** Name-resolution AI generator (the only LLM in a filing). No key -> deterministic static generator. */
   anthropicApiKey: process.env.ANTHROPIC_API_KEY || null,

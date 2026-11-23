@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { describeRoute, parseProxy, parseSiteProxies, routeFor } from "../src/browser/egress.js";
+import { describeRoute, isSteel, parseProxy, parseSiteProxies, parseSteelProfiles, routeFor, STEEL_ROUTE } from "../src/browser/egress.js";
 import { BrowserHarness } from "../src/browser/harness.js";
 
 describe("per-portal network routing", () => {
@@ -34,10 +34,90 @@ describe("per-portal network routing", () => {
     expect(describeRoute(null)).toBe("direct");
   });
 
+  it("routes a site to a Steel hosted browser with \"steel\", per site or by default", () => {
+    const sites = parseSiteProxies("IRS=steel,NY=Steel,MO=http://office:3128,NJ=direct");
+    expect(isSteel(sites.IRS)).toBe(true);
+    expect(isSteel(sites.NY)).toBe(true);
+    expect(sites.MO).toEqual({ server: "http://office:3128" });
+    expect(describeRoute(routeFor("IRS", null, sites))).toBe("via Steel");
+    expect(isSteel(routeFor("FL", STEEL_ROUTE, sites))).toBe(true); // BROWSER_PROXY=steel
+    expect(routeFor("NJ", STEEL_ROUTE, sites)).toBeNull();
+    const h = new BrowserHarness({ profileDir: "var/test-profiles", proxyServer: "steel", siteProxies: parseSiteProxies("NJ=direct") });
+    expect(describeRoute(h.routeFor("IRS"))).toBe("via Steel");
+    expect(describeRoute(h.routeFor("NJ"))).toBe("direct");
+  });
+
+  it("parses saved Steel sign-ins by profile key, without echoing a bad entry", () => {
+    expect(parseSteelProfiles("nygov=prof_1, ny:keystone=prof_2")).toEqual({ nygov: "prof_1", "ny:keystone": "prof_2" });
+    expect(parseSteelProfiles(undefined)).toEqual({});
+    expect(() => parseSteelProfiles("nygov=prof_1,oops")).toThrow(/entry 2 must look like profileKey=profileId/);
+  });
+
   it("the harness picks each site's route from its config", () => {
     const h = new BrowserHarness({ profileDir: "var/test-profiles", siteProxies: parseSiteProxies("IRS=http://office:3128,NY=http://office:3128") });
     expect(h.routeFor("IRS")).toEqual({ server: "http://office:3128" });
     expect(h.routeFor("NJ")).toBeNull();
     expect(h.routeFor(undefined)).toBeNull();
+  });
+});
+
+import { classify } from "../tools/probe-sites.js";
+import { detectChallenge } from "../src/browser/harness.js";
+
+describe("challenge recognition", () => {
+  it("treats JavaScript-check pages as not-yet-reachable, and the real page as ok", () => {
+    expect(classify(200, "", "Please enable JavaScript to view the page content. Your support ID is: 1234567890")).toBe("blocked");
+    expect(classify(200, "Just a moment...", "")).toBe("blocked");
+    expect(classify(200, "On-Line Filing", "An official website of New York State")).toBe("ok");
+    expect(classify(403, "Access Denied", "")).toBe("blocked");
+  });
+
+  it("never marks a blank page or an unexpected page ok", () => {
+    expect(classify(200, "", "")).toBe("blocked"); // a check that has not rendered yet
+    expect(classify(200, "", "  \n ")).toBe("blocked");
+    expect(classify(200, "Something else", "text", undefined, /Public Inquiry/i)).toBe("error");
+    expect(classify(200, "Public Inquiry", "Search", undefined, /Public Inquiry/i)).toBe("ok");
+    expect(classify(200, "State of NJ - Online Business Entity Filing", "Welcome to Business Formation", undefined, /Business Formation/i)).toBe("ok");
+  });
+
+  it("the engine stops on the same interstitials", async () => {
+    const page = (title: string, body: string) => ({ title: async () => title, locator: () => ({ innerText: async () => body }) }) as never;
+    expect(await detectChallenge(page("Just a moment...", ""))).toBe("just a moment");
+    expect(await detectChallenge(page("", "Please enable JavaScript to view the page content. Your support ID is: 42"))).not.toBeNull();
+    expect(await detectChallenge(page("On-Line Filing", "An official website of New York State"))).toBeNull();
+  });
+});
+
+import { waitOutJsCheck } from "../src/browser/harness.js";
+
+describe("JavaScript checks", () => {
+  function scripted(titles: string[]) {
+    let i = 0, waits = 0;
+    const page = {
+      title: async () => titles[Math.min(i, titles.length - 1)]!, // the page changes as time passes, not as it is read
+      locator: () => ({ innerText: async () => "" }),
+      waitForTimeout: async () => { waits++; i++; },
+    } as never;
+    return { page, waits: () => waits };
+  }
+  it("waits for a JavaScript check to clear on its own", async () => {
+    const p = scripted(["Just a moment...", "Just a moment...", "Missouri Business Filings"]);
+    expect(await waitOutJsCheck(p.page)).toBeNull();
+    expect(p.waits()).toBe(2);
+  });
+  it("stops at once on a hard block (nothing is bypassed)", async () => {
+    const p = scripted(["Access Denied"]);
+    expect(await waitOutJsCheck(p.page)).toBe("access denied");
+    expect(p.waits()).toBe(0);
+  });
+  it("waits while the page is still blank", async () => {
+    const p = scripted(["", "", "On-Line Filing"]);
+    expect(await waitOutJsCheck(p.page)).toBeNull();
+    expect(p.waits()).toBe(2);
+  });
+  it("gives up when a check does not clear", async () => {
+    const p = scripted(["Just a moment..."]);
+    expect(await waitOutJsCheck(p.page, 3000)).toBe("just a moment");
+    expect(p.waits()).toBe(3);
   });
 });

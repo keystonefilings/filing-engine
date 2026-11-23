@@ -10,13 +10,38 @@ import type { ClientCompanySettings, TenantSettings } from "../settings/schema.j
 import type { PageSnapshot } from "../resolver/types.js";
 import type { FilingStatus } from "../domain/states.js";
 
+/**
+ * Applies the schema in one transaction under a transaction-scoped lock, so an API and a worker
+ * starting together on an empty database (a first deploy) do not race to create the same tables.
+ * A transaction lock also works through a transaction-mode pooler (Neon), where a session lock
+ * would not hold.
+ */
+async function applySchema(pool: pg.Pool, schema: string): Promise<void> {
+  const client = await pool.connect();
+  try {
+    await client.query("begin");
+    await client.query("select pg_advisory_xact_lock(7372815)");
+    await client.query(schema);
+    await client.query("commit");
+  } catch (e) {
+    await client.query("rollback").catch(() => {});
+    throw e;
+  } finally {
+    client.release();
+  }
+}
+
 /** JSONB-document Postgres store. Schema: db/schema.sql (applied on connect). */
 export class PostgresStore implements Store {
   private constructor(private readonly pool: pg.Pool) {}
 
   static async connect(url: string): Promise<PostgresStore> {
-    const pool = new pg.Pool({ connectionString: url });
-    await pool.query(readFileSync(path.resolve("db/schema.sql"), "utf8"));
+    const pool = new pg.Pool({ connectionString: url, max: Number(process.env.PG_POOL_MAX) || 5, idleTimeoutMillis: 10_000 });
+    // A hosted Postgres (Neon) closes idle connections when it scales to zero or its pooler
+    // recycles them. Without a listener that error would crash the process; the pool simply
+    // opens a new connection on the next query.
+    pool.on("error", (e) => console.warn(`postgres: idle connection closed (${e.message.split("\n")[0]})`));
+    await applySchema(pool, readFileSync(path.resolve("db/schema.sql"), "utf8"));
     return new PostgresStore(pool);
   }
 

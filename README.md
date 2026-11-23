@@ -26,8 +26,9 @@ npm test
 ```
 Point the NJ adapter at the replica with `NJ_FORMATION_URL=http://127.0.0.1:4310/nj-formation/welcome.html`.
 
-## Fixed-IP machine and walks
-- `docs/fixed-ip-machine.md`: install on the machine that files for the IRS and NY; `npm run probe-sites` checks which sites accept it.
+## Deployment and walks
+- `docs/deploy-fly.md`: Keystone's deployment on Fly.io with a Neon database, Fly object storage and every browser on Steel.
+- `docs/fixed-ip-machine.md`: which portals serve which network, Steel setup and saved sign-ins, and other layouts (a single machine with docker compose); `npm run probe-sites` checks the routes.
 - `docs/walks/HOW-TO-RUN-THE-WALKS.md`: `npm run walk -- <name> --url <start>` records a person-driven walk and blocks Pay/Submit.
 - `docs/walks/CHATGPT-WALK-INSTRUCTIONS.md`: hand this to an assistant helping on a person's computer; it ends with a fixed report format.
 - `docs/walks/2026-11-17.md`: what the Nov 17 walks found.
@@ -43,5 +44,6 @@ Point the NJ adapter at the replica with `NJ_FORMATION_URL=http://127.0.0.1:4310
 - Each run holds a lease on its filing, renewed while the worker is alive. Recovery (on start and every minute, limited to `WORKER_TENANTS`) only settles filings whose lease lapsed, so starting a second worker never touches another worker's runs.
 - A payment screen passes the fee check only when the payable amount is verified: a total line equal to the approved total, or every charge line matched one-for-one. Screens marked `feeDisplay: "price_list"` (NJ formation) can be previewed in a dry run, but a live run stops there.
 - Dry-run previews are a flag on the queued job; the approved request is never changed, and the placeholder EIN is never stored.
-- Tenant settings and drift reviews require a platform staff key (`STAFF_API_KEYS`).
+- Drift reviews, and creating or changing another company's tenant settings, require a platform staff key (`x-staff-key`, from `PLATFORM_STAFF_KEYS`). A tenant's own key changes only its own settings and client companies, and cannot claim a client-company id another tenant holds.
+- In production (`NODE_ENV=production`, as the image sets) the API and worker refuse to start without real values for `API_KEYS` and `APPROVAL_SIGNING_SECRET`.
 - First observation of a screen halts for review unless `firstObservationPolicy: "accept"` is set (bootstrap/fixtures only).

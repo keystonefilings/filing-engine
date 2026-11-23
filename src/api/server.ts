@@ -1,5 +1,5 @@
-import { createHash, timingSafeEqual } from "node:crypto";
 import Fastify, { type FastifyInstance } from "fastify";
+import { keyMatches } from "./keys.js";
 import { z } from "zod";
 import type { FilingService } from "../orchestrator/service.js";
 import { ValidationFailed } from "../orchestrator/service.js";
@@ -25,24 +25,8 @@ export interface ApiDeps {
   reviewGate?: ReviewGateService;
   /** Caller API keys: key -> tenantId. Production: hashed keys in the database. */
   apiKeys: Record<string, string>;
-  /**
-   * Platform staff keys: key -> staff identity. Only these may change tenant settings and
-   * decide drift reviews (the site mappings every tenant's runs trust). None by default.
-   */
-  staffKeys?: Record<string, string>;
-}
-
-const digest = (s: string) => createHash("sha256").update(s).digest();
-
-/** Finds the value for a presented key without prototype lookups or early-exit comparison. */
-function lookupKey(table: Record<string, string>, presented: string): string | null {
-  if (!presented) return null;
-  const want = digest(presented);
-  let hit: string | null = null;
-  for (const [k, v] of Object.entries(table)) {
-    if (timingSafeEqual(digest(k), want)) hit = v;
-  }
-  return hit;
+  /** Platform staff keys (header x-staff-key): drift reviews and any tenant's settings. None = those routes stay closed. */
+  staffKeys?: string[];
 }
 
 function filingTitle(f: FilingRecord | null): string {
@@ -51,11 +35,10 @@ function filingTitle(f: FilingRecord | null): string {
   return `${f.request.state} ${f.request.type.replace(/_/g, " ")}${n}`;
 }
 
-// decidedBy is taken from the authenticated staff key, never from the body.
 const DriftDecisionBody = z.discriminatedUnion("action", [
-  z.object({ action: z.literal("accept") }),
-  z.object({ action: z.literal("correct"), mapping: z.record(z.string(), z.string()), knownUnused: z.array(z.string()).optional() }),
-  z.object({ action: z.literal("reject"), reason: z.string().min(1) }),
+  z.object({ action: z.literal("accept"), decidedBy: z.string().min(1) }),
+  z.object({ action: z.literal("correct"), decidedBy: z.string().min(1), mapping: z.record(z.string(), z.string()), knownUnused: z.array(z.string()).optional() }),
+  z.object({ action: z.literal("reject"), decidedBy: z.string().min(1), reason: z.string().min(1) }),
 ]);
 
 export function buildServer(deps: ApiDeps): FastifyInstance {
@@ -66,16 +49,12 @@ export function buildServer(deps: ApiDeps): FastifyInstance {
     done(null, Object.fromEntries(new URLSearchParams(String(body))));
   });
 
-  const presentedKey = (req: { headers: Record<string, unknown> }) => String(req.headers["x-api-key"] ?? "");
-  const tenantOf = (req: { headers: Record<string, unknown> }): string | null => lookupKey(deps.apiKeys, presentedKey(req));
-  const staffOf = (req: { headers: Record<string, unknown> }): string | null => lookupKey(deps.staffKeys ?? {}, presentedKey(req));
-  /** Platform-staff routes: 401 without a key, 403 with a tenant's key. */
-  const requireStaff = (req: { headers: Record<string, unknown> }, reply: import("fastify").FastifyReply): string | null => {
-    const staff = staffOf(req);
-    if (staff) return staff;
-    void reply.code(tenantOf(req) ? 403 : 401).send({ error: tenantOf(req) ? "platform staff only" : "invalid api key" });
-    return null;
+  const tenantOf = (req: { headers: Record<string, unknown> }): string | null => {
+    const key = String(req.headers["x-api-key"] ?? "");
+    return Object.prototype.hasOwnProperty.call(deps.apiKeys, key) ? deps.apiKeys[key]! : null;
   };
+  const isStaff = (req: { headers: Record<string, unknown> }): boolean => keyMatches(String(req.headers["x-staff-key"] ?? ""), deps.staffKeys ?? []);
+  const STAFF_ONLY = { error: "platform staff key required" };
 
   app.get("/healthz", async () => ({ ok: true }));
   app.get("/v1/events", async () => ({ events: EVENT_TYPES }));
@@ -153,10 +132,12 @@ export function buildServer(deps: ApiDeps): FastifyInstance {
   });
 
   // ---- Settings ----
-  // Tenant settings carry webhook endpoints, approvers and vault keys: platform staff only.
   app.put("/v1/tenants/:id", async (req, reply) => {
-    if (!requireStaff(req, reply)) return reply;
-    const parsed = TenantSettings.safeParse({ ...(req.body as object), tenantId: (req.params as { id: string }).id });
+    // A filing company changes its own settings; only platform staff touch another's (or create one).
+    const id = (req.params as { id: string }).id;
+    const caller = tenantOf(req);
+    if (!isStaff(req) && caller !== id) return reply.code(caller ? 403 : 401).send({ error: caller ? "tenant mismatch" : "invalid api key" });
+    const parsed = TenantSettings.safeParse({ ...(req.body as object), tenantId: id });
     if (!parsed.success) return reply.code(422).send({ error: parsed.error.issues });
     await deps.store.putTenant(parsed.data);
     return { ok: true };
@@ -211,22 +192,21 @@ export function buildServer(deps: ApiDeps): FastifyInstance {
 
   // ---- Drift reviews (platform staff, decision 6): the platform maintains the site adapters for all tenants ----
   app.get("/v1/drift-reviews", async (req, reply) => {
-    if (!requireStaff(req, reply)) return reply;
+    if (!isStaff(req)) return reply.code(401).send(STAFF_ONLY);
     const status = (req.query as { status?: "pending" | "accepted" | "corrected" | "rejected" }).status;
     return { halts: await deps.store.listDriftHalts(status) };
   });
   app.get("/v1/drift-reviews/:id", async (req, reply) => {
-    if (!requireStaff(req, reply)) return reply;
+    if (!isStaff(req)) return reply.code(401).send(STAFF_ONLY);
     const h = await deps.store.getDriftHalt((req.params as { id: string }).id);
     return h ? h : reply.code(404).send({ error: "not found" });
   });
   app.post("/v1/drift-reviews/:id/decision", async (req, reply) => {
-    const staff = requireStaff(req, reply);
-    if (!staff) return reply;
+    if (!isStaff(req)) return reply.code(401).send(STAFF_ONLY);
     const parsed = DriftDecisionBody.safeParse(req.body);
     if (!parsed.success) return reply.code(422).send({ error: parsed.error.issues });
     try {
-      return await deps.service.onDriftDecision((req.params as { id: string }).id, { ...parsed.data, decidedBy: staff });
+      return await deps.service.onDriftDecision((req.params as { id: string }).id, parsed.data);
     } catch (e) {
       return reply.code(409).send({ error: (e as Error).message });
     }

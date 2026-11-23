@@ -19,12 +19,18 @@ export interface ArtifactMeta {
 
 /**
  * Artifacts: CP 575, NJ formation documents, NY receipts, per-step screenshots and
- * DOM snapshots. Production target is encrypted object storage; the filesystem
- * implementation is for development and the worker's local spool.
+ * DOM snapshots. Production on separate machines (Fly.io) uses object storage
+ * (artifacts/s3.ts, ARTIFACT_BUCKET); the filesystem store is for development and a
+ * single machine where the API and worker share one volume.
  */
 export interface ArtifactStore {
   put(meta: Omit<ArtifactMeta, "id" | "bytes" | "createdAt">, body: Buffer | string): Promise<ArtifactMeta>;
   get(id: string): Promise<{ meta: ArtifactMeta; body: Buffer } | null>;
+}
+
+/** Artifact ids are UUIDs we generate; anything else (from a URL) is never looked up. */
+export function isArtifactId(id: string): boolean {
+  return /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id);
 }
 
 export class FsArtifactStore implements ArtifactStore {
@@ -42,6 +48,7 @@ export class FsArtifactStore implements ArtifactStore {
   }
 
   async get(id: string): Promise<{ meta: ArtifactMeta; body: Buffer } | null> {
+    if (!isArtifactId(id)) return null; // ids come from URLs; never build a path from anything else
     // Scan filing directories; fine for development volumes.
     const { readdir } = await import("node:fs/promises");
     let dirs: string[] = [];

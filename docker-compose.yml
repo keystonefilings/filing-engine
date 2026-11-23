@@ -1,5 +1,6 @@
-# All-in-one deployment for the fixed-IP machine (decision 4): Postgres, API, worker.
-# Later, the API can move to the cloud and point at the same DATABASE_URL; the worker stays here.
+# All-in-one deployment: Postgres, API, worker (docs/fixed-ip-machine.md).
+# IMAGE_TARGET=steel builds the browserless image, for a worker whose browsers all run on Steel
+# (BROWSER_PROXY=steel); the default "full" image ships Chromium.
 services:
   db:
     image: postgres:17
@@ -10,21 +11,20 @@ services:
       POSTGRES_DB: filing
     volumes: [ "pgdata:/var/lib/postgresql/data" ]
   api:
-    build: .
-    command: ["npx", "tsx", "src/index.ts"]
+    build: { context: ., target: "${IMAGE_TARGET:-full}" }
+    command: ["node", "--import", "tsx", "src/index.ts"]
     restart: unless-stopped
     env_file: .env
     environment:
       DATABASE_URL: postgres://filing:${POSTGRES_PASSWORD}@db:5432/filing
       WORKER_ENABLED: "false"
     ports: [ "127.0.0.1:8080:8080" ]   # publish through an HTTPS reverse proxy, never directly
-    # The worker writes screenshots and filing documents; the API serves them. Same volume,
-    # read-only here. An API on another machine needs shared object storage instead.
-    volumes: [ "artifacts:/app/var/artifacts:ro" ]
+    # The API serves the documents and screenshots the worker writes: one shared volume.
+    volumes: [ "artifacts:/app/var/artifacts" ]
     depends_on: [ db ]
   worker:
-    build: .
-    command: ["npx", "tsx", "src/worker.ts"]
+    build: { context: ., target: "${IMAGE_TARGET:-full}" }
+    command: ["node", "--import", "tsx", "src/worker.ts"]
     restart: unless-stopped
     env_file: .env
     environment:

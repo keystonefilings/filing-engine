@@ -1,4 +1,4 @@
-import { readFile } from "node:fs/promises";
+import { readDownload } from "../../browser/harness.js";
 import type { ScreenStep, SiteAdapter, StepContext } from "../types.js";
 import { IRS_ACTIVITY_CATEGORIES, IRS_SCREENS, IRS_START } from "./intents.js";
 import { stateName } from "../../domain/usStates.js";
@@ -330,8 +330,8 @@ export const irsEinAdapter: SiteAdapter = {
     if (await dl.count()) {
       try {
         const [download] = await Promise.all([ctx.page.waitForEvent("download", { timeout: 20_000 }), dl.click()]);
-        const file = await download.path();
-        if (file) out.push({ kind: "cp575", label: "CP 575 EIN confirmation letter", contentType: "application/pdf", body: await readFile(file) });
+        // Local or Steel-hosted browser alike (a remote browser's file is not on this machine).
+        out.push({ kind: "cp575", label: "CP 575 EIN confirmation letter", contentType: "application/pdf", body: await readDownload(download) });
       } catch (e) {
         await ctx.note(`CP 575 download did not complete: ${(e as Error).message.split("\n")[0]}`);
       }

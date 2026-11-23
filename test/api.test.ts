@@ -3,19 +3,14 @@ import { buildServer } from "../src/api/server.js";
 import { FsArtifactStore } from "../src/artifacts/store.js";
 import { seededStore, wire, njFormationRequest } from "./helpers.js";
 import type { FastifyInstance } from "fastify";
-import type { MemoryStore } from "../src/store/memory.js";
-import { TenantSettings } from "../src/settings/schema.js";
 
 let app: FastifyInstance;
-let store: MemoryStore;
+let store: Awaited<ReturnType<typeof seededStore>>;
+const STAFF = "staff-key-0123456789abcdefghij";
 beforeAll(async () => {
   store = await seededStore();
-  await store.putTenant(TenantSettings.parse({ tenantId: "otherco", name: "Other Co" }));
   const w = wire(store);
-  app = buildServer({
-    service: w.service, approvals: w.approvals, store, artifacts: new FsArtifactStore("var/test-artifacts"), publicBaseUrl: "http://api.test",
-    apiKeys: { k1: "keystone", k2: "otherco" }, staffKeys: { s1: "ops@platform.test" },
-  });
+  app = buildServer({ service: w.service, approvals: w.approvals, store, artifacts: new FsArtifactStore("var/test-artifacts"), publicBaseUrl: "http://api.test", apiKeys: { k1: "keystone", k2: "other-co" }, staffKeys: [STAFF] });
   await app.ready();
 });
 afterAll(() => app.close());
@@ -55,40 +50,28 @@ describe("API", () => {
     expect(res.json().issues.length).toBeGreaterThan(0);
   });
 
-  it("tenant settings are platform-staff only", async () => {
-    const body = { name: "Keystone Filings", webhookEndpoints: [{ url: "https://attacker.example.test/h", secret: "attacker-secret-0123456789" }] };
-    const none = await app.inject({ method: "PUT", url: "/v1/tenants/keystone", payload: body });
-    expect(none.statusCode).toBe(401);
-    const tenantKey = await app.inject({ method: "PUT", url: "/v1/tenants/keystone", headers: { "x-api-key": "k1" }, payload: body });
-    expect(tenantKey.statusCode).toBe(403);
-    // Prototype names are not keys.
-    const proto = await app.inject({ method: "PUT", url: "/v1/tenants/keystone", headers: { "x-api-key": "constructor" }, payload: body });
-    expect(proto.statusCode).toBe(401);
-    expect((await store.getTenant("keystone"))!.webhookEndpoints[0]!.url).toBe("https://hooks.example.test/filings");
-    const staff = await app.inject({ method: "PUT", url: "/v1/tenants/newco", headers: { "x-api-key": "s1" }, payload: { name: "New Co" } });
-    expect(staff.statusCode).toBe(200);
-    expect((await store.getTenant("newco"))!.name).toBe("New Co");
+  it("lets a filing company change only its own settings", async () => {
+    const put = (id: string, headers: Record<string, string>) => app.inject({ method: "PUT", url: `/v1/tenants/${id}`, headers, payload: { name: "Keystone Filings" } });
+    expect((await put("keystone", {})).statusCode).toBe(401);
+    expect((await put("keystone", { "x-api-key": "k1" })).statusCode).toBe(200);
+    expect((await put("keystone", { "x-api-key": "k2" })).statusCode).toBe(403); // another company's key
+    expect((await put("new-co", { "x-api-key": "k1" })).statusCode).toBe(403);
+    expect((await put("new-co", { "x-staff-key": STAFF })).statusCode).toBe(200); // staff create tenants
+    expect((await put("keystone", { "x-staff-key": "wrong" })).statusCode).toBe(401);
   });
 
-  it("drift reviews are platform-staff only, and the decision records the staff identity", async () => {
-    const { filing } = await wire(store).service.createFiling(njFormationRequest());
-    const halt = await store.createDriftHalt({
-      id: crypto.randomUUID(), runId: "r1", filingId: filing.id, site: "NJ", screenKey: "nj.payment", previous: null,
-      current: { site: "NJ", screenKey: "nj.payment", fields: [], prices: [], takenAt: new Date().toISOString(), fingerprint: "x" },
-      diff: null, proposal: { summary: "s", items: [], requiresClientReapproval: false }, status: "pending", requiresClientReapproval: false, createdAt: new Date().toISOString(),
-    });
-    for (const headers of [{}, { "x-api-key": "k1" }]) {
-      expect((await app.inject({ method: "GET", url: "/v1/drift-reviews", headers })).statusCode).toBeGreaterThanOrEqual(401);
-      expect((await app.inject({ method: "GET", url: `/v1/drift-reviews/${halt.id}`, headers })).statusCode).toBeGreaterThanOrEqual(401);
-      const d = await app.inject({ method: "POST", url: `/v1/drift-reviews/${halt.id}/decision`, headers, payload: { action: "accept", decidedBy: "someone" } });
-      expect([401, 403]).toContain(d.statusCode);
+  it("keeps drift reviews to platform staff", async () => {
+    for (const [method, url] of [["GET", "/v1/drift-reviews"], ["GET", "/v1/drift-reviews/x"], ["POST", "/v1/drift-reviews/x/decision"]] as const) {
+      expect((await app.inject({ method, url })).statusCode).toBe(401);
+      expect((await app.inject({ method, url, headers: { "x-api-key": "k1" } })).statusCode).toBe(401); // a tenant key is not enough
     }
-    expect((await store.getDriftHalt(halt.id))!.status).toBe("pending");
-    const list = await app.inject({ method: "GET", url: "/v1/drift-reviews", headers: { "x-api-key": "s1" } });
-    expect(list.statusCode).toBe(200);
-    const ok = await app.inject({ method: "POST", url: `/v1/drift-reviews/${halt.id}/decision`, headers: { "x-api-key": "s1" }, payload: { action: "accept", decidedBy: "spoofed" } });
-    expect(ok.statusCode).toBe(200);
-    expect((await store.getDriftHalt(halt.id))!.decidedBy).toBe("ops@platform.test");
+    expect((await app.inject({ method: "GET", url: "/v1/drift-reviews", headers: { "x-staff-key": STAFF } })).statusCode).toBe(200);
+  });
+
+  it("does not treat built-in object names as API keys", async () => {
+    for (const key of ["constructor", "__proto__", "toString"]) {
+      expect((await app.inject({ method: "GET", url: "/v1/filings", headers: { "x-api-key": key } })).statusCode).toBe(401);
+    }
   });
 
   it("a tenant cannot take over another tenant's client company", async () => {
@@ -101,6 +84,6 @@ describe("API", () => {
     expect((await app.inject({ method: "PUT", url: "/v1/client-companies/acme-cpa", headers: { "x-api-key": "k1" }, payload: { ...acme, name: "Acme CPA LLP" } })).statusCode).toBe(200);
     expect((await store.getClientCompany("acme-cpa"))!.name).toBe("Acme CPA LLP");
     expect((await app.inject({ method: "PUT", url: "/v1/client-companies/other-firm", headers: { "x-api-key": "k2" }, payload: { name: "Other Firm", einMode: "after_acceptance" } })).statusCode).toBe(200);
-    expect((await store.getClientCompany("other-firm"))!.tenantId).toBe("otherco");
+    expect((await store.getClientCompany("other-firm"))!.tenantId).toBe("other-co");
   });
 });

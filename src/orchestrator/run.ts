@@ -9,7 +9,7 @@ import { matchIntents } from "../resolver/match.js";
 import { diffSnapshots, snapshotFromInventory } from "../resolver/drift.js";
 import { normalizeLabel, structuralInventory, type FieldDescriptor, type PageInventory, type ScreenIntents } from "../resolver/types.js";
 import { BotChallenge, DriftHalt, DryRunStop, FeeMismatch, ReviewGateHalt, SubmissionUnconfirmed } from "../browser/guard.js";
-import { BrowserHarness, detectChallenge } from "../browser/harness.js";
+import { BrowserHarness, waitOutJsCheck } from "../browser/harness.js";
 import { StepRecorder } from "../browser/recorder.js";
 import type { ArtifactStore } from "../artifacts/store.js";
 import { buildProposal, DriftReviewService } from "../drift-review/service.js";
@@ -84,17 +84,21 @@ export class RunExecutor {
     const profileKey = input.adapter.profileKey(input);
     // Each site's browser goes out the network route configured for it (browser/egress.ts).
     const site = input.adapter.site;
-    const context: BrowserContext = profileKey ? await this.deps.harness.persistentContext(profileKey, site) : await this.deps.harness.ephemeralContext(site);
-    const credKey = input.adapter.credentialKey(input);
-    const credential = credKey ? await this.deps.vault.getCredential(credKey) : null;
     const values: StepContext["values"] = {};
     // Reuse an EIN the IRS already issued; never file a second one. The dry-run placeholder is not one.
     if (isIssuedEin(input.filing.ein)) values.ein = input.filing.ein;
     let einPlaceholder = false;
     const tracker: SubmitTracker = { open: null, confirmed: [] };
     const stateConfirmed = () => tracker.confirmed.some((c) => c.site === input.adapter.site);
-    let stage = "open";
+    let stage = "browser";
+    let context: BrowserContext | undefined;
     try {
+      // Inside the try: a browser that cannot be opened (a Steel session refused, a launch that
+      // fails) ends this run as failed and is reported, instead of leaving the filing "running".
+      context = profileKey ? await this.deps.harness.persistentContext(profileKey, site) : await this.deps.harness.ephemeralContext(site);
+      const credKey = input.adapter.credentialKey(input);
+      const credential = credKey ? await this.deps.vault.getCredential(credKey) : null;
+      stage = "open";
       const page = await context.newPage();
       await page.goto(input.adapter.entryUrl(input), { waitUntil: "domcontentloaded" });
       // Third-party registered agent: order it now (irreversible) so the assigned agent is
@@ -197,7 +201,7 @@ export class RunExecutor {
       const kindStage = err instanceof FeeMismatch ? "fee_mismatch" : err instanceof BotChallenge ? "bot_challenge" : stage;
       return { kind: "failed", run: done, stage: kindStage, error: err.message };
     } finally {
-      await context.close().catch(() => {});
+      if (context) await this.deps.harness.closeContext(context); // a Steel context also ends its session
     }
   }
 
@@ -248,12 +252,12 @@ export class RunExecutor {
       }
       return { ein: assigned, placeholder: false };
     } finally {
-      await context.close().catch(() => {});
+      await this.deps.harness.closeContext(context); // a Steel context also ends its session
     }
   }
 
   private async driftCheck(page: Page, screen: ScreenIntents, input: RunInput, run: RunRecord, recorder: StepRecorder): Promise<void> {
-    const challenge = await detectChallenge(page);
+    const challenge = await waitOutJsCheck(page); // a JavaScript check may clear itself; a block or CAPTCHA stops the run
     if (challenge) {
       await recorder.record(page, screen.screenKey, `bot challenge: ${challenge}`);
       throw new BotChallenge(input.adapter.site, challenge);
