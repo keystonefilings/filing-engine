@@ -9,7 +9,7 @@ import { matchIntents } from "../resolver/match.js";
 import { diffSnapshots, snapshotFromInventory } from "../resolver/drift.js";
 import { normalizeLabel, structuralInventory, type FieldDescriptor, type PageInventory, type ScreenIntents } from "../resolver/types.js";
 import { BotChallenge, DriftHalt, DryRunStop, FeeMismatch, ReviewGateHalt } from "../browser/guard.js";
-import { BrowserHarness, detectChallenge } from "../browser/harness.js";
+import { BrowserHarness, waitOutJsCheck } from "../browser/harness.js";
 import { StepRecorder } from "../browser/recorder.js";
 import type { ArtifactStore } from "../artifacts/store.js";
 import { buildProposal, DriftReviewService } from "../drift-review/service.js";
@@ -207,7 +207,7 @@ export class RunExecutor {
   }
 
   private async driftCheck(page: Page, screen: ScreenIntents, input: RunInput, run: RunRecord, recorder: StepRecorder): Promise<void> {
-    const challenge = await detectChallenge(page);
+    const challenge = await waitOutJsCheck(page); // a JavaScript check may clear itself; a block or CAPTCHA stops the run
     if (challenge) {
       await recorder.record(page, screen.screenKey, `bot challenge: ${challenge}`);
       throw new BotChallenge(input.adapter.site, challenge);

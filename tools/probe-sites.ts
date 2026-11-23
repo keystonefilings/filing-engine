@@ -11,6 +11,10 @@
  * From the cloud container (2026-11-17 through 2026-11-19): NJ and FL served; the IRS EIN
  * assistant answered "Access Denied" (Akamai), NY DOS closed the connection, Missouri served a
  * Cloudflare challenge. Those three need a route their portals serve; the rest go direct.
+ *
+ * Through Steel (2026-11-23, plain session, its scrape API from the cloud container, which carries
+ * no WebSocket so --steel itself could not run there): NJ, FL and the IRS assistant served at once;
+ * NY DOS and Missouri served a JavaScript check that cleared to the real page within ~10 seconds.
  */
 import path from "node:path";
 import { fileURLToPath } from "node:url";
@@ -29,11 +33,14 @@ export const SITES = [
   { key: "FL Sunbiz filing", site: "FL", url: "https://efile.sunbiz.org/llc_file.html", expect: /Articles of Organization/i },
 ];
 
+/** Interstitials a real browser clears by running the site's own script (no CAPTCHA, nothing solved). */
+const JS_CHECK = /just a moment|performing security verification|checking your browser|your support id is|please enable javascript to view the page content/i;
+
 export function classify(status: number | null, title: string, body: string, error?: string): "ok" | "blocked" | "error" {
   if (error) return /EMPTY_RESPONSE|CONNECTION_(RESET|CLOSED|REFUSED)|TUNNEL/i.test(error) ? "blocked" : "error";
   // A proxy in front of the browser reports a site that closes without answering as 502/504.
   if ((status === 502 || status === 504) && !title && !body.trim()) return "blocked";
-  if (status === 403 || /access denied|request blocked|unusual traffic|pardon our interruption|just a moment|performing security verification|verify you are (not a bot|human)/i.test(title + " " + body.slice(0, 2000))) return "blocked";
+  if (status === 403 || JS_CHECK.test(title + " " + body.slice(0, 2000)) || /access denied|request blocked|unusual traffic|pardon our interruption|verify you are (not a bot|human)/i.test(title + " " + body.slice(0, 2000))) return "blocked";
   return status && status < 400 ? "ok" : "error";
 }
 
@@ -103,6 +110,13 @@ async function main() {
       status = r?.status() ?? null;
       title = await page.title();
       body = await page.locator("body").innerText().catch(() => "");
+      // A JavaScript check page clears itself within seconds in a real browser; wait (up to 20s) for it.
+      for (let waited = 0; JS_CHECK.test(`${title} ${body.slice(0, 2000)}`) && waited < 20_000; waited += 1000) {
+        await page.waitForTimeout(1000);
+        title = await page.title().catch(() => title);
+        body = await page.locator("body").innerText().catch(() => body);
+        status = 200; // the check page itself answered; what matters is what replaced it
+      }
     } catch (e) { error = (e as Error).message.split("\n")[0]; }
     await page?.close().catch(() => {});
     const verdict = classify(status, title, body, error);

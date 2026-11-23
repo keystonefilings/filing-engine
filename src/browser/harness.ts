@@ -82,7 +82,28 @@ export class BrowserHarness {
 export async function detectChallenge(page: Page): Promise<string | null> {
   const title = (await page.title()).toLowerCase();
   const body = (await page.locator("body").innerText().catch(() => "")).toLowerCase().slice(0, 4000);
-  const signals = ["access denied", "captcha", "verify you are human", "unusual traffic", "request blocked", "reference #", "pardon our interruption", "are you a robot"];
+  const signals = [
+    "access denied", "captcha", "verify you are human", "unusual traffic", "request blocked", "reference #",
+    "pardon our interruption", "are you a robot", "just a moment", "performing security verification",
+    "your support id is", "please enable javascript to view the page content",
+  ];
   for (const s of signals) if (title.includes(s) || body.includes(s)) return s;
   return null;
+}
+
+/** Interstitials that a real browser clears by running the site's own script within seconds. */
+const JS_CHECKS = new Set(["just a moment", "performing security verification", "your support id is", "please enable javascript to view the page content"]);
+
+/**
+ * Waits (bounded) for a JavaScript check page to clear on its own; returns the challenge still
+ * showing, or null. A hard block or a CAPTCHA returns at once: nothing is solved or bypassed, so
+ * the run stops and reports.
+ */
+export async function waitOutJsCheck(page: Page, maxMs = 20_000): Promise<string | null> {
+  let hit = await detectChallenge(page);
+  for (let waited = 0; hit && JS_CHECKS.has(hit) && waited < maxMs; waited += 1000) {
+    await page.waitForTimeout(1000);
+    hit = await detectChallenge(page);
+  }
+  return hit;
 }

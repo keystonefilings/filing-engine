@@ -41,3 +41,51 @@ describe("per-portal network routing", () => {
     expect(h.routeFor(undefined)).toBeNull();
   });
 });
+
+import { classify } from "../tools/probe-sites.js";
+import { detectChallenge } from "../src/browser/harness.js";
+
+describe("challenge recognition", () => {
+  it("treats JavaScript-check pages as not-yet-reachable, and the real page as ok", () => {
+    expect(classify(200, "", "Please enable JavaScript to view the page content. Your support ID is: 1234567890")).toBe("blocked");
+    expect(classify(200, "Just a moment...", "")).toBe("blocked");
+    expect(classify(200, "On-Line Filing", "An official website of New York State")).toBe("ok");
+    expect(classify(403, "Access Denied", "")).toBe("blocked");
+  });
+
+  it("the engine stops on the same interstitials", async () => {
+    const page = (title: string, body: string) => ({ title: async () => title, locator: () => ({ innerText: async () => body }) }) as never;
+    expect(await detectChallenge(page("Just a moment...", ""))).toBe("just a moment");
+    expect(await detectChallenge(page("", "Please enable JavaScript to view the page content. Your support ID is: 42"))).not.toBeNull();
+    expect(await detectChallenge(page("On-Line Filing", "An official website of New York State"))).toBeNull();
+  });
+});
+
+import { waitOutJsCheck } from "../src/browser/harness.js";
+
+describe("JavaScript checks", () => {
+  function scripted(titles: string[]) {
+    let i = 0, waits = 0;
+    const page = {
+      title: async () => titles[Math.min(i++, titles.length - 1)]!,
+      locator: () => ({ innerText: async () => "" }),
+      waitForTimeout: async () => { waits++; },
+    } as never;
+    return { page, waits: () => waits };
+  }
+  it("waits for a JavaScript check to clear on its own", async () => {
+    const p = scripted(["Just a moment...", "Just a moment...", "Missouri Business Filings"]);
+    expect(await waitOutJsCheck(p.page)).toBeNull();
+    expect(p.waits()).toBe(2);
+  });
+  it("stops at once on a hard block (nothing is bypassed)", async () => {
+    const p = scripted(["Access Denied"]);
+    expect(await waitOutJsCheck(p.page)).toBe("access denied");
+    expect(p.waits()).toBe(0);
+  });
+  it("gives up when a check does not clear", async () => {
+    const p = scripted(["Just a moment..."]);
+    expect(await waitOutJsCheck(p.page, 3000)).toBe("just a moment");
+    expect(p.waits()).toBe(3);
+  });
+});
