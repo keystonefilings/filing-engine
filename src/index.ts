@@ -41,3 +41,13 @@ if (config.workerEnabled) {
 
 await app.listen({ port: config.port, host: "0.0.0.0" });
 console.log(`filing engine listening on ${config.publicBaseUrl} (worker ${config.workerEnabled ? "on" : "off"}, dry-run default ${config.dryRunDefault})`);
+
+// A deploy or restart sends SIGTERM. Inside a container this process is PID 1, which ignores the
+// signal unless it handles it, so stop serving and exit instead of waiting to be killed.
+for (const signal of ["SIGTERM", "SIGINT"] as const) {
+  process.once(signal, () => {
+    console.log(`api: ${signal}, stopping`);
+    void app.close().finally(() => process.exit(0));
+    setTimeout(() => process.exit(0), 10_000).unref();
+  });
+}

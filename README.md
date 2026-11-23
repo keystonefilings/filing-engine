@@ -26,8 +26,9 @@ npm test
 ```
 Point the NJ adapter at the replica with `NJ_FORMATION_URL=http://127.0.0.1:4310/nj-formation/welcome.html`.
 
-## Fixed-IP machine and walks
-- `docs/fixed-ip-machine.md`: install on the machine that files for the IRS and NY; `npm run probe-sites` checks which sites accept it.
+## Deployment and walks
+- `docs/deploy-fly.md`: Keystone's deployment on Fly.io with a Neon database, Fly object storage and every browser on Steel.
+- `docs/fixed-ip-machine.md`: which portals serve which network, Steel setup and saved sign-ins, and other layouts (a single machine with docker compose); `npm run probe-sites` checks the routes.
 - `docs/walks/HOW-TO-RUN-THE-WALKS.md`: `npm run walk -- <name> --url <start>` records a person-driven walk and blocks Pay/Submit.
 - `docs/walks/CHATGPT-WALK-INSTRUCTIONS.md`: hand this to an assistant helping on a person's computer; it ends with a fixed report format.
 - `docs/walks/2026-11-17.md`: what the Nov 17 walks found.

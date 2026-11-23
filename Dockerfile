@@ -15,7 +15,7 @@ COPY package.json package-lock.json ./
 RUN npm ci --omit=dev
 COPY . .
 ENV NODE_ENV=production BROWSERS=steel-only
-CMD ["npx", "tsx", "src/worker.ts"]
+CMD ["node", "--import", "tsx", "src/worker.ts"]
 
 FROM mcr.microsoft.com/playwright:v1.63.0-noble AS full
 WORKDIR /app
@@ -23,4 +23,4 @@ COPY package.json package-lock.json ./
 RUN npm ci
 COPY . .
 ENV NODE_ENV=production
-CMD ["npx", "tsx", "src/worker.ts"]
+CMD ["node", "--import", "tsx", "src/worker.ts"]

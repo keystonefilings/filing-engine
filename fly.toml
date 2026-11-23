@@ -1,0 +1,71 @@
+# Fly.io deployment (docs/deploy-fly.md): the API and the worker as two process groups of one
+# app, built from the browserless "steel" image; every portal's browser runs on Steel. The
+# database is an external Postgres (DATABASE_URL secret, e.g. a Neon pooled connection string),
+# and documents and screenshots go to Fly's object storage (fly storage create sets BUCKET_NAME
+# and the AWS_* secrets). Secrets are set with `fly secrets set`, never in this file.
+
+app = "keystone-filing-engine"   # if you pick another name, change WORKER_WAKE_URL below to match
+primary_region = "iad"           # Ashburn, next to Steel's sessions and a Neon project in AWS us-east-1
+
+kill_signal = "SIGTERM"
+kill_timeout = 300               # seconds: the worker finishes the filing in progress before it stops
+
+[build]
+  dockerfile = "Dockerfile"
+  build-target = "steel"
+
+[deploy]
+  # Replace machines one at a time, stopping the old one first: a starting worker marks any
+  # filing still shown as running as interrupted, so two workers must never overlap.
+  strategy = "rolling"
+
+[env]
+  NODE_ENV = "production"
+  BROWSER_PROXY = "steel"
+  WORKER_TENANTS = "keystone"
+  DRY_RUN_DEFAULT = "true"
+  WORKER_PORT = "8081"
+  # Idle check every 10 minutes (the database can scale to zero in between); the API wakes the
+  # worker over Fly's private network as soon as a filing is queued.
+  WORKER_IDLE_POLL_MS = "600000"
+  WORKER_WAKE_URL = "http://worker.process.keystone-filing-engine.internal:8081/wake"
+  # PUBLIC_BASE_URL (the address in approval links) is not decided yet: set it as a secret or
+  # here once it is, e.g. https://filings.keystonefilings.com (docs/deploy-fly.md, step 8).
+
+[processes]
+  # node itself, not npx, so the stop signal reaches the program directly
+  api = "node --import tsx src/index.ts"
+  worker = "node --import tsx src/worker.ts"
+
+# The API: public over HTTPS, stopped when idle and started on the next request.
+[http_service]
+  processes = ["api"]
+  internal_port = 8080
+  force_https = true
+  auto_stop_machines = "stop"
+  auto_start_machines = true
+  min_machines_running = 0
+
+  [[http_service.checks]]
+    grace_period = "20s"
+    interval = "30s"
+    method = "GET"
+    path = "/healthz"
+    timeout = "5s"
+
+# The worker: always on, no public port; /healthz and /wake on the private network only.
+[checks]
+  [checks.worker]
+    processes = ["worker"]
+    type = "http"
+    port = 8081
+    method = "GET"
+    path = "/healthz"
+    interval = "30s"
+    timeout = "5s"
+    grace_period = "30s"
+
+[[vm]]
+  processes = ["api", "worker"]
+  size = "shared-cpu-1x"
+  memory = "1gb"

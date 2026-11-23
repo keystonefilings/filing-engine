@@ -1,7 +1,7 @@
 import { config } from "./config.js";
 import { MemoryStore } from "./store/memory.js";
 import type { Store } from "./store/types.js";
-import { FsArtifactStore } from "./artifacts/store.js";
+import { FsArtifactStore, type ArtifactStore } from "./artifacts/store.js";
 import { ApprovalService } from "./approvals/service.js";
 import { WebhookDispatcher } from "./webhooks/dispatcher.js";
 import { InMemoryQueue, type JobQueue } from "./orchestrator/queue.js";
@@ -31,7 +31,14 @@ export async function bootstrap(opts: { withExecutor: boolean }) {
     store = pgStore;
     queue = new PgQueue(pgStore.connectionPool);
   }
-  const artifacts = new FsArtifactStore(config.artifactDir);
+  // The API wakes a separate worker after queuing a filing (Fly.io); an in-process worker needs no wake.
+  if (config.workerWakeUrl && !opts.withExecutor) {
+    const { WakingQueue, WorkerWaker } = await import("./orchestrator/wake.js");
+    queue = new WakingQueue(queue, new WorkerWaker(config.workerWakeUrl, config.workerWakeToken));
+  }
+  const artifacts: ArtifactStore = config.artifactBucket
+    ? new (await import("./artifacts/s3.js")).S3ArtifactStore({ bucket: config.artifactBucket, ...config.artifactS3 })
+    : new FsArtifactStore(config.artifactDir);
   const approvals = new ApprovalService({
     store, signingSecret: config.approvalSigningSecret, publicBaseUrl: config.publicBaseUrl, defaultTtlHours: config.approvalTtlHours,
   });

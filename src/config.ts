@@ -30,6 +30,21 @@ export const config = {
   approvalTtlHours: envInt("APPROVAL_TTL_HOURS", 168),
   databaseUrl: process.env.DATABASE_URL || null,
   artifactDir: path.resolve(env("ARTIFACT_DIR", "./var/artifacts")),
+  /** Object storage for artifacts, shared by an API and a worker on different machines (Fly.io).
+   *  Fly Tigris (fly storage create) sets BUCKET_NAME and the AWS_* variables; unset = ARTIFACT_DIR. */
+  artifactBucket: process.env.ARTIFACT_BUCKET || process.env.BUCKET_NAME || null,
+  artifactS3: {
+    endpoint: process.env.AWS_ENDPOINT_URL_S3 || undefined,
+    region: process.env.AWS_REGION || undefined,
+    forcePathStyle: process.env.ARTIFACT_S3_PATH_STYLE === "true",
+  },
+  /** API side: the worker's wake endpoint (POST), called after a filing is queued. Unset = no wake. */
+  workerWakeUrl: process.env.WORKER_WAKE_URL || null,
+  /** Shared by the API (sends it) and the worker (checks it). */
+  workerWakeToken: process.env.WORKER_WAKE_TOKEN || null,
+  /** Worker side: the port for /healthz and /wake (unset = no HTTP listener), and how long it waits between checks when idle. */
+  workerPort: process.env.WORKER_PORT ? envInt("WORKER_PORT", 8081) : null,
+  workerIdlePollMs: envInt("WORKER_IDLE_POLL_MS", 2_000),
   workerEnabled: env("WORKER_ENABLED", "true") === "true",
   chromiumPath: process.env.PW_CHROMIUM_PATH || null,
   /** Default network route for the browser (see browser/egress.ts): a proxy URL or "steel"; unset = direct. */

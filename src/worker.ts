@@ -2,6 +2,7 @@ import { bootstrap } from "./bootstrap.js";
 import { config } from "./config.js";
 import { ADAPTERS } from "./adapters/index.js";
 import { browserSetupProblems } from "./browser/setup-check.js";
+import { startWorkerHttp, WorkerLoop } from "./orchestrator/worker-loop.js";
 
 // Refuse to start on browser settings that would fail every run on some site.
 const problems = browserSetupProblems({
@@ -17,12 +18,21 @@ if (flagged.length) console.warn("filings needing reconciliation:", flagged);
 const interrupted = await sys.service.recoverInterruptedRuns();
 if (interrupted.length) console.warn("filings interrupted by a worker stop:", interrupted);
 const workerId = process.env.WORKER_ID ?? `worker-${process.pid}`;
-// A service company's own worker (its own fixed IP) sets WORKER_TENANTS to its tenant id(s).
+// A service company's own worker sets WORKER_TENANTS to its tenant id(s).
 const workerTenants = (process.env.WORKER_TENANTS ?? "").split(",").map((t) => t.trim()).filter(Boolean);
-console.log("worker started");
-for (;;) {
-  const job = await sys.queue.dequeue(workerId, workerTenants);
-  if (!job) { await new Promise((r) => setTimeout(r, 2_000)); continue; }
-  if (job.kind === "run_filing" && job.filingId) await sys.service.runFiling(job.filingId).catch((e) => console.error("run failed", e));
-  await sys.queue.complete(job.id);
+const loop = new WorkerLoop({
+  queue: sys.queue, run: (id) => sys.service.runFiling(id), workerId, tenants: workerTenants, idlePollMs: config.workerIdlePollMs,
+});
+const http = config.workerPort ? startWorkerHttp(config.workerPort, config.workerWakeToken, loop) : null;
+if (http && !config.workerWakeToken) console.warn("worker: WORKER_WAKE_TOKEN is not set, so /wake is closed; new filings wait for the next periodic check");
+
+// A deploy or restart sends SIGTERM: finish the filing in progress, take no new one, then exit.
+for (const signal of ["SIGTERM", "SIGINT"] as const) {
+  process.once(signal, () => { console.log(`worker: ${signal}, stopping after the current filing`); loop.stop(); });
 }
+console.log("worker started");
+await loop.runUntilStopped();
+http?.close();
+await sys.harness.close();
+console.log("worker stopped");
+process.exit(0);
