@@ -19,14 +19,16 @@ don't buy one on that basis. What matters per portal is whether it serves the wo
 Steel's public address changed with every session, and that was fine: no portal needs a fixed
 one. NY additionally needs Keystone's logged-in service-company session (a saved sign-in, below).
 
-**Per-portal routing.** Run the worker wherever is convenient. Send only the portals that refuse
-its network another way: a Steel hosted browser (`steel`), or a proxy on a line they serve:
+**Per-portal routing.** Each portal's browser runs where its route says: on the worker's own
+machine (direct), through a proxy on a line the portal serves, or in a Steel hosted browser
+(`steel`). Keystone runs every portal on Steel (section 1):
 
 ```
-SITE_PROXIES=IRS=steel,NY=steel
+BROWSER_PROXY=steel
 ```
 
-Every other site goes direct. Missouri has no working hosted route today: file Missouri by
+A worker that has its own browser can instead send only the portals that refuse its network,
+e.g. `SITE_PROXIES=IRS=steel,NY=steel`, with every other site direct. Missouri has no working hosted route today: file Missouri by
 hand, or give it an office line (`MO=http://office:3128`) if Keystone ever has one. When a run
 meets a bot check that does not clear, it stops before submitting anything and the admin is told
 ("Portal bot check"). The engine never solves or gets around one. `npm run probe-sites` shows
@@ -34,7 +36,23 @@ each portal through the route it would use, so it is the go/no-go check for any 
 
 ## 1. Pick the machine
 
-Either works; the site check (step 3) decides, and the two can be combined.
+**Keystone's choice (2026-11-23): every browser on Steel.** Steel hosts browsers only, not
+programs: the worker program (and the API and Postgres) still run on a host, the same one
+that runs the SpedReports robot that drives Steel today. With every browser on Steel that host
+needs no browser of its own, so it can be any small container host:
+
+- the `steel` image: `docker build --target steel .` (about 0.5 GB instead of 4 GB);
+- `BROWSER_PROXY=steel` and no `SITE_PROXIES` entry other than `steel`;
+- outbound HTTPS and WebSocket to `api.steel.dev` and `connect.steel.dev` on port 443, a
+  Postgres the API shares, and no inbound port for the worker; 1 CPU and 1 GB RAM are plenty;
+- `STEEL_API_KEY` (this worker's own key) and the saved sign-ins listed under "Steel hosted
+  browsers" below.
+
+The worker refuses to start, with a message naming the problem, if any site would still need a
+local browser or the Steel key is missing. Missouri runs meet its bot check and stop before
+submitting, with an admin notice: file Missouri by hand.
+
+Other layouts, if that ever changes (the site check, step 3, decides; they can be combined):
 
 - **A hosted worker (cloud VM or container) with Steel for the IRS and NY.** No office or
   always-on computer needed: NJ and FL go direct, the IRS and NY run in Steel's browsers
@@ -43,6 +61,11 @@ Either works; the site check (step 3) decides, and the two can be combined.
   business connection, so it is the likeliest to pass the IRS and NY on its own.
 
 Needs: Docker, 2 CPU, 4 GB RAM, 20 GB disk, US location.
+
+**What waits on the web address.** `PUBLIC_BASE_URL` (for example
+`https://filings.keystonefilings.com`, not decided yet) is the address in every approval and
+admin link the engine sends. Set it on the API and the worker once it is decided, behind HTTPS
+(step 4). Everything above works without it; links sent before then point at the placeholder.
 
 ## 2. Install
 
@@ -92,16 +115,20 @@ STEEL_PROFILES=nygov=<profile id>  # saved sign-ins, from npm run steel-login (b
 
 Give each worker its own Steel key (not the SpedReports key), so either can be rotated alone.
 
-**Saved sign-ins.** A NY run needs a logged-in browser (Keystone's company-wide ny.gov login is
-profile `nygov`; NY DOS accounts are `ny:<tenant>`). On Steel that login lives in a Steel
-profile. An operator creates it once by signing in by hand in Steel's live view:
+**Saved sign-ins.** Runs on a logged-in account use a saved sign-in; the engine never types a
+password. On Steel each lives in a Steel profile, created once by an operator signing in by hand
+in Steel's live view:
 
-```bash
-npm run steel-login -- nygov https://my.ny.gov/
-```
+| Profile | Account | Sign-in command |
+|---|---|---|
+| `nygov` | Keystone's company-wide ny.gov login (NY payroll) | `npm run steel-login -- nygov https://my.ny.gov/` |
+| `ny:keystone` | Keystone's NY DOS filing account | `npm run steel-login -- ny:keystone https://filings.dos.ny.gov/ords/r/corpanc/efiling/1` |
+| `nj:keystone` | Keystone's NJ business account | `npm run steel-login -- nj:keystone https://my.nj.gov/aui/Login` |
+| `nj:<client id>` | a client's own NJ account, when the client files on it | same NJ command with the client's id |
 
-It prints a live-view link (do not share it: it controls the browser), waits for you to sign
-in, then prints the `STEEL_PROFILES` entry to add. Run it again when the login expires.
+Each prints a live-view link (do not share it: it controls the browser), waits for you to sign
+in, then prints the `STEEL_PROFILES` entry to add. Run it again when a login expires. NJ and FL
+filings that need no login (NJ payroll registration, Florida) need no saved sign-in.
 
 **Before real filings run through Steel.** SSNs, state logins and payment pages would pass
 through Steel's browsers. Recording is off in every session the engine creates; the rest is

@@ -2,6 +2,8 @@ import { bootstrap } from "./bootstrap.js";
 import { buildServer } from "./api/server.js";
 import { config } from "./config.js";
 import { parseApiKeys, parseStaffKeys } from "./api/keys.js";
+import { ADAPTERS } from "./adapters/index.js";
+import { browserSetupProblems } from "./browser/setup-check.js";
 
 /**
  * Cloud tier: API + approval pages + webhook delivery. With WORKER_ENABLED=true the
@@ -18,6 +20,11 @@ const app = buildServer({
 
 setInterval(() => void sys.webhooks.processDue(), 15_000).unref();
 if (config.workerEnabled) {
+  const problems = browserSetupProblems({
+    sites: Object.values(ADAPTERS).map((a) => a.site), browserProxy: config.browserProxy, siteProxies: config.siteProxies,
+    steelOnly: config.browsersSteelOnly, production: config.production, steelKeySet: !!config.steel.apiKey,
+  });
+  if (problems.length) { for (const p of problems) console.error(`worker not started: ${p}`); process.exit(1); }
   await sys.service.reconcileOpenIntents();
   await sys.service.recoverInterruptedRuns();
   let busy = false;

@@ -49,6 +49,8 @@ export const config = {
     timeoutMs: envInt("STEEL_SESSION_TIMEOUT_MS", 15 * 60_000),
   },
   browserProfileDir: path.resolve(env("BROWSER_PROFILE_DIR", "./var/profiles")),
+  /** "steel-only": this image ships no local browser (Dockerfile target "steel"); every site must route to Steel. */
+  browsersSteelOnly: process.env.BROWSERS === "steel-only",
   dryRunDefault: env("DRY_RUN_DEFAULT", "true") === "true",
   /** Name-resolution AI generator (the only LLM in a filing). No key -> deterministic static generator. */
   anthropicApiKey: process.env.ANTHROPIC_API_KEY || null,

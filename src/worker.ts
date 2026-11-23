@@ -1,4 +1,14 @@
 import { bootstrap } from "./bootstrap.js";
+import { config } from "./config.js";
+import { ADAPTERS } from "./adapters/index.js";
+import { browserSetupProblems } from "./browser/setup-check.js";
+
+// Refuse to start on browser settings that would fail every run on some site.
+const problems = browserSetupProblems({
+  sites: Object.values(ADAPTERS).map((a) => a.site), browserProxy: config.browserProxy, siteProxies: config.siteProxies,
+  steelOnly: config.browsersSteelOnly, production: config.production, steelKeySet: !!config.steel.apiKey,
+});
+if (problems.length) { for (const p of problems) console.error(`worker not started: ${p}`); process.exit(1); }
 
 /** Worker tier (fixed-IP VM, decision 4): outbound-only; pulls jobs, drives browsers, uploads artifacts. */
 const sys = await bootstrap({ withExecutor: true });
