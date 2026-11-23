@@ -100,8 +100,10 @@ const JS_CHECKS = new Set(["just a moment", "performing security verification", 
  * the run stops and reports.
  */
 export async function waitOutJsCheck(page: Page, maxMs = 20_000): Promise<string | null> {
+  // A check that runs before it shows anything (NY DOS's) leaves a blank page until it reloads.
+  const blank = async () => !(await page.title().catch(() => "")).trim() && !(await page.locator("body").innerText().catch(() => "")).trim();
   let hit = await detectChallenge(page);
-  for (let waited = 0; hit && JS_CHECKS.has(hit) && waited < maxMs; waited += 1000) {
+  for (let waited = 0; ((hit && JS_CHECKS.has(hit)) || (!hit && (await blank()))) && waited < maxMs; waited += 1000) {
     await page.waitForTimeout(1000);
     hit = await detectChallenge(page);
   }

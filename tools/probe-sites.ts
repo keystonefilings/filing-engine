@@ -12,9 +12,11 @@
  * assistant answered "Access Denied" (Akamai), NY DOS closed the connection, Missouri served a
  * Cloudflare challenge. Those three need a route their portals serve; the rest go direct.
  *
- * Through Steel (2026-11-23, plain session, its scrape API from the cloud container, which carries
- * no WebSocket so --steel itself could not run there): NJ, FL and the IRS assistant served at once;
- * NY DOS and Missouri served a JavaScript check that cleared to the real page within ~10 seconds.
+ * Through Steel (2026-11-23, one plain session per run, driven over Steel's HTTPS command API from
+ * the cloud container, which carries no WebSocket so --steel itself could not run there): NJ, FL,
+ * the IRS assistant and both NY DOS pages served their real pages (NY after its JavaScript check
+ * cleared). Missouri stayed on Cloudflare's "Performing security verification" page in two
+ * sessions, including after 60 seconds; it cleared once in an earlier scrape-API test.
  */
 import path from "node:path";
 import { fileURLToPath } from "node:url";
@@ -27,21 +29,35 @@ export const SITES = [
   { key: "NJ business records", site: "NJ", url: "https://www.njportal.com/dor/businessrecords/EntityDocs/StandingCerts.aspx", expect: /Standing Certificates/i },
   { key: "NJ sign-in (my.nj.gov)", site: "NJ", url: "https://my.nj.gov/aui/Login", expect: /Log In/i },
   { key: "IRS EIN assistant", site: "IRS", url: "https://sa.www4.irs.gov/applyein/", expect: /EIN|Employer Identification/i },
-  { key: "NY DOS ecorp", site: "NY", url: "https://filings.dos.ny.gov/ords/r/corpanc/ecorp/ecorphome", expect: /.+/ },
-  { key: "NY DOS public inquiry", site: "NY", url: "https://apps.dos.ny.gov/publicInquiry/", expect: /.+/ },
-  { key: "MO online filing", site: "MO", url: "https://bsd.sos.mo.gov/", expect: /.+/ },
+  { key: "NY DOS ecorp", site: "NY", url: "https://filings.dos.ny.gov/ords/r/corpanc/ecorp/ecorphome", expect: /On-?Line Filing/i },
+  { key: "NY DOS public inquiry", site: "NY", url: "https://apps.dos.ny.gov/publicInquiry/", expect: /Public Inquiry/i },
+  { key: "MO online filing", site: "MO", url: "https://bsd.sos.mo.gov/", expect: /Missouri Business Filings/i },
   { key: "FL Sunbiz filing", site: "FL", url: "https://efile.sunbiz.org/llc_file.html", expect: /Articles of Organization/i },
 ];
 
 /** Interstitials a real browser clears by running the site's own script (no CAPTCHA, nothing solved). */
-const JS_CHECK = /just a moment|performing security verification|checking your browser|your support id is|please enable javascript to view the page content/i;
+export const JS_CHECK = /just a moment|performing security verification|checking your browser|your support id is|please enable javascript to view the page content/i;
 
-export function classify(status: number | null, title: string, body: string, error?: string): "ok" | "blocked" | "error" {
+/**
+ * True while a page is a JavaScript check, or still blank: a check that runs before it shows
+ * anything (NY DOS's does) leaves an empty page until it reloads into the real one.
+ */
+export function stillChecking(title: string, body: string): boolean {
+  return JS_CHECK.test(`${title} ${body.slice(0, 2000)}`) || (!title.trim() && !body.trim());
+}
+
+/**
+ * "ok" only for the portal's real page: a check page, a blank page, or a page that does not show
+ * what that portal's real page shows (`expect`, matched against its title and text) is never ok.
+ */
+export function classify(status: number | null, title: string, body: string, error?: string, expect?: RegExp): "ok" | "blocked" | "error" {
   if (error) return /EMPTY_RESPONSE|CONNECTION_(RESET|CLOSED|REFUSED)|TUNNEL/i.test(error) ? "blocked" : "error";
   // A proxy in front of the browser reports a site that closes without answering as 502/504.
   if ((status === 502 || status === 504) && !title && !body.trim()) return "blocked";
+  if (!title.trim() && !body.trim()) return "blocked";
   if (status === 403 || JS_CHECK.test(title + " " + body.slice(0, 2000)) || /access denied|request blocked|unusual traffic|pardon our interruption|verify you are (not a bot|human)/i.test(title + " " + body.slice(0, 2000))) return "blocked";
-  return status && status < 400 ? "ok" : "error";
+  if (!status || status >= 400) return "error";
+  return expect && !expect.test(`${title} ${body}`) ? "error" : "ok";
 }
 
 interface Opener { open(site: string): Promise<Page>; label(site: string): string; close(): Promise<void> }
@@ -111,7 +127,7 @@ async function main() {
       title = await page.title();
       body = await page.locator("body").innerText().catch(() => "");
       // A JavaScript check page clears itself within seconds in a real browser; wait (up to 20s) for it.
-      for (let waited = 0; JS_CHECK.test(`${title} ${body.slice(0, 2000)}`) && waited < 20_000; waited += 1000) {
+      for (let waited = 0; stillChecking(title, body) && waited < 20_000; waited += 1000) {
         await page.waitForTimeout(1000);
         title = await page.title().catch(() => title);
         body = await page.locator("body").innerText().catch(() => body);
@@ -119,9 +135,10 @@ async function main() {
       }
     } catch (e) { error = (e as Error).message.split("\n")[0]; }
     await page?.close().catch(() => {});
-    const verdict = classify(status, title, body, error);
+    const verdict = classify(status, title, body, error, s.expect);
     if (verdict !== "ok") failedSites.add(s.site);
-    say(`${verdict.padEnd(8)} ${s.key.padEnd(26)} ${opener.label(s.site).padEnd(28)} ${status ?? "-"}  ${error ?? title.slice(0, 60)}`);
+    say(`${verdict.padEnd(8)} ${s.key.padEnd(26)} ${opener.label(s.site).padEnd(28)} ${status ?? "-"}  ${error ?? (title.slice(0, 60) || "(blank page)")}`);
+    if (verdict !== "ok" && !error && body.trim()) say(`         page text: ${body.replace(/\s+/g, " ").trim().slice(0, 160)}`);
   }
   await opener.close();
   if (!failedSites.size) {

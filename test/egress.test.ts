@@ -53,6 +53,14 @@ describe("challenge recognition", () => {
     expect(classify(403, "Access Denied", "")).toBe("blocked");
   });
 
+  it("never marks a blank page or an unexpected page ok", () => {
+    expect(classify(200, "", "")).toBe("blocked"); // a check that has not rendered yet
+    expect(classify(200, "", "  \n ")).toBe("blocked");
+    expect(classify(200, "Something else", "text", undefined, /Public Inquiry/i)).toBe("error");
+    expect(classify(200, "Public Inquiry", "Search", undefined, /Public Inquiry/i)).toBe("ok");
+    expect(classify(200, "State of NJ - Online Business Entity Filing", "Welcome to Business Formation", undefined, /Business Formation/i)).toBe("ok");
+  });
+
   it("the engine stops on the same interstitials", async () => {
     const page = (title: string, body: string) => ({ title: async () => title, locator: () => ({ innerText: async () => body }) }) as never;
     expect(await detectChallenge(page("Just a moment...", ""))).toBe("just a moment");
@@ -67,9 +75,9 @@ describe("JavaScript checks", () => {
   function scripted(titles: string[]) {
     let i = 0, waits = 0;
     const page = {
-      title: async () => titles[Math.min(i++, titles.length - 1)]!,
+      title: async () => titles[Math.min(i, titles.length - 1)]!, // the page changes as time passes, not as it is read
       locator: () => ({ innerText: async () => "" }),
-      waitForTimeout: async () => { waits++; },
+      waitForTimeout: async () => { waits++; i++; },
     } as never;
     return { page, waits: () => waits };
   }
@@ -82,6 +90,11 @@ describe("JavaScript checks", () => {
     const p = scripted(["Access Denied"]);
     expect(await waitOutJsCheck(p.page)).toBe("access denied");
     expect(p.waits()).toBe(0);
+  });
+  it("waits while the page is still blank", async () => {
+    const p = scripted(["", "", "On-Line Filing"]);
+    expect(await waitOutJsCheck(p.page)).toBeNull();
+    expect(p.waits()).toBe(2);
   });
   it("gives up when a check does not clear", async () => {
     const p = scripted(["Just a moment..."]);
