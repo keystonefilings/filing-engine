@@ -115,3 +115,15 @@ alter table jobs add column if not exists done_at timestamptz;
 -- Platform: a service company's own worker claims only its own jobs.
 alter table jobs add column if not exists tenant_id text;
 create index if not exists jobs_open_idx on jobs (id) where taken_at is null;
+
+-- Run leases: the worker running a filing renews its lease; recovery touches only filings
+-- whose lease lapsed (the worker stopped), never one another live worker is still running.
+create table if not exists run_leases (
+  filing_id uuid primary key,
+  worker_id text not null,
+  token text not null,
+  acquired_at timestamptz not null,
+  expires_at timestamptz not null
+);
+-- Dry-run previews are a property of the queued job, never of the approved request.
+alter table jobs add column if not exists dry_run boolean not null default false;

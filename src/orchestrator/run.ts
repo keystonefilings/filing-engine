@@ -2,13 +2,13 @@ import { randomUUID } from "node:crypto";
 import type { BrowserContext, Page } from "playwright";
 import type { ApprovalRecord, FilingRecord, RunRecord, Store } from "../store/types.js";
 import type { ClientCompanySettings, TenantSettings } from "../settings/schema.js";
-import type { ScreenStep, SiteAdapter, StepContext } from "../adapters/types.js";
-import { NameUnavailable } from "../adapters/types.js";
+import type { ScreenStep, SiteAdapter, StepContext, SubmissionEvidence } from "../adapters/types.js";
+import { isIssuedEin, NameUnavailable, PLACEHOLDER_EIN } from "../adapters/types.js";
 import { collectInventory } from "../resolver/inventory.js";
 import { matchIntents } from "../resolver/match.js";
 import { diffSnapshots, snapshotFromInventory } from "../resolver/drift.js";
 import { normalizeLabel, structuralInventory, type FieldDescriptor, type PageInventory, type ScreenIntents } from "../resolver/types.js";
-import { BotChallenge, DriftHalt, DryRunStop, FeeMismatch, ReviewGateHalt } from "../browser/guard.js";
+import { BotChallenge, DriftHalt, DryRunStop, FeeMismatch, ReviewGateHalt, SubmissionUnconfirmed } from "../browser/guard.js";
 import { BrowserHarness, waitOutJsCheck } from "../browser/harness.js";
 import { StepRecorder } from "../browser/recorder.js";
 import type { ArtifactStore } from "../artifacts/store.js";
@@ -44,16 +44,25 @@ export interface RunInput {
   expectedFees: FeeLine[];
   /** Set on the re-run after an admin approved the beta review-gate: proceed past the gate. */
   reviewGateApproved?: boolean;
+  /** Fence before every irreversible click: throws when this worker no longer holds the filing's lease. */
+  assertLease?: () => Promise<void>;
 }
 
 export type RunOutcome =
   | { kind: "submitted"; run: RunRecord; ein?: string }
-  | { kind: "dry_run_stop"; run: RunRecord; stoppedBefore: string; ein?: string }
+  /** einPlaceholder: the dry run used PLACEHOLDER_EIN in memory; nothing was applied for or stored. */
+  | { kind: "dry_run_stop"; run: RunRecord; stoppedBefore: string; ein?: string; einPlaceholder?: boolean }
   | { kind: "drift_halt"; run: RunRecord; haltId: string; requiresClientReapproval: boolean }
   | { kind: "name_unavailable"; run: RunRecord; requestedName: { baseName: string; designator: string; name: string }; purpose?: string; site: string }
   | { kind: "review_gate"; run: RunRecord; recordId: string; screenKey: string; screenshotArtifactId?: string }
   | { kind: "failed"; run: RunRecord; stage: string; error: string }
   | { kind: "needs_reconciliation"; run: RunRecord; error: string };
+
+/** The run's irreversible clicks: at most one open (clicked, unconfirmed) at a time. */
+interface SubmitTracker {
+  open: { id: string; site: string } | null;
+  confirmed: { id: string; site: string; evidence: SubmissionEvidence }[];
+}
 
 /**
  * One browser pass. Reads every screen live, matches by label, checks drift and
@@ -76,7 +85,11 @@ export class RunExecutor {
     // Each site's browser goes out the network route configured for it (browser/egress.ts).
     const site = input.adapter.site;
     const values: StepContext["values"] = {};
-    if (input.filing.ein) values.ein = input.filing.ein; // reuse an EIN already filed; never file a second one
+    // Reuse an EIN the IRS already issued; never file a second one. The dry-run placeholder is not one.
+    if (isIssuedEin(input.filing.ein)) values.ein = input.filing.ein;
+    let einPlaceholder = false;
+    const tracker: SubmitTracker = { open: null, confirmed: [] };
+    const stateConfirmed = () => tracker.confirmed.some((c) => c.site === input.adapter.site);
     let stage = "browser";
     let context: BrowserContext | undefined;
     try {
@@ -99,7 +112,7 @@ export class RunExecutor {
       }
       for (const step of input.adapter.steps) {
         stage = step.screen.screenKey;
-        const ctx = await this.stepContext(page, step.screen, input, values, credential, recorder, run);
+        const ctx = await this.stepContext(page, step.screen, input, values, credential, recorder, run, tracker);
         if (step.present && !(await step.present(ctx))) continue;
         await this.driftCheck(page, step.screen, input, run, recorder);
         await step.fill(ctx);
@@ -114,32 +127,58 @@ export class RunExecutor {
           await recorder.record(page, step.screen.screenKey, "review gate halt");
           throw new ReviewGateHalt(step.screen.screenKey, rec.id);
         }
-        if (step.paymentScreen) await this.feeCheck(page, step.screen, input, run, recorder);
+        if (step.paymentScreen) await this.feeCheck(page, step, input, run, recorder);
         await actAndSettle(page, () => step.advance(ctx));
         if (step.verify) await step.verify(ctx);
-        if (step.nameCheckGate && input.einAdapter && input.filing.request.ein && !input.filing.ein && (input.filing.request.ein.mode ?? input.client.einMode) === "in_run") {
+        if (step.nameCheckGate && input.einAdapter && input.filing.request.ein && !values.ein && (input.filing.request.ein.mode ?? input.client.einMode) === "in_run") {
           stage = "ein";
-          values.ein = await this.einSubRun(input, run, recorder);
-          await store.updateFiling(input.filing.id, { ein: values.ein });
+          const ein = await this.einSubRun(input, run, recorder, tracker);
+          values.ein = ein.ein;
+          // Only an EIN the IRS issued is stored; a dry run's placeholder lives in this run's memory.
+          if (ein.placeholder) einPlaceholder = true;
+          else await store.updateFiling(input.filing.id, { ein: ein.ein });
         }
       }
-      // All steps done without a submit screen stopping us: the last advance was the submit.
+      // All steps done. A live run counts as submitted only once the adapter has read evidence
+      // (confirmation number, receipt, EIN) that the portal took the filing.
+      stage = "confirmation";
+      const confirmCtx = await this.stepContext(page, { screenKey: "confirmation", title: "confirmation", intents: [] }, input, values, credential, recorder, run, tracker);
+      await this.confirmSubmission(input.adapter, confirmCtx, tracker, recorder);
+      if (!stateConfirmed()) throw new Error(`${input.adapter.key} finished its screens without an irreversible click through the submit guard`);
       stage = "artifacts";
       if (input.adapter.collectArtifacts) {
-        const ctx = await this.stepContext(page, { screenKey: "artifacts", title: "artifacts", intents: [] }, input, values, credential, recorder, run);
-        for (const a of await input.adapter.collectArtifacts(ctx)) {
-          const meta = await this.deps.artifacts.put({ filingId: input.filing.id, runId: run.id, kind: a.kind as never, label: a.label, contentType: a.contentType }, a.body);
-          const f = await store.getFiling(input.filing.id);
-          await store.updateFiling(input.filing.id, { artifacts: [...(f?.artifacts ?? []), { id: meta.id, kind: a.kind, label: a.label }] });
+        // The filing is at the state: a failed download is noted, never turned into a failed run.
+        try {
+          for (const a of await input.adapter.collectArtifacts(confirmCtx)) {
+            const meta = await this.deps.artifacts.put({ filingId: input.filing.id, runId: run.id, kind: a.kind as never, label: a.label, contentType: a.contentType }, a.body);
+            const f = await store.getFiling(input.filing.id);
+            await store.updateFiling(input.filing.id, { artifacts: [...(f?.artifacts ?? []), { id: meta.id, kind: a.kind, label: a.label }] });
+          }
+        } catch (e) {
+          await recorder.noteOnly("artifacts", `artifact collection failed after a confirmed submission: ${(e as Error).message.split("\n")[0]}`);
         }
       }
       const done = await store.updateRun(run.id, { status: "submitted", endedAt: new Date().toISOString() });
       return { kind: "submitted", run: done, ein: values.ein };
     } catch (e) {
       const err = e as Error;
+      // Checked before any other classification: once an irreversible click is unconfirmed, a
+      // drift halt, name message, bot page or crash afterwards must never make the filing re-runnable.
+      const open = tracker.open ?? (await store.listOpenSubmitIntents()).find((i) => i.runId === run.id);
+      if (open) {
+        const done = await store.updateRun(run.id, { status: "needs_reconciliation", endedAt: new Date().toISOString(), error: err.message });
+        return { kind: "needs_reconciliation", run: done, error: err.message };
+      }
+      if (stateConfirmed()) {
+        // The portal confirmed the filing; whatever failed after that does not undo it.
+        const done = await store.updateRun(run.id, { status: "submitted", endedAt: new Date().toISOString(), error: `after confirmed submission: ${err.message}` });
+        return { kind: "submitted", run: done, ein: values.ein };
+      }
       if (err instanceof DryRunStop) {
         const done = await store.updateRun(run.id, { status: "completed", endedAt: new Date().toISOString(), error: err.message });
-        return { kind: "dry_run_stop", run: done, stoppedBefore: err.action, ein: values.ein };
+        return einPlaceholder
+          ? { kind: "dry_run_stop", run: done, stoppedBefore: err.action, einPlaceholder: true }
+          : { kind: "dry_run_stop", run: done, stoppedBefore: err.action, ein: values.ein };
       }
       if (err instanceof DriftHalt) {
         const halt = await store.getDriftHalt(err.haltId);
@@ -158,11 +197,6 @@ export class RunExecutor {
         const done = await store.updateRun(run.id, { status: "halted_name", endedAt: new Date().toISOString(), error: err.message });
         return { kind: "name_unavailable", run: done, requestedName, purpose: fm?.purpose, site: input.adapter.site };
       }
-      const open = (await store.listOpenSubmitIntents()).find((i) => i.runId === run.id);
-      if (open) {
-        const done = await store.updateRun(run.id, { status: "needs_reconciliation", endedAt: new Date().toISOString(), error: err.message });
-        return { kind: "needs_reconciliation", run: done, error: err.message };
-      }
       const done = await store.updateRun(run.id, { status: "failed", endedAt: new Date().toISOString(), error: `${stage}: ${err.message}` });
       const kindStage = err instanceof FeeMismatch ? "fee_mismatch" : err instanceof BotChallenge ? "bot_challenge" : stage;
       return { kind: "failed", run: done, stage: kindStage, error: err.message };
@@ -171,11 +205,17 @@ export class RunExecutor {
     }
   }
 
-  /** Rule 4: file the EIN in the same session window; any failure throws and stops the state run. */
-  private async einSubRun(input: RunInput, parentRun: RunRecord, recorder: StepRecorder): Promise<string> {
+  /**
+   * Rule 4: file the EIN in the same session window; any failure throws and stops the state run.
+   * A dry run with the IRS adapter unmapped returns the placeholder, which the caller never stores.
+   */
+  private async einSubRun(input: RunInput, parentRun: RunRecord, recorder: StepRecorder, tracker: SubmitTracker): Promise<{ ein: string; placeholder: boolean }> {
     const ein = input.einAdapter!;
     if (!ein.complete) {
-      if (input.dryRun) { await recorder.noteOnly("irs.skipped", "dry run: IRS adapter not mapped (walk B); placeholder EIN used"); return "00-0000000"; }
+      if (input.dryRun) {
+        await recorder.noteOnly("irs.skipped", "dry run: IRS adapter not mapped (walk B); placeholder EIN used for this preview only");
+        return { ein: PLACEHOLDER_EIN, placeholder: true };
+      }
       throw new Error("IRS EIN adapter not mapped (walk B); run stopped before the state filing per rule 4");
     }
     const context = await this.deps.harness.ephemeralContext(ein.site);
@@ -185,7 +225,7 @@ export class RunExecutor {
       await page.goto(ein.entryUrl(input), { waitUntil: "domcontentloaded" });
       const values: StepContext["values"] = {};
       for (const step of ein.steps) {
-        const ctx = await this.stepContext(page, step.screen, einInput, values, null, recorder, parentRun);
+        const ctx = await this.stepContext(page, step.screen, einInput, values, null, recorder, parentRun, tracker);
         if (step.present && !(await step.present(ctx))) continue;
         await this.driftCheck(page, step.screen, einInput, parentRun, recorder);
         await step.fill(ctx);
@@ -193,18 +233,24 @@ export class RunExecutor {
         await actAndSettle(page, () => step.advance(ctx));
         if (step.verify) await step.verify(ctx);
       }
-      const text = await page.locator("body").innerText();
-      const m = /\b(\d{2}-\d{7})\b/.exec(text);
-      if (!m) throw new Error("EIN not found on the IRS confirmation page");
+      // The IRS intent closes only on the EIN read from the assignment page; otherwise it stays
+      // open and the filing goes to reconciliation (an EIN may have been issued).
+      const ctx = await this.stepContext(page, { screenKey: "irs.confirmation", title: "EIN assignment", intents: [] }, einInput, values, null, recorder, parentRun, tracker);
+      await this.confirmSubmission(ein, ctx, tracker, recorder);
+      const assigned = tracker.confirmed.find((c) => c.site === ein.site)?.evidence.reference;
+      if (!assigned) throw new Error("IRS sub-run finished without a confirmed EIN request");
       if (ein.collectArtifacts) {
-        const ctx = await this.stepContext(page, { screenKey: "irs.artifacts", title: "CP 575", intents: [] }, einInput, values, null, recorder, parentRun);
-        for (const a of await ein.collectArtifacts(ctx)) {
-          const meta = await this.deps.artifacts.put({ filingId: input.filing.id, runId: parentRun.id, kind: "cp575", label: a.label, contentType: a.contentType }, a.body);
-          const f = await this.deps.store.getFiling(input.filing.id);
-          await this.deps.store.updateFiling(input.filing.id, { artifacts: [...(f?.artifacts ?? []), { id: meta.id, kind: "cp575", label: a.label }] });
+        try {
+          for (const a of await ein.collectArtifacts(ctx)) {
+            const meta = await this.deps.artifacts.put({ filingId: input.filing.id, runId: parentRun.id, kind: "cp575", label: a.label, contentType: a.contentType }, a.body);
+            const f = await this.deps.store.getFiling(input.filing.id);
+            await this.deps.store.updateFiling(input.filing.id, { artifacts: [...(f?.artifacts ?? []), { id: meta.id, kind: "cp575", label: a.label }] });
+          }
+        } catch (e) {
+          await recorder.noteOnly("irs.artifacts", `CP 575 collection failed after the EIN was assigned: ${(e as Error).message.split("\n")[0]}`);
         }
       }
-      return m[1]!;
+      return { ein: assigned, placeholder: false };
     } finally {
       await this.deps.harness.closeContext(context); // a Steel context also ends its session
     }
@@ -247,11 +293,40 @@ export class RunExecutor {
     throw new DriftHalt(screen.screenKey, rec.id, proposal.summary);
   }
 
-  private async feeCheck(page: Page, screen: ScreenIntents, input: RunInput, run: RunRecord, recorder: StepRecorder): Promise<void> {
+  private async feeCheck(page: Page, step: ScreenStep, input: RunInput, run: RunRecord, recorder: StepRecorder): Promise<void> {
+    const screen = step.screen;
     const inventory = await collectInventory(page);
     const check = checkLiveFees(input.expectedFees, inventory.prices, input.filing.request.feeCapUsd);
-    await recorder.record(page, screen.screenKey, `fee check: ${check.ok ? "ok" : check.reason}`);
-    if (!check.ok) throw new FeeMismatch(screen.screenKey, check.reason ?? "mismatch");
+    if (check.ok) {
+      await recorder.record(page, screen.screenKey, "fee check: ok");
+      return;
+    }
+    if (step.feeDisplay === "price_list" && check.linesListed) {
+      // Every approved line is listed, but the screen shows prices for all options and no
+      // payable total, so the charge itself cannot be verified before the click.
+      const note = "fee check: approved lines listed; payable total not shown on this screen";
+      if (input.dryRun) {
+        await recorder.record(page, screen.screenKey, `${note} (a live run stops here)`);
+        return;
+      }
+      await recorder.record(page, screen.screenKey, note);
+      throw new FeeMismatch(screen.screenKey, "payable total not shown before the irreversible click; the charge cannot be verified");
+    }
+    await recorder.record(page, screen.screenKey, `fee check: ${check.reason}`);
+    throw new FeeMismatch(screen.screenKey, check.reason ?? "mismatch");
+  }
+
+  /** Closes the open submit intent only on evidence the adapter reads from the portal. */
+  private async confirmSubmission(adapter: SiteAdapter, ctx: StepContext, tracker: SubmitTracker, recorder: StepRecorder): Promise<void> {
+    const open = tracker.open;
+    if (!open) return;
+    if (!adapter.confirmSubmission) throw new SubmissionUnconfirmed(adapter.key, "no confirmation check is mapped for this site");
+    const evidence = await adapter.confirmSubmission(ctx);
+    if (!evidence) throw new SubmissionUnconfirmed(adapter.key, "no confirmation number, receipt or EIN found after the click");
+    await this.deps.store.updateSubmitIntent(open.id, { outcome: "submitted", outcomeAt: new Date().toISOString(), evidence });
+    tracker.confirmed.push({ ...open, evidence });
+    tracker.open = null;
+    await recorder.noteOnly(`${adapter.key}.confirmed`, `submission confirmed: ${evidence.detail}`);
   }
 
   /** Beta review-gate: capture the review screen as an artifact for the admin to inspect. */
@@ -270,7 +345,7 @@ export class RunExecutor {
     }
   }
 
-  private async stepContext(page: Page, screen: ScreenIntents, input: RunInput, values: StepContext["values"], credential: StepContext["credential"], recorder: StepRecorder, run: RunRecord): Promise<StepContext> {
+  private async stepContext(page: Page, screen: ScreenIntents, input: RunInput, values: StepContext["values"], credential: StepContext["credential"], recorder: StepRecorder, run: RunRecord, tracker: SubmitTracker): Promise<StepContext> {
     const store = this.deps.store;
     const site = input.adapter.site;
     const resolve = async (s: ScreenIntents) => {
@@ -322,11 +397,16 @@ export class RunExecutor {
           throw new DryRunStop(screen.screenKey, action);
         }
         if (!input.approval) throw new Error("refusing to submit without an approval record");
+        if (tracker.open) throw new Error(`submit intent ${tracker.open.id} on ${tracker.open.site} is not confirmed; refusing another irreversible click`);
+        // Fence: only the worker still holding this filing's lease may make the click.
+        if (input.assertLease) await input.assertLease();
         const intent = await store.createSubmitIntent({ id: randomUUID(), runId: run.id, filingId: input.filing.id, site, payloadHash: input.filing.payloadHash, createdAt: new Date().toISOString() });
+        tracker.open = { id: intent.id, site };
         await recorder.record(page, screen.screenKey, `submit intent ${intent.id} before ${action}`);
         await click();
-        await store.updateSubmitIntent(intent.id, { outcome: "submitted", outcomeAt: new Date().toISOString() });
-        await recorder.record(page, screen.screenKey, `after ${action}`);
+        // The click returning is not a submission: the intent stays open until confirmSubmission.
+        await store.updateSubmitIntent(intent.id, { clickedAt: new Date().toISOString() });
+        await recorder.record(page, screen.screenKey, `after ${action}; awaiting confirmation`);
       },
     };
   }

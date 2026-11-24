@@ -50,6 +50,8 @@ export async function preflight(input: {
 
   if (!adapter) b.push(`no adapter wired for ${req.state}/${req.type} yet`);
   else if (!adapter.complete && !dryRun) b.push(`${adapter.key} is not fully mapped; only dry runs are allowed`);
+  // Without a confirmation check a live click could never be told apart from a rejected one.
+  else if (!adapter.confirmSubmission && !dryRun) b.push(`${adapter.key} has no submission confirmation check; only dry runs are allowed`);
 
   if (!dryRun) {
     if (!approval) b.push("no approval on file");

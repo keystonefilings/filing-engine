@@ -40,5 +40,10 @@ Point the NJ adapter at the replica with `NJ_FORMATION_URL=http://127.0.0.1:4310
 ## Safety defaults
 - `DRY_RUN_DEFAULT=true`: every run stops before the irreversible click and records a `dry_run_stop` submit intent.
 - Adapters marked `complete: false` refuse non-dry runs.
-- A submit intent without an outcome on worker start marks the filing `needs_reconciliation`; nothing is ever re-run automatically.
+- A submit intent stays open after the irreversible click until the adapter's `confirmSubmission` reads evidence (confirmation number, receipt, EIN). Any error while it is open, or no evidence, ends in `needs_reconciliation`; nothing is ever re-run automatically. Adapters without `confirmSubmission` only dry-run.
+- Each run holds a lease on its filing, renewed while the worker is alive. Recovery (on start and every minute, limited to `WORKER_TENANTS`) only settles filings whose lease lapsed, so starting a second worker never touches another worker's runs.
+- A payment screen passes the fee check only when the payable amount is verified: a total line equal to the approved total, or every charge line matched one-for-one. Screens marked `feeDisplay: "price_list"` (NJ formation) can be previewed in a dry run, but a live run stops there.
+- Dry-run previews are a flag on the queued job; the approved request is never changed, and the placeholder EIN is never stored.
+- Tenant settings and drift reviews require a platform staff key (`STAFF_API_KEYS`, `key:identity`, presented in `x-api-key`); a drift decision records the staff identity. A tenant's key manages only its own client companies and cannot claim a client-company id another tenant holds.
+- In production (`NODE_ENV=production`, as the image sets) the API and worker refuse to start without real values for `API_KEYS`, `STAFF_API_KEYS` and `APPROVAL_SIGNING_SECRET` (see `src/startup-check.ts` for the full list).
 - First observation of a screen halts for review unless `firstObservationPolicy: "accept"` is set (bootstrap/fixtures only).

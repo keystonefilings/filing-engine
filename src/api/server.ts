@@ -5,7 +5,7 @@ import type { FilingService } from "../orchestrator/service.js";
 import { ValidationFailed } from "../orchestrator/service.js";
 import type { ApprovalService } from "../approvals/service.js";
 import { renderReviewPage, maskSensitive } from "../approvals/render.js";
-import type { Store, FilingRecord } from "../store/types.js";
+import { ClientCompanyOwnershipError, type Store, type FilingRecord } from "../store/types.js";
 import type { ArtifactStore } from "../artifacts/store.js";
 import { TenantSettings, ClientCompanySettings } from "../settings/schema.js";
 import { EVENT_TYPES } from "../domain/events.js";
@@ -151,9 +151,18 @@ export function buildServer(deps: ApiDeps): FastifyInstance {
   app.put("/v1/client-companies/:id", async (req, reply) => {
     const tenantId = tenantOf(req);
     if (!tenantId) return reply.code(401).send({ error: "invalid api key" });
-    const parsed = ClientCompanySettings.safeParse({ ...(req.body as object), clientCompanyId: (req.params as { id: string }).id, tenantId });
+    const id = (req.params as { id: string }).id;
+    // Company ids are global: a tenant may create a new one or update its own, never take another tenant's.
+    const existing = await deps.store.getClientCompany(id);
+    if (existing && existing.tenantId !== tenantId) return reply.code(409).send({ error: "client company id already in use" });
+    const parsed = ClientCompanySettings.safeParse({ ...(req.body as object), clientCompanyId: id, tenantId });
     if (!parsed.success) return reply.code(422).send({ error: parsed.error.issues });
-    await deps.store.putClientCompany(parsed.data);
+    try {
+      await deps.store.putClientCompany(parsed.data);
+    } catch (e) {
+      if (e instanceof ClientCompanyOwnershipError) return reply.code(409).send({ error: "client company id already in use" });
+      throw e;
+    }
     return { ok: true };
   });
 

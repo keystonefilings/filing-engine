@@ -4,7 +4,8 @@ import type { JobQueue } from "./queue.js";
 
 export interface WorkerLoopOptions {
   queue: JobQueue;
-  run: (filingId: string) => Promise<void>;
+  /** opts.dryRun comes from the job: a preview, which can never make a run live. */
+  run: (filingId: string, opts: { dryRun?: boolean }) => Promise<void>;
   workerId: string;
   /** Only claim jobs for these tenants (a service company's own worker); empty = any. */
   tenants: string[];
@@ -42,7 +43,7 @@ export class WorkerLoop {
       if (!job) { await this.idle(); continue; }
       this.current = job.filingId ?? job.id;
       try {
-        if (job.kind === "run_filing" && job.filingId) await this.o.run(job.filingId).catch((e) => console.error("run failed", e));
+        if (job.kind === "run_filing" && job.filingId) await this.o.run(job.filingId, { dryRun: job.dryRun }).catch((e) => console.error("run failed", e));
         await this.o.queue.complete(job.id);
       } finally {
         this.current = null;

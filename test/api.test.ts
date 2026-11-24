@@ -5,9 +5,10 @@ import { seededStore, wire, njFormationRequest } from "./helpers.js";
 import type { FastifyInstance } from "fastify";
 
 let app: FastifyInstance;
+let store: Awaited<ReturnType<typeof seededStore>>;
 const STAFF = "staff-key-0123456789abcdefghij";
 beforeAll(async () => {
-  const store = await seededStore();
+  store = await seededStore();
   const w = wire(store);
   app = buildServer({ service: w.service, approvals: w.approvals, store, artifacts: new FsArtifactStore("var/test-artifacts"), publicBaseUrl: "http://api.test", apiKeys: { k1: "keystone", k2: "other-co" }, staffKeys: { [STAFF]: "ops@keystone" } });
   await app.ready();
@@ -74,5 +75,18 @@ describe("API", () => {
     for (const key of ["constructor", "__proto__", "toString"]) {
       expect((await app.inject({ method: "GET", url: "/v1/filings", headers: { "x-api-key": key } })).statusCode).toBe(401);
     }
+  });
+
+  it("a tenant cannot take over another tenant's client company", async () => {
+    const res = await app.inject({ method: "PUT", url: "/v1/client-companies/acme-cpa", headers: { "x-api-key": "k2" }, payload: { name: "Hijacked", einMode: "after_acceptance" } });
+    expect(res.statusCode).toBe(409);
+    const acme = (await store.getClientCompany("acme-cpa"))!;
+    expect(acme.tenantId).toBe("keystone");
+    expect(acme.name).toBe("Acme CPA");
+    // The owner can still update it, and anyone can create a new id.
+    expect((await app.inject({ method: "PUT", url: "/v1/client-companies/acme-cpa", headers: { "x-api-key": "k1" }, payload: { ...acme, name: "Acme CPA LLP" } })).statusCode).toBe(200);
+    expect((await store.getClientCompany("acme-cpa"))!.name).toBe("Acme CPA LLP");
+    expect((await app.inject({ method: "PUT", url: "/v1/client-companies/other-firm", headers: { "x-api-key": "k2" }, payload: { name: "Other Firm", einMode: "after_acceptance" } })).statusCode).toBe(200);
+    expect((await store.getClientCompany("other-firm"))!.tenantId).toBe("other-co");
   });
 });

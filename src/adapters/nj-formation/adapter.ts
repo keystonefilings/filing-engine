@@ -218,6 +218,7 @@ const review: ScreenStep = {
 const payment: ScreenStep = {
   screen: NJ_SCREENS.payment,
   paymentScreen: true,
+  feeDisplay: "price_list", // the screen lists every option's price and no payable total
   submitScreen: true,
   async fill(ctx) {
     const f = formation(ctx);

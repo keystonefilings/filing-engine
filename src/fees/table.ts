@@ -71,38 +71,70 @@ export function totalUsd(lines: FeeLine[]): number {
 }
 
 export interface FeeCheck {
+  /** True only when the amount that will be charged is verified against the approval and cap. */
   ok: boolean;
   reason?: string;
   expectedTotal: number;
   liveTotal?: number;
+  /** How the charge was verified: a total line on the page, or every charge line reconciled. */
+  verifiedBy?: "total" | "lines";
+  /** Every approved line is listed (enough for a price-list screen, not for payment). */
+  linesListed: boolean;
   missing: FeeLine[];
   unexpected: PriceItem[];
 }
 
+const cents = (usd: number) => Math.round(usd * 100);
+
 /**
- * Compares what the payment screen shows against the approved fee lines. Every
- * expected amount must appear on the page; any live total above the cap fails.
+ * Compares what the payment screen shows against the approved fee lines. Payment is allowed
+ * only when the payable amount is verified: a total line equal to the approved total, or, with
+ * no total shown, every charge on the page accounted for one-for-one by an approved line. A
+ * charge the approval does not cover, with no total to reconcile it, fails. The verified
+ * amount must be within the cap.
  */
 export function checkLiveFees(expected: FeeLine[], live: PriceItem[], capUsd?: number): FeeCheck {
-  const liveAmounts = live.map((p) => p.amountUsd);
-  const missing = expected.filter((e) => !liveAmounts.includes(e.amountUsd));
-  const expectedAmounts = new Set(expected.map((e) => e.amountUsd));
   const expectedTotal = totalUsd(expected);
+  const missing = expected.filter((e) => !live.some((p) => cents(p.amountUsd) === cents(e.amountUsd)));
   // Only a line labelled as a total ("Total", "Cart Total"); table headers that merely contain
   // the word (NJ cart: "Description Statutory Fee Portal Admin Fee Total ...") do not count.
   const totals = live.filter((p) => /(^|\s)((cart|grand|order|amount) )?total( due)?$/.test(normalizeLabel(p.label)));
   const totalLine = totals.length ? totals.reduce((a, b) => (b.amountUsd > a.amountUsd ? b : a)) : undefined;
   const liveTotal = totalLine?.amountUsd;
-  const unexpected = live.filter(
-    (p) => !expectedAmounts.has(p.amountUsd) && p.amountUsd !== liveTotal && p.amountUsd !== expectedTotal && p.amountUsd > 0,
-  );
-  const result: FeeCheck = { ok: true, expectedTotal, liveTotal, missing, unexpected };
-  if (missing.length) { result.ok = false; result.reason = `expected fee lines not shown: ${missing.map((m) => `${m.label} $${m.amountUsd}`).join(", ")}`; }
-  if (liveTotal !== undefined && Math.abs(liveTotal - expectedTotal) > 0.005) {
-    result.ok = false; result.reason = `live total $${liveTotal} differs from approved total $${expectedTotal}`;
+  // One-for-one: each approved line accounts for one charge on the page. A line repeating the
+  // approved total, or the total line itself, is not a separate charge.
+  const pool = expected.filter((e) => e.amountUsd > 0).map((e) => cents(e.amountUsd));
+  const unexpected: PriceItem[] = [];
+  for (const p of live) {
+    if (p.amountUsd <= 0 || p === totalLine) continue;
+    const i = pool.indexOf(cents(p.amountUsd));
+    if (i >= 0) { pool.splice(i, 1); continue; }
+    if (cents(p.amountUsd) === cents(expectedTotal)) continue;
+    unexpected.push(p);
   }
-  if (capUsd !== undefined && liveTotal !== undefined && liveTotal > capUsd + 0.005) {
-    result.ok = false; result.reason = `live total $${liveTotal} exceeds approved cap $${capUsd}`;
+  const result: FeeCheck = { ok: false, expectedTotal, liveTotal, linesListed: missing.length === 0, missing, unexpected };
+  if (missing.length) {
+    result.reason = `expected fee lines not shown: ${missing.map((m) => `${m.label} $${m.amountUsd}`).join(", ")}`;
+    return result;
   }
+  if (liveTotal !== undefined) {
+    if (cents(liveTotal) !== cents(expectedTotal)) {
+      result.reason = `live total $${liveTotal} differs from approved total $${expectedTotal}`;
+      return result;
+    }
+    result.verifiedBy = "total";
+  } else if (unexpected.length) {
+    result.reason = `no payable total shown, and charges not in the approval: ${unexpected.map((u) => `${u.label} $${u.amountUsd}`).join(", ")}`;
+    return result;
+  } else {
+    result.verifiedBy = "lines";
+  }
+  const payable = liveTotal ?? expectedTotal;
+  if (capUsd !== undefined && cents(payable) > cents(capUsd)) {
+    result.verifiedBy = undefined;
+    result.reason = `payable $${payable} exceeds approved cap $${capUsd}`;
+    return result;
+  }
+  result.ok = true;
   return result;
 }

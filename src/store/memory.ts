@@ -1,8 +1,11 @@
-import type {
-  ApprovalRecord, DriftHaltRecord, FilingRecord, MessageRecord, NameResolutionRecord, ReviewGateRecord, RunRecord, Store, SubmitIntentRecord, WebhookDeliveryRecord,
+import { randomUUID } from "node:crypto";
+import {
+  ClientCompanyOwnershipError,
+  type ApprovalRecord, type DriftHaltRecord, type FilingRecord, type MessageRecord, type NameResolutionRecord, type ReviewGateRecord, type RunRecord, type Store, type SubmitIntentRecord, type WebhookDeliveryRecord,
 } from "./types.js";
 import type { ClientCompanySettings, TenantSettings } from "../settings/schema.js";
 import type { PageSnapshot } from "../resolver/types.js";
+import type { FilingStatus } from "../domain/states.js";
 
 function patchInto<T extends { id: string }>(map: Map<string, T>, id: string, patch: Partial<T>, what: string): T {
   const cur = map.get(id);
@@ -27,6 +30,9 @@ export class MemoryStore implements Store {
   messages = new Map<string, MessageRecord>();
   nameResolutions = new Map<string, NameResolutionRecord>();
   reviewGates = new Map<string, ReviewGateRecord>();
+  leases = new Map<string, { workerId: string; token: string; expiresAt: number }>();
+  /** Clock for lease expiry; injectable for tests. */
+  now: () => number = () => Date.now();
 
   async createFiling(f: FilingRecord) { this.filings.set(f.id, f); return f; }
   async getFiling(id: string) { return this.filings.get(id) ?? null; }
@@ -39,6 +45,9 @@ export class MemoryStore implements Store {
   }
   async listFilings(tenantId?: string) {
     return [...this.filings.values()].filter((f) => !tenantId || f.tenantId === tenantId);
+  }
+  async listFilingsByStatus(statuses: FilingStatus[], tenants?: string[]) {
+    return [...this.filings.values()].filter((f) => statuses.includes(f.status) && (!tenants?.length || tenants.includes(f.tenantId)));
   }
 
   async createApproval(a: ApprovalRecord) { this.approvals.set(a.id, a); return a; }
@@ -67,7 +76,32 @@ export class MemoryStore implements Store {
   async getTenant(id: string) { return this.tenants.get(id) ?? null; }
   async putTenant(t: TenantSettings) { this.tenants.set(t.tenantId, t); }
   async getClientCompany(id: string) { return this.clients.get(id) ?? null; }
-  async putClientCompany(c: ClientCompanySettings) { this.clients.set(c.clientCompanyId, c); }
+  async putClientCompany(c: ClientCompanySettings) {
+    const cur = this.clients.get(c.clientCompanyId);
+    if (cur && cur.tenantId !== c.tenantId) throw new ClientCompanyOwnershipError(c.clientCompanyId);
+    this.clients.set(c.clientCompanyId, c);
+  }
+
+  async acquireRunLease(filingId: string, workerId: string, ttlMs: number) {
+    const cur = this.leases.get(filingId);
+    if (cur && cur.expiresAt > this.now()) return null;
+    const token = randomUUID();
+    this.leases.set(filingId, { workerId, token, expiresAt: this.now() + ttlMs });
+    return token;
+  }
+  async renewRunLease(filingId: string, token: string, ttlMs: number) {
+    const cur = this.leases.get(filingId);
+    if (!cur || cur.token !== token || cur.expiresAt <= this.now()) return false;
+    cur.expiresAt = this.now() + ttlMs;
+    return true;
+  }
+  async releaseRunLease(filingId: string, token: string) {
+    if (this.leases.get(filingId)?.token === token) this.leases.delete(filingId);
+  }
+  async hasLiveRunLease(filingId: string) {
+    const cur = this.leases.get(filingId);
+    return !!cur && cur.expiresAt > this.now();
+  }
 
   async createNameResolution(r: NameResolutionRecord) { this.nameResolutions.set(r.id, r); return r; }
   async getNameResolution(id: string) { return this.nameResolutions.get(id) ?? null; }

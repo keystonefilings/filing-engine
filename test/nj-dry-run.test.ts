@@ -43,7 +43,9 @@ describe("NJ formation dry run over the fixture wizard", () => {
     }
     expect(run.steps.some((s) => s.note?.startsWith("member added"))).toBe(true);
     expect(run.steps.some((s) => s.note?.startsWith("signer added"))).toBe(true);
-    expect(run.steps.find((s) => s.note?.startsWith("fee check"))?.note).toBe("fee check: ok");
+    // The NJ payment screen lists every option's price and no payable total: the approved lines
+    // are there, but a live run cannot verify the charge on it and stops (dry runs continue).
+    expect(run.steps.find((s) => s.note?.startsWith("fee check"))?.note).toBe("fee check: approved lines listed; payable total not shown on this screen (a live run stops here)");
     const intents = await store.listOpenSubmitIntents();
     expect(intents).toHaveLength(0); // dry-run intent carries outcome dry_run_stop
     expect([...store.intents.values()].map((i) => i.outcome)).toEqual(["dry_run_stop"]);

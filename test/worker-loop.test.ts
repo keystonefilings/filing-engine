@@ -25,6 +25,19 @@ describe("worker loop", () => {
     await done;
   });
 
+  it("passes a preview job's dry-run flag to the run, through a waking queue too", async () => {
+    const queue = new WakingQueue(new InMemoryQueue(), new WorkerWaker("http://worker.test/wake", null, async () => new Response(null, { status: 202 })));
+    const ran: { id: string; dryRun?: boolean }[] = [];
+    const loop = new WorkerLoop({ queue, run: async (id, opts) => { ran.push({ id, dryRun: opts.dryRun }); }, workerId: "w", tenants: [], idlePollMs: 10 });
+    await queue.enqueue({ kind: "run_filing", filingId: "preview", tenantId: "keystone", dryRun: true });
+    await queue.enqueue({ kind: "run_filing", filingId: "live", tenantId: "keystone" });
+    const done = loop.runUntilStopped();
+    await sleep(50);
+    loop.stop();
+    await done;
+    expect(ran).toEqual([{ id: "preview", dryRun: true }, { id: "live", dryRun: undefined }]);
+  });
+
   it("keeps going when the database cannot be reached", async () => {
     let fails = 2;
     const inner = new InMemoryQueue();

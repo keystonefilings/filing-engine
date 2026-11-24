@@ -11,7 +11,7 @@ import { exitOnStartupProblems } from "./startup-check.js";
  */
 // Refuse to start on settings that would leave the API open, lose data or stall filings.
 exitOnStartupProblems("api");
-const sys = await bootstrap({ withExecutor: config.workerEnabled });
+const sys = await bootstrap({ withExecutor: config.workerEnabled, workerId: process.env.WORKER_ID ?? "api-inprocess" });
 const app = buildServer({
   service: sys.service, approvals: sys.approvals, store: sys.store, artifacts: sys.artifacts, publicBaseUrl: config.publicBaseUrl,
   nameResolution: sys.nameResolution, reviewGate: sys.reviewGate,
@@ -21,15 +21,22 @@ const app = buildServer({
 
 setInterval(() => void sys.webhooks.processDue(), 15_000).unref();
 if (config.workerEnabled) {
-  await sys.service.reconcileOpenIntents();
-  await sys.service.recoverInterruptedRuns();
+  // Same lease-aware recovery as the worker tier, on start and then periodically.
+  const recover = async () => {
+    try {
+      await sys.service.reconcileOpenIntents();
+      await sys.service.recoverInterruptedRuns();
+    } catch (e) { console.error("recovery pass failed", e); }
+  };
+  await recover();
+  setInterval(() => void recover(), 60_000).unref();
   let busy = false;
   setInterval(async () => {
     if (busy) return;
     busy = true;
     try {
       const job = await sys.queue.dequeue("api-inprocess");
-      if (job?.kind === "run_filing" && job.filingId) await sys.service.runFiling(job.filingId).catch((e) => console.error("run failed", e));
+      if (job?.kind === "run_filing" && job.filingId) await sys.service.runFiling(job.filingId, { dryRun: job.dryRun }).catch((e) => console.error("run failed", e));
       if (job) await sys.queue.complete(job.id);
     } finally { busy = false; }
   }, 2_000).unref();
