@@ -35,6 +35,11 @@ export interface StepContext {
   actAndSettle(action: () => Promise<void>): Promise<void>;
   /** Marks the moment before the irreversible click. Dry runs stop here; real runs write the submit intent. */
   submit(action: string, click: () => Promise<void>): Promise<void>;
+  /**
+   * The saved signature image for a form, or why it can't be used. Opens it only on a real run of a
+   * filing its client approved, unchanged since (src/signatures/apply.ts); a dry run always gets no.
+   */
+  signatureForForm(signatureId: string | undefined, signerName: string): Promise<{ ok: true; png: Buffer } | { ok: false; reason: string }>;
   /** Expected fee lines for this filing (from the approved table). */
   expectedFees: FeeLine[];
   feeCapUsd?: number;

@@ -176,6 +176,46 @@ export interface MessageRecord {
   error?: string;
 }
 
+/**
+ * A tenant API key the tenant issued itself (enterprise self-service). Only the SHA-256 of the
+ * key is stored; the key is shown once, when it is created. Keys from API_KEYS in the
+ * environment keep working alongside these.
+ */
+/** A signer's saved signature for one client company. The image is sealed (src/signatures/sealed.ts). */
+export interface SignatureRecord {
+  id: string;
+  tenantId: string;
+  clientCompanyId: string;
+  signerName: string;
+  signerEmail?: string;
+  /** Who captured it (portal user or API caller), and the consent the signer gave. */
+  capturedBy: string;
+  consentText: string;
+  createdAt: string;
+  revokedAt?: string;
+  lastUsedAt?: string;
+  imageSha256: string;
+  width: number;
+  height: number;
+  /** Encrypted PNG; removed when revoked. Never returned by the API. */
+  sealedImage?: string;
+}
+
+export interface ApiKeyRecord {
+  id: string;
+  tenantId: string;
+  /** The caller's label for the key ("website", "zapier"). */
+  name: string;
+  /** First characters of the key, shown so the owner can tell keys apart. */
+  prefix: string;
+  /** Hex SHA-256 of the full key. */
+  hash: string;
+  createdAt: string;
+  createdBy?: string;
+  revokedAt?: string;
+  lastUsedAt?: string;
+}
+
 export interface WebhookDeliveryRecord {
   id: string;
   event: WebhookEvent;
@@ -233,6 +273,22 @@ export interface Store {
   getClientCompany(id: string): Promise<ClientCompanySettings | null>;
   /** Creates or updates; throws ClientCompanyOwnershipError if the id belongs to another tenant. */
   putClientCompany(c: ClientCompanySettings): Promise<void>;
+  /** A tenant's own client companies (its customer firms). */
+  listClientCompanies(tenantId: string): Promise<ClientCompanySettings[]>;
+  // self-service API keys (hashed)
+  createSignature(s: SignatureRecord): Promise<SignatureRecord>;
+  getSignature(id: string): Promise<SignatureRecord | null>;
+  listSignatures(tenantId: string, clientCompanyId?: string): Promise<SignatureRecord[]>;
+  /** Marks it revoked and deletes the sealed image. False when not found for this tenant. */
+  revokeSignature(tenantId: string, id: string, at: string): Promise<boolean>;
+  touchSignature(id: string, at: string): Promise<void>;
+  createApiKey(k: ApiKeyRecord): Promise<ApiKeyRecord>;
+  listApiKeys(tenantId: string): Promise<ApiKeyRecord[]>;
+  /** The live (not revoked) key with this hash, or null. */
+  findApiKeyByHash(hash: string): Promise<ApiKeyRecord | null>;
+  /** Revokes the tenant's own key; false when no such live key belongs to the tenant. */
+  revokeApiKey(tenantId: string, id: string, at: string): Promise<boolean>;
+  touchApiKey(id: string, at: string): Promise<void>;
   // run leases: the worker running a filing holds and renews one; recovery skips live leases
   /** Takes the filing's lease unless another unexpired one holds it. Returns the lease token, or null. */
   acquireRunLease(filingId: string, workerId: string, ttlMs: number): Promise<string | null>;

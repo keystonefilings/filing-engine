@@ -4,7 +4,7 @@ import path from "node:path";
 import { randomUUID } from "node:crypto";
 import {
   ClientCompanyOwnershipError,
-  type ApprovalRecord, type DriftHaltRecord, type FilingRecord, type MessageRecord, type NameResolutionRecord, type ReviewGateRecord, type RunRecord, type Store, type SubmitIntentRecord, type WebhookDeliveryRecord,
+  type ApiKeyRecord, type SignatureRecord, type ApprovalRecord, type DriftHaltRecord, type FilingRecord, type MessageRecord, type NameResolutionRecord, type ReviewGateRecord, type RunRecord, type Store, type SubmitIntentRecord, type WebhookDeliveryRecord,
 } from "./types.js";
 import type { ClientCompanySettings, TenantSettings } from "../settings/schema.js";
 import type { PageSnapshot } from "../resolver/types.js";
@@ -174,6 +174,53 @@ export class PostgresStore implements Store {
       [c.clientCompanyId, c.tenantId, c],
     );
     if (r.rowCount === 0) throw new ClientCompanyOwnershipError(c.clientCompanyId);
+  }
+  async listClientCompanies(tenantId: string) {
+    return this.docs<ClientCompanySettings>(`select doc from client_companies where tenant_id=$1 order by id`, [tenantId]);
+  }
+
+  async createSignature(r: SignatureRecord) {
+    await this.pool.query(`insert into signatures (id, tenant_id, client_company_id, revoked_at, doc) values ($1,$2,$3,$4,$5)`, [r.id, r.tenantId, r.clientCompanyId, r.revokedAt ?? null, r]);
+    return r;
+  }
+  async getSignature(id: string) {
+    return this.doc<SignatureRecord>(`select doc from signatures where id=$1`, [id]);
+  }
+  async listSignatures(tenantId: string, clientCompanyId?: string) {
+    return clientCompanyId
+      ? this.docs<SignatureRecord>(`select doc from signatures where tenant_id=$1 and client_company_id=$2 order by created_at`, [tenantId, clientCompanyId])
+      : this.docs<SignatureRecord>(`select doc from signatures where tenant_id=$1 order by created_at`, [tenantId]);
+  }
+  async revokeSignature(tenantId: string, id: string, at: string) {
+    const r = await this.pool.query(
+      `update signatures set revoked_at = coalesce(revoked_at, $3::timestamptz),
+         doc = (doc - 'sealedImage') || jsonb_build_object('revokedAt', coalesce(doc->>'revokedAt', $3::text))
+       where id=$1 and tenant_id=$2`, [id, tenantId, at]);
+    return (r.rowCount ?? 0) > 0;
+  }
+  async touchSignature(id: string, at: string) {
+    await this.pool.query(`update signatures set doc = doc || jsonb_build_object('lastUsedAt', $2::text) where id=$1`, [id, at]);
+  }
+  async createApiKey(k: ApiKeyRecord) {
+    await this.pool.query(`insert into tenant_api_keys (id, tenant_id, hash, revoked_at, doc) values ($1,$2,$3,$4,$5)`, [k.id, k.tenantId, k.hash, k.revokedAt ?? null, k]);
+    return k;
+  }
+  async listApiKeys(tenantId: string) {
+    return this.docs<ApiKeyRecord>(`select doc from tenant_api_keys where tenant_id=$1 order by created_at`, [tenantId]);
+  }
+  async findApiKeyByHash(hash: string) {
+    return this.doc<ApiKeyRecord>(`select doc from tenant_api_keys where hash=$1 and revoked_at is null`, [hash]);
+  }
+  async revokeApiKey(tenantId: string, id: string, at: string) {
+    const r = await this.pool.query(
+      `update tenant_api_keys set revoked_at=$3, doc = doc || jsonb_build_object('revokedAt', $3::text)
+       where id=$1 and tenant_id=$2 and revoked_at is null`,
+      [id, tenantId, at],
+    );
+    return r.rowCount === 1;
+  }
+  async touchApiKey(id: string, at: string) {
+    await this.pool.query(`update tenant_api_keys set doc = doc || jsonb_build_object('lastUsedAt', $2::text) where id=$1`, [id, at]);
   }
 
   // Lease expiry uses the database clock, so workers on different machines agree on it.

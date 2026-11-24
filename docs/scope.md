@@ -53,8 +53,10 @@ changes a form, the platform reviews the drift once for every subscriber.
 | Approval links | yes (branded per subscriber) | uses it |
 | Questionnaires as settings, defaults, locks, provenance | yes | uses it |
 | Channel delivery (email, Slack, WhatsApp, SMS) | settings only; delivery module not built | |
-| Subscriber self-service sign-up, users and roles, billing | not built | |
-| Keystone front end for CPAs / title / payroll companies | | not built |
+| Subscriber self-service: API keys, webhooks, usage, firm portals (web/dashboard) | yes (draft); sign-up, users and roles, billing not built | |
+| API docs site (web/docs, OpenAPI) | yes (draft) | uses it |
+| White-label firm portal for CPAs / title / payroll companies (web/p) | | yes (draft); filings are dry runs unless PORTAL_LIVE_FILINGS=true |
+| NY PDF upload filings (DOS-1335-f, DOS-1338-f) with saved signatures | yes (dry run) | uses it |
 
 ## Open naming question
 

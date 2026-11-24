@@ -127,3 +127,27 @@ create table if not exists run_leases (
 );
 -- Dry-run previews are a property of the queued job, never of the approved request.
 alter table jobs add column if not exists dry_run boolean not null default false;
+
+-- Self-service tenant API keys: only the SHA-256 of each key is kept.
+create table if not exists tenant_api_keys (
+  id uuid primary key,
+  tenant_id text not null,
+  hash text not null unique,
+  revoked_at timestamptz,
+  created_at timestamptz not null default now(),
+  doc jsonb not null
+);
+create index if not exists tenant_api_keys_tenant_idx on tenant_api_keys (tenant_id);
+create index if not exists client_companies_tenant_idx on client_companies (tenant_id);
+
+-- Saved signatures for paper-upload forms. The PNG is AES-256-GCM sealed with SIGNATURE_KEY (never in the
+-- database); revoking deletes the sealed image and keeps the record for the audit trail.
+create table if not exists signatures (
+  id uuid primary key,
+  tenant_id text not null,
+  client_company_id text not null,
+  revoked_at timestamptz,
+  created_at timestamptz not null default now(),
+  doc jsonb not null
+);
+create index if not exists signatures_company_idx on signatures (tenant_id, client_company_id);

@@ -215,6 +215,12 @@ export const PayrollOwner = z.object({
   title: z.string().min(1),
   address: Address.optional(),
   percentOwnership: z.number().min(0).max(100).optional(),
+  /** NYS-100 member screen: date of birth, US residency (SSN required when resident), contact, profit share. */
+  dateOfBirth: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional(),
+  usResident: z.boolean().optional(),
+  phone: z.string().min(7).optional(),
+  email: z.string().email().optional(),
+  profitDistributionPercent: z.number().min(0).max(100).optional(),
 });
 
 export const PayrollRegistrationDetails = z.object({
@@ -268,6 +274,76 @@ export const PayrollRegistrationDetails = z.object({
 });
 export type PayrollRegistrationDetails = z.infer<typeof PayrollRegistrationDetails>;
 
+/**
+ * NY filings that go in as a completed PDF through E-Submission (docs/portal-maps/ny-dos-corporations.md,
+ * Screen L). The engine fills the state's own form (assets/forms/ny/) from these fields and uploads it.
+ */
+export const NY_COUNTY_NAMES = [
+  "Albany", "Allegany", "Bronx", "Broome", "Cattaraugus", "Cayuga", "Chautauqua", "Chemung", "Chenango", "Clinton",
+  "Columbia", "Cortland", "Delaware", "Dutchess", "Erie", "Essex", "Franklin", "Fulton", "Genesee", "Greene", "Hamilton",
+  "Herkimer", "Jefferson", "Kings", "Lewis", "Livingston", "Madison", "Monroe", "Montgomery", "Nassau", "New York",
+  "Niagara", "Oneida", "Onondaga", "Ontario", "Orange", "Orleans", "Oswego", "Otsego", "Putnam", "Queens", "Rensselaer",
+  "Richmond", "Rockland", "St. Lawrence", "Saratoga", "Schenectady", "Schoharie", "Schuyler", "Seneca", "Steuben",
+  "Suffolk", "Sullivan", "Tioga", "Tompkins", "Ulster", "Warren", "Washington", "Wayne", "Westchester", "Wyoming", "Yates",
+] as const;
+export const NyCounty = z.enum(NY_COUNTY_NAMES);
+
+/** Filer's name and mailing address, printed on the last page of each form. */
+export const FormFiler = z.object({ name: z.string().min(1), company: z.string().optional(), address: Address });
+
+/** DOS-1335-f: Application for Authority of a foreign business corporation (BCL s.1304). $225. */
+export const NyApplicationForAuthority = z.object({
+  corporateName: z.string().min(1),
+  /** Word or abbreviation added for use in NY when the name lacks a corporate indicator (BCL s.301). */
+  nameAddition: z.string().optional(),
+  /** Only when the true name is not available in NY (BCL s.301/302). */
+  fictitiousName: z.string().optional(),
+  jurisdiction: z.string().min(1),
+  incorporationDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
+  county: NyCounty,
+  /** Where the Secretary of State mails process: a name and an address. */
+  processRecipient: z.object({ name: z.string().min(1), address: Address }),
+  /** SIXTH: no NY activity yet, or the NYS Tax Commission consent is attached. */
+  priorActivity: z.enum(["none_in_new_york", "tax_consent_attached"]),
+  signer: z.object({ name: z.string().min(1), title: z.string().min(1) }),
+  filer: FormFiler,
+});
+
+export const AssumedNameLaw = z.enum(["business_corporation", "limited_liability_company", "religious_corporations", "education", "not_for_profit_corporation", "revised_limited_partnership", "other"]);
+
+/** DOS-1338-f: Certificate of Assumed Name (GBL s.130). $25; corporations add a fee per county. */
+export const NyAssumedName = z.object({
+  /** DOS ID of the existing entity; E-Submission finds the record by it. */
+  dosId: z.string().regex(/^\d{1,10}$/).optional(),
+  realName: z.string().min(1),
+  foreignFictitiousName: z.string().optional(),
+  formedUnder: AssumedNameLaw,
+  otherLaw: z.string().optional(),
+  assumedName: z.string().min(1),
+  /** Principal place of business in NY; or none in NY, with the out-of-state address. */
+  principalPlace: Address,
+  noNyPrincipalPlace: z.boolean().default(false),
+  counties: z.union([z.literal("all"), z.array(NyCounty).min(1)]),
+  /** Each NY place of business (10 fit on the form). */
+  locations: z.array(Address).max(10).default([]),
+  noNyLocation: z.boolean().default(false),
+  signer: z.object({ name: z.string().min(1), capacity: z.enum(["authorized_person", "officer", "general_partner", "member", "manager"]) }),
+  filer: FormFiler,
+});
+
+export const PaperUploadDetails = z.object({
+  form: z.enum(["ny_application_for_authority", "ny_assumed_name"]),
+  applicationForAuthority: NyApplicationForAuthority.optional(),
+  assumedName: NyAssumedName.optional(),
+  /** Saved signature (POST /v1/signatures) drawn onto the form. Applied only on a run of the approved
+   *  filing, never on a dry run; it must belong to the filing's client company and the form's signer. */
+  signatureId: z.string().optional(),
+  levelOfService: z.enum(["routine", "24_hour", "same_day", "2_hour"]).default("routine"),
+  plainCopy: z.boolean().optional(),
+  certifiedCopy: z.boolean().optional(),
+});
+export type PaperUploadDetails = z.infer<typeof PaperUploadDetails>;
+
 export const FilingRequest = z.object({
   tenantId: z.string().min(1),
   clientCompanyId: z.string().min(1),
@@ -277,6 +353,7 @@ export const FilingRequest = z.object({
   formation: FormationDetails.optional(),
   standing: StandingCertificateDetails.optional(),
   payroll: PayrollRegistrationDetails.optional(),
+  paperUpload: PaperUploadDetails.optional(),
   ein: EinRequest.optional(),
   contact: Contact,
   /** The service company's intake answers for this entity (shape: settings/policies.ts FilingIntake). */

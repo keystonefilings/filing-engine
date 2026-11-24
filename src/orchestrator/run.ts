@@ -18,6 +18,7 @@ import type { RegisteredAgentService } from "../registered-agents/service.js";
 import { checkLiveFees, type FeeLine } from "../fees/table.js";
 import type { Vault } from "../settings/vault.js";
 import { labelScore } from "../resolver/match.js";
+import { signatureForApprovedFiling } from "../signatures/apply.js";
 
 export interface RunDeps {
   store: Store;
@@ -369,6 +370,11 @@ export class RunExecutor {
       page, filing: input.filing, tenant: input.tenant, client: input.client, values, dryRun: input.dryRun, credential,
       set: base.set, field: base.field, resolve,
       expectedFees: input.expectedFees, feeCapUsd: input.filing.request.feeCapUsd,
+      signatureForForm: async (signatureId, signerName) => {
+        const d = await signatureForApprovedFiling({ store, filing: input.filing, approval: input.approval, dryRun: input.dryRun, signatureId, signerName });
+        await recorder.record(page, screen.screenKey, d.ok ? `saved signature ${d.signatureId} applied to the form` : `form not signed: ${d.reason}`);
+        return d;
+      },
       clickButton: async (label) => {
         const inventory = await collectInventory(page);
         const buttons = inventory.fields.filter((f) => f.kind === "button" && f.visible && !f.disabled);

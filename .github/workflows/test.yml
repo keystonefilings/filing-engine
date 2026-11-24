@@ -1,0 +1,54 @@
+# Runs on every pull request: the engine's typecheck and full test suite (including the tests that
+# drive a real Chromium against the local fixture sites), and the web app's typecheck, tests and
+# build. Read-only: no secrets, no deploy, nothing leaves the runner.
+name: Tests
+
+on:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: tests-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  engine:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - name: Install Chromium for the browser tests
+        run: npx playwright install --with-deps chromium
+      - run: npm run typecheck
+      - run: npm test
+
+  web:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: web
+    env:
+      # Placeholders so the production build can load; the build never calls the engine.
+      ENGINE_API_URL: http://127.0.0.1:8080
+      PORTAL_SESSION_SECRET: ci-build-only-not-a-real-secret-0123456789
+      NEXT_TELEMETRY_DISABLED: "1"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: web/package-lock.json
+      - run: npm ci
+      - run: npm run typecheck
+      - run: npm test
+      - run: npm run build

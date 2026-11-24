@@ -1,0 +1,38 @@
+import { readClientIntake } from "@/lib/session";
+import { filingKind } from "@/lib/intake/forms";
+import { brandOf, loadCompany, offeredKinds } from "@/lib/firm";
+import { listSignatures } from "@/lib/signatures";
+import { IntakeForm } from "@/components/IntakeForm";
+import { submitClientIntake } from "./actions";
+
+export const metadata = { title: "Your filing" };
+
+export default async function ClientIntakePage({ params }: { params: Promise<{ token: string }> }) {
+  const { token } = await params;
+  const link = readClientIntake(token);
+  if (!link) {
+    return <main className="wrap narrow"><h1>This link has expired or isn&apos;t valid</h1><p>Ask whoever sent it for a new one.</p></main>;
+  }
+  const company = await loadCompany(link.apiKey, link.clientCompanyId);
+  const brand = brandOf(company);
+  const kind = filingKind(link.kind);
+  if (!kind || !offeredKinds(company).some((k) => k.id === kind.id)) {
+    return <main className="wrap narrow"><h1>This filing is no longer offered</h1><p>Contact {brand.name}{brand.supportEmail ? ` at ${brand.supportEmail}` : ""}.</p></main>;
+  }
+  const signed = kind.sections.some((s) => s.items.some((i) => i.kind === "field" && i.type === "signature"));
+  // A client signs fresh: saved signatures belong to the firm's own list, not to whoever holds the link.
+  const consentText = signed ? (await listSignatures(link.apiKey, link.clientCompanyId)).consentText : undefined;
+  return (
+    <div style={{ ["--accent" as string]: brand.color }}>
+      <header className="topbar"><div className="inner"><span className="brand">
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        {brand.logoUrl ? <img src={brand.logoUrl} alt="" /> : null}<span>{brand.name}</span></span></div></header>
+      <main className="wrap narrow stack">
+        <h1>{kind.title}{link.label ? <span className="muted" style={{ fontWeight: 400 }}> · {link.label}</span> : null}</h1>
+        <p className="muted">{kind.summary} After you send this, you&apos;ll get a link to check exactly what will be filed, and nothing is filed until it&apos;s approved.</p>
+        <IntakeForm kind={kind} nonce={link.nonce} action={submitClientIntake.bind(null, token)} submitLabel="Send" consentText={consentText} />
+        {brand.supportEmail ? <p className="small muted">Questions? Email <a href={`mailto:${brand.supportEmail}`}>{brand.supportEmail}</a>.</p> : null}
+      </main>
+    </div>
+  );
+}
