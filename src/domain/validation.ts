@@ -172,6 +172,32 @@ export function validateFiling(req: FilingRequest): ValidationIssue[] {
     }
   }
 
+  if (req.type === "paper_upload") {
+    const u = req.paperUpload;
+    if (req.state !== "NY") err("state", "PDF upload filings are wired for New York only");
+    if (!u) err("paperUpload", "a PDF upload filing needs paperUpload");
+    else if (u.form === "ny_application_for_authority") {
+      const a = u.applicationForAuthority;
+      if (!a) err("paperUpload.applicationForAuthority", "the Application for Authority answers are required");
+      else {
+        if (a.jurisdiction.trim().toLowerCase() === "new york") err("paperUpload.applicationForAuthority.jurisdiction", "an Application for Authority is for a corporation formed outside New York");
+        if (a.incorporationDate > new Date().toISOString().slice(0, 10)) err("paperUpload.applicationForAuthority.incorporationDate", "the incorporation date can't be in the future");
+        warn("paperUpload.applicationForAuthority", "attach a Certificate of Existence or Good Standing from the home jurisdiction, dated within the last 6 months");
+        if (a.priorActivity === "tax_consent_attached") warn("paperUpload.applicationForAuthority.priorActivity", "the NYS Tax Commission consent must be attached to the upload");
+      }
+    } else if (u.form === "ny_assumed_name") {
+      const n = u.assumedName;
+      if (!n) err("paperUpload.assumedName", "the Certificate of Assumed Name answers are required");
+      else {
+        if (n.formedUnder === "other" && !n.otherLaw) err("paperUpload.assumedName.otherLaw", "name the law the entity was formed under");
+        if (!n.noNyLocation && n.locations.length === 0) err("paperUpload.assumedName.locations", "list each NY place of business, or say there is none");
+        if (n.assumedName.trim().toLowerCase() === n.realName.trim().toLowerCase()) err("paperUpload.assumedName.assumedName", "the assumed name must differ from the real name");
+        if (!n.dosId) warn("paperUpload.assumedName.dosId", "E-Submission finds the entity by DOS ID; without it the run searches by the real name");
+      }
+    }
+    if (u && !u.signatureId) warn("paperUpload.signatureId", "no saved signature: the form is uploaded unsigned and DOS may reject it");
+  }
+
   return issues;
 }
 

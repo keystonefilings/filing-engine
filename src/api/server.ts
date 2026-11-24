@@ -1,6 +1,7 @@
 import Fastify, { type FastifyInstance, type FastifyReply } from "fastify";
 import { lookupKey } from "./keys.js";
 import { registerSelfService, tenantFromStoredKey } from "./self-service.js";
+import { registerSignatures } from "./signatures.js";
 import { z } from "zod";
 import type { FilingService } from "../orchestrator/service.js";
 import { ValidationFailed } from "../orchestrator/service.js";
@@ -189,6 +190,7 @@ export function buildServer(deps: ApiDeps): FastifyInstance {
   });
 
   registerSelfService(app, { store: deps.store, tenantOf });
+  registerSignatures(app, { store: deps.store, tenantOf });
 
   // ---- Approval link (client-facing, decision 2) ----
   app.get("/approve/:token", async (req, reply) => {

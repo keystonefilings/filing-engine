@@ -8,6 +8,7 @@ import type { FilingRecord, Store } from "../store/types.js";
 import { ApprovalService } from "../approvals/service.js";
 import { WebhookDispatcher } from "../webhooks/dispatcher.js";
 import { expectedFees, FeeUnknownError, type FeeLine } from "../fees/table.js";
+import { paperUploadFees } from "../fees/paper-upload.js";
 import { adapterFor, irsEinAdapter } from "../adapters/index.js";
 import { preflight, unknownBalanceProvider, type BalanceProvider } from "./preflight.js";
 import type { JobQueue } from "./queue.js";
@@ -77,6 +78,7 @@ export class FilingService {
   feesFor(req: FilingRequestT, tenant: TenantSettings, client: ClientCompanySettings): FeeLine[] {
     if (req.type === "ein_only") return [{ label: "EIN application", amountUsd: 0 }];
     if (req.type === "payroll_registration") return [{ label: `${req.state} payroll / employer registration (no fee)`, amountUsd: 0 }];
+    if (req.type === "paper_upload") return paperUploadFees(req);
     return expectedFees(req.state, req.type, {
       // The method the NJ adapters will pick on the account the run signs in with.
       paymentMethod: req.state === "NJ" ? njAccount(tenant, client).feeMethod : req.state === "MO" ? moAccount(tenant, client).feeMethod : req.state === "FL" ? flAccount(tenant, client).feeMethod : undefined,

@@ -181,6 +181,26 @@ export interface MessageRecord {
  * key is stored; the key is shown once, when it is created. Keys from API_KEYS in the
  * environment keep working alongside these.
  */
+/** A signer's saved signature for one client company. The image is sealed (src/signatures/sealed.ts). */
+export interface SignatureRecord {
+  id: string;
+  tenantId: string;
+  clientCompanyId: string;
+  signerName: string;
+  signerEmail?: string;
+  /** Who captured it (portal user or API caller), and the consent the signer gave. */
+  capturedBy: string;
+  consentText: string;
+  createdAt: string;
+  revokedAt?: string;
+  lastUsedAt?: string;
+  imageSha256: string;
+  width: number;
+  height: number;
+  /** Encrypted PNG; removed when revoked. Never returned by the API. */
+  sealedImage?: string;
+}
+
 export interface ApiKeyRecord {
   id: string;
   tenantId: string;
@@ -256,6 +276,12 @@ export interface Store {
   /** A tenant's own client companies (its customer firms). */
   listClientCompanies(tenantId: string): Promise<ClientCompanySettings[]>;
   // self-service API keys (hashed)
+  createSignature(s: SignatureRecord): Promise<SignatureRecord>;
+  getSignature(id: string): Promise<SignatureRecord | null>;
+  listSignatures(tenantId: string, clientCompanyId?: string): Promise<SignatureRecord[]>;
+  /** Marks it revoked and deletes the sealed image. False when not found for this tenant. */
+  revokeSignature(tenantId: string, id: string, at: string): Promise<boolean>;
+  touchSignature(id: string, at: string): Promise<void>;
   createApiKey(k: ApiKeyRecord): Promise<ApiKeyRecord>;
   listApiKeys(tenantId: string): Promise<ApiKeyRecord[]>;
   /** The live (not revoked) key with this hash, or null. */
