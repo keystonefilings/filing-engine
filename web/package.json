@@ -1,0 +1,26 @@
+{
+  "name": "keystone-filing-web",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "description": "Front end for the Keystone filing engine: API docs, the white-label CPA and payroll portal, and enterprise self-service. Deploys on Vercel (root directory: web).",
+  "scripts": {
+    "dev": "next dev -p 3000",
+    "build": "next build",
+    "start": "next start",
+    "typecheck": "tsc --noEmit",
+    "test": "node --test --experimental-strip-types lib/*.test.ts",
+    "coverage": "node --experimental-strip-types scripts/coverage.ts"
+  },
+  "dependencies": {
+    "next": "15.5.28",
+    "react": "19.1.1",
+    "react-dom": "19.1.1"
+  },
+  "devDependencies": {
+    "@types/node": "22.20.5",
+    "@types/react": "19.1.17",
+    "@types/react-dom": "19.1.9",
+    "typescript": "5.9.3"
+  }
+}
