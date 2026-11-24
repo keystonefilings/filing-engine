@@ -26,6 +26,13 @@ npm test
 ```
 Point the NJ adapter at the replica with `NJ_FORMATION_URL=http://127.0.0.1:4310/nj-formation/welcome.html`.
 
+## Front end (web/)
+A Next.js app for Vercel, separate from the engine: API docs (`/docs`, `/openapi.json`), the white-label firm portal (`/p/<slug>`, client intake links at `/i/<token>`) and the enterprise dashboard (`/dashboard`: API keys, webhooks, usage, firms, filings). It talks to the engine only through the public API. See `web/.env.example`.
+```bash
+cd web && npm install && npm run dev   # :3000
+npm test && npm run typecheck && npx next build
+```
+
 ## Deployment and walks
 - `docs/deploy-fly.md`: Keystone's deployment on Fly.io with a Neon database, Fly object storage and every browser on Steel.
 - `docs/fixed-ip-machine.md`: which portals serve which network, Steel setup and saved sign-ins, and other layouts (a single machine with docker compose); `npm run probe-sites` checks the routes.

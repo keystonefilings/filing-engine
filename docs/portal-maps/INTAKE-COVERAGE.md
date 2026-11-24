@@ -641,3 +641,108 @@ Not covered yet:
 - Only the business-entity registration option is covered; sole proprietorships and partnerships (option 2) and options 3 to 7 are not.
 - The confirmation screen after Complete Registration is not mapped.
 - The engine's NJ payroll adapter does not yet enter the answers kept in payroll.stateAnswers.
+
+## New York Application for Authority (foreign corporation) (`ny-authority`)
+
+Registers a corporation formed in another state to do business in New York (form DOS-1335-f, BCL §1304), uploaded through E-Submission. Walkthrough: [ny-dos-corporations.md](./ny-dos-corporations.md). Engine type `paper_upload`, state `NY`.
+
+Fees: State filing fee $225. Faster handling and copies cost extra.
+
+| Section | Field | Request path | Required | Walkthrough |
+|---|---|---|---|---|
+| The corporation | Corporation's exact name | `paperUpload.applicationForAuthority.corporateName` | yes | DOS-1335-f FIRST |
+| The corporation | Word added for use in New York (if needed) | `paperUpload.applicationForAuthority.nameAddition` |  | DOS-1335-f FIRST (added word) |
+| The corporation | Fictitious name for use in New York (if the real name isn't available) | `paperUpload.applicationForAuthority.fictitiousName` |  | DOS-1335-f FIRST (fictitious name) |
+| The corporation | State or country where it was formed | `paperUpload.applicationForAuthority.jurisdiction` | yes | DOS-1335-f SECOND |
+| The corporation | Date it was formed | `paperUpload.applicationForAuthority.incorporationDate` | yes | DOS-1335-f SECOND |
+| The corporation | County where its New York office will be | `paperUpload.applicationForAuthority.county` | yes | DOS-1335-f THIRD |
+| Service of process | Name process is mailed to | `paperUpload.applicationForAuthority.processRecipient.name` | yes | DOS-1335-f FIFTH |
+| Service of process | Address: street address | `paperUpload.applicationForAuthority.processRecipient.address.street1` | yes | DOS-1335-f FIFTH |
+| Service of process | Address: suite, unit or floor | `paperUpload.applicationForAuthority.processRecipient.address.street2` |  | DOS-1335-f FIFTH |
+| Service of process | Address: city | `paperUpload.applicationForAuthority.processRecipient.address.city` | yes | DOS-1335-f FIFTH |
+| Service of process | Address: state | `paperUpload.applicationForAuthority.processRecipient.address.state` | yes | DOS-1335-f FIFTH |
+| Service of process | Address: ZIP code | `paperUpload.applicationForAuthority.processRecipient.address.zip` | yes | DOS-1335-f FIFTH |
+| Business already done in New York | Has the corporation done business in New York before this application? | `paperUpload.applicationForAuthority.priorActivity` | yes | DOS-1335-f SIXTH |
+| Signature | Signer's name | `paperUpload.applicationForAuthority.signer.name` | yes | DOS-1335-f Name of Signer |
+| Signature | Signer's title | `paperUpload.applicationForAuthority.signer.title` | yes | DOS-1335-f Title of Signer |
+| Signature | Signature | `paperUpload.signatureId` | yes | DOS-1335-f (Signature) |
+| Filer | Filer's name | `paperUpload.applicationForAuthority.filer.name` | yes | Filer box |
+| Filer | Company (if any) | `paperUpload.applicationForAuthority.filer.company` |  | Filer box |
+| Filer | Mailing address: street address | `paperUpload.applicationForAuthority.filer.address.street1` | yes | Filer box |
+| Filer | Mailing address: suite, unit or floor | `paperUpload.applicationForAuthority.filer.address.street2` |  | Filer box |
+| Filer | Mailing address: city | `paperUpload.applicationForAuthority.filer.address.city` | yes | Filer box |
+| Filer | Mailing address: state | `paperUpload.applicationForAuthority.filer.address.state` | yes | Filer box |
+| Filer | Mailing address: ZIP code | `paperUpload.applicationForAuthority.filer.address.zip` | yes | Filer box |
+| Handling and copies | How fast the state handles it | `paperUpload.levelOfService` | yes | Screen L3, Level Of Service |
+| Handling and copies | Plain copy of the filed document (+$5) | `paperUpload.plainCopy` |  | Screen L3, Plain Copy |
+| Handling and copies | Certified copy of the filed document (+$10) | `paperUpload.certifiedCopy` |  | Screen L3, Certified Copy |
+| Filing contact | First name | `contact.firstName` | yes | Screen L3: Email Address |
+| Filing contact | Last name | `contact.lastName` | yes | Screen L3: Email Address |
+| Filing contact | Email | `contact.email` | yes | Screen L3: Email Address |
+| Filing contact | Phone | `contact.phone` | yes | Screen L3: Email Address |
+
+Authorizations the client grants (and confirms again on the approval page):
+
+- **ny-esub-signature** (Form signature line (STOP)): The signer named above authorizes the filing company to place their saved signature on this New York form, only once this filing is approved, and confirms what the form states is true.
+- **ny-esub-payment** (Screen L4: Payment Authorization (STOP)): I authorize the filing company to submit this form to the NY Department of State and pay the fees shown on the approval page.
+
+Not covered yet:
+
+- The Certificate of Existence from the home state is not collected here yet; the engine uploads only the form.
+- E-Submission's route for this form and its payment page are mapped from a recording; the engine runs it as a dry run only.
+
+## New York Certificate of Assumed Name (DBA) (`ny-assumed-name`)
+
+Registers a name the business trades under other than its real name (form DOS-1338-f, GBL §130), uploaded through E-Submission. Walkthrough: [ny-dos-corporations.md](./ny-dos-corporations.md). Engine type `paper_upload`, state `NY`.
+
+Fees: $25 for an LLC or LP. A corporation pays $25 plus $100 for each New York City county and $25 for each other county.
+
+| Section | Field | Request path | Required | Walkthrough |
+|---|---|---|---|---|
+| The business | Real name of the business | `paperUpload.assumedName.realName` | yes | DOS-1338-f 1 |
+| The business | NY DOS ID (if known) | `paperUpload.assumedName.dosId` |  | Screen L2: Entity Selection, DOS ID |
+| The business | Fictitious name it uses in New York (out-of-state businesses only) | `paperUpload.assumedName.foreignFictitiousName` |  | DOS-1338-f 1a |
+| The business | Formed under | `paperUpload.assumedName.formedUnder` | yes | DOS-1338-f 2 |
+| The business | Which law | `paperUpload.assumedName.otherLaw` | when shown | DOS-1338-f 2, Other |
+| Assumed name | The assumed name | `paperUpload.assumedName.assumedName` | yes | DOS-1338-f 3 |
+| Principal place of business | It has no principal place of business in New York | `paperUpload.assumedName.noNyPrincipalPlace` |  | DOS-1338-f 4, check box |
+| Principal place of business | Address: street address | `paperUpload.assumedName.principalPlace.street1` | yes | DOS-1338-f 4 |
+| Principal place of business | Address: suite, unit or floor | `paperUpload.assumedName.principalPlace.street2` |  | DOS-1338-f 4 |
+| Principal place of business | Address: city | `paperUpload.assumedName.principalPlace.city` | yes | DOS-1338-f 4 |
+| Principal place of business | Address: state | `paperUpload.assumedName.principalPlace.state` | yes | DOS-1338-f 4 |
+| Principal place of business | Address: ZIP code | `paperUpload.assumedName.principalPlace.zip` | yes | DOS-1338-f 4 |
+| Counties | Where it will do business under this name | `intake.portal.nyAllCounties` | yes | DOS-1338-f 5, all counties |
+| Counties | County | `paperUpload.assumedName.counties[]` | yes | DOS-1338-f 5 |
+| Places of business in New York | It has no place of business in New York | `paperUpload.assumedName.noNyLocation` |  | DOS-1338-f 6, if none |
+| Places of business in New York | Street address | `paperUpload.assumedName.locations[].street1` | yes | DOS-1338-f 6 |
+| Places of business in New York | Suite, unit or floor | `paperUpload.assumedName.locations[].street2` |  | DOS-1338-f 6 |
+| Places of business in New York | City | `paperUpload.assumedName.locations[].city` | yes | DOS-1338-f 6 |
+| Places of business in New York | State | `paperUpload.assumedName.locations[].state` | yes | DOS-1338-f 6 |
+| Places of business in New York | ZIP code | `paperUpload.assumedName.locations[].zip` | yes | DOS-1338-f 6 |
+| Signature | Signer's name | `paperUpload.assumedName.signer.name` | yes | DOS-1338-f Name of Signer |
+| Signature | Signing as | `paperUpload.assumedName.signer.capacity` | yes | DOS-1338-f Capacity of Signer |
+| Signature | Signature | `paperUpload.signatureId` | yes | DOS-1338-f Signature |
+| Filer | Filer's name | `paperUpload.assumedName.filer.name` | yes | Filer box |
+| Filer | Company (if any) | `paperUpload.assumedName.filer.company` |  | Filer box |
+| Filer | Mailing address: street address | `paperUpload.assumedName.filer.address.street1` | yes | Filer box |
+| Filer | Mailing address: suite, unit or floor | `paperUpload.assumedName.filer.address.street2` |  | Filer box |
+| Filer | Mailing address: city | `paperUpload.assumedName.filer.address.city` | yes | Filer box |
+| Filer | Mailing address: state | `paperUpload.assumedName.filer.address.state` | yes | Filer box |
+| Filer | Mailing address: ZIP code | `paperUpload.assumedName.filer.address.zip` | yes | Filer box |
+| Handling and copies | How fast the state handles it | `paperUpload.levelOfService` | yes | Screen L3, Level Of Service |
+| Handling and copies | Plain copy of the filed document (+$5) | `paperUpload.plainCopy` |  | Screen L3, Plain Copy |
+| Handling and copies | Certified copy of the filed document (+$10) | `paperUpload.certifiedCopy` |  | Screen L3, Certified Copy |
+| Filing contact | First name | `contact.firstName` | yes | Screen L3: Email Address |
+| Filing contact | Last name | `contact.lastName` | yes | Screen L3: Email Address |
+| Filing contact | Email | `contact.email` | yes | Screen L3: Email Address |
+| Filing contact | Phone | `contact.phone` | yes | Screen L3: Email Address |
+
+Authorizations the client grants (and confirms again on the approval page):
+
+- **ny-esub-signature** (Form signature line (STOP)): The signer named above authorizes the filing company to place their saved signature on this New York form, only once this filing is approved, and confirms what the form states is true.
+- **ny-esub-payment** (Screen L4: Payment Authorization (STOP)): I authorize the filing company to submit this form to the NY Department of State and pay the fees shown on the approval page.
+
+Not covered yet:
+
+- E-Submission's entity search results and payment page are mapped from a recording; the engine runs it as a dry run only.
+- Some counties also require the certificate to be published or filed with the county clerk; that is not handled.

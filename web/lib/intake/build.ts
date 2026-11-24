@@ -92,6 +92,36 @@ export function condHolds(c: Cond | undefined, raw: Raw, itemPrefix: string | nu
   return Array.isArray(c.equals) ? c.equals.includes(v) : v === c.equals;
 }
 
+export interface Visibility {
+  /** Whether a showIf holds, counting a controlling field that is itself hidden as empty. */
+  holds: (c: Cond | undefined, itemPrefix?: string | null) => boolean;
+  /** Top-level field paths that are shown. */
+  top: Set<string>;
+}
+
+/**
+ * Works out which fields are shown. A field hidden by its own condition counts as empty for the
+ * fields it controls, so closing a branch closes everything under it (the agent's name fields
+ * close when the filing company provides the agent, even though "a person" is still picked).
+ * Controllers come before the fields they control, so one pass in order is enough.
+ */
+export function visibility(kind: FilingKind, raw: Raw): Visibility {
+  const known = new Set<string>();
+  for (const s of kind.sections) for (const it of s.items) if (it.kind === "field") known.add(it.path);
+  const top = new Set<string>();
+  const holds = (c: Cond | undefined, itemPrefix: string | null = null): boolean => {
+    if (!c) return true;
+    const path = condPath(c, itemPrefix);
+    const v = known.has(path) && !top.has(path) ? "" : (raw[path] ?? "").trim();
+    return Array.isArray(c.equals) ? c.equals.includes(v) : v === c.equals;
+  };
+  for (const s of kind.sections) {
+    if (!holds(s.showIf)) continue;
+    for (const it of s.items) if (it.kind === "field" && holds(it.showIf)) top.add(it.path);
+  }
+  return { holds, top };
+}
+
 /** Group item indexes present in the form, in order. */
 export function groupIndexes(g: Group, raw: Raw): number[] {
   const re = new RegExp(`^${g.path.replace(/\./g, "\\.")}\\.(\\d+)(?:\\.|$)`);
@@ -168,10 +198,11 @@ interface Visible { field: Field; name: string; itemPrefix: string | null; targe
 
 function visibleFields(kind: FilingKind, raw: Raw, issues: BuildIssue[]): Visible[] {
   const out: Visible[] = [];
+  const vis = visibility(kind, raw);
   const walk = (items: Item[], itemPrefix: string | null) => {
     for (const it of items) {
       if (it.kind === "note") continue;
-      if (!condHolds(it.showIf, raw, itemPrefix)) continue;
+      if (it.kind === "field" ? !vis.top.has(it.path) : !vis.holds(it.showIf, itemPrefix)) continue;
       if (it.kind === "field") { out.push({ field: it, name: it.path, itemPrefix }); continue; }
       const idx = groupIndexes(it, raw).filter((i) => it.fields.some((gf) => gf.kind === "field" && !isEmpty(gf, raw[fieldName(`${it.path}.${i}`, gf)])));
       if (idx.length < it.min) issues.push({ path: it.path, message: `${it.label}: add at least ${it.min}` });
@@ -179,7 +210,7 @@ function visibleFields(kind: FilingKind, raw: Raw, issues: BuildIssue[]): Visibl
       idx.slice(0, it.max).forEach((i, n) => {
         const prefix = `${it.path}.${i}`;
         for (const gf of it.fields) {
-          if (gf.kind !== "field" || !condHolds(gf.showIf, raw, prefix)) continue;
+          if (gf.kind !== "field" || !vis.holds(gf.showIf, prefix)) continue;
           // Re-index so the request has no holes: members.0, members.1, ...
           const target = gf.path.startsWith("stateAnswers_")
             ? stateAnswersPath(it.path, n, gf.path.slice("stateAnswers_".length))
@@ -189,7 +220,7 @@ function visibleFields(kind: FilingKind, raw: Raw, issues: BuildIssue[]): Visibl
       });
     }
   };
-  for (const s of kind.sections) if (condHolds(s.showIf, raw)) walk(s.items, null);
+  for (const s of kind.sections) if (vis.holds(s.showIf)) walk(s.items, null);
   return out;
 }
 
@@ -269,6 +300,9 @@ function postProcess(kind: FilingKind, r: Record<string, unknown>, raw: Raw): vo
 
   const payroll = r.payroll as Record<string, unknown> | undefined;
   if (payroll && raw["intake.portal.booksSameAsBusiness"] === "on" && payroll.businessAddress) payroll.booksRecordsAddress = payroll.businessAddress;
+
+  const assumed = (r.paperUpload as { assumedName?: Record<string, unknown> } | undefined)?.assumedName;
+  if (assumed && raw["intake.portal.nyAllCounties"] === "all") assumed.counties = "all";
 }
 
 /** Every field path a kind can produce, for the coverage table and tests. */

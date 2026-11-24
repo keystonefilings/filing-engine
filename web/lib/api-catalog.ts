@@ -8,7 +8,7 @@ export interface Endpoint {
   id: string;
   method: "GET" | "POST" | "PUT" | "DELETE";
   path: string;
-  group: "Filings" | "Client companies" | "Account" | "API keys" | "Webhooks" | "Usage" | "Approvals";
+  group: "Filings" | "Client companies" | "Account" | "API keys" | "Webhooks" | "Usage" | "Approvals" | "Signatures";
   summary: string;
   description?: string;
   auth: "api_key" | "none";
@@ -156,6 +156,26 @@ export const ENDPOINTS: Endpoint[] = [
     summary: "Usage for your tenant",
     description: "Filing counts by status, type, state, client company and month; webhook deliveries by status; API key counts.",
     responses: [{ status: 200, description: "Usage.", example: { tenantId: "your-tenant", filings: { total: 12, live: 3, byStatus: { completed: 9, awaiting_approval: 3 }, byMonth: { "2026-11": 12 } }, webhooks: { delivered: 40, failed: 1 }, apiKeys: { live: 2, revoked: 1 } } }],
+  },
+  {
+    id: "list-signatures", method: "GET", path: "/v1/signatures", group: "Signatures", auth: "api_key",
+    summary: "Saved signatures for a client company",
+    query: [{ name: "clientCompanyId", description: "Required. The company whose signatures to list." }],
+    responses: [{ status: 200, description: "Signatures (never the image) and the consent text a new one must carry.", example: { consentText: "I adopt this image as my signature. …", signatures: [{ id: "sig_01J…", clientCompanyId: "acme-cpa", signerName: "Jordan Signer", createdAt: "2026-11-24T15:02:11.000Z", active: true }] } }],
+  },
+  {
+    id: "create-signature", method: "POST", path: "/v1/signatures", group: "Signatures", auth: "api_key",
+    summary: "Save a signer's signature",
+    description: "A PNG of the signer's drawn signature, with the exact consent text from GET /v1/signatures and consented: true. The image is encrypted at rest and never returned. It is placed on a state form only for a filing the client approved, unchanged since approval, signed by the same named person, and never on a dry run. Up to 10 live signatures per company.",
+    body: "clientCompanyId, signerName, signerEmail?, image (PNG data URL or base64), consentText, consented: true",
+    bodyExample: { clientCompanyId: "acme-cpa", signerName: "Jordan Signer", image: "data:image/png;base64,iVBORw0KGgo…", consentText: "I adopt this image as my signature. …", consented: true },
+    responses: [{ status: 201, description: "The saved signature, without the image." }, { status: 422, description: "Not a PNG of a sensible size, or the consent text doesn't match." }, { status: 503, description: "Signature storage isn't set up on this deployment." }],
+  },
+  {
+    id: "revoke-signature", method: "DELETE", path: "/v1/signatures/{id}", group: "Signatures", auth: "api_key",
+    summary: "Revoke a saved signature",
+    description: "Deletes the stored image. Filings that name it can no longer be signed with it.",
+    responses: [{ status: 200, description: "Revoked." }, { status: 404, description: "No such signature for your tenant." }],
   },
   {
     id: "approval-page", method: "GET", path: "/approve/{token}", group: "Approvals", auth: "none",

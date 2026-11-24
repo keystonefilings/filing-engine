@@ -108,3 +108,42 @@ test("sealed tokens round-trip, are purpose-bound and expire", () => {
   assert.equal(unseal("client-intake", t, "y".repeat(40)), null);
   assert.equal(unseal("client-intake", seal("client-intake", {}, -1, s), s), null);
 });
+
+test("a hidden controller closes the fields under it", () => {
+  const r = buildRequest(filingKind("fl-llc")!, {
+    "formation.registeredAgentChoice": "filing_company", "intake.portal.flAgentKind": "individual", "intake.portal.flAgentFirstName": "Ana",
+  }, ctx);
+  assert.equal((r.request.intake as any).portal.flAgentFirstName, undefined);
+  assert.ok(!r.issues.some((i) => i.path === "intake.portal.flAgentLastName"));
+});
+
+test("NY Certificate of Assumed Name builds a paper upload with counties and locations", () => {
+  const AN = "paperUpload.assumedName";
+  const base: Raw = {
+    [`${AN}.realName`]: "Blue Harbor Inc.", [`${AN}.formedUnder`]: "business_corporation", [`${AN}.assumedName`]: "Blue Harbor Bakery",
+    ...addr(`${AN}.principalPlace`), "intake.portal.nyAllCounties": "some",
+    [`${AN}.counties.0`]: "Albany", [`${AN}.counties.3`]: "Kings",
+    ...addr(`${AN}.locations.2`), [`${AN}.signer.name`]: "Jordan Lee", [`${AN}.signer.capacity`]: "officer",
+    "paperUpload.signatureId": "sig-1", [`${AN}.filer.name`]: "Pat Lee", ...addr(`${AN}.filer.address`),
+    "paperUpload.levelOfService": "routine", ...contact, ...auths("ny-assumed-name"),
+  };
+  const { request, issues } = buildRequest(filingKind("ny-assumed-name")!, base, ctx);
+  assert.deepEqual(issues, []);
+  assert.equal(request.type, "paper_upload");
+  const u = request.paperUpload as Record<string, any>;
+  assert.equal(u.form, "ny_assumed_name");
+  assert.equal(u.signatureId, "sig-1");
+  assert.deepEqual(u.assumedName.counties, ["Albany", "Kings"]);
+  assert.equal(u.assumedName.locations.length, 1);
+  assert.equal(u.assumedName.locations[0].zip, "12207");
+
+  const all = buildRequest(filingKind("ny-assumed-name")!, { ...base, "intake.portal.nyAllCounties": "all" }, ctx);
+  assert.equal((all.request.paperUpload as any).assumedName.counties, "all");
+});
+
+test("NY Application for Authority needs a signature and the signer", () => {
+  const { issues } = buildRequest(filingKind("ny-authority")!, { ...contact, ...auths("ny-authority") }, ctx);
+  const paths = issues.map((i) => i.path);
+  assert.ok(paths.includes("paperUpload.signatureId"));
+  assert.ok(paths.includes("paperUpload.applicationForAuthority.signer.name"));
+});

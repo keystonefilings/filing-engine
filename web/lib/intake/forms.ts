@@ -16,7 +16,9 @@
 
 export type FieldType =
   | "text" | "email" | "tel" | "textarea" | "select" | "radio" | "yesno" | "checkbox"
-  | "date" | "month" | "number" | "ssn" | "fein" | "zip" | "usState";
+  | "date" | "month" | "number" | "ssn" | "fein" | "zip" | "usState"
+  /** A saved signature's id: pick one, or draw a new one (saved with the signer's consent). */
+  | "signature";
 
 /** Shown when the value at `path` equals one of `equals` (a path starting with "." is a sibling in the same group item). */
 export interface Cond { path: string; equals: string | string[] }
@@ -40,6 +42,8 @@ export interface Field {
   ref?: string;
   /** Turns the form value into the engine's shape. */
   transform?: "monthToDate";
+  /** For a signature field: the path of the signer's name, which a saved signature must match. */
+  signerPath?: string;
 }
 
 export interface Group {
@@ -69,7 +73,7 @@ export interface FilingKind {
   title: string;
   summary: string;
   /** Engine request type and state. */
-  type: "formation" | "ein_only" | "payroll_registration" | "standing_certificate";
+  type: "formation" | "ein_only" | "payroll_registration" | "standing_certificate" | "paper_upload";
   state: "NY" | "NJ" | "FL" | "MO";
   /** Fixed values written into the request. */
   constants: Record<string, unknown>;
@@ -877,7 +881,188 @@ const njReg: FilingKind = {
   ],
 };
 
-export const FILING_KINDS: FilingKind[] = [nyLlc, njLlc, flLlc, flCorp, flLp, irsEin, nyNys100, njReg];
+
+// ---------------------------------------------------------------- NY forms uploaded through E-Submission
+
+const NY_LEVELS = lv([["routine", "Routine (no extra fee)"], ["24_hour", "24 hour (+$25)"], ["same_day", "Same day (+$75)"], ["2_hour", "2 hour (+$150)"]]);
+
+function deliverySection(): Section {
+  return {
+    title: "Handling and copies",
+    ref: "Screen L3: Filing Information, Additional Services",
+    items: [
+      f("paperUpload.levelOfService", "How fast the state handles it", "radio", { required: true, defaultValue: "routine", options: NY_LEVELS, ref: "Screen L3, Level Of Service" }),
+      f("paperUpload.plainCopy", "Plain copy of the filed document (+$5)", "checkbox", { ref: "Screen L3, Plain Copy" }),
+      f("paperUpload.certifiedCopy", "Certified copy of the filed document (+$10)", "checkbox", { ref: "Screen L3, Certified Copy" }),
+    ],
+  };
+}
+
+function filerSection(base: string): Section {
+  return {
+    title: "Filer",
+    help: "Printed at the end of the form: who the state mails the filing receipt to.",
+    items: [
+      f(`${base}.filer.name`, "Filer's name", "text", { required: true, ref: "Filer box" }),
+      f(`${base}.filer.company`, "Company (if any)", "text", { ref: "Filer box" }),
+      ...address(`${base}.filer.address`, "Mailing address", { required: true, ref: "Filer box" }),
+    ],
+  };
+}
+
+const esubSign: Authorization = {
+  id: "ny-esub-signature",
+  ref: "Form signature line (STOP)",
+  text: "The signer named above authorizes the filing company to place their saved signature on this New York form, only once this filing is approved, and confirms what the form states is true.",
+};
+const esubPay: Authorization = {
+  id: "ny-esub-payment",
+  ref: "Screen L4: Payment Authorization (STOP)",
+  text: "I authorize the filing company to submit this form to the NY Department of State and pay the fees shown on the approval page.",
+};
+
+const AU = "paperUpload.applicationForAuthority";
+
+const nyAuthority: FilingKind = {
+  id: "ny-authority",
+  title: "New York Application for Authority (foreign corporation)",
+  summary: "Registers a corporation formed in another state to do business in New York (form DOS-1335-f, BCL §1304), uploaded through E-Submission.",
+  type: "paper_upload",
+  state: "NY",
+  constants: { paperUpload: { form: "ny_application_for_authority" } },
+  map: NY_DOS,
+  feeNote: "State filing fee $225. Faster handling and copies cost extra.",
+  sections: [
+    {
+      title: "The corporation",
+      ref: "DOS-1335-f, paragraphs FIRST to FOURTH",
+      items: [
+        f(`${AU}.corporateName`, "Corporation's exact name", "text", { required: true, help: "As on its formation documents in its home state.", ref: "DOS-1335-f FIRST" }),
+        f(`${AU}.nameAddition`, "Word added for use in New York (if needed)", "text", { help: "Only if the name lacks Corporation, Incorporated, Limited or an abbreviation, e.g. \"Inc.\"", ref: "DOS-1335-f FIRST (added word)" }),
+        f(`${AU}.fictitiousName`, "Fictitious name for use in New York (if the real name isn't available)", "text", { ref: "DOS-1335-f FIRST (fictitious name)" }),
+        f(`${AU}.jurisdiction`, "State or country where it was formed", "text", { required: true, ref: "DOS-1335-f SECOND" }),
+        f(`${AU}.incorporationDate`, "Date it was formed", "date", { required: true, ref: "DOS-1335-f SECOND" }),
+        f(`${AU}.county`, "County where its New York office will be", "select", { required: true, options: opts(...NY_COUNTIES), ref: "DOS-1335-f THIRD" }),
+      ],
+    },
+    {
+      title: "Service of process",
+      help: "The Secretary of State is the corporation's agent for service of process and mails any process it receives to this name and address.",
+      ref: "DOS-1335-f FIFTH",
+      items: [
+        f(`${AU}.processRecipient.name`, "Name process is mailed to", "text", { required: true, ref: "DOS-1335-f FIFTH" }),
+        ...address(`${AU}.processRecipient.address`, "Address", { required: true, ref: "DOS-1335-f FIFTH" }),
+      ],
+    },
+    {
+      title: "Business already done in New York",
+      ref: "DOS-1335-f SIXTH",
+      items: [
+        f(`${AU}.priorActivity`, "Has the corporation done business in New York before this application?", "radio", { required: true, options: lv([["none_in_new_york", "No, it hasn't done business in New York yet"], ["tax_consent_attached", "Yes, and the NYS Tax Commission's consent is attached"]]), ref: "DOS-1335-f SIXTH" }),
+        { kind: "note", text: "The state also needs a Certificate of Existence (good standing) from the home state, dated within the last 6 months. Send it to the filing company; it is uploaded with the form.", },
+      ],
+    },
+    {
+      title: "Signature",
+      ref: "DOS-1335-f signature block",
+      items: [
+        f(`${AU}.signer.name`, "Signer's name", "text", { required: true, help: "An officer or director of the corporation.", ref: "DOS-1335-f Name of Signer" }),
+        f(`${AU}.signer.title`, "Signer's title", "text", { required: true, ref: "DOS-1335-f Title of Signer" }),
+        f("paperUpload.signatureId", "Signature", "signature", { required: true, signerPath: `${AU}.signer.name`, ref: "DOS-1335-f (Signature)" }),
+      ],
+    },
+    filerSection(AU),
+    deliverySection(),
+    contactSection("Screen L3: Email Address"),
+  ],
+  authorizations: [esubSign, esubPay],
+  gaps: [
+    "The Certificate of Existence from the home state is not collected here yet; the engine uploads only the form.",
+    "E-Submission's route for this form and its payment page are mapped from a recording; the engine runs it as a dry run only.",
+  ],
+};
+
+const AN = "paperUpload.assumedName";
+
+const nyAssumedName: FilingKind = {
+  id: "ny-assumed-name",
+  title: "New York Certificate of Assumed Name (DBA)",
+  summary: "Registers a name the business trades under other than its real name (form DOS-1338-f, GBL §130), uploaded through E-Submission.",
+  type: "paper_upload",
+  state: "NY",
+  constants: { paperUpload: { form: "ny_assumed_name" } },
+  map: NY_DOS,
+  feeNote: "$25 for an LLC or LP. A corporation pays $25 plus $100 for each New York City county and $25 for each other county.",
+  sections: [
+    {
+      title: "The business",
+      ref: "DOS-1338-f paragraphs 1 and 2",
+      items: [
+        f(`${AN}.realName`, "Real name of the business", "text", { required: true, ref: "DOS-1338-f 1" }),
+        f(`${AN}.dosId`, "NY DOS ID (if known)", "text", { help: "On the state's entity search; it lets the filing find the business exactly.", maxLength: 10, ref: "Screen L2: Entity Selection, DOS ID" }),
+        f(`${AN}.foreignFictitiousName`, "Fictitious name it uses in New York (out-of-state businesses only)", "text", { ref: "DOS-1338-f 1a" }),
+        f(`${AN}.formedUnder`, "Formed under", "select", { required: true, options: lv([["limited_liability_company", "Limited Liability Company Law"], ["business_corporation", "Business Corporation Law"], ["not_for_profit_corporation", "Not-for-Profit Corporation Law"], ["revised_limited_partnership", "Revised Limited Partnership Act"], ["religious_corporations", "Religious Corporations Law"], ["education", "Education Law"], ["other", "Another law"]]), ref: "DOS-1338-f 2" }),
+        f(`${AN}.otherLaw`, "Which law", "text", { required: true, showIf: { path: `${AN}.formedUnder`, equals: "other" }, ref: "DOS-1338-f 2, Other" }),
+      ],
+    },
+    {
+      title: "Assumed name",
+      ref: "DOS-1338-f 3",
+      items: [f(`${AN}.assumedName`, "The assumed name", "text", { required: true, ref: "DOS-1338-f 3" })],
+    },
+    {
+      title: "Principal place of business",
+      ref: "DOS-1338-f 4",
+      items: [
+        f(`${AN}.noNyPrincipalPlace`, "It has no principal place of business in New York", "checkbox", { help: "Then give its address outside New York below.", ref: "DOS-1338-f 4, check box" }),
+        ...address(`${AN}.principalPlace`, "Address", { required: true, noPoBox: true, ref: "DOS-1338-f 4" }),
+      ],
+    },
+    {
+      title: "Counties",
+      ref: "DOS-1338-f 5",
+      items: [
+        f("intake.portal.nyAllCounties", "Where it will do business under this name", "radio", { required: true, defaultValue: "some", options: lv([["all", "Every county in New York"], ["some", "Only certain counties"]]), help: "For a corporation each county adds a fee: $100 in New York City, $25 elsewhere.", ref: "DOS-1338-f 5, all counties" }),
+        { kind: "group", path: `${AN}.counties`, label: "Counties", itemLabel: "County", min: 1, max: 62, showIf: { path: "intake.portal.nyAllCounties", equals: "some" }, ref: "DOS-1338-f 5",
+          fields: [f("", "County", "select", { required: true, options: opts(...NY_COUNTIES), ref: "DOS-1338-f 5" })] },
+      ],
+    },
+    {
+      title: "Places of business in New York",
+      ref: "DOS-1338-f 6",
+      items: [
+        f(`${AN}.noNyLocation`, "It has no place of business in New York", "checkbox", { ref: "DOS-1338-f 6, if none" }),
+        { kind: "group", path: `${AN}.locations`, label: "Each place it does business under this name", itemLabel: "Location", min: 0, max: 10, help: "Street address of each location in New York (up to 10).", ref: "DOS-1338-f 6",
+          fields: [
+            f("street1", "Street address", "text", { required: true, ref: "DOS-1338-f 6" }),
+            f("street2", "Suite, unit or floor", "text", { ref: "DOS-1338-f 6" }),
+            f("city", "City", "text", { required: true, ref: "DOS-1338-f 6" }),
+            f("state", "State", "usState", { required: true, defaultValue: "NY", ref: "DOS-1338-f 6" }),
+            f("zip", "ZIP code", "zip", { required: true, ref: "DOS-1338-f 6" }),
+          ] },
+      ],
+    },
+    {
+      title: "Signature",
+      ref: "DOS-1338-f signature block",
+      items: [
+        f(`${AN}.signer.name`, "Signer's name", "text", { required: true, ref: "DOS-1338-f Name of Signer" }),
+        f(`${AN}.signer.capacity`, "Signing as", "radio", { required: true, options: lv([["authorized_person", "Authorized person"], ["officer", "Officer of the corporation"], ["general_partner", "General partner of the limited partnership"], ["member", "Member of the LLC"], ["manager", "Manager of the LLC"]]), ref: "DOS-1338-f Capacity of Signer" }),
+        f("paperUpload.signatureId", "Signature", "signature", { required: true, signerPath: `${AN}.signer.name`, ref: "DOS-1338-f Signature" }),
+      ],
+    },
+    filerSection(AN),
+    deliverySection(),
+    contactSection("Screen L3: Email Address"),
+  ],
+  authorizations: [esubSign, esubPay],
+  gaps: [
+    "E-Submission's entity search results and payment page are mapped from a recording; the engine runs it as a dry run only.",
+    "Some counties also require the certificate to be published or filed with the county clerk; that is not handled.",
+  ],
+};
+
+export const FILING_KINDS: FilingKind[] = [nyLlc, njLlc, flLlc, flCorp, flLp, irsEin, nyNys100, njReg, nyAuthority, nyAssumedName];
 
 export function filingKind(id: string): FilingKind | undefined {
   return FILING_KINDS.find((k) => k.id === id);

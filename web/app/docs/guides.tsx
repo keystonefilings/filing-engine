@@ -153,6 +153,25 @@ export function verify(secret, header, rawBody, toleranceSec = 300) {
     ),
   },
   {
+    slug: "signatures",
+    title: "Saved signatures and PDF uploads",
+    summary: "New York filings that upload the state's own PDF, signed with the signer's saved signature.",
+    body: () => (
+      <>
+        <p>Some New York filings go through DOS E-Submission as an uploaded PDF: the Application for Authority of a foreign business corporation (DOS-1335-f) and the Certificate of Assumed Name (DOS-1338-f). Send them as <code>type: &quot;paper_upload&quot;</code> with <code>state: &quot;NY&quot;</code> and the form&apos;s answers under <code>paperUpload</code>. The engine fills the state&apos;s form, flattens it, signs it and uploads it.</p>
+        <h2>The signature</h2>
+        <ol>
+          <li>The signer draws their signature once, in the portal or your own app, and adopts it by accepting the consent text from <code>GET /v1/signatures</code>.</li>
+          <li>Save it with <code>POST /v1/signatures</code>. The image is encrypted and never returned; you get its <code>id</code>.</li>
+          <li>Put that id in <code>paperUpload.signatureId</code>. The signer named on the form must be the person who saved it.</li>
+        </ol>
+        <p>The engine places the signature on the form only during a live run of a filing the client approved, and only if the filing is unchanged since that approval. A dry run uploads an unsigned copy marked as not for filing. A live run that can&apos;t sign stops before uploading. Revoke a signature with <code>DELETE /v1/signatures/{"{id}"}</code>.</p>
+        <h2>Fees</h2>
+        <p>Application for Authority is $225. A Certificate of Assumed Name is $25, plus, for a corporation, $100 for each New York City county and $25 for each other county. Expedited handling and copies are added.</p>
+      </>
+    ),
+  },
+  {
     slug: "portal",
     title: "White-label firm portal",
     summary: "Give a CPA or payroll firm its own branded filing portal.",

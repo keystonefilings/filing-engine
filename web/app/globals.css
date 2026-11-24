@@ -96,3 +96,8 @@ legend { font-weight: 700; padding: 0 6px; }
   .docs aside nav { position: static; flex-direction: row; flex-wrap: wrap; }
   .docs aside .navhead { width: 100%; margin: 6px 8px 0; }
 }
+
+/* Signature pad: always a light "paper" so the ink reads in dark mode too. */
+.sigpad canvas { display: block; width: 100%; max-width: 520px; height: 150px; background: #fff; border: 1px dashed var(--border); border-radius: 8px; cursor: crosshair; }
+.sigpad .row { max-width: 520px; justify-content: space-between; margin-top: 6px; }
+.consent { background: var(--surface-2, var(--surface)); border: 1px solid var(--border); border-radius: 8px; padding: 10px 12px; font-size: 0.9rem; }
