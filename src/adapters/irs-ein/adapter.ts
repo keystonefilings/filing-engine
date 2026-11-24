@@ -1,24 +1,31 @@
 import { readDownload } from "../../browser/harness.js";
 import type { ScreenStep, SiteAdapter, StepContext } from "../types.js";
+import type { ScreenIntents } from "../../resolver/types.js";
 import { IRS_ACTIVITY_CATEGORIES, IRS_SCREENS, IRS_START } from "./intents.js";
 import { stateName } from "../../domain/usStates.js";
 
 /**
- * IRS EIN Assistant (sa.www4.irs.gov/applyein), domestic LLC route, built from Keystone's
- * live owner-route walk through Review and Submit (docs/walks/ny-irs-2026-11-18.md).
+ * IRS EIN Assistant (sa.www4.irs.gov/applyein), domestic LLC route, built to the portal map
+ * of 2026-11-24 (docs/portal-maps/irs-ein-online.md, walked to "Submit EIN Request") and the
+ * owner-route walk of 2026-11-18 (docs/walks/ny-irs-2026-11-18.md).
  *
- * Screens: (start) -> Legal Structure -> LLC members -> Reason -> Identity -> (designee) ->
- * Addresses -> Additional Details -> regulated activities -> employees -> business activity ->
- * Review and Submit -> EIN Assignment. "Submit EIN Request" is the irreversible click: a dry
- * run stops there, a real run records a submit intent first and needs an approval.
+ * Pages: (Before You Begin) -> Legal Structure -> Identity -> (designee) -> Addresses ->
+ * Additional Details -> business activity -> Review & Submit -> EIN Assignment. Two pages build
+ * themselves as they are answered: Legal Structure reveals the member count and physical state
+ * after "LLC", then the reason; Additional Details reveals the employee questions after Yes to
+ * W-2 employees. Those parts are filled after they appear, with no Continue between them (a
+ * Continue with a part unanswered gets "Selection is required"). "Submit EIN Request" is the
+ * irreversible click: a dry run stops there, a real run records a submit intent first and needs
+ * an approval.
  *
  * The SSN/ITIN goes only into the Identity field. Identity and Review are sensitive screens:
  * screenshots are masked and DOM snapshots stripped (browser/recorder.ts), and nothing here
  * notes or logs the number.
  *
- * complete:false — dry runs only, until a run from a network the IRS serves verifies the live
- * labels, the third-party designee branch, the address-suggestion dialog and the assignment /
- * CP 575 download screen (this container's network is refused by the IRS).
+ * complete:false — dry runs only, until a supervised dry run on the live site (through Steel,
+ * whose network the IRS serves) confirms the labels and how the pages reveal their questions.
+ * Not mapped yet: the third-party designee branch, the separate mailing block, the address-
+ * suggestion dialog, Other > Consulting's follow-ups, and the EIN Assignment / CP 575 screen.
  */
 
 const CONTINUE = /^(continue|next)\b/i;
@@ -31,7 +38,7 @@ const REASON_LABEL = {
   purchased_business: "Purchased active business",
 } as const;
 const ROLE_LABEL = {
-  owner: "I am the owner, member, or managing member",
+  owner: "I am one of the owners, members, or the managing member of this LLC.",
   third_party_designee: "I am a third party applying for an EIN on behalf of this LLC",
 } as const;
 const NAME_SUFFIXES = new Set(["DDS", "MD", "PHD", "JR", "SR", "I", "II", "III", "IV", "V", "VI"]);
@@ -78,6 +85,33 @@ async function setMonth(set: StepContext["set"], key: string, month: number) {
   try { await set(key, MONTHS[month - 1]!); } catch { await set(key, String(month).padStart(2, "0")); }
 }
 
+/** One page's questions, matched together so a revealed question never takes another's field. */
+const onePage = (base: ScreenIntents, ...parts: ScreenIntents[]): ScreenIntents => ({ ...base, intents: [base, ...parts].flatMap((p) => p.intents) });
+const LEGAL_STRUCTURE_PAGE = onePage(IRS_SCREENS.legalStructure, IRS_SCREENS.llcMembers, IRS_SCREENS.reason);
+/** Everything on Additional Details at load: the LLC and the five Yes/No questions. */
+const DETAILS_PAGE = onePage(IRS_SCREENS.details, IRS_SCREENS.regulatory);
+
+/**
+ * Waits (bounded) for questions the page reveals after an answer, then returns the page
+ * resolved fresh. A question that never appears stops the run here, before anything is sent.
+ */
+async function whenShown(ctx: StepContext, screen: ScreenIntents, keys: string[], after: string, timeoutMs = 15_000) {
+  for (let waited = 0; ; waited += 500) {
+    const r = await ctx.resolve(screen);
+    if (keys.every((k) => r.field(k)?.visible)) return r;
+    if (waited >= timeoutMs) throw new Error(`${screen.title}: ${keys.join(", ")} did not appear after ${after}`);
+    await ctx.page.waitForTimeout(500);
+  }
+}
+
+/** The page may raise an information box after an answer (what an LLC is; single-member LLC). */
+async function acknowledgeInfo(ctx: StepContext) {
+  const box = ctx.page.locator('[role="dialog"]:visible, [role="alertdialog"]:visible').first();
+  if (!(await box.count())) return; // shown inline: nothing to press
+  const ok = box.getByRole("button", { name: /^(continue|ok|close|got it|i understand)$/i }).first();
+  if (await ok.count()) { await ok.click(); await ctx.note("acknowledged an information box"); }
+}
+
 /** The LLC's start date: the stated one; for an in-run EIN on a new filing, the effective date or the run date. */
 function startDate(ctx: StepContext): { month: number; year: number } {
   const e = einReq(ctx);
@@ -101,34 +135,25 @@ const start: ScreenStep = {
 };
 
 const legalStructure: ScreenStep = {
-  screen: IRS_SCREENS.legalStructure,
+  screen: IRS_SCREENS.legalStructure, // at load only the structure question shows
   async fill(ctx) {
     const f = entity(ctx);
+    const e = einReq(ctx);
     if (f.floridaEntityType && f.floridaEntityType !== "llc") {
       throw new Error("the IRS adapter maps the LLC route only; corporation and partnership branches are not walked yet");
     }
     await ctx.set("legalStructure", "Limited Liability Company (LLC)");
-  },
-  async advance(ctx) { await ctx.clickButton(CONTINUE); },
-};
-
-const llcMembers: ScreenStep = {
-  screen: IRS_SCREENS.llcMembers,
-  async fill(ctx) {
-    const e = einReq(ctx);
-    const f = entity(ctx);
-    await ctx.set("memberCount", String(e.memberCount ?? Math.max(1, f.members.length)));
+    await acknowledgeInfo(ctx);
+    const members = await whenShown(ctx, LEGAL_STRUCTURE_PAGE, ["memberCount", "physicalState"], "choosing LLC");
+    await members.set("memberCount", String(e.memberCount ?? Math.max(1, f.members.length)));
     const physical = e.physicalState ?? f.mainBusinessAddress?.state;
     if (!physical) throw new Error("the EIN interview needs the LLC's physical state");
-    await setState(ctx.set, "physicalState", physical);
-    // Spousal / community-property question (two-member LLCs in some states): not collected yet; left for the walk.
+    await setState(members.set, "physicalState", physical);
+    // Spousal / community-property question (two-member LLCs in some states): not mapped yet.
+    await acknowledgeInfo(ctx);
+    const why = await whenShown(ctx, LEGAL_STRUCTURE_PAGE, ["reason"], "the member count and state");
+    await why.set("reason", REASON_LABEL[e.reason]);
   },
-  async advance(ctx) { await ctx.clickButton(CONTINUE); },
-};
-
-const reason: ScreenStep = {
-  screen: IRS_SCREENS.reason,
-  async fill(ctx) { await ctx.set("reason", REASON_LABEL[einReq(ctx).reason]); },
   async advance(ctx) { await ctx.clickButton(CONTINUE); },
 };
 
@@ -213,7 +238,7 @@ const address: ScreenStep = {
 };
 
 const details: ScreenStep = {
-  screen: IRS_SCREENS.details,
+  screen: DETAILS_PAGE,
   async fill(ctx) {
     const f = entity(ctx);
     const e = einReq(ctx);
@@ -229,39 +254,29 @@ const details: ScreenStep = {
     const sd = startDate(ctx);
     await setMonth(ctx.set, "startMonth", sd.month);
     await ctx.set("startYear", String(sd.year));
-  },
-  async advance(ctx) { await ctx.clickButton(CONTINUE); },
-};
 
-const regulatory: ScreenStep = {
-  screen: IRS_SCREENS.regulatory,
-  async fill(ctx) {
-    const r = einReq(ctx).regulated;
+    // "Tell us more about the LLC": five Yes/No questions on the same page.
+    const r = e.regulated;
     if (!r) throw new Error("the four regulated-activity answers are required (ein.regulated)");
+    const emp = e.employees;
+    if (!emp) throw new Error("the W-2 employees answer is required (ein.employees)");
     await ctx.set("highwayVehicle", yesNo(r.highwayVehicle));
     await ctx.set("wagering", yesNo(r.wagering));
     await ctx.set("form720", yesNo(r.form720));
     await ctx.set("atf", yesNo(r.alcoholTobaccoFirearms));
-  },
-  async advance(ctx) { await ctx.clickButton(CONTINUE); },
-};
-
-const employees: ScreenStep = {
-  screen: IRS_SCREENS.employees,
-  async fill(ctx) {
-    const emp = einReq(ctx).employees;
-    if (!emp) throw new Error("the W-2 employees answer is required (ein.employees)");
     await ctx.set("expectsEmployees", yesNo(emp.expected));
     if (!emp.expected) return;
-    const s = await ctx.resolve(IRS_SCREENS.employees); // follow-ups appear after "Yes"
-    if (emp.firstWages) {
-      const [y, m] = emp.firstWages.split("-");
-      await setMonth(s.set, "firstWagesMonth", Number(m));
-      await s.set("firstWagesYear", y!);
-    }
-    if (emp.agriculturalCount !== undefined) await s.set("agriculturalCount", String(emp.agriculturalCount));
-    if (emp.otherCount !== undefined) await s.set("otherCount", String(emp.otherCount));
-    if (emp.lowAnnualLiability !== undefined) await s.set("lowLiability", yesNo(emp.lowAnnualLiability));
+
+    // Yes opens "Describe your employees" on the same page.
+    if (!emp.firstWages) throw new Error("employees expected: the first wages month is required (ein.employees.firstWages)");
+    if (emp.lowAnnualLiability === undefined) throw new Error("employees expected: the $1,000-or-less liability answer is required (ein.employees.lowAnnualLiability)");
+    const s2 = await whenShown(ctx, onePage(DETAILS_PAGE, IRS_SCREENS.employees), ["firstWagesMonth", "firstWagesYear", "lowLiability"], "Yes to W-2 employees");
+    const [y, m] = emp.firstWages.split("-");
+    await setMonth(s2.set, "firstWagesMonth", Number(m));
+    await s2.set("firstWagesYear", y!);
+    if (emp.agriculturalCount !== undefined) await s2.set("agriculturalCount", String(emp.agriculturalCount));
+    if (emp.otherCount !== undefined) await s2.set("otherCount", String(emp.otherCount));
+    await s2.set("lowLiability", yesNo(emp.lowAnnualLiability));
   },
   async advance(ctx) { await ctx.clickButton(CONTINUE); },
 };
@@ -316,7 +331,7 @@ export const irsEinAdapter: SiteAdapter = {
   entryUrl: () => process.env.IRS_EIN_URL ?? "https://sa.www4.irs.gov/applyein/",
   profileKey: () => null, // always a fresh context
   credentialKey: () => null,
-  steps: [start, legalStructure, llcMembers, reason, identity, designee, address, details, regulatory, employees, activity, review, assignment],
+  steps: [start, legalStructure, identity, designee, address, details, activity, review, assignment],
   async confirmSubmission(ctx) {
     // Evidence is the EIN printed on the assignment page itself, not a value carried in memory.
     const m = /\b(\d{2}-\d{7})\b/.exec(await ctx.page.locator("body").innerText());

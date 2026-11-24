@@ -1,5 +1,42 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8"><title>Legal Structure | EIN Assistant (replica)</title><script src="_reflect.js"></script></head>
-<body><p>Replica of the IRS EIN Assistant for engine tests. Built from docs/walks/ny-irs-2026-11-18.md. Not affiliated with the IRS.</p>
-<h1>Legal Structure</h1>
-<fieldset><legend>Legal structure</legend><label><input type="radio" name="ls" value="sp"> Sole proprietor</label><br><label><input type="radio" name="ls" value="pt"> Partnerships</label><br><label><input type="radio" name="ls" value="co"> Corporations</label><br><label><input type="radio" name="ls" value="llc"> Limited Liability Company (LLC)</label><br><label><input type="radio" name="ls" value="es"> Estate</label><br></fieldset>
-<p><button type="button" onclick="location.href='llc-members.html'">Continue</button></p></body></html>
+<!doctype html><html lang="en"><head><meta charset="utf-8"><title>Legal Structure | Apply for an EIN (replica)</title><script src="_reflect.js"></script>
+<script>
+// The live page re-renders after each answer: each part appears a moment later.
+function later(fn) { setTimeout(fn, 300); }
+function show(id, on) { document.getElementById(id).hidden = !on; }
+function onStructure() { var llc = document.querySelector('input[name=ls]:checked').value === 'llc'; later(function () { show('llc-info', llc); show('llc-part', llc); }); }
+function onMembers() {
+  var n = Number(document.getElementById('members').value), st = document.getElementById('phys').value;
+  later(function () { show('single-info', n === 1); show('reason-part', n >= 1 && !!st); });
+}
+function next() {
+  var done = document.querySelector('input[name=ls]:checked') && document.getElementById('members').value && document.getElementById('phys').value && document.querySelector('input[name=why]:checked');
+  if (!done) { show('err', true); return; }
+  location.href = 'identity.html';
+}
+</script></head>
+<body><p>Replica of the IRS EIN Assistant for engine tests, laid out as docs/portal-maps/irs-ein-online.md (2026-11-24) describes the live pages. Not affiliated with the IRS.</p>
+<h1>Apply for an Employer Identification Number (EIN)</h1><h2>Legal Structure</h2>
+<div id="err" role="alert" hidden>Legal Structure: Selection is required.</div>
+<fieldset><legend>Choose type of legal structure*</legend>
+<label><input type="radio" name="ls" value="sp" onchange="onStructure()"> Sole Proprietor</label><br>
+<label><input type="radio" name="ls" value="pt" onchange="onStructure()"> Partnerships</label><br>
+<label><input type="radio" name="ls" value="co" onchange="onStructure()"> Corporations</label><br>
+<label><input type="radio" name="ls" value="llc" onchange="onStructure()"> Limited Liability Company (LLC)</label><br>
+<label><input type="radio" name="ls" value="es" onchange="onStructure()"> Estate</label><br>
+<label><input type="radio" name="ls" value="tr" onchange="onStructure()"> Trusts</label><br>
+</fieldset>
+<div id="llc-info" hidden><p>A Limited Liability Company (LLC) is an entity created by state statute.</p></div>
+<div id="llc-part" hidden>
+<p><label for="members">How many member(s) are in the LLC?*</label> <input id="members" type="text" oninput="onMembers()"></p>
+<p><label for="phys">Please select the state/territory where the business is physically located*</label> <select id="phys" onchange="onMembers()"><option value="">Select</option><option value="NY">New York</option><option value="NJ">New Jersey</option><option value="FL">Florida</option><option value="MO">Missouri</option><option value="CA">California</option></select></p>
+</div>
+<div id="single-info" hidden><p>This is a Single-Member LLC, a disregarded entity by default.</p></div>
+<div id="reason-part" hidden><h3>Why is the LLC requesting an EIN?</h3>
+<fieldset><legend>Choose one reason why you are requesting an EIN*</legend>
+<label><input type="radio" name="why" value="new"> Started a new business</label><br>
+<label><input type="radio" name="why" value="hired"> Hired employee(s)</label><br>
+<label><input type="radio" name="why" value="bank"> Banking purposes</label><br>
+<label><input type="radio" name="why" value="chg"> Changed type of organization</label><br>
+<label><input type="radio" name="why" value="buy"> Purchased active business</label><br>
+</fieldset></div>
+<p><button type="button" onclick="history.back()">Back</button> <button type="button" onclick="next()">Continue</button> <button type="button">Cancel</button></p></body></html>
