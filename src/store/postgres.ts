@@ -4,7 +4,7 @@ import path from "node:path";
 import { randomUUID } from "node:crypto";
 import {
   ClientCompanyOwnershipError,
-  type ApprovalRecord, type DriftHaltRecord, type FilingRecord, type MessageRecord, type NameResolutionRecord, type ReviewGateRecord, type RunRecord, type Store, type SubmitIntentRecord, type WebhookDeliveryRecord,
+  type ApiKeyRecord, type ApprovalRecord, type DriftHaltRecord, type FilingRecord, type MessageRecord, type NameResolutionRecord, type ReviewGateRecord, type RunRecord, type Store, type SubmitIntentRecord, type WebhookDeliveryRecord,
 } from "./types.js";
 import type { ClientCompanySettings, TenantSettings } from "../settings/schema.js";
 import type { PageSnapshot } from "../resolver/types.js";
@@ -174,6 +174,31 @@ export class PostgresStore implements Store {
       [c.clientCompanyId, c.tenantId, c],
     );
     if (r.rowCount === 0) throw new ClientCompanyOwnershipError(c.clientCompanyId);
+  }
+  async listClientCompanies(tenantId: string) {
+    return this.docs<ClientCompanySettings>(`select doc from client_companies where tenant_id=$1 order by id`, [tenantId]);
+  }
+
+  async createApiKey(k: ApiKeyRecord) {
+    await this.pool.query(`insert into tenant_api_keys (id, tenant_id, hash, revoked_at, doc) values ($1,$2,$3,$4,$5)`, [k.id, k.tenantId, k.hash, k.revokedAt ?? null, k]);
+    return k;
+  }
+  async listApiKeys(tenantId: string) {
+    return this.docs<ApiKeyRecord>(`select doc from tenant_api_keys where tenant_id=$1 order by created_at`, [tenantId]);
+  }
+  async findApiKeyByHash(hash: string) {
+    return this.doc<ApiKeyRecord>(`select doc from tenant_api_keys where hash=$1 and revoked_at is null`, [hash]);
+  }
+  async revokeApiKey(tenantId: string, id: string, at: string) {
+    const r = await this.pool.query(
+      `update tenant_api_keys set revoked_at=$3, doc = doc || jsonb_build_object('revokedAt', $3::text)
+       where id=$1 and tenant_id=$2 and revoked_at is null`,
+      [id, tenantId, at],
+    );
+    return r.rowCount === 1;
+  }
+  async touchApiKey(id: string, at: string) {
+    await this.pool.query(`update tenant_api_keys set doc = doc || jsonb_build_object('lastUsedAt', $2::text) where id=$1`, [id, at]);
   }
 
   // Lease expiry uses the database clock, so workers on different machines agree on it.

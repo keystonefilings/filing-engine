@@ -1,5 +1,6 @@
 import Fastify, { type FastifyInstance, type FastifyReply } from "fastify";
 import { lookupKey } from "./keys.js";
+import { registerSelfService, tenantFromStoredKey } from "./self-service.js";
 import { z } from "zod";
 import type { FilingService } from "../orchestrator/service.js";
 import { ValidationFailed } from "../orchestrator/service.js";
@@ -52,13 +53,22 @@ export function buildServer(deps: ApiDeps): FastifyInstance {
   });
 
   const presented = (req: { headers: Record<string, unknown> }) => String(req.headers["x-api-key"] ?? "");
-  const tenantOf = (req: { headers: Record<string, unknown> }): string | null => lookupKey(deps.apiKeys, presented(req));
+  /** The caller's tenant: a key from API_KEYS, or a key the tenant issued itself (stored hashed). */
+  const tenantOf = async (req: { headers: Record<string, unknown> }): Promise<string | null> => {
+    const key = presented(req);
+    const fromEnv = lookupKey(deps.apiKeys, key);
+    if (fromEnv) return fromEnv;
+    const stored = await tenantFromStoredKey(deps.store, key);
+    if (!stored) return null;
+    void deps.store.touchApiKey(stored.keyId, new Date().toISOString()).catch(() => {});
+    return stored.tenantId;
+  };
   const staffOf = (req: { headers: Record<string, unknown> }): string | null => lookupKey(deps.staffKeys ?? {}, presented(req));
   /** Platform-staff routes: the staff identity, or null after answering 401 (no key) / 403 (a tenant's key). */
-  const requireStaff = (req: { headers: Record<string, unknown> }, reply: FastifyReply): string | null => {
+  const requireStaff = async (req: { headers: Record<string, unknown> }, reply: FastifyReply): Promise<string | null> => {
     const staff = staffOf(req);
     if (staff) return staff;
-    const tenant = tenantOf(req);
+    const tenant = await tenantOf(req);
     void reply.code(tenant ? 403 : 401).send({ error: tenant ? "platform staff only" : "invalid api key" });
     return null;
   };
@@ -68,7 +78,7 @@ export function buildServer(deps: ApiDeps): FastifyInstance {
 
   // ---- Filings (callers) ----
   app.post("/v1/filings", async (req, reply) => {
-    const tenantId = tenantOf(req);
+    const tenantId = await tenantOf(req);
     if (!tenantId) return reply.code(401).send({ error: "invalid api key" });
     const body = (req.body ?? {}) as Record<string, unknown>;
     if (body.tenantId && body.tenantId !== tenantId) return reply.code(403).send({ error: "tenant mismatch" });
@@ -82,21 +92,29 @@ export function buildServer(deps: ApiDeps): FastifyInstance {
   });
 
   app.get("/v1/filings", async (req, reply) => {
-    const tenantId = tenantOf(req);
+    const tenantId = await tenantOf(req);
     if (!tenantId) return reply.code(401).send({ error: "invalid api key" });
-    return { filings: (await deps.store.listFilings(tenantId)).map(publicFiling) };
+    const { clientCompanyId, status } = req.query as { clientCompanyId?: string; status?: string };
+    let filings = await deps.store.listFilings(tenantId);
+    if (clientCompanyId) filings = filings.filter((f) => f.clientCompanyId === clientCompanyId);
+    if (status) { const wanted = new Set(status.split(",")); filings = filings.filter((f) => wanted.has(f.status)); }
+    filings.sort((a, b) => b.createdAt.localeCompare(a.createdAt));
+    return { filings: filings.map(publicFiling) };
   });
 
   app.get("/v1/filings/:id", async (req, reply) => {
-    const tenantId = tenantOf(req);
+    const tenantId = await tenantOf(req);
     const f = await deps.store.getFiling((req.params as { id: string }).id);
     if (!f || f.tenantId !== tenantId) return reply.code(404).send({ error: "not found" });
     const run = f.currentRunId ? await deps.store.getRun(f.currentRunId) : null;
-    return { filing: publicFiling(f), run };
+    // The pending approval link, so a caller that lost the one returned at creation can show it again.
+    const approval = f.status === "awaiting_approval" && f.currentApprovalId ? await deps.store.getApproval(f.currentApprovalId) : null;
+    const approvalLink = approval && approval.status === "pending" && approval.expiresAt > new Date().toISOString() ? `${deps.publicBaseUrl}/approve/${approval.token}` : undefined;
+    return { filing: publicFiling(f), run, approvalLink };
   });
 
   app.post("/v1/filings/:id/dry-run", async (req, reply) => {
-    const tenantId = tenantOf(req);
+    const tenantId = await tenantOf(req);
     const f = await deps.store.getFiling((req.params as { id: string }).id);
     if (!f || f.tenantId !== tenantId) return reply.code(404).send({ error: "not found" });
     await deps.service.enqueueDryRun(f.id);
@@ -105,7 +123,7 @@ export function buildServer(deps: ApiDeps): FastifyInstance {
 
   // Supply missing info for a filing in awaiting_information (completeness check).
   app.post("/v1/filings/:id/information", async (req, reply) => {
-    const tenantId = tenantOf(req);
+    const tenantId = await tenantOf(req);
     const f = await deps.store.getFiling((req.params as { id: string }).id);
     if (!f || f.tenantId !== tenantId) return reply.code(404).send({ error: "not found" });
     const r = await deps.service.supplyInformation(f.id, (req.body ?? {}) as Record<string, unknown>);
@@ -115,21 +133,21 @@ export function buildServer(deps: ApiDeps): FastifyInstance {
   });
 
   app.get("/v1/filings/:id/deliveries", async (req, reply) => {
-    const tenantId = tenantOf(req);
+    const tenantId = await tenantOf(req);
     const f = await deps.store.getFiling((req.params as { id: string }).id);
     if (!f || f.tenantId !== tenantId) return reply.code(404).send({ error: "not found" });
     return { deliveries: await deps.store.listDeliveries(f.id) };
   });
 
   app.get("/v1/filings/:id/messages", async (req, reply) => {
-    const tenantId = tenantOf(req);
+    const tenantId = await tenantOf(req);
     const f = await deps.store.getFiling((req.params as { id: string }).id);
     if (!f || f.tenantId !== tenantId) return reply.code(404).send({ error: "not found" });
     return { messages: await deps.store.listMessages(f.id) };
   });
 
   app.get("/v1/artifacts/:id", async (req, reply) => {
-    const tenantId = tenantOf(req);
+    const tenantId = await tenantOf(req);
     if (!tenantId) return reply.code(401).send({ error: "invalid api key" });
     const a = await deps.artifacts.get((req.params as { id: string }).id);
     if (!a) return reply.code(404).send({ error: "not found" });
@@ -141,7 +159,7 @@ export function buildServer(deps: ApiDeps): FastifyInstance {
   // ---- Settings ----
   app.put("/v1/tenants/:id", async (req, reply) => {
     // Tenant settings carry webhook endpoints, approvers and vault keys: platform staff only.
-    if (!requireStaff(req, reply)) return reply;
+    if (!(await requireStaff(req, reply))) return reply;
     const id = (req.params as { id: string }).id;
     const parsed = TenantSettings.safeParse({ ...(req.body as object), tenantId: id });
     if (!parsed.success) return reply.code(422).send({ error: parsed.error.issues });
@@ -149,7 +167,7 @@ export function buildServer(deps: ApiDeps): FastifyInstance {
     return { ok: true };
   });
   app.put("/v1/client-companies/:id", async (req, reply) => {
-    const tenantId = tenantOf(req);
+    const tenantId = await tenantOf(req);
     if (!tenantId) return reply.code(401).send({ error: "invalid api key" });
     const id = (req.params as { id: string }).id;
     // Company ids are global: a tenant may create a new one or update its own, never take another tenant's.
@@ -157,6 +175,10 @@ export function buildServer(deps: ApiDeps): FastifyInstance {
     if (existing && existing.tenantId !== tenantId) return reply.code(409).send({ error: "client company id already in use" });
     const parsed = ClientCompanySettings.safeParse({ ...(req.body as object), clientCompanyId: id, tenantId });
     if (!parsed.success) return reply.code(422).send({ error: parsed.error.issues });
+    const slug = parsed.data.portal?.slug;
+    if (slug && (await deps.store.listClientCompanies(tenantId)).some((c) => c.clientCompanyId !== id && c.portal?.slug === slug)) {
+      return reply.code(409).send({ error: "portal slug already in use by another client company" });
+    }
     try {
       await deps.store.putClientCompany(parsed.data);
     } catch (e) {
@@ -165,6 +187,8 @@ export function buildServer(deps: ApiDeps): FastifyInstance {
     }
     return { ok: true };
   });
+
+  registerSelfService(app, { store: deps.store, tenantOf });
 
   // ---- Approval link (client-facing, decision 2) ----
   app.get("/approve/:token", async (req, reply) => {
@@ -198,17 +222,17 @@ export function buildServer(deps: ApiDeps): FastifyInstance {
 
   // ---- Drift reviews (platform staff, decision 6): the platform maintains the site adapters for all tenants ----
   app.get("/v1/drift-reviews", async (req, reply) => {
-    if (!requireStaff(req, reply)) return reply;
+    if (!(await requireStaff(req, reply))) return reply;
     const status = (req.query as { status?: "pending" | "accepted" | "corrected" | "rejected" }).status;
     return { halts: await deps.store.listDriftHalts(status) };
   });
   app.get("/v1/drift-reviews/:id", async (req, reply) => {
-    if (!requireStaff(req, reply)) return reply;
+    if (!(await requireStaff(req, reply))) return reply;
     const h = await deps.store.getDriftHalt((req.params as { id: string }).id);
     return h ? h : reply.code(404).send({ error: "not found" });
   });
   app.post("/v1/drift-reviews/:id/decision", async (req, reply) => {
-    const staff = requireStaff(req, reply);
+    const staff = await requireStaff(req, reply);
     if (!staff) return reply;
     const parsed = DriftDecisionBody.safeParse(req.body);
     if (!parsed.success) return reply.code(422).send({ error: parsed.error.issues });
@@ -295,13 +319,13 @@ export function buildServer(deps: ApiDeps): FastifyInstance {
 
   // ---- Beta flows, JSON for dashboards (tenant-scoped) ----
   app.get("/v1/name-resolutions", async (req, reply) => {
-    const tenantId = tenantOf(req);
+    const tenantId = await tenantOf(req);
     if (!tenantId) return reply.code(401).send({ error: "invalid api key" });
     const all = await deps.store.listNameResolutions((req.query as { status?: "awaiting_admin" | "resolved" | "aborted" }).status);
     return { resolutions: all.filter((r) => r.tenantId === tenantId) };
   });
   app.get("/v1/review-gates", async (req, reply) => {
-    const tenantId = tenantOf(req);
+    const tenantId = await tenantOf(req);
     if (!tenantId) return reply.code(401).send({ error: "invalid api key" });
     const all = await deps.store.listReviewGates((req.query as { status?: "pending" | "approved" | "rejected" }).status);
     return { reviewGates: all.filter((r) => r.tenantId === tenantId) };

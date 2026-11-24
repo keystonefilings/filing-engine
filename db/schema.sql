@@ -127,3 +127,15 @@ create table if not exists run_leases (
 );
 -- Dry-run previews are a property of the queued job, never of the approved request.
 alter table jobs add column if not exists dry_run boolean not null default false;
+
+-- Self-service tenant API keys: only the SHA-256 of each key is kept.
+create table if not exists tenant_api_keys (
+  id uuid primary key,
+  tenant_id text not null,
+  hash text not null unique,
+  revoked_at timestamptz,
+  created_at timestamptz not null default now(),
+  doc jsonb not null
+);
+create index if not exists tenant_api_keys_tenant_idx on tenant_api_keys (tenant_id);
+create index if not exists client_companies_tenant_idx on client_companies (tenant_id);

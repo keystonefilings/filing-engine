@@ -215,6 +215,12 @@ export const PayrollOwner = z.object({
   title: z.string().min(1),
   address: Address.optional(),
   percentOwnership: z.number().min(0).max(100).optional(),
+  /** NYS-100 member screen: date of birth, US residency (SSN required when resident), contact, profit share. */
+  dateOfBirth: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional(),
+  usResident: z.boolean().optional(),
+  phone: z.string().min(7).optional(),
+  email: z.string().email().optional(),
+  profitDistributionPercent: z.number().min(0).max(100).optional(),
 });
 
 export const PayrollRegistrationDetails = z.object({

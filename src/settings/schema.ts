@@ -201,5 +201,18 @@ export const ClientCompanySettings = z.object({
     })
     .prefault({}),
   mainBusinessAddress: Address.optional(),
+  /**
+   * The firm's white-label portal (web/): the address slug and the brand its own clients see.
+   * Absent = the firm has no portal page. The slug is unique within the service company.
+   */
+  portal: z.object({
+    slug: z.string().regex(/^[a-z0-9](?:[a-z0-9-]{0,46}[a-z0-9])?$/, "lowercase letters, digits and dashes"),
+    displayName: z.string().min(1).max(80).optional(),
+    logoUrl: z.string().url().startsWith("https://").optional(),
+    primaryColor: z.string().regex(/^#[0-9a-fA-F]{6}$/, "a hex color like #1f4b99").optional(),
+    supportEmail: z.string().email().optional(),
+    /** Filing kinds the firm offers its clients (web/lib/intake ids); absent = all. */
+    filingKinds: z.array(z.string()).optional(),
+  }).optional(),
 });
 export type ClientCompanySettings = z.infer<typeof ClientCompanySettings>;

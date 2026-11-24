@@ -1,7 +1,7 @@
 import { randomUUID } from "node:crypto";
 import {
   ClientCompanyOwnershipError,
-  type ApprovalRecord, type DriftHaltRecord, type FilingRecord, type MessageRecord, type NameResolutionRecord, type ReviewGateRecord, type RunRecord, type Store, type SubmitIntentRecord, type WebhookDeliveryRecord,
+  type ApiKeyRecord, type ApprovalRecord, type DriftHaltRecord, type FilingRecord, type MessageRecord, type NameResolutionRecord, type ReviewGateRecord, type RunRecord, type Store, type SubmitIntentRecord, type WebhookDeliveryRecord,
 } from "./types.js";
 import type { ClientCompanySettings, TenantSettings } from "../settings/schema.js";
 import type { PageSnapshot } from "../resolver/types.js";
@@ -31,6 +31,7 @@ export class MemoryStore implements Store {
   nameResolutions = new Map<string, NameResolutionRecord>();
   reviewGates = new Map<string, ReviewGateRecord>();
   leases = new Map<string, { workerId: string; token: string; expiresAt: number }>();
+  apiKeys = new Map<string, ApiKeyRecord>();
   /** Clock for lease expiry; injectable for tests. */
   now: () => number = () => Date.now();
 
@@ -80,6 +81,24 @@ export class MemoryStore implements Store {
     const cur = this.clients.get(c.clientCompanyId);
     if (cur && cur.tenantId !== c.tenantId) throw new ClientCompanyOwnershipError(c.clientCompanyId);
     this.clients.set(c.clientCompanyId, c);
+  }
+  async listClientCompanies(tenantId: string) { return [...this.clients.values()].filter((c) => c.tenantId === tenantId); }
+
+  async createApiKey(k: ApiKeyRecord) { this.apiKeys.set(k.id, k); return k; }
+  async listApiKeys(tenantId: string) { return [...this.apiKeys.values()].filter((k) => k.tenantId === tenantId); }
+  async findApiKeyByHash(hash: string) {
+    for (const k of this.apiKeys.values()) if (k.hash === hash && !k.revokedAt) return k;
+    return null;
+  }
+  async revokeApiKey(tenantId: string, id: string, at: string) {
+    const k = this.apiKeys.get(id);
+    if (!k || k.tenantId !== tenantId || k.revokedAt) return false;
+    this.apiKeys.set(id, { ...k, revokedAt: at });
+    return true;
+  }
+  async touchApiKey(id: string, at: string) {
+    const k = this.apiKeys.get(id);
+    if (k) this.apiKeys.set(id, { ...k, lastUsedAt: at });
   }
 
   async acquireRunLease(filingId: string, workerId: string, ttlMs: number) {
