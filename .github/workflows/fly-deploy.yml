@@ -19,10 +19,22 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: superfly/flyctl-actions/setup-flyctl@master
-      # --ha=false: one machine per process group. The worker must run as exactly one machine.
-      - run: flyctl deploy --remote-only --ha=false --app keystone-filing-engine
+      - name: Deploy
         env:
-          FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
-      - run: flyctl status --app keystone-filing-engine
-        env:
-          FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
+          FLY_API_TOKEN_SAVED: ${{ secrets.FLY_API_TOKEN }}
+        run: |
+          # A token copied from a terminal window can pick up line breaks where the window wrapped
+          # it, plus stray spaces or quotes. Remove those; Fly tokens never contain them.
+          t=$(printf '%s' "$FLY_API_TOKEN_SAVED" | tr -d '\r\n' | sed -e 's/^[[:space:]"'"'"']*//' -e 's/[[:space:]"'"'"']*$//')
+          case "$t" in fm2_*|fm1r_*|fm1a_*) t="FlyV1 $t" ;; esac
+          echo "::add-mask::$t"
+          # The token's shape only, never any part of it.
+          case "$FLY_API_TOKEN_SAVED" in *$'\n'*|*$'\r'*) breaks=yes ;; *) breaks=no ;; esac
+          case "$t" in "FlyV1 fm"*) prefix=yes ;; *) prefix=no ;; esac
+          parts=$(printf '%s' "${t#FlyV1 }" | tr ',' '\n' | grep -c . || true)
+          echo "token: ${#t} characters, starts with 'FlyV1 fm': $prefix, parts: $parts, line breaks in the saved secret: $breaks"
+          if [ -z "$t" ]; then echo "::error::The FLY_API_TOKEN repository secret is empty or missing"; exit 1; fi
+          export FLY_API_TOKEN="$t"
+          # --ha=false: one machine per process group. The worker must run as exactly one machine.
+          flyctl deploy --remote-only --ha=false --app keystone-filing-engine
+          flyctl status --app keystone-filing-engine
