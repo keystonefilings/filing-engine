@@ -8,16 +8,18 @@ subscriber files from its own setup); Keystone's is the first.
 data-center networks. A static IP rented from a cloud provider is blocked the same way, so
 don't buy one on that basis. What matters per portal is whether it serves the worker's network.
 
-| Portal | From our cloud container (2026-11-17 to -19) | Through a plain Steel session (2026-11-23) |
-|---|---|---|
-| NJ (formation, records, sign-in) | served | served |
-| FL Sunbiz filing | served | served |
-| IRS EIN assistant | refused: "Access Denied" (Akamai) | served |
-| NY DOS (filing, public inquiry) | refused: connection closed | served, after its JavaScript check clears |
-| Missouri | refused: Cloudflare challenge | refused: Cloudflare's check did not clear (3 sessions, one waited 60 s) |
+| Portal | From our cloud container (2026-11-17 to -19) | Through a plain Steel session (2026-11-23) | From the Fly worker through Steel (2026-11-24) |
+|---|---|---|---|
+| NJ (formation, records, sign-in) | served | served | served |
+| FL Sunbiz filing | served | served | served |
+| IRS EIN assistant | refused: "Access Denied" (Akamai) | served | served |
+| NY DOS (filing, public inquiry) | refused: connection closed | served, after its JavaScript check clears | public inquiry served; online filing was still titled "Loading…" when read (the wait now covers that) |
+| Missouri | refused: Cloudflare challenge | refused: Cloudflare's check did not clear (3 sessions, one waited 60 s) | served, for the first time |
 
 Steel's public address changed with every session, and that was fine: no portal needs a fixed
-one. NY additionally needs Keystone's logged-in service-company session (a saved sign-in, below).
+one. The last column is the engine's own browser connection to Steel from the deployed worker
+(`Check Fly deploy` workflow). Missouri passed once in four tries: treat it as unreliable; a run
+that meets its check stops before submitting and tells the admin. NY additionally needs Keystone's logged-in service-company session (a saved sign-in, below).
 
 **Per-portal routing.** Each portal's browser runs where its route says: on the worker's own
 machine (direct), through a proxy on a line the portal serves, or in a Steel hosted browser

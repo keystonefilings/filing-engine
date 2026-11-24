@@ -61,7 +61,7 @@ describe("per-portal network routing", () => {
   });
 });
 
-import { classify } from "../tools/probe-sites.js";
+import { classify, stillChecking } from "../tools/probe-sites.js";
 import { detectChallenge } from "../src/browser/harness.js";
 
 describe("challenge recognition", () => {
@@ -70,6 +70,11 @@ describe("challenge recognition", () => {
     expect(classify(200, "Just a moment...", "")).toBe("blocked");
     expect(classify(200, "On-Line Filing", "An official website of New York State")).toBe("ok");
     expect(classify(403, "Access Denied", "")).toBe("blocked");
+  });
+
+  it("keeps waiting on a title that says Loading, but not on page text that does", () => {
+    expect(stillChecking("Loading https://filings.dos.ny.gov/ords/r/corpanc/ecorp/ecorphome", "")).toBe(true);
+    expect(stillChecking("On-Line Filing", "Loading your filings... An official website of New York State")).toBe(false);
   });
 
   it("never marks a blank page or an unexpected page ok", () => {
@@ -112,6 +117,11 @@ describe("JavaScript checks", () => {
   });
   it("waits while the page is still blank", async () => {
     const p = scripted(["", "", "On-Line Filing"]);
+    expect(await waitOutJsCheck(p.page)).toBeNull();
+    expect(p.waits()).toBe(2);
+  });
+  it("waits while the page is still titled Loading (NY DOS through Steel, 2026-11-24)", async () => {
+    const p = scripted(["Loading https://filings.dos.ny.gov/ords/r/corpanc/ecorp/ecorphome", "Loading https://filings.dos.ny.gov/ords/r/corpanc/ecorp/ecorphome", "On-Line Filing"]);
     expect(await waitOutJsCheck(p.page)).toBeNull();
     expect(p.waits()).toBe(2);
   });

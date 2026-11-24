@@ -41,12 +41,16 @@ export const SITES = [
 /** Interstitials a real browser clears by running the site's own script (no CAPTCHA, nothing solved). */
 export const JS_CHECK = /just a moment|performing security verification|checking your browser|your support id is|please enable javascript to view the page content/i;
 
+/** A page that is still loading names itself so in its title ("Loading https://filings.dos.ny.gov/…"). */
+export const LOADING_TITLE = /^\s*loading\b/i;
+
 /**
- * True while a page is a JavaScript check, or still blank: a check that runs before it shows
- * anything (NY DOS's does) leaves an empty page until it reloads into the real one.
+ * True while a page is a JavaScript check, still blank, or still titled "Loading…": a check that
+ * runs before it shows anything (NY DOS's does) leaves an empty or loading page until it reloads
+ * into the real one. Only the title counts for "Loading": real pages often say it in their text.
  */
 export function stillChecking(title: string, body: string): boolean {
-  return JS_CHECK.test(`${title} ${body.slice(0, 2000)}`) || (!title.trim() && !body.trim());
+  return JS_CHECK.test(`${title} ${body.slice(0, 2000)}`) || (!title.trim() && !body.trim()) || LOADING_TITLE.test(title);
 }
 
 /**
