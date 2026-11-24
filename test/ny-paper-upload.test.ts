@@ -74,7 +74,7 @@ describe("sealed signatures", () => {
   });
   it("accepts only real PNGs of a sensible size", () => {
     expect(parsePng(`data:image/png;base64,${png().toString("base64")}`).width).toBe(200);
-    expect(() => parsePng(Buffer.from("not a png at all, just some text that is long enough to pass the size check ok").toString("base64"))).toThrow(/PNG/);
+    expect(() => parsePng(Buffer.from("not a png at all, only text. ".repeat(10)).toString("base64"))).toThrow(/PNG/);
     expect(() => parsePng(png(10, 10).toString("base64"))).toThrow();
   });
 });
