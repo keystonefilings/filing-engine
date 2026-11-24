@@ -23,7 +23,8 @@ const dir = mkdtempSync(path.join(tmpdir(), "ke-pg-"));
 chmodSync(dir, 0o777); // Postgres runs as its own unprivileged user when the tests run as root
 const pgServer = new EmbeddedPostgres({
   databaseDir: path.join(dir, "data"), port: PORT, user: "filing", password: "filing",
-  persistent: false, createPostgresUser: true, onLog: () => {}, onError: () => {},
+  // Only root needs a separate postgres user; elsewhere (a CI runner) Postgres runs as the current user.
+  persistent: false, createPostgresUser: process.getuid?.() === 0, onLog: () => {}, onError: () => {},
 });
 let store: PostgresStore;
 let queue: PgQueue;
