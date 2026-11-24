@@ -27,13 +27,25 @@ export function parseApiKeys(spec: string | undefined, production: boolean): Rec
   return out;
 }
 
-/** PLATFORM_STAFF_KEYS="key1,key2": platform staff (drift reviews, any tenant's settings). Empty = those routes stay closed. */
-export function parseStaffKeys(spec: string | undefined, production: boolean): string[] {
-  const keys = (spec ?? "").split(",").map((s) => s.trim()).filter(Boolean);
-  keys.forEach((k, i) => {
-    if (production && (k.length < MIN_KEY || PLACEHOLDER.test(k))) throw new Error(`PLATFORM_STAFF_KEYS entry ${i + 1}: use a random key of at least ${MIN_KEY} characters in production`);
-  });
-  return keys;
+/**
+ * STAFF_API_KEYS="key:identity,key2:identity2": platform staff, presented in x-api-key like a
+ * tenant key. Only staff change tenant settings and decide drift reviews; the identity is
+ * recorded as the reviewer. Required in production: without it nothing can be configured.
+ */
+export function parseStaffKeys(spec: string | undefined, production: boolean): Record<string, string> {
+  if (!spec?.trim()) {
+    if (production) throw new Error("STAFF_API_KEYS must be set in production (key:identity, comma separated): only staff can create tenants and review site changes");
+    return {};
+  }
+  const out: Record<string, string> = {};
+  for (const [i, entry] of spec.split(",").map((s) => s.trim()).filter(Boolean).entries()) {
+    const c = entry.indexOf(":");
+    if (c < 1 || c === entry.length - 1) throw new Error(`STAFF_API_KEYS entry ${i + 1} must look like key:identity`);
+    const key = entry.slice(0, c);
+    if (production && (key.length < MIN_KEY || PLACEHOLDER.test(key))) throw new Error(`STAFF_API_KEYS entry ${i + 1}: use a random key of at least ${MIN_KEY} characters in production`);
+    out[key] = entry.slice(c + 1);
+  }
+  return out;
 }
 
 /** The approval-link signing secret. In production it must be set, random-looking and not the development default. */
@@ -45,11 +57,16 @@ export function signingSecretFrom(value: string | undefined, production: boolean
   return value;
 }
 
-/** Constant-time membership check (hashing first makes lengths equal). */
-export function keyMatches(candidate: string, keys: readonly string[]): boolean {
-  if (!candidate) return false;
+/** Constant-time lookup: the value for a presented key, or null (hashing first makes lengths equal). */
+export function lookupKey(table: Record<string, string>, candidate: string): string | null {
+  if (!candidate) return null;
   const c = createHash("sha256").update(candidate).digest();
-  let hit = false;
-  for (const k of keys) if (timingSafeEqual(c, createHash("sha256").update(k).digest())) hit = true;
+  let hit: string | null = null;
+  for (const [k, v] of Object.entries(table)) if (timingSafeEqual(c, createHash("sha256").update(k).digest())) hit = v;
   return hit;
+}
+
+/** Constant-time membership check. */
+export function keyMatches(candidate: string, keys: readonly string[]): boolean {
+  return lookupKey(Object.fromEntries(keys.map((k) => [k, "1"])), candidate) !== null;
 }

@@ -1,0 +1,29 @@
+# Deploys main to Fly.io (fly.toml, docs/deploy-fly.md). Run by hand from the Actions tab for now.
+# Fly's builders do the image build (--remote-only); the token comes from the FLY_API_TOKEN repo secret.
+name: Deploy to Fly
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+# One deploy at a time: a second one waits instead of overlapping (two workers must never overlap).
+concurrency:
+  group: fly-deploy
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: superfly/flyctl-actions/setup-flyctl@master
+      - name: Deploy
+        env:
+          FLY_API_TOKEN_SAVED: ${{ secrets.FLY_API_TOKEN }}
+        run: |
+          source .github/fly-token.sh   # FLY_API_TOKEN, cleaned of whatever came along when it was pasted
+          # --ha=false: one machine per process group. The worker must run as exactly one machine.
+          flyctl deploy --remote-only --ha=false --app keystone-filing-engine
+          flyctl status --app keystone-filing-engine

@@ -12,7 +12,8 @@
     "test:watch": "vitest",
     "walk": "tsx tools/walk-recorder.ts",
     "probe-sites": "tsx tools/probe-sites.ts",
-    "steel-login": "tsx tools/steel-login.ts"
+    "steel-login": "tsx tools/steel-login.ts",
+    "check-deploy": "tsx tools/check-deploy.ts"
   },
   "keywords": [],
   "author": "",

@@ -4,6 +4,11 @@ import { signingSecretFrom } from "./api/keys.js";
 
 /** The Docker image sets NODE_ENV=production: no development defaults for keys or secrets there. */
 const production = process.env.NODE_ENV === "production";
+/** Settings that are wrong for this environment, collected so start-up reports them all at once (startup-check.ts). */
+const problems: string[] = [];
+function collect<T>(read: () => T, fallback: T): T {
+  try { return read(); } catch (e) { problems.push((e as Error).message); return fallback; }
+}
 
 function env(name: string, fallback?: string): string {
   const v = process.env[name];
@@ -24,9 +29,10 @@ function envInt(name: string, fallback: number): number {
 
 export const config = {
   production,
+  problems,
   port: envInt("PORT", 8080),
   publicBaseUrl: env("PUBLIC_BASE_URL", "http://localhost:8080"),
-  approvalSigningSecret: signingSecretFrom(process.env.APPROVAL_SIGNING_SECRET, production),
+  approvalSigningSecret: collect(() => signingSecretFrom(process.env.APPROVAL_SIGNING_SECRET, production), ""),
   approvalTtlHours: envInt("APPROVAL_TTL_HOURS", 168),
   databaseUrl: process.env.DATABASE_URL || null,
   artifactDir: path.resolve(env("ARTIFACT_DIR", "./var/artifacts")),
@@ -45,7 +51,9 @@ export const config = {
   /** Worker side: the port for /healthz and /wake (unset = no HTTP listener), and how long it waits between checks when idle. */
   workerPort: process.env.WORKER_PORT ? envInt("WORKER_PORT", 8081) : null,
   workerIdlePollMs: envInt("WORKER_IDLE_POLL_MS", 2_000),
-  workerEnabled: env("WORKER_ENABLED", "true") === "true",
+  /** The API process also runs filings (development). Off by default in production, where the
+   *  worker is its own process: an API that stops when idle must never be mid-filing. */
+  workerEnabled: env("WORKER_ENABLED", production ? "false" : "true") === "true",
   chromiumPath: process.env.PW_CHROMIUM_PATH || null,
   /** Default network route for the browser (see browser/egress.ts): a proxy URL or "steel"; unset = direct. */
   browserProxy: process.env.BROWSER_PROXY || null,

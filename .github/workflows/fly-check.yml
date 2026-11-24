@@ -1,0 +1,57 @@
+# Checks the live Fly deploy (docs/deploy-fly.md, steps 5 and 7) from GitHub's runners, for when
+# `fly ssh console` cannot run from the operator's computer. Run by hand from the Actions tab.
+# Read-only: tools/check-deploy.ts opens one Steel session and releases it at once; the portal
+# probe loads each portal's entry page through Steel and nothing else.
+name: Check Fly deploy
+
+on:
+  workflow_dispatch:
+    inputs:
+      probe:
+        description: "Also load each portal's entry page through Steel (the portal probe)"
+        type: boolean
+        default: true
+
+permissions:
+  contents: read
+
+concurrency:
+  group: fly-check
+  cancel-in-progress: false
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    env:
+      FLY_API_TOKEN_SAVED: ${{ secrets.FLY_API_TOKEN }}
+      APP: keystone-filing-engine
+    steps:
+      - uses: actions/checkout@v4
+      - uses: superfly/flyctl-actions/setup-flyctl@master
+      - name: Machines
+        run: |
+          source .github/fly-token.sh
+          flyctl status --app "$APP"
+      - name: Check the API machine
+        run: |
+          source .github/fly-token.sh
+          id=$(flyctl machines list --app "$APP" --json | jq -r '[.[] | select(.config.metadata.fly_process_group == "api")][0].id // empty')
+          [ -n "$id" ] || { echo "::error::no api machine"; exit 1; }
+          flyctl machine start "$id" --app "$APP" >/dev/null 2>&1 || true   # it stops when idle
+          flyctl ssh console --app "$APP" --machine "$id" -C "sh -c 'cd /app && node --import tsx tools/check-deploy.ts api'"
+      - name: Check the worker machine
+        if: always()
+        run: |
+          source .github/fly-token.sh
+          id=$(flyctl machines list --app "$APP" --json | jq -r '[.[] | select(.config.metadata.fly_process_group == "worker")][0].id // empty')
+          [ -n "$id" ] || { echo "::error::no worker machine"; exit 1; }
+          flyctl ssh console --app "$APP" --machine "$id" -C "sh -c 'cd /app && node --import tsx tools/check-deploy.ts worker'"
+      - name: Portal probe through Steel
+        if: ${{ always() && inputs.probe }}
+        # Missouri's bot check does not clear on Steel, so the probe reports it and exits 1 even
+        # when everything else is reachable; read the lines, not the step's colour.
+        continue-on-error: true
+        run: |
+          source .github/fly-token.sh
+          id=$(flyctl machines list --app "$APP" --json | jq -r '[.[] | select(.config.metadata.fly_process_group == "worker")][0].id // empty')
+          flyctl ssh console --app "$APP" --machine "$id" -C "sh -c 'cd /app && node --import tsx tools/probe-sites.ts'"
