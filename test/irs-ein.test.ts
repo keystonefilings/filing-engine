@@ -70,9 +70,12 @@ describe("EIN-only filings", () => {
     expect(run.status).toBe("completed");
     expect(run.error).toContain('dry run stopped before "Submit EIN Request"');
     const screens = run.steps.map((s) => s.screenKey);
-    for (const k of ["irs.start", "irs.legal_structure", "irs.llc_members", "irs.reason", "irs.identity", "irs.address", "irs.details", "irs.regulatory", "irs.employees", "irs.activity", "irs.review"]) {
+    // The live pages (docs/portal-maps/irs-ein-online.md): Legal Structure and Additional Details
+    // reveal their later questions on the same page, so they are one screen each.
+    for (const k of ["irs.start", "irs.legal_structure", "irs.identity", "irs.address", "irs.details", "irs.activity", "irs.review"]) {
       expect(screens).toContain(k);
     }
+    for (const k of ["irs.llc_members", "irs.reason", "irs.regulatory", "irs.employees"]) expect(screens).not.toContain(k);
     expect(screens).not.toContain("irs.designee");   // owner route
     expect(screens).not.toContain("irs.assignment"); // never past the submit click
     expect(f.status).toBe("approved");               // a dry run leaves the filing where it was
@@ -86,7 +89,21 @@ describe("EIN-only filings", () => {
     expect(selected(address, "state", "NY")).toBe(true);
     expect(selected(address, "mail-state", "NJ")).toBe(true);
 
+    // Revealed on the same page after LLC, then after the member count and state.
+    const ls = await domOf(run, "irs.legal_structure");
+    expect(ls).toMatch(/value="llc"[^>]*checked/);
+    expect(ls).toMatch(/id="members"[^>]*value="1"/);
+    expect(selected(ls, "phys", "NY")).toBe(true);
+    expect(ls).toMatch(/value="new"[^>]*checked/);
+
     const details = await domOf(run, "irs.details");
+    // The five Yes/No questions, then "Describe your employees" revealed by Yes to W-2 employees.
+    for (const g of ["hv", "wg", "f720", "atf"]) expect(details).toMatch(new RegExp(`name="${g}" value="no"[^>]*checked`));
+    expect(details).toMatch(/name="w2" value="yes"[^>]*checked/);
+    expect(selected(details, "wages-month", "1")).toBe(true);
+    expect(details).toMatch(/id="wages-year"[^>]*value="2027"/);
+    expect(details).toMatch(/id="other"[^>]*value="2"/);
+    expect(details).toMatch(/name="low" value="yes"[^>]*checked/);
     expect(details).toMatch(/id="legal-name"[^>]*value="Blue Harbor Consulting LLC"/);
     expect(selected(details, "formation-state", "NY")).toBe(true);
     expect(selected(details, "start-month", "11")).toBe(true);

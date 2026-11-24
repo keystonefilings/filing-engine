@@ -1,5 +1,34 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8"><title>Additional Details | EIN Assistant (replica)</title><script src="_reflect.js"></script></head>
-<body><p>Replica of the IRS EIN Assistant for engine tests. Built from docs/walks/ny-irs-2026-11-18.md. Not affiliated with the IRS.</p>
-<h1>Additional Details</h1>
-<p><label for="legal-name">Full legal name</label> <input id="legal-name" type="text"></p><p><label for="trade-name">Trade name</label> <input id="trade-name" type="text"></p><p><label for="county">County</label> <input id="county" type="text"></p><p><label for="phys-state">Physical state/territory</label> <select id="phys-state"><option value="">Select</option><option value="NY">New York</option><option value="NJ">New Jersey</option><option value="FL">Florida</option><option value="MO">Missouri</option><option value="CA">California</option></select></p><p><label for="formation-state">State where the articles of organization were filed</label> <select id="formation-state"><option value="">Select</option><option value="NY">New York</option><option value="NJ">New Jersey</option><option value="FL">Florida</option><option value="MO">Missouri</option><option value="CA">California</option></select></p><p><label for="start-month">Start month</label> <select id="start-month"><option value="">Select</option><option value="1">January</option><option value="2">February</option><option value="3">March</option><option value="4">April</option><option value="5">May</option><option value="6">June</option><option value="7">July</option><option value="8">August</option><option value="9">September</option><option value="10">October</option><option value="11">November</option><option value="12">December</option></select></p><p><label for="start-year">Start year</label> <input id="start-year" type="text"></p>
-<p><button type="button" onclick="location.href='regulatory.html'">Continue</button></p></body></html>
+<!doctype html><html lang="en"><head><meta charset="utf-8"><title>Additional Details | Apply for an EIN (replica)</title><script src="_reflect.js"></script>
+<script>
+function onEmployees(el) { var yes = el.value === 'yes'; setTimeout(function () { document.getElementById('emp-follow').hidden = !yes; }, 300); }
+function next() {
+  var groups = ['hv', 'wg', 'f720', 'atf', 'w2'];
+  var done = document.getElementById('legal-name').value && document.getElementById('county').value && groups.every(function (g) { return document.querySelector('input[name=' + g + ']:checked'); });
+  if (!done) { document.getElementById('err').hidden = false; return; }
+  location.href = 'activity.html';
+}
+</script></head>
+<body><p>Replica of the IRS EIN Assistant for engine tests, laid out as docs/portal-maps/irs-ein-online.md (2026-11-24) describes the live pages. Not affiliated with the IRS.</p>
+<h1>Apply for an Employer Identification Number (EIN)</h1><h2>Additional Details</h2>
+<div id="err" role="alert" hidden>Please answer every required question.</div>
+<h3>Tell us about the Limited Liability Company (LLC)</h3>
+<p><label for="legal-name">Legal name*</label> <input id="legal-name" type="text"> (must match articles of organization, if filed)</p>
+<p><label for="trade-name">Trade name/Doing business as</label> <input id="trade-name" type="text"></p>
+<p><label for="county">County where the LLC is located*</label> <input id="county" type="text"></p>
+<p><label for="phys-state">State/Territory where the LLC is located*</label> <select id="phys-state"><option value="">Select</option><option value="NY">New York</option><option value="NJ">New Jersey</option><option value="FL">Florida</option><option value="MO">Missouri</option><option value="CA">California</option></select></p>
+<p><label for="formation-state">State/Territory where articles of organization are (or will be) filed*</label> <select id="formation-state"><option value="">Select</option><option value="NY">New York</option><option value="NJ">New Jersey</option><option value="FL">Florida</option><option value="MO">Missouri</option><option value="CA">California</option></select></p>
+<p><label for="start-month">LLC Start Date*</label> <select id="start-month"><option value="">Month</option><option value="1">January</option><option value="2">February</option><option value="3">March</option><option value="4">April</option><option value="5">May</option><option value="6">June</option><option value="7">July</option><option value="8">August</option><option value="9">September</option><option value="10">October</option><option value="11">November</option><option value="12">December</option></select> <label for="start-year">LLC Start Date year</label> <input id="start-year" type="text"></p>
+<h3>Tell us more about the LLC</h3>
+<fieldset><legend>Owns a highway motor vehicle with taxable gross weight 55,000 lb or more?*</legend><label><input type="radio" name="hv" value="yes"> Yes</label> <label><input type="radio" name="hv" value="no"> No</label></fieldset>
+<fieldset><legend>Involves gambling/wagering?*</legend><label><input type="radio" name="wg" value="yes"> Yes</label> <label><input type="radio" name="wg" value="no"> No</label></fieldset>
+<fieldset><legend>Needs to file Form 720 (Quarterly Federal Excise Tax Return)?*</legend><label><input type="radio" name="f720" value="yes"> Yes</label> <label><input type="radio" name="f720" value="no"> No</label></fieldset>
+<fieldset><legend>Sells or manufactures alcohol, tobacco, or firearms?*</legend><label><input type="radio" name="atf" value="yes"> Yes</label> <label><input type="radio" name="atf" value="no"> No</label></fieldset>
+<fieldset><legend>Has or expects employees who will receive Forms W-2 in the next 12 months?*</legend><label><input type="radio" name="w2" value="yes" onchange="onEmployees(this)"> Yes</label> <label><input type="radio" name="w2" value="no" onchange="onEmployees(this)"> No</label></fieldset>
+<div id="emp-follow" hidden><h3>Describe your employees</h3>
+<p><label for="wages-month">First date wages or annuities were or will be paid*</label> <select id="wages-month"><option value="">Month</option><option value="1">January</option><option value="2">February</option><option value="3">March</option><option value="4">April</option><option value="5">May</option><option value="6">June</option><option value="7">July</option><option value="8">August</option><option value="9">September</option><option value="10">October</option><option value="11">November</option><option value="12">December</option></select> <label for="wages-year">First date wages or annuities were or will be paid year</label> <input id="wages-year" type="text"></p>
+<p>Highest number of employees expected in the next 12 months*. Total number of employees must be at least 1.</p>
+<p><label for="ag">Number of agricultural employees</label> <input id="ag" type="text"></p>
+<p><label for="other">Number of other employees</label> <input id="other" type="text"></p>
+<fieldset><legend>Do you expect your employment tax liability to be $1,000 or less in a full calendar year?*</legend><label><input type="radio" name="low" value="yes"> Yes</label> <label><input type="radio" name="low" value="no"> No</label></fieldset>
+</div>
+<p><button type="button" onclick="history.back()">Back</button> <button type="button" onclick="next()">Continue</button> <button type="button">Cancel</button></p></body></html>

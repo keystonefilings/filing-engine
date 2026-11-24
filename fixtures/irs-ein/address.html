@@ -1,5 +1,19 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8"><title>Addresses | EIN Assistant (replica)</title><script src="_reflect.js"></script></head>
-<body><p>Replica of the IRS EIN Assistant for engine tests. Built from docs/walks/ny-irs-2026-11-18.md. Not affiliated with the IRS.</p>
-<h1>Addresses</h1>
-<h2>Physical location</h2><p><label for="street">Street address</label> <input id="street" type="text"></p><p><label for="city">City</label> <input id="city" type="text"></p><p><label for="state">State</label> <select id="state"><option value="">Select</option><option value="NY">New York</option><option value="NJ">New Jersey</option><option value="FL">Florida</option><option value="MO">Missouri</option><option value="CA">California</option></select></p><p><label for="zip">ZIP code</label> <input id="zip" type="text"></p><p><label for="phone">Phone number</label> <input id="phone" type="tel"></p><fieldset><legend>Do you have a different mailing address?</legend><label><input type="radio" name="hasmail" value="yes" onchange="document.getElementById('mailing').style.display = this.value === 'yes' ? 'block' : 'none'"> Yes</label><br><label><input type="radio" name="hasmail" value="no" onchange="document.getElementById('mailing').style.display = this.value === 'yes' ? 'block' : 'none'"> No</label><br></fieldset><div id="mailing" style="display:none"><fieldset><legend>Mailing address</legend><p><label for="mail-street">Street</label> <input id="mail-street" type="text"></p><p><label for="mail-city">City</label> <input id="mail-city" type="text"></p><p><label for="mail-state">State</label> <select id="mail-state"><option value="">Select</option><option value="NY">New York</option><option value="NJ">New Jersey</option><option value="FL">Florida</option><option value="MO">Missouri</option><option value="CA">California</option></select></p><p><label for="mail-zip">ZIP code</label> <input id="mail-zip" type="text"></p><p><label for="mail-country">Country</label> <select id="mail-country"><option value="US" selected>United States</option><option value="CA">Canada</option></select></p></fieldset></div>
-<p><button type="button" onclick="location.href='details.html'">Continue</button></p></body></html>
+<!doctype html><html lang="en"><head><meta charset="utf-8"><title>Addresses | Apply for an EIN (replica)</title><script src="_reflect.js"></script></head>
+<body><p>Replica of the IRS EIN Assistant for engine tests, laid out as docs/portal-maps/irs-ein-online.md (2026-11-24) describes the live pages. Not affiliated with the IRS.</p>
+<h1>Apply for an Employer Identification Number (EIN)</h1><h2>Where is the Single Member Limited Liability Company (LLC) physically located?</h2>
+<p><label for="street">Street*</label> <input id="street" type="text"> Must be a U.S. address. Do not enter a P.O. box.</p>
+<p><label for="city">City*</label> <input id="city" type="text"></p>
+<p><label for="state">State/U.S. territory*</label> <select id="state"><option value="">Select</option><option value="NY">New York</option><option value="NJ">New Jersey</option><option value="FL">Florida</option><option value="MO">Missouri</option><option value="CA">California</option></select></p>
+<p><label for="zip">ZIP/Postal code*</label> <input id="zip" type="text"></p>
+<p><label for="phone">Phone number*</label> <input id="phone" type="tel"></p>
+<fieldset><legend>Do you have an address different from the above where you want your mail to be sent?*</legend>
+<label><input type="radio" name="hasmail" value="yes" onchange="document.getElementById('mailing').hidden = false"> Yes</label>
+<label><input type="radio" name="hasmail" value="no" onchange="document.getElementById('mailing').hidden = true"> No</label></fieldset>
+<div id="mailing" hidden><fieldset><legend>Mailing address</legend>
+<p><label for="mail-street">Street</label> <input id="mail-street" type="text"></p>
+<p><label for="mail-city">City</label> <input id="mail-city" type="text"></p>
+<p><label for="mail-state">State/province/U.S. territory</label> <select id="mail-state"><option value="">Select</option><option value="NY">New York</option><option value="NJ">New Jersey</option><option value="FL">Florida</option><option value="MO">Missouri</option><option value="CA">California</option></select></p>
+<p><label for="mail-zip">ZIP/postal code</label> <input id="mail-zip" type="text"></p>
+<p><label for="mail-country">Country</label> <select id="mail-country"><option value="US" selected>United States</option><option value="CA">Canada</option></select></p>
+</fieldset></div>
+<p><button type="button" onclick="history.back()">Back</button> <button type="button" onclick="location.href='details.html'">Continue</button> <button type="button">Cancel</button></p></body></html>
