@@ -1,0 +1,188 @@
+# Vision check, 2026-11-25
+
+The Nov 25 voice memo (`docs/vision-memo-2026-11-25-transcript.md`) checked against the code at
+`d688d69`. Status: **Done** works as described; **Partial** exists but is incomplete, inert or
+dry-run only; **Missing** has no implementation.
+
+## Summary
+
+- Most of the *shape* is built: the landing page, a single login with routing, partner sign-up and
+  setup, the enterprise dashboard, API docs and OpenAPI, the state-then-type portal, intake forms
+  with folding and "Same as", and adapters for NY, NJ, FL and IRS.
+- **Nothing files for real yet.** All 11 adapters are `complete: false`, and only `irs-ein` has
+  `confirmSubmission`. Payment screens are the common blocker: none of the card or deposit checkout
+  pages after "Pay" is mapped.
+- **No email or message is ever sent.** The only sender is `LogChannelSender`
+  (`src/bootstrap.ts:64`), yet the UI promises approval emails, sign-up emails and completion
+  emails in several places.
+- **Many settings are saved but never read.** These include payment routing (`stateFeeCards` is
+  never called), `portalDefaults`, `channels`, and `documentsTo` (H1). Users will think they have
+  configured things that do nothing.
+- Missing outright: subscription billing, a password reset, permanent branded per-service pages,
+  a client address book, fonts, channel connectors (email, Slack, WhatsApp) and the 20-persona
+  copy review.
+- Web checks pass: `npm test` 20/20, `typecheck` clean, `next build` succeeds. The engine suite was
+  not run in this check (it needs Chromium and embedded Postgres); CI runs it on pull requests.
+
+## Status by requirement
+
+### Filing engine
+
+| # | Memo asks for | Status | Where / what's missing |
+|---|---|---|---|
+| 1 | NY, NJ, FL, all filing types, and IRS EIN mapped and live | Partial | `src/adapters/index.ts`. Every adapter is `complete: false`, so `preflight.ts:53` blocks live runs. **NY formation:** deposit throws (`ny-formation/adapter.ts:105`) and the page after File Document isn't mapped. **NJ formation and standing:** the NICUSA checkout isn't mapped. **FL:** the card page isn't mapped. **IRS:** the EIN Assignment screen isn't mapped. **NJ-REG and NYS-100:** built from the paper forms, not the walked maps (`docs/portal-maps/nj-reg.md`, `ny-nys100-unemployment.md`). **MO:** every `fill` throws. Mapped in the docs with no adapter: NY dissolution, amendment, certificate of change, copies and certificates of status; NJ for-profit corporation. |
+| 2 | Filings use the stored payment methods, with a backup if the first fails | Partial | `src/settings/payments.ts` models a default card, `fallbackMethodId` and per-filing routing, but nothing reads it, and the vault has no card type. The FL Sunbiz prepaid account is the only payment path that works. This contradicts decision 3 (see Decisions below). |
+| 3 | State logins saved securely, used on every filing | Partial | The `Vault` interface exists, but production uses `EnvVault` (environment variables). Nothing writes `portalLogins`, and the dashboard's "Connect" button is disabled. Sign-ins depend on Steel profiles saved by hand. |
+| 4 | Per-state defaults (registered agent, service of process, signer, organizer), overridden by what the submission says | Partial | Precedence and provenance work (`src/settings/policies.ts:96-223`: the filing value wins and each field records its source). But defaults are one per tenant or firm, not per state. `portalDefaults` is saved but never read. The NY adapter never fills the registered agent. There's no UI for these fields; only staff can set them. |
+| 5 | Stop at the state review page, email a screenshot, pay and submit after approval | Partial | Client approval happens **before** the run, on a signed link with no screenshot (`src/approvals`). A beta review gate does take a screenshot at the review page (`run.ts:121-130`), but it is staff-only, off by default, and only on the FL, IRS and NY formation screens. After approval it re-runs from scratch in a new browser and never compares the result with what was approved. See Decisions. |
+| 6 | Send filings to the engine through email, Slack or WhatsApp | Missing | The `channels` schema exists and isn't read. There is no inbound parsing and no senders; the only intake is `POST /v1/filings`. |
+| 7 | Fetch the EIN PDF as soon as it appears | Partial, **will fail** | The CP 575 download exists (`irs-ein/adapter.ts:340-358`). But the Assignment screen gets a drift check before it's filled (`run.ts:118`). A screen never seen before halts by default (`run.ts:274-280`), and a dry run never reaches this one. So the first live run halts after submit, before the download, and the letter is lost. Every adapter's post-submit screen has the same problem. |
+| 8 | Enterprise picks the state copy email; the CPA firm goes in NY's CC | Partial | NY formation fills CC only from a per-filing field (`ny-formation/adapter.ts:304`). There's no tenant or firm setting for it, and nothing puts the CPA firm's email in automatically. E-Submission never fills CC. |
+
+### Landing, login and accounts
+
+| # | Memo asks for | Status | Where / what's missing |
+|---|---|---|---|
+| 9 | Landing page with compelling copy | Done | `web/app/page.tsx`. The copy is specific and builds trust. Some claims go further than the code: "cards and logins in a vault", "connected securely", subscription cards. `web/app/layout.tsx:6` sets `robots: noindex`, so search engines won't index the page. |
+| 10 | Three paths: create an account (CPA, CFO, payroll), request Enterprise, log in | Done | Firm types are one dropdown. Title companies, which `docs/scope.md` names, aren't offered. |
+| 11 | One login, routed automatically to the enterprise or partner dashboard | Done | `web/lib/accounts.ts:21-52`. A second, API-key login still exists at `/dashboard/login`. |
+| 12 | Forgot password and the account basics | Missing | There's no reset, change-password or email verification flow. Logout doesn't revoke the engine session key (it lasts 12 h for enterprise, 7 days for partners). No error pages: an engine 401 or 5xx shows the raw Next.js error. |
+| 13 | Enterprise request form, then staff follow-up, then a login | Partial | The form stores the request (`POST /v1/inquiries`), and the platform tenant can see the list. Creating the account means staff running curl commands with a password they choose and pass on by hand. There's no invite or set-password email and no Google sign-in. |
+
+### Enterprise
+
+| # | Memo asks for | Status | Where / what's missing |
+|---|---|---|---|
+| 14 | Full API and webhook docs, readable by humans and AI agents, downloadable | Partial | There are 8 guides, a 25-endpoint reference and `/openapi.json`. The OpenAPI schemas are bare `{type: "object"}` with no `webhooks` section and no FilingRequest schema. There's no `llms.txt`, single-file Markdown or download. Samples are curl and JavaScript only. One guide links to a repo file outsiders can't see. |
+| 15 | Plug into their website; filings arrive from their site | Partial | API keys and the webhook editor work. Webhooks return 409 until staff configure the tenant. There's no test delivery or delivery log, no cancel endpoint, no pagination on `GET /v1/filings`, and `filing.accepted`/`filing.rejected` are never emitted. `X-Frame-Options: DENY` blocks embedding. |
+| 16 | Subscription billing with set pricing | Missing | There are no plans, prices, processor or invoices. |
+| 17 | Setup page for each portal's login (NY DOS, NYS-100, NJ, IRS, FL) | Partial | The portal list renders, but the Connect buttons are disabled (row 3). |
+| 18 | Resend email for screenshots, approvals and notices | Missing | There is no email sender of any kind. |
+
+### Partner front end (CPA, payroll)
+
+| # | Memo asks for | Status | Where / what's missing |
+|---|---|---|---|
+| 19 | Sign up, log in, setup guide | Done | Accounts wait for approval unless `PARTNER_SIGNUP_MODE=automatic`. The "states you file in" answer is collected and never used. |
+| 20 | Name, logo, colors, **fonts** (presets and upload) | Partial | Name, logo and two colors exist. Fonts are missing entirely: `globals.css` hard-codes system fonts. |
+| 21 | Pay Keystone (subscription) and filing payment methods | Partial | Only a card-routing preference saves, with no card able to be added. There is no subscription for partners. The payments step is marked done with zero cards. |
+| 22 | Portal lists filings by state, then filing type | Done (dry run) | **NY:** LLC, corporation, NYS-100, Application for Authority, Assumed Name. **NJ:** LLC, NJ-REG. **FL:** LLC, profit corporation, LP. The EIN is offered under every state. All are dry runs. Partners can't choose which filings they offer. |
+| 23 | Permanent branded page per partner per service (`/bestaccounting/llc-filing-new-york`) | Missing | Only one-off `/i/<token>` links exist: one per client, one filing each, expiring within 30 days, and they can't be listed or revoked. The approval page shows Keystone's brand, not the partner's (`src/api/server.ts:242`). |
+| 24 | Finished filing emailed back to the partner | Missing | The completion message goes to approvers through the log sender, with the text "Documents are available." and no link or attachment. |
+| 25 | Minimal forms: no duplicates, "Same as", optional questions folded | Partial | Folding, paired fields and address "Same as" exist. Duplicates remain: **FL** asks for correspondence contact and filing contact separately. **NY** asks for SOP email, contact email and CC. **EIN** asks again for the state and the physical state. **NYS-100** asks for phone numbers even when "same as business" is ticked. **NJ-REG** asks for signer and contact separately. There's no "Same as" for people (organizer equal to a member). Saved firm defaults never skip a question. |
+| 26 | Save client information for next time | Missing | There's no address book or prefill. |
+| 27 | Partner saves its registered agent per state; no state passwords | Partial | Partners correctly can't enter logins. But they can't set a registered agent or any other default either, and the engine holds one agent per firm, not per state. |
+| 28 | Client submissions go straight into the engine and get filed | Done, to approval | `/i/<token>` goes to `POST /v1/filings` and then the approval link (which isn't sent; row 18). |
+
+### Other
+
+| # | Memo asks for | Status | Where / what's missing |
+|---|---|---|---|
+| 29 | Review the copy with 20 simulated personas and apply the best | Missing | Not started. |
+
+## Decisions needed (the memo changes earlier decisions)
+
+1. **Approval at the review page (memo) vs. approval before the run (decision 2, Nov 15).**
+   Decision 2 moved approval before the run because email replies are slow and IRS sessions time out
+   after about 15 minutes, so a browser can't wait at the review page for an email answer.
+   Recommendation: keep one client approval, but base it on the real review page.
+   1. A preview pass (a dry run) goes to the state's review page, takes a screenshot and stops.
+   2. The client approves that screenshot together with the payload.
+   3. The live pass must reproduce the same review page before it pays: the same text, the same
+      fee, and a matching payload hash. It halts if anything differs.
+
+   This is close to what the beta review gate does. It needs to become client-facing, run on every
+   adapter, and compare the live pass with what was approved.
+2. **Stored payment cards (memo) vs. "no cards or ACH in our vault" (decision 3).** The memo wants
+   cards, a backup card, and an engine that types them in. A card the engine types into a state
+   checkout has to exist as a raw card number on the worker at run time. Stripe never releases raw
+   numbers of saved cards, so Stripe can't be that vault. The options:
+   - **A. Keystone pays the states with virtual cards** (recommended for the partner front end).
+     Issue a single-use card per filing, locked to the approved amount, from a card-issuing API
+     such as Stripe Issuing or Lithic. Recover the fee from the customer through Stripe Billing,
+     alongside the subscription. Customers' card numbers never reach the worker, and a backup
+     method is simply the customer's backup card in Stripe.
+   - **B. Store each enterprise's own cards** in a card vault built for passing them on (VGS or
+     Basis Theory). The worker detokenizes a card at the payment screen. This puts the worker
+     machine in PCI scope and needs a compliance review.
+   - **C. Prefer state prepaid accounts wherever they exist**: NY DOS drawdown and the FL Sunbiz
+     E-file account. These need no card at all, and C combines with A or B.
+   
+   Recommendation: C everywhere it's available, A for partners, and B only if an enterprise
+   insists on its own cards.
+3. **Where state logins live.** Use a real secret store with per-tenant keys in place of `EnvVault`.
+   Options are a cloud KMS with envelope encryption in Postgres, HashiCorp Vault, or 1Password
+   service accounts. Add a write path (the dashboard's Connect form posts once and never reads the
+   password back) and MFA handling per portal.
+
+## How the channels would get running
+
+- **Email out (Resend):** Verify `keystonefilings.com` in Resend (SPF and DKIM DNS records), add a
+  `ResendSender` behind the existing `ChannelSender` interface (`src/comms/senders.ts`), and store
+  the API key as a secret. This one change makes approvals, sign-up, reset and completion emails
+  real, so it should come first.
+- **Email in:** Use a dedicated inbound address (for example `file@...`) through an inbound-parse
+  webhook (Postmark, SendGrid, or Resend's inbound if it fits).
+- **Slack:** Build a Slack app that each customer installs with OAuth, using a message shortcut or
+  slash command. It needs a public HTTPS events endpoint on the API.
+- **WhatsApp:** Use the Meta WhatsApp Business Platform, directly or through Twilio. It needs Meta
+  business verification, a dedicated number and approved message templates; expect days to weeks
+  for verification.
+- **SMS:** Use Twilio, with US A2P 10DLC brand and campaign registration (also days to weeks).
+
+The rule for every inbound channel: free text never files directly. Each message becomes a
+**draft** filing with Claude extracting the fields. The reply is a link to the prefilled intake
+form, which asks only for what's missing, and the normal approval follows. The audit trail and the
+payload-hash approval stay as they are.
+
+## Risks found during the check (not in the memo)
+
+1. **CP 575 loss on the first live EIN run** (row 7). Fix this before any live EIN: let
+   post-submit screens skip the first-observation halt, and collect artifacts before any check
+   that can throw.
+2. **NYS-100 shares one browser profile across tenants.** `ny-payroll` uses the global profile
+   `"nygov"` (`src/adapters/ny-payroll/adapter.ts:110`); every other NY adapter scopes it to
+   `ny:<tenantId>`. This breaks the isolation rule in `docs/scope.md`.
+3. **SSNs are stored in plain text** in `filings.doc`, with no purge job, although
+   `src/domain/filing.ts:46` promises one.
+4. **UI promises that aren't kept.** Approval, sign-up and completion emails never go out, and
+   setup pages save settings nothing reads. Either wire them up or soften the wording until they
+   work.
+5. **Firm invite links carry the inviter's engine key.** A "7-day" invite dies when the 12-hour
+   session does. The invitee holds a key for the whole tenant, limited to one firm only by the
+   front end (`web/app/dashboard/(app)/firms/[id]/actions.ts:64`).
+6. **Idempotency key reuse.** A reused key with a different payload silently returns the old
+   filing (`src/orchestrator/service.ts:100-105`). It should be a 409.
+7. **CI gaps.** CI doesn't run on push to `main`, and `fly-deploy.yml` deploys with no test gate.
+
+## Suggested order
+
+1. **Make what exists honest and safe.**
+   - The Resend sender.
+   - Password reset and invite emails.
+   - Fix the CP 575 halt.
+   - Scope the NYS-100 profile per tenant.
+   - Encrypt SSNs and add the purge job.
+   - Soften the UI copy that promises unbuilt features.
+2. **First live filing, end to end, on one portal.** NY LLC on the drawdown account is the
+   shortest path (decision 3, prepaid). Map the deposit and post-submit pages, set
+   `complete: true`, and send the completion email with the documents. Then FL on Sunbiz prepaid,
+   then the IRS EIN.
+3. **Settle decisions 1 and 2 above**, then build the review-page screenshot approval and the
+   payment approach you choose.
+4. **Partner front end.**
+   - Permanent branded pages `/<partner>/<filing>`.
+   - Fonts.
+   - Per-state registered agent and other defaults that skip questions.
+   - A client address book.
+   - Removing the duplicate questions in row 25.
+   - Partner-branded approval pages.
+5. **Enterprise.**
+   - The secret store and the Connect form for logins.
+   - Per-state defaults the adapters actually read.
+   - A copy and CC email setting.
+   - Staff approval of enterprise requests with an invite email.
+   - Stripe Billing subscriptions.
+   - Full OpenAPI schemas, `llms.txt` and a downloadable docs bundle.
+6. **Channels**, in this order: email in, Slack, WhatsApp, SMS.
+7. **20-persona copy review**, once the features the copy describes are real.
