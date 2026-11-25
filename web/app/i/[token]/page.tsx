@@ -5,6 +5,7 @@ import { platformName } from "@/lib/brand";
 import { listSignatures } from "@/lib/signatures";
 import { IntakeForm } from "@/components/IntakeForm";
 import { submitClientIntake } from "./actions";
+import { CLOSED_TEXT, linkRecord } from "@/lib/intake-links";
 import { BrandFont } from "@/components/BrandFont";
 
 export const metadata = { title: "Your filing" };
@@ -16,6 +17,10 @@ export default async function ClientIntakePage({ params }: { params: Promise<{ t
     return <main className="wrap narrow"><h1>This link has expired or isn&apos;t valid</h1><p>Ask whoever sent it for a new one.</p></main>;
   }
   const key = intakeKey(link);
+  const record = await linkRecord(key, link.clientCompanyId, link.nonce).catch(() => null);
+  if (record && record.state !== "open") {
+    return <main className="wrap narrow"><h1>This link can&apos;t be used</h1><p>{CLOSED_TEXT[record.state]}</p></main>;
+  }
   const company = await loadCompany(key, link.clientCompanyId);
   const brand = brandOf(company);
   const kind = filingKind(link.kind);

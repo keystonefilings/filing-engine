@@ -18,6 +18,7 @@ import { renderNameResolutionPage } from "../name-resolution/render.js";
 import { renderReviewGatePage } from "../review-gate/render.js";
 import { registerUsers, portalSlugFor, type Auth, type PartnerSignupMode } from "../users/routes.js";
 import { registerBrandLogos } from "./brand-logos.js";
+import { registerIntakeLinks } from "./intake-links.js";
 import { readSessionKey, SESSION_PREFIX } from "../users/session-token.js";
 import { partnerGuard } from "../users/partner-guard.js";
 import { FONT_PRESETS, googleFontHref, type FontPreset } from "../settings/fonts.js";
@@ -285,6 +286,7 @@ export function buildServer(deps: ApiDeps): FastifyInstance {
   registerBrandLogos(app, { store: deps.store, artifacts: deps.artifacts, authOf });
   registerSelfService(app, { store: deps.store, tenantOf });
   registerSignatures(app, { store: deps.store, tenantOf });
+  registerIntakeLinks(app, { store: deps.store, authOf });
   registerUsers(app, {
     store: deps.store, authOf, staffOf, sessionSecret,
     platformTenantId: deps.platformTenantId ?? "keystone", partnerSignupMode: deps.partnerSignupMode ?? "approval",

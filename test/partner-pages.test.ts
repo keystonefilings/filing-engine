@@ -98,3 +98,28 @@ describe("the firm's font (V21)", () => {
     expect(page).toContain('font-family:"FirmFont"');
   });
 });
+
+describe("client links: list, turn off, one use (V26)", () => {
+  it("records a link, lists it, refuses a second use, and lets the firm turn it off", async () => {
+    const { key, firm } = await partner("Link Firm", "li@link-firm.test");
+    const base = `/v1/client-companies/${firm}/intake-links`;
+    const h = { "x-api-key": key };
+    const make = (id: string) => app.inject({ method: "POST", url: base, headers: h, payload: { id, kind: "ny-llc", label: "Sam's LLC", expiresAt: new Date(Date.now() + 86_400_000).toISOString() } });
+    expect((await make("AAAAAAAAAAAAAAAA")).statusCode).toBe(201);
+    expect((await make("BBBBBBBBBBBBBBBB")).statusCode).toBe(201);
+    expect((await make("AAAAAAAAAAAAAAAA")).statusCode).toBe(409);
+    const list = (await app.inject({ method: "GET", url: base, headers: h })).json().links;
+    expect(list.map((l: { id: string; state: string }) => l.state)).toEqual(["open", "open"]);
+    // One use: the same filing again is fine (a retry), another filing is refused.
+    expect((await app.inject({ method: "POST", url: `${base}/AAAAAAAAAAAAAAAA/used`, headers: h, payload: { filingId: "f1" } })).json().link.state).toBe("used");
+    expect((await app.inject({ method: "POST", url: `${base}/AAAAAAAAAAAAAAAA/used`, headers: h, payload: { filingId: "f1" } })).statusCode).toBe(200);
+    expect((await app.inject({ method: "POST", url: `${base}/AAAAAAAAAAAAAAAA/used`, headers: h, payload: { filingId: "f2" } })).statusCode).toBe(409);
+    // Turned off: it can no longer be used.
+    expect((await app.inject({ method: "POST", url: `${base}/BBBBBBBBBBBBBBBB/revoke`, headers: h })).json().link.state).toBe("revoked");
+    expect((await app.inject({ method: "POST", url: `${base}/BBBBBBBBBBBBBBBB/used`, headers: h, payload: { filingId: "f3" } })).statusCode).toBe(409);
+    // Another firm can't see or touch them.
+    const other = await partner("Other Link Firm", "ol@other-link.test");
+    expect((await app.inject({ method: "GET", url: base, headers: { "x-api-key": other.key } })).statusCode).toBe(404);
+    expect((await app.inject({ method: "POST", url: `${base}/BBBBBBBBBBBBBBBB/revoke`, headers: { "x-api-key": other.key } })).statusCode).toBe(404);
+  });
+});

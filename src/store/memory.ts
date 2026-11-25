@@ -1,7 +1,7 @@
 import { randomUUID } from "node:crypto";
 import {
   ClientCompanyOwnershipError,
-  type ApiKeyRecord, type InquiryRecord, type UserRecord, type SignatureRecord, type ApprovalRecord, type DriftHaltRecord, type FilingRecord, type MessageRecord, type NameResolutionRecord, type ReviewGateRecord, type RunRecord, type Store, type SubmitIntentRecord, type WebhookDeliveryRecord,
+  type ApiKeyRecord, type InquiryRecord, type IntakeLinkRecord, type UserRecord, type SignatureRecord, type ApprovalRecord, type DriftHaltRecord, type FilingRecord, type MessageRecord, type NameResolutionRecord, type ReviewGateRecord, type RunRecord, type Store, type SubmitIntentRecord, type WebhookDeliveryRecord,
 } from "./types.js";
 import type { ClientCompanySettings, TenantSettings } from "../settings/schema.js";
 import type { PageSnapshot } from "../resolver/types.js";
@@ -34,6 +34,7 @@ export class MemoryStore implements Store {
   apiKeys = new Map<string, ApiKeyRecord>();
   users = new Map<string, UserRecord>();
   inquiries = new Map<string, InquiryRecord>();
+  intakeLinks = new Map<string, IntakeLinkRecord>();
   signatures = new Map<string, SignatureRecord>();
   /** Clock for lease expiry; injectable for tests. */
   now: () => number = () => Date.now();
@@ -127,6 +128,13 @@ export class MemoryStore implements Store {
   async updateUser(id: string, patch: Partial<UserRecord>) {
     const u = this.users.get(id); if (!u) throw new Error("user not found");
     const next = { ...u, ...patch, id: u.id, email: u.email }; this.users.set(id, next); return next;
+  }
+  async createIntakeLink(l: IntakeLinkRecord) { if (this.intakeLinks.has(l.id)) throw new Error("link exists"); this.intakeLinks.set(l.id, l); return l; }
+  async getIntakeLink(id: string) { return this.intakeLinks.get(id) ?? null; }
+  async listIntakeLinks(clientCompanyId: string) { return [...this.intakeLinks.values()].filter((l) => l.clientCompanyId === clientCompanyId).sort((a, b) => b.createdAt.localeCompare(a.createdAt)); }
+  async updateIntakeLink(id: string, patch: Partial<IntakeLinkRecord>) {
+    const l = this.intakeLinks.get(id); if (!l) throw new Error("link not found");
+    const next = { ...l, ...patch, id: l.id }; this.intakeLinks.set(id, next); return next;
   }
   async createInquiry(i: InquiryRecord) { this.inquiries.set(i.id, i); return i; }
   async listInquiries() { return [...this.inquiries.values()].sort((a, b) => b.createdAt.localeCompare(a.createdAt)); }

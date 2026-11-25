@@ -163,6 +163,16 @@ create table if not exists users (
 );
 create index if not exists users_tenant_idx on users (tenant_id);
 
+-- Client links (V26): one link, one client, one filing; listed and revocable by the firm.
+create table if not exists intake_links (
+  id text primary key,
+  tenant_id text not null,
+  client_company_id text not null,
+  created_at timestamptz not null default now(),
+  doc jsonb not null
+);
+create index if not exists intake_links_company_idx on intake_links (client_company_id, created_at desc);
+
 -- Enterprise contact-form requests from the landing page.
 create table if not exists inquiries (
   id uuid primary key,

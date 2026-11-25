@@ -4,7 +4,7 @@ import path from "node:path";
 import { randomUUID } from "node:crypto";
 import {
   ClientCompanyOwnershipError,
-  type ApiKeyRecord, type InquiryRecord, type UserRecord, type SignatureRecord, type ApprovalRecord, type DriftHaltRecord, type FilingRecord, type MessageRecord, type NameResolutionRecord, type ReviewGateRecord, type RunRecord, type Store, type SubmitIntentRecord, type WebhookDeliveryRecord,
+  type ApiKeyRecord, type InquiryRecord, type IntakeLinkRecord, type UserRecord, type SignatureRecord, type ApprovalRecord, type DriftHaltRecord, type FilingRecord, type MessageRecord, type NameResolutionRecord, type ReviewGateRecord, type RunRecord, type Store, type SubmitIntentRecord, type WebhookDeliveryRecord,
 } from "./types.js";
 import type { ClientCompanySettings, TenantSettings } from "../settings/schema.js";
 import type { PageSnapshot } from "../resolver/types.js";
@@ -240,6 +240,18 @@ export class PostgresStore implements Store {
     const r = await this.pool.query(`update users set doc = doc || $2::jsonb, tenant_id = coalesce($3, tenant_id) where id=$1 returning doc`, [id, JSON.stringify(rest), rest.tenantId ?? null]);
     if (!r.rows[0]) throw new Error("user not found");
     return r.rows[0].doc as UserRecord;
+  }
+  async createIntakeLink(l: IntakeLinkRecord) {
+    await this.pool.query(`insert into intake_links (id, tenant_id, client_company_id, doc) values ($1,$2,$3,$4)`, [l.id, l.tenantId, l.clientCompanyId, l]);
+    return l;
+  }
+  async getIntakeLink(id: string) { return this.doc<IntakeLinkRecord>(`select doc from intake_links where id=$1`, [id]); }
+  async listIntakeLinks(clientCompanyId: string) { return this.docs<IntakeLinkRecord>(`select doc from intake_links where client_company_id=$1 order by created_at desc limit 200`, [clientCompanyId]); }
+  async updateIntakeLink(id: string, patch: Partial<IntakeLinkRecord>) {
+    const { id: _i, ...rest } = patch;
+    const r = await this.pool.query(`update intake_links set doc = doc || $2::jsonb where id=$1 returning doc`, [id, JSON.stringify(rest)]);
+    if (!r.rows[0]) throw new Error("link not found");
+    return r.rows[0].doc as IntakeLinkRecord;
   }
   async createInquiry(i: InquiryRecord) {
     await this.pool.query(`insert into inquiries (id, doc) values ($1,$2)`, [i.id, i]);

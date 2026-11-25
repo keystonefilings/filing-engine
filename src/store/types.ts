@@ -254,6 +254,22 @@ export interface UserRecord {
   passwordReset?: { tokenHash: string; expiresAt: string; sessionGen: number; requestedAt: string; usedAt?: string };
 }
 
+/** V26: a link a firm sends one client to fill in one filing (the link itself is a sealed token in the web app). */
+export interface IntakeLinkRecord {
+  id: string;
+  tenantId: string;
+  clientCompanyId: string;
+  /** The service (web filing kind id). */
+  kind: string;
+  label?: string;
+  createdAt: string;
+  createdBy?: string;
+  expiresAt?: string;
+  revokedAt?: string;
+  usedAt?: string;
+  filingId?: string;
+}
+
 export interface PartnerSignupDetails {
   companyName: string;
   companyType: "cpa" | "payroll" | "cfo" | "other";
@@ -357,6 +373,10 @@ export interface Store {
   findUserByEmail(email: string): Promise<UserRecord | null>;
   listUsers(tenantId: string): Promise<UserRecord[]>;
   updateUser(id: string, patch: Partial<UserRecord>): Promise<UserRecord>;
+  createIntakeLink(l: IntakeLinkRecord): Promise<IntakeLinkRecord>;
+  getIntakeLink(id: string): Promise<IntakeLinkRecord | null>;
+  listIntakeLinks(clientCompanyId: string): Promise<IntakeLinkRecord[]>;
+  updateIntakeLink(id: string, patch: Partial<IntakeLinkRecord>): Promise<IntakeLinkRecord>;
   createInquiry(i: InquiryRecord): Promise<InquiryRecord>;
   listInquiries(): Promise<InquiryRecord[]>;
   // run leases: the worker running a filing holds and renews one; recovery skips live leases
