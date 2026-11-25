@@ -9,6 +9,7 @@ import {
 import type { ClientCompanySettings, TenantSettings } from "../settings/schema.js";
 import type { PageSnapshot } from "../resolver/types.js";
 import type { FilingStatus } from "../domain/states.js";
+import { FieldCipher, openFiling, sealFiling } from "./sensitive.js";
 
 /**
  * Applies the schema in one transaction under a transaction-scoped lock, so an API and a worker
@@ -33,16 +34,17 @@ async function applySchema(pool: pg.Pool, schema: string): Promise<void> {
 
 /** JSONB-document Postgres store. Schema: db/schema.sql (applied on connect). */
 export class PostgresStore implements Store {
-  private constructor(private readonly pool: pg.Pool) {}
+  /** cipher: SSNs in filings are sealed in the database (store/sensitive.ts); null keeps them plain (development). */
+  private constructor(private readonly pool: pg.Pool, private readonly cipher: FieldCipher | null = null) {}
 
-  static async connect(url: string): Promise<PostgresStore> {
+  static async connect(url: string, opts: { cipher?: FieldCipher | null } = {}): Promise<PostgresStore> {
     const pool = new pg.Pool({ connectionString: url, max: Number(process.env.PG_POOL_MAX) || 5, idleTimeoutMillis: 10_000 });
     // A hosted Postgres (Neon) closes idle connections when it scales to zero or its pooler
     // recycles them. Without a listener that error would crash the process; the pool simply
     // opens a new connection on the next query.
     pool.on("error", (e) => console.warn(`postgres: idle connection closed (${e.message.split("\n")[0]})`));
     await applySchema(pool, readFileSync(path.resolve("db/schema.sql"), "utf8"));
-    return new PostgresStore(pool);
+    return new PostgresStore(pool, opts.cipher ?? null);
   }
 
   async close(): Promise<void> { await this.pool.end(); }
@@ -59,34 +61,37 @@ export class PostgresStore implements Store {
     return r.rows.map((row) => row.doc as T);
   }
 
+  // Filings: SSNs are sealed on the way in and opened on the way out (store/sensitive.ts).
   async createFiling(f: FilingRecord) {
     await this.pool.query(
       `insert into filings (id, tenant_id, client_company_id, idempotency_key, status, payload_hash, doc) values ($1,$2,$3,$4,$5,$6,$7)`,
-      [f.id, f.tenantId, f.clientCompanyId, f.idempotencyKey, f.status, f.payloadHash, f],
+      [f.id, f.tenantId, f.clientCompanyId, f.idempotencyKey, f.status, f.payloadHash, sealFiling(f, this.cipher)],
     );
     return f;
   }
-  async getFiling(id: string) { return this.doc<FilingRecord>(`select doc from filings where id=$1`, [id]); }
+  async getFiling(id: string) { return openFiling(await this.doc<FilingRecord>(`select doc from filings where id=$1`, [id]), this.cipher); }
   async findFilingByIdempotency(tenantId: string, key: string) {
-    return this.doc<FilingRecord>(`select doc from filings where tenant_id=$1 and idempotency_key=$2`, [tenantId, key]);
+    return openFiling(await this.doc<FilingRecord>(`select doc from filings where tenant_id=$1 and idempotency_key=$2`, [tenantId, key]), this.cipher);
   }
   async updateFiling(id: string, patch: Partial<FilingRecord>) {
     const cur = await this.getFiling(id);
     if (!cur) throw new Error(`filing ${id} not found`);
     const next = { ...cur, ...patch, id, updatedAt: new Date().toISOString() };
-    await this.pool.query(`update filings set status=$2, doc=$3, updated_at=now() where id=$1`, [id, next.status, next]);
+    await this.pool.query(`update filings set status=$2, doc=$3, updated_at=now() where id=$1`, [id, next.status, sealFiling(next, this.cipher)]);
     return next;
   }
   async listFilings(tenantId?: string) {
-    return tenantId
-      ? this.docs<FilingRecord>(`select doc from filings where tenant_id=$1 order by created_at desc`, [tenantId])
-      : this.docs<FilingRecord>(`select doc from filings order by created_at desc`, []);
+    const rows = tenantId
+      ? await this.docs<FilingRecord>(`select doc from filings where tenant_id=$1 order by created_at desc`, [tenantId])
+      : await this.docs<FilingRecord>(`select doc from filings order by created_at desc`, []);
+    return rows.map((f) => openFiling(f, this.cipher));
   }
   async listFilingsByStatus(statuses: FilingStatus[], tenants?: string[]) {
-    return this.docs<FilingRecord>(
+    const rows = await this.docs<FilingRecord>(
       `select doc from filings where status = any($1::text[]) and ($2::text[] is null or tenant_id = any($2::text[])) order by created_at`,
       [statuses, tenants?.length ? tenants : null],
     );
+    return rows.map((f) => openFiling(f, this.cipher));
   }
 
   async createApproval(a: ApprovalRecord) {

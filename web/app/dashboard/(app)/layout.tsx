@@ -2,9 +2,13 @@ import Link from "next/link";
 import { TopBar } from "@/components/TopBar";
 import { isPlatformTenant, platformName } from "@/lib/brand";
 import { requireTenant } from "@/lib/session";
+import { redirect } from "next/navigation";
+import { engine, sessionEnded } from "@/lib/engine";
 
 export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
   const s = await requireTenant();
+  // An ended session (expired, signed out elsewhere, password changed) goes back to log in, not to an error page.
+  try { await engine(s.apiKey, "/v1/account"); } catch (e) { if (sessionEnded(e)) redirect("/session-ended"); }
   return (
     <>
       <TopBar brand={platformName()} href="/dashboard"

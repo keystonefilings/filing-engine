@@ -45,7 +45,8 @@ export class Notifier {
       if (!sender) { out.push(await this.deps.store.createMessage({ ...base, status: "skipped", error: `no sender for ${channel}` })); continue; }
       try {
         const res = await sender.send({ address: r.address, name: r.name }, { subject: rendered.subject, body: rendered.body, link: rendered.link, screenshotUrl });
-        out.push(await this.deps.store.createMessage({ ...base, status: res.ok ? "sent" : "failed", error: res.ok ? undefined : res.detail }));
+        // A message only recorded (no provider set up) is "skipped", never reported as sent.
+        out.push(await this.deps.store.createMessage({ ...base, status: res.notSent ? "skipped" : res.ok ? "sent" : "failed", error: res.ok && !res.notSent ? undefined : res.detail }));
       } catch (e) {
         out.push(await this.deps.store.createMessage({ ...base, status: "failed", error: (e as Error).message }));
       }

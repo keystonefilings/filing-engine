@@ -32,6 +32,11 @@ export async function engine<T = unknown>(apiKey: string | null, path: string, i
   return body as T;
 }
 
+/** The engine refused the key itself: the session expired, was signed out, or the password changed. */
+export function sessionEnded(e: unknown): boolean {
+  return e instanceof EngineError && e.status === 401 && (e.body as { error?: string } | null)?.error === "invalid api key";
+}
+
 // ---- Shapes the front end reads (a subset of the engine's records) ----
 
 export interface Account { tenantId: string; name: string; configured: boolean; branding: { displayName?: string; logoUrl?: string; supportEmail?: string }; webhookEndpointCount: number }

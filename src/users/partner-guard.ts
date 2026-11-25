@@ -37,6 +37,7 @@ const RULES: Record<string, Rule> = {
   "GET /v1/me": async () => true,
   "POST /v1/auth/sign-out-everywhere": async () => true,
   "POST /v1/auth/change-password": async () => true,
+  "POST /v1/auth/sign-out": async () => true,
   "GET /v1/portals": async () => true,
   "GET /v1/events": async () => true,
   "POST /v1/filings": bodyFirm,
@@ -59,7 +60,7 @@ const RULES: Record<string, Rule> = {
 };
 
 /** Routes anyone may call without a key; a partner session presented there changes nothing. */
-const PUBLIC = /^(GET|POST) (\/healthz|\/approve\/|\/admin\/|\/v1\/auth\/sign-in|\/v1\/auth\/password-reset|\/v1\/signups\/|\/v1\/inquiries$|\/v1\/brand-logos\/)/;
+const PUBLIC = /^(GET|POST) (\/healthz|\/approve\/|\/admin\/|\/v1\/auth\/sign-in|\/v1\/auth\/password-reset|\/v1\/auth\/verify-email|\/v1\/signups\/|\/v1\/inquiries$|\/v1\/brand-logos\/)/;
 
 export function partnerGuard(deps: GuardDeps) {
   return async (req: FastifyRequest, reply: FastifyReply) => {

@@ -3,6 +3,7 @@ import { buildServer } from "./api/server.js";
 import { config } from "./config.js";
 import { parseApiKeys, parseStaffKeys } from "./api/keys.js";
 import { exitOnStartupProblems } from "./startup-check.js";
+import { purgeSensitive } from "./store/sensitive.js";
 
 /**
  * Cloud tier: API + approval pages + webhook delivery. With WORKER_ENABLED=true the
@@ -26,6 +27,12 @@ const app = buildServer({
 });
 
 setInterval(() => void sys.webhooks.processDue(), 15_000).unref();
+// SSNs of filings finished SENSITIVE_RETENTION_DAYS ago are replaced by their masked form.
+const purge = () => void purgeSensitive(sys.store, { retentionDays: config.sensitiveRetentionDays })
+  .then((ids) => { if (ids.length) console.log(`purged SSNs from ${ids.length} finished filing(s)`); })
+  .catch((e) => console.warn(`SSN purge failed: ${(e as Error).message.split("\n")[0]}`));
+purge();
+setInterval(purge, 3_600_000).unref();
 if (config.workerEnabled) {
   // Same lease-aware recovery as the worker tier, on start and then periodically.
   const recover = async () => {

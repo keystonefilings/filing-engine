@@ -28,7 +28,8 @@ export async function bootstrap(opts: { withExecutor: boolean; workerId?: string
     // Shared database: the cloud tier and the fixed-IP worker meet in Postgres (store + queue).
     const { PostgresStore } = await import("./store/postgres.js");
     const { PgQueue } = await import("./orchestrator/pg-queue.js");
-    const pgStore = await PostgresStore.connect(config.databaseUrl);
+    const { FieldCipher } = await import("./store/sensitive.js");
+    const pgStore = await PostgresStore.connect(config.databaseUrl, { cipher: FieldCipher.fromSpec(config.dataEncryptionKey) });
     store = pgStore;
     queue = new PgQueue(pgStore.connectionPool);
   }

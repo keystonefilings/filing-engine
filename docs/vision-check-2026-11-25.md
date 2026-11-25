@@ -209,10 +209,10 @@ Rows refer to the status tables above.
 - [x] V2. Password reset (forgot password, then a link to set a new one) and change password (row 12). **Done**: `/forgot-password`, `/reset-password`, and Password pages in both dashboards; links are single-use, last an hour and end every session.
 - [x] V3. EIN CP 575: post-submit screens never halt on first sight; artifacts are collected even when confirmation fails (row 7, risk 1). **Done** (`src/orchestrator/run.ts`, `test/post-submit.test.ts`); also fixed in-run EIN artifacts all being stored as `cp575`.
 - [x] V4. NYS-100 browser profile scoped per tenant (risk 2). **Done**: profile `nygov:<tenant>` and credential `<tenant>/NYGOV`. *Deploy note: rename the Fly secret entry `STEEL_PROFILES` `nygov=` to `nygov:keystone=`.*
-- [ ] V5. SSNs encrypted at rest, plus the purge job `src/domain/filing.ts:46` promises (risk 3).
-- [ ] V6. UI copy matches what works: no promised emails, vaults or subscription cards that don't exist (risk 4, row 9).
-- [ ] V7. Email verification for new sign-ups, and logout revokes the engine session key (row 12).
-- [ ] V8. Error pages in the web app for an engine 401 or 5xx (row 12).
+- [x] V5. SSNs encrypted at rest, plus the purge job `src/domain/filing.ts:46` promises (risk 3). **Done** (`src/store/sensitive.ts`): AES-256-GCM per field in Postgres under `DATA_ENCRYPTION_KEY` (required in production); masked once a filing has been completed or aborted for `SENSITIVE_RETENTION_DAYS` (30). *Deploy note: set `DATA_ENCRYPTION_KEY` (`docs/deploy-fly.md`, step 3) before the next deploy, or the API won't start.*
+- [x] V6. UI copy matches what works: no promised emails, vaults or subscription cards that don't exist (risk 4, row 9). **Done for the app**: emails promised are now sent (V1); unsent messages are recorded as "skipped", never "sent"; the filing page says whether the approval link was emailed; sign-up and setup copy match. The landing page's vault lines describe V18 and V29 and get rewritten in the copy review (V44).
+- [x] V7. Email verification for new sign-ups, and logout revokes the engine session key (row 12). **Done**: partner sign-ups confirm their email (a button on the link page, so mail scanners can't confirm); `POST /v1/auth/sign-out` ends one session; the web logout calls it for password sessions.
+- [x] V8. Error pages in the web app for an engine 401 or 5xx (row 12). **Done**: an ended session goes to log in with a notice (`/session-ended`); `error.tsx` and `not-found.tsx` replace the raw Next.js pages.
 
 ### Step 2: first live filings (adapters)
 - [ ] V9. NY LLC and corporation live on the drawdown account: map the deposit and post-submit pages, `confirmSubmission`, `complete: true` (row 1). *Needs: a supervised live walk.*

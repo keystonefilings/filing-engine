@@ -13,13 +13,13 @@ const SECRET = "9b1e4c7a2d5f8036e1a4b7c0d3f6e9a2";
 /** A port nothing listens on: getting as far as connecting proves every start-up check passed. */
 const UNREACHABLE_DB = "postgres://filing:filing@127.0.0.1:1/filing";
 const VALID = {
-  API_KEYS: `${API_KEY}:keystone`, STAFF_API_KEYS: `${STAFF_KEY}:ops@keystone.test`, APPROVAL_SIGNING_SECRET: SECRET, DATABASE_URL: UNREACHABLE_DB,
+  API_KEYS: `${API_KEY}:keystone`, STAFF_API_KEYS: `${STAFF_KEY}:ops@keystone.test`, APPROVAL_SIGNING_SECRET: SECRET, DATABASE_URL: UNREACHABLE_DB, DATA_ENCRYPTION_KEY: "c".repeat(64),
 };
 /** What each process prints once it is up: seeing it means the refusal did not happen. */
 const STARTED = /listening on|worker started/;
 /** Settings the test controls; anything set in the test runner's own environment is dropped. */
 const CONTROLLED = [
-  "API_KEYS", "STAFF_API_KEYS", "APPROVAL_SIGNING_SECRET", "DATABASE_URL", "WORKER_ENABLED", "PORT", "NODE_ENV",
+  "API_KEYS", "STAFF_API_KEYS", "APPROVAL_SIGNING_SECRET", "DATABASE_URL", "DATA_ENCRYPTION_KEY", "WORKER_ENABLED", "PORT", "NODE_ENV",
   "BROWSER_PROXY", "SITE_PROXIES", "BROWSERS", "FLY_APP_NAME", "ARTIFACT_BUCKET", "BUCKET_NAME", "WORKER_WAKE_URL", "WORKER_WAKE_TOKEN", "WORKER_PORT",
 ];
 

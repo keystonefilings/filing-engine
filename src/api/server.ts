@@ -81,8 +81,9 @@ export function buildServer(deps: ApiDeps): FastifyInstance {
       if (!c) return null;
       const u = await deps.store.getUser(c.sub);
       if (!u || u.status !== "active" || u.sessionGen !== c.gen || u.tenantId !== c.tenantId || u.kind !== c.kind) return null;
-      if (u.kind === "partner") return u.clientCompanyId && u.clientCompanyId === c.clientCompanyId ? { tenantId: u.tenantId, user: u, partnerOf: u.clientCompanyId } : null;
-      return { tenantId: u.tenantId, user: u };
+      if (c.jti && u.revokedSessions?.some((r) => r.jti === c.jti)) return null;
+      if (u.kind === "partner") return u.clientCompanyId && u.clientCompanyId === c.clientCompanyId ? { tenantId: u.tenantId, user: u, partnerOf: u.clientCompanyId, session: c } : null;
+      return { tenantId: u.tenantId, user: u, session: c };
     }
     const fromEnv = lookupKey(deps.apiKeys, key);
     if (fromEnv) return { tenantId: fromEnv };

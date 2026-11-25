@@ -4,7 +4,7 @@ import { redirect } from "next/navigation";
 import { engine, EngineError, type Account, type ClientCompany, type SignInResult } from "./engine";
 import { readSession, writeSession } from "./session";
 
-export type FormState = { error?: string; issues?: Record<string, string>; ok?: boolean; message?: string } | null;
+export type FormState = { error?: string; issues?: Record<string, string>; ok?: boolean; message?: string; link?: { href: string; label: string } } | null;
 
 const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const text = (fd: FormData, k: string, max = 200) => String(fd.get(k) ?? "").trim().slice(0, max);
@@ -31,6 +31,7 @@ export async function signInWithEmail(_prev: FormState, fd: FormData): Promise<F
       if (e.status === 429) return { error: "Too many tries. Wait a few minutes and try again." };
       if (e.status === 403) {
         const status = (e.body as { status?: string } | null)?.status;
+        if (status === "unverified") return { error: "Confirm your email first: open the link we sent when you signed up.", link: { href: "/verify-email", label: "Send the link again" } };
         return { error: status === "pending" ? "Your account is waiting for approval. We'll email you when it's ready." : "This account can't sign in. Contact us if you think that's wrong." };
       }
     }
@@ -71,9 +72,9 @@ export async function signUpPartner(_prev: FormState, fd: FormData): Promise<For
   if (body.password !== String(fd.get("password2") ?? "")) issues.password2 = "The two passwords don't match.";
   if (body.website && !body.website.startsWith("https://")) body.website = `https://${body.website.replace(/^https?:\/\//, "")}`;
   if (Object.keys(issues).length) return { error: "Check the highlighted fields.", issues };
-  let status: string;
+  let approvalRequired = true;
   try {
-    status = (await engine<{ status: string }>(null, "/v1/signups/partner", { method: "POST", body })).status;
+    approvalRequired = (await engine<{ status: string; approvalRequired?: boolean }>(null, "/v1/signups/partner", { method: "POST", body })).approvalRequired !== false;
   } catch (e) {
     if (e instanceof EngineError && e.status === 422) {
       const found = issuesOf(e);
@@ -82,8 +83,8 @@ export async function signUpPartner(_prev: FormState, fd: FormData): Promise<For
     if (e instanceof EngineError && e.status === 429) return { error: "Too many sign-ups from here. Try again later." };
     return { error: "We can't create your account right now. Try again in a minute." };
   }
-  // "active" and "check_sign_in" both mean sign-ups open at once; "pending" waits for approval.
-  redirect(status === "pending" ? "/signup/sent" : "/login?new=1");
+  // Every new account confirms its email first; some also wait for approval.
+  redirect(`/signup/sent${approvalRequired ? "" : "?open=1"}`);
 }
 
 /** Enterprise contact form on the landing page. Nothing is emailed from here: requests wait in the platform dashboard. */
@@ -162,4 +163,28 @@ export async function changePassword(_prev: FormState, fd: FormData): Promise<Fo
   }
   await writeSession(s.kind === "firm" ? { ...s, apiKey: r.sessionKey, expiresAt: r.expiresAt } : { ...s, apiKey: r.sessionKey });
   return { ok: true, message: "Your password is changed. You're signed out everywhere else." };
+}
+
+/** The confirmation link's page: confirming takes a button press, so a mail scanner opening the link changes nothing. */
+export async function confirmEmail(_prev: FormState, fd: FormData): Promise<FormState> {
+  const token = String(fd.get("token") ?? "");
+  try {
+    const r = await engine<{ ok: boolean; status: string }>(null, "/v1/auth/verify-email", { method: "POST", body: { token } });
+    if (r.status === "active") return { ok: true, message: "Your email is confirmed. You can log in now.", link: { href: "/login", label: "Log in" } };
+    return { ok: true, message: "Your email is confirmed. We review new partner accounts and will email you as soon as yours is open." };
+  } catch (e) {
+    if (e instanceof EngineError && e.status === 410) return { error: "This link has expired or isn't valid. Ask for a new one below.", link: { href: "/verify-email", label: "Send a new link" } };
+    return { error: "We can't confirm your email right now. Try again in a minute." };
+  }
+}
+
+export async function resendConfirmation(_prev: FormState, fd: FormData): Promise<FormState> {
+  const email = text(fd, "email").toLowerCase();
+  if (!EMAIL.test(email)) return { error: "Enter the email you signed up with.", issues: { email: "Enter the email you signed up with." } };
+  try {
+    await engine(null, "/v1/auth/verify-email/resend", { method: "POST", body: { email } });
+  } catch {
+    return { error: "We can't send a link right now. Try again in a minute." };
+  }
+  return { ok: true, message: "If that email is waiting for confirmation, we've sent a new link. It works for 7 days." };
 }

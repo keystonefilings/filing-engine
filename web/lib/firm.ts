@@ -3,6 +3,8 @@ import { engine, type ClientCompany, type PortalBrand } from "./engine";
 import { requireFirm, type FirmSession } from "./session";
 import { FILING_KINDS, type FilingKind } from "./intake/forms";
 import { logoSrc, safeColor, textOn } from "./brand";
+import { redirect } from "next/navigation";
+import { sessionEnded } from "./engine";
 
 export interface FirmBrand { name: string; logoUrl?: string; color: string; color2: string; supportEmail?: string }
 
@@ -31,7 +33,14 @@ export const loadCompany = cache(async (apiKey: string, clientCompanyId: string)
 /** The signed-in firm for a portal page, its settings and brand. Redirects when not signed in to this portal. */
 export async function firmContext(slug: string): Promise<{ session: FirmSession; company: ClientCompany; brand: FirmBrand }> {
   const session = await requireFirm(slug);
-  const company = await loadCompany(session.apiKey, session.clientCompanyId);
+  let company: ClientCompany;
+  try {
+    company = await loadCompany(session.apiKey, session.clientCompanyId);
+  } catch (e) {
+    // The session ended at the engine (expired, signed out elsewhere, password changed).
+    if (sessionEnded(e)) redirect("/session-ended");
+    throw e;
+  }
   return { session, company, brand: brandOf(company) };
 }
 

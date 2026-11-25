@@ -7,6 +7,7 @@ export interface DeploySettings {
   role: "api" | "worker";
   production: boolean;
   databaseUrl: string | null;
+  dataEncryptionKey?: string | null;
   /** Fly sets FLY_APP_NAME on every machine. */
   onFly: boolean;
   artifactBucket: string | null;
@@ -20,6 +21,7 @@ export function deployProblems(s: DeploySettings): string[] {
   if (!s.production) return [];
   const p: string[] = [];
   if (!s.databaseUrl) p.push("DATABASE_URL is not set: filings would be kept in memory and lost on every restart");
+  if (s.databaseUrl && !s.dataEncryptionKey) p.push("DATA_ENCRYPTION_KEY is not set: Social Security numbers would be stored unencrypted (openssl rand -hex 32)");
   if (s.onFly && !s.artifactBucket) {
     p.push("no object storage for documents and screenshots (ARTIFACT_BUCKET or BUCKET_NAME): on Fly the API cannot read the worker's disk and every deploy wipes it; run fly storage create");
   }
@@ -37,7 +39,7 @@ export function startupProblems(role: "api" | "worker", env: NodeJS.ProcessEnv =
     }
   }
   p.push(...deployProblems({
-    role, production: config.production, databaseUrl: config.databaseUrl, onFly: !!env.FLY_APP_NAME,
+    role, production: config.production, databaseUrl: config.databaseUrl, dataEncryptionKey: config.dataEncryptionKey, onFly: !!env.FLY_APP_NAME,
     artifactBucket: config.artifactBucket, workerWakeUrl: config.workerWakeUrl, workerPort: config.workerPort, workerWakeToken: config.workerWakeToken,
   }));
   if (role === "worker" || config.workerEnabled) {

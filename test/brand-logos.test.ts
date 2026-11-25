@@ -4,6 +4,9 @@ import { buildServer } from "../src/api/server.js";
 import { FsArtifactStore } from "../src/artifacts/store.js";
 import { logoType, MAX_LOGO_BYTES } from "../src/api/brand-logos.js";
 import { seededStore, wire } from "./helpers.js";
+import type { OutboundMessage } from "../src/comms/senders.js";
+
+const mail: OutboundMessage[] = [];
 
 let app: FastifyInstance;
 let store: Awaited<ReturnType<typeof seededStore>>;
@@ -19,6 +22,7 @@ beforeAll(async () => {
   app = buildServer({
     service: w.service, approvals: w.approvals, store, artifacts: new FsArtifactStore("var/test-artifacts"), publicBaseUrl: "http://api.test",
     apiKeys: { k1: "keystone", k2: "other-co" }, sessionSecret: "session-secret-for-tests-0123456789", platformTenantId: "keystone", partnerSignupMode: "automatic",
+    email: { channel: "email", async send(_to, msg) { mail.push(msg); return { ok: true }; } }, webBaseUrl: "http://web.test",
   });
   await app.ready();
 });
@@ -82,6 +86,8 @@ describe("uploaded logos", () => {
   it("lets a partner change only its own firm's logo", async () => {
     const r = await app.inject({ method: "POST", url: "/v1/signups/partner", payload: { companyName: "Logo Test CPA", companyType: "cpa", name: "Lee Park", email: "lee@logo-test.test", password: PW, states: ["NY"] } });
     expect(r.statusCode).toBeLessThan(300);
+    const token = new URL(mail.find((m) => m.subject === "Confirm your email")!.link!).searchParams.get("token");
+    expect((await app.inject({ method: "POST", url: "/v1/auth/verify-email", payload: { token } })).statusCode).toBe(200);
     const key = (await app.inject({ method: "POST", url: "/v1/auth/sign-in", payload: { email: "lee@logo-test.test", password: PW } })).json().sessionKey as string;
     const firm = "firm-logo-test-cpa";
     expect((await app.inject({ method: "PUT", url: `/v1/client-companies/${firm}/logo`, headers: as(key), payload: { data: PNG.toString("base64") } })).statusCode).toBe(200);

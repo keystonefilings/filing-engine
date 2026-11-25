@@ -18,6 +18,12 @@ export default async function FilingPage({ params }: { params: Promise<{ slug: s
   }
   const { filing: f, run, approvalLink } = data;
   if (f.clientCompanyId !== session.clientCompanyId) notFound();
+  // What actually happened to the approval email, so the page never claims a send that didn't happen.
+  const messages = approvalLink
+    ? (await engine<{ messages: { eventType: string; channel: string; address: string; status: string; createdAt: string }[] }>(session.apiKey, `/v1/filings/${encodeURIComponent(id)}/messages`).catch(() => ({ messages: [] }))).messages
+    : [];
+  const approvalSends = messages.filter((m) => m.eventType === "filing.awaiting_approval");
+  const emailedTo = approvalSends.filter((m) => m.status === "sent").map((m) => m.address);
   const base = `/p/${encodeURIComponent(slug)}`;
   const portal = (f.request.intake as { portal?: { kind?: string; submittedBy?: string; source?: string } } | undefined)?.portal;
   const kind = filingKind(portal?.kind ?? "");
@@ -33,7 +39,12 @@ export default async function FilingPage({ params }: { params: Promise<{ slug: s
       {approvalLink ? (
         <div className="card">
           <strong>Approval link</strong>
-          <p className="small muted">The approver was sent this link. If they can&apos;t find it, you can pass it on. It shows exactly what will be filed and the fees.</p>
+          <p className="small muted">
+            {emailedTo.length
+              ? <>We emailed this link to {Array.from(new Set(emailedTo)).join(", ")}. If they can&apos;t find it, you can pass it on.</>
+              : <>This link hasn&apos;t been emailed{approvalSends.some((m) => m.status === "failed") ? " (sending failed)" : ""}. Send it to the person who approves the filing.</>}
+            {" "}It shows exactly what will be filed and the fees.
+          </p>
           <p className="secret small">{approvalLink}</p>
         </div>
       ) : null}

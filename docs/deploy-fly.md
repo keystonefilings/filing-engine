@@ -45,7 +45,7 @@ make sure it ends in `?sslmode=require`. The engine creates its tables on first 
 
 ## 3. Set the secrets
 
-All six are required: the API and the worker refuse to start, listing everything missing, until
+All seven are required: the API and the worker refuse to start, listing everything missing, until
 they are set. `--stage` holds them for the first deploy.
 
 Two values you paste. `read -s` asks without showing the value or saving it in shell history:
@@ -64,6 +64,14 @@ Two values only the machines need, generated in place and never shown:
 
 ```bash
 fly secrets set --stage --app keystone-filing-engine APPROVAL_SIGNING_SECRET="$(openssl rand -hex 32)" WORKER_WAKE_TOKEN="$(openssl rand -hex 32)"
+```
+
+`DATA_ENCRYPTION_KEY` seals Social Security numbers in the database. Without it they can't be read
+back, so it goes into a file only you can read, then into the password manager (delete the file
+after). Never change it once filings exist: rows sealed with one key can't be opened with another.
+
+```bash
+(umask 077 && openssl rand -hex 32 > ~/fe-data-key) && fly secrets set --stage --app keystone-filing-engine DATA_ENCRYPTION_KEY="$(cat ~/fe-data-key)"
 ```
 
 Two keys people use: the caller key (keystonefilings.com calls the engine with it) and the
@@ -90,11 +98,12 @@ folder encrypted with Windows DPAPI (readable only by the same Windows account o
 & {
   $rng = [Security.Cryptography.RandomNumberGenerator]::Create()
   function New-Hex { $b = New-Object byte[] 32; $rng.GetBytes($b); -join ($b | ForEach-Object { $_.ToString('x2') }) }
-  $api = New-Hex; $staff = New-Hex
+  $api = New-Hex; $staff = New-Hex; $data = New-Hex
   ConvertTo-SecureString $api -AsPlainText -Force | ConvertFrom-SecureString | Set-Content "$HOME\fe-api-key.dpapi"
   ConvertTo-SecureString $staff -AsPlainText -Force | ConvertFrom-SecureString | Set-Content "$HOME\fe-staff-key.dpapi"
-  .\flyctl secrets set --stage --app keystone-filing-engine "API_KEYS=$($api):keystone" "STAFF_API_KEYS=$($staff):ops@keystone" "APPROVAL_SIGNING_SECRET=$(New-Hex)" "WORKER_WAKE_TOKEN=$(New-Hex)"
-  if ($LASTEXITCODE -eq 0) { 'Done: 4 secrets staged. Keys saved encrypted in your home folder.' } else { 'flyctl failed: run this block again.' }
+  ConvertTo-SecureString $data -AsPlainText -Force | ConvertFrom-SecureString | Set-Content "$HOME\fe-data-key.dpapi"
+  .\flyctl secrets set --stage --app keystone-filing-engine "API_KEYS=$($api):keystone" "STAFF_API_KEYS=$($staff):ops@keystone" "APPROVAL_SIGNING_SECRET=$(New-Hex)" "WORKER_WAKE_TOKEN=$(New-Hex)" "DATA_ENCRYPTION_KEY=$($data)"
+  if ($LASTEXITCODE -eq 0) { 'Done: 5 secrets staged. Keys saved encrypted in your home folder.' } else { 'flyctl failed: run this block again.' }
 }
 ```
 

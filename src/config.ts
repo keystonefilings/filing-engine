@@ -35,6 +35,14 @@ export const config = {
   approvalSigningSecret: collect(() => signingSecretFrom(process.env.APPROVAL_SIGNING_SECRET, production), ""),
   approvalTtlHours: envInt("APPROVAL_TTL_HOURS", 168),
   databaseUrl: process.env.DATABASE_URL || null,
+  /** Seals SSNs in the database (store/sensitive.ts): 64 hex characters. Required in production. */
+  dataEncryptionKey: collect(() => {
+    const v = process.env.DATA_ENCRYPTION_KEY || null;
+    if (v && !/^[0-9a-fA-F]{64}$/.test(v)) throw new Error("DATA_ENCRYPTION_KEY must be 64 hex characters (openssl rand -hex 32)");
+    return v;
+  }, null),
+  /** Days after a filing is completed or aborted before its SSNs are replaced by the masked form. */
+  sensitiveRetentionDays: envInt("SENSITIVE_RETENTION_DAYS", 30),
   artifactDir: path.resolve(env("ARTIFACT_DIR", "./var/artifacts")),
   /** Object storage for artifacts, shared by an API and a worker on different machines (Fly.io).
    *  Fly Tigris (fly storage create) sets BUCKET_NAME and the AWS_* variables; unset = ARTIFACT_DIR. */

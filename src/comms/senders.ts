@@ -15,7 +15,8 @@ export interface OutboundMessage {
  */
 export interface ChannelSender {
   channel: Channel;
-  send(to: { address: string; name?: string }, msg: OutboundMessage): Promise<{ ok: boolean; detail?: string }>;
+  /** notSent: accepted but not delivered to anyone (no provider is set up for the channel). */
+  send(to: { address: string; name?: string }, msg: OutboundMessage): Promise<{ ok: boolean; detail?: string; notSent?: boolean }>;
 }
 
 /**
@@ -29,6 +30,6 @@ export class LogChannelSender implements ChannelSender {
   async send(to: { address: string; name?: string }, msg: OutboundMessage) {
     this.sent.push({ address: to.address, subject: msg.subject });
     if (this.opts.print) console.log(`[${this.channel} not sent: no provider] to ${to.address}: ${msg.subject}${msg.link ? `\n  ${msg.link}` : ""}`);
-    return { ok: true, detail: "logged (no provider wired)" };
+    return { ok: true, notSent: true, detail: `not sent: no ${this.channel} provider is set up` };
   }
 }

@@ -12,8 +12,9 @@ function Err({ s, k }: { s: FormState; k: string }) {
 }
 
 function Msg({ s }: { s: FormState }) {
-  if (s?.error) return <p className="form-msg bad" role="alert">{s.error}</p>;
-  if (s?.message) return <p className="form-msg good" role="status">{s.message}</p>;
+  const link = s?.link ? <> <Link href={s.link.href}>{s.link.label}</Link></> : null;
+  if (s?.error) return <p className="form-msg bad" role="alert">{s.error}{link}</p>;
+  if (s?.message) return <p className="form-msg good" role="status">{s.message}{link}</p>;
   return <p className="form-msg" role="status" />;
 }
 
@@ -111,7 +112,7 @@ export function PartnerSignupForm({ action, approvalRequired }: { action: Action
           <option>Under 10</option><option>10 to 50</option><option>50 to 200</option><option>Over 200</option>
         </select></label>
       <button className="btn btn-primary" type="submit" disabled={pending}>{pending ? "Creating…" : "Create account"}</button>
-      <p className="hero-note">{approvalRequired ? "We review new accounts before they open, and email you when yours is ready." : "Your account opens straight away."} Already have one? <Link href="/login">Log in</Link>.</p>
+      <p className="hero-note">{approvalRequired ? "You'll confirm your email, then we review new accounts before they open and email you when yours is ready." : "Your account opens as soon as you confirm your email."} Already have one? <Link href="/login">Log in</Link>.</p>
       <Msg s={s} />
     </form>
   );
@@ -137,6 +138,30 @@ export function InquiryForm({ action }: { action: Action }) {
       <label htmlFor="bf-msg">What you&apos;d like to do (optional)<textarea id="bf-msg" name="message" maxLength={2000} /></label>
       <div className="hp" aria-hidden="true"><label htmlFor="bf-website">Leave this empty<input id="bf-website" name="website" tabIndex={-1} autoComplete="off" /></label></div>
       <button className="btn btn-primary" type="submit" disabled={pending}>{pending ? "Sending…" : "Send"}</button>
+      <Msg s={s} />
+    </form>
+  );
+}
+
+export function ConfirmEmailForm({ action, token }: { action: Action; token: string }) {
+  const { state: s, pending, formProps } = useKeptForm(action, null);
+  if (s?.ok) return <Msg s={s} />;
+  return (
+    <form {...formProps}>
+      <input type="hidden" name="token" value={token} />
+      <button className="btn btn-primary" type="submit" disabled={pending}>{pending ? "Confirming…" : "Confirm my email"}</button>
+      <Msg s={s} />
+    </form>
+  );
+}
+
+export function ResendConfirmationForm({ action }: { action: Action }) {
+  const { state: s, pending, formProps } = useKeptForm(action, null);
+  if (s?.ok) return <Msg s={s} />;
+  return (
+    <form {...formProps} noValidate>
+      <label htmlFor="rc-email">Email<input id="rc-email" name="email" type="email" autoComplete="email" required aria-describedby="email-err" /><Err s={s} k="email" /></label>
+      <button className="btn btn-primary" type="submit" disabled={pending}>{pending ? "Sending…" : "Send a new link"}</button>
       <Msg s={s} />
     </form>
   );

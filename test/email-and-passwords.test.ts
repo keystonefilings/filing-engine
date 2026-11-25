@@ -173,11 +173,11 @@ describe("account emails that the pages promise (V1, V6)", () => {
     try {
       const s = await srv.inject({ method: "POST", url: "/v1/signups/partner", payload: { companyName: "Rivera CPA", companyType: "cpa", name: "Pat Rivera", email: "pat@rivera.test", password: PW } });
       expect(s.statusCode).toBe(202);
-      expect(box.sent).toHaveLength(0);
+      expect(box.sent.map((m) => m.msg.subject)).toEqual(["Confirm your email"]);
       const id = (await srv.inject({ method: "GET", url: "/v1/partner-signups", headers: { "x-api-key": "k1" } })).json().signups[0].id as string;
       const d = await srv.inject({ method: "POST", url: `/v1/partner-signups/${id}/decision`, payload: { action: "approve" }, headers: { "x-api-key": "k1" } });
       expect(d.statusCode).toBe(200);
-      expect(box.sent[0]).toMatchObject({ address: "pat@rivera.test", msg: { subject: "Your partner account is open", link: "http://web.test/login" } });
+      expect(box.sent[1]).toMatchObject({ address: "pat@rivera.test", msg: { subject: "Your partner account is open", link: "http://web.test/login" } });
     } finally { await srv.close(); }
   });
 });
@@ -199,9 +199,23 @@ describe("change password (V2)", () => {
 
   it("is open to partner sessions too", async () => {
     const s = await post("/v1/signups/partner", { companyName: "Best Accounting", companyType: "cpa", name: "Pat Rivera", email: "pat@best-accounting.test", password: PW, states: ["NY"] });
-    expect(s.statusCode).toBe(201);
+    expect(s.statusCode).toBe(202);
+    const link = outbox.linkFor("pat@best-accounting.test")!;
+    expect((await post("/v1/auth/verify-email", { token: new URL(link).searchParams.get("token") })).json().status).toBe("active");
     const key = (await signIn("pat@best-accounting.test", PW)).json().sessionKey as string;
     const r = await post("/v1/auth/change-password", { currentPassword: PW, newPassword: NEW_PW }, { "x-api-key": key });
     expect(r.statusCode).toBe(200);
+  });
+});
+
+describe("sign out on one device (V7)", () => {
+  it("ends that session's key and leaves the person's other sessions alone", async () => {
+    await enterpriseUser("rae@acme-filings.test");
+    const laptop = (await signIn("rae@acme-filings.test", PW)).json().sessionKey as string;
+    const phone = (await signIn("rae@acme-filings.test", PW)).json().sessionKey as string;
+    const r = await post("/v1/auth/sign-out", {}, { "x-api-key": laptop });
+    expect(r.json()).toEqual({ ok: true, ended: true });
+    expect((await me(laptop)).statusCode).toBe(401);
+    expect((await me(phone)).statusCode).toBe(200);
   });
 });

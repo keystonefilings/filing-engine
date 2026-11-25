@@ -13,6 +13,8 @@ export interface FilingRecord {
   idempotencyKey: string;
   status: FilingStatus;
   request: FilingRequest;
+  /** When the SSNs in request were replaced by their masked form (store/sensitive.ts). */
+  sensitivePurgedAt?: string;
   payloadHash: string;
   createdAt: string;
   updatedAt: string;
@@ -241,6 +243,11 @@ export interface UserRecord {
   signup?: PartnerSignupDetails;
   decidedAt?: string;
   decidedBy?: string;
+  /** Partner sign-ups confirm their email before they can sign in: the latest link (hash only). */
+  emailVerification?: { tokenHash: string; expiresAt: string; sentAt: string };
+  emailVerifiedAt?: string;
+  /** Session keys signed out one by one (sign-out on one device); pruned once they expire. */
+  revokedSessions?: { jti: string; exp: number }[];
   /** The latest password-reset link: only a hash of its secret. Marked used rather than removed. */
   passwordReset?: { tokenHash: string; expiresAt: string; sessionGen: number; requestedAt: string; usedAt?: string };
 }

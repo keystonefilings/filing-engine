@@ -3,7 +3,7 @@ import { Shell } from "@/components/landing/Shell";
 import { ResetPasswordForm } from "@/components/AuthForms";
 import { resetPassword } from "@/lib/accounts";
 
-export const metadata = { title: "Choose a new password", referrer: "no-referrer" };
+export const metadata = { title: "Choose a new password" };
 
 export default async function ResetPasswordPage({ searchParams }: { searchParams: Promise<{ token?: string }> }) {
   const { token } = await searchParams;

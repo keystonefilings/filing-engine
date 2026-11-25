@@ -30,6 +30,8 @@ export interface Auth {
   tenantId: string;
   /** Set for a dashboard session. */
   user?: UserRecord;
+  /** The session key's claims, for a dashboard session. */
+  session?: SessionClaims;
   /** Partner sessions are limited to this client company. */
   partnerOf?: string;
 }
@@ -50,12 +52,14 @@ export interface UsersDeps {
 
 const SESSION_TTL = { enterprise: 12 * 3600, partner: 7 * 24 * 3600 } as const;
 const RESET_TTL_MINUTES = 60;
+const VERIFY_TTL_DAYS = 7;
 const MAX_FAILS = 5;
 const LOCK_MINUTES = 15;
 
 const email = z.string().trim().toLowerCase().email().max(200);
 const SignInBody = z.object({ email, password: z.string().min(1).max(200) });
 const ResetRequestBody = z.object({ email });
+const VerifyBody = z.object({ token: z.string().min(10).max(300) });
 const ResetConfirmBody = z.object({ token: z.string().min(10).max(300), password: z.string().max(200) });
 const ChangePasswordBody = z.object({ currentPassword: z.string().min(1).max(200), newPassword: z.string().max(200) });
 
@@ -110,10 +114,14 @@ const ProfileBody = z.object({
 });
 const DecisionBody = z.object({ action: z.enum(["approve", "reject"]) });
 
+/** Accounts made before email confirmation existed have no emailVerification and count as confirmed. */
+export const emailConfirmed = (u: UserRecord) => !u.emailVerification || !!u.emailVerifiedAt;
+
 export function publicUser(u: UserRecord) {
   return {
     id: u.id, email: u.email, name: u.name, kind: u.kind, tenantId: u.tenantId, clientCompanyId: u.clientCompanyId,
     status: u.status, createdAt: u.createdAt, lastSignInAt: u.lastSignInAt, signup: u.signup, decidedAt: u.decidedAt,
+    emailConfirmed: emailConfirmed(u),
   };
 }
 
@@ -158,7 +166,7 @@ export function registerUsers(app: FastifyInstance, deps: UsersDeps): void {
   const issue = (u: UserRecord) => {
     const ttl = SESSION_TTL[u.kind];
     const claims: SessionClaims = {
-      sub: u.id, tenantId: u.tenantId, kind: u.kind, exp: Math.floor(now().getTime() / 1000) + ttl, gen: u.sessionGen,
+      sub: u.id, tenantId: u.tenantId, kind: u.kind, exp: Math.floor(now().getTime() / 1000) + ttl, gen: u.sessionGen, jti: randomBytes(12).toString("base64url"),
       ...(u.kind === "partner" && u.clientCompanyId ? { clientCompanyId: u.clientCompanyId } : {}),
     };
     return { sessionKey: mintSessionKey(deps.sessionSecret, claims), expiresAt: new Date(claims.exp * 1000).toISOString() };
@@ -186,6 +194,7 @@ export function registerUsers(app: FastifyInstance, deps: UsersDeps): void {
       }
       return reply.code(401).send({ error: "that email and password don't match an account" });
     }
+    if (!emailConfirmed(u)) return reply.code(403).send({ error: "confirm your email first: open the link we sent when you signed up", status: "unverified" });
     if (u.status === "pending") return reply.code(403).send({ error: "your account is waiting for approval", status: "pending" });
     if (u.status !== "active") return reply.code(403).send({ error: "this account can't sign in", status: u.status });
     if (u.kind === "partner" && !u.clientCompanyId) return reply.code(403).send({ error: "your account is waiting for approval", status: "pending" });
@@ -198,6 +207,19 @@ export function registerUsers(app: FastifyInstance, deps: UsersDeps): void {
     if (!a) return reply;
     if (!a.user) return reply.code(404).send({ error: "this key isn't a signed-in person" });
     return { user: publicUser(a.user) };
+  });
+
+  // Ends this session only (signing out on one device).
+  app.post("/v1/auth/sign-out", async (req, reply) => {
+    const a = await requireAuth(req, reply);
+    if (!a) return reply;
+    if (!a.user || !a.session) return reply.code(404).send({ error: "this key isn't a signed-in person" });
+    const nowSec = Math.floor(now().getTime() / 1000);
+    // A key from before session ids existed can only be ended with sign-out-everywhere.
+    if (!a.session.jti) return { ok: true, ended: false };
+    const kept = (a.user.revokedSessions ?? []).filter((r) => r.exp > nowSec).slice(-49);
+    await deps.store.updateUser(a.user.id, { revokedSessions: [...kept, { jti: a.session.jti, exp: a.session.exp }] });
+    return { ok: true, ended: true };
   });
 
   // Ends every session of the signed-in person (sign out everywhere).
@@ -286,25 +308,71 @@ export function registerUsers(app: FastifyInstance, deps: UsersDeps): void {
     const pw = passwordProblem(d.password, d.email);
     if (pw) return reply.code(422).send({ error: "validation failed", issues: [{ path: "password", message: pw }] });
     if (!publicFormLimit.take("signup")) return reply.code(429).send({ error: "too many sign-ups right now; try again later" });
-    if (await deps.store.findUserByEmail(d.email)) {
-      // Same answer as a new sign-up, so the form can't be used to find out who has an account.
-      return reply.code(202).send({ status: deps.partnerSignupMode === "automatic" ? "check_sign_in" : "pending" });
-    }
+    // Every sign-up confirms its email first. automatic: the account opens on confirmation;
+    // approval: it also waits for the platform to approve it.
+    const answer = { status: "verify_email", approvalRequired: deps.partnerSignupMode !== "automatic" };
+    // Same answer as a new sign-up, so the form can't be used to find out who has an account.
+    if (await deps.store.findUserByEmail(d.email)) return reply.code(202).send(answer);
+    const secret = randomBytes(32).toString("base64url");
+    const at = now();
     const u: UserRecord = {
       id: randomUUID(), email: d.email, name: d.name, kind: "partner", tenantId: deps.platformTenantId, status: "pending",
-      passwordHash: await hashPassword(d.password), sessionGen: 0, createdAt: now().toISOString(),
+      passwordHash: await hashPassword(d.password), sessionGen: 0, createdAt: at.toISOString(),
       signup: { companyName: d.companyName, companyType: d.companyType, phone: d.phone, website: d.website, states: d.states, expectedVolume: d.expectedVolume },
+      emailVerification: { tokenHash: sha256(secret).toString("hex"), expiresAt: new Date(at.getTime() + VERIFY_TTL_DAYS * 86_400_000).toISOString(), sentAt: at.toISOString() },
     };
     try {
       await deps.store.createUser(u);
     } catch {
-      return reply.code(202).send({ status: deps.partnerSignupMode === "automatic" ? "check_sign_in" : "pending" });
+      return reply.code(202).send(answer);
     }
-    if (deps.partnerSignupMode === "automatic") {
-      await approvePartner(u, "automatic");
-      return reply.code(201).send({ status: "active" });
-    }
-    return reply.code(202).send({ status: "pending" });
+    sendVerification(u, secret);
+    return reply.code(202).send(answer);
+  });
+
+  const sendVerification = (u: UserRecord, secret: string) => {
+    void deps.email?.send({ address: u.email, name: u.name }, {
+      subject: "Confirm your email",
+      body: `Confirm that ${u.email} is your email to finish setting up the partner account for ${u.signup?.companyName ?? "your firm"}. The link works for ${VERIFY_TTL_DAYS} days.\n\nIf you didn't sign up, ignore this email.`,
+      link: `${deps.webBaseUrl}/verify-email?token=${encodeURIComponent(`${u.id}.${secret}`)}`,
+    }).catch((e) => console.error("confirmation email failed", (e as Error).message));
+  };
+
+  // The link in the confirmation email. The web page asks for a button press first, so a mail
+  // scanner opening the link does not confirm anything.
+  app.post("/v1/auth/verify-email", async (req, reply) => {
+    const parsed = VerifyBody.safeParse(req.body);
+    const bad = () => reply.code(410).send({ error: "this confirmation link has expired or isn't valid; ask for a new one" });
+    if (!parsed.success) return bad();
+    const t = readResetToken(parsed.data.token);
+    const u = t ? await deps.store.getUser(t.userId) : null;
+    const v = u?.emailVerification;
+    if (!t || !u || !v) return bad();
+    const want = Buffer.from(v.tokenHash, "hex");
+    const got = sha256(t.secret);
+    if (want.length !== got.length || !timingSafeEqual(want, got)) return bad();
+    if (u.emailVerifiedAt) return { ok: true, status: u.status };
+    if (v.expiresAt <= now().toISOString()) return bad();
+    let next = await deps.store.updateUser(u.id, { emailVerifiedAt: now().toISOString() });
+    if (deps.partnerSignupMode === "automatic" && next.kind === "partner" && next.status === "pending" && next.signup) next = await approvePartner(next, "automatic");
+    return { ok: true, status: next.status };
+  });
+
+  const verifyResendLimit = new RateLimiter(3, 3_600_000);
+  app.post("/v1/auth/verify-email/resend", async (req, reply) => {
+    const parsed = ResetRequestBody.safeParse(req.body);
+    if (!parsed.success) return reply.code(422).send({ error: "enter your email" });
+    const answer = { ok: true, message: "If that email has an account waiting for confirmation, a new link is on its way." };
+    if (!resetAllLimit.take("all") || !verifyResendLimit.take(parsed.data.email)) return reply.code(202).send(answer);
+    const u = await deps.store.findUserByEmail(parsed.data.email);
+    if (!u || emailConfirmed(u) || (u.status !== "pending" && u.status !== "active")) return reply.code(202).send(answer);
+    const secret = randomBytes(32).toString("base64url");
+    const at = now();
+    const updated = await deps.store.updateUser(u.id, {
+      emailVerification: { tokenHash: sha256(secret).toString("hex"), expiresAt: new Date(at.getTime() + VERIFY_TTL_DAYS * 86_400_000).toISOString(), sentAt: at.toISOString() },
+    });
+    sendVerification(updated, secret);
+    return reply.code(202).send(answer);
   });
 
   /** Creates the firm for an approved partner sign-up and activates the user. */
