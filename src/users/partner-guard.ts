@@ -58,6 +58,8 @@ const RULES: Record<string, Rule> = {
   "PUT /v1/client-companies/:id/font": ownCompany,
   "POST /v1/client-companies/:id/payment-methods": ownCompany,
   "DELETE /v1/client-companies/:id/payment-methods/:methodId": ownCompany,
+  "GET /v1/client-companies/:id/card-codes": ownCompany,
+  "POST /v1/client-companies/:id/payment-methods/:methodId/code": ownCompany,
   "POST /v1/client-companies/:id/intake-links": ownCompany,
   "GET /v1/client-companies/:id/intake-links": ownCompany,
   "GET /v1/client-companies/:id/intake-links/:linkId": ownCompany,

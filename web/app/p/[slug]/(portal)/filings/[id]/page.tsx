@@ -38,7 +38,9 @@ export default async function FilingPage({ params }: { params: Promise<{ slug: s
       <div className="row"><h1 style={{ margin: 0 }}>{filingTitle(f)}</h1><StatusBadge status={f.status} />{f.request.dryRun ? <span className="badge">Test</span> : null}</div>
       <p className="muted" style={{ marginTop: 0 }}>{kind?.title ?? `${f.request.state} ${f.request.type.replace(/_/g, " ")}`} · started {new Date(f.createdAt).toLocaleString()}{portal?.submittedBy ? ` by ${portal.submittedBy}` : ""}{portal?.source === "client_link" ? " (client link)" : ""}</p>
       {step ? <p className="notice">{step}</p> : null}
-      {f.lastError && ["invalid", "failed", "blocked", "rejected"].includes(f.status) ? <p className="notice bad">{f.lastError}</p> : null}
+      {f.awaitingCardCode
+        ? <p className="notice warn">Approved and ready to pay. It needs the security code of {f.awaitingCardCode.label}{f.awaitingCardCode.last4 ? ` ending ${f.awaitingCardCode.last4}` : ""}. <Link href={`/p/${encodeURIComponent(slug)}/pay`}>Pay and file</Link></p>
+        : f.lastError && ["invalid", "failed", "blocked", "rejected"].includes(f.status) ? <p className="notice bad">{f.lastError}</p> : null}
       {f.status === "awaiting_information" ? (
         f.missingInformation?.length
           ? <MissingInfoForm action={supplyMissing.bind(null, slug, f.id)} inputs={missingInputs(f.missingInformation)} startOverHref={`${base}/new${kind ? `/${kind.id}` : ""}`} />

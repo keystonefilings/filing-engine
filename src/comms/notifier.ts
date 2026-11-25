@@ -40,7 +40,10 @@ export class Notifier {
     const client = rendered.audience === "client" ? await this.deps.store.getClientCompany(filing.clientCompanyId) : null;
     const recipients = rendered.audience === "admin"
       ? (tenant?.adminChannels ?? [])
-      : await this.clientRecipients(event, filing, tenant, client);
+      : rendered.audience === "card_owner"
+        ? (Array.isArray(event.data.recipients) ? event.data.recipients as { channel: string; address: string; name?: string }[] : [])
+        : await this.clientRecipients(event, filing, tenant, client);
+    if (event.type === "filing.card_code_needed" && this.deps.webBaseUrl && typeof event.data.webPath === "string") rendered.link = `${this.deps.webBaseUrl}${event.data.webPath}`;
     const screenshotUrl = rendered.screenshotArtifactId ? `${this.deps.publicBaseUrl}/v1/artifacts/${rendered.screenshotArtifactId}` : undefined;
     let attachments: NonNullable<import("./senders.js").OutboundMessage["attachments"]> | undefined;
     if (event.type === "filing.awaiting_approval" && typeof event.data.reviewShotArtifactId === "string" && this.deps.artifacts) {

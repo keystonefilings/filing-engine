@@ -6,6 +6,7 @@ export const EVENT_TYPES = [
   "filing.previewing",
   "filing.awaiting_approval",
   "filing.approved",
+  "filing.card_code_needed",
   "filing.changes_requested",
   "filing.blocked",
   "filing.started",

@@ -87,6 +87,11 @@ export interface SiteAdapter {
   key: string;
   /** False until the walk that maps the remaining screens is done; incomplete adapters only dry-run. */
   complete: boolean;
+  /**
+   * V18: the state's checkout takes a card typed per filing (NJ, FL). A live run then starts only
+   * once the card's owner has given the security code for the hour (payments/card-codes.ts).
+   */
+  paysWithCard?: boolean;
   entryUrl(ctx: Pick<StepContext, "filing" | "client" | "tenant">): string;
   /** Persistent profile key (ny.gov, client NJ account) or null for an ephemeral context. */
   profileKey(ctx: Pick<StepContext, "filing" | "client" | "tenant">): string | null;

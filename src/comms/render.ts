@@ -2,8 +2,9 @@ import type { WebhookEvent } from "../domain/events.js";
 import type { FilingRecord } from "../store/types.js";
 
 export interface RenderedMessage {
-  /** client = the filing company's client / end customer; admin = the filing company's staff. */
-  audience: "client" | "admin";
+  /** client = the filing company's client / end customer; admin = the filing company's staff;
+   *  card_owner = whoever's card pays the state (the event names them). */
+  audience: "client" | "admin" | "card_owner";
   subject: string;
   body: string;
   link?: string;
@@ -34,6 +35,8 @@ export function renderMessage(event: WebhookEvent, filing: FilingRecord): Render
       const missing = Array.isArray(d.missing) ? (d.missing as { label: string }[]).map((m) => m.label).join(", ") : "";
       return { audience: "client", subject: `More information needed: ${t}`, body: `Before we can file, we still need: ${missing}.` };
     }
+    case "filing.card_code_needed":
+      return { audience: "card_owner", subject: `Card security code needed: ${t}`, body: `This filing is approved and ready to pay the state with ${str("card") ?? "your saved card"}. A card's security code can't be stored, so please type it once: every filing waiting for this card is filed right away. We keep the code for an hour at most, then it's deleted.` };
     case "filing.changes_requested":
       return { audience: "client", subject: `Changes requested: ${t}`, body: `Changes were requested${str("comment") ? `: ${str("comment")}` : "."}` };
     case "filing.completed":

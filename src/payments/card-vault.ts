@@ -7,12 +7,14 @@ import type { FilingRecord } from "../store/types.js";
  * V18 (decision 8): customers' own cards live in Basis Theory, collected in Basis Theory's own fields
  * in the browser (the number never reaches our servers). The engine keeps only the token, and reads
  * the card back at the state's payment screen. The security code (CVC) can't be kept after use (PCI
- * DSS), so it comes fresh for each filing (cvcTokenId), typed by the client when they approve.
+ * DSS), so the card's owner types it when filings are ready to pay (payments/card-codes.ts).
  */
 export interface CardData { number: string; expMonth: number; expYear: number; cvc?: string }
 
 export interface CardVault {
   getCard(tokenId: string): Promise<CardData | null>;
+  /** A security code the owner typed: a short-lived token holding { cvc }. */
+  getCode(tokenId: string): Promise<string | null>;
 }
 
 export class BasisTheoryCardVault implements CardVault {
@@ -20,17 +22,25 @@ export class BasisTheoryCardVault implements CardVault {
   constructor(private readonly opts: { apiKey: string; apiUrl?: string; fetchImpl?: typeof fetch }) {
     this.fetchImpl = opts.fetchImpl ?? fetch;
   }
-  async getCard(tokenId: string): Promise<CardData | null> {
+  private async token(tokenId: string): Promise<{ data?: unknown } | null> {
     if (!/^[0-9a-f-]{36}$/i.test(tokenId)) return null;
     const res = await this.fetchImpl(`${this.opts.apiUrl ?? "https://api.basistheory.com"}/tokens/${tokenId}`, {
       headers: { "BT-API-KEY": this.opts.apiKey }, signal: AbortSignal.timeout(15_000),
     });
     if (res.status === 404) return null;
     if (!res.ok) throw new Error(`basis theory ${res.status}`);
-    const t = (await res.json()) as { data?: { number?: string; expiration_month?: number | string; expiration_year?: number | string; cvc?: string } };
-    const d = t.data;
+    return (await res.json()) as { data?: unknown };
+  }
+  async getCard(tokenId: string): Promise<CardData | null> {
+    const t = await this.token(tokenId);
+    const d = t?.data as { number?: string; expiration_month?: number | string; expiration_year?: number | string; cvc?: string } | undefined;
     if (!d?.number) return null;
     return { number: String(d.number), expMonth: Number(d.expiration_month), expYear: Number(d.expiration_year), ...(d.cvc ? { cvc: String(d.cvc) } : {}) };
+  }
+  async getCode(tokenId: string): Promise<string | null> {
+    const d = (await this.token(tokenId))?.data;
+    const cvc = typeof d === "string" ? d : (d as { cvc?: unknown } | undefined)?.cvc;
+    return typeof cvc === "string" && /^\d{3,4}$/.test(cvc) ? cvc : null;
   }
 }
 

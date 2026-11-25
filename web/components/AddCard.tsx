@@ -7,7 +7,7 @@ export type AddCardResult = { ok: boolean; error?: string };
 /**
  * V18: a card typed into Basis Theory's own fields (secure frames: the number never reaches our
  * pages or servers). We keep the token, the brand and the last four digits. The security code isn't
- * asked here: it can't be stored, so the client gives it when they approve a filing.
+ * asked here: it can't be stored, so the card's owner gives it when filings are ready to pay (CardCode).
  */
 export function AddCard({ publicKey, save, purpose = "state_fees" }: { publicKey: string; save: (card: { tokenId: string; label: string; brand?: string; last4?: string; purpose: string }) => Promise<AddCardResult>; purpose?: "state_fees" | "subscription" }) {
   const numberRef = useRef<HTMLDivElement>(null), expiryRef = useRef<HTMLDivElement>(null);
@@ -56,7 +56,7 @@ export function AddCard({ publicKey, save, purpose = "state_fees" }: { publicKey
       </div>
       <button type="button" className="btn primary" onClick={add} disabled={state.pending}>{state.pending ? "Saving…" : "Save card"}</button>
       {state.error ? <p className="notice bad" role="alert">{state.error}</p> : state.done ? <p className="notice ok" role="status">{state.done}</p> : null}
-      <p className="help">The card is held by Basis Theory, a card vault, never by us. The security code is asked when each filing is approved.</p>
+      <p className="help">The card is held by Basis Theory, a card vault, never by us. We never keep the security code: when filings are ready to pay, we ask you for it and use it for an hour at most.</p>
     </div>
   );
 }

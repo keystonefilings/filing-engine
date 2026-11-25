@@ -77,11 +77,13 @@ export async function bootstrap(opts: { withExecutor: boolean; workerId?: string
   const notifier = new Notifier({ store, senders: { email }, defaultSender: new LogChannelSender("email"), publicBaseUrl: config.publicBaseUrl, artifacts, webBaseUrl: config.webBaseUrl });
   const harness = new BrowserHarness({ chromiumPath: config.chromiumPath, proxyServer: config.browserProxy, siteProxies: config.siteProxies, steel: config.steel, profileDir: config.browserProfileDir });
   const { BasisTheoryCardVault } = await import("./payments/card-vault.js");
+  const { CardCodes } = await import("./payments/card-codes.js");
   const cardVault = config.basisTheoryApiKey ? new BasisTheoryCardVault({ apiKey: config.basisTheoryApiKey }) : undefined;
-  const executor = opts.withExecutor ? new RunExecutor({ store, artifacts, harness, drift, vault, reviewGate, registeredAgents, cardVault }) : undefined;
+  const cardCodes = new CardCodes(store);
+  const executor = opts.withExecutor ? new RunExecutor({ store, artifacts, harness, drift, vault, reviewGate, registeredAgents, cardVault, cardCodes }) : undefined;
   const limiter = new ConcurrencyLimiter({
     "site:IRS": config.siteConcurrency.IRS, "site:NY": config.siteConcurrency.NY, "site:NJ": config.siteConcurrency.NJ,
   });
-  const service = new FilingService({ store, approvals, webhooks, queue, vault, drift, nameResolution, reviewGate, registeredAgents, notifier, executor, limiter, dryRunDefault: config.dryRunDefault, workerId: opts.workerId });
+  const service = new FilingService({ store, approvals, webhooks, queue, vault, drift, nameResolution, reviewGate, registeredAgents, notifier, executor, cardCodes, limiter, dryRunDefault: config.dryRunDefault, workerId: opts.workerId });
   return { store, artifacts, approvals, webhooks, queue, vault, secrets, drift, nameResolution, reviewGate, registeredAgents, notifier, email, harness, executor, service };
 }

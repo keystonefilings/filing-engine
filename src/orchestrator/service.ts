@@ -30,6 +30,9 @@ import type { ArtifactStore } from "../artifacts/store.js";
 import type { CapturedReview } from "./run.js";
 import type { SiteAdapter } from "../adapters/types.js";
 import { createHash } from "node:crypto";
+import { cardRefsForFiling } from "../payments/card-vault.js";
+import { CODE_MIN_LEFT_MS, cardOwnerFor, sameOwner, type CardCodes, type CardOwner } from "../payments/card-codes.js";
+import type { PaymentMethodRef } from "../settings/payments.js";
 
 export interface FilingServiceDeps {
   /** Which adapter files a request (tests inject their own); default: the adapter registry. */
@@ -45,6 +48,8 @@ export interface FilingServiceDeps {
   registeredAgents?: RegisteredAgentService; // resolve/procure the registered agent
   notifier?: Notifier; // outbound communication layer (reports back / asks)
   executor?: RunExecutor; // absent on the API tier
+  /** V18: the security codes card owners give for stored cards (payments/card-codes.ts). */
+  cardCodes?: CardCodes;
   balances?: BalanceProvider;
   limiter?: ConcurrencyLimiter;
   dryRunDefault: boolean;
@@ -347,6 +352,69 @@ export class FilingService {
     return result;
   }
 
+  /** The card that pays this filing when its owner hasn't given its security code for the hour. */
+  private async cardCodeNeeded(filing: FilingRecord, tenant: TenantSettings, client: ClientCompanySettings, fees: FeeLine[]): Promise<{ owner: CardOwner; card: PaymentMethodRef } | null> {
+    const codes = this.d.cardCodes;
+    // Only a worker that can read stored cards pays with one.
+    if (!codes || !this.d.executor?.readsStoredCards || fees.reduce((s, f) => s + f.amountUsd, 0) <= 0) return null;
+    const card = cardRefsForFiling(filing, tenant, client).find((r) => r.provider === "basis_theory");
+    if (!card) return null;
+    const owner = cardOwnerFor(tenant, client);
+    return (await codes.fresh(owner, card.id, CODE_MIN_LEFT_MS)) ? null : { owner, card };
+  }
+
+  private async waitForCardCode(filing: FilingRecord, tenant: TenantSettings, client: ClientCompanySettings, need: { owner: CardOwner; card: PaymentMethodRef }) {
+    const { owner, card } = need;
+    const already = (await this.d.store.listFilingsByStatus(["blocked"], [filing.tenantId]))
+      .some((f) => f.id !== filing.id && f.awaitingCardCode?.methodId === card.id && sameOwner(f.awaitingCardCode.owner, owner));
+    const named = `${card.label}${card.last4 ? ` ending ${card.last4}` : ""}`;
+    const f = await this.transition(filing, "blocked", {
+      lastError: `waiting for the security code of ${named}`,
+      awaitingCardCode: { methodId: card.id, label: card.label, last4: card.last4, owner, since: new Date().toISOString() },
+    });
+    // One email per card while filings wait on it; the dashboard lists every waiting filing.
+    const recipients = already ? [] : await this.cardOwnerRecipients(owner, tenant, client);
+    const slug = owner.clientCompanyId && client.portal?.slug && client.partner ? client.portal.slug : undefined;
+    await this.emit("filing.card_code_needed", f, {
+      methodId: card.id, card: named, owner: owner.clientCompanyId ? "firm" : "subscriber", recipients,
+      webPath: slug ? `/p/${encodeURIComponent(slug)}/pay` : "/dashboard/pay",
+    });
+  }
+
+  /** Who can type a card's code: the firm's own users (and its contact), else the subscriber's staff. */
+  private async cardOwnerRecipients(owner: CardOwner, tenant: TenantSettings, client: ClientCompanySettings) {
+    const users = (await this.d.store.listUsers(owner.tenantId)).filter((u) => u.status === "active");
+    const firmUsers = owner.clientCompanyId ? users.filter((u) => u.clientCompanyId === owner.clientCompanyId) : [];
+    let list = firmUsers.map((u) => ({ channel: "email", address: u.email, name: u.name }));
+    if (owner.clientCompanyId && client.partner?.contactEmail) list.push({ channel: "email", address: client.partner.contactEmail, name: client.partner.contactName ?? "" });
+    if (!list.length) list = users.filter((u) => u.kind === "enterprise").map((u) => ({ channel: "email", address: u.email, name: u.name }));
+    if (!list.length) list = tenant.adminChannels.map((c) => ({ channel: c.channel, address: c.address, name: c.name ?? "" }));
+    return list.filter((r, i) => list.findIndex((o) => o.address.toLowerCase() === r.address.toLowerCase()) === i);
+  }
+
+  /**
+   * V18: the card's owner gave its security code (a Basis Theory token id that expires within the
+   * hour). Every filing waiting for that card goes back in the queue at once.
+   */
+  async supplyCardCode(owner: CardOwner, methodId: string, tokenId: string, expiresAt?: string, by?: string): Promise<{ expiresAt: string; queued: string[] }> {
+    if (!this.d.cardCodes) throw new Error("no card code store");
+    const exp = await this.d.cardCodes.put(owner, methodId, tokenId, expiresAt, by);
+    const waiting = await this.filingsAwaitingCardCode(owner, methodId);
+    const queued: string[] = [];
+    for (const f of waiting) {
+      await this.d.store.updateFiling(f.id, { awaitingCardCode: undefined, lastError: undefined });
+      await this.enqueueRun(f.id);
+      queued.push(f.id);
+    }
+    return { expiresAt: exp, queued };
+  }
+
+  /** Filings approved and waiting for a card's code; with no owner, every one in the tenant. */
+  async filingsAwaitingCardCode(owner: CardOwner, methodId?: string, opts: { anyOwner?: boolean } = {}): Promise<FilingRecord[]> {
+    return (await this.d.store.listFilingsByStatus(["blocked"], [owner.tenantId]))
+      .filter((f) => f.awaitingCardCode && (opts.anyOwner || sameOwner(f.awaitingCardCode.owner, owner)) && (!methodId || f.awaitingCardCode.methodId === methodId));
+  }
+
   async enqueueRun(filingId: string): Promise<void> {
     const filing = await this.d.store.getFiling(filingId);
     if (!filing) throw new Error("filing not found");
@@ -430,6 +498,12 @@ export class FilingService {
       const f = filing.status === "queued" || filing.status === "approved" ? await this.transition(filing, "blocked", { lastError: pf.blockers.join("; ") }) : await store.updateFiling(filing.id, { lastError: pf.blockers.join("; ") });
       await this.emit("filing.blocked", f, { blockers: pf.blockers, warnings: pf.warnings, dryRun });
       return;
+    }
+
+    // V18: a checkout that takes a stored card needs its security code, given by the card's owner.
+    if (!dryRun && adapter.paysWithCard) {
+      const need = await this.cardCodeNeeded(filing, tenant, client, approval?.fees ?? []);
+      if (need) { await this.waitForCardCode(filing, tenant, client, need); return; }
     }
 
     const releaseSite = await this.limiter.acquire(`site:${adapter.site}`);

@@ -21,10 +21,13 @@ import { labelScore } from "../resolver/match.js";
 import { signatureForApprovedFiling } from "../signatures/apply.js";
 import { reviewFingerprint } from "./review-fingerprint.js";
 import { cardRefsForFiling, cardsForPayment, type CardVault } from "../payments/card-vault.js";
+import { cardOwnerFor, type CardCodes } from "../payments/card-codes.js";
 
 export interface RunDeps {
   /** V18: where saved cards are read at the payment screen (Basis Theory). */
   cardVault?: CardVault;
+  /** V18: the security codes card owners typed (payments/card-codes.ts). */
+  cardCodes?: CardCodes;
   store: Store;
   artifacts: ArtifactStore;
   harness: BrowserHarness;
@@ -88,6 +91,9 @@ interface SubmitTracker {
  */
 export class RunExecutor {
   constructor(private readonly deps: RunDeps) {}
+
+  /** V18: this worker can read saved cards at a payment screen. */
+  get readsStoredCards(): boolean { return !!this.deps.cardVault; }
 
   async execute(input: RunInput): Promise<RunOutcome> {
     const { store } = this.deps;
@@ -446,14 +452,18 @@ export class RunExecutor {
         }
         await fillField(page, f, value);
       };
-      const vault = this.deps.cardVault;
-    const paymentCards = vault ? () => cardsForPayment(vault, cardRefsForFiling(input.filing, input.tenant, input.client),
-      async () => (input.approval?.cvcTokenId ? (await vault.getCard(input.approval.cvcTokenId))?.cvc : undefined)) : undefined;
-    return {
-      ...(paymentCards ? { paymentCards } : {}), set, field, fields: inventory.fields };
+      return { set, field, fields: inventory.fields };
     };
     const base = await resolve(screen);
+    // V18: the saved cards, read at the payment screen only, with the security code the card's
+    // owner gave for this hour (payments/card-codes.ts).
+    const vault = this.deps.cardVault;
+    const codes = this.deps.cardCodes;
+    const owner = cardOwnerFor(input.tenant, input.client);
+    const paymentCards = vault && !input.dryRun ? () => cardsForPayment(vault, cardRefsForFiling(input.filing, input.tenant, input.client),
+      async (ref) => { const t = codes ? await codes.fresh(owner, ref.id) : null; return (t ? await vault.getCode(t) : null) ?? undefined; }) : undefined;
     return {
+      ...(paymentCards ? { paymentCards } : {}),
       page, filing: input.filing, tenant: input.tenant, client: input.client, values, dryRun: input.dryRun, credential,
       set: base.set, field: base.field, resolve,
       expectedFees: input.expectedFees, feeCapUsd: input.filing.request.feeCapUsd,

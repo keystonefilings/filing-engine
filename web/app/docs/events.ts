@@ -7,6 +7,7 @@ export const EVENT_NAMES: [string, string][] = [
   ["filing.previewing", "A preview run is taking the state's review page for the client to approve (decision 7). data.reason says why when it is a second preview."],
   ["filing.awaiting_approval", "The approval link went to the client. data.reviewPage is true when the approval shows the state's review page (data.reviewShotArtifactId)."],
   ["filing.approved", "The client approved; a run is queued."],
+  ["filing.card_code_needed", "Approved and ready to pay with a saved card, waiting for the card's security code (it can't be stored). data: methodId, card, owner (firm or subscriber). Send it with POST /v1/account/payment-methods/{methodId}/code."],
   ["filing.changes_requested", "The client asked for changes; data.comment has their note."],
   ["filing.blocked", "Held by a policy, the fee cap or a site problem."],
   ["filing.started", "A run started on the state site."],

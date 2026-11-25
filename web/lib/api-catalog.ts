@@ -181,6 +181,19 @@ export const ENDPOINTS: Endpoint[] = [
     responses: [{ status: 200, description: "Your tenant.", example: { tenantId: "your-tenant", name: "Your Filing Co", configured: true, branding: { displayName: "Your Filing Co" }, webhookEndpointCount: 1 } }],
   },
   {
+    id: "card-codes", method: "GET", path: "/v1/account/card-codes", group: "Account", auth: "api_key",
+    summary: "Filings waiting for a saved card's security code",
+    description: "A saved card's security code can't be stored, so filings that pay the state with a saved card wait for it (status `blocked`, `awaitingCardCode` set). Grouped by card; each group names the path that takes the code.",
+    responses: [{ status: 200, description: "Waiting filings by card.", example: { waiting: [{ methodId: "card1", card: "Company Visa", last4: "4242", owner: {}, codePath: "/v1/account/payment-methods/card1/code", filings: [{ id: "f_123", title: "NJ formation: Blue Harbor LLC", since: "2026-11-25T15:02:11Z" }] }] } }],
+  },
+  {
+    id: "card-code", method: "POST", path: "/v1/account/payment-methods/{methodId}/code", group: "Account", auth: "api_key",
+    summary: "Give a saved card's security code",
+    description: "Type the code into a Basis Theory field in your own page (never send the code itself here) and create a token of type `token` with data `{ cvc }` and `expires_at` within the hour. Send that token's id. Every filing waiting for this card goes back in the queue at once, and the code is used for an hour at most. A firm's own card takes the same body at `/v1/client-companies/{id}/payment-methods/{methodId}/code`.",
+    body: "{ tokenId, expiresAt? }", bodyExample: { tokenId: "3f8c5a2e-1b7d-4c9e-8a6f-2d4b9e1c7a50", expiresAt: "2026-11-25T16:00:00Z" },
+    responses: [{ status: 200, description: "Kept; the waiting filings are queued.", example: { expiresAt: "2026-11-25T16:00:00.000Z", queued: ["f_123"] } }, { status: 404, description: "No such card for state fees." }, { status: 409, description: "The card isn't held in the card vault." }, { status: 422, description: "Not a token id." }],
+  },
+  {
     id: "list-keys", method: "GET", path: "/v1/api-keys", group: "API keys", auth: "api_key",
     summary: "List API keys (never the keys themselves)",
     responses: [{ status: 200, description: "Keys with name, prefix, created, last used and revoked times.", example: { keys: [{ id: "…", name: "website", prefix: "kfe_AbCdEfGh", createdAt: "2026-11-24T15:00:00Z" }] } }],
@@ -256,7 +269,7 @@ export const FILING_STATUSES: { status: string; meaning: string }[] = [
   { status: "awaiting_approval", meaning: "Waiting for the client to approve on the approval page." },
   { status: "changes_requested", meaning: "The client asked for changes. Create a corrected filing with a new idempotency key." },
   { status: "approved", meaning: "Approved; a run is queued." },
-  { status: "blocked", meaning: "Held by a policy, fee cap or site problem." },
+  { status: "blocked", meaning: "Held by a policy, fee cap or site problem, or approved and waiting for a saved card's security code (awaitingCardCode is set)." },
   { status: "queued", meaning: "Waiting for a worker." },
   { status: "running", meaning: "The state site is being filled in." },
   { status: "awaiting_drift_review", meaning: "The state site changed; the platform team is checking the map." },

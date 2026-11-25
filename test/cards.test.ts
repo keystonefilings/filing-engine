@@ -22,6 +22,13 @@ describe("Basis Theory card vault", () => {
     expect(calls[0]).toEqual({ url: `https://api.basistheory.com/tokens/${T1}`, key: "key_priv" });
     expect(await vault.getCard("not-a-token")).toBeNull();
   });
+  it("reads a security code token, and nothing that isn't a code", async () => {
+    const data: Record<string, unknown> = { [T1]: { cvc: "1234" }, [T2]: "567", [CVC]: { cvc: "12a" } };
+    const vault = new BasisTheoryCardVault({ apiKey: "key_priv", fetchImpl: (async (url: string) => Response.json({ type: "token", data: data[url.split("/").pop()!] })) as never });
+    expect(await vault.getCode(T1)).toBe("1234");
+    expect(await vault.getCode(T2)).toBe("567");
+    expect(await vault.getCode(CVC)).toBeNull();
+  });
 });
 
 describe("which cards pay a filing", () => {
@@ -33,14 +40,17 @@ describe("which cards pay a filing", () => {
     ],
     routing: { mode: "per_filing", defaultMethodId: "a", fallbackMethodId: "b", byFilingKind: { "nj-llc": "b" } },
   });
-  it("uses the firm's own cards under own_account, by filing type, then the backup, with the CVC from approval", async () => {
+  it("uses the firm's own cards under own_account, by filing type, then the backup, with the code the owner gave", async () => {
     const store = await seededStore();
     const tenant = (await store.getTenant("keystone"))!;
     const client = { ...(await store.getClientCompany("acme-cpa"))!, payments };   // acme-cpa answers G1 = own_account
     expect(cardRefsForFiling(filing("nj-llc"), tenant, client).map((m) => m.id)).toEqual(["b"]);
     expect(cardRefsForFiling(filing("ny-llc"), tenant, client).map((m) => m.id)).toEqual(["a", "b"]);
-    const vault: CardVault = { async getCard(id) { return id === CVC ? { number: "", expMonth: 0, expYear: 0, cvc: "123" } : { number: id === T1 ? "378282246310005" : "4242424242424242", expMonth: 1, expYear: 2031 }; } };
-    const cards = await cardsForPayment(vault, cardRefsForFiling(filing("ny-llc"), tenant, client), async () => (await vault.getCard(CVC))?.cvc);
+    const vault: CardVault = {
+      async getCard(id) { return { number: id === T1 ? "378282246310005" : "4242424242424242", expMonth: 1, expYear: 2031 }; },
+      async getCode(id) { return id === CVC ? "123" : null; },
+    };
+    const cards = await cardsForPayment(vault, cardRefsForFiling(filing("ny-llc"), tenant, client), async () => (await vault.getCode(CVC)) ?? undefined);
     expect(cards.map((c) => [c.label, c.number.slice(-4), c.cvc])).toEqual([["Amex", "0005", "123"], ["Visa", "4242", "123"]]);
   });
 });

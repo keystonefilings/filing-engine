@@ -20,6 +20,7 @@ import { registerUsers, portalSlugFor, type Auth, type PartnerSignupMode } from 
 import { registerBrandLogos } from "./brand-logos.js";
 import { registerIntakeLinks } from "./intake-links.js";
 import { registerPublicPages } from "./public-pages.js";
+import { registerCardCodes } from "./card-codes.js";
 import { readSessionKey, SESSION_PREFIX } from "../users/session-token.js";
 import { partnerGuard } from "../users/partner-guard.js";
 import { FONT_PRESETS, googleFontHref, type FontPreset } from "../settings/fonts.js";
@@ -364,6 +365,7 @@ export function buildServer(deps: ApiDeps): FastifyInstance {
   registerSelfService(app, { store: deps.store, tenantOf });
   registerSignatures(app, { store: deps.store, tenantOf });
   registerIntakeLinks(app, { store: deps.store, authOf });
+  registerCardCodes(app, { store: deps.store, service: deps.service, authOf });
   registerPublicPages(app, { store: deps.store, service: deps.service, platformTenantId: deps.platformTenantId ?? "keystone" });
   registerUsers(app, {
     store: deps.store, authOf, staffOf, sessionSecret,

@@ -62,6 +62,8 @@ export interface ClientCompany {
 export interface Filing {
   id: string;
   missingInformation?: { path: string; label: string }[];
+  /** V18: approved, waiting for the card's security code. */
+  awaitingCardCode?: { methodId: string; label: string; last4?: string };
   tenantId: string;
   clientCompanyId: string;
   status: string;

@@ -17,6 +17,8 @@ export interface FilingRecord {
   requestFingerprint?: string;
   /** V27: what the completeness check still needs while the filing is awaiting_information. */
   missingInformation?: { path: string; label: string }[];
+  /** V18: approved and ready to pay, waiting for the card owner to give the card's security code. */
+  awaitingCardCode?: { methodId: string; label: string; last4?: string; owner: { tenantId: string; clientCompanyId?: string }; since: string };
   /** When the SSNs in request were replaced by their masked form (store/sensitive.ts). */
   sensitivePurgedAt?: string;
   payloadHash: string;
@@ -40,8 +42,6 @@ export interface ApprovalRecord {
   filingId: string;
   tenantId: string;
   payloadHash: string;
-  /** V18: the card security code the client typed with their approval (a short-lived Basis Theory token). */
-  cvcTokenId?: string;
   /** Decision 7: the state's review page the client approved (a hash of its text, never the text). */
   review?: { screenKey: string; site: string; fingerprint: string; artifactId?: string; capturedAt: string };
   settingsSnapshot: SettingsSnapshot;
@@ -174,7 +174,7 @@ export interface MessageRecord {
   filingId: string;
   tenantId: string;
   eventType: string;
-  audience: "client" | "admin";
+  audience: "client" | "admin" | "card_owner";
   channel: string;
   address: string;
   subject: string;
