@@ -21,7 +21,7 @@ export function WebhookForm({ action, endpoints, events }: { action: (prev: R, f
       {rows.map((e, i) => (
         <fieldset key={i} className="card">
           <legend>{e ? "Endpoint" : "New endpoint"}</legend>
-          <div className="field"><label htmlFor={`ep-${i}`}>URL (https)</label><input id={`ep-${i}`} name={`ep.${i}.url`} type="url" defaultValue={e?.url} readOnly={!!e} placeholder="https://example.com/keystone/webhooks" /></div>
+          <div className="field"><label htmlFor={`ep-${i}`}>URL (https)</label><input id={`ep-${i}`} name={`ep.${i}.url`} type="url" defaultValue={e?.url} readOnly={!!e} placeholder="https://example.com/cofile/webhooks" /></div>
           {e ? <p className="small muted">Signing secret ends in <code>{e.secretHint}</code>. To change it, remove the endpoint and add it again.</p> : null}
           <label className="choice"><input type="checkbox" name={`ep.${i}.all`} defaultChecked={!e?.events?.length} /><span>Every event</span></label>
           <details><summary className="small">Or only these events</summary>

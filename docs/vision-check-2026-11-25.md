@@ -199,6 +199,9 @@ payload-hash approval stay as they are.
 
 ## Tracker
 
+*Nov 25: the site is now **CoFile** (cofile.app). Addresses written as keystonefilings.com above
+are cofile.app (for example cofile.app/bestaccounting/llc-filing-new-york).*
+
 Every issue from the memo and from this check, in one list. Tick an item only when it is done in
 code (with tests) or, for items that need a person, when that step has happened. Items marked
 *needs* name what has to come from outside the code (a live walk, a vendor account, a decision).

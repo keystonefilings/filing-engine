@@ -23,7 +23,7 @@ const app = buildServer({
   platformTenantId: process.env.PLATFORM_TENANT_ID || "keystone",
   // Partner sign-ups wait for approval unless this is set to "automatic".
   partnerSignupMode: process.env.PARTNER_SIGNUP_MODE === "automatic" ? "automatic" : "approval",
-  email: sys.email, webBaseUrl: config.webBaseUrl,
+  email: sys.email, webBaseUrl: config.webBaseUrl, platformName: config.platformName,
 });
 
 setInterval(() => void sys.webhooks.processDue(), 15_000).unref();

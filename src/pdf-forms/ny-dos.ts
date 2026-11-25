@@ -172,7 +172,7 @@ export async function fillNyForm(details: PaperUploadDetails, opts: FillOptions 
       void width;
     }
   }
-  doc.setProducer("Keystone filing engine");
+  doc.setProducer("CoFile");
   doc.setModificationDate(new Date());
   return doc.save();
 }

@@ -26,14 +26,14 @@ import { FONT_CHOICES } from "../settings/fonts.js";
  */
 
 /**
- * A partner firm's address is also its public pages' address (keystonefilings.com/<slug>/<service>),
+ * A partner firm's address is also its public pages' address (cofile.app/<slug>/<service>),
  * so it can never be a path the site itself uses.
  */
 export const RESERVED_SLUGS = new Set([
   "login", "signup", "docs", "dashboard", "p", "i", "logo", "join", "logout", "forgot-password", "reset-password",
   "verify-email", "session-ended", "invite-expired", "openapi.json", "api", "admin", "approve", "static", "_next",
   "favicon.ico", "robots.txt", "sitemap.xml", "pricing", "about", "contact", "help", "support", "terms", "privacy", "security",
-  "keystone", "keystonefilings", "www", "app", "mail", "status",
+  "cofile", "keystone", "keystonefilings", "www", "app", "mail", "status",
 ]);
 export const SLUG_PATTERN = /^[a-z0-9](?:[a-z0-9-]{0,38}[a-z0-9])?$/;
 

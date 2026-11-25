@@ -74,7 +74,7 @@ after). Never change it once filings exist: rows sealed with one key can't be op
 (umask 077 && openssl rand -hex 32 > ~/fe-data-key) && fly secrets set --stage --app keystone-filing-engine DATA_ENCRYPTION_KEY="$(cat ~/fe-data-key)"
 ```
 
-Two keys people use: the caller key (keystonefilings.com calls the engine with it) and the
+Two keys people use: the caller key (cofile.app calls the engine with it) and the
 platform staff key (tenant settings and drift reviews). Each is generated into a file only you
 can read:
 
@@ -88,7 +88,7 @@ fly secrets set --stage --app keystone-filing-engine API_KEYS="$(cat ~/fe-api-ke
 
 The text after the staff key's colon is the name recorded on drift-review decisions; use who
 holds the key. Keep both files until step 6, then move the keys to a password manager (and the
-caller key to wherever keystonefilings.com keeps its secrets) and delete the files.
+caller key to wherever the cofile.app web app keeps its secrets) and delete the files.
 
 **On Windows PowerShell 5.1** (no `openssl`; flyctl as `.\flyctl` in its folder), one block
 generates and stages the four generated secrets, saving the caller and staff keys in the home
@@ -109,7 +109,7 @@ folder encrypted with Windows DPAPI (readable only by the same Windows account o
 
 **Email (Resend).** Not required to start, but without it nothing is emailed: approval links,
 password resets and notices are only recorded on each filing. In Resend, add the sending
-domain (for example `keystonefilings.com`), add the DNS records it shows (SPF and DKIM) and wait
+domain (`cofile.app`), add the DNS records it shows (SPF and DKIM) and wait
 until it says Verified. Then create an API key with sending access only, and:
 
 ```bash
@@ -117,7 +117,7 @@ read -s RESEND_API_KEY && fly secrets set --stage --app keystone-filing-engine R
 ```
 
 ```bash
-fly secrets set --stage --app keystone-filing-engine EMAIL_FROM="Keystone Filings <filings@keystonefilings.com>" WEB_BASE_URL="https://keystonefilings.com"
+fly secrets set --stage --app keystone-filing-engine EMAIL_FROM="CoFile <filings@cofile.app>" WEB_BASE_URL="https://cofile.app"
 ```
 
 `EMAIL_FROM` must be an address on the verified domain, and `WEB_BASE_URL` is where the web
@@ -161,7 +161,7 @@ still run, at the worker's next 10-minute check.
 Only the staff key creates a tenant; the caller key then adds client companies:
 
 ```bash
-curl -fsS -X PUT https://keystone-filing-engine.fly.dev/v1/tenants/keystone -H "x-api-key: $(cat ~/fe-staff-key)" -H "content-type: application/json" -d '{"name":"Keystone Filings"}'
+curl -fsS -X PUT https://keystone-filing-engine.fly.dev/v1/tenants/keystone -H "x-api-key: $(cat ~/fe-staff-key)" -H "content-type: application/json" -d '{"name":"CoFile"}'
 ```
 
 ```bash
@@ -204,16 +204,16 @@ and stops before "Submit EIN Request".
 Use a real client's details, with their consent. The IRS assistant receives each page as the
 interview advances; only the final submission is skipped. Never use made-up identities.
 
-## 9. When the web address is decided
+## 9. The engine's web address (api.cofile.app)
 
 ```bash
-fly certs add filings.keystonefilings.com --app keystone-filing-engine
+fly certs add api.cofile.app --app keystone-filing-engine
 ```
 
 Add the DNS record that command shows, then:
 
 ```bash
-fly secrets set --app keystone-filing-engine PUBLIC_BASE_URL=https://filings.keystonefilings.com
+fly secrets set --app keystone-filing-engine PUBLIC_BASE_URL=https://api.cofile.app
 ```
 
 Links sent from then on use the new address.

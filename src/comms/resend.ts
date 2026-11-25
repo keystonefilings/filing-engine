@@ -2,7 +2,7 @@ import type { ChannelSender, OutboundMessage } from "./senders.js";
 
 export interface ResendOptions {
   apiKey: string;
-  /** "Keystone Filings <filings@keystonefilings.com>": the domain must be verified in Resend. */
+  /** "CoFile <filings@cofile.app>": the domain must be verified in Resend. */
   from: string;
   replyTo?: string;
   apiUrl?: string;

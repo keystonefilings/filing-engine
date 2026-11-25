@@ -75,7 +75,7 @@ describe("webhooks", () => {
     await d.emit("filing.started", { tenantId: "t", filingId: "f" }, { a: 1 }, [ep]);
     await d.processDue();
     expect(calls).toHaveLength(1);
-    const sig = calls[0]!.headers["x-keystone-signature"]!;
+    const sig = calls[0]!.headers["x-cofile-signature"]!;
     expect(verifySignature(ep.secret, sig, calls[0]!.body, 300, clock.getTime())).toBe(true);
     expect(verifySignature("wrong", sig, calls[0]!.body, 300, clock.getTime())).toBe(false);
     // Not due until backoff elapses.
@@ -99,7 +99,7 @@ describe("webhooks", () => {
     await d.emit("filing.completed", { tenantId: "t", filingId: "h" }, {}, [ep]);
     await fresh.processDue();
     const last = calls[calls.length - 1]!;
-    expect(verifySignature(ep.secret, last.headers["x-keystone-signature"]!, last.body, 300, clock.getTime())).toBe(true);
+    expect(verifySignature(ep.secret, last.headers["x-cofile-signature"]!, last.body, 300, clock.getTime())).toBe(true);
 
     // Endpoint removed from settings: dead-lettered, never sent unsigned.
     await d.emit("filing.completed", { tenantId: "t", filingId: "i" }, {}, [{ url: "https://gone.example.test", secret: "x".repeat(20) }]);

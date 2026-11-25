@@ -15,7 +15,7 @@ export default function DocsHome() {
         <li>Create a filing with <code>&quot;dryRun&quot;: true</code> and watch it go to <code>awaiting_approval</code>.</li>
         <li>Add a webhook endpoint so you hear about each step.</li>
       </ol>
-      <pre><code>{`curl ${api}/v1/filings -H "x-api-key: $KEYSTONE_API_KEY"`}</code></pre>
+      <pre><code>{`curl ${api}/v1/filings -H "x-api-key: $COFILE_API_KEY"`}</code></pre>
       <p className="small muted">Base URL: <code>{api}</code>. All requests and responses are JSON.</p>
       <h2>Guides</h2>
       <div className="grid">

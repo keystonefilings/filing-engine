@@ -83,13 +83,15 @@ export const config = {
   /** "steel-only": this image ships no local browser (Dockerfile target "steel"); every site must route to Steel. */
   browsersSteelOnly: process.env.BROWSERS === "steel-only",
   dryRunDefault: env("DRY_RUN_DEFAULT", "true") === "true",
+  /** The site's name, shown to clients on approval pages (partner firms are "with CoFile"). */
+  platformName: env("PLATFORM_NAME", "CoFile"),
   /** The web front end (web/): links in account emails (password reset) point here. */
   webBaseUrl: env("WEB_BASE_URL", "http://localhost:3000").replace(/\/+$/, ""),
   /** Email through Resend (comms/resend.ts). No key: every message is recorded, none is sent. */
   email: {
     resendApiKey: process.env.RESEND_API_KEY || null,
     /** A sender on a domain verified in Resend. */
-    from: env("EMAIL_FROM", "Keystone Filings <filings@keystonefilings.com>"),
+    from: env("EMAIL_FROM", "CoFile <filings@cofile.app>"),
     replyTo: process.env.EMAIL_REPLY_TO || undefined,
   },
   /** Name-resolution AI generator (the only LLM in a filing). No key -> deterministic static generator. */

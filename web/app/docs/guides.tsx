@@ -104,9 +104,9 @@ export const GUIDES: Guide[] = [
         <h2>The request</h2>
         <Code>{`POST /your/endpoint
 content-type: application/json
-x-keystone-event: filing.completed
-x-keystone-delivery: 6f1c…
-x-keystone-signature: t=1764000000,v1=5d41402abc4b2a76b9719d911017c592…
+x-cofile-event: filing.completed
+x-cofile-delivery: 6f1c…
+x-cofile-signature: t=1764000000,v1=5d41402abc4b2a76b9719d911017c592…
 
 {"id":"evt_…","type":"filing.completed","tenantId":"your-tenant","filingId":"f_…","occurredAt":"2026-11-24T15:30:00.000Z","data":{…}}`}</Code>
         <h2>Verifying the signature</h2>
@@ -123,7 +123,7 @@ export function verify(secret, header, rawBody, toleranceSec = 300) {
   return expected.length === got.length && timingSafeEqual(expected, got);
 }`}</Code>
         <h2>Retries</h2>
-        <p>Answer with any 2xx within a few seconds. Anything else is retried after 1 minute, 5 minutes, 30 minutes, 2 hours and 12 hours, then given up. Use <code>x-keystone-delivery</code> to ignore a delivery you have already handled. <code>GET /v1/filings/{"{id}"}/deliveries</code> shows every attempt.</p>
+        <p>Answer with any 2xx within a few seconds. Anything else is retried after 1 minute, 5 minutes, 30 minutes, 2 hours and 12 hours, then given up. Use <code>x-cofile-delivery</code> to ignore a delivery you have already handled. <code>GET /v1/filings/{"{id}"}/deliveries</code> shows every attempt.</p>
         <h2>Events</h2>
         <div className="table-wrap"><table><thead><tr><th>Event</th><th>When</th></tr></thead><tbody>
           {EVENT_NAMES.map(([e, when]) => <tr key={e}><td><code>{e}</code></td><td>{when}</td></tr>)}

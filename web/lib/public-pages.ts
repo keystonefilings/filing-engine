@@ -5,7 +5,7 @@ import { publicUrl } from "./session";
 
 /**
  * V19 (docs/vision-check-2026-11-25.md): each partner firm's permanent, branded page per service,
- * keystonefilings.com/<firm>/<service>, e.g. /best-accounting/llc-formation-new-york. Anyone with
+ * cofile.app/<firm>/<service>, e.g. /best-accounting/llc-formation-new-york. Anyone with
  * the address can fill it in; each submission is a new filing for that firm, which then goes
  * through the same preview and approval as any other.
  */

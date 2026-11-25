@@ -68,7 +68,7 @@ describe("approval page in the firm's brand (V20)", () => {
     expect(page.body).toContain('src="https://rivera-tax.test/logo.png"');
     expect(page.body).toContain("#7a1f5c");
     expect(page.body).toContain("help@rivera-tax.test");
-    expect(page.body).toMatch(/with Keystone/);
+    expect(page.body).toMatch(/with CoFile/);
   });
 });
 

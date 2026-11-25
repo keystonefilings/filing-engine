@@ -46,6 +46,8 @@ export interface ApiDeps {
   email?: ChannelSender;
   /** The web front end, for links in account emails. */
   webBaseUrl?: string;
+  /** The site's name (CoFile): the platform tenant's approval pages and partner firms' "with …". */
+  platformName?: string;
 }
 
 function filingTitle(f: FilingRecord | null): string {
@@ -312,7 +314,7 @@ export function buildServer(deps: ApiDeps): FastifyInstance {
     const firmBrand = portal && (portal.displayName || portal.logoUrl || portal.logoArtifactId || client?.partner);
     const firmLogo = portal?.logoArtifactId ? `${deps.publicBaseUrl}/v1/brand-logos/${portal.logoArtifactId}` : portal?.logoUrl?.startsWith("https://") ? portal.logoUrl : undefined;
     const html = renderReviewPage({
-      brandName: firmBrand ? (portal!.displayName ?? client!.name) : (tenant?.branding.displayName ?? tenant?.name),
+      brandName: firmBrand ? (portal!.displayName ?? client!.name) : (a.tenantId === (deps.platformTenantId ?? "keystone") ? (deps.platformName ?? "CoFile") : (tenant?.branding.displayName ?? tenant?.name)),
       supportEmail: (firmBrand ? portal!.supportEmail : undefined) ?? tenant?.branding.supportEmail,
       logoUrl: firmBrand ? firmLogo : undefined, primaryColor: firmBrand ? portal!.primaryColor : undefined,
       font: firmBrand && portal!.font && portal!.font !== "system"
@@ -320,7 +322,7 @@ export function buildServer(deps: ApiDeps): FastifyInstance {
           ? (portal!.fontArtifactId ? { stack: FONT_PRESETS.system.stack, fileUrl: `${deps.publicBaseUrl}/v1/brand-fonts/${portal!.fontArtifactId}` } : undefined)
           : { stack: FONT_PRESETS[portal!.font as FontPreset]?.stack ?? FONT_PRESETS.system.stack, href: googleFontHref(portal!.font) ?? undefined }
         : undefined,
-      poweredBy: client?.partner ? (tenant?.branding.displayName ?? tenant?.name) : undefined,
+      poweredBy: client?.partner ? (deps.platformName ?? "CoFile") : undefined,
       filingId: a.filingId,
       filingTitle: f ? `${f.request.state} ${f.request.type.replace("_", " ")}${f.request.formation ? `: ${f.request.formation.name.baseName} ${f.request.formation.name.designator}` : ""}` : "Filing",
       payload: a.shownPayload, fees: a.fees, feeCapUsd: a.feeCapUsd, expiresAt: a.expiresAt,

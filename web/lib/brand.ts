@@ -1,6 +1,6 @@
 /** The platform's own name, shown on the docs and the dashboard (firm portals show the firm's brand). */
 export function platformName(): string {
-  return process.env.PLATFORM_NAME?.trim() || "Keystone Filings";
+  return process.env.PLATFORM_NAME?.trim() || "CoFile";
 }
 
 /** The engine's public URL as callers use it, for the docs and the OpenAPI servers entry. */

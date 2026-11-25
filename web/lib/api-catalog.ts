@@ -170,14 +170,14 @@ export const ENDPOINTS: Endpoint[] = [
     id: "list-webhooks", method: "GET", path: "/v1/webhook-endpoints", group: "Webhooks", auth: "api_key",
     summary: "List webhook endpoints",
     description: "Secrets are never returned; `secretHint` shows the last four characters.",
-    responses: [{ status: 200, description: "Endpoints.", example: { endpoints: [{ url: "https://hooks.example.com/keystone", events: ["filing.completed"], secretHint: "…9f2a" }] } }],
+    responses: [{ status: 200, description: "Endpoints.", example: { endpoints: [{ url: "https://hooks.example.com/cofile", events: ["filing.completed"], secretHint: "…9f2a" }] } }],
   },
   {
     id: "put-webhooks", method: "PUT", path: "/v1/webhook-endpoints", group: "Webhooks", auth: "api_key",
     summary: "Replace your webhook endpoints",
     description: "Sends the whole list (up to 10). An endpoint that keeps its URL keeps its secret. A new endpoint without a `secret` gets one generated, returned once in `generatedSecrets`. URLs must be public https.",
-    body: "{ endpoints: [{ url, secret?, events? }] }", bodyExample: { endpoints: [{ url: "https://hooks.example.com/keystone", events: ["filing.awaiting_approval", "filing.completed", "filing.failed"] }] },
-    responses: [{ status: 200, description: "Saved.", example: { endpoints: [{ url: "https://hooks.example.com/keystone", secretHint: "…9f2a" }], generatedSecrets: [{ url: "https://hooks.example.com/keystone", secret: "whsec_…" }] } }, { status: 409, description: "Your tenant isn't set up yet; ask the platform team." }, { status: 422, description: "A URL is not public https, or is listed twice." }],
+    body: "{ endpoints: [{ url, secret?, events? }] }", bodyExample: { endpoints: [{ url: "https://hooks.example.com/cofile", events: ["filing.awaiting_approval", "filing.completed", "filing.failed"] }] },
+    responses: [{ status: 200, description: "Saved.", example: { endpoints: [{ url: "https://hooks.example.com/cofile", secretHint: "…9f2a" }], generatedSecrets: [{ url: "https://hooks.example.com/cofile", secret: "whsec_…" }] } }, { status: 409, description: "Your tenant isn't set up yet; ask the platform team." }, { status: 422, description: "A URL is not public https, or is listed twice." }],
   },
   {
     id: "list-events", method: "GET", path: "/v1/events", group: "Webhooks", auth: "none",
