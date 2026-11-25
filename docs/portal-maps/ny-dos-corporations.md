@@ -155,10 +155,34 @@ Legend: `*` = required. FINAL = the button that files and charges. STOP = attest
 ## Screen M: Replenish DD Account (fund the draw-down account)
 - Drawdown Deposit: Service Company (display), *Drawdown Accounts select ("Select One" / "<company> - F##"), Account Balance, *Deposit Amount; Payment Authorization.
 - Error without an account picked: toast "You need to login. Please select a drawdown account." and inline "Please select a drawdown account."
-- Continues to an Elavon hosted payment page: Order Section (amount in USD), Payment Card (Visa/MC/Amex/Discover), Card Number, Expiration Date (MMYY), CVV2, "do not close your browser" note, Submit Payment. The engine never enters card data; replenishing is the user's job.
+- Continues to an Elavon hosted payment page: Order Section (amount in USD), Payment Card (Visa/MC/Amex/Discover), Card Number, Expiration Date (MMYY), CVV2, "do not close your browser" note, Submit Payment.
+- The engine replenishes this account itself before every filing, with the card saved for the account's state fees. See "Prepay step (before every NY DOS filing)" below.
+
+## Prepay step (before every NY DOS filing)
+Direction from the user (voice note, 2026-11-24): every NY DOS filing starts by funding the draw-down account with exactly what that filing will cost, and only then starts the filing. The other states (NJ, FL) take the saved card straight into their own payment form instead. The engine must work the same whatever account it runs in: Keystone's own service-company account, or an enterprise subscriber's.
+
+Order of a run:
+1. Sign in as the account's service company (Common page chrome).
+2. Compute the filing's exact total (rules below) from the approved request. It must equal the total on the client's approval; if the two differ, stop before the deposit and send the filing back for re-approval.
+3. Menu **Replenish DD Account** (Screen M). Pick the account's draw-down account (the one named in the account's NY portal settings; with one listed, that one). Read the Account Balance before.
+4. Enter the exact total in *Deposit Amount. Tick Payment Authorization (STOP: covered only by the client's approval of this filing's fees).
+5. Continue to the Elavon page. Check the Order Section amount equals the total to the cent; otherwise stop. Enter the saved card for this account's NY state fees (from the payment vault at run time, never stored on the worker, never in logs, screenshots or page copies: mask the card fields in the recorder). Submit Payment (FINAL for the deposit).
+6. Back on DOS, confirm the deposit: Account Balance went up by exactly the total. Record the deposit (amount, balance before and after, time, Elavon confirmation if shown) on the filing as a submit intent of its own, so a crash after Submit Payment is never followed by a second deposit. A deposit with no confirmation goes to reconciliation, like a filing.
+7. Click **Home** (Screen A) and start the filing from the menu as mapped above.
+8. On the filing's Payment screen pick Drawdown Account, check the balance covers the Total Fee, and that the Total Fee equals the deposited amount. Then the usual Payment Authorization and FINAL button.
+
+Cost rules (the deposit amount):
+- Base filing fee by filing type, from `config/fees.json` NY (LLC Articles $200, BCL Certificate of Incorporation $125 plus Tax on Shares as the page computes it, dissolution $60, name-change amendment $60, Certificate of Change $30, Certificate of Status $25 short form, copy requests $5 per document plain, E-Submission fees per filing type).
+- Plus every additional service the request asks for, counted per document where the page says per document: Plain Copy $5.00, Certified Copy $10.00, Certificate of Existence $25.00 (formation), Certificate of Status Short-Form $25.00 (E-Submission).
+- Plus the expedite level on E-Submission: 2 HOUR $150.00, SAME DAY $75.00, 24 HOUR $25.00, ROUTINE $0.00.
+- Plus county fees where the form charges them (DOS-1338-f assumed name: corporations $100 per NYC county, $25 per other county).
+- BCL Tax on Shares is computed by the page; the engine can't know it before the form is filled. Until that is mapped, a BCL filing quotes the tax from the share answers at approval and stops if the page shows a different amount.
+- No service fee is added for paying the draw-down account; the card fee, if Elavon adds one, is shown on its page and must be part of the approved total or the run stops.
+
+Open for the user: whether an existing balance counts toward the deposit (the direction says add the exact amount every time, so the engine does that), and which payment vault holds the card.
 
 ## Engine notes
-- Service companies pay from the prefunded draw-down account. The account in the recording showed a $0 balance, so every Submit would fail until it is replenished. Check the balance on the payment page before submitting.
+- Service companies pay from the prefunded draw-down account. The account in the recording showed a $0 balance, so every Submit would fail until it is replenished; the prepay step above does that for every filing. Check the balance on the payment page before submitting.
 - Every filing ends with a Payment Authorization checkbox and, before that, a certify box plus typed signature (except copies, status and E-Submission, which have only the payment box). Both need the user's explicit yes per filing.
 - BCL: incorporator name must equal the typed signature.
 - Amendments, changes and dissolutions start with an exact DOS ID + entity name match; get both from the DOS entity search first.
