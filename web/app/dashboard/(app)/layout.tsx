@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { TopBar } from "@/components/TopBar";
 import { isPlatformTenant, platformName } from "@/lib/brand";
 import { requireTenant } from "@/lib/session";
@@ -14,7 +15,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
           ...(isPlatformTenant(s.tenantId) ? [{ href: "/dashboard/partners", label: "Sign-ups" }] : []),
           { href: "/docs", label: "Docs" },
         ]}
-        right={<form action="/logout" method="post" className="row"><span className="small muted">{s.email ?? s.name}</span><button className="btn small" type="submit">Sign out</button></form>} />
+        right={<form action="/logout" method="post" className="row">{s.signedInWith === "password" ? <Link className="small muted" href="/dashboard/password" title="Change password">{s.email ?? s.name}</Link> : <span className="small muted">{s.email ?? s.name}</span>}<button className="btn small" type="submit">Sign out</button></form>} />
       <main className="wrap">{children}</main>
     </>
   );

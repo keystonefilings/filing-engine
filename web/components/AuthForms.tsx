@@ -1,7 +1,7 @@
 "use client";
 
+import { useKeptForm } from "./useKeptForm";
 import Link from "next/link";
-import { useActionState } from "react";
 import type { FormState } from "@/lib/accounts";
 
 type Action = (prev: FormState, fd: FormData) => Promise<FormState>;
@@ -18,22 +18,64 @@ function Msg({ s }: { s: FormState }) {
 }
 
 export function EmailLoginForm({ action, notice }: { action: Action; notice?: string }) {
-  const [s, run, pending] = useActionState(action, null);
+  const { state: s, pending, formProps } = useKeptForm(action, null);
   return (
-    <form action={run}>
+    <form {...formProps}>
       {notice && !s ? <p className="form-msg good" role="status">{notice}</p> : null}
       <label htmlFor="li-email">Email<input id="li-email" name="email" type="email" autoComplete="email" required /></label>
       <label htmlFor="li-pw">Password<input id="li-pw" name="password" type="password" autoComplete="current-password" required /></label>
+      <p className="hero-note" style={{ margin: 0 }}><Link href="/forgot-password">Forgot your password?</Link></p>
       <button className="btn btn-primary" type="submit" disabled={pending}>{pending ? "Signing in…" : "Log in"}</button>
       <Msg s={s} />
     </form>
   );
 }
 
-export function PartnerSignupForm({ action, approvalRequired }: { action: Action; approvalRequired: boolean }) {
-  const [s, run, pending] = useActionState(action, null);
+export function ForgotPasswordForm({ action }: { action: Action }) {
+  const { state: s, pending, formProps } = useKeptForm(action, null);
+  if (s?.ok) return <p className="form-msg good" role="status">{s.message}</p>;
   return (
-    <form action={run} noValidate>
+    <form {...formProps} noValidate>
+      <label htmlFor="fp-email">Email<input id="fp-email" name="email" type="email" autoComplete="email" required aria-describedby="email-err" /><Err s={s} k="email" /></label>
+      <button className="btn btn-primary" type="submit" disabled={pending}>{pending ? "Sending…" : "Email me a reset link"}</button>
+      <Msg s={s} />
+    </form>
+  );
+}
+
+export function ResetPasswordForm({ action, token }: { action: Action; token: string }) {
+  const { state: s, pending, formProps } = useKeptForm(action, null);
+  return (
+    <form {...formProps} noValidate>
+      <input type="hidden" name="token" value={token} />
+      <label htmlFor="rp-pw">New password<input id="rp-pw" name="password" type="password" autoComplete="new-password" minLength={12} required aria-describedby="password-err" /><Err s={s} k="password" /></label>
+      <label htmlFor="rp-pw2">New password again<input id="rp-pw2" name="password2" type="password" autoComplete="new-password" required aria-describedby="password2-err" /><Err s={s} k="password2" /></label>
+      <p className="help">At least 12 characters. A few unrelated words work well.</p>
+      <button className="btn btn-primary" type="submit" disabled={pending}>{pending ? "Saving…" : "Set new password"}</button>
+      <Msg s={s} />
+      {s?.error?.includes("expired") ? <p className="hero-note"><Link href="/forgot-password">Ask for a new link</Link></p> : null}
+    </form>
+  );
+}
+
+export function ChangePasswordForm({ action }: { action: Action }) {
+  const { state: s, pending, formProps } = useKeptForm(action, null, { clearOnSuccess: true });
+  return (
+    <form {...formProps} noValidate className="card" style={{ maxWidth: 460 }}>
+      <div className="field"><label htmlFor="cp-cur">Current password</label><input id="cp-cur" name="currentPassword" type="password" autoComplete="current-password" required aria-describedby="currentPassword-err" /><Err s={s} k="currentPassword" /></div>
+      <div className="field"><label htmlFor="cp-new">New password</label><input id="cp-new" name="newPassword" type="password" autoComplete="new-password" minLength={12} required aria-describedby="newPassword-err" /><Err s={s} k="newPassword" /></div>
+      <div className="field"><label htmlFor="cp-new2">New password again</label><input id="cp-new2" name="newPassword2" type="password" autoComplete="new-password" required aria-describedby="newPassword2-err" /><Err s={s} k="newPassword2" /></div>
+      <p className="help">At least 12 characters. Changing it signs you out on every other device.</p>
+      <button className="btn primary" type="submit" disabled={pending}>{pending ? "Saving…" : "Change password"}</button>
+      {s?.error ? <p className="notice bad" role="alert">{s.error}</p> : s?.message ? <p className="notice ok" role="status">{s.message}</p> : null}
+    </form>
+  );
+}
+
+export function PartnerSignupForm({ action, approvalRequired }: { action: Action; approvalRequired: boolean }) {
+  const { state: s, pending, formProps } = useKeptForm(action, null);
+  return (
+    <form {...formProps} noValidate>
       <div className="form-row">
         <label htmlFor="su-co">Firm name<input id="su-co" name="companyName" autoComplete="organization" required /><Err s={s} k="companyName" /></label>
         <label htmlFor="su-type">Kind of firm
@@ -76,10 +118,10 @@ export function PartnerSignupForm({ action, approvalRequired }: { action: Action
 }
 
 export function InquiryForm({ action }: { action: Action }) {
-  const [s, run, pending] = useActionState(action, null);
+  const { state: s, pending, formProps } = useKeptForm(action, null, { clearOnSuccess: true });
   if (s?.ok) return <form><p className="form-msg good" role="status">{s.message}</p></form>;
   return (
-    <form action={run} noValidate>
+    <form {...formProps} noValidate>
       <div className="form-row">
         <label htmlFor="bf-name">Name<input id="bf-name" name="name" autoComplete="name" required /><Err s={s} k="name" /></label>
         <label htmlFor="bf-company">Company<input id="bf-company" name="company" autoComplete="organization" required /><Err s={s} k="company" /></label>

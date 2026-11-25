@@ -1,14 +1,13 @@
 "use client";
 
-import { useActionState } from "react";
-
+import { useKeptForm } from "./useKeptForm";
 type R = { ok: true; key: string; name: string } | { ok: false; message: string } | null;
 
 export function NewKeyForm({ action }: { action: (prev: R, fd: FormData) => Promise<R> }) {
-  const [state, run, pending] = useActionState(action, null);
+  const { state, pending, formProps } = useKeptForm(action, null, { clearOnSuccess: true });
   return (
     <div className="stack">
-      <form action={run} className="card row">
+      <form {...formProps} className="card row">
         <input name="name" type="text" maxLength={60} placeholder="Key name, e.g. Production server" aria-label="Key name" style={{ flex: 1, minWidth: 220 }} required />
         <button className="btn primary" type="submit" disabled={pending}>Create key</button>
       </form>

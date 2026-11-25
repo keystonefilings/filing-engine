@@ -1,4 +1,5 @@
 import type { ScreenStep, SiteAdapter, StepContext } from "../types.js";
+import { tenantVaultKey } from "../../settings/accounts.js";
 import { NY_PAYROLL_SCREENS } from "./intents.js";
 
 /**
@@ -6,8 +7,9 @@ import { NY_PAYROLL_SCREENS } from "./intents.js";
  * Business Express is NY.gov-ID login-gated and was not walked, so the online screen
  * sequence, field names and the final Submit button are unverified. The field intents are
  * from the official NYS 100 (03/26) form; the fixed-IP walk confirms the online layout and
- * flips this to complete. Keystone's company-wide NY login (tenant.nyGovCredentialKey) is
- * used; there is no fee.
+ * flips this to complete. Each subscriber's own NY.gov login is used (tenant.nyGovCredentialKey,
+ * scoped to the tenant like every other login: one subscriber's sign-in never runs another's
+ * filing); there is no fee.
  */
 function payroll(ctx: StepContext) {
   const p = ctx.filing.request.payroll;
@@ -107,7 +109,8 @@ export const nyPayrollAdapter: SiteAdapter = {
   key: "ny-payroll",
   complete: false,
   entryUrl: () => process.env.NY_PAYROLL_URL ?? "https://www.businessexpress.ny.gov",
-  profileKey: () => "nygov", // Keystone's company-wide NY.gov login (persistent context)
-  credentialKey: (ctx) => ctx.tenant.nyGovCredentialKey ?? null,
+  // The subscriber's NY.gov business login (persistent context), kept apart from its NY DOS account (ny:<tenant>).
+  profileKey: (ctx) => `nygov:${ctx.tenant.tenantId}`,
+  credentialKey: (ctx) => tenantVaultKey(ctx.tenant, ctx.tenant.nyGovCredentialKey),
   steps: [employerInformation, liabilityInformation, requiredAddresses, businessInformation, affirmation],
 };

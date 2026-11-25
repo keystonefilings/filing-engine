@@ -1,4 +1,5 @@
 import Fastify, { type FastifyInstance, type FastifyReply } from "fastify";
+import type { ChannelSender } from "../comms/senders.js";
 import { lookupKey } from "./keys.js";
 import { registerSelfService, tenantFromStoredKey } from "./self-service.js";
 import { registerSignatures } from "./signatures.js";
@@ -40,6 +41,10 @@ export interface ApiDeps {
   platformTenantId?: string;
   /** Whether partner sign-ups wait for approval (default) or are approved at once. */
   partnerSignupMode?: PartnerSignupMode;
+  /** Sends account emails (password reset). Absent: those emails are not sent. */
+  email?: ChannelSender;
+  /** The web front end, for links in account emails. */
+  webBaseUrl?: string;
 }
 
 function filingTitle(f: FilingRecord | null): string {
@@ -229,6 +234,7 @@ export function buildServer(deps: ApiDeps): FastifyInstance {
   registerUsers(app, {
     store: deps.store, authOf, staffOf, sessionSecret,
     platformTenantId: deps.platformTenantId ?? "keystone", partnerSignupMode: deps.partnerSignupMode ?? "approval",
+    email: deps.email, webBaseUrl: deps.webBaseUrl ?? "http://localhost:3000",
   });
 
   // ---- Approval link (client-facing, decision 2) ----

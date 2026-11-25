@@ -241,6 +241,8 @@ export interface UserRecord {
   signup?: PartnerSignupDetails;
   decidedAt?: string;
   decidedBy?: string;
+  /** The latest password-reset link: only a hash of its secret. Marked used rather than removed. */
+  passwordReset?: { tokenHash: string; expiresAt: string; sessionGen: number; requestedAt: string; usedAt?: string };
 }
 
 export interface PartnerSignupDetails {

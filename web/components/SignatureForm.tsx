@@ -1,14 +1,14 @@
 "use client";
 
-import { useActionState } from "react";
+import { useKeptForm } from "./useKeptForm";
 import { SignaturePad } from "./SignaturePad";
 
 type R = { ok: boolean; message: string } | null;
 
 export function SignatureForm({ action, consentText }: { action: (prev: R, fd: FormData) => Promise<R>; consentText: string }) {
-  const [state, run, pending] = useActionState(action, null);
+  const { state, pending, formProps } = useKeptForm(action, null, { clearOnSuccess: true });
   return (
-    <form action={run} className="card">
+    <form {...formProps} className="card">
       {state ? <p className={`notice ${state.ok ? "ok" : "bad"}`} role="status">{state.message}</p> : null}
       <div className="field"><label htmlFor="sig-name">Signer&apos;s full name</label><input id="sig-name" name="signerName" type="text" required autoComplete="name" /></div>
       <div className="field"><label htmlFor="sig-email">Signer&apos;s email (optional)</label><input id="sig-email" name="signerEmail" type="email" /></div>

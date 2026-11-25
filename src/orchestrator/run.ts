@@ -93,14 +93,19 @@ export class RunExecutor {
     const stateConfirmed = () => tracker.confirmed.some((c) => c.site === input.adapter.site);
     let stage = "browser";
     let context: BrowserContext | undefined;
+    // Kept outside the try so a failure after the irreversible click can still save the portal's
+    // documents (salvageArtifacts) before the run settles.
+    let page: Page | undefined;
+    let credential: StepContext["credential"] = null;
+    let artifactsCollected = false;
     try {
       // Inside the try: a browser that cannot be opened (a Steel session refused, a launch that
       // fails) ends this run as failed and is reported, instead of leaving the filing "running".
       context = profileKey ? await this.deps.harness.persistentContext(profileKey, site) : await this.deps.harness.ephemeralContext(site);
       const credKey = input.adapter.credentialKey(input);
-      const credential = credKey ? await this.deps.vault.getCredential(credKey) : null;
+      credential = credKey ? await this.deps.vault.getCredential(credKey) : null;
       stage = "open";
-      const page = await context.newPage();
+      page = await context.newPage();
       await page.goto(input.adapter.entryUrl(input), { waitUntil: "domcontentloaded" });
       // Third-party registered agent: order it now (irreversible) so the assigned agent is
       // known before the form asks for it. Dry runs never order one.
@@ -115,7 +120,7 @@ export class RunExecutor {
         stage = step.screen.screenKey;
         const ctx = await this.stepContext(page, step.screen, input, values, credential, recorder, run, tracker);
         if (step.present && !(await step.present(ctx))) continue;
-        await this.driftCheck(page, step.screen, input, run, recorder);
+        await this.driftCheck(page, step.screen, input, run, recorder, !!tracker.open);
         await step.fill(ctx);
         await recorder.record(page, step.screen.screenKey, "filled");
         if (step.reviewScreen && this.deps.reviewGate && input.tenant.betaReviewGate && !input.dryRun && !input.reviewGateApproved) {
@@ -147,18 +152,9 @@ export class RunExecutor {
       await this.confirmSubmission(input.adapter, confirmCtx, tracker, recorder);
       if (!stateConfirmed()) throw new Error(`${input.adapter.key} finished its screens without an irreversible click through the submit guard`);
       stage = "artifacts";
-      if (input.adapter.collectArtifacts) {
-        // The filing is at the state: a failed download is noted, never turned into a failed run.
-        try {
-          for (const a of await input.adapter.collectArtifacts(confirmCtx)) {
-            const meta = await this.deps.artifacts.put({ filingId: input.filing.id, runId: run.id, kind: a.kind as never, label: a.label, contentType: a.contentType }, a.body);
-            const f = await store.getFiling(input.filing.id);
-            await store.updateFiling(input.filing.id, { artifacts: [...(f?.artifacts ?? []), { id: meta.id, kind: a.kind, label: a.label }] });
-          }
-        } catch (e) {
-          await recorder.noteOnly("artifacts", `artifact collection failed after a confirmed submission: ${(e as Error).message.split("\n")[0]}`);
-        }
-      }
+      artifactsCollected = true;
+      // The filing is at the state: a failed download is noted, never turned into a failed run.
+      await this.collectArtifacts(input.adapter, confirmCtx, input, run, recorder, "after a confirmed submission");
       const done = await store.updateRun(run.id, { status: "submitted", endedAt: new Date().toISOString() });
       return { kind: "submitted", run: done, ein: values.ein };
     } catch (e) {
@@ -166,6 +162,14 @@ export class RunExecutor {
       // Checked before any other classification: once an irreversible click is unconfirmed, a
       // drift halt, name message, bot page or crash afterwards must never make the filing re-runnable.
       const open = tracker.open ?? (await store.listOpenSubmitIntents()).find((i) => i.runId === run.id);
+      // Past this portal's irreversible click, whatever the page shows now may be shown only once
+      // (the IRS EIN letter): save what the adapter can collect before the run settles.
+      if (page && !artifactsCollected && (open?.site === input.adapter.site || stateConfirmed())) {
+        try {
+          const salvageCtx = await this.stepContext(page, { screenKey: "confirmation", title: "confirmation", intents: [] }, input, values, credential, recorder, run, tracker);
+          await this.collectArtifacts(input.adapter, salvageCtx, input, run, recorder, `after an error past the irreversible click (${err.message.split("\n")[0]})`);
+        } catch { /* best effort; the run still settles below */ }
+      }
       if (open) {
         const done = await store.updateRun(run.id, { status: "needs_reconciliation", endedAt: new Date().toISOString(), error: err.message });
         return { kind: "needs_reconciliation", run: done, error: err.message };
@@ -221,14 +225,16 @@ export class RunExecutor {
     }
     const context = await this.deps.harness.ephemeralContext(ein.site);
     const einInput: RunInput = { ...input, adapter: ein };
+    let page: Page | undefined;
+    const values: StepContext["values"] = {};
+    let artifactsCollected = false;
     try {
-      const page = await context.newPage();
+      page = await context.newPage();
       await page.goto(ein.entryUrl(input), { waitUntil: "domcontentloaded" });
-      const values: StepContext["values"] = {};
       for (const step of ein.steps) {
         const ctx = await this.stepContext(page, step.screen, einInput, values, null, recorder, parentRun, tracker);
         if (step.present && !(await step.present(ctx))) continue;
-        await this.driftCheck(page, step.screen, einInput, parentRun, recorder);
+        await this.driftCheck(page, step.screen, einInput, parentRun, recorder, tracker.open?.site === ein.site);
         await step.fill(ctx);
         await recorder.record(page, step.screen.screenKey, "filled");
         await actAndSettle(page, () => step.advance(ctx));
@@ -240,24 +246,32 @@ export class RunExecutor {
       await this.confirmSubmission(ein, ctx, tracker, recorder);
       const assigned = tracker.confirmed.find((c) => c.site === ein.site)?.evidence.reference;
       if (!assigned) throw new Error("IRS sub-run finished without a confirmed EIN request");
-      if (ein.collectArtifacts) {
-        try {
-          for (const a of await ein.collectArtifacts(ctx)) {
-            const meta = await this.deps.artifacts.put({ filingId: input.filing.id, runId: parentRun.id, kind: "cp575", label: a.label, contentType: a.contentType }, a.body);
-            const f = await this.deps.store.getFiling(input.filing.id);
-            await this.deps.store.updateFiling(input.filing.id, { artifacts: [...(f?.artifacts ?? []), { id: meta.id, kind: "cp575", label: a.label }] });
-          }
-        } catch (e) {
-          await recorder.noteOnly("irs.artifacts", `CP 575 collection failed after the EIN was assigned: ${(e as Error).message.split("\n")[0]}`);
-        }
-      }
+      artifactsCollected = true;
+      await this.collectArtifacts(ein, ctx, input, parentRun, recorder, "after the EIN was assigned");
       return { ein: assigned, placeholder: false };
+    } catch (e) {
+      // Past the IRS click the EIN letter is offered once: save it before the parent run settles.
+      if (page && !artifactsCollected && tracker.open?.site === ein.site) {
+        try {
+          const ctx = await this.stepContext(page, { screenKey: "irs.confirmation", title: "EIN assignment", intents: [] }, einInput, values, null, recorder, parentRun, tracker);
+          await this.collectArtifacts(ein, ctx, input, parentRun, recorder, `after an error past the IRS click (${(e as Error).message.split("\n")[0]})`);
+        } catch { /* best effort; the error below still settles the run */ }
+      }
+      throw e;
     } finally {
       await this.deps.harness.closeContext(context); // a Steel context also ends its session
     }
   }
 
-  private async driftCheck(page: Page, screen: ScreenIntents, input: RunInput, run: RunRecord, recorder: StepRecorder): Promise<void> {
+  /**
+   * Compares the live screen with its approved snapshot and halts on a substantive change.
+   * afterSubmit: this portal's irreversible click is open. A halt can no longer protect anything
+   * (the filing is already at the portal), and these screens can show something only once (the
+   * IRS EIN letter). A dry run stops at the click, so none of them ever has a snapshot before the
+   * first live run. They are recorded with a screenshot for review and never halt; the run
+   * still counts as submitted only on the evidence confirmSubmission reads.
+   */
+  private async driftCheck(page: Page, screen: ScreenIntents, input: RunInput, run: RunRecord, recorder: StepRecorder, afterSubmit = false): Promise<void> {
     const challenge = await waitOutJsCheck(page); // a JavaScript check may clear itself; a block or CAPTCHA stops the run
     if (challenge) {
       await recorder.record(page, screen.screenKey, `bot challenge: ${challenge}`);
@@ -271,6 +285,13 @@ export class RunExecutor {
     const match = matchIntents(screen.intents, inventory, overrides, knownUnused);
     const requiredUnmatched = match.unmatchedIntents.filter((i) => i.required);
 
+    if (afterSubmit) {
+      if (!previous) await recorder.record(page, screen.screenKey, "post-submit screen seen for the first time: recorded for review, not halted");
+      else if (diffSnapshots(previous, current).substantive || requiredUnmatched.length) {
+        await recorder.record(page, screen.screenKey, "post-submit screen differs from its approved snapshot: recorded for review, not halted");
+      }
+      return;
+    }
     if (!previous) {
       if ((this.deps.firstObservationPolicy ?? "halt") === "accept" && requiredUnmatched.length === 0) {
         await this.deps.store.putApprovedSnapshot(input.adapter.site, screen.screenKey, current);
@@ -315,6 +336,23 @@ export class RunExecutor {
     }
     await recorder.record(page, screen.screenKey, `fee check: ${check.reason}`);
     throw new FeeMismatch(screen.screenKey, check.reason ?? "mismatch");
+  }
+
+  /**
+   * Saves what the adapter collects from the page (receipt, certificate, EIN letter) onto the
+   * filing. Never throws: the filing is already at the portal, so a failed download is a run note.
+   */
+  private async collectArtifacts(adapter: SiteAdapter, ctx: StepContext, input: RunInput, run: RunRecord, recorder: StepRecorder, when: string): Promise<void> {
+    if (!adapter.collectArtifacts) return;
+    try {
+      for (const a of await adapter.collectArtifacts(ctx)) {
+        const meta = await this.deps.artifacts.put({ filingId: input.filing.id, runId: run.id, kind: a.kind as never, label: a.label, contentType: a.contentType }, a.body);
+        const f = await this.deps.store.getFiling(input.filing.id);
+        await this.deps.store.updateFiling(input.filing.id, { artifacts: [...(f?.artifacts ?? []), { id: meta.id, kind: a.kind, label: a.label }] });
+      }
+    } catch (e) {
+      await recorder.noteOnly(`${adapter.key}.artifacts`, `artifact collection failed ${when}: ${(e as Error).message.split("\n")[0]}`).catch(() => undefined);
+    }
   }
 
   /** Closes the open submit intent only on evidence the adapter reads from the portal. */

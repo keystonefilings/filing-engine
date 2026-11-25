@@ -15,7 +15,8 @@ import { NameResolutionService, DEFAULT_NAME_RESOLUTION_CONFIG } from "./name-re
 import { ReviewGateService } from "./review-gate/service.js";
 import { RegisteredAgentService } from "./registered-agents/service.js";
 import { Notifier } from "./comms/notifier.js";
-import { LogChannelSender } from "./comms/senders.js";
+import { LogChannelSender, type ChannelSender } from "./comms/senders.js";
+import { ResendEmailSender } from "./comms/resend.js";
 import { StaticNameGenerator, AnthropicNameGenerator, type NameCandidateGenerator } from "./name-resolution/generator.js";
 import type { NameCheckerRegistry } from "./name-resolution/checker.js";
 
@@ -59,14 +60,20 @@ export async function bootstrap(opts: { withExecutor: boolean; workerId?: string
   const reviewGate = new ReviewGateService({ store, signingSecret: config.approvalSigningSecret, publicBaseUrl: config.publicBaseUrl, ttlHours: config.approvalTtlHours });
   // Registered-agent resolution: client's own agent, the filing company's per-state agent, or a third-party provider.
   const registeredAgents = new RegisteredAgentService({ vault });
-  // Outbound communication: real channel senders (email/Slack/SMS) plug in per tenant with
-  // their own vault credentials; until then every message is recorded via the log sender.
-  const notifier = new Notifier({ store, senders: {}, defaultSender: new LogChannelSender("email"), publicBaseUrl: config.publicBaseUrl });
+  // Outbound communication. Email goes through Resend when RESEND_API_KEY is set; Slack, WhatsApp
+  // and SMS senders are not built yet, so those messages (and email without a key) are recorded only.
+  const email: ChannelSender = config.email.resendApiKey
+    ? new ResendEmailSender({ apiKey: config.email.resendApiKey, from: config.email.from, replyTo: config.email.replyTo })
+    : new LogChannelSender("email", { print: !config.production });
+  if (config.production && !config.email.resendApiKey) {
+    console.warn("RESEND_API_KEY is not set: approval links, password resets and notices are recorded, not emailed");
+  }
+  const notifier = new Notifier({ store, senders: { email }, defaultSender: new LogChannelSender("email"), publicBaseUrl: config.publicBaseUrl });
   const harness = new BrowserHarness({ chromiumPath: config.chromiumPath, proxyServer: config.browserProxy, siteProxies: config.siteProxies, steel: config.steel, profileDir: config.browserProfileDir });
   const executor = opts.withExecutor ? new RunExecutor({ store, artifacts, harness, drift, vault, reviewGate, registeredAgents }) : undefined;
   const limiter = new ConcurrencyLimiter({
     "site:IRS": config.siteConcurrency.IRS, "site:NY": config.siteConcurrency.NY, "site:NJ": config.siteConcurrency.NJ,
   });
   const service = new FilingService({ store, approvals, webhooks, queue, vault, drift, nameResolution, reviewGate, registeredAgents, notifier, executor, limiter, dryRunDefault: config.dryRunDefault, workerId: opts.workerId });
-  return { store, artifacts, approvals, webhooks, queue, vault, drift, nameResolution, reviewGate, registeredAgents, notifier, harness, executor, service };
+  return { store, artifacts, approvals, webhooks, queue, vault, drift, nameResolution, reviewGate, registeredAgents, notifier, email, harness, executor, service };
 }

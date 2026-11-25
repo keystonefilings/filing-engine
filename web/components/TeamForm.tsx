@@ -1,12 +1,12 @@
 "use client";
 
-import { useActionState } from "react";
+import { useKeptForm } from "./useKeptForm";
 import type { TeamState } from "@/app/dashboard/(app)/team/actions";
 
 export function TeamForm({ action }: { action: (prev: TeamState, fd: FormData) => Promise<TeamState> }) {
-  const [s, run, pending] = useActionState(action, null);
+  const { state: s, pending, formProps } = useKeptForm(action, null, { clearOnSuccess: true });
   return (
-    <form action={run} className="card">
+    <form {...formProps} className="card">
       {s?.error ? <p className="notice bad" role="alert">{s.error}</p> : null}
       {s?.ok ? <p className="notice ok" role="status">Added. Give them the password privately; they can sign in at the log-in page.</p> : null}
       <div className="field-row n2">

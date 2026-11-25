@@ -2,7 +2,7 @@
 
 import { redirect } from "next/navigation";
 import { engine, EngineError, type Account, type ClientCompany, type SignInResult } from "./engine";
-import { writeSession } from "./session";
+import { readSession, writeSession } from "./session";
 
 export type FormState = { error?: string; issues?: Record<string, string>; ok?: boolean; message?: string } | null;
 
@@ -105,4 +105,61 @@ export async function sendInquiry(_prev: FormState, fd: FormData): Promise<FormS
     return { error: "We couldn't send that just now. Try again in a minute." };
   }
   return { ok: true, message: "Thanks. We have your request and will reply by email." };
+}
+
+/** Forgot password: the engine emails a reset link if the email has an account; the answer is the same either way. */
+export async function requestPasswordReset(_prev: FormState, fd: FormData): Promise<FormState> {
+  const email = text(fd, "email").toLowerCase();
+  if (!EMAIL.test(email)) return { error: "Enter the email you log in with.", issues: { email: "Enter the email you log in with." } };
+  try {
+    await engine(null, "/v1/auth/password-reset", { method: "POST", body: { email } });
+  } catch {
+    return { error: "We can't send a reset link right now. Try again in a minute." };
+  }
+  return { ok: true, message: "If that email has an account, we've sent it a link to choose a new password. It works for an hour." };
+}
+
+/** The page the emailed link opens: sets the new password, then sends the person to log in. */
+export async function resetPassword(_prev: FormState, fd: FormData): Promise<FormState> {
+  const token = String(fd.get("token") ?? "");
+  const password = String(fd.get("password") ?? "");
+  if (password !== String(fd.get("password2") ?? "")) return { error: "The two passwords don't match.", issues: { password2: "The two passwords don't match." } };
+  try {
+    await engine(null, "/v1/auth/password-reset/confirm", { method: "POST", body: { token, password } });
+  } catch (e) {
+    if (e instanceof EngineError && e.status === 410) return { error: "This link has expired or was already used. Ask for a new one below." };
+    if (e instanceof EngineError && e.status === 422) {
+      const found = issuesOf(e);
+      return { error: found.password ? `Password: ${found.password}` : "This link isn't complete. Open it again from the email.", issues: found };
+    }
+    return { error: "We can't change your password right now. Try again in a minute." };
+  }
+  redirect("/login?reset=1");
+}
+
+/** Change password while signed in. Every other session ends; this one continues on the fresh key. */
+export async function changePassword(_prev: FormState, fd: FormData): Promise<FormState> {
+  const s = await readSession();
+  if (!s || s.signedInWith !== "password") return { error: "Sign in with your email and password to change it." };
+  const currentPassword = String(fd.get("currentPassword") ?? "");
+  const newPassword = String(fd.get("newPassword") ?? "");
+  if (newPassword !== String(fd.get("newPassword2") ?? "")) return { error: "The two new passwords don't match.", issues: { newPassword2: "The two new passwords don't match." } };
+  let r: SignInResult;
+  try {
+    r = await engine<SignInResult>(s.apiKey, "/v1/auth/change-password", { method: "POST", body: { currentPassword, newPassword } });
+  } catch (e) {
+    if (e instanceof EngineError && e.status === 401) {
+      const why = (e.body as { error?: string } | null)?.error ?? "";
+      if (/current password/.test(why)) return { error: "Your current password isn't right.", issues: { currentPassword: "This isn't your current password." } };
+      redirect("/login");
+    }
+    if (e instanceof EngineError && e.status === 429) return { error: "Too many wrong passwords. Wait 15 minutes and try again." };
+    if (e instanceof EngineError && e.status === 422) {
+      const found = issuesOf(e);
+      return { error: found.newPassword ? `New password: ${found.newPassword}` : "Check the highlighted fields.", issues: found };
+    }
+    return { error: "We can't change your password right now. Try again in a minute." };
+  }
+  await writeSession(s.kind === "firm" ? { ...s, apiKey: r.sessionKey, expiresAt: r.expiresAt } : { ...s, apiKey: r.sessionKey });
+  return { ok: true, message: "Your password is changed. You're signed out everywhere else." };
 }

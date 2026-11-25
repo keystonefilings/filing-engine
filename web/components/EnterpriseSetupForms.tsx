@@ -1,6 +1,7 @@
 "use client";
 
-import { useActionState, useState } from "react";
+import { useKeptForm } from "./useKeptForm";
+import { useState } from "react";
 import type { Saved } from "@/app/dashboard/(app)/setup/actions";
 import type { PaymentMethodRef, PaymentRouting, PortalDefaultField } from "@/lib/engine";
 
@@ -22,12 +23,12 @@ function CardSelect({ name, value, cards, label }: { name: string; value?: strin
 }
 
 export function RoutingForm({ action, methods, routing, kinds }: { action: Action; methods: PaymentMethodRef[]; routing: PaymentRouting; kinds: { id: string; title: string }[] }) {
-  const [s, run, pending] = useActionState(action, null);
+  const { state: s, pending, formProps } = useKeptForm(action, null);
   const [mode, setMode] = useState(routing.mode);
   const fee = methods.filter((m) => m.purpose === "state_fees");
   const subs = methods.filter((m) => m.purpose === "subscription");
   return (
-    <form action={run} className="card">
+    <form {...formProps} className="card">
       <Result s={s} />
       <div className="field"><label>Card for your subscription</label><CardSelect name="subscriptionMethodId" value={routing.subscriptionMethodId} cards={subs} label="Subscription card" /></div>
       <fieldset>
@@ -51,9 +52,9 @@ export function RoutingForm({ action, methods, routing, kinds }: { action: Actio
 }
 
 export function DefaultsForm({ title, fields, values, action }: { title: string; fields: PortalDefaultField[]; values: Record<string, string | number | boolean>; action: Action }) {
-  const [s, run, pending] = useActionState(action, null);
+  const { state: s, pending, formProps } = useKeptForm(action, null);
   return (
-    <form action={run} className="card">
+    <form {...formProps} className="card">
       <strong>{title}</strong>
       <Result s={s} />
       <div style={{ marginTop: 10 }}>

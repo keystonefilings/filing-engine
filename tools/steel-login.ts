@@ -1,11 +1,11 @@
 /**
  * Save a sign-in as a Steel profile, for a site routed "steel" whose runs need a logged-in
- * browser: Keystone's company-wide ny.gov login is profile "nygov", NY DOS accounts are
+ * browser: a subscriber's ny.gov business login is profile "nygov:<tenant>", NY DOS accounts are
  * "ny:<tenant>". An operator signs in by hand in Steel's live view; nothing here types or
  * stores a password. The session is plain and unrecorded like every engine session
  * (src/browser/steel.ts), except that its live view accepts input so the operator can sign in.
  *
- *   npm run steel-login -- nygov https://my.ny.gov/
+ *   npm run steel-login -- nygov:keystone https://my.ny.gov/
  *
  * Then add the printed "profileKey=profileId" to STEEL_PROFILES. Running it again for a key
  * already in STEEL_PROFILES refreshes that profile.
@@ -17,7 +17,7 @@ import { createSteelSession, redact } from "../src/browser/steel.js";
 const say = (line: string) => console.log(redact(line, config.steel.apiKey));
 const [profileKey, startUrl] = process.argv.slice(2);
 if (!profileKey || !startUrl) {
-  say("usage: npm run steel-login -- <profileKey> <sign-in URL>     e.g. nygov https://my.ny.gov/");
+  say("usage: npm run steel-login -- <profileKey> <sign-in URL>     e.g. nygov:keystone https://my.ny.gov/");
   process.exit(2);
 }
 const existing = config.steel.profiles[profileKey];

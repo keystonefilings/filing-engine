@@ -1,6 +1,7 @@
 "use client";
 
-import { useActionState, useState } from "react";
+import { useKeptForm } from "./useKeptForm";
+import { useState } from "react";
 import { ColorField, LogoField } from "./BrandFields";
 import { BrandPreview } from "./SetupForms";
 
@@ -9,7 +10,7 @@ type I = { ok: true; link: string; email: string } | { ok: false; message: strin
 interface Portal { slug: string; displayName?: string; logoUrl?: string; logoArtifactId?: string; primaryColor?: string; secondaryColor?: string; supportEmail?: string; filingKinds?: string[] }
 
 export function PortalForm({ action, portal, kinds, firmName, logoSrc }: { action: (prev: P, fd: FormData) => Promise<P>; portal?: Portal; kinds: { id: string; title: string }[]; firmName: string; logoSrc?: string }) {
-  const [state, run, pending] = useActionState(action, null);
+  const { state, pending, formProps } = useKeptForm(action, null);
   const [on, setOn] = useState(Boolean(portal));
   const [name, setName] = useState(portal?.displayName ?? "");
   const [logo, setLogo] = useState<string | undefined>(logoSrc);
@@ -18,7 +19,7 @@ export function PortalForm({ action, portal, kinds, firmName, logoSrc }: { actio
   const offered = portal?.filingKinds;
   return (
     <div className="stack">
-      <form action={run} className="card">
+      <form {...formProps} className="card">
         {state ? <p className={`notice ${state.ok ? "ok" : "bad"}`} role="status">{state.message}</p> : null}
         <label className="choice"><input type="checkbox" name="portalOn" checked={on} onChange={(e) => setOn(e.target.checked)} /><span><b>This firm has a portal</b></span></label>
         <p className="help">{portal?.slug ? <>Its address is <code>/p/{portal.slug}</code>.</> : "Its address is made from the firm's name when you save."} Unticking turns the portal off.</p>
@@ -44,10 +45,10 @@ export function PortalForm({ action, portal, kinds, firmName, logoSrc }: { actio
 }
 
 export function InviteForm({ action }: { action: (prev: I, fd: FormData) => Promise<I> }) {
-  const [state, run, pending] = useActionState(action, null);
+  const { state, pending, formProps } = useKeptForm(action, null, { clearOnSuccess: true });
   return (
     <div className="stack">
-      <form action={run} className="card row">
+      <form {...formProps} className="card row">
         <input name="email" type="email" required placeholder="name@firm.com" aria-label="Staff email" style={{ flex: 1, minWidth: 220 }} />
         <button className="btn primary" type="submit" disabled={pending}>Make invite link</button>
       </form>

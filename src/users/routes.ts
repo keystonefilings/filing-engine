@@ -1,4 +1,4 @@
-import { randomUUID } from "node:crypto";
+import { createHash, randomBytes, randomUUID, timingSafeEqual } from "node:crypto";
 import type { FastifyInstance, FastifyReply, FastifyRequest } from "fastify";
 import { z } from "zod";
 import type { InquiryRecord, Store, UserRecord } from "../store/types.js";
@@ -8,6 +8,7 @@ import { dummyHash, hashPassword, passwordProblem, verifyPassword } from "./pass
 import { mintSessionKey, type SessionClaims } from "./session-token.js";
 import { PORTALS, portalDefaultsProblems } from "./portals.js";
 import { RateLimiter } from "./rate-limit.js";
+import type { ChannelSender } from "../comms/senders.js";
 
 /**
  * Dashboard accounts.
@@ -19,6 +20,8 @@ import { RateLimiter } from "./rate-limit.js";
  *    staff create the subscriber's first user after approving it.
  *  - Self-service settings a signed-in person may change: partner profile, branding, payment routing;
  *    enterprise payment routing and portal defaults. Cards and portal logins are vault references only.
+ *  - Password reset (public): an emailed single-use link, valid an hour, that dies with any password
+ *    change or sign-out-everywhere; and change password for a signed-in person. Both end every session.
  */
 
 export type PartnerSignupMode = "approval" | "automatic";
@@ -38,15 +41,31 @@ export interface UsersDeps {
   sessionSecret: string;
   platformTenantId: string;
   partnerSignupMode: PartnerSignupMode;
+  /** Sends the password-reset email. Absent: the link is created but not sent. */
+  email?: ChannelSender;
+  /** The web front end; the reset link opens its /reset-password page. */
+  webBaseUrl: string;
   now?: () => Date;
 }
 
 const SESSION_TTL = { enterprise: 12 * 3600, partner: 7 * 24 * 3600 } as const;
+const RESET_TTL_MINUTES = 60;
 const MAX_FAILS = 5;
 const LOCK_MINUTES = 15;
 
 const email = z.string().trim().toLowerCase().email().max(200);
 const SignInBody = z.object({ email, password: z.string().min(1).max(200) });
+const ResetRequestBody = z.object({ email });
+const ResetConfirmBody = z.object({ token: z.string().min(10).max(300), password: z.string().max(200) });
+const ChangePasswordBody = z.object({ currentPassword: z.string().min(1).max(200), newPassword: z.string().max(200) });
+
+const sha256 = (s: string) => createHash("sha256").update(s).digest();
+/** A reset link's token: the user id (to find the record) and a secret (only its hash is stored). */
+function readResetToken(token: string): { userId: string; secret: string } | null {
+  const i = token.indexOf(".");
+  if (i < 1) return null;
+  return { userId: token.slice(0, i), secret: token.slice(i + 1) };
+}
 const PartnerSignupBody = z.object({
   companyName: z.string().trim().min(2).max(120),
   companyType: z.enum(["cpa", "payroll", "cfo", "other"]),
@@ -190,6 +209,75 @@ export function registerUsers(app: FastifyInstance, deps: UsersDeps): void {
     return { ok: true };
   });
 
+  // ---- Password reset and change ----
+  const resetLimit = new RateLimiter(3, 3_600_000);
+  const resetAllLimit = new RateLimiter(200, 3_600_000);
+  app.post("/v1/auth/password-reset", async (req, reply) => {
+    const parsed = ResetRequestBody.safeParse(req.body);
+    if (!parsed.success) return reply.code(422).send({ error: "enter your email" });
+    // The same answer whether or not the email has an account, so the form can't be used to find out.
+    const answer = { ok: true, message: "If that email has an account, a link to reset the password is on its way." };
+    if (!resetAllLimit.take("all") || !resetLimit.take(parsed.data.email)) return reply.code(202).send(answer);
+    const u = await deps.store.findUserByEmail(parsed.data.email);
+    if (!u || u.status !== "active") return reply.code(202).send(answer);
+    const secret = randomBytes(32).toString("base64url");
+    const at = now();
+    await deps.store.updateUser(u.id, {
+      passwordReset: { tokenHash: sha256(secret).toString("hex"), expiresAt: new Date(at.getTime() + RESET_TTL_MINUTES * 60_000).toISOString(), sessionGen: u.sessionGen, requestedAt: at.toISOString() },
+    });
+    const link = `${deps.webBaseUrl}/reset-password?token=${encodeURIComponent(`${u.id}.${secret}`)}`;
+    // Not awaited: how long a send takes must not tell the caller whether the account exists.
+    void deps.email?.send({ address: u.email, name: u.name }, {
+      subject: "Reset your password",
+      body: `Someone asked to reset the password for the account ${u.email}. Open the link below within ${RESET_TTL_MINUTES} minutes to choose a new one. It works once.\n\nIf this wasn't you, ignore this email: your password stays the same.`,
+      link,
+    }).catch((e) => console.error("password reset email failed", (e as Error).message));
+    return reply.code(202).send(answer);
+  });
+
+  app.post("/v1/auth/password-reset/confirm", async (req, reply) => {
+    const parsed = ResetConfirmBody.safeParse(req.body);
+    if (!parsed.success) return reply.code(422).send({ error: "this reset link isn't complete; open it again from the email" });
+    const bad = () => reply.code(410).send({ error: "this reset link has expired or was already used; ask for a new one" });
+    const t = readResetToken(parsed.data.token);
+    const u = t ? await deps.store.getUser(t.userId) : null;
+    const r = u?.passwordReset;
+    if (!t || !u || !r || r.usedAt || r.expiresAt <= now().toISOString() || r.sessionGen !== u.sessionGen || u.status !== "active") return bad();
+    const want = Buffer.from(r.tokenHash, "hex");
+    const got = sha256(t.secret);
+    if (want.length !== got.length || !timingSafeEqual(want, got)) return bad();
+    const pw = passwordProblem(parsed.data.password, u.email);
+    if (pw) return reply.code(422).send({ error: pw, issues: [{ path: "password", message: pw }] });
+    const at = now().toISOString();
+    await deps.store.updateUser(u.id, {
+      passwordHash: await hashPassword(parsed.data.password), sessionGen: u.sessionGen + 1,
+      failedSignIns: 0, lockedUntil: at, passwordReset: { ...r, usedAt: at },
+    });
+    return { ok: true, email: u.email };
+  });
+
+  app.post("/v1/auth/change-password", async (req, reply) => {
+    const a = await requireAuth(req, reply);
+    if (!a) return reply;
+    if (!a.user) return reply.code(404).send({ error: "this key isn't a signed-in person" });
+    const parsed = ChangePasswordBody.safeParse(req.body);
+    if (!parsed.success) return reply.code(422).send({ error: "enter your current and new password" });
+    const u = a.user;
+    if (u.lockedUntil && u.lockedUntil > now().toISOString()) return reply.code(429).send({ error: `too many wrong passwords; try again after ${LOCK_MINUTES} minutes` });
+    if (!(await verifyPassword(parsed.data.currentPassword, u.passwordHash))) {
+      const fails = (u.failedSignIns ?? 0) + 1;
+      await deps.store.updateUser(u.id, fails >= MAX_FAILS
+        ? { failedSignIns: 0, lockedUntil: new Date(now().getTime() + LOCK_MINUTES * 60_000).toISOString() }
+        : { failedSignIns: fails });
+      return reply.code(401).send({ error: "your current password isn't right" });
+    }
+    const pw = passwordProblem(parsed.data.newPassword, u.email);
+    if (pw) return reply.code(422).send({ error: pw, issues: [{ path: "newPassword", message: pw }] });
+    // Every other session ends; this one gets a fresh key.
+    const next = await deps.store.updateUser(u.id, { passwordHash: await hashPassword(parsed.data.newPassword), sessionGen: u.sessionGen + 1, failedSignIns: 0 });
+    return { user: publicUser(next), ...issue(next) };
+  });
+
   // ---- Partner sign-up ----
   app.post("/v1/signups/partner", async (req, reply) => {
     const parsed = PartnerSignupBody.safeParse(req.body);
@@ -255,7 +343,14 @@ export function registerUsers(app: FastifyInstance, deps: UsersDeps): void {
     if (parsed.data.action === "reject") {
       return { user: publicUser(await deps.store.updateUser(u.id, { status: "rejected", decidedAt: now().toISOString(), decidedBy: by })) };
     }
-    return { user: publicUser(await approvePartner(u, by)) };
+    const approved = await approvePartner(u, by);
+    // The sign-up page told them we'd email once the account opens.
+    void deps.email?.send({ address: approved.email, name: approved.name }, {
+      subject: "Your partner account is open",
+      body: `Your account for ${u.signup!.companyName} is approved. Log in with the email and password you chose to set up your dashboard.`,
+      link: `${deps.webBaseUrl}/login`,
+    }).catch((e) => console.error("approval email failed", (e as Error).message));
+    return { user: publicUser(approved) };
   });
 
   // ---- Enterprise contact requests ----

@@ -66,7 +66,7 @@ export const config = {
     apiKey: process.env.STEEL_API_KEY || null,
     apiUrl: process.env.STEEL_API_URL || undefined,
     connectUrl: process.env.STEEL_CONNECT_URL || undefined,
-    /** Saved sign-ins by profile key, e.g. "nygov=<profile id>" (npm run steel-login). */
+    /** Saved sign-ins by profile key, e.g. "nygov:keystone=<profile id>" (npm run steel-login). */
     profiles: parseSteelProfiles(process.env.STEEL_PROFILES),
     /** Hard cap per run; Keystone's Steel plan allows at most 15 minutes. */
     timeoutMs: envInt("STEEL_SESSION_TIMEOUT_MS", 15 * 60_000),
@@ -75,6 +75,15 @@ export const config = {
   /** "steel-only": this image ships no local browser (Dockerfile target "steel"); every site must route to Steel. */
   browsersSteelOnly: process.env.BROWSERS === "steel-only",
   dryRunDefault: env("DRY_RUN_DEFAULT", "true") === "true",
+  /** The web front end (web/): links in account emails (password reset) point here. */
+  webBaseUrl: env("WEB_BASE_URL", "http://localhost:3000").replace(/\/+$/, ""),
+  /** Email through Resend (comms/resend.ts). No key: every message is recorded, none is sent. */
+  email: {
+    resendApiKey: process.env.RESEND_API_KEY || null,
+    /** A sender on a domain verified in Resend. */
+    from: env("EMAIL_FROM", "Keystone Filings <filings@keystonefilings.com>"),
+    replyTo: process.env.EMAIL_REPLY_TO || undefined,
+  },
   /** Name-resolution AI generator (the only LLM in a filing). No key -> deterministic static generator. */
   anthropicApiKey: process.env.ANTHROPIC_API_KEY || null,
   nameGeneratorModel: env("NAME_GENERATOR_MODEL", "claude-haiku-5-5"),

@@ -205,10 +205,10 @@ code (with tests) or, for items that need a person, when that step has happened.
 Rows refer to the status tables above.
 
 ### Step 1: honest and safe
-- [ ] V1. Resend email sender behind `ChannelSender`, wired as the default email sender (row 18). *Needs: Resend API key and DNS verification of the sending domain.*
-- [ ] V2. Password reset (forgot password, then a link to set a new one) and change password (row 12).
-- [ ] V3. EIN CP 575: post-submit screens never halt on first sight; artifacts are collected even when confirmation fails (row 7, risk 1).
-- [ ] V4. NYS-100 browser profile scoped per tenant (risk 2).
+- [x] V1. Resend email sender behind `ChannelSender`, wired as the default email sender (row 18). **Done in code** (`src/comms/resend.ts`; approval links, password resets and partner approvals). *To turn on: a Resend API key and DNS verification of the sending domain (`docs/deploy-fly.md`, step 3).*
+- [x] V2. Password reset (forgot password, then a link to set a new one) and change password (row 12). **Done**: `/forgot-password`, `/reset-password`, and Password pages in both dashboards; links are single-use, last an hour and end every session.
+- [x] V3. EIN CP 575: post-submit screens never halt on first sight; artifacts are collected even when confirmation fails (row 7, risk 1). **Done** (`src/orchestrator/run.ts`, `test/post-submit.test.ts`); also fixed in-run EIN artifacts all being stored as `cp575`.
+- [x] V4. NYS-100 browser profile scoped per tenant (risk 2). **Done**: profile `nygov:<tenant>` and credential `<tenant>/NYGOV`. *Deploy note: rename the Fly secret entry `STEEL_PROFILES` `nygov=` to `nygov:keystone=`.*
 - [ ] V5. SSNs encrypted at rest, plus the purge job `src/domain/filing.ts:46` promises (risk 3).
 - [ ] V6. UI copy matches what works: no promised emails, vaults or subscription cards that don't exist (risk 4, row 9).
 - [ ] V7. Email verification for new sign-ups, and logout revokes the engine session key (row 12).
@@ -217,7 +217,7 @@ Rows refer to the status tables above.
 ### Step 2: first live filings (adapters)
 - [ ] V9. NY LLC and corporation live on the drawdown account: map the deposit and post-submit pages, `confirmSubmission`, `complete: true` (row 1). *Needs: a supervised live walk.*
 - [ ] V10. FL LLC, profit corporation and LP live on the Sunbiz prepaid account: map the card and post-submit pages (row 1). *Needs: a live walk.*
-- [ ] V11. IRS EIN live: map the Assignment screen; entity types beyond LLC (row 1). *Needs: a live walk.*
+- [ ] V11. IRS EIN live: map the Assignment screen; entity types beyond LLC (row 1). *Needs: a live walk.* Also: once the IRS adapter is complete, a dry run of a formation with an in-run EIN stops at the IRS click and never previews the state's later screens; the preview needs to continue past the EIN with the placeholder.
 - [ ] V12. NJ formation and standing live: map the NICUSA checkout (row 1). *Needs: a live walk; card storage (V18).*
 - [ ] V13. NJ-REG and NYS-100 adapters rebuilt from the walked maps, not the paper forms (row 1).
 - [ ] V14. MO formation `fill` steps; NY par value; adapters for the mapped NY filings (dissolution, amendment, certificate of change, copies, certificates of status) and NJ for-profit corporation (row 1).
@@ -262,3 +262,6 @@ Rows refer to the status tables above.
 ### Step 7: copy and release hygiene
 - [ ] V44. 20-persona copy review of the full site, best recommendations applied (row 29).
 - [ ] V45. CI on push to `main`, and a test gate before the Fly deploy (risk 7).
+
+### Found while building
+- [x] V46. Forms lost everything typed after an error (React 19 clears a form after its action, so a wrong password emptied the email and a sign-up error emptied the form). **Done**: `web/components/useKeptForm.ts` keeps values on every action form; forms that create something still clear after a success.

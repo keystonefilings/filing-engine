@@ -98,6 +98,22 @@ folder encrypted with Windows DPAPI (readable only by the same Windows account o
 }
 ```
 
+**Email (Resend).** Not required to start, but without it nothing is emailed: approval links,
+password resets and notices are only recorded on each filing. In Resend, add the sending
+domain (for example `keystonefilings.com`), add the DNS records it shows (SPF and DKIM) and wait
+until it says Verified. Then create an API key with sending access only, and:
+
+```bash
+read -s RESEND_API_KEY && fly secrets set --stage --app keystone-filing-engine RESEND_API_KEY="$RESEND_API_KEY"
+```
+
+```bash
+fly secrets set --stage --app keystone-filing-engine EMAIL_FROM="Keystone Filings <filings@keystonefilings.com>" WEB_BASE_URL="https://keystonefilings.com"
+```
+
+`EMAIL_FROM` must be an address on the verified domain, and `WEB_BASE_URL` is where the web
+front end runs: password-reset and log-in links in emails point there.
+
 To copy a saved key to the clipboard for a password manager without showing it (then clear the
 clipboard with `Set-Clipboard -Value ' '`, and delete the entry from clipboard history if it is on):
 
@@ -159,14 +175,14 @@ Every line should say `ok` except Missouri, whose bot check does not clear on St
 Missouri by hand). Then save each logged-in account (docs/fixed-ip-machine.md, "Saved sign-ins"):
 
 ```bash
-fly ssh console --app keystone-filing-engine --select --pty -C "node --import tsx tools/steel-login.ts nygov https://my.ny.gov/"
+fly ssh console --app keystone-filing-engine --select --pty -C "node --import tsx tools/steel-login.ts nygov:keystone https://my.ny.gov/"
 ```
 
 Open the link it prints, sign in, press Enter, and repeat for `ny:keystone` and `nj:keystone`.
 Then set every printed entry at once:
 
 ```bash
-fly secrets set --app keystone-filing-engine STEEL_PROFILES="nygov=<profile id>,ny:keystone=<profile id>,nj:keystone=<profile id>"
+fly secrets set --app keystone-filing-engine STEEL_PROFILES="nygov:keystone=<profile id>,ny:keystone=<profile id>,nj:keystone=<profile id>"
 ```
 
 ## 8. First dry run

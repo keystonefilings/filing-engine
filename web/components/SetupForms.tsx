@@ -1,6 +1,7 @@
 "use client";
 
-import { useActionState, useState } from "react";
+import { useKeptForm } from "./useKeptForm";
+import { useState } from "react";
 import type { SetupState } from "@/app/p/[slug]/(portal)/setup/actions";
 import type { PaymentMethodRef, PaymentRouting } from "@/lib/engine";
 import { textOn } from "@/lib/brand";
@@ -20,9 +21,9 @@ function Top({ s }: { s: SetupState }) {
 export interface DetailsValues { name: string; companyType?: string; contactName?: string; contactEmail?: string; phone?: string; website?: string }
 
 export function DetailsForm({ action, v }: { action: Action; v: DetailsValues }) {
-  const [s, run, pending] = useActionState(action, null);
+  const { state: s, pending, formProps } = useKeptForm(action, null);
   return (
-    <form action={run} className="card">
+    <form {...formProps} className="card">
       <Top s={s} />
       <div className="field"><label htmlFor="d-name">Firm name</label><input id="d-name" name="name" type="text" defaultValue={v.name} required /><Issue s={s} k="name" /></div>
       <div className="field"><label htmlFor="d-type">Kind of firm</label>
@@ -46,14 +47,14 @@ export function DetailsForm({ action, v }: { action: Action; v: DetailsValues })
 export interface BrandValues { displayName?: string; logoSrc?: string; logoUrl?: string; primaryColor?: string; secondaryColor?: string; supportEmail?: string }
 
 export function BrandingForm({ action, v, platform }: { action: Action; v: BrandValues; platform: string }) {
-  const [s, run, pending] = useActionState(action, null);
+  const { state: s, pending, formProps } = useKeptForm(action, null);
   const [name, setName] = useState(v.displayName ?? "");
   const [logo, setLogo] = useState<string | undefined>(v.logoSrc);
   const [color, setColor] = useState(v.primaryColor ?? "#1f4fd1");
   const [color2, setColor2] = useState(v.secondaryColor ?? v.primaryColor ?? "#0f766e");
   return (
     <div className="stack">
-      <form action={run} className="card">
+      <form {...formProps} className="card">
         <Top s={s} />
         <div className="field"><label htmlFor="b-name">Name your clients see</label><input id="b-name" name="displayName" type="text" value={name} onChange={(e) => setName(e.target.value)} maxLength={80} /></div>
         <LogoField current={v.logoSrc} currentLink={v.logoUrl} onPreview={setLogo} />
@@ -89,7 +90,7 @@ export function BrandPreview({ name, logo, color, color2, platform }: { name: st
 }
 
 export function PaymentsForm({ action, methods, routing, kinds }: { action: Action; methods: PaymentMethodRef[]; routing?: PaymentRouting; kinds: { id: string; title: string }[] }) {
-  const [s, run, pending] = useActionState(action, null);
+  const { state: s, pending, formProps } = useKeptForm(action, null);
   const [mode, setMode] = useState<"single" | "per_filing">(routing?.mode ?? "single");
   const cards = methods.filter((m) => m.purpose === "state_fees");
   const none = cards.length === 0;
@@ -100,7 +101,7 @@ export function PaymentsForm({ action, methods, routing, kinds }: { action: Acti
     </select>
   );
   return (
-    <form action={run} className="card">
+    <form {...formProps} className="card">
       <Top s={s} />
       <fieldset>
         <legend>How state fees are paid</legend>
