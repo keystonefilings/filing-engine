@@ -5,6 +5,9 @@ import { engine, EngineError, filingTitle, type Filing, type Run } from "@/lib/e
 import { StatusBadge } from "@/components/StatusBadge";
 import { nextStep } from "@/lib/status";
 import { filingKind } from "@/lib/intake/forms";
+import { missingInputs } from "@/lib/missing-fields";
+import { MissingInfoForm } from "@/components/MissingInfoForm";
+import { supplyMissing } from "./actions";
 
 export default async function FilingPage({ params }: { params: Promise<{ slug: string; id: string }> }) {
   const { slug, id } = await params;
@@ -35,7 +38,12 @@ export default async function FilingPage({ params }: { params: Promise<{ slug: s
       <div className="row"><h1 style={{ margin: 0 }}>{filingTitle(f)}</h1><StatusBadge status={f.status} />{f.request.dryRun ? <span className="badge">Test</span> : null}</div>
       <p className="muted" style={{ marginTop: 0 }}>{kind?.title ?? `${f.request.state} ${f.request.type.replace(/_/g, " ")}`} · started {new Date(f.createdAt).toLocaleString()}{portal?.submittedBy ? ` by ${portal.submittedBy}` : ""}{portal?.source === "client_link" ? " (client link)" : ""}</p>
       {step ? <p className="notice">{step}</p> : null}
-      {f.lastError && ["invalid", "awaiting_information", "failed", "blocked", "rejected"].includes(f.status) ? <p className="notice bad">{f.lastError}</p> : null}
+      {f.lastError && ["invalid", "failed", "blocked", "rejected"].includes(f.status) ? <p className="notice bad">{f.lastError}</p> : null}
+      {f.status === "awaiting_information" ? (
+        f.missingInformation?.length
+          ? <MissingInfoForm action={supplyMissing.bind(null, slug, f.id)} inputs={missingInputs(f.missingInformation)} startOverHref={`${base}/new${kind ? `/${kind.id}` : ""}`} />
+          : f.lastError ? <p className="notice bad">{f.lastError}</p> : null
+      ) : null}
       {approvalLink ? (
         <div className="card">
           <strong>Approval link</strong>

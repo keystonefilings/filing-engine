@@ -240,7 +240,7 @@ Rows refer to the status tables above.
 - [ ] V24. Remove the duplicate questions listed in row 25; "Same as" for people (row 25).
 - [x] V25. Partners choose which filings they offer; use the "states you file in" answer (rows 19, 22). **Done**: "Services you offer your clients" in the Your firm step; until a partner chooses, it offers its sign-up states plus the EIN. Unoffered services leave the portal and their public pages.
 - [x] V26. Client links can be listed and revoked; resubmitting returns an error, not the old filing. **Done**: Client links lists each link (who it's for, filing, status, a link to its filing once used) with Turn off; a used, turned-off or expired link tells the client so and refuses to send. Links made before this change keep working until they expire.
-- [ ] V27. "Needs information" filings get a form on the filing page.
+- [x] V27. "Needs information" filings get a form on the filing page. **Done**: the filing keeps its list of missing answers (`missingInformation`); the page asks for single values and addresses directly, and for people, members and owners offers to start the filing again with the full form.
 - [ ] V28. The CPA firm's email goes in NY's CC automatically on Keystone-account filings; E-Submission fills CC; the firm's details prefill the contact block (rows 8, 11).
 
 ### Step 5: enterprise

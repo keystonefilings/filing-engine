@@ -57,6 +57,8 @@ describe("FilingService completeness gate", () => {
     const { filing } = await w.service.createFiling(raw);
     expect(filing.status).toBe("awaiting_information");
     expect(filing.lastError).toMatch(/business purpose/);
+    // V27: the filing itself says what's missing, for the filing page's form.
+    expect(filing.missingInformation).toEqual([{ path: "formation.purpose", label: "business purpose" }]);
     const types = (await store.listDeliveries(filing.id)).map((d) => d.event.type);
     expect(types).toContain("filing.information_required");
     expect(types).not.toContain("filing.awaiting_approval");
@@ -66,6 +68,8 @@ describe("FilingService completeness gate", () => {
     const after = (await store.getFiling(filing.id))!;
     expect(after.status).toBe("awaiting_approval");
     expect(after.request.formation!.purpose).toBe("General consulting services");
+    expect(after.missingInformation).toEqual([]);
+    expect(after.lastError).toBeUndefined();
     expect((await store.listDeliveries(filing.id)).map((d) => d.event.type)).toContain("filing.awaiting_approval");
   });
 

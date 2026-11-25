@@ -167,7 +167,7 @@ export class FilingService {
     // Pre-flight completeness: verify the filing has every piece of info it needs before it proceeds.
     const completeness = checkCompleteness(req, this.completenessConfig(tenant, client));
     if (!completeness.complete) {
-      const f = await this.transition(filing, "awaiting_information", { lastError: `missing: ${completeness.missing.map((m) => m.label).join(", ")}` });
+      const f = await this.transition(filing, "awaiting_information", { lastError: `missing: ${completeness.missing.map((m) => m.label).join(", ")}`, missingInformation: completeness.missing });
       await this.emit("filing.information_required", f, { missing: completeness.missing });
       return { filing: f, issues, existing: false };
     }
@@ -287,10 +287,11 @@ export class FilingService {
     }
     const completeness = checkCompleteness(req, this.completenessConfig(tenant, client));
     if (!completeness.complete) {
-      await this.emit("filing.information_required", updated, { missing: completeness.missing });
+      const still = await this.d.store.updateFiling(updated.id, { missingInformation: completeness.missing, lastError: `missing: ${completeness.missing.map((m) => m.label).join(", ")}` });
+      await this.emit("filing.information_required", still, { missing: completeness.missing });
       return { ok: true as const, complete: false as const, missing: completeness.missing };
     }
-    const result = await this.finalizeFiling(updated, tenant, client, issues);
+    const result = await this.finalizeFiling(await this.d.store.updateFiling(updated.id, { missingInformation: [], lastError: undefined }), tenant, client, issues);
     return { ok: true as const, complete: true as const, filing: result.filing, approvalLink: result.approvalLink };
   }
 

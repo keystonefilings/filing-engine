@@ -13,6 +13,8 @@ export interface FilingRecord {
   idempotencyKey: string;
   status: FilingStatus;
   request: FilingRequest;
+  /** V27: what the completeness check still needs while the filing is awaiting_information. */
+  missingInformation?: { path: string; label: string }[];
   /** When the SSNs in request were replaced by their masked form (store/sensitive.ts). */
   sensitivePurgedAt?: string;
   payloadHash: string;

@@ -59,6 +59,7 @@ export interface ClientCompany {
 
 export interface Filing {
   id: string;
+  missingInformation?: { path: string; label: string }[];
   tenantId: string;
   clientCompanyId: string;
   status: string;
