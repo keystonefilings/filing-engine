@@ -182,6 +182,9 @@ export class MemoryStore implements Store {
   async listDeliveries(filingId?: string) {
     return [...this.deliveries.values()].filter((d) => !filingId || d.event.filingId === filingId);
   }
+  async listTenantDeliveries(tenantId: string, limit: number) {
+    return [...this.deliveries.values()].filter((d) => d.event.tenantId === tenantId).sort((a, b) => b.event.occurredAt.localeCompare(a.event.occurredAt)).slice(0, limit);
+  }
 
   async createMessage(m: MessageRecord) { this.messages.set(m.id, m); return m; }
   async listMessages(filingId?: string) {

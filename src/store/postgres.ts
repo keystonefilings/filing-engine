@@ -337,6 +337,9 @@ export class PostgresStore implements Store {
   async listDueDeliveries(now: string) {
     return this.docs<WebhookDeliveryRecord>(`select doc from webhook_deliveries where status='pending' and next_attempt_at <= $1`, [now]);
   }
+  async listTenantDeliveries(tenantId: string, limit: number) {
+    return this.docs<WebhookDeliveryRecord>(`select doc from webhook_deliveries where doc->'event'->>'tenantId' = $1 order by doc->'event'->>'occurredAt' desc limit $2`, [tenantId, limit]);
+  }
   async listDeliveries(filingId?: string) {
     return filingId
       ? this.docs<WebhookDeliveryRecord>(`select doc from webhook_deliveries where filing_id=$1`, [filingId])

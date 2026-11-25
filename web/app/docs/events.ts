@@ -3,6 +3,7 @@ export const EVENT_NAMES: [string, string][] = [
   ["filing.validated", "The request passed validation (warnings, if any, in data.warnings)."],
   ["filing.invalid", "Validation failed; data.issues lists the problems."],
   ["filing.information_required", "Something is missing; data.missing lists it."],
+  ["webhook.test", "A test delivery you asked for (POST /v1/webhooks/test); filingId is all zeros."],
   ["filing.previewing", "A preview run is taking the state's review page for the client to approve (decision 7). data.reason says why when it is a second preview."],
   ["filing.awaiting_approval", "The approval link went to the client. data.reviewPage is true when the approval shows the state's review page (data.reviewShotArtifactId)."],
   ["filing.approved", "The client approved; a run is queued."],

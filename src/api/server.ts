@@ -5,7 +5,7 @@ import { registerSelfService, tenantFromStoredKey } from "./self-service.js";
 import { registerSignatures } from "./signatures.js";
 import { z } from "zod";
 import type { FilingService } from "../orchestrator/service.js";
-import { OutcomeError, ValidationFailed } from "../orchestrator/service.js";
+import { IdempotencyConflict, OutcomeError, ValidationFailed } from "../orchestrator/service.js";
 import type { ApprovalService } from "../approvals/service.js";
 import { renderReviewPage, maskSensitive } from "../approvals/render.js";
 import { ClientCompanyOwnershipError, type Store, type FilingRecord } from "../store/types.js";
@@ -22,6 +22,7 @@ import { registerIntakeLinks } from "./intake-links.js";
 import { readSessionKey, SESSION_PREFIX } from "../users/session-token.js";
 import { partnerGuard } from "../users/partner-guard.js";
 import { FONT_PRESETS, googleFontHref, type FontPreset } from "../settings/fonts.js";
+import type { WebhookDispatcher } from "../webhooks/dispatcher.js";
 
 export interface ApiDeps {
   service: FilingService;
@@ -47,6 +48,8 @@ export interface ApiDeps {
   email?: ChannelSender;
   /** The web front end, for links in account emails. */
   webBaseUrl?: string;
+  /** Sends webhook test deliveries (V35). */
+  webhooks?: WebhookDispatcher;
   /** The site's name (CoFile): the platform tenant's approval pages and partner firms' "with …". */
   platformName?: string;
 }
@@ -139,6 +142,7 @@ export function buildServer(deps: ApiDeps): FastifyInstance {
       return reply.code(r.existing ? 200 : 201).send({ filing: publicFiling(r.filing), approvalLink: r.approvalLink, issues: r.issues });
     } catch (e) {
       if (e instanceof ValidationFailed) return reply.code(422).send({ error: "validation failed", issues: e.issues });
+      if (e instanceof IdempotencyConflict) return reply.code(409).send({ error: e.message, filingId: e.filingId });
       throw e;
     }
   });
@@ -150,7 +154,16 @@ export function buildServer(deps: ApiDeps): FastifyInstance {
     let filings = await deps.store.listFilings(tenantId);
     if (clientCompanyId) filings = filings.filter((f) => f.clientCompanyId === clientCompanyId);
     if (status) { const wanted = new Set(status.split(",")); filings = filings.filter((f) => wanted.has(f.status)); }
-    filings.sort((a, b) => b.createdAt.localeCompare(a.createdAt));
+    filings.sort((a, b) => b.createdAt.localeCompare(a.createdAt) || b.id.localeCompare(a.id));
+    // V35: pages, newest first. limit (1 to 200) and before (the nextBefore of the page before).
+    const q = req.query as { limit?: string; before?: string };
+    if (q.before) { const [at, id] = q.before.split("|"); filings = filings.filter((f) => f.createdAt < at! || (f.createdAt === at && !!id && f.id < id)); }
+    if (q.limit) {
+      const n = Math.min(200, Math.max(1, Number(q.limit) || 50));
+      const page = filings.slice(0, n);
+      const last = page[page.length - 1];
+      return { filings: page.map(publicFiling), nextBefore: filings.length > n && last ? `${last.createdAt}|${last.id}` : null };
+    }
     return { filings: filings.map(publicFiling) };
   });
 
@@ -218,6 +231,59 @@ export function buildServer(deps: ApiDeps): FastifyInstance {
       if (e instanceof OutcomeError) return reply.code(e.status).send({ error: e.message });
       throw e;
     }
+  });
+
+  // V35: cancel before anything has started at the state.
+  app.post("/v1/filings/:id/cancel", async (req, reply) => {
+    const auth = await authOf(req);
+    if (!auth) return reply.code(401).send({ error: "invalid api key" });
+    const f = await deps.store.getFiling((req.params as { id: string }).id);
+    if (!f || f.tenantId !== auth.tenantId) return reply.code(404).send({ error: "not found" });
+    const reason = typeof (req.body as { reason?: unknown } | undefined)?.reason === "string" ? String((req.body as { reason: string }).reason).slice(0, 500) : undefined;
+    try {
+      return { filing: publicFiling(await deps.service.cancelFiling(f.id, auth.user?.email ?? "api key", reason)) };
+    } catch (e) {
+      if (e instanceof OutcomeError) return reply.code(e.status).send({ error: e.message });
+      throw e;
+    }
+  });
+
+  // V35: the client's decision, collected in the subscriber's own app.
+  app.post("/v1/filings/:id/approval", async (req, reply) => {
+    const auth = await authOf(req);
+    if (!auth) return reply.code(401).send({ error: "invalid api key" });
+    if (auth.partnerOf) return reply.code(403).send({ error: "partners approve through the approval link" });
+    const f = await deps.store.getFiling((req.params as { id: string }).id);
+    if (!f || f.tenantId !== auth.tenantId) return reply.code(404).send({ error: "not found" });
+    const parsed = z.object({ decision: z.enum(["approve", "request_changes"]), approvedBy: z.string().trim().min(2).max(200), comment: z.string().max(2000).optional(), code: z.string().max(20).optional() }).safeParse(req.body);
+    if (!parsed.success) return reply.code(422).send({ error: "send decision and approvedBy (who approved)" });
+    try {
+      const r = await deps.service.decideByApi(f.id, parsed.data.decision, { by: parsed.data.approvedBy, comment: parsed.data.comment, code: parsed.data.code });
+      if (!r.ok) return reply.code(409).send({ error: r.reason });
+      return { filing: publicFiling((await deps.store.getFiling(f.id))!) };
+    } catch (e) {
+      if (e instanceof OutcomeError) return reply.code(e.status).send({ error: e.message });
+      throw e;
+    }
+  });
+
+  // V35: a test delivery to every endpoint, and the recent delivery log.
+  app.post("/v1/webhooks/test", async (req, reply) => {
+    const auth = await authOf(req);
+    if (!auth || auth.partnerOf) return reply.code(auth ? 403 : 401).send({ error: auth ? "not available to partner accounts" : "invalid api key" });
+    const tenant = await deps.store.getTenant(auth.tenantId);
+    if (!tenant?.webhookEndpoints.length) return reply.code(409).send({ error: "no webhook endpoints are set up" });
+    if (!deps.webhooks) return reply.code(501).send({ error: "webhook delivery isn't available on this server" });
+    const event = await deps.webhooks.emit("webhook.test", { tenantId: auth.tenantId, filingId: "00000000-0000-0000-0000-000000000000" }, { message: "a test delivery you asked for" }, tenant.webhookEndpoints);
+    await deps.webhooks.processDue();
+    return reply.code(202).send({ eventId: event.id, deliveries: (await deps.store.listDeliveries("00000000-0000-0000-0000-000000000000")).filter((d) => d.event.id === event.id).map(({ event: _e, ...d }) => d) });
+  });
+  app.get("/v1/webhooks/deliveries", async (req, reply) => {
+    const auth = await authOf(req);
+    if (!auth || auth.partnerOf) return reply.code(auth ? 403 : 401).send({ error: auth ? "not available to partner accounts" : "invalid api key" });
+    const limit = Math.min(200, Math.max(1, Number((req.query as { limit?: string }).limit) || 50));
+    const ds = await deps.store.listTenantDeliveries(auth.tenantId, limit);
+    return { deliveries: ds.map((d) => ({ id: d.id, url: d.url, eventType: d.event.type, filingId: d.event.filingId, occurredAt: d.event.occurredAt, status: d.status, attempts: d.attempts, lastStatusCode: d.lastStatusCode, lastError: d.lastError })) };
   });
 
   app.get("/v1/filings/:id/deliveries", async (req, reply) => {

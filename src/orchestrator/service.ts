@@ -29,6 +29,7 @@ import type { ClientCompanySettings, TenantSettings } from "../settings/schema.j
 import type { ArtifactStore } from "../artifacts/store.js";
 import type { CapturedReview } from "./run.js";
 import type { SiteAdapter } from "../adapters/types.js";
+import { createHash } from "node:crypto";
 
 export interface FilingServiceDeps {
   /** Which adapter files a request (tests inject their own); default: the adapter registry. */
@@ -131,6 +132,10 @@ export class FilingService {
     const client = typeof r0.clientCompanyId === "string" ? await this.d.store.getClientCompany(r0.clientCompanyId) : null;
     if (typeof r0.tenantId === "string" && typeof r0.idempotencyKey === "string") {
       const existing = await this.d.store.findFilingByIdempotency(r0.tenantId, r0.idempotencyKey);
+      // V35: the same key with a different request is a mistake to report, not the old filing to return.
+      if (existing?.requestFingerprint && existing.requestFingerprint !== requestFingerprint(r0)) {
+        throw new IdempotencyConflict(existing.id);
+      }
       if (existing) {
         const a = existing.currentApprovalId ? await this.d.store.getApproval(existing.currentApprovalId) : null;
         return { filing: existing, approvalLink: a && a.status === "pending" ? this.d.approvals.linkFor(a) : undefined, issues: [], existing: true };
@@ -156,7 +161,7 @@ export class FilingService {
     const filing: FilingRecord = {
       id: randomUUID(), tenantId: req.tenantId, clientCompanyId: req.clientCompanyId, idempotencyKey: req.idempotencyKey,
       status: "created", request: req, payloadHash: this.d.approvals.payloadHash(req), createdAt: now, updatedAt: now, artifacts: [],
-      appliedPolicies: applied.provenance,
+      appliedPolicies: applied.provenance, requestFingerprint: requestFingerprint(r0),
     };
     await this.d.store.createFiling(filing);
     if (hasErrors(issues)) {
@@ -243,6 +248,36 @@ export class FilingService {
     if (!filing) throw new OutcomeError(404, "filing not found");
     if (!["failed", "blocked", "awaiting_drift_review"].includes(filing.status)) throw new OutcomeError(409, `the filing is ${filing.status}; a preview starts from failed, blocked or awaiting_drift_review`);
     return this.startPreview(filing, "preview requested again");
+  }
+
+  /**
+   * V35: cancel a filing before anything has started at the state. A running or submitted filing
+   * can't be cancelled (the portal may already have it); its pending approval stops working.
+   */
+  async cancelFiling(filingId: string, by: string, reason?: string): Promise<FilingRecord> {
+    const f = await this.d.store.getFiling(filingId);
+    if (!f) throw new OutcomeError(404, "filing not found");
+    const CANCELLABLE = new Set(["created", "invalid", "awaiting_information", "previewing", "awaiting_approval", "changes_requested", "approved", "blocked", "queued", "failed", "awaiting_drift_review", "awaiting_name_resolution", "awaiting_review_gate"]);
+    if (!CANCELLABLE.has(f.status)) throw new OutcomeError(409, `the filing is ${f.status} and can't be cancelled`);
+    if (f.currentApprovalId) {
+      const a = await this.d.store.getApproval(f.currentApprovalId);
+      if (a?.status === "pending") await this.d.store.updateApproval(a.id, { status: "superseded" });
+    }
+    const done = await this.transition(f, "aborted", { lastError: `cancelled by ${by}${reason ? `: ${reason}` : ""}` });
+    await this.emit("filing.aborted", done, { cancelledBy: by, reason });
+    return done;
+  }
+
+  /**
+   * V35: a subscriber that collects its client's approval in its own app records it here. It is the
+   * same decision as the link (single use, bound to the payload); the caller vouches for the person.
+   */
+  async decideByApi(filingId: string, decision: "approve" | "request_changes", via: { by: string; comment?: string; code?: string }) {
+    const f = await this.d.store.getFiling(filingId);
+    if (!f) throw new OutcomeError(404, "filing not found");
+    const a = f.currentApprovalId ? await this.d.store.getApproval(f.currentApprovalId) : null;
+    if (!a || a.status !== "pending" || f.status !== "awaiting_approval") throw new OutcomeError(409, `the filing is ${f.status}; there is no approval waiting`);
+    return this.onApprovalDecision(a.token, decision, { userAgent: `api:${via.by}`, comment: via.comment, code: via.code });
   }
 
   /** Creates the approval (with the captured review page, if any) and sends the link. */
@@ -679,6 +714,18 @@ function deepMerge(base: Record<string, unknown>, patch: Record<string, unknown>
       : v;
   }
   return out;
+}
+
+export class IdempotencyConflict extends Error {
+  constructor(readonly filingId: string) { super("this idempotency key was already used for a different request"); }
+}
+
+/** A stable hash of a submitted request (key order ignored), to tell a retry from a different request. */
+export function requestFingerprint(raw: Record<string, unknown>): string {
+  const stable = (v: unknown): unknown => Array.isArray(v) ? v.map(stable)
+    : v && typeof v === "object" ? Object.fromEntries(Object.keys(v as object).sort().map((k) => [k, stable((v as Record<string, unknown>)[k])])) : v;
+  const { idempotencyKey: _k, ...rest } = raw;
+  return createHash("sha256").update(JSON.stringify(stable(rest))).digest("hex");
 }
 
 export class OutcomeError extends Error {

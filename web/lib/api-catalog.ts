@@ -54,8 +54,12 @@ export const ENDPOINTS: Endpoint[] = [
   {
     id: "list-filings", method: "GET", path: "/v1/filings", group: "Filings", auth: "api_key",
     summary: "List filings, newest first",
-    query: [{ name: "clientCompanyId", description: "Only this client company's filings." }, { name: "status", description: "Comma-separated statuses, e.g. `awaiting_approval,awaiting_information`." }],
-    responses: [{ status: 200, description: "Your filings.", example: { filings: [FILING_OUT] } }],
+    query: [
+      { name: "clientCompanyId", description: "Only this client company's filings." }, { name: "status", description: "Comma-separated statuses, e.g. `awaiting_approval,awaiting_information`." },
+      { name: "limit", description: "Page size, 1 to 200. Without it, every filing comes back in one list." },
+      { name: "before", description: "The `nextBefore` of the previous page, for the next one." },
+    ],
+    responses: [{ status: 200, description: "Your filings, and `nextBefore` (null on the last page) when `limit` is given.", example: { filings: [FILING_OUT], nextBefore: "2026-11-25T20:41:00.000Z|f_122" } }],
   },
   {
     id: "get-filing", method: "GET", path: "/v1/filings/{id}", group: "Filings", auth: "api_key",
@@ -72,6 +76,33 @@ export const ENDPOINTS: Endpoint[] = [
       { status: 409, description: "The filing is not waiting for information." },
       { status: 422, description: "The merged request is invalid." },
     ],
+  },
+  {
+    id: "cancel-filing", method: "POST", path: "/v1/filings/{id}/cancel", group: "Filings", auth: "api_key",
+    summary: "Cancel a filing",
+    description: "Before anything has started at the state: any status up to `queued`, and `failed`. The approval link stops working and `filing.aborted` is sent. A running or submitted filing can't be cancelled.",
+    body: "{ reason? }", bodyExample: { reason: "The client changed their mind" },
+    responses: [{ status: 200, description: "The filing, now `aborted`.", example: { filing: { id: "f_123", status: "aborted" } } }, { status: 409, description: "The filing has started at the state, or is already finished." }],
+  },
+  {
+    id: "record-approval", method: "POST", path: "/v1/filings/{id}/approval", group: "Filings", auth: "api_key",
+    summary: "Record the client's approval",
+    description: "When you collect the client's approval in your own app instead of sending them the approval link. The same single decision as the link: it applies to the exact data and fees waiting for approval. You vouch for who approved (`approvedBy`); send `code` if the firm requires a one-time code.",
+    body: "{ decision, approvedBy, comment?, code? }", bodyExample: { decision: "approve", approvedBy: "Sam Rivera, in our client portal" },
+    responses: [{ status: 200, description: "The filing, now approved and queued.", example: { filing: { id: "f_123", status: "queued" } } }, { status: 409, description: "No approval is waiting, or it was already decided." }],
+  },
+  {
+    id: "webhook-test", method: "POST", path: "/v1/webhooks/test", group: "Webhooks", auth: "api_key",
+    summary: "Send a test delivery",
+    description: "Sends a `webhook.test` event to each of your endpoints, signed like any other delivery, so you can check your receiver.",
+    responses: [{ status: 202, description: "Sent; each endpoint's result.", example: { eventId: "e_1", deliveries: [{ url: "https://hooks.example.com/cofile", status: "delivered", attempts: 1, lastStatusCode: 200 }] } }, { status: 409, description: "No endpoints are set up." }],
+  },
+  {
+    id: "webhook-deliveries", method: "GET", path: "/v1/webhooks/deliveries", group: "Webhooks", auth: "api_key",
+    summary: "Recent deliveries",
+    description: "Your most recent webhook deliveries, newest first, with their status and the last answer from your endpoint.",
+    query: [{ name: "limit", description: "1 to 200, default 50." }],
+    responses: [{ status: 200, description: "Deliveries.", example: { deliveries: [{ id: "d_1", url: "https://hooks.example.com/cofile", eventType: "filing.completed", filingId: "f_123", status: "delivered", attempts: 1, lastStatusCode: 200 }] } }],
   },
   {
     id: "preview", method: "POST", path: "/v1/filings/{id}/preview", group: "Filings", auth: "api_key",

@@ -13,6 +13,8 @@ export interface FilingRecord {
   idempotencyKey: string;
   status: FilingStatus;
   request: FilingRequest;
+  /** V35: a hash of the request as submitted, to refuse an idempotency key reused for another request. */
+  requestFingerprint?: string;
   /** V27: what the completeness check still needs while the filing is awaiting_information. */
   missingInformation?: { path: string; label: string }[];
   /** When the SSNs in request were replaced by their masked form (store/sensitive.ts). */
@@ -394,6 +396,8 @@ export interface Store {
   updateDelivery(id: string, patch: Partial<WebhookDeliveryRecord>): Promise<WebhookDeliveryRecord>;
   listDueDeliveries(now: string): Promise<WebhookDeliveryRecord[]>;
   listDeliveries(filingId?: string): Promise<WebhookDeliveryRecord[]>;
+  /** V35: a subscriber's most recent deliveries, newest first. */
+  listTenantDeliveries(tenantId: string, limit: number): Promise<WebhookDeliveryRecord[]>;
   // comms (outbound messages)
   createMessage(m: MessageRecord): Promise<MessageRecord>;
   listMessages(filingId?: string): Promise<MessageRecord[]>;

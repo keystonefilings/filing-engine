@@ -250,7 +250,7 @@ Rows refer to the status tables above.
 - [ ] V32. Staff review of enterprise requests in the dashboard: approve, create the account, send an invite email to set a password (row 13).
 - [ ] V33. Subscription billing (Stripe Billing): plans, pricing, enterprise and partner subscriptions (rows 16, 21). *Needs: prices and a Stripe account.*
 - [ ] V34. Docs: full OpenAPI schemas with a `webhooks` section, `llms.txt`, a single-file Markdown download, Python samples, no links to private repo files (row 14).
-- [ ] V35. API gaps: cancel, approve through the API, pagination, webhook test delivery and log, 409 on idempotency key reuse with a different payload (row 15, risk 6).
+- [x] V35. API gaps: cancel, approve through the API, pagination, webhook test delivery and log, 409 on idempotency key reuse with a different payload (row 15, risk 6). **Done**: `POST /v1/filings/{id}/cancel` (partners too, for their own), `POST /v1/filings/{id}/approval`, `limit`/`before` on `GET /v1/filings`, `POST /v1/webhooks/test` and `GET /v1/webhooks/deliveries`, and 409 for a reused key with a different request (filings made before this keep the old behavior). All in the API reference.
 - [ ] V36. Firm invite links get their own scoped key, not the inviter's session key (risk 5).
 - [ ] V37. Sign in with Google (row 13, "eventually").
 - [ ] V38. Landing page: remove `noindex` when launching, offer title companies, stop freezing env values at build (rows 9, 10).

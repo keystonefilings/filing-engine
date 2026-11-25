@@ -27,13 +27,13 @@ export type FilingStatus =
   | "needs_reconciliation"; // submit intent recorded, outcome unknown; never auto re-run
 
 const TRANSITIONS: Record<FilingStatus, FilingStatus[]> = {
-  created: ["invalid", "awaiting_approval", "awaiting_information", "previewing"],
-  invalid: ["created"],
+  created: ["invalid", "awaiting_approval", "awaiting_information", "previewing", "aborted"],
+  invalid: ["created", "aborted"],
   awaiting_information: ["awaiting_approval", "invalid", "aborted", "previewing"],
   previewing: ["awaiting_approval", "awaiting_drift_review", "awaiting_name_resolution", "failed", "blocked", "aborted"],
   awaiting_approval: ["approved", "changes_requested", "aborted"],
   changes_requested: ["awaiting_approval", "aborted"],
-  approved: ["queued", "blocked", "awaiting_approval"],
+  approved: ["queued", "blocked", "awaiting_approval", "aborted"],
   blocked: ["queued", "aborted", "awaiting_approval", "previewing"],
   queued: ["running", "blocked", "aborted"],
   running: ["awaiting_drift_review", "awaiting_name_resolution", "awaiting_review_gate", "ein_filed", "submitted", "failed", "aborted", "needs_reconciliation", "blocked"],

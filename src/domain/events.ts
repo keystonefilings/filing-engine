@@ -25,6 +25,8 @@ export const EVENT_TYPES = [
   "filing.failed",
   "filing.aborted",
   "filing.needs_reconciliation",
+  /** V35: a test delivery the subscriber asked for (POST /v1/webhooks/test); no filing behind it. */
+  "webhook.test",
 ] as const;
 
 export type EventType = (typeof EVENT_TYPES)[number];
