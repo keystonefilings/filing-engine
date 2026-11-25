@@ -1,28 +1,45 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useState } from "react";
+import { ColorField, LogoField } from "./BrandFields";
+import { BrandPreview } from "./SetupForms";
 
 type P = { ok: boolean; message: string } | null;
 type I = { ok: true; link: string; email: string } | { ok: false; message: string } | null;
-interface Portal { slug: string; displayName?: string; logoUrl?: string; primaryColor?: string; supportEmail?: string; filingKinds?: string[] }
+interface Portal { slug: string; displayName?: string; logoUrl?: string; logoArtifactId?: string; primaryColor?: string; secondaryColor?: string; supportEmail?: string; filingKinds?: string[] }
 
-export function PortalForm({ action, portal, kinds }: { action: (prev: P, fd: FormData) => Promise<P>; portal?: Portal; kinds: { id: string; title: string }[] }) {
+export function PortalForm({ action, portal, kinds, firmName, logoSrc }: { action: (prev: P, fd: FormData) => Promise<P>; portal?: Portal; kinds: { id: string; title: string }[]; firmName: string; logoSrc?: string }) {
   const [state, run, pending] = useActionState(action, null);
+  const [on, setOn] = useState(Boolean(portal));
+  const [name, setName] = useState(portal?.displayName ?? "");
+  const [logo, setLogo] = useState<string | undefined>(logoSrc);
+  const [color, setColor] = useState(portal?.primaryColor ?? "#1f4fd1");
+  const [color2, setColor2] = useState(portal?.secondaryColor ?? portal?.primaryColor ?? "#0f766e");
   const offered = portal?.filingKinds;
   return (
-    <form action={run} className="card">
-      {state ? <p className={`notice ${state.ok ? "ok" : "bad"}`} role="status">{state.message}</p> : null}
-      <div className="field"><label htmlFor="slug">Portal address</label><input id="slug" name="slug" type="text" defaultValue={portal?.slug} pattern="[a-z0-9][a-z0-9-]{0,46}[a-z0-9]" placeholder="smith-cpa" />
-        <p className="help">Lowercase letters, digits and dashes. Leave empty to turn the portal off.</p></div>
-      <div className="field"><label htmlFor="dn">Name shown on the portal</label><input id="dn" name="displayName" type="text" maxLength={80} defaultValue={portal?.displayName} /></div>
-      <div className="field"><label htmlFor="logo">Logo URL (https)</label><input id="logo" name="logoUrl" type="url" defaultValue={portal?.logoUrl} /></div>
-      <div className="field"><label htmlFor="color">Brand color</label><input id="color" name="primaryColor" type="text" defaultValue={portal?.primaryColor} placeholder="#1f4b99" pattern="#[0-9a-fA-F]{6}" /></div>
-      <div className="field"><label htmlFor="support">Support email shown to clients</label><input id="support" name="supportEmail" type="email" defaultValue={portal?.supportEmail} /></div>
-      <fieldset><legend>Filings offered</legend>
-        <div className="choices">{kinds.map((k) => <label key={k.id} className="choice"><input type="checkbox" name="kinds" value={k.id} defaultChecked={!offered || offered.includes(k.id)} /><span>{k.title}</span></label>)}</div>
-      </fieldset>
-      <button className="btn primary" type="submit" disabled={pending}>{pending ? "Saving…" : "Save portal"}</button>
-    </form>
+    <div className="stack">
+      <form action={run} className="card">
+        {state ? <p className={`notice ${state.ok ? "ok" : "bad"}`} role="status">{state.message}</p> : null}
+        <label className="choice"><input type="checkbox" name="portalOn" checked={on} onChange={(e) => setOn(e.target.checked)} /><span><b>This firm has a portal</b></span></label>
+        <p className="help">{portal?.slug ? <>Its address is <code>/p/{portal.slug}</code>.</> : "Its address is made from the firm's name when you save."} Unticking turns the portal off.</p>
+        {on ? (
+          <>
+            <div className="field"><label htmlFor="dn">Name shown on the portal</label><input id="dn" name="displayName" type="text" maxLength={80} value={name} onChange={(e) => setName(e.target.value)} placeholder={firmName} /></div>
+            <LogoField current={logoSrc} currentLink={portal?.logoArtifactId ? undefined : portal?.logoUrl} onPreview={setLogo} />
+            <div className="field-row n2">
+              <ColorField id="color" name="primaryColor" label="Main color" value={color} onChange={setColor} help="Buttons and the top of the page." />
+              <ColorField id="color2" name="secondaryColor" label="Second color" value={color2} onChange={setColor2} help="Links and highlights." />
+            </div>
+            <div className="field"><label htmlFor="support">Support email shown to clients</label><input id="support" name="supportEmail" type="email" defaultValue={portal?.supportEmail} /></div>
+            <fieldset><legend>Filings offered</legend>
+              <div className="choices">{kinds.map((k) => <label key={k.id} className="choice"><input type="checkbox" name="kinds" value={k.id} defaultChecked={!offered || offered.includes(k.id)} /><span>{k.title}</span></label>)}</div>
+            </fieldset>
+          </>
+        ) : null}
+        <button className="btn primary" type="submit" disabled={pending}>{pending ? "Saving…" : "Save portal"}</button>
+      </form>
+      {on ? <BrandPreview name={name || firmName} logo={logo} color={color} color2={color2} /> : null}
+    </div>
   );
 }
 

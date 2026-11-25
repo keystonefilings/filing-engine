@@ -15,7 +15,8 @@ import type { NameResolutionService, NameDecision } from "../name-resolution/ser
 import type { ReviewGateService, ReviewGateDecision } from "../review-gate/service.js";
 import { renderNameResolutionPage } from "../name-resolution/render.js";
 import { renderReviewGatePage } from "../review-gate/render.js";
-import { registerUsers, type Auth, type PartnerSignupMode } from "../users/routes.js";
+import { registerUsers, portalSlugFor, type Auth, type PartnerSignupMode } from "../users/routes.js";
+import { registerBrandLogos } from "./brand-logos.js";
 import { readSessionKey, SESSION_PREFIX } from "../users/session-token.js";
 import { partnerGuard } from "../users/partner-guard.js";
 
@@ -200,7 +201,14 @@ export function buildServer(deps: ApiDeps): FastifyInstance {
     // Company ids are global: a tenant may create a new one or update its own, never take another tenant's.
     const existing = await deps.store.getClientCompany(id);
     if (existing && existing.tenantId !== tenantId) return reply.code(409).send({ error: "client company id already in use" });
-    const parsed = ClientCompanySettings.safeParse({ ...(req.body as object), clientCompanyId: id, tenantId });
+    const body = { ...(req.body as Record<string, unknown>) };
+    // A portal sent without an address gets one: the firm's own, or one made from its name.
+    const portalIn = body.portal as Record<string, unknown> | undefined;
+    if (portalIn && typeof portalIn === "object" && !portalIn.slug) {
+      const name = typeof body.name === "string" && body.name ? body.name : existing?.name ?? id;
+      body.portal = { ...portalIn, slug: await portalSlugFor(deps.store, tenantId, { clientCompanyId: id, name, portal: existing?.portal }) };
+    }
+    const parsed = ClientCompanySettings.safeParse({ ...body, clientCompanyId: id, tenantId });
     if (!parsed.success) return reply.code(422).send({ error: parsed.error.issues });
     const slug = parsed.data.portal?.slug;
     if (slug && (await deps.store.listClientCompanies(tenantId)).some((c) => c.clientCompanyId !== id && c.portal?.slug === slug)) {
@@ -212,9 +220,10 @@ export function buildServer(deps: ApiDeps): FastifyInstance {
       if (e instanceof ClientCompanyOwnershipError) return reply.code(409).send({ error: "client company id already in use" });
       throw e;
     }
-    return { ok: true };
+    return { ok: true, ...(slug ? { portalSlug: slug } : {}) };
   });
 
+  registerBrandLogos(app, { store: deps.store, artifacts: deps.artifacts, authOf });
   registerSelfService(app, { store: deps.store, tenantOf });
   registerSignatures(app, { store: deps.store, tenantOf });
   registerUsers(app, {

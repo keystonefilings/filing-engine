@@ -50,13 +50,15 @@ const RULES: Record<string, Rule> = {
   },
   "GET /v1/client-companies/:id": ownCompany,
   "PUT /v1/client-companies/:id/profile": ownCompany,
+  "PUT /v1/client-companies/:id/logo": ownCompany,
+  "DELETE /v1/client-companies/:id/logo": ownCompany,
   "GET /v1/signatures": forceQueryFirm,
   "POST /v1/signatures": bodyFirm,
   "DELETE /v1/signatures/:id": async ({ req, firm, deps }) => (await deps.store.getSignature(params(req).id ?? ""))?.clientCompanyId === firm,
 };
 
 /** Routes anyone may call without a key; a partner session presented there changes nothing. */
-const PUBLIC = /^(GET|POST) (\/healthz|\/approve\/|\/admin\/|\/v1\/auth\/sign-in|\/v1\/signups\/|\/v1\/inquiries$)/;
+const PUBLIC = /^(GET|POST) (\/healthz|\/approve\/|\/admin\/|\/v1\/auth\/sign-in|\/v1\/signups\/|\/v1\/inquiries$|\/v1\/brand-logos\/)/;
 
 export function partnerGuard(deps: GuardDeps) {
   return async (req: FastifyRequest, reply: FastifyReply) => {

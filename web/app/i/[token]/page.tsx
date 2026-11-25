@@ -1,6 +1,6 @@
 import { intakeKey, readClientIntake } from "@/lib/session";
 import { filingKind } from "@/lib/intake/forms";
-import { brandOf, loadCompany, offeredKinds } from "@/lib/firm";
+import { brandOf, brandStyle, loadCompany, offeredKinds } from "@/lib/firm";
 import { platformName } from "@/lib/brand";
 import { listSignatures } from "@/lib/signatures";
 import { IntakeForm } from "@/components/IntakeForm";
@@ -25,7 +25,7 @@ export default async function ClientIntakePage({ params }: { params: Promise<{ t
   // A client signs fresh: saved signatures belong to the firm's own list, not to whoever holds the link.
   const consentText = signed ? (await listSignatures(key, link.clientCompanyId)).consentText : undefined;
   return (
-    <div style={{ ["--accent" as string]: brand.color }}>
+    <div className="branded" style={brandStyle(brand)}>
       <header className="topbar"><div className="inner"><span className="brand">
         {/* eslint-disable-next-line @next/next/no-img-element */}
         {brand.logoUrl ? <img src={brand.logoUrl} alt="" /> : null}<span>{brand.name}</span></span>

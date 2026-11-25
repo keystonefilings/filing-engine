@@ -2,13 +2,19 @@ import { cache } from "react";
 import { engine, type ClientCompany, type PortalBrand } from "./engine";
 import { requireFirm, type FirmSession } from "./session";
 import { FILING_KINDS, type FilingKind } from "./intake/forms";
-import { safeColor, safeLogo } from "./brand";
+import { logoSrc, safeColor, textOn } from "./brand";
 
-export interface FirmBrand { name: string; logoUrl?: string; color: string; supportEmail?: string }
+export interface FirmBrand { name: string; logoUrl?: string; color: string; color2: string; supportEmail?: string }
 
 export function brandOf(c: Pick<ClientCompany, "name" | "portal">): FirmBrand {
   const p: PortalBrand | undefined = c.portal;
-  return { name: p?.displayName || c.name, logoUrl: safeLogo(p?.logoUrl), color: safeColor(p?.primaryColor), supportEmail: p?.supportEmail };
+  const color = safeColor(p?.primaryColor);
+  return { name: p?.displayName || c.name, logoUrl: logoSrc(p), color, color2: safeColor(p?.secondaryColor, color), supportEmail: p?.supportEmail };
+}
+
+/** The CSS variables a firm's pages use: main color (buttons), its text color, second color (links, highlights). */
+export function brandStyle(b: Pick<FirmBrand, "color" | "color2">): Record<string, string> {
+  return { "--accent": b.color, "--accent-text": textOn(b.color), "--accent-2": b.color2 };
 }
 
 /** Filings this firm's portal offers: all of them unless the firm's settings list some. */

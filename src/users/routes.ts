@@ -84,6 +84,7 @@ const ProfileBody = z.object({
     displayName: z.string().trim().min(1).max(80).optional(),
     logoUrl: z.string().url().startsWith("https://").optional(),
     primaryColor: z.string().regex(/^#[0-9a-fA-F]{6}$/).optional(),
+    secondaryColor: z.string().regex(/^#[0-9a-fA-F]{6}$/).optional(),
     supportEmail: z.string().email().optional(),
   }).optional(),
   paymentRouting: PaymentRouting.optional(),
@@ -100,6 +101,19 @@ export function publicUser(u: UserRecord) {
 export function slugFor(name: string): string {
   const s = name.toLowerCase().normalize("NFKD").replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "").slice(0, 40).replace(/-+$/, "");
   return s || "firm";
+}
+
+/**
+ * A portal address for a firm: the one it has, or one made from its name that no other firm
+ * in the tenant uses (smith-cpa, then smith-cpa-2 and so on). Nobody types it.
+ */
+export async function portalSlugFor(store: Store, tenantId: string, c: { clientCompanyId: string; name: string; portal?: { slug?: string } }): Promise<string> {
+  if (c.portal?.slug) return c.portal.slug;
+  const taken = new Set((await store.listClientCompanies(tenantId)).filter((o) => o.clientCompanyId !== c.clientCompanyId).map((o) => o.portal?.slug ?? ""));
+  const base = slugFor(c.name);
+  let slug = base;
+  for (let i = 2; taken.has(slug); i++) slug = `${base}-${i}`;
+  return slug;
 }
 
 export function registerUsers(app: FastifyInstance, deps: UsersDeps): void {
@@ -315,7 +329,8 @@ export function registerUsers(app: FastifyInstance, deps: UsersDeps): void {
       ...c,
       ...(b.name ? { name: b.name } : {}),
       ...(b.partner ? { partner: { setupDone: [], ...c.partner, ...b.partner } } : {}),
-      ...(b.brand ? { portal: { slug: c.portal?.slug ?? slugFor(c.name), ...c.portal, ...b.brand } } : {}),
+      // A logo link the firm types replaces an uploaded logo (the upload is shown first otherwise).
+      ...(b.brand ? { portal: { ...c.portal, slug: await portalSlugFor(deps.store, c.tenantId, c), ...b.brand, ...(b.brand.logoUrl ? { logoArtifactId: undefined } : {}) } } : {}),
       ...(b.paymentRouting ? { payments: { methods: c.payments?.methods ?? [], routing: b.paymentRouting } } : {}),
     };
     const checked = ClientCompanySettings.safeParse(next);
