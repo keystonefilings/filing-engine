@@ -1,0 +1,22 @@
+import { notFound } from "next/navigation";
+import { firmContext } from "@/lib/firm";
+import { platformName } from "@/lib/brand";
+import { BrandingForm } from "@/components/SetupForms";
+import { saveBranding } from "../actions";
+
+export const metadata = { title: "Branding" };
+
+export default async function BrandingPage({ params }: { params: Promise<{ slug: string }> }) {
+  const { slug } = await params;
+  const { company } = await firmContext(slug);
+  if (!company.partner) notFound();
+  const p = company.portal;
+  return (
+    <div className="narrow stack">
+      <p className="small muted">Step 2 of 3</p>
+      <h1>Branding</h1>
+      <p className="muted">Your clients see your name, logo and color on the pages where they fill in and approve filings.</p>
+      <BrandingForm action={saveBranding.bind(null, slug)} platform={platformName()} v={{ displayName: p?.displayName ?? company.name, logoUrl: p?.logoUrl, primaryColor: p?.primaryColor, supportEmail: p?.supportEmail }} />
+    </div>
+  );
+}

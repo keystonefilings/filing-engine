@@ -216,6 +216,57 @@ export interface ApiKeyRecord {
   lastUsedAt?: string;
 }
 
+/** A person who signs in to the dashboards with email and password (src/users). */
+export interface UserRecord {
+  id: string;
+  /** Lower-cased; unique across the platform. */
+  email: string;
+  name: string;
+  /** enterprise: a subscriber's staff (enterprise dashboard). partner: a CPA, payroll or CFO firm's staff (partner dashboard). */
+  kind: "enterprise" | "partner";
+  tenantId: string;
+  /** Partner users only: the firm they belong to. Unset while a partner sign-up waits for approval. */
+  clientCompanyId?: string;
+  /** pending: a partner sign-up not yet approved. disabled: can't sign in. */
+  status: "active" | "pending" | "disabled" | "rejected";
+  passwordHash: string;
+  /** Bumped to end every session of this user. */
+  sessionGen: number;
+  createdAt: string;
+  createdBy?: string;
+  lastSignInAt?: string;
+  failedSignIns?: number;
+  lockedUntil?: string;
+  /** What a partner told us at sign-up; becomes the client company on approval. */
+  signup?: PartnerSignupDetails;
+  decidedAt?: string;
+  decidedBy?: string;
+}
+
+export interface PartnerSignupDetails {
+  companyName: string;
+  companyType: "cpa" | "payroll" | "cfo" | "other";
+  phone?: string;
+  website?: string;
+  states?: string[];
+  expectedVolume?: string;
+}
+
+/** A request from the landing page's enterprise contact form. */
+export interface InquiryRecord {
+  id: string;
+  kind: "enterprise";
+  name: string;
+  company: string;
+  email: string;
+  phone?: string;
+  states?: string;
+  volume?: string;
+  message?: string;
+  createdAt: string;
+  status: "new" | "contacted" | "closed";
+}
+
 export interface WebhookDeliveryRecord {
   id: string;
   event: WebhookEvent;
@@ -289,6 +340,14 @@ export interface Store {
   /** Revokes the tenant's own key; false when no such live key belongs to the tenant. */
   revokeApiKey(tenantId: string, id: string, at: string): Promise<boolean>;
   touchApiKey(id: string, at: string): Promise<void>;
+  // dashboard users and landing-page inquiries
+  createUser(u: UserRecord): Promise<UserRecord>;
+  getUser(id: string): Promise<UserRecord | null>;
+  findUserByEmail(email: string): Promise<UserRecord | null>;
+  listUsers(tenantId: string): Promise<UserRecord[]>;
+  updateUser(id: string, patch: Partial<UserRecord>): Promise<UserRecord>;
+  createInquiry(i: InquiryRecord): Promise<InquiryRecord>;
+  listInquiries(): Promise<InquiryRecord[]>;
   // run leases: the worker running a filing holds and renews one; recovery skips live leases
   /** Takes the filing's lease unless another unexpired one holds it. Returns the lease token, or null. */
   acquireRunLease(filingId: string, workerId: string, ttlMs: number): Promise<string | null>;

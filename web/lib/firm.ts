@@ -33,3 +33,8 @@ export async function firmContext(slug: string): Promise<{ session: FirmSession;
 export function liveFilings(): boolean {
   return process.env.PORTAL_LIVE_FILINGS === "true";
 }
+
+/** Filings for a state: that state's own, plus the federal EIN, which goes with a business in any state. */
+export function kindsForState(all: FilingKind[], st: string): FilingKind[] {
+  return all.filter((k) => (k.type === "ein_only" ? true : k.state === st));
+}

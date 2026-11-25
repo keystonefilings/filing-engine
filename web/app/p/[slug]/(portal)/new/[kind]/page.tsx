@@ -15,9 +15,9 @@ export default async function NewKindPage({ params }: { params: Promise<{ slug: 
   const sigs = signed ? await listSignatures(session.apiKey, session.clientCompanyId) : null;
   return (
     <div className="narrow stack">
-      <p className="small"><Link href={`/p/${encodeURIComponent(slug)}/new`}>← All filings</Link></p>
+      <p className="small"><Link href={`/p/${encodeURIComponent(slug)}/new${kind.type === "ein_only" ? "" : `?state=${kind.state}`}`}>← Other filings</Link></p>
       <h1>{kind.title}</h1>
-      <p className="muted">{kind.summary}</p>
+      <p className="muted">{kind.summary} Would your client rather fill it in? <Link href={`/p/${encodeURIComponent(slug)}/client-links?kind=${encodeURIComponent(kind.id)}`}>Send them a link</Link>.</p>
       {!liveFilings() ? <p className="notice warn">Test mode: filings from this portal are walked through the state site up to the final step and stopped there. Nothing is filed or paid.</p> : null}
       <IntakeForm
         kind={kind}

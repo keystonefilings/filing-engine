@@ -1,10 +1,11 @@
 "use client";
 
-import { useMemo, useState, useTransition } from "react";
+import { useMemo, useRef, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { US_STATES, type Field, type FilingKind, type Group, type Item, type Note } from "@/lib/intake/forms";
 import { AUTH_PREFIX, visibility, type Raw } from "@/lib/intake/build";
 import { NEW_SIGNATURE } from "@/lib/intake/signature-field";
+import { ADDRESS_PARTS, addressBlocks, planSections, type Block } from "@/lib/intake/simplify";
 import { SignaturePad } from "./SignaturePad";
 
 export type IntakeResult =
@@ -51,6 +52,36 @@ export function IntakeForm({ kind, nonce, action, submitLabel = "Submit for appr
   const [result, setResult] = useState<IntakeResult | null>(null);
   const [pending, start] = useTransition();
   const vis = useMemo(() => visibility(kind, values), [kind, values]);
+  const plan = useMemo(() => planSections(kind), [kind]);
+  const addresses = useMemo(() => addressBlocks(kind), [kind]);
+  const formRef = useRef<HTMLFormElement>(null);
+
+  /** Copies an address already entered into another one ("Same as"). */
+  const copyAddress = (from: string, to: string) => {
+    const form = formRef.current;
+    if (!form) return;
+    const next: Raw = {};
+    for (const part of ADDRESS_PARTS) {
+      const src = form.elements.namedItem(`${from}.${part}`) as HTMLInputElement | HTMLSelectElement | null;
+      const dst = form.elements.namedItem(`${to}.${part}`) as HTMLInputElement | HTMLSelectElement | null;
+      if (!src || !dst) continue;
+      dst.value = src.value;
+      next[`${to}.${part}`] = src.value;
+    }
+    setValues((p) => ({ ...p, ...next }));
+  };
+  const sameAs = (street1Path: string) => {
+    const to = street1Path.replace(/\.street1$/, "");
+    const i = addresses.findIndex((a) => a.prefix === to);
+    const earlier = i > 0 ? addresses.slice(0, i).filter((a) => values[`${a.prefix}.street1`]?.trim()) : [];
+    if (!earlier.length) return null;
+    return (
+      <div className="same-as" key={`same-${to}`}>
+        <span className="small muted">Same as</span>
+        {earlier.map((a) => <button key={a.prefix} type="button" className="btn small" onClick={() => copyAddress(a.prefix, to)}>{a.label}</button>)}
+      </div>
+    );
+  };
 
   const fieldIssues = useMemo(() => {
     const m = new Map<string, string>();
@@ -219,11 +250,29 @@ export function IntakeForm({ kind, nonce, action, submitLabel = "Submit for appr
   const renderItem = (it: Item, k: number) => {
     if (it.kind === "note") return <p key={k} className="notice" hidden={!vis.holds(it.showIf)}>{it.text}</p>;
     if (it.kind === "group") return renderGroup(it);
-    return renderField(it, it.path, vis.top.has(it.path));
+    const field = renderField(it, it.path, vis.top.has(it.path));
+    if (it.path.endsWith(".street1") && vis.top.has(it.path)) {
+      const copy = sameAs(it.path);
+      if (copy) return <div key={it.path}>{copy}{field}</div>;
+    }
+    return field;
+  };
+
+  const renderBlock = (b: Block, k: number) => {
+    if (b.kind === "item") return renderItem(b.item, k);
+    const shown = b.fields.some((f) => vis.top.has(f.path));
+    const first = b.fields[0];
+    const copy = first.path.endsWith(".street1") && shown ? sameAs(first.path) : null;
+    return (
+      <div key={`row-${first.path}`} hidden={!shown}>
+        {copy}
+        <div className={`field-row n${b.fields.length}`}>{b.fields.map((f, i) => renderItem(f, i))}</div>
+      </div>
+    );
   };
 
   return (
-    <form onSubmit={onSubmit} onChange={onChange} noValidate>
+    <form ref={formRef} onSubmit={onSubmit} onChange={onChange} noValidate>
       <input type="hidden" name="_nonce" value={nonce} />
       {result && !result.ok ? (
         <div className="notice bad" role="alert">
@@ -231,13 +280,38 @@ export function IntakeForm({ kind, nonce, action, submitLabel = "Submit for appr
           {result.issues.length ? <ul className="issues">{result.issues.slice(0, 20).map((i, n) => <li key={n}>{i.message}</li>)}</ul> : null}
         </div>
       ) : null}
-      {kind.sections.map((s) => (
-        <fieldset key={s.title} hidden={!vis.holds(s.showIf)}>
-          <legend>{s.title}</legend>
-          {s.help ? <p className="help" style={{ marginTop: 0, marginBottom: 12 }}>{s.help}</p> : null}
-          {s.items.map(renderItem)}
-        </fieldset>
-      ))}
+      {plan.map(({ section: s, folded, main, more }) => {
+        // A folded section opens by itself when it already holds an answer or a problem.
+        const touched = s.items.some((it) => Object.keys(values).some((k) => "path" in it && it.path && k.startsWith(it.path) && values[k] && values[k] !== (it.kind === "field" ? it.defaultValue : undefined)))
+          || [...fieldIssues.keys()].some((k) => s.items.some((it) => "path" in it && it.path && k.startsWith(it.path)));
+        const body = (
+          <>
+            {s.help ? <p className="help" style={{ marginTop: 0, marginBottom: 12 }}>{s.help}</p> : null}
+            {main.map(renderBlock)}
+            {more.length ? (
+              <details className="more" open={touched || undefined}>
+                <summary>More options <span className="muted">(optional)</span></summary>
+                {more.map(renderBlock)}
+              </details>
+            ) : null}
+          </>
+        );
+        if (folded) {
+          const title = /\(optional\)$/i.test(s.title) ? s.title : `${s.title} (optional)`;
+          return (
+            <details key={s.title} className="fold" hidden={!vis.holds(s.showIf)} open={touched || undefined}>
+              <summary>{title}</summary>
+              <fieldset>{body}</fieldset>
+            </details>
+          );
+        }
+        return (
+          <fieldset key={s.title} hidden={!vis.holds(s.showIf)}>
+            <legend>{s.title}</legend>
+            {body}
+          </fieldset>
+        );
+      })}
       <fieldset>
         <legend>Authorizations</legend>
         <p className="help" style={{ marginTop: 0 }}>The state form asks for these. Each one is shown again on the approval page before anything is filed.</p>

@@ -1,0 +1,367 @@
+import { randomUUID } from "node:crypto";
+import type { FastifyInstance, FastifyReply, FastifyRequest } from "fastify";
+import { z } from "zod";
+import type { InquiryRecord, Store, UserRecord } from "../store/types.js";
+import { ClientCompanySettings, TenantSettings } from "../settings/schema.js";
+import { PaymentRouting, PaymentSettings } from "../settings/payments.js";
+import { dummyHash, hashPassword, passwordProblem, verifyPassword } from "./password.js";
+import { mintSessionKey, type SessionClaims } from "./session-token.js";
+import { PORTALS, portalDefaultsProblems } from "./portals.js";
+import { RateLimiter } from "./rate-limit.js";
+
+/**
+ * Dashboard accounts.
+ *  - Sign-in (public): email + password -> a signed session key the front end presents for the person.
+ *  - Partner sign-up (public): a CPA, payroll or CFO firm signs up on the landing page. It joins the
+ *    platform's own tenant (Scope 2). PARTNER_SIGNUP_MODE decides whether it waits for approval
+ *    ("approval", the default) or is approved at once ("automatic").
+ *  - Enterprise accounts are never self-serve: the landing page takes a contact request, and platform
+ *    staff create the subscriber's first user after approving it.
+ *  - Self-service settings a signed-in person may change: partner profile, branding, payment routing;
+ *    enterprise payment routing and portal defaults. Cards and portal logins are vault references only.
+ */
+
+export type PartnerSignupMode = "approval" | "automatic";
+
+export interface Auth {
+  tenantId: string;
+  /** Set for a dashboard session. */
+  user?: UserRecord;
+  /** Partner sessions are limited to this client company. */
+  partnerOf?: string;
+}
+
+export interface UsersDeps {
+  store: Store;
+  authOf: (req: FastifyRequest) => Promise<Auth | null>;
+  staffOf: (req: FastifyRequest) => string | null;
+  sessionSecret: string;
+  platformTenantId: string;
+  partnerSignupMode: PartnerSignupMode;
+  now?: () => Date;
+}
+
+const SESSION_TTL = { enterprise: 12 * 3600, partner: 7 * 24 * 3600 } as const;
+const MAX_FAILS = 5;
+const LOCK_MINUTES = 15;
+
+const email = z.string().trim().toLowerCase().email().max(200);
+const SignInBody = z.object({ email, password: z.string().min(1).max(200) });
+const PartnerSignupBody = z.object({
+  companyName: z.string().trim().min(2).max(120),
+  companyType: z.enum(["cpa", "payroll", "cfo", "other"]),
+  name: z.string().trim().min(2).max(120),
+  email,
+  password: z.string().max(200),
+  phone: z.string().trim().max(40).optional(),
+  website: z.string().trim().url().startsWith("https://").max(200).optional(),
+  states: z.array(z.enum(["NY", "NJ", "FL", "MO"])).max(4).optional(),
+  expectedVolume: z.string().max(40).optional(),
+});
+const InquiryBody = z.object({
+  name: z.string().trim().min(2).max(120),
+  company: z.string().trim().min(2).max(120),
+  email,
+  phone: z.string().trim().max(40).optional(),
+  states: z.string().max(80).optional(),
+  volume: z.string().max(40).optional(),
+  message: z.string().trim().max(2000).optional(),
+  /** Hidden field; people leave it empty, form-filling bots don't. */
+  website: z.string().max(0).optional(),
+});
+const NewUserBody = z.object({ email, name: z.string().trim().min(2).max(120), password: z.string().max(200) });
+const ProfileBody = z.object({
+  name: z.string().trim().min(2).max(120).optional(),
+  partner: z.object({
+    companyType: z.enum(["cpa", "payroll", "cfo", "other"]).optional(),
+    contactName: z.string().trim().max(120).optional(),
+    contactEmail: z.string().email().optional(),
+    phone: z.string().trim().max(40).optional(),
+    website: z.string().url().startsWith("https://").optional(),
+    setupDone: z.array(z.enum(["details", "branding", "payments"])).optional(),
+  }).optional(),
+  brand: z.object({
+    displayName: z.string().trim().min(1).max(80).optional(),
+    logoUrl: z.string().url().startsWith("https://").optional(),
+    primaryColor: z.string().regex(/^#[0-9a-fA-F]{6}$/).optional(),
+    supportEmail: z.string().email().optional(),
+  }).optional(),
+  paymentRouting: PaymentRouting.optional(),
+});
+const DecisionBody = z.object({ action: z.enum(["approve", "reject"]) });
+
+export function publicUser(u: UserRecord) {
+  return {
+    id: u.id, email: u.email, name: u.name, kind: u.kind, tenantId: u.tenantId, clientCompanyId: u.clientCompanyId,
+    status: u.status, createdAt: u.createdAt, lastSignInAt: u.lastSignInAt, signup: u.signup, decidedAt: u.decidedAt,
+  };
+}
+
+export function slugFor(name: string): string {
+  const s = name.toLowerCase().normalize("NFKD").replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "").slice(0, 40).replace(/-+$/, "");
+  return s || "firm";
+}
+
+export function registerUsers(app: FastifyInstance, deps: UsersDeps): void {
+  const now = deps.now ?? (() => new Date());
+  // Public endpoints are reached through the front end, so the client address is mostly the front end's.
+  // Limits are per email and overall; the per-email lockout below is the main brake on guessing.
+  const signInLimit = new RateLimiter(60, 60_000);
+  const publicFormLimit = new RateLimiter(30, 3_600_000);
+
+  const requireAuth = async (req: FastifyRequest, reply: FastifyReply): Promise<Auth | null> => {
+    const a = await deps.authOf(req);
+    if (!a) void reply.code(401).send({ error: "invalid api key" });
+    return a;
+  };
+  /** A subscriber's key or one of its enterprise users (never a partner session). */
+  const requireTenantScope = async (req: FastifyRequest, reply: FastifyReply): Promise<string | null> => {
+    const a = await requireAuth(req, reply);
+    if (!a) return null;
+    if (a.partnerOf) { void reply.code(403).send({ error: "not available to partner accounts" }); return null; }
+    return a.tenantId;
+  };
+
+  const issue = (u: UserRecord) => {
+    const ttl = SESSION_TTL[u.kind];
+    const claims: SessionClaims = {
+      sub: u.id, tenantId: u.tenantId, kind: u.kind, exp: Math.floor(now().getTime() / 1000) + ttl, gen: u.sessionGen,
+      ...(u.kind === "partner" && u.clientCompanyId ? { clientCompanyId: u.clientCompanyId } : {}),
+    };
+    return { sessionKey: mintSessionKey(deps.sessionSecret, claims), expiresAt: new Date(claims.exp * 1000).toISOString() };
+  };
+
+  // ---- Sign-in ----
+  app.post("/v1/auth/sign-in", async (req, reply) => {
+    const parsed = SignInBody.safeParse(req.body);
+    if (!parsed.success) return reply.code(422).send({ error: "enter your email and password" });
+    if (!signInLimit.take("all")) return reply.code(429).send({ error: "too many sign-in attempts; try again in a minute" });
+    const { email: em, password } = parsed.data;
+    const u = await deps.store.findUserByEmail(em);
+    const at = now();
+    if (u?.lockedUntil && u.lockedUntil > at.toISOString()) {
+      await verifyPassword(password, await dummyHash());
+      return reply.code(429).send({ error: `too many wrong passwords; try again after ${LOCK_MINUTES} minutes` });
+    }
+    const ok = u ? await verifyPassword(password, u.passwordHash) : (await verifyPassword(password, await dummyHash()), false);
+    if (!u || !ok) {
+      if (u) {
+        const fails = (u.failedSignIns ?? 0) + 1;
+        await deps.store.updateUser(u.id, fails >= MAX_FAILS
+          ? { failedSignIns: 0, lockedUntil: new Date(at.getTime() + LOCK_MINUTES * 60_000).toISOString() }
+          : { failedSignIns: fails });
+      }
+      return reply.code(401).send({ error: "that email and password don't match an account" });
+    }
+    if (u.status === "pending") return reply.code(403).send({ error: "your account is waiting for approval", status: "pending" });
+    if (u.status !== "active") return reply.code(403).send({ error: "this account can't sign in", status: u.status });
+    if (u.kind === "partner" && !u.clientCompanyId) return reply.code(403).send({ error: "your account is waiting for approval", status: "pending" });
+    await deps.store.updateUser(u.id, { failedSignIns: 0, lockedUntil: undefined, lastSignInAt: at.toISOString() });
+    return { user: publicUser(u), ...issue(u) };
+  });
+
+  app.get("/v1/me", async (req, reply) => {
+    const a = await requireAuth(req, reply);
+    if (!a) return reply;
+    if (!a.user) return reply.code(404).send({ error: "this key isn't a signed-in person" });
+    return { user: publicUser(a.user) };
+  });
+
+  // Ends every session of the signed-in person (sign out everywhere).
+  app.post("/v1/auth/sign-out-everywhere", async (req, reply) => {
+    const a = await requireAuth(req, reply);
+    if (!a) return reply;
+    if (!a.user) return reply.code(404).send({ error: "this key isn't a signed-in person" });
+    await deps.store.updateUser(a.user.id, { sessionGen: a.user.sessionGen + 1 });
+    return { ok: true };
+  });
+
+  // ---- Partner sign-up ----
+  app.post("/v1/signups/partner", async (req, reply) => {
+    const parsed = PartnerSignupBody.safeParse(req.body);
+    if (!parsed.success) return reply.code(422).send({ error: "validation failed", issues: parsed.error.issues.map((i) => ({ path: i.path.join("."), message: i.message })) });
+    const d = parsed.data;
+    const pw = passwordProblem(d.password, d.email);
+    if (pw) return reply.code(422).send({ error: "validation failed", issues: [{ path: "password", message: pw }] });
+    if (!publicFormLimit.take("signup")) return reply.code(429).send({ error: "too many sign-ups right now; try again later" });
+    if (await deps.store.findUserByEmail(d.email)) {
+      // Same answer as a new sign-up, so the form can't be used to find out who has an account.
+      return reply.code(202).send({ status: deps.partnerSignupMode === "automatic" ? "check_sign_in" : "pending" });
+    }
+    const u: UserRecord = {
+      id: randomUUID(), email: d.email, name: d.name, kind: "partner", tenantId: deps.platformTenantId, status: "pending",
+      passwordHash: await hashPassword(d.password), sessionGen: 0, createdAt: now().toISOString(),
+      signup: { companyName: d.companyName, companyType: d.companyType, phone: d.phone, website: d.website, states: d.states, expectedVolume: d.expectedVolume },
+    };
+    try {
+      await deps.store.createUser(u);
+    } catch {
+      return reply.code(202).send({ status: deps.partnerSignupMode === "automatic" ? "check_sign_in" : "pending" });
+    }
+    if (deps.partnerSignupMode === "automatic") {
+      await approvePartner(u, "automatic");
+      return reply.code(201).send({ status: "active" });
+    }
+    return reply.code(202).send({ status: "pending" });
+  });
+
+  /** Creates the firm for an approved partner sign-up and activates the user. */
+  const approvePartner = async (u: UserRecord, by: string): Promise<UserRecord> => {
+    const s = u.signup!;
+    const existing = new Set((await deps.store.listClientCompanies(u.tenantId)).flatMap((c) => [c.clientCompanyId, c.portal?.slug ?? ""]));
+    const base = slugFor(s.companyName);
+    let slug = base;
+    for (let i = 2; existing.has(slug) || (await deps.store.getClientCompany(`firm-${slug}`)); i++) slug = `${base}-${i}`;
+    const company = ClientCompanySettings.parse({
+      clientCompanyId: `firm-${slug}`, tenantId: u.tenantId, name: s.companyName,
+      portal: { slug, displayName: s.companyName },
+      partner: { companyType: s.companyType, contactName: u.name, contactEmail: u.email, phone: s.phone, website: s.website, setupDone: [] },
+    });
+    await deps.store.putClientCompany(company);
+    return deps.store.updateUser(u.id, { status: "active", clientCompanyId: company.clientCompanyId, decidedAt: now().toISOString(), decidedBy: by });
+  };
+
+  app.get("/v1/partner-signups", async (req, reply) => {
+    const tenantId = await requireTenantScope(req, reply);
+    if (!tenantId) return reply;
+    const users = (await deps.store.listUsers(tenantId)).filter((u) => u.kind === "partner" && u.signup);
+    return { mode: tenantId === deps.platformTenantId ? deps.partnerSignupMode : "approval", signups: users.map(publicUser).sort((a, b) => b.createdAt.localeCompare(a.createdAt)) };
+  });
+
+  app.post("/v1/partner-signups/:id/decision", async (req, reply) => {
+    const tenantId = await requireTenantScope(req, reply);
+    if (!tenantId) return reply;
+    const parsed = DecisionBody.safeParse(req.body);
+    if (!parsed.success) return reply.code(422).send({ error: parsed.error.issues });
+    const u = await deps.store.getUser((req.params as { id: string }).id);
+    if (!u || u.tenantId !== tenantId || u.kind !== "partner" || !u.signup) return reply.code(404).send({ error: "not found" });
+    if (u.status !== "pending") return reply.code(409).send({ error: `already ${u.status}` });
+    const a = await deps.authOf(req);
+    const by = a?.user?.email ?? "api key";
+    if (parsed.data.action === "reject") {
+      return { user: publicUser(await deps.store.updateUser(u.id, { status: "rejected", decidedAt: now().toISOString(), decidedBy: by })) };
+    }
+    return { user: publicUser(await approvePartner(u, by)) };
+  });
+
+  // ---- Enterprise contact requests ----
+  app.post("/v1/inquiries", async (req, reply) => {
+    const parsed = InquiryBody.safeParse(req.body);
+    if (!parsed.success) return reply.code(422).send({ error: "validation failed", issues: parsed.error.issues.map((i) => ({ path: i.path.join("."), message: i.message })) });
+    if (parsed.data.website) return reply.code(202).send({ received: true });
+    if (!publicFormLimit.take("inquiry")) return reply.code(429).send({ error: "too many requests right now; try again later" });
+    const { website: _w, ...d } = parsed.data;
+    const rec: InquiryRecord = { id: randomUUID(), kind: "enterprise", ...d, createdAt: now().toISOString(), status: "new" };
+    await deps.store.createInquiry(rec);
+    return reply.code(202).send({ received: true });
+  });
+
+  app.get("/v1/inquiries", async (req, reply) => {
+    // Requests are for the platform, so only the platform's own tenant (or staff) reads them.
+    if (!deps.staffOf(req)) {
+      const tenantId = await requireTenantScope(req, reply);
+      if (!tenantId) return reply;
+      if (tenantId !== deps.platformTenantId) return reply.code(403).send({ error: "platform only" });
+    }
+    return { inquiries: await deps.store.listInquiries() };
+  });
+
+  // ---- Users of a subscriber ----
+  // Staff create a subscriber's first enterprise user once its request is approved.
+  app.post("/v1/tenants/:id/users", async (req, reply) => {
+    const staff = deps.staffOf(req);
+    if (!staff) return reply.code(403).send({ error: "platform staff only" });
+    return createEnterpriseUser(req, reply, (req.params as { id: string }).id, staff);
+  });
+  // A subscriber adds its own team.
+  app.get("/v1/users", async (req, reply) => {
+    const tenantId = await requireTenantScope(req, reply);
+    if (!tenantId) return reply;
+    return { users: (await deps.store.listUsers(tenantId)).filter((u) => u.kind === "enterprise").map(publicUser) };
+  });
+  app.post("/v1/users", async (req, reply) => {
+    const tenantId = await requireTenantScope(req, reply);
+    if (!tenantId) return reply;
+    const a = await deps.authOf(req);
+    return createEnterpriseUser(req, reply, tenantId, a?.user?.email ?? "api key");
+  });
+
+  async function createEnterpriseUser(req: FastifyRequest, reply: FastifyReply, tenantId: string, by: string) {
+    const parsed = NewUserBody.safeParse(req.body);
+    if (!parsed.success) return reply.code(422).send({ error: "validation failed", issues: parsed.error.issues.map((i) => ({ path: i.path.join("."), message: i.message })) });
+    const pw = passwordProblem(parsed.data.password, parsed.data.email);
+    if (pw) return reply.code(422).send({ error: "validation failed", issues: [{ path: "password", message: pw }] });
+    if (await deps.store.findUserByEmail(parsed.data.email)) return reply.code(409).send({ error: "that email already has an account" });
+    const u: UserRecord = {
+      id: randomUUID(), email: parsed.data.email, name: parsed.data.name, kind: "enterprise", tenantId, status: "active",
+      passwordHash: await hashPassword(parsed.data.password), sessionGen: 0, createdAt: now().toISOString(), createdBy: by,
+    };
+    await deps.store.createUser(u);
+    return reply.code(201).send({ user: publicUser(u) });
+  }
+
+  // ---- Partner self-service: profile, brand and which card pays which filing ----
+  app.put("/v1/client-companies/:id/profile", async (req, reply) => {
+    const a = await requireAuth(req, reply);
+    if (!a) return reply;
+    const id = (req.params as { id: string }).id;
+    if (a.partnerOf && a.partnerOf !== id) return reply.code(404).send({ error: "not found" });
+    const c = await deps.store.getClientCompany(id);
+    if (!c || c.tenantId !== a.tenantId) return reply.code(404).send({ error: "not found" });
+    const parsed = ProfileBody.safeParse(req.body);
+    if (!parsed.success) return reply.code(422).send({ error: "validation failed", issues: parsed.error.issues.map((i) => ({ path: i.path.join("."), message: i.message })) });
+    const b = parsed.data;
+    const next = {
+      ...c,
+      ...(b.name ? { name: b.name } : {}),
+      ...(b.partner ? { partner: { setupDone: [], ...c.partner, ...b.partner } } : {}),
+      ...(b.brand ? { portal: { slug: c.portal?.slug ?? slugFor(c.name), ...c.portal, ...b.brand } } : {}),
+      ...(b.paymentRouting ? { payments: { methods: c.payments?.methods ?? [], routing: b.paymentRouting } } : {}),
+    };
+    const checked = ClientCompanySettings.safeParse(next);
+    if (!checked.success) return reply.code(422).send({ error: "validation failed", issues: checked.error.issues.map((i) => ({ path: i.path.join("."), message: i.message })) });
+    await deps.store.putClientCompany(checked.data);
+    return { clientCompany: checked.data };
+  });
+
+  // ---- Enterprise self-service: payment routing, portal defaults, portal catalog ----
+  app.get("/v1/portals", async () => ({ portals: PORTALS }));
+
+  app.get("/v1/account/setup", async (req, reply) => {
+    const tenantId = await requireTenantScope(req, reply);
+    if (!tenantId) return reply;
+    const t = await deps.store.getTenant(tenantId);
+    return {
+      configured: !!t,
+      payments: t?.payments ?? { methods: [], routing: PaymentRouting.parse({}) },
+      portalLogins: Object.fromEntries(Object.entries(t?.portalLogins ?? {}).map(([k, v]) => [k, { connectedAt: v.connectedAt, connectedBy: v.connectedBy }])),
+      portalDefaults: t?.portalDefaults ?? {},
+      portals: PORTALS,
+    };
+  });
+
+  app.put("/v1/account/payment-routing", async (req, reply) => {
+    const tenantId = await requireTenantScope(req, reply);
+    if (!tenantId) return reply;
+    const t = await deps.store.getTenant(tenantId);
+    if (!t) return reply.code(409).send({ error: "tenant settings are not set up yet; ask the platform to configure the tenant first" });
+    const parsed = PaymentSettings.safeParse({ methods: t.payments?.methods ?? [], routing: req.body });
+    if (!parsed.success) return reply.code(422).send({ error: "validation failed", issues: parsed.error.issues.map((i) => ({ path: i.path.join("."), message: i.message })) });
+    await deps.store.putTenant(TenantSettings.parse({ ...t, payments: parsed.data }));
+    return { payments: parsed.data };
+  });
+
+  app.put("/v1/account/portal-defaults/:portal", async (req, reply) => {
+    const tenantId = await requireTenantScope(req, reply);
+    if (!tenantId) return reply;
+    const t = await deps.store.getTenant(tenantId);
+    if (!t) return reply.code(409).send({ error: "tenant settings are not set up yet; ask the platform to configure the tenant first" });
+    const portal = (req.params as { portal: string }).portal;
+    const body = z.record(z.string(), z.union([z.string(), z.number(), z.boolean()])).safeParse(req.body);
+    if (!body.success) return reply.code(422).send({ error: "send an object of defaults" });
+    const problems = portalDefaultsProblems(portal, body.data);
+    if (problems.length) return reply.code(422).send({ error: "validation failed", issues: problems.map((message) => ({ path: portal, message })) });
+    await deps.store.putTenant(TenantSettings.parse({ ...t, portalDefaults: { ...t.portalDefaults, [portal]: body.data } }));
+    return { portal, defaults: body.data };
+  });
+}

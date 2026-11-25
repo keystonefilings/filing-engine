@@ -4,7 +4,7 @@ import path from "node:path";
 import { randomUUID } from "node:crypto";
 import {
   ClientCompanyOwnershipError,
-  type ApiKeyRecord, type SignatureRecord, type ApprovalRecord, type DriftHaltRecord, type FilingRecord, type MessageRecord, type NameResolutionRecord, type ReviewGateRecord, type RunRecord, type Store, type SubmitIntentRecord, type WebhookDeliveryRecord,
+  type ApiKeyRecord, type InquiryRecord, type UserRecord, type SignatureRecord, type ApprovalRecord, type DriftHaltRecord, type FilingRecord, type MessageRecord, type NameResolutionRecord, type ReviewGateRecord, type RunRecord, type Store, type SubmitIntentRecord, type WebhookDeliveryRecord,
 } from "./types.js";
 import type { ClientCompanySettings, TenantSettings } from "../settings/schema.js";
 import type { PageSnapshot } from "../resolver/types.js";
@@ -222,6 +222,25 @@ export class PostgresStore implements Store {
   async touchApiKey(id: string, at: string) {
     await this.pool.query(`update tenant_api_keys set doc = doc || jsonb_build_object('lastUsedAt', $2::text) where id=$1`, [id, at]);
   }
+
+  async createUser(u: UserRecord) {
+    await this.pool.query(`insert into users (id, email, tenant_id, doc) values ($1,$2,$3,$4)`, [u.id, u.email, u.tenantId, u]);
+    return u;
+  }
+  async getUser(id: string) { return this.doc<UserRecord>(`select doc from users where id=$1`, [id]); }
+  async findUserByEmail(email: string) { return this.doc<UserRecord>(`select doc from users where email=$1`, [email]); }
+  async listUsers(tenantId: string) { return this.docs<UserRecord>(`select doc from users where tenant_id=$1 order by created_at`, [tenantId]); }
+  async updateUser(id: string, patch: Partial<UserRecord>) {
+    const { id: _i, email: _e, ...rest } = patch;
+    const r = await this.pool.query(`update users set doc = doc || $2::jsonb, tenant_id = coalesce($3, tenant_id) where id=$1 returning doc`, [id, JSON.stringify(rest), rest.tenantId ?? null]);
+    if (!r.rows[0]) throw new Error("user not found");
+    return r.rows[0].doc as UserRecord;
+  }
+  async createInquiry(i: InquiryRecord) {
+    await this.pool.query(`insert into inquiries (id, doc) values ($1,$2)`, [i.id, i]);
+    return i;
+  }
+  async listInquiries() { return this.docs<InquiryRecord>(`select doc from inquiries order by created_at desc limit 500`, []); }
 
   // Lease expiry uses the database clock, so workers on different machines agree on it.
   async acquireRunLease(filingId: string, workerId: string, ttlMs: number) {

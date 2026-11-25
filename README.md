@@ -27,7 +27,13 @@ npm test
 Point the NJ adapter at the replica with `NJ_FORMATION_URL=http://127.0.0.1:4310/nj-formation/welcome.html`.
 
 ## Front end (web/)
-A Next.js app for Vercel, separate from the engine: API docs (`/docs`, `/openapi.json`), the white-label firm portal (`/p/<slug>`, client intake links at `/i/<token>`) and the enterprise dashboard (`/dashboard`: API keys, webhooks, usage, firms, filings). It talks to the engine only through the public API. See `web/.env.example`.
+A Next.js app for Vercel, separate from the engine. It talks to the engine only through the public API. See `web/.env.example`.
+- `/`: the landing page (adapted from `site/landing.html`) with the enterprise contact form; `/login` email sign-in for everyone; `/signup` partner sign-up for CPA, payroll and CFO firms (waits for approval unless `PARTNER_SIGNUP_MODE=automatic`).
+- `/p/<slug>`: a firm's dashboard. Partner firms get ours, co-branded with their logo, plus a setup guide (details, branding, payment routing). New filings go state, then filing type, then a short form (paired fields, optional questions folded, "Same as" for addresses). Client intake links at `/i/<token>`.
+- `/dashboard`: enterprise (API keys, webhooks, usage, firms, filings, setup for payment routing, portal logins and portal defaults, team). The platform tenant also sees partner sign-ups and enterprise requests.
+- `/docs`, `/openapi.json`: API docs.
+
+Cards and state logins are never stored by us: payment settings hold only vault references, and connecting cards and logins opens once the vault provider is chosen.
 ```bash
 cd web && npm install && npm run dev   # :3000
 npm test && npm run typecheck && npx next build

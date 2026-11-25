@@ -18,3 +18,13 @@ export function safeLogo(u: string | undefined): string | undefined {
   if (!u) return undefined;
   try { return new URL(u).protocol === "https:" ? u : undefined; } catch { return undefined; }
 }
+
+/** Mirrors the engine's PARTNER_SIGNUP_MODE so the sign-up page says what will happen. Approval unless set to "automatic". */
+export function partnerApprovalRequired(): boolean {
+  return process.env.PARTNER_SIGNUP_MODE !== "automatic";
+}
+
+/** The platform's own tenant (mirrors the engine's PLATFORM_TENANT_ID): partners sign up under it. */
+export function isPlatformTenant(tenantId: string): boolean {
+  return tenantId === (process.env.PLATFORM_TENANT_ID?.trim() || "keystone");
+}

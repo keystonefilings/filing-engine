@@ -1,6 +1,7 @@
-import { readClientIntake } from "@/lib/session";
+import { intakeKey, readClientIntake } from "@/lib/session";
 import { filingKind } from "@/lib/intake/forms";
 import { brandOf, loadCompany, offeredKinds } from "@/lib/firm";
+import { platformName } from "@/lib/brand";
 import { listSignatures } from "@/lib/signatures";
 import { IntakeForm } from "@/components/IntakeForm";
 import { submitClientIntake } from "./actions";
@@ -13,7 +14,8 @@ export default async function ClientIntakePage({ params }: { params: Promise<{ t
   if (!link) {
     return <main className="wrap narrow"><h1>This link has expired or isn&apos;t valid</h1><p>Ask whoever sent it for a new one.</p></main>;
   }
-  const company = await loadCompany(link.apiKey, link.clientCompanyId);
+  const key = intakeKey(link);
+  const company = await loadCompany(key, link.clientCompanyId);
   const brand = brandOf(company);
   const kind = filingKind(link.kind);
   if (!kind || !offeredKinds(company).some((k) => k.id === kind.id)) {
@@ -21,12 +23,13 @@ export default async function ClientIntakePage({ params }: { params: Promise<{ t
   }
   const signed = kind.sections.some((s) => s.items.some((i) => i.kind === "field" && i.type === "signature"));
   // A client signs fresh: saved signatures belong to the firm's own list, not to whoever holds the link.
-  const consentText = signed ? (await listSignatures(link.apiKey, link.clientCompanyId)).consentText : undefined;
+  const consentText = signed ? (await listSignatures(key, link.clientCompanyId)).consentText : undefined;
   return (
     <div style={{ ["--accent" as string]: brand.color }}>
       <header className="topbar"><div className="inner"><span className="brand">
         {/* eslint-disable-next-line @next/next/no-img-element */}
-        {brand.logoUrl ? <img src={brand.logoUrl} alt="" /> : null}<span>{brand.name}</span></span></div></header>
+        {brand.logoUrl ? <img src={brand.logoUrl} alt="" /> : null}<span>{brand.name}</span></span>
+        {company.partner ? <><span className="spacer" /><span className="small muted">with {platformName()}</span></> : null}</div></header>
       <main className="wrap narrow stack">
         <h1>{kind.title}{link.label ? <span className="muted" style={{ fontWeight: 400 }}> · {link.label}</span> : null}</h1>
         <p className="muted">{kind.summary} After you send this, you&apos;ll get a link to check exactly what will be filed, and nothing is filed until it&apos;s approved.</p>
