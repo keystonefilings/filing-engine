@@ -35,12 +35,12 @@ export function setPath(obj: Record<string, unknown>, path: string, value: unkno
   const parts = path.split(".");
   let cur: Record<string, unknown> = obj;
   for (let i = 0; i < parts.length - 1; i++) {
-    const k = parts[i];
-    const nextIsIndex = /^\d+$/.test(parts[i + 1]);
+    const k = parts[i]!;
+    const nextIsIndex = /^\d+$/.test(parts[i + 1] ?? "");
     if (cur[k] === undefined || cur[k] === null || typeof cur[k] !== "object") cur[k] = nextIsIndex ? [] : {};
     cur = cur[k] as Record<string, unknown>;
   }
-  cur[parts[parts.length - 1]] = value;
+  cur[parts[parts.length - 1]!] = value;
 }
 
 export function getPath(obj: unknown, path: string): unknown {
@@ -147,6 +147,7 @@ function coerce(f: Field, value: string, path: string, issues: BuildIssue[]): un
   const bad = (message: string) => { issues.push({ path, message: `${f.label}: ${message}` }); return undefined; };
   if (f.maxLength && v.length > f.maxLength) return bad(`keep it to ${f.maxLength} characters`);
   if (f.options && v && !f.options.some((o) => o.value === v)) return bad("pick one of the listed choices");
+  if (f.minWords && v && v.split(/\s+/).length < f.minWords) return bad("enter a first and last name");
   switch (f.type) {
     case "checkbox": return v === "on" || v === "true" ? true : undefined;
     case "yesno": return v === "yes" ? true : v === "no" ? false : undefined;
@@ -154,6 +155,7 @@ function coerce(f: Field, value: string, path: string, issues: BuildIssue[]): un
       if (!v) return undefined;
       const n = Number(v);
       if (!Number.isFinite(n)) return bad("enter a number");
+      if (f.integer && !Number.isInteger(n)) return bad("enter a whole number");
       if (f.min !== undefined && n < f.min) return bad(`must be at least ${f.min}`);
       if (f.max !== undefined && n > f.max) return bad(`must be at most ${f.max}`);
       return n;

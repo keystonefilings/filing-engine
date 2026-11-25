@@ -147,3 +147,35 @@ test("NY Application for Authority needs a signature and the signer", () => {
   assert.ok(paths.includes("paperUpload.signatureId"));
   assert.ok(paths.includes("paperUpload.applicationForAuthority.signer.name"));
 });
+
+test("NY corporation builds a business corporation request", () => {
+  const raw: Raw = {
+    "formation.name.baseName": "Hudson Ledger", "formation.name.designator": "Inc.", "formation.county": "Kings",
+    "formation.stockShares": "200", "formation.effectiveDate": "upon_filing",
+    "formation.serviceOfProcess.mode": "manual", "formation.serviceOfProcess.person.name": "THE CORPORATION",
+    ...addr("formation.serviceOfProcess.person.address"), "formation.serviceOfProcess.noticeEmail": "sop@example.test",
+    "formation.incorporator.name": "Dana J Park", ...addr("formation.incorporator.address"),
+    "formation.additionalCertificates.plainCopy": "on", "intake.portal.customerReference": "ACME-42",
+    ...contact, ...auths("ny-corp"),
+  };
+  const { request, issues } = buildRequest(filingKind("ny-corp")!, raw, ctx);
+  assert.deepEqual(issues, []);
+  assert.equal(request.state, "NY");
+  const f = request.formation as Record<string, any>;
+  assert.equal(f.nyEntityType, "business_corporation");
+  assert.equal(f.stockShares, 200);
+  assert.equal(f.incorporator.name, "Dana J Park");
+  assert.equal(f.incorporator.address.zip, "12207");
+  assert.equal(f.additionalCertificates.plainCopy, true);
+  assert.equal(f.organizer, undefined);
+  assert.equal(f.managementStructure, undefined);
+  assert.equal((request.intake as any).portal.customerReference, "ACME-42");
+});
+
+test("NY corporation wants whole shares and a first and last name", () => {
+  const { issues } = buildRequest(filingKind("ny-corp")!, { "formation.stockShares": "2.5", "formation.incorporator.name": "Dana" }, ctx);
+  const msg = (p: string) => issues.find((i) => i.path === p)?.message ?? "";
+  assert.match(msg("formation.stockShares"), /whole number/);
+  assert.match(msg("formation.incorporator.name"), /first and last name/);
+  assert.ok(issues.some((i) => i.path === "auth.ny-corp-signature"));
+});

@@ -201,7 +201,7 @@ export function IntakeForm({ kind, nonce, action, submitLabel = "Submit for appr
         const type = f.type === "email" ? "email" : f.type === "tel" ? "tel" : f.type === "number" ? "number" : f.type === "date" ? "date" : f.type === "month" ? "month" : "text";
         const numeric = f.type === "zip" || f.type === "ssn" || f.type === "fein";
         control = (
-          <input {...common} type={type} defaultValue={f.defaultValue} maxLength={f.maxLength} min={f.min} max={f.max} placeholder={f.placeholder}
+          <input {...common} type={type} defaultValue={f.defaultValue} maxLength={f.maxLength} min={f.min} max={f.max} step={f.integer ? 1 : undefined} placeholder={f.placeholder}
             inputMode={numeric ? "numeric" : undefined} autoComplete={f.type === "ssn" || f.type === "fein" ? "off" : undefined}
             spellCheck={f.type === "ssn" ? false : undefined} />
         );
