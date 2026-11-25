@@ -6,13 +6,15 @@ import { liveFilings, loadCompany, offeredKinds } from "@/lib/firm";
 import { submitIntake } from "@/lib/intake/submit";
 import { CLOSED_TEXT, linkRecord, markLinkUsed } from "@/lib/intake-links";
 import type { IntakeResult } from "@/components/IntakeForm";
+import { withFirmDefaults } from "@/lib/firm-defaults";
 
 export async function submitClientIntake(token: string, fd: FormData): Promise<IntakeResult> {
   const link = readClientIntake(token);
   if (!link) return { ok: false, error: "This link has expired. Ask whoever sent it for a new one.", issues: [] };
   const key = intakeKey(link);
   const company = await loadCompany(key, link.clientCompanyId);
-  const kind = filingKind(link.kind);
+  const base = filingKind(link.kind);
+  const kind = base ? withFirmDefaults(base, company).kind : base;
   if (!kind || !offeredKinds(company).some((k) => k.id === kind.id)) return { ok: false, error: "This filing is no longer offered.", issues: [] };
   const record = await linkRecord(key, link.clientCompanyId, link.nonce).catch(() => null);
   if (record && record.state !== "open") return { ok: false, error: CLOSED_TEXT[record.state], issues: [] };

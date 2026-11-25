@@ -88,7 +88,8 @@ export class RegisteredAgentService {
     }
 
     if (choice === "client_provided") {
-      const a = req.formation?.registeredAgent ?? client.registeredAgent;
+      // V22: the filing's own agent, else the firm's saved agent for this state, else its one saved agent.
+      const a = req.formation?.registeredAgent ?? client.registeredAgentsByState?.[state as "NY" | "NJ" | "FL" | "MO"] ?? client.registeredAgent;
       if (!a?.address) throw new Error("client-provided registered agent is missing a name or address");
       if (a.address.state !== state) throw new Error(`the registered agent address must be in ${state}`);
       return { source: "client_provided", agent: { name: a.name, address: a.address, email: a.email } };

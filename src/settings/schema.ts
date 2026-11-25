@@ -185,6 +185,8 @@ export const ClientCompanySettings = z.object({
   njStoredPaymentMethod: z.enum(["stored_card", "stored_echeck"]).optional(),
   /** This firm's own NY drawdown account; used only when answer G1 is "own_account". */
   nyDrawdownAccountRef: z.string().optional(),
+  /** V22: the firm's own registered agent per state, used when a filing names none. */
+  registeredAgentsByState: z.object({ NY: Person.optional(), NJ: Person.optional(), FL: Person.optional(), MO: Person.optional() }).optional(),
   registeredAgent: Person.optional(),
   /** This firm's default registered-agent choice for its filings: none, bring its own, or let the filing company provide it. */
   registeredAgentChoice: z.enum(["none", "client_provided", "filing_company"]).optional(),

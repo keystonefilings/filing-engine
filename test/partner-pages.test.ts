@@ -123,3 +123,24 @@ describe("client links: list, turn off, one use (V26)", () => {
     expect((await app.inject({ method: "POST", url: `${base}/BBBBBBBBBBBBBBBB/revoke`, headers: { "x-api-key": other.key } })).statusCode).toBe(404);
   });
 });
+
+describe("the firm's registered agent per state (V22)", () => {
+  it("saves one per state, checks the state, and a filing that names none uses it", async () => {
+    const { key, firm } = await partner("Agent Firm", "ag@agent-firm.test");
+    const nj = { name: "Garden State Agents", address: { street1: "9 Agent Way", city: "Newark", state: "NJ", zip: "07102" } };
+    expect((await app.inject({ method: "PUT", url: `/v1/client-companies/${firm}/profile`, headers: { "x-api-key": key }, payload: { registeredAgents: { NJ: { ...nj, address: { ...nj.address, state: "NY" } } } } })).statusCode).toBe(422);
+    const ok = await app.inject({ method: "PUT", url: `/v1/client-companies/${firm}/profile`, headers: { "x-api-key": key }, payload: { registeredAgents: { NJ: nj } } });
+    expect(ok.statusCode).toBe(200);
+    expect(ok.json().clientCompany.registeredAgentsByState.NJ.name).toBe("Garden State Agents");
+    const { RegisteredAgentService } = await import("../src/registered-agents/service.js");
+    const { njFormationRequest } = await import("./helpers.js");
+    const req = njFormationRequest({ clientCompanyId: firm }) as any;
+    delete req.formation.registeredAgent;
+    req.formation.registeredAgentChoice = "client_provided";
+    const r = await new RegisteredAgentService({ vault: { getCredential: async () => null } }).resolve(req, (await store.getTenant("keystone"))!, (await store.getClientCompany(firm))!);
+    expect(r).toMatchObject({ source: "client_provided", agent: { name: "Garden State Agents" } });
+    // null removes it.
+    const gone = await app.inject({ method: "PUT", url: `/v1/client-companies/${firm}/profile`, headers: { "x-api-key": key }, payload: { registeredAgents: { NJ: null } } });
+    expect(gone.json().clientCompany.registeredAgentsByState?.NJ).toBeUndefined();
+  });
+});

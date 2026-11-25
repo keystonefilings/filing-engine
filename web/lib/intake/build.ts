@@ -287,6 +287,8 @@ export function buildRequest(kind: FilingKind, raw: Raw, ctx: BuildContext): Bui
 function postProcess(kind: FilingKind, r: Record<string, unknown>, raw: Raw): void {
   const formation = r.formation as Record<string, unknown> | undefined;
   if (formation && formation.registeredAgentChoice === "filing_company") delete formation.registeredAgent;
+  // V22: "our saved agent" is the firm's own agent, which the engine takes from the firm's settings.
+  if (formation && formation.registeredAgentChoice === "firm_saved") { formation.registeredAgentChoice = "client_provided"; delete formation.registeredAgent; }
 
   if (kind.state === "FL" && formation && formation.registeredAgentChoice === "client_provided") {
     const kindOfAgent = raw["intake.portal.flAgentKind"];

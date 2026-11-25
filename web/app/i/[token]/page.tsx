@@ -7,6 +7,7 @@ import { IntakeForm } from "@/components/IntakeForm";
 import { submitClientIntake } from "./actions";
 import { CLOSED_TEXT, linkRecord } from "@/lib/intake-links";
 import { BrandFont } from "@/components/BrandFont";
+import { withFirmDefaults } from "@/lib/firm-defaults";
 
 export const metadata = { title: "Your filing" };
 
@@ -23,7 +24,8 @@ export default async function ClientIntakePage({ params }: { params: Promise<{ t
   }
   const company = await loadCompany(key, link.clientCompanyId);
   const brand = brandOf(company);
-  const kind = filingKind(link.kind);
+  const base = filingKind(link.kind);
+  const { kind, prefill } = base ? withFirmDefaults(base, company) : { kind: base, prefill: {} };
   if (!kind || !offeredKinds(company).some((k) => k.id === kind.id)) {
     return <main className="wrap narrow"><h1>This filing is no longer offered</h1><p>Contact {brand.name}{brand.supportEmail ? ` at ${brand.supportEmail}` : ""}.</p></main>;
   }
@@ -40,7 +42,7 @@ export default async function ClientIntakePage({ params }: { params: Promise<{ t
       <main className="wrap narrow stack">
         <h1>{kind.title}{link.label ? <span className="muted" style={{ fontWeight: 400 }}> · {link.label}</span> : null}</h1>
         <p className="muted">{kind.summary} After you send this, you&apos;ll get a link to check exactly what will be filed, and nothing is filed until it&apos;s approved.</p>
-        <IntakeForm kind={kind} nonce={link.nonce} action={submitClientIntake.bind(null, token)} submitLabel="Send" consentText={consentText} />
+        <IntakeForm kind={kind} nonce={link.nonce} action={submitClientIntake.bind(null, token)} submitLabel="Send" consentText={consentText} prefill={prefill} />
         {brand.supportEmail ? <p className="small muted">Questions? Email <a href={`mailto:${brand.supportEmail}`}>{brand.supportEmail}</a>.</p> : null}
       </main>
     </div>

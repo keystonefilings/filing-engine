@@ -3,6 +3,7 @@ import assert from "node:assert/strict";
 import { FILING_KINDS, filingKind } from "./intake/forms.ts";
 import { allFields, buildRequest, type Raw } from "./intake/build.ts";
 import { seal, unseal } from "./seal.ts";
+import { withFirmDefaults } from "./firm-defaults.ts";
 
 const ctx = { tenantId: "t1", clientCompanyId: "firm-1", idempotencyKey: "intake-abcdef123", submittedBy: "pat@example.test", source: "firm_portal" as const };
 const addr = (p: string, state = "NY"): Raw => ({ [`${p}.street1`]: "1 Main St", [`${p}.city`]: "Albany", [`${p}.state`]: state, [`${p}.zip`]: "12207" });
@@ -178,4 +179,31 @@ test("NY corporation wants whole shares and a first and last name", () => {
   assert.match(msg("formation.stockShares"), /whole number/);
   assert.match(msg("formation.incorporator.name"), /first and last name/);
   assert.ok(issues.some((i) => i.path === "auth.ny-corp-signature"));
+});
+
+test("a firm's saved agent is offered first and sent as the firm's own agent (V22)", () => {
+  const company = { registeredAgentsByState: { NJ: { name: "Garden State Agents", address: { street1: "9 Agent Way", city: "Newark", state: "NJ", zip: "07102" } } } };
+  const { kind, prefill } = withFirmDefaults(filingKind("nj-llc")!, company);
+  const choice = kind.sections.flatMap((s) => s.items).find((i: any) => i.path === "formation.registeredAgentChoice") as any;
+  assert.equal(choice.defaultValue, "firm_saved");
+  assert.equal(choice.options[0].label, "Our saved agent: Garden State Agents");
+  assert.deepEqual(prefill, {});
+  const raw: Raw = {
+    "formation.name.baseName": "Shore", "formation.name.designator": "LLC", "formation.effectiveDate": "upon_filing",
+    "formation.registeredAgentChoice": "firm_saved",
+    "formation.members.3.name": "Avery", ...addr("formation.members.3.address", "NJ"),
+    "formation.signers.0.name": "Avery", "formation.signers.0.title": "Member",
+    ...contact, ...auths("nj-llc"),
+  };
+  const { request, issues } = buildRequest(kind, raw, ctx);
+  assert.deepEqual(issues, []);
+  const f = request.formation as any;
+  assert.equal(f.registeredAgentChoice, "client_provided");
+  assert.equal(f.registeredAgent, undefined);
+  // A New York form (agent optional) gets the saved agent filled in instead.
+  const ny = withFirmDefaults(filingKind("ny-llc")!, { registeredAgentsByState: { NY: { name: "Empire Agents", address: { street1: "1 State St", city: "Albany", state: "NY", zip: "12207" } } } });
+  assert.equal(ny.prefill["formation.registeredAgent.name"], "Empire Agents");
+  assert.equal(ny.prefill["formation.registeredAgent.address.city"], "Albany");
+  // No saved agent: the form is unchanged.
+  assert.equal(withFirmDefaults(filingKind("nj-llc")!, {}).kind, filingKind("nj-llc"));
 });

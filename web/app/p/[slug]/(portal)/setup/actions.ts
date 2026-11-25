@@ -7,6 +7,7 @@ import { firmContext } from "@/lib/firm";
 import { FILING_KINDS } from "@/lib/intake/forms";
 import { applyLogo } from "@/lib/logo-upload";
 import { writeSession } from "@/lib/session";
+import type { AgentsState } from "@/components/AgentsForm";
 
 export type SetupState = { error?: string; issues?: Record<string, string> } | null;
 type Step = "details" | "branding" | "payments";
@@ -101,4 +102,26 @@ export async function savePayments(slug: string, _prev: SetupState, fd: FormData
   const routing: PaymentRouting = { mode, defaultMethodId: pick("defaultMethodId"), fallbackMethodId: pick("fallbackMethodId"), byFilingKind };
   if (routing.fallbackMethodId && routing.fallbackMethodId === routing.defaultMethodId) return { error: "The backup card has to be a different card." };
   return save(slug, "payments", { paymentRouting: routing });
+}
+
+/** V22: saves the firm's registered agent per state (an empty name removes that state's agent). */
+export async function saveAgents(slug: string, _prev: AgentsState, fd: FormData): Promise<AgentsState> {
+  const { session } = await firmContext(slug);
+  const agents: Record<string, unknown> = {};
+  for (const st of ["NY", "NJ", "FL", "MO"]) {
+    if (!fd.has(`${st}.name`)) continue;
+    const name = text(fd, `${st}.name`, 160);
+    if (!name) { agents[st] = null; continue; }
+    const street1 = text(fd, `${st}.street1`, 120), city = text(fd, `${st}.city`, 80), zip = text(fd, `${st}.zip`, 10);
+    if (!street1 || !city || !/^\d{5}(-\d{4})?$/.test(zip)) return { error: `Fill in the ${st} agent's street, city and ZIP, or leave its name empty.` };
+    agents[st] = { name, ...(text(fd, `${st}.email`) ? { email: text(fd, `${st}.email`) } : {}), address: { street1, ...(text(fd, `${st}.street2`, 120) ? { street2: text(fd, `${st}.street2`, 120) } : {}), city, state: st, zip } };
+  }
+  try {
+    await engine(session.apiKey, `/v1/client-companies/${encodeURIComponent(session.clientCompanyId)}/profile`, { method: "PUT", body: { registeredAgents: agents } });
+  } catch (e) {
+    if (e instanceof EngineError && e.status === 422) return { error: "Check the agents' details: each address must be in its own state." };
+    return { error: "That didn't save. Try again in a minute." };
+  }
+  revalidatePath(`/p/${encodeURIComponent(slug)}`, "layout");
+  return { ok: true, message: "Saved. New filings offer these agents." };
 }

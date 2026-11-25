@@ -6,6 +6,7 @@ import { newNonce } from "@/lib/intake/submit";
 import { listSignatures } from "@/lib/signatures";
 import { createFirmFiling } from "./actions";
 import type { ClientCompany } from "@/lib/engine";
+import { withFirmDefaults } from "@/lib/firm-defaults";
 
 /** V28: the firm files this one itself, so its own contact details start in the contact block. */
 function contactPrefill(c: ClientCompany): Record<string, string> {
@@ -18,8 +19,9 @@ function contactPrefill(c: ClientCompany): Record<string, string> {
 export default async function NewKindPage({ params }: { params: Promise<{ slug: string; kind: string }> }) {
   const { slug, kind: kindId } = await params;
   const { session, company } = await firmContext(slug);
-  const kind = offeredKinds(company).find((k) => k.id === kindId);
-  if (!kind) notFound();
+  const offered = offeredKinds(company).find((k) => k.id === kindId);
+  if (!offered) notFound();
+  const { kind, prefill: saved } = withFirmDefaults(offered, company);
   const signed = kind.sections.some((s) => s.items.some((i) => i.kind === "field" && i.type === "signature"));
   const sigs = signed ? await listSignatures(session.apiKey, session.clientCompanyId) : null;
   return (
@@ -34,7 +36,7 @@ export default async function NewKindPage({ params }: { params: Promise<{ slug: 
         action={createFirmFiling.bind(null, slug, kind.id)}
         signatures={sigs?.signatures.filter((s) => s.active) ?? []}
         consentText={sigs?.consentText}
-        prefill={contactPrefill(company)}
+        prefill={{ ...contactPrefill(company), ...saved }}
       />
     </div>
   );

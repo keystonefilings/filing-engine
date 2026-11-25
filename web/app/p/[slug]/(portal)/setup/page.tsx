@@ -30,6 +30,11 @@ export default async function SetupPage({ params }: { params: Promise<{ slug: st
           </li>
         ))}
       </ol>
+      <div className="card">
+        <strong>Registered agents</strong> <span className="small muted">(optional)</span>
+        <p className="small muted">Save the agent you use in each state, and your forms offer it so nobody types it again.</p>
+        <Link className="btn small" href={`${base}/setup/agents`}>{Object.keys(company.registeredAgentsByState ?? {}).length ? "Change agents" : "Add agents"}</Link>
+      </div>
       {!next ? <p><Link className="btn primary" href={`${base}/new`}>Start a filing</Link></p> : null}
     </div>
   );

@@ -129,6 +129,13 @@ const ProfileBody = z.object({
     filingKinds: z.array(z.string().regex(/^[a-z0-9-]{2,40}$/)).max(60).optional(),
   }).optional(),
   paymentRouting: PaymentRouting.optional(),
+  /** V22: the firm's registered agent per state (null removes one). */
+  registeredAgents: z.partialRecord(z.enum(["NY", "NJ", "FL", "MO"]), z.union([z.object({
+    name: z.string().trim().min(2).max(160),
+    email: z.string().email().optional(),
+    address: z.object({ street1: z.string().trim().min(2).max(120), street2: z.string().trim().max(120).optional(), city: z.string().trim().min(2).max(80), state: z.enum(["NY", "NJ", "FL", "MO"]), zip: z.string().regex(/^\d{5}(-\d{4})?$/) }),
+  }), z.null()])).optional()
+    .refine((m) => !m || Object.entries(m).every(([st, a]) => !a || a.address.state === st), { message: "each agent's address must be in its own state" }),
 });
 const DecisionBody = z.object({ action: z.enum(["approve", "reject"]) });
 
@@ -519,6 +526,7 @@ export function registerUsers(app: FastifyInstance, deps: UsersDeps): void {
       // A logo link the firm types replaces an uploaded logo (the upload is shown first otherwise).
       ...(b.brand ? { portal: { ...c.portal, ...b.brand, slug: b.brand.slug ?? await portalSlugFor(deps.store, c.tenantId, c), ...(b.brand.logoUrl ? { logoArtifactId: undefined } : {}) } } : {}),
       ...(b.paymentRouting ? { payments: { methods: c.payments?.methods ?? [], routing: b.paymentRouting } } : {}),
+      ...(b.registeredAgents ? { registeredAgentsByState: Object.fromEntries(Object.entries({ ...c.registeredAgentsByState, ...b.registeredAgents }).filter(([, v]) => v)) } : {}),
     };
     const checked = ClientCompanySettings.safeParse(next);
     if (!checked.success) return reply.code(422).send({ error: "validation failed", issues: checked.error.issues.map((i) => ({ path: i.path.join("."), message: i.message })) });
