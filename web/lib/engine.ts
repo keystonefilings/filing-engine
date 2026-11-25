@@ -14,10 +14,11 @@ export function engineBaseUrl(): string {
   return "http://127.0.0.1:8080";
 }
 
-export async function engine<T = unknown>(apiKey: string, path: string, init: { method?: string; body?: unknown } = {}): Promise<T> {
+/** Calls the engine. Pass null as the key only for its public routes (sign-in, partner sign-up, contact form). */
+export async function engine<T = unknown>(apiKey: string | null, path: string, init: { method?: string; body?: unknown } = {}): Promise<T> {
   const res = await fetch(`${engineBaseUrl()}${path}`, {
     method: init.method ?? "GET",
-    headers: { "x-api-key": apiKey, ...(init.body !== undefined ? { "content-type": "application/json" } : {}) },
+    headers: { ...(apiKey ? { "x-api-key": apiKey } : {}), ...(init.body !== undefined ? { "content-type": "application/json" } : {}) },
     body: init.body !== undefined ? JSON.stringify(init.body) : undefined,
     cache: "no-store",
   });
@@ -45,6 +46,9 @@ export interface ClientCompany {
   einMode?: string;
   approvers?: { channel: string; address: string; name?: string }[];
   portal?: PortalBrand;
+  /** Set on firms that signed up themselves (partners of the platform). */
+  partner?: PartnerProfile;
+  payments?: PaymentSettings;
   [k: string]: unknown;
 }
 
@@ -91,4 +95,38 @@ export function filingTitle(f: Filing): string {
   const r = f.request;
   const n = r.formation?.name ? `${r.formation.name.baseName} ${r.formation.name.designator}` : r.payroll?.legalName ?? r.standing?.entityName ?? "";
   return n || `${r.state} ${r.type.replace(/_/g, " ")}`;
+}
+
+// ---- Accounts, sign-up and self-service setup ----
+
+export type CompanyType = "cpa" | "payroll" | "cfo" | "other";
+
+export interface PublicUser {
+  id: string; email: string; name: string; kind: "enterprise" | "partner"; tenantId: string; clientCompanyId?: string;
+  status: "pending" | "active" | "rejected" | "disabled"; createdAt: string; lastSignInAt?: string; decidedAt?: string;
+  signup?: { companyName: string; companyType: CompanyType; phone?: string; website?: string; states?: string[]; expectedVolume?: string };
+}
+
+export interface SignInResult { user: PublicUser; sessionKey: string; expiresAt: string }
+
+export interface Inquiry { id: string; createdAt: string; name: string; company: string; email: string; phone?: string; states?: string; volume?: string; message?: string }
+
+export interface PaymentMethodRef { id: string; label: string; provider: string; brand?: string; last4?: string; expMonth?: number; expYear?: number; purpose: "state_fees" | "subscription" }
+export interface PaymentRouting { mode: "single" | "per_filing"; defaultMethodId?: string; fallbackMethodId?: string; byFilingKind: Record<string, string>; subscriptionMethodId?: string }
+export interface PaymentSettings { methods: PaymentMethodRef[]; routing: PaymentRouting }
+
+export interface PortalDefaultField { id: string; label: string; type: "boolean" | "number" | "select"; options?: { value: string; label: string }[]; help?: string }
+export interface PortalInfo { id: string; state: "NY" | "NJ" | "FL" | "MO" | "US"; name: string; needsLogin: boolean; pays: string; defaults: PortalDefaultField[] }
+
+export interface AccountSetup {
+  configured: boolean;
+  payments: PaymentSettings;
+  portalLogins: Record<string, { connectedAt: string; connectedBy?: string }>;
+  portalDefaults: Record<string, Record<string, string | number | boolean>>;
+  portals: PortalInfo[];
+}
+
+export interface PartnerProfile {
+  companyType?: CompanyType; contactName?: string; contactEmail?: string; phone?: string; website?: string;
+  setupDone?: ("details" | "branding" | "payments")[];
 }

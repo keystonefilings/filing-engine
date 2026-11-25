@@ -11,8 +11,9 @@ import { seal, unseal } from "./seal";
  *    create that one firm's filings; the scoping is enforced here, on the server.
  */
 
-export interface TenantSession { kind: "tenant"; apiKey: string; tenantId: string; name: string }
-export interface FirmSession { kind: "firm"; apiKey: string; tenantId: string; clientCompanyId: string; slug: string; email: string }
+/** signedInWith "password": the apiKey is a short-lived session key the engine issued at email sign-in. */
+export interface TenantSession { kind: "tenant"; apiKey: string; tenantId: string; name: string; signedInWith?: "api_key" | "password"; email?: string }
+export interface FirmSession { kind: "firm"; apiKey: string; tenantId: string; clientCompanyId: string; slug: string; email: string; signedInWith?: "invite" | "password"; expiresAt?: string }
 export type Session = TenantSession | FirmSession;
 
 const COOKIE = "kfe_session";
@@ -39,7 +40,7 @@ export async function clearSession(): Promise<void> {
 
 export async function requireTenant(): Promise<TenantSession> {
   const s = await readSession();
-  if (!s || s.kind !== "tenant") redirect("/dashboard/login");
+  if (!s || s.kind !== "tenant") redirect("/login");
   return s;
 }
 
@@ -52,7 +53,19 @@ export async function requireFirm(slug: string): Promise<FirmSession> {
 // ---- Invite links ----
 
 export interface StaffInvite { apiKey: string; tenantId: string; clientCompanyId: string; slug: string; email: string }
-export interface ClientIntake { apiKey: string; tenantId: string; clientCompanyId: string; slug: string; kind: string; nonce: string; label?: string }
+/**
+ * via "platform": a link a partner firm made. It carries no key; the site uses its own PLATFORM_API_KEY
+ * (the platform tenant's key) when the client opens it, scoped to the firm in the link.
+ */
+export interface ClientIntake { apiKey: string; tenantId: string; clientCompanyId: string; slug: string; kind: string; nonce: string; label?: string; via?: "platform" }
+
+/** The engine key a client link acts with. */
+export function intakeKey(i: ClientIntake): string {
+  if (i.via !== "platform") return i.apiKey;
+  const k = process.env.PLATFORM_API_KEY?.trim();
+  if (!k) throw new Error("PLATFORM_API_KEY is not set");
+  return k;
+}
 
 export const INVITE_TTL = { staff: 7 * 24 * 3600, client: 30 * 24 * 3600 } as const;
 
@@ -64,8 +77,9 @@ export function staffInviteLink(i: StaffInvite): string {
   return `${publicUrl()}/join/${seal("staff-invite", { ...i }, INVITE_TTL.staff)}`;
 }
 
-export function clientIntakeLink(i: ClientIntake): string {
-  return `${publicUrl()}/i/${seal("client-intake", { ...i }, INVITE_TTL.client)}`;
+/** ttlSec shortens the link, e.g. to the life of the session key it carries. */
+export function clientIntakeLink(i: ClientIntake, ttlSec: number = INVITE_TTL.client): string {
+  return `${publicUrl()}/i/${seal("client-intake", { ...i }, Math.min(ttlSec, INVITE_TTL.client))}`;
 }
 
 export function readStaffInvite(token: string): StaffInvite | null {
