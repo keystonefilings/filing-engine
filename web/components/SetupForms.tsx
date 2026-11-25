@@ -189,7 +189,7 @@ export function PaymentsForm({ action, methods, routing, kinds }: { action: Acti
           ))}
         </fieldset>
       ) : null}
-      {none ? <p className="notice">Adding a card isn&apos;t switched on yet. Cards will be held by a secure card vault, never by us, and you&apos;ll pick them here. Your choice above is saved now.</p> : null}
+      {none ? <p className="notice">No card saved yet. Add one above, then pick which pays what here. Your choice is saved now.</p> : null}
       <button className="btn primary" type="submit" disabled={pending}>{pending ? "Saving…" : "Save"}</button>
     </form>
   );

@@ -7,6 +7,9 @@ import { PortalLoginForm } from "@/components/PortalLoginForm";
 import { FilingDefaultsForm } from "@/components/FilingDefaultsForm";
 import { AgentsForm } from "@/components/AgentsForm";
 import { saveFilingDefaults, saveTenantAgents } from "./actions";
+import { AddCard } from "@/components/AddCard";
+import { SavedCards } from "@/components/SavedCards";
+import { saveCard } from "@/lib/cards";
 
 export const metadata = { title: "Setup" };
 
@@ -21,7 +24,9 @@ export default async function SetupPage() {
       {!setup.configured ? <p className="notice warn">Your account settings haven&apos;t been set up yet, so nothing here can be saved. We&apos;ll do that with you first.</p> : null}
 
       <h2>Payment methods</h2>
-      <p className="muted">Your subscription and state filing fees can be paid by different cards. Cards are held by a card vault, never by us; the engine asks the vault for the card only when it pays a state.</p>
+      <p className="muted">Your subscription and state filing fees can be paid by different cards. Cards are held by Basis Theory, a card vault, never by us; the engine reads a card only when it pays a state.</p>
+      <SavedCards methods={setup.payments.methods} />
+      {process.env.BASIS_THEORY_PUBLIC_KEY ? <AddCard publicKey={process.env.BASIS_THEORY_PUBLIC_KEY} save={saveCard} /> : <p className="notice">Adding cards needs the card vault switched on for this site.</p>}
       <RoutingForm action={saveRouting} methods={setup.payments.methods} routing={setup.payments.routing} kinds={FILING_KINDS.map((k) => ({ id: k.id, title: k.title }))} />
 
       <h2>State portal logins</h2>

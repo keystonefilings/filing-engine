@@ -87,6 +87,8 @@ export const config = {
   platformName: env("PLATFORM_NAME", "CoFile"),
   /** The web front end (web/): links in account emails (password reset) point here. */
   webBaseUrl: env("WEB_BASE_URL", "http://localhost:3000").replace(/\/+$/, ""),
+  /** V18: Basis Theory private key (token:read) the worker uses to read a card at the payment screen. */
+  basisTheoryApiKey: process.env.BASIS_THEORY_API_KEY || null,
   /** Email through Resend (comms/resend.ts). No key: every message is recorded, none is sent. */
   email: {
     resendApiKey: process.env.RESEND_API_KEY || null,

@@ -15,6 +15,11 @@ export interface RunValues {
 
 /** What a step gets from the engine. Filling goes through `set` so every value is matched by label, never by selector. */
 export interface StepContext {
+  /**
+   * V18: the cards to try at a state's payment screen, in order (the filing's card, then the
+   * backup), read from the card vault only when called. Absent when no card vault is set up.
+   */
+  paymentCards?: () => Promise<{ label: string; last4?: string; number: string; expMonth: number; expYear: number; cvc?: string }[]>;
   page: Page;
   filing: FilingRecord;
   tenant: TenantSettings;

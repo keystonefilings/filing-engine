@@ -20,8 +20,11 @@ import type { Vault } from "../settings/vault.js";
 import { labelScore } from "../resolver/match.js";
 import { signatureForApprovedFiling } from "../signatures/apply.js";
 import { reviewFingerprint } from "./review-fingerprint.js";
+import { cardRefsForFiling, cardsForPayment, type CardVault } from "../payments/card-vault.js";
 
 export interface RunDeps {
+  /** V18: where saved cards are read at the payment screen (Basis Theory). */
+  cardVault?: CardVault;
   store: Store;
   artifacts: ArtifactStore;
   harness: BrowserHarness;
@@ -443,7 +446,11 @@ export class RunExecutor {
         }
         await fillField(page, f, value);
       };
-      return { set, field, fields: inventory.fields };
+      const vault = this.deps.cardVault;
+    const paymentCards = vault ? () => cardsForPayment(vault, cardRefsForFiling(input.filing, input.tenant, input.client),
+      async () => (input.approval?.cvcTokenId ? (await vault.getCard(input.approval.cvcTokenId))?.cvc : undefined)) : undefined;
+    return {
+      ...(paymentCards ? { paymentCards } : {}), set, field, fields: inventory.fields };
     };
     const base = await resolve(screen);
     return {

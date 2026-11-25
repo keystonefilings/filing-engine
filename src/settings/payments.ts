@@ -2,13 +2,15 @@ import { z } from "zod";
 
 /**
  * Saved payment methods and which one pays what. The engine never holds a card number: a method is a
- * reference into the payment vault (the provider is not chosen yet), plus what the owner needs to
+ * reference into the payment vault (Basis Theory, payments/card-vault.ts), plus what the owner needs to
  * tell cards apart. At run time the worker asks the vault for the card and types it into the state's
  * own payment page (NJ, FL) or the NY DOS draw-down deposit page (docs/portal-maps/ny-dos-corporations.md).
  *
  * purpose: state_fees pays government fees; subscription pays the platform (enterprise only).
  */
 const CARD_NUMBER_LIKE = /\d[\d -]{11,}\d/;
+/** A provider token in UUID form (Basis Theory's): its digit-and-dash runs are not a card number. */
+const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 export const PaymentMethodRef = z.object({
   id: z.string().regex(/^[a-z0-9_-]{1,40}$/),
@@ -16,7 +18,7 @@ export const PaymentMethodRef = z.object({
   /** The vault or card provider that holds the card. */
   provider: z.string().min(1).max(40),
   /** The provider's token for the card. Never a card number. */
-  providerRef: z.string().min(1).max(200).refine((v) => !CARD_NUMBER_LIKE.test(v), "must be the provider's token, never a card number"),
+  providerRef: z.string().min(1).max(200).refine((v) => UUID.test(v) || !CARD_NUMBER_LIKE.test(v), "must be the provider's token, never a card number"),
   brand: z.string().max(20).optional(),
   last4: z.string().regex(/^\d{4}$/).optional(),
   expMonth: z.number().int().min(1).max(12).optional(),

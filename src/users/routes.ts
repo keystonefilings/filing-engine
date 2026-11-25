@@ -674,6 +674,73 @@ export function registerUsers(app: FastifyInstance, deps: UsersDeps): void {
     return { portal, disconnected: true };
   });
 
+  // V18: cards saved from Basis Theory's fields. Only the token and what tells cards apart arrive here.
+  const NewCard = z.object({
+    provider: z.literal("basis_theory"), providerRef: z.string().regex(/^[0-9a-f-]{36}$/i, "a Basis Theory token id"),
+    label: z.string().trim().min(1).max(60), brand: z.string().max(20).optional(), last4: z.string().regex(/^\d{4}$/).optional(),
+    expMonth: z.number().int().min(1).max(12).optional(), expYear: z.number().int().min(2024).max(2100).optional(),
+    purpose: z.enum(["state_fees", "subscription"]).default("state_fees"),
+  });
+  const addCard = (methods: { id: string }[], card: z.infer<typeof NewCard>) => {
+    const id = `card-${randomBytes(4).toString("hex")}`;
+    if (methods.length >= 10) return null;
+    return { id, ...card };
+  };
+  app.post("/v1/account/payment-methods", async (req, reply) => {
+    const tenantId = await requireTenantScope(req, reply);
+    if (!tenantId) return reply;
+    const t = await deps.store.getTenant(tenantId);
+    if (!t) return reply.code(409).send({ error: "tenant settings are not set up yet" });
+    const parsed = NewCard.safeParse(req.body);
+    if (!parsed.success) return reply.code(422).send({ error: "validation failed", issues: parsed.error.issues.map((i) => ({ path: i.path.join("."), message: i.message })) });
+    const card = addCard(t.payments?.methods ?? [], parsed.data);
+    if (!card) return reply.code(409).send({ error: "ten cards at most" });
+    const methods = [...(t.payments?.methods ?? []), card];
+    const routing = { ...PaymentRouting.parse(t.payments?.routing ?? {}), ...(card.purpose === "state_fees" && !t.payments?.routing?.defaultMethodId ? { defaultMethodId: card.id } : {}) };
+    await deps.store.putTenant(TenantSettings.parse({ ...t, payments: PaymentSettings.parse({ methods, routing }) }));
+    return reply.code(201).send({ method: card });
+  });
+  app.delete("/v1/account/payment-methods/:methodId", async (req, reply) => {
+    const tenantId = await requireTenantScope(req, reply);
+    if (!tenantId) return reply;
+    const t = await deps.store.getTenant(tenantId);
+    const id = (req.params as { methodId: string }).methodId;
+    if (!t?.payments?.methods.some((m) => m.id === id)) return reply.code(404).send({ error: "not found" });
+    const r = t.payments.routing;
+    const routing = { ...r, defaultMethodId: r.defaultMethodId === id ? undefined : r.defaultMethodId, fallbackMethodId: r.fallbackMethodId === id ? undefined : r.fallbackMethodId,
+      subscriptionMethodId: r.subscriptionMethodId === id ? undefined : r.subscriptionMethodId, byFilingKind: Object.fromEntries(Object.entries(r.byFilingKind).filter(([, v]) => v !== id)) };
+    await deps.store.putTenant(TenantSettings.parse({ ...t, payments: PaymentSettings.parse({ methods: t.payments.methods.filter((m) => m.id !== id), routing }) }));
+    return { removed: id };
+  });
+  app.post("/v1/client-companies/:id/payment-methods", async (req, reply) => {
+    const a = await requireAuth(req, reply);
+    if (!a) return reply;
+    const cid = (req.params as { id: string }).id;
+    if (a.partnerOf && a.partnerOf !== cid) return reply.code(404).send({ error: "not found" });
+    const c = await deps.store.getClientCompany(cid);
+    if (!c || c.tenantId !== a.tenantId) return reply.code(404).send({ error: "not found" });
+    const parsed = NewCard.safeParse(req.body);
+    if (!parsed.success || parsed.data.purpose !== "state_fees") return reply.code(422).send({ error: "validation failed", issues: parsed.success ? [{ path: "purpose", message: "a firm saves cards for state fees" }] : parsed.error.issues.map((i) => ({ path: i.path.join("."), message: i.message })) });
+    const card = addCard(c.payments?.methods ?? [], parsed.data);
+    if (!card) return reply.code(409).send({ error: "ten cards at most" });
+    const routing = { ...PaymentRouting.parse(c.payments?.routing ?? {}), ...(!c.payments?.routing?.defaultMethodId ? { defaultMethodId: card.id } : {}) };
+    await deps.store.putClientCompany(ClientCompanySettings.parse({ ...c, payments: PaymentSettings.parse({ methods: [...(c.payments?.methods ?? []), card], routing }) }));
+    return reply.code(201).send({ method: card });
+  });
+  app.delete("/v1/client-companies/:id/payment-methods/:methodId", async (req, reply) => {
+    const a = await requireAuth(req, reply);
+    if (!a) return reply;
+    const { id: cid, methodId } = req.params as { id: string; methodId: string };
+    if (a.partnerOf && a.partnerOf !== cid) return reply.code(404).send({ error: "not found" });
+    const c = await deps.store.getClientCompany(cid);
+    if (!c || c.tenantId !== a.tenantId || !c.payments?.methods.some((m) => m.id === methodId)) return reply.code(404).send({ error: "not found" });
+    const r = c.payments.routing;
+    const routing = { ...r, defaultMethodId: r.defaultMethodId === methodId ? undefined : r.defaultMethodId, fallbackMethodId: r.fallbackMethodId === methodId ? undefined : r.fallbackMethodId,
+      byFilingKind: Object.fromEntries(Object.entries(r.byFilingKind).filter(([, v]) => v !== methodId)) };
+    await deps.store.putClientCompany(ClientCompanySettings.parse({ ...c, payments: PaymentSettings.parse({ methods: c.payments.methods.filter((m) => m.id !== methodId), routing }) }));
+    return { removed: methodId };
+  });
+
   // V30: who is named on the subscriber's filings: organizer, filer, signer, and its own
   // registered agent per state (used when a client asks the filing company for the agent).
   const AddressIn = z.object({ street1: z.string().trim().min(2).max(120), street2: z.string().trim().max(120).optional(), city: z.string().trim().min(2).max(80), state: z.string().regex(/^[A-Z]{2}$/), zip: z.string().regex(/^\d{5}(-\d{4})?$/) });

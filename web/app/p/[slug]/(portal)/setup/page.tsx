@@ -7,7 +7,7 @@ export const metadata = { title: "Set up your account" };
 const STEPS = [
   { id: "details", title: "Your firm", text: "Name, kind of firm and who to contact." },
   { id: "branding", title: "Branding", text: "Your logo and color on the pages your clients see." },
-  { id: "payments", title: "Payment", text: "Which card pays state fees, per filing or one for all, with a backup. Adding a card opens soon; your choices are saved now." },
+  { id: "payments", title: "Payment", text: "Which card pays state fees, per filing or one for all, with a backup." },
 ] as const;
 
 export default async function SetupPage({ params }: { params: Promise<{ slug: string }> }) {

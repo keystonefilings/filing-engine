@@ -40,6 +40,8 @@ export interface ApprovalRecord {
   filingId: string;
   tenantId: string;
   payloadHash: string;
+  /** V18: the card security code the client typed with their approval (a short-lived Basis Theory token). */
+  cvcTokenId?: string;
   /** Decision 7: the state's review page the client approved (a hash of its text, never the text). */
   review?: { screenKey: string; site: string; fingerprint: string; artifactId?: string; capturedAt: string };
   settingsSnapshot: SettingsSnapshot;
