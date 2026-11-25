@@ -7,7 +7,7 @@ import { BrandPreview } from "./SetupForms";
 
 type P = { ok: boolean; message: string } | null;
 type I = { ok: true; link: string; email: string } | { ok: false; message: string } | null;
-interface Portal { slug: string; displayName?: string; logoUrl?: string; logoArtifactId?: string; primaryColor?: string; secondaryColor?: string; supportEmail?: string; filingKinds?: string[] }
+interface Portal { slug: string; publicPages?: boolean; displayName?: string; logoUrl?: string; logoArtifactId?: string; primaryColor?: string; secondaryColor?: string; supportEmail?: string; filingKinds?: string[] }
 
 export function PortalForm({ action, portal, kinds, firmName, logoSrc }: { action: (prev: P, fd: FormData) => Promise<P>; portal?: Portal; kinds: { id: string; title: string }[]; firmName: string; logoSrc?: string }) {
   const { state, pending, formProps } = useKeptForm(action, null);
@@ -32,6 +32,7 @@ export function PortalForm({ action, portal, kinds, firmName, logoSrc }: { actio
               <ColorField id="color2" name="secondaryColor" label="Second color" value={color2} onChange={setColor2} help="Links and highlights." />
             </div>
             <div className="field"><label htmlFor="support">Support email shown to clients</label><input id="support" name="supportEmail" type="email" defaultValue={portal?.supportEmail} /></div>
+            <label className="choice"><input type="checkbox" name="publicPages" defaultChecked={portal?.publicPages} /><span><b>Public pages and website widget</b><br /><span className="small muted">A page per service anyone can fill in, and code to put the form on the firm&apos;s own website. Each submission becomes a filing for this firm and goes through approval as usual.</span></span></label>
             <fieldset><legend>Filings offered</legend>
               <div className="choices">{kinds.map((k) => <label key={k.id} className="choice"><input type="checkbox" name="kinds" value={k.id} defaultChecked={!offered || offered.includes(k.id)} /><span>{k.title}</span></label>)}</div>
             </fieldset>

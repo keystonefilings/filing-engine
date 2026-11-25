@@ -231,6 +231,8 @@ export const ClientCompanySettings = z.object({
   portal: z.object({
     slug: z.string().regex(/^[a-z0-9](?:[a-z0-9-]{0,46}[a-z0-9])?$/, "lowercase letters, digits and dashes"),
     displayName: z.string().min(1).max(80).optional(),
+    /** V39: public pages and the website widget for this firm (partner firms always have them). */
+    publicPages: z.boolean().optional(),
     logoUrl: z.string().url().startsWith("https://").optional(),
     /** A logo the firm uploaded (artifact kind brand_logo, served at /v1/brand-logos/:id). Shown ahead of logoUrl. */
     logoArtifactId: z.string().uuid().optional(),

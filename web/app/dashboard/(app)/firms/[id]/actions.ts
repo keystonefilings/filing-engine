@@ -34,6 +34,8 @@ export async function savePortal(id: string, _prev: PortalResult, fd: FormData):
     logoArtifactId: link || removing ? undefined : old?.logoArtifactId,
     primaryColor: hex("primaryColor"), secondaryColor: hex("secondaryColor"), supportEmail: str("supportEmail"),
     ...(kinds.length && kinds.length < FILING_KINDS.length ? { filingKinds: kinds } : {}),
+    // V39: public pages and the website widget, so this firm's clients can file from the firm's own site.
+    publicPages: fd.get("publicPages") === "on",
   } : undefined;
   const { clientCompanyId: _id, tenantId: _t, ...rest } = c;
   let slug: string | undefined;

@@ -11,6 +11,8 @@ export type SubmitOutcome =
 
 export interface SubmitContext extends Omit<BuildContext, "idempotencyKey"> {
   apiKey: string;
+  /** V39: a public page or widget: post here with no key (the engine's /v1/public/firms/... route). */
+  publicPath?: string;
   /** A stable key per form (its nonce), so a double submit makes one filing. */
   idempotencySeed: string;
   /** Whether the form may use a signature saved earlier (firm staff), or must be signed fresh (a client link). */
@@ -52,7 +54,7 @@ export async function submitIntake(kind: FilingKind, fd: FormData, ctx: SubmitCo
   }
 
   // Check the form before saving anything, so a form with mistakes saves no signature.
-  const idempotencyKey = `portal-${ctx.idempotencySeed}`.slice(0, 120);
+  const idempotencyKey = `${ctx.publicPath ? "public" : "portal"}-${ctx.idempotencySeed}`.slice(0, 120);
   const probe = buildRequest(kind, { ...raw, ...(sig && raw[sig.path] === NEW_SIGNATURE.choice ? { [sig.path]: "pending" } : {}) }, { ...ctx, idempotencyKey });
   issues.push(...probe.issues);
   if (issues.length) return { ok: false, issues };
@@ -72,7 +74,9 @@ export async function submitIntake(kind: FilingKind, fd: FormData, ctx: SubmitCo
 
   const { request } = buildRequest(kind, raw, { ...ctx, idempotencyKey });
   try {
-    const result = await engine<CreateFilingResult>(ctx.apiKey, "/v1/filings", { method: "POST", body: request });
+    const result = ctx.publicPath
+      ? await engine<CreateFilingResult>(null, ctx.publicPath, { method: "POST", body: request })
+      : await engine<CreateFilingResult>(ctx.apiKey, "/v1/filings", { method: "POST", body: request });
     return { ok: true, result };
   } catch (e) {
     if (e instanceof EngineError && e.status === 422) {

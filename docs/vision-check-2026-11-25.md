@@ -254,7 +254,7 @@ Rows refer to the status tables above.
 - [x] V36. Firm invite links get their own scoped key, not the inviter's session key (risk 5). **Done**: inviting a firm's staff creates their own account, limited to that firm by the engine, with an emailed 7-day link to set their password; no key is in any link. Old invite links no longer sign anyone in.
 - [ ] V37. Sign in with Google (row 13, "eventually").
 - [x] V38. Landing page: remove `noindex` when launching, offer title companies, stop freezing env values at build (rows 9, 10). **Done**: indexing is a setting (`SITE_INDEXABLE=true` at launch); title companies can sign up and are named on the landing and sign-up pages; every page reads its settings when served.
-- [ ] V39. Embedding: decide whether the portal may be framed on a customer's site (`X-Frame-Options: DENY` today) (row 15). *Nov 25: it means a **drop-in form widget**: a snippet on the customer's site shows our branded filing form inside their page.*
+- [x] V39. Embedding: decide whether the portal may be framed on a customer's site (`X-Frame-Options: DENY` today) (row 15). **Done** (a drop-in form widget, as decided): a firm pastes `<script src="https://cofile.app/embed.js" data-account data-firm data-service>` and its branded form appears in its own page, sized to the form. Works for partner firms and for a subscriber's firm once "Public pages and website widget" is on (also giving it pages at `/e/<account>/<firm>/<service>`). Public pages and the widget now go through the engine with no key and no web-app platform key; only `/embed` pages may be framed. Forms that need a drawn signature stay on the firm's portal and client links.
 
 ### Step 6: channels
 - [ ] V40. Email in: inbound address to draft filing to prefilled form link (row 6).

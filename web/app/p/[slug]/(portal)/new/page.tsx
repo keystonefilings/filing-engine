@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { firmContext, kindsForState, offeredKinds } from "@/lib/firm";
-import { platformKey, publicPageUrl, SERVICE_SLUGS } from "@/lib/public-pages";
+import { firmPageUrl, publicKind, SERVICE_SLUGS, widgetSnippet } from "@/lib/public-pages";
 
 export const metadata = { title: "New filing" };
 
@@ -53,13 +53,17 @@ export default async function NewFilingPage({ params, searchParams }: { params: 
           ))}
         </div>
       )}
-      {company.partner && platformKey() && kinds.some((k) => SERVICE_SLUGS[k.id]) ? (
+      {(company.partner || company.portal?.publicPages) && kinds.some((k) => SERVICE_SLUGS[k.id] && publicKind(k)) ? (
         <div className="card">
           <strong>Your pages for clients</strong>
-          <p className="small muted">Each service has a permanent page with your branding. Put it on your website or send it to any client; every submission becomes a filing here.</p>
-          <ul className="small">
-            {kinds.filter((k) => SERVICE_SLUGS[k.id]).map((k) => <li key={k.id}>{k.title}: <span className="secret">{publicPageUrl(company.portal?.slug ?? slug, k)}</span></li>)}
-          </ul>
+          <p className="small muted">Each service has a permanent page with your branding. Send it to any client, or put the form on your own website with the widget code; every submission becomes a filing here.</p>
+          {kinds.filter((k) => SERVICE_SLUGS[k.id] && publicKind(k)).map((k) => (
+            <details key={k.id} className="small" style={{ marginTop: 8 }}>
+              <summary>{k.title}: <span className="secret">{firmPageUrl(company.tenantId, company.portal?.slug ?? slug, k)}</span></summary>
+              <p className="muted" style={{ margin: "6px 0 2px" }}>Website widget: paste where the form should appear.</p>
+              <pre className="secret" style={{ whiteSpace: "pre-wrap" }}>{widgetSnippet(company.tenantId, company.portal?.slug ?? slug, k)}</pre>
+            </details>
+          ))}
         </div>
       ) : null}
     </div>

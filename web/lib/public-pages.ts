@@ -38,26 +38,34 @@ export function publicPageUrl(firmSlug: string, kind: FilingKind): string {
   return `${publicUrl()}/${encodeURIComponent(firmSlug)}/${serviceSlug(kind)}`;
 }
 
-/** The platform tenant's key: public pages act for the platform, on behalf of the firm. */
-export function platformKey(): string | null {
-  return process.env.PLATFORM_API_KEY?.trim() || null;
+/** The platform's own account: partner firms' pages live at /<firm>/<service>. */
+export function platformTenant(): string {
+  return process.env.PLATFORM_TENANT_ID?.trim() || "keystone";
 }
 
-/** The partner firm a public address belongs to, or null. Only partner firms have public pages. */
-export const firmBySlug = cache(async (slug: string): Promise<ClientCompany | null> => {
-  const key = platformKey();
-  if (!key || !/^[a-z0-9][a-z0-9-]{0,62}$/.test(slug)) return null;
-  const r = await engine<{ clientCompanies: ClientCompany[] }>(key, "/v1/client-companies").catch(() => ({ clientCompanies: [] as ClientCompany[] }));
-  return r.clientCompanies.find((c) => c.portal?.slug === slug && c.partner) ?? null;
+/** Signed forms save a drawn signature with the firm's own key, so they stay on the firm's portal and client links. */
+export function publicKind(kind: FilingKind | undefined): kind is FilingKind {
+  return !!kind && !kind.sections.some((s) => s.items.some((i) => i.kind === "field" && i.type === "signature"));
+}
+
+/** A firm with public pages (a partner, or a subscriber's firm with them switched on), or null. No key involved. */
+export const firmBySlug = cache(async (slug: string, tenantId: string = platformTenant()): Promise<ClientCompany | null> => {
+  if (!/^[a-z0-9][a-z0-9-]{0,62}$/.test(slug) || !/^[a-z0-9][a-z0-9-]{0,62}$/.test(tenantId)) return null;
+  try {
+    return (await engine<{ clientCompany: ClientCompany }>(null, `/v1/public/firms/${encodeURIComponent(tenantId)}/${encodeURIComponent(slug)}`)).clientCompany;
+  } catch { return null; }
 });
 
-/** In-memory, per web process: a brake on someone flooding a firm's public page. */
-const hits = new Map<string, { n: number; until: number }>();
-export function takePublicSubmission(firm: string, max = 30, windowMs = 3_600_000): boolean {
-  const now = Date.now();
-  const h = hits.get(firm);
-  if (!h || h.until <= now) { hits.set(firm, { n: 1, until: now + windowMs }); return true; }
-  if (h.n >= max) return false;
-  h.n++;
-  return true;
+export function publicSubmitPath(tenantId: string, slug: string): string {
+  return `/v1/public/firms/${encodeURIComponent(tenantId)}/${encodeURIComponent(slug)}/filings`;
+}
+
+/** The widget snippet a firm pastes on its own site. */
+export function widgetSnippet(tenantId: string, firmSlug: string, kind: FilingKind): string {
+  return `<script src="${publicUrl()}/embed.js" data-account="${tenantId}" data-firm="${firmSlug}" data-service="${serviceSlug(kind)}" async></script>`;
+}
+
+/** Where a firm's public page lives: partners at /<firm>/<service>, a subscriber's firms under /e/<account>/. */
+export function firmPageUrl(tenantId: string, firmSlug: string, kind: FilingKind): string {
+  return tenantId === platformTenant() ? publicPageUrl(firmSlug, kind) : `${publicUrl()}/e/${encodeURIComponent(tenantId)}/${encodeURIComponent(firmSlug)}/${serviceSlug(kind)}`;
 }
