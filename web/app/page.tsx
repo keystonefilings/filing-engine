@@ -37,6 +37,7 @@ const COVERAGE: [string, string, "live" | "map" | "", string][] = [
   ["Limited partnership formation", "Florida", "live", "Verified on the live site"],
   ["EIN application, with confirmation letter", "IRS", "map", "Mapped from a live walk"],
   ["Articles of Organization (LLC)", "New York", "map", "Mapped from a live walk"],
+  ["Certificate of Incorporation (business corporation)", "New York", "map", "Mapped from a live walk"],
   ["Payroll registration (NYS-100)", "New York", "map", "Mapped from a live walk"],
   ["Name-change amendment", "New York", "", "Planned"],
   ["Alternate name, charter amendments", "New Jersey", "", "Planned"],

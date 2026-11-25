@@ -35,6 +35,10 @@ export interface Field {
   maxLength?: number;
   min?: number;
   max?: number;
+  /** A number field that takes whole numbers only. */
+  integer?: boolean;
+  /** A text field that needs at least this many words (a first and last name). */
+  minWords?: number;
   placeholder?: string;
   defaultValue?: string;
   showIf?: Cond;
@@ -223,7 +227,7 @@ const nyLlc: FilingKind = {
       items: [
         f("formation.additionalCertificates.certifiedCopy", "Certified copy ($10)", "checkbox", { ref: "Screen F, Additional Services" }),
         f("formation.additionalCertificates.certificateOfStanding", "Certificate of existence ($25)", "checkbox", { ref: "Screen F, Additional Services" }),
-        f("intake.portal.plainCopy", "Plain copy ($5)", "checkbox", { ref: "Screen F, Additional Services" }),
+        f("formation.additionalCertificates.plainCopy", "Plain copy ($5)", "checkbox", { ref: "Screen F, Additional Services" }),
         f("intake.portal.customerReference", "Your reference number (optional)", "text", { maxLength: 40, ref: "Screen F, Customer Reference Number" }),
         f("intake.portal.ccEmail", "Copy receipts to this email (optional)", "email", { ref: "Screen F, Cc E-mail Address" }),
       ],
@@ -235,8 +239,95 @@ const nyLlc: FilingKind = {
     { id: "ny-payment", ref: "Screen F, Payment Authorization (STOP)", text: "I authorize the filing company to authorize payment of the state fee shown on the approval page. The Department of State does not refund fees." },
   ],
   gaps: [
-    "NY business corporations (Screen D1: shares, incorporator, preemptive rights) need engine support first; the engine forms LLCs only in NY.",
     "Dissolution, name-change amendment, certificate of change, copies, certificates of status and E-Submission (Screens G to L) are mapped but have no engine adapter yet.",
+  ],
+};
+
+// ---------------------------------------------------------------- NY business corporation (DOS)
+
+const nyCorp: FilingKind = {
+  id: "ny-corp",
+  title: "New York corporation formation",
+  summary: "Certificate of Incorporation for a domestic business corporation, filed online with the NY Department of State.",
+  type: "formation",
+  state: "NY",
+  constants: { formation: { entityType: "LLC", nyEntityType: "business_corporation" } },
+  map: NY_DOS,
+  feeNote: "State filing fee $125 (no tax on shares without par value). Optional: plain copy $5, certified copy $10, certificate of existence $25.",
+  sections: [
+    {
+      title: "Name",
+      ref: "Screen C: Proposed Entity Name",
+      items: [
+        f("formation.name.baseName", "Corporation name, without the ending", "text", { required: true, help: "For example: Hudson Ledger. Words like bank, insurance or school need state consent.", ref: "Screen C" }),
+        f("formation.name.designator", "Ending", "select", { required: true, options: opts("Inc.", "Corp.", "Corporation", "Incorporated", "Limited", "Ltd."), defaultValue: "Inc.", help: "New York rejects a corporation name without one of these.", ref: "Screen C, entity indicator check (BCL s.301)" }),
+        f("formation.name.englishTranslation", "English translation of the name (if not in English)", "text", { ref: "Screen D1, Corporation Name" }),
+      ],
+    },
+    {
+      title: "Certificate",
+      ref: "Screen D1: BCL main form",
+      items: [
+        f("formation.county", "County where the corporation's office will be", "select", { required: true, options: opts(...NY_COUNTIES), ref: "Screen D1, County" }),
+        f("formation.stockShares", "Number of shares the corporation may issue", "number", { required: true, min: 1, integer: true, help: "Shares without par value. Many new corporations authorize 200.", ref: "Screen D1, Shares" }),
+        f("formation.effectiveDate", "Effective date", "radio", { required: true, defaultValue: "upon_filing", options: lv([["upon_filing", "When filed"], ["specific", "On a later date"]]), ref: "Screen D1, Effective Date" }),
+        f("formation.effectiveDateValue", "Effective on", "date", { required: true, showIf: { path: "formation.effectiveDate", equals: "specific" }, ref: "Screen D1, Effective Date" }),
+      ],
+    },
+    {
+      title: "Service of process",
+      ref: "Screen D1: Service of Process",
+      help: "Where the Secretary of State forwards legal papers served on the corporation.",
+      items: [
+        f("formation.serviceOfProcess.mode", "Send legal papers to", "radio", { required: true, defaultValue: "manual", options: lv([["manual", "A name and address I enter (often \"The Corporation\" at its address)"], ["service_company", "A registered service company"]]), ref: "Screen D1, SOP Select One" }),
+        f("formation.serviceOfProcess.person.name", "Name", "text", { required: true, defaultValue: "THE CORPORATION", showIf: { path: "formation.serviceOfProcess.mode", equals: "manual" }, ref: "Screen D1, SOP Name" }),
+        ...address("formation.serviceOfProcess.person.address", "Mailing address", { required: true, state: "NY", ref: "Screen D1, SOP address", showIf: { path: "formation.serviceOfProcess.mode", equals: "manual" } }),
+        f("formation.serviceOfProcess.serviceCompany", "Service company name, as registered with DOS", "text", { required: true, showIf: { path: "formation.serviceOfProcess.mode", equals: "service_company" }, ref: "Screen D1, Select Service Company" }),
+        { kind: "note", text: "If you pick a service company, the Department of State gives that company your contact details, including your email.", showIf: { path: "formation.serviceOfProcess.mode", equals: "service_company" } },
+        f("formation.serviceOfProcess.noticeEmail", "Email for service-of-process notices", "email", { required: true, ref: "Screen D1, SOP email statement" }),
+      ],
+    },
+    {
+      title: "Incorporator",
+      ref: "Screen D1: Incorporator, Signature",
+      items: [
+        f("formation.incorporator.name", "Incorporator's full name", "text", { required: true, minWords: 2, help: "First and last name, with a middle initial if any. This name is typed as the incorporator's signature.", ref: "Screen D1, Incorporator / Signature" }),
+        ...address("formation.incorporator.address", "Incorporator address", { required: true, ref: "Screen D1, Incorporator" }),
+      ],
+    },
+    {
+      title: "Filer",
+      ref: "Screen D1: Filer",
+      help: "Leave blank to use the filing company's details (its filer on record).",
+      items: [
+        f("formation.filer.name", "Filer name", "text", { required: "withSiblings", ref: "Screen D1, Filer" }),
+        ...address("formation.filer.address", "Filer address", { ref: "Screen D1, Filer" }),
+      ],
+    },
+    {
+      title: "Principal business address (optional)",
+      items: address("formation.mainBusinessAddress", "", { ref: "used for the EIN application" }),
+    },
+    {
+      title: "Copies and payment details",
+      ref: "Screen F: Payment Information",
+      items: [
+        f("formation.additionalCertificates.certifiedCopy", "Certified copy ($10)", "checkbox", { ref: "Screen F, Additional Services" }),
+        f("formation.additionalCertificates.certificateOfStanding", "Certificate of existence ($25)", "checkbox", { ref: "Screen F, Additional Services" }),
+        f("formation.additionalCertificates.plainCopy", "Plain copy ($5)", "checkbox", { ref: "Screen F, Additional Services" }),
+        f("intake.portal.customerReference", "Your reference number (optional)", "text", { maxLength: 40, ref: "Screen F, Customer Reference Number" }),
+        f("intake.portal.ccEmail", "Copy receipts to this email (optional)", "email", { ref: "Screen F, Cc E-mail Address" }),
+      ],
+    },
+    contactSection("Screen F, E-mail Address"),
+  ],
+  authorizations: [
+    { id: "ny-corp-signature", ref: "Screen D1, Signature of Incorporator (STOP)", text: "The incorporator named above authorizes the filing company to type their name as the incorporator's signature on this Certificate of Incorporation and to certify that the statements in it are true and correct." },
+    { id: "ny-payment", ref: "Screen F, Payment Authorization (STOP)", text: "I authorize the filing company to authorize payment of the state fee shown on the approval page. The Department of State does not refund fees." },
+  ],
+  gaps: [
+    "Only shares without par value are supported; par-value shares (and their tax on shares) aren't mapped yet.",
+    "The optional registered agent, duration date, director-liability and preemptive-rights statements on the form aren't entered by the engine yet, so the form doesn't ask for them.",
   ],
 };
 
@@ -1062,7 +1153,7 @@ const nyAssumedName: FilingKind = {
   ],
 };
 
-export const FILING_KINDS: FilingKind[] = [nyLlc, njLlc, flLlc, flCorp, flLp, irsEin, nyNys100, njReg, nyAuthority, nyAssumedName];
+export const FILING_KINDS: FilingKind[] = [nyLlc, nyCorp, njLlc, flLlc, flCorp, flLp, irsEin, nyNys100, njReg, nyAuthority, nyAssumedName];
 
 export function filingKind(id: string): FilingKind | undefined {
   return FILING_KINDS.find((k) => k.id === id);
