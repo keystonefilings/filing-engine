@@ -11,6 +11,18 @@
 
     out.headings = Array.from(document.querySelectorAll("h1,h2,h3,legend")).map(txt).filter(Boolean);
 
+    // The section a field sits in: the nearest heading before it in the page. Forms that repeat a
+    // label in several sections (NY DOS: "City" under service of process, organizer and filer)
+    // are matched by section (FieldIntent.section).
+    const sectionHeads = Array.from(document.querySelectorAll("h1,h2,h3,h4,h5,h6,[role=heading],.t-Region-title"));
+    const sectionOf = (el) => {
+      let s = "";
+      for (const h of sectionHeads) {
+        if (h.compareDocumentPosition(el) & Node.DOCUMENT_POSITION_FOLLOWING) s = txt(h); else break;
+      }
+      return s.slice(0, 120);
+    };
+
     const labelFor = (el) => {
       const id = el.getAttribute("id");
       if (id) {
@@ -123,7 +135,7 @@
         const req = requiredOf(el, groupLabel);
         seenRadioGroups.set(name, out.fields.length);
         out.fields.push({
-          ref, label: groupLabel, labelSource: legend ? "legend" : "nearby-text", kind: "radio", name,
+          ref, label: groupLabel, labelSource: legend ? "legend" : "nearby-text", kind: "radio", name, section: sectionOf(el),
           required: req.required, requiredSource: req.source,
           options: [{ value: el.value, label: optLabel, ref }],
           disabled: el.disabled, visible: visible(el),
@@ -143,7 +155,7 @@
         return "other";
       })();
       const field = {
-        ref, label, labelSource: source, kind, name: el.getAttribute("name") || undefined,
+        ref, label, labelSource: source, kind, name: el.getAttribute("name") || undefined, section: sectionOf(el),
         required: kind === "button" ? false : req.required, requiredSource: req.source,
         disabled: el.disabled, visible: visible(el),
       };

@@ -1,0 +1,22 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><script src="_reflect.js"></script><title>Proposed Entity Name (replica)</title>
+<script>
+var corp = new URLSearchParams(location.search).get('t') === 'DBC';
+function next() {
+  var n = document.getElementById('name').value.trim().toUpperCase();
+  var ok = corp ? /(^|\s)(CORPORATION|CORP\.?|INCORPORATED|INC\.?|LIMITED|LTD\.?)$/.test(n) : /(LLC|L\.L\.C\.|LIMITED LIABILITY COMPANY)$/.test(n);
+  if (!ok) { document.getElementById('reject').hidden = false; return; }
+  sessionStorage.setItem('ny-name', n);
+  location.href = corp ? 'form-bcl.html' : 'form-llc.html';
+}
+window.addEventListener('DOMContentLoaded', function () {
+  document.getElementById('title').textContent = corp
+    ? 'Certificate of Incorporation for a Domestic Business Corporation (For Profit) - Proposed Entity Name'
+    : 'Articles of Organization for a Domestic Limited Liability Company - Proposed Entity Name';
+});
+</script></head><body><p>Replica of the NY Department of State On-Line Filing System for engine tests, laid out as docs/portal-maps/ny-dos-corporations.md (2026-11-24) describes it. Not affiliated with NY DOS.</p>
+<div>Department of State · Form a Corporation or Business ▸ Division of Corporations On-Line Filing System</div>
+<nav><a href="home.html">Home</a> · <a href="replenish.html">Replenish DD Account</a> · <a href="#">Retrieve Images</a> · <a href="#">Service Company Administration</a> · User ID: KF01 · <a href="#">Log Out</a></nav>
+<h1 id="title">Proposed Entity Name</h1>
+<div id="reject" hidden><p>The proposed entity name is unacceptable for the reason(s) listed below. Please revise the proposed name.</p><p>Entity Indicator Evaluation: Type indicator applicable to specified entity type not found.</p></div>
+<p><label for="name">*Name</label> <input id="name" type="text"></p>
+<p><button type="button">Cancel</button> <button type="button">Reset</button> <button type="button" onclick="next()">Continue</button></p></body></html>

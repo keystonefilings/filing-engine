@@ -52,6 +52,7 @@ export function matchIntents(
     for (const field of fields) {
       if (field.kind === "button") continue;
       if (!kindsCompatible(intent.kinds, field.kind)) continue;
+      if (intent.section && !normalizeLabel(field.section ?? "").includes(normalizeLabel(intent.section))) continue;
       let best = 0;
       for (const l of labels) best = Math.max(best, labelScore(l, field.label));
       if (best > 0) ranked.push({ field, score: best });

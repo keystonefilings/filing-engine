@@ -8,6 +8,9 @@ import type { FeeLine } from "../fees/table.js";
 export interface RunValues {
   /** EIN obtained in this run (decision 1), entered into the state form when present. */
   ein?: string;
+  /** NY DOS prepay: the draw-down deposit this run prepared (dry run) or made, and the balance before it. */
+  nyDepositUsd?: string;
+  nyBalanceBeforeUsd?: string;
 }
 
 /** What a step gets from the engine. Filling goes through `set` so every value is matched by label, never by selector. */

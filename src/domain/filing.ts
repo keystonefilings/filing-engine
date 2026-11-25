@@ -158,11 +158,17 @@ export const FormationDetails = z.object({
     entityName: z.string().optional(),
     address: Address.optional(),
   })).max(6).default([]),
+  /** NY formation on the DOS On-Line Filing System: LLC Articles of Organization (default) or a
+   *  business corporation's Certificate of Incorporation (BCL s.402). */
+  nyEntityType: z.enum(["llc", "business_corporation"]).default("llc"),
+  /** NY business corporation: par value per share in USD; omit for shares without par value. */
+  stockParValueUsd: z.number().positive().optional(),
   /** FL formation entity type (Sunbiz): LLC (default), profit corporation, or limited partnership. */
   floridaEntityType: z.enum(["llc", "profit_corporation", "limited_partnership"]).default("llc"),
-  /** FL profit corporation: number of authorized shares (required). */
+  /** FL profit corporation and NY business corporation: number of authorized shares (required). */
   stockShares: z.number().int().positive().optional(),
-  /** FL profit corporation incorporator (name + address); its name is the incorporator signature. */
+  /** FL profit corporation / NY business corporation incorporator (name + address); its name is the
+   *  incorporator's typed signature (NY: the two must be the same). */
   incorporator: Person.optional(),
   /** FL limited partnership general partners (at least one, each signs). */
   generalPartners: z.array(z.object({
@@ -178,6 +184,8 @@ export const FormationDetails = z.object({
     .object({
       certificateOfStanding: z.boolean().default(false),
       certifiedCopy: z.boolean().default(false),
+      /** NY: a plain copy of the filed document ($5). */
+      plainCopy: z.boolean().default(false),
     })
     .prefault({}),
 });

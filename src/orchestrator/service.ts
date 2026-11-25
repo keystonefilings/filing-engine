@@ -1,4 +1,5 @@
 import { randomUUID } from "node:crypto";
+import { wantsPlainCopy } from "../domain/portal-intake.js";
 import { FilingRequest, type FilingRequest as FilingRequestT } from "../domain/filing.js";
 import { hasErrors, validateFiling, type ValidationIssue } from "../domain/validation.js";
 import { checkCompleteness, type CompletenessConfig } from "../domain/completeness.js";
@@ -84,8 +85,10 @@ export class FilingService {
       paymentMethod: req.state === "NJ" ? njAccount(tenant, client).feeMethod : req.state === "MO" ? moAccount(tenant, client).feeMethod : req.state === "FL" ? flAccount(tenant, client).feeMethod : undefined,
       certificateOfStanding: req.formation?.additionalCertificates.certificateOfStanding,
       certifiedCopy: req.formation?.additionalCertificates.certifiedCopy,
+      plainCopy: wantsPlainCopy(req),
       entityType: req.standing?.entityType,
       floridaEntityType: req.formation?.floridaEntityType,
+      nyEntityType: req.formation?.nyEntityType,
     });
   }
 

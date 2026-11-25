@@ -16,6 +16,8 @@ export interface FieldDescriptor {
   options?: FieldOption[];
   disabled: boolean;
   visible: boolean;
+  /** The nearest heading before the field on the page (its section). */
+  section?: string;
   checked?: boolean;
   value?: string;
 }
@@ -54,6 +56,8 @@ export interface FieldIntent {
   kinds?: FieldKind[];
   required: boolean;
   note?: string;
+  /** Only fields under a heading containing this text match (forms that repeat "City" per section). */
+  section?: string;
 }
 
 export interface ScreenIntents {

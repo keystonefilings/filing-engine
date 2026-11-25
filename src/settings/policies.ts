@@ -143,9 +143,12 @@ export function applyPolicies(raw: unknown, tenant: TenantSettings, client: Clie
     // D1 organizer (NY uses it directly; NJ signer may follow it).
     const organizerValue = pick(p.organizer, { service_company: tenant.organizer, firm: client.organizer, client: owner, intake: intake.organizer });
     if (state === "NY") {
-      fill(f, "organizer", "formation.organizer", "D1", p.organizer, organizerValue, "the organizer");
+      // A business corporation has an incorporator (given on the request), not an organizer, and no
+      // management-structure clause: D1 and E2 apply to LLCs only.
+      const nyLlc = (f as { nyEntityType?: string }).nyEntityType !== "business_corporation";
+      if (nyLlc) fill(f, "organizer", "formation.organizer", "D1", p.organizer, organizerValue, "the organizer");
       fill(f, "filer", "formation.filer", "D3", p.nyFiler, pick(p.nyFiler, { service_company: tenant.filer, firm: client.filer }), "the filer");
-      fill(f, "managementStructure", "formation.managementStructure", "E2", p.nyManagement,
+      if (nyLlc) fill(f, "managementStructure", "formation.managementStructure", "E2", p.nyManagement,
         p.nyManagement === "member_managed" || p.nyManagement === "manager_managed" ? p.nyManagement : intake.managementStructure, "the management structure");
       fill(f, "county", "formation.county", "E4", p.county, pick(p.county, { firm_default: client.countyDefault, intake: intake.county }), "the county");
       // C3 service of process + C4 notice email.

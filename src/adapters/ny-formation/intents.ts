@@ -1,80 +1,159 @@
 import type { ScreenIntents } from "../../resolver/types.js";
 
 /**
- * NY DOS On-Line Filing (filings.dos.ny.gov), Domestic LLC Articles of Organization.
- * Field flags from Keystone's signed-in service-company walk (docs/walks/ny-irs-2026-11-18.md,
- * 2026-11-18): R required, O optional, C conditional on a branch. The long Filing form was
- * verified; the filing-to-checkout transition, distribution email, drawdown/card selection
- * and the final button are still V, so the adapter stays complete:false (dry-run only).
- * No EIN field appears on this form; the EIN is filed separately and entered where asked.
+ * NY DOS Division of Corporations On-Line Filing System, signed in as the service company
+ * (filings.dos.ny.gov/ords/r/corpanc/), built to the portal map of 2026-11-24
+ * (docs/portal-maps/ny-dos-corporations.md, written from Keystone's screen recording up to each
+ * flow's final button) and the walk of 2026-11-18 (docs/walks/ny-irs-2026-11-18.md).
+ *
+ * A run: Replenish DD Account (Screen M, the prepay deposit) -> Home (Screen A) -> filing
+ * selection (B) -> Proposed Entity Name (C) -> the one long form (D1 business corporation, D2
+ * LLC) -> Review (E) -> Payment Information (F, File Document = FINAL).
+ *
+ * The long forms repeat labels per section ("Address", "City", "State", "Postal Code" under
+ * Service of Process, Registered Agent, Organizer/Incorporator and Filer; "Check if applicable"
+ * and "Select One" under each optional clause), so those intents name their section.
  */
+const SOP = "Service of Process";
+
+/** Service of process, the same block on both forms. Manual fields show after "enter" is picked. */
+const serviceOfProcess = [
+  { key: "sopMode", labels: ["Select One", "Service of Process"], kinds: ["radio" as const], required: true, section: SOP, note: "enter the SOP information, or select a service company" },
+  { key: "sopName", labels: ["SOP Name", "Name"], kinds: ["text" as const], required: false, section: SOP, note: "C: enter mode; the entity button fills THE LLC / THE CORPORATION" },
+  { key: "sopAddress1", labels: ["Address"], kinds: ["text" as const], required: false, section: SOP },
+  { key: "sopAddress2", labels: ["Address 2"], kinds: ["text" as const], required: false, section: SOP },
+  { key: "sopCity", labels: ["City"], kinds: ["text" as const], required: false, section: SOP },
+  { key: "sopState", labels: ["State"], kinds: ["select" as const, "text" as const], required: false, section: SOP, note: "NY by default" },
+  { key: "sopZip", labels: ["Postal Code", "Zip"], kinds: ["text" as const], required: false, section: SOP },
+  { key: "sopServiceCompany", labels: ["Select Service Company", "Service Company"], kinds: ["select" as const], required: false, section: SOP, note: "C: a pick autofills; DOS then gives that company the filer's contact details" },
+  { key: "sopEmailClause", labels: ["E-mail statement", "email statement", "electronic"], kinds: ["checkbox" as const], required: false, section: SOP },
+  { key: "sopEmail", labels: ["E-mail", "Email"], kinds: ["email" as const, "text" as const], required: false, section: SOP, note: "C: when the e-mail statement is on" },
+  { key: "sopEmailConfirm", labels: ["Confirm E-mail", "Confirm Email"], kinds: ["email" as const, "text" as const], required: false, section: SOP },
+];
+const filer = [
+  { key: "filerName", labels: ["Filer Name"], kinds: ["text" as const], required: true, section: "Filer" },
+  { key: "filerAddress1", labels: ["Address"], kinds: ["text" as const], required: true, section: "Filer" },
+  { key: "filerAddress2", labels: ["Address 2"], kinds: ["text" as const], required: false, section: "Filer" },
+  { key: "filerCity", labels: ["City"], kinds: ["text" as const], required: true, section: "Filer" },
+  { key: "filerState", labels: ["State"], kinds: ["select" as const, "text" as const], required: true, section: "Filer" },
+  { key: "filerZip", labels: ["Postal Code", "Zip"], kinds: ["text" as const], required: true, section: "Filer" },
+];
+/** Address autofill buttons on the forms: read, never needed (the engine types each address). */
+const FORM_BUTTONS = ["Service Company Address", "SOP Address", "Organizer Address", "Incorporator Address", "Go Back", "Cancel", "Save for Later", "The LLC", "The Corporation"];
+
 export const NY_SCREENS = {
+  /** Screen M: fund the draw-down account with exactly this filing's approved total. */
+  replenish: {
+    screenKey: "ny.replenish",
+    title: "Replenish DD Account",
+    intents: [
+      { key: "drawdownAccount", labels: ["Drawdown Accounts", "Drawdown Account"], kinds: ["select"], required: true, note: "the account named in the NY settings; with one listed, that one" },
+      { key: "depositAmount", labels: ["Deposit Amount"], kinds: ["text", "number"], required: true },
+      { key: "paymentAuthorization", labels: ["Payment Authorization", "authorize"], kinds: ["checkbox"], required: false, note: "STOP: ticked only on a live run, covered by the client's approval of this filing's fees" },
+    ],
+  },
+  /** Screen A: service-company home; the formation entry is a link. */
+  home: { screenKey: "ny.home", title: "On-Line Filings for Service Company Filers", intents: [] },
+  /** Screen B: which formation document; links. */
+  selection: { screenKey: "ny.filing_selection", title: "Formation: filing selection", intents: [] },
+  /** Screen C. */
   entityName: {
     screenKey: "ny.entity_name",
     title: "Proposed Entity Name",
     intents: [
-      { key: "entityName", labels: ["Proposed Entity Name", "Entity Name", "Name"], kinds: ["text"], required: true, note: "full approved name with the LLC designator; double entry is an account option (currently off)" },
+      { key: "entityName", labels: ["Name", "Proposed Entity Name", "Entity Name"], kinds: ["text"], required: true, note: "the full name with its type indicator (LLC, or Inc./Corp. for a corporation)" },
     ],
+    knownUnused: ["Reset"],
   },
+  /** Screen D2: Articles of Organization, Domestic LLC (one long page). */
   filing: {
     screenKey: "ny.filing",
     title: "Articles of Organization",
     intents: [
-      // Opening and purpose (all optional)
-      { key: "openingStatement", labels: ["include following statement", "Include the following statement", "organizer"], kinds: ["checkbox"], required: false, note: "natural-person organizer only" },
-      { key: "llcName", labels: ["Name of the Limited Liability Company", "LLC Name", "Entity Name"], kinds: ["text"], required: true },
-      { key: "englishTranslation", labels: ["English translation", "English Translation of Name"], kinds: ["text"], required: false },
-      { key: "purposes", labels: ["Purposes", "Purpose", "lawful"], kinds: ["checkbox"], required: false },
-      // Office
-      { key: "county", labels: ["County", "NY office county"], kinds: ["select"], required: true, note: "independent of every address record" },
-      // Service of process: mode R, manual fields C
-      { key: "sopMode", labels: ["Service of Process", "Address for Service of Process", "Enter"], kinds: ["radio"], required: true },
-      { key: "sopName", labels: ["Name"], kinds: ["text"], required: false, note: "C: required when manual entry" },
-      { key: "sopAddress1", labels: ["Address", "Address Line 1"], kinds: ["text"], required: false, note: "C: manual" },
-      { key: "sopAddress2", labels: ["Address Line 2", "Address 2"], kinds: ["text"], required: false },
-      { key: "sopCity", labels: ["City"], kinds: ["text"], required: false, note: "C: manual" },
-      { key: "sopState", labels: ["State"], kinds: ["select", "text"], required: false, note: "C: manual" },
-      { key: "sopZip", labels: ["Zip", "Zip Code", "Postal"], kinds: ["text"], required: false, note: "C: manual" },
-      { key: "sopServiceCompany", labels: ["Service Company", "Select a service company"], kinds: ["select"], required: false, note: "C: when a listed provider is chosen" },
-      // Electronic process notice (optional clause; email C when enabled)
-      { key: "sopEmailClause", labels: ["Include the electronic", "electronic process notice", "notify by email"], kinds: ["checkbox"], required: false },
-      { key: "sopEmail", labels: ["Email", "Secretary of State notice email", "Email Address"], kinds: ["email", "text"], required: false, note: "C: when the electronic notice clause is on" },
-      { key: "sopEmailConfirm", labels: ["Confirm Email", "Confirm Email Address"], kinds: ["email", "text"], required: false, note: "C" },
-      // Additional registered agent (optional)
-      { key: "registeredAgentClause", labels: ["Include a registered agent", "Additional registered agent", "Registered Agent"], kinds: ["checkbox"], required: false },
-      { key: "registeredAgentMode", labels: ["Registered Agent"], kinds: ["radio"], required: false, note: "C: manual or listed provider when the clause is on" },
-      // Management (optional clause)
-      { key: "managementClause", labels: ["Include a management", "Management"], kinds: ["checkbox"], required: false },
-      { key: "managementStructure", labels: ["Management Structure", "Management", "member", "manager"], kinds: ["radio", "checkbox"], required: false, note: "C: one/more members, class of members, one/more managers, class of managers" },
-      // Effective date (optional clause)
-      { key: "effectiveDateMode", labels: ["Effective Date", "upon filing", "specified date"], kinds: ["radio"], required: false },
-      { key: "effectiveDate", labels: ["Effective Date", "Date"], kinds: ["date", "text"], required: false, note: "C: specified-date branch" },
-      // Duration (optional clause)
-      { key: "dissolutionMode", labels: ["Dissolution Date", "Date of Dissolution", "Duration", "perpetual"], kinds: ["radio", "checkbox"], required: false },
-      { key: "dissolutionDate", labels: ["Dissolution Date", "latest date"], kinds: ["date", "text"], required: false, note: "C: specified-date branch" },
-      // Liability (optional)
-      { key: "liabilityStatement", labels: ["Liability statement", "Limitation of Liability", "indemnif"], kinds: ["checkbox"], required: false },
-      // Organizer: name R, address O
-      { key: "organizerName", labels: ["Organizer Name", "Organizer"], kinds: ["text"], required: true },
-      { key: "organizerAddress1", labels: ["Organizer Address", "Address Line 1", "Address"], kinds: ["text"], required: false },
-      { key: "organizerCity", labels: ["City"], kinds: ["text"], required: false },
-      { key: "organizerState", labels: ["State"], kinds: ["select", "text"], required: false },
-      { key: "organizerZip", labels: ["Zip", "Zip Code", "Postal"], kinds: ["text"], required: false },
-      // Signature R
-      { key: "signature", labels: ["Signature", "Signature of Organizer", "typed"], kinds: ["text"], required: true, note: "certification of authority and truthfulness" },
-      // Filer: name + address R; line 2 V
-      { key: "filerName", labels: ["Filer Name", "Filer"], kinds: ["text"], required: true },
-      { key: "filerAddress1", labels: ["Filer Address", "Address Line 1", "Address"], kinds: ["text"], required: true },
-      { key: "filerAddress2", labels: ["Address Line 2", "Address 2"], kinds: ["text"], required: false, note: "V: AX marked it required but live validation named only the entity name" },
-      { key: "filerCity", labels: ["City"], kinds: ["text"], required: true },
-      { key: "filerState", labels: ["State"], kinds: ["select", "text"], required: true },
-      { key: "filerZip", labels: ["Zip", "Zip Code", "Postal"], kinds: ["text"], required: true },
-      // Bottom: Go Back, Cancel, Save for Later, Continue. Next screen (fee, distribution email,
-      // drawdown/card, final button) is V. No EIN field on this form.
+      { key: "openingStatement", labels: ["Include following statement", "THE UNDERSIGNED, being a natural person"], kinds: ["checkbox"], required: false, note: "natural-person organizer only" },
+      { key: "llcName", labels: ["Name"], kinds: ["text"], required: true, section: "LLC Name", note: "read-only, prefilled from Screen C: read back, never typed" },
+      { key: "englishTranslation", labels: ["English Translation"], kinds: ["text"], required: false, section: "LLC Name" },
+      { key: "purposes", labels: ["Check if applicable", "Purposes"], kinds: ["checkbox"], required: false, section: "Purposes" },
+      { key: "county", labels: ["County"], kinds: ["select"], required: true, section: "County", note: "independent of every address record" },
+      ...serviceOfProcess,
+      { key: "registeredAgentClause", labels: ["Check if applicable"], kinds: ["checkbox"], required: false, section: "Registered Agent" },
+      { key: "managementClause", labels: ["Check if applicable", "Management Structure"], kinds: ["checkbox"], required: false, section: "Management Structure" },
+      { key: "managementStructure", labels: ["Select One"], kinds: ["radio"], required: false, section: "Management Structure", note: "C: one/more members, class of members, one/more managers, class of managers" },
+      { key: "effectiveDateClause", labels: ["Check if applicable"], kinds: ["checkbox"], required: false, section: "Effective Date" },
+      { key: "effectiveDateMode", labels: ["Select One"], kinds: ["radio"], required: false, section: "Effective Date", note: "C: upon filing / on a date" },
+      { key: "effectiveDate", labels: ["Effective Date"], kinds: ["date", "text"], required: false, section: "Effective Date", note: "C: on-a-date branch" },
+      { key: "dissolutionClause", labels: ["Check if applicable"], kinds: ["checkbox"], required: false, section: "Dissolution Date" },
+      { key: "liabilityStatement", labels: ["Check if applicable"], kinds: ["checkbox"], required: false, section: "Liability Statement" },
+      { key: "organizerName", labels: ["Organizer Name"], kinds: ["text"], required: true, section: "Organizer" },
+      { key: "organizerAddress1", labels: ["Address"], kinds: ["text"], required: true, section: "Organizer" },
+      { key: "organizerAddress2", labels: ["Address 2"], kinds: ["text"], required: false, section: "Organizer" },
+      { key: "organizerCity", labels: ["City"], kinds: ["text"], required: true, section: "Organizer" },
+      { key: "organizerState", labels: ["State"], kinds: ["select", "text"], required: true, section: "Organizer" },
+      { key: "organizerZip", labels: ["Postal Code", "Zip"], kinds: ["text"], required: true, section: "Organizer" },
+      { key: "signature", labels: ["Signature"], kinds: ["text"], required: true, section: "Signature", note: "STOP: typed signature; the organizer's name, under the client's approval of this filing" },
+      ...filer,
     ],
-    knownUnused: ["SOP Address", "Service Company Address", "Organizer Address", "Go Back", "Cancel", "Save for Later"],
+    knownUnused: FORM_BUTTONS,
+  },
+  /** Screen D1: Certificate of Incorporation, Domestic Business Corporation (BCL s.402). */
+  bclFiling: {
+    screenKey: "ny.bcl_filing",
+    title: "Certificate of Incorporation",
+    intents: [
+      { key: "openingStatement", labels: ["Include following statement", "I, the undersigned, a natural person"], kinds: ["checkbox"], required: false },
+      { key: "corpName", labels: ["Name"], kinds: ["text"], required: true, section: "Corporation Name", note: "read-only, prefilled from Screen C" },
+      { key: "englishTranslation", labels: ["English Translation"], kinds: ["text"], required: false, section: "Corporation Name" },
+      { key: "county", labels: ["County"], kinds: ["select"], required: true, section: "County" },
+      { key: "shareCount", labels: ["Number of Shares"], kinds: ["text", "number"], required: true, section: "Shares" },
+      { key: "shareValue", labels: ["Share Value"], kinds: ["select"], required: true, section: "Shares", note: "No Par Value, or a par value" },
+      ...serviceOfProcess,
+      { key: "registeredAgentClause", labels: ["Check if applicable"], kinds: ["checkbox"], required: false, section: "Registered Agent" },
+      { key: "effectiveDateClause", labels: ["Check if applicable"], kinds: ["checkbox"], required: false, section: "Effective Date" },
+      { key: "effectiveDateMode", labels: ["Select One"], kinds: ["radio"], required: false, section: "Effective Date" },
+      { key: "effectiveDate", labels: ["Effective Date"], kinds: ["date", "text"], required: false, section: "Effective Date" },
+      { key: "durationClause", labels: ["Check if applicable"], kinds: ["checkbox"], required: false, section: "Duration Date" },
+      { key: "liabilityStatement", labels: ["Check if applicable"], kinds: ["checkbox"], required: false, section: "Liability Statement", note: "BCL 719 director-liability text" },
+      { key: "preemptiveRights", labels: ["Check if applicable"], kinds: ["checkbox"], required: false, section: "Preemptive Rights" },
+      { key: "incFirstName", labels: ["First Name"], kinds: ["text"], required: true, section: "Incorporator" },
+      { key: "incMiddle", labels: ["Middle Initial"], kinds: ["text"], required: false, section: "Incorporator" },
+      { key: "incLastName", labels: ["Last Name"], kinds: ["text"], required: true, section: "Incorporator" },
+      { key: "incAddress1", labels: ["Address"], kinds: ["text"], required: true, section: "Incorporator" },
+      { key: "incAddress2", labels: ["Address 2"], kinds: ["text"], required: false, section: "Incorporator" },
+      { key: "incCity", labels: ["City"], kinds: ["text"], required: true, section: "Incorporator" },
+      { key: "incState", labels: ["State"], kinds: ["select", "text"], required: true, section: "Incorporator" },
+      { key: "incZip", labels: ["Postal Code", "Zip"], kinds: ["text"], required: true, section: "Incorporator" },
+      { key: "signature", labels: ["Signature of Incorporator", "Signature"], kinds: ["text"], required: true, section: "Signature", note: "STOP: must equal the incorporator's name exactly" },
+      ...filer,
+    ],
+    knownUnused: FORM_BUTTONS,
+  },
+  /** Screen E: rendered preview; Continue. */
+  review: { screenKey: "ny.review", title: "Review", intents: [], knownUnused: ["Print Preview", "Go Back"] },
+  /** Screen F: Payment Information; File Document is the FINAL button. */
+  payment: {
+    screenKey: "ny.payment",
+    title: "Payment Information",
+    intents: [
+      { key: "customerReference", labels: ["Customer Reference Number"], kinds: ["text"], required: false },
+      { key: "fein", labels: ["FEIN"], kinds: ["text"], required: false, note: "of the entity being formed, when one exists" },
+      { key: "plainCopy", labels: ["Plain Copy"], kinds: ["checkbox"], required: false },
+      { key: "certifiedCopy", labels: ["Certified Copy"], kinds: ["checkbox"], required: false },
+      { key: "certificateOfExistence", labels: ["Certificate of Existence"], kinds: ["checkbox"], required: false },
+      { key: "ccEmail", labels: ["Cc E-mail Address", "Cc Email Address"], kinds: ["email", "text"], required: false },
+      { key: "paymentMethod", labels: ["Select One", "Payment"], kinds: ["radio"], required: true, section: "Payment", note: "Credit Card or Drawdown Account" },
+      { key: "drawdownAccount", labels: ["Drawdown Account", "Drawdown"], kinds: ["select"], required: false, section: "Payment", note: "C: shows with Drawdown Account" },
+      { key: "paymentAuthorization", labels: ["By checking this box I authorize", "Payment Authorization"], kinds: ["checkbox"], required: true, note: "STOP: ticked only inside the submit guard, on a live run" },
+    ],
+    knownUnused: ["Distribution E-mail Address", "Go Back"],
   },
 } satisfies Record<string, ScreenIntents>;
+
+/**
+ * The business corporation's Payment Information: the same fields, its own fee lines ($125 plus
+ * the tax on shares the page computes), so its own approved snapshot. Prices are part of the
+ * drift check on purpose, so a tax the page computes differently stops for review.
+ */
+export const NY_BCL_PAYMENT: ScreenIntents = { ...NY_SCREENS.payment, screenKey: "ny.bcl_payment", title: "Payment Information (business corporation)" };
 
 /**
  * NY E-Submission upload envelope ("Filing Information"), verified on the Initial

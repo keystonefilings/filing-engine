@@ -1,5 +1,5 @@
 import type { FilingRequest } from "./filing.js";
-import { hasLlcIndicator, fullLegalName } from "./name.js";
+import { hasLlcIndicator, fullLegalName, hasCorpIndicator } from "./name.js";
 
 export interface ValidationIssue {
   path: string;
@@ -44,8 +44,18 @@ export function validateFiling(req: FilingRequest): ValidationIssue[] {
       err("formation.name.baseName", "baseName must not contain the designator; put it in designator");
     }
 
+    if (req.type === "formation" && req.state !== "NY" && f.nyEntityType !== "llc") {
+      err("formation.nyEntityType", "nyEntityType applies to New York formations only");
+    }
+    const nyCorp = req.type === "formation" && req.state === "NY" && f.nyEntityType === "business_corporation";
+    if (nyCorp) {
+      if (!hasCorpIndicator(legal)) err("formation.name", "a NY business corporation name must end with Corporation, Corp., Incorporated, Inc., Limited or Ltd.");
+      if (!f.stockShares) err("formation.stockShares", "a NY business corporation needs the number of shares");
+      if (f.stockParValueUsd) err("formation.stockParValueUsd", "par-value shares are not mapped yet: NY's tax on par-value shares has not been read from the live page; use shares without par value");
+      if (!f.incorporator?.address) err("formation.incorporator", "a NY business corporation needs an incorporator with an address (the incorporator's name is the typed signature)");
+    }
     if (req.type === "formation" && req.state === "NY") {
-      if (!hasLlcIndicator(legal)) err("formation.name", "NY requires an LLC type indicator in the name");
+      if (!nyCorp && !hasLlcIndicator(legal)) err("formation.name", "NY requires an LLC type indicator in the name");
       if (!f.county) err("formation.county", "NY requires the county");
       if (!f.serviceOfProcess) err("formation.serviceOfProcess", "NY requires service of process details");
       else if (f.serviceOfProcess.mode === "manual") {
@@ -54,8 +64,8 @@ export function validateFiling(req: FilingRequest): ValidationIssue[] {
       } else if (!f.serviceOfProcess.serviceCompany) {
         err("formation.serviceOfProcess.serviceCompany", "service company name required");
       }
-      if (!f.managementStructure) err("formation.managementStructure", "NY requires the management structure");
-      if (!f.organizer?.address) err("formation.organizer", "NY requires organizer name and address");
+      if (!nyCorp && !f.managementStructure) err("formation.managementStructure", "NY requires the management structure");
+      if (!nyCorp && !f.organizer?.address) err("formation.organizer", "NY requires organizer name and address");
       if (!f.filer?.address) err("formation.filer", "NY requires filer name and address");
       if (f.effectiveDate === "specific" && !f.effectiveDateValue) err("formation.effectiveDateValue", "effective date value required");
       if (f.registeredAgent && f.registeredAgent.address && f.registeredAgent.address.state !== "NY") {

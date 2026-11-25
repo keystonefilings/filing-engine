@@ -12,6 +12,13 @@ export function hasLlcIndicator(fullName: string): boolean {
   return NY_LLC_INDICATORS.some((ind) => upper.endsWith(ind));
 }
 
+/** Indicators a NY business corporation name must end with (BCL s.301); DOS rejects a name without one. */
+export const NY_CORP_INDICATORS = ["CORPORATION", "CORP.", "CORP", "INCORPORATED", "INC.", "INC", "LIMITED", "LTD.", "LTD"];
+
+export function hasCorpIndicator(fullName: string): boolean {
+  return /(^|\s)(CORPORATION|CORP\.?|INCORPORATED|INC\.?|LIMITED|LTD\.?)$/.test(fullName.toUpperCase().trim());
+}
+
 /**
  * NJ wants the name WITHOUT the designator (its own screen); NY wants the indicator
  * inside the single name field; IRS wants the full legal name.

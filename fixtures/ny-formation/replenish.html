@@ -1,0 +1,12 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><script src="_reflect.js"></script><title>Replenish DD Account (replica)</title>
+<script>function next() { if (!document.getElementById('dd').value) { document.getElementById('err').hidden = false; return; } if (!document.getElementById('auth').checked) return; location.href = 'elavon.html'; }</script></head><body><p>Replica of the NY Department of State On-Line Filing System for engine tests, laid out as docs/portal-maps/ny-dos-corporations.md (2026-11-24) describes it. Not affiliated with NY DOS.</p>
+<div>Department of State · Form a Corporation or Business ▸ Division of Corporations On-Line Filing System</div>
+<nav><a href="home.html">Home</a> · <a href="replenish.html">Replenish DD Account</a> · <a href="#">Retrieve Images</a> · <a href="#">Service Company Administration</a> · User ID: KF01 · <a href="#">Log Out</a></nav>
+<h1>Drawdown Deposit</h1>
+<div id="err" role="alert" hidden>You need to login. Please select a drawdown account.</div>
+<p>Service Company: KEYSTONE FILINGS LLC</p>
+<p><label for="dd">Drawdown Accounts</label> <select id="dd"><option value="">Select One</option><option value="F12">KEYSTONE FILINGS LLC - F12</option></select></p>
+<p>Account Balance $0.00</p>
+<p><label for="deposit">Deposit Amount</label> <input id="deposit" type="text"></p>
+<h3>Payment Authorization</h3><p><label><input type="checkbox" id="auth"> By checking this box I authorize the deposit amount to be charged to my card.</label></p>
+<p><button type="button" onclick="next()">Continue</button></p></body></html>

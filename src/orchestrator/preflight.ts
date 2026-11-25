@@ -111,13 +111,10 @@ export async function preflight(input: {
   }
 
   if (req.state === "NY" && paysState && !dryRun) {
+    // Each NY DOS run first deposits exactly the approved total into this account (the prepay
+    // step, docs/portal-maps/ny-dos-corporations.md), so no balance is needed beforehand.
     const dd = nyDrawdownAccount(tenant, client);
     if (!dd) b.push("NY filings pay from a drawdown account, but the account in force (service company's, or the firm's per G1) is not set");
-    else {
-      const bal = await input.balances.nyDrawdownBalanceUsd(dd);
-      if (bal === null) b.push("NY drawdown balance could not be read; refusing to start (no drafts, payment is the last step)");
-      else if (approval && bal < approval.fees.reduce((s, f) => s + f.amountUsd, 0)) b.push(`NY drawdown balance $${bal} is below the approved fees`);
-    }
   }
 
   return { ok: b.length === 0, blockers: b, warnings: w };

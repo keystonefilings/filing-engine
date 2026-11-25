@@ -19,7 +19,7 @@ export class FeeUnknownError extends Error {}
 export function expectedFees(
   state: "NY" | "NJ" | "MO" | "FL",
   type: string,
-  opts: { paymentMethod?: string; certificateOfStanding?: boolean; certifiedCopy?: boolean; entityType?: string; floridaEntityType?: string } = {},
+  opts: { paymentMethod?: string; certificateOfStanding?: boolean; certifiedCopy?: boolean; plainCopy?: boolean; entityType?: string; floridaEntityType?: string; nyEntityType?: string } = {},
   table: FeeTable = loadFeeTable(),
 ): FeeLine[] {
   const entry = table[state]?.[type] as Record<string, any> | null | undefined;
@@ -37,7 +37,16 @@ export function expectedFees(
     if (opts.certifiedCopy && typeof flEntity.certified_copy === "number") lines.push({ label: "Certified Copy", amountUsd: flEntity.certified_copy });
     return lines;
   }
-  if (entry.statutory) lines.push({ label: entry.statutory.label, amountUsd: entry.statutory.amountUsd });
+  // NY formation: an LLC's Articles use the entry's own fee; a business corporation's Certificate of
+  // Incorporation is priced under entityFees. Both take the same additional services below.
+  const nyEntity = state === "NY" && type === "formation" && opts.nyEntityType && opts.nyEntityType !== "llc"
+    ? (entry.entityFees as Record<string, any> | undefined)?.[opts.nyEntityType]
+    : undefined;
+  if (state === "NY" && type === "formation" && opts.nyEntityType && opts.nyEntityType !== "llc" && !nyEntity) {
+    throw new FeeUnknownError(`NY formation price for ${opts.nyEntityType} has not been verified yet`);
+  }
+  if (nyEntity) lines.push({ label: nyEntity.label, amountUsd: nyEntity.statutory });
+  else if (entry.statutory) lines.push({ label: entry.statutory.label, amountUsd: entry.statutory.amountUsd });
   if (entry.byEntityType) {
     // Price depends on the entity's type (NJ standing certificate: LLC $50, corporation $25).
     if (!opts.entityType) throw new FeeUnknownError(`${state}/${type} is priced by entity type; the request must give it`);
@@ -63,6 +72,7 @@ export function expectedFees(
     const s = method ? c.serviceFee?.[method] : undefined;
     if (typeof s === "number" && s > 0) lines.push({ label: `${c.label} service fee`, amountUsd: s });
   }
+  if (opts.plainCopy && entry.plain_copy) lines.push({ label: entry.plain_copy.label, amountUsd: entry.plain_copy.amountUsd });
   return lines;
 }
 
@@ -96,9 +106,9 @@ const cents = (usd: number) => Math.round(usd * 100);
 export function checkLiveFees(expected: FeeLine[], live: PriceItem[], capUsd?: number): FeeCheck {
   const expectedTotal = totalUsd(expected);
   const missing = expected.filter((e) => !live.some((p) => cents(p.amountUsd) === cents(e.amountUsd)));
-  // Only a line labelled as a total ("Total", "Cart Total"); table headers that merely contain
-  // the word (NJ cart: "Description Statutory Fee Portal Admin Fee Total ...") do not count.
-  const totals = live.filter((p) => /(^|\s)((cart|grand|order|amount) )?total( due)?$/.test(normalizeLabel(p.label)));
+  // Only a line labelled as a total ("Total", "Cart Total", NY's "TOTAL FEE" / "Total Fees"); table
+  // headers that merely contain the word (NJ cart: "Description Statutory Fee Portal Admin Fee Total ...") do not count.
+  const totals = live.filter((p) => /(^|\s)((cart|grand|order|amount) )?total( fees?| due)?$/.test(normalizeLabel(p.label)));
   const totalLine = totals.length ? totals.reduce((a, b) => (b.amountUsd > a.amountUsd ? b : a)) : undefined;
   const liveTotal = totalLine?.amountUsd;
   // One-for-one: each approved line accounts for one charge on the page. A line repeating the

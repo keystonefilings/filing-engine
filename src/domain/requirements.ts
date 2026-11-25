@@ -23,8 +23,10 @@ export function fieldRequirements(req: FilingRequest): FieldRequirement[] {
     out.push(R("formation.name.baseName", "entity name"), R("formation.name.designator", "entity designator"));
     if (req.state === "NY") out.push(
       R("formation.county", "NY county"),
-      R("formation.managementStructure", "management structure"),
-      R("formation.organizer", "organizer"),
+      // An LLC names its organizer and management; a business corporation its shares and incorporator.
+      ...(req.formation?.nyEntityType === "business_corporation"
+        ? [R("formation.stockShares", "number of shares"), R("formation.incorporator", "incorporator")]
+        : [R("formation.managementStructure", "management structure"), R("formation.organizer", "organizer")]),
       R("formation.filer", "filer"),
       R("formation.serviceOfProcess", "service of process"),
       O("formation.mainBusinessAddress", "principal business address"),

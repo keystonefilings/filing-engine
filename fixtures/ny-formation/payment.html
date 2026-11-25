@@ -1,0 +1,30 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><script src="_reflect.js"></script><title>Payment Information (replica)</title>
+<script>
+function corp() { return /(^|\s)(CORPORATION|CORP\.?|INCORPORATED|INC\.?|LIMITED|LTD\.?)$/.test(sessionStorage.getItem('ny-name') || ''); }
+function fees() {
+  var rows = [[corp() ? 'Certificate Filing Fee' : 'Certificate Filing Fee', corp() ? 125 : 200], ['Tax on Shares', 0]];
+  [['plain','Plain Copy',5],['certified','Certified Copy',10],['existence','Certificate of Existence',25]].forEach(function (x) { if (document.getElementById(x[0]).checked) rows.push([x[1], x[2]]); });
+  var total = rows.reduce(function (s, r) { return s + r[1]; }, 0);
+  document.getElementById('fees').innerHTML = rows.map(function (r) { return '<tr><td>' + r[0] + '</td><td>$' + r[1].toFixed(2) + '</td></tr>'; }).join('') + '<tr><td>TOTAL FEE</td><td>$' + total.toFixed(2) + '</td></tr>';
+}
+function onPay(v) { setTimeout(function () { document.getElementById('dd-part').hidden = v !== 'dd'; }, 300); }
+window.addEventListener('DOMContentLoaded', fees);
+</script></head><body><p>Replica of the NY Department of State On-Line Filing System for engine tests, laid out as docs/portal-maps/ny-dos-corporations.md (2026-11-24) describes it. Not affiliated with NY DOS.</p>
+<div>Department of State · Form a Corporation or Business ▸ Division of Corporations On-Line Filing System</div>
+<nav><a href="home.html">Home</a> · <a href="replenish.html">Replenish DD Account</a> · <a href="#">Retrieve Images</a> · <a href="#">Service Company Administration</a> · User ID: KF01 · <a href="#">Log Out</a></nav>
+<h1>Payment Information</h1>
+<h3>Optional Information</h3><p><label for="ref">Customer Reference Number</label> <input id="ref" type="text"></p><p><label for="fein">FEIN</label> <input id="fein" type="text"></p>
+<h3>Additional Services</h3>
+<p><label><input type="checkbox" id="plain" onchange="fees()"> Plain Copy ($5.00)</label></p>
+<p><label><input type="checkbox" id="certified" onchange="fees()"> Certified Copy ($10.00)</label></p>
+<p><label><input type="checkbox" id="existence" onchange="fees()"> Certificate of Existence ($25.00)</label></p>
+<h3>Fee Information</h3><table id="fees"></table>
+<h3>E-mail Address</h3><p>Please provide an e-mail address to send the filing receipts and related documents</p>
+<p><label for="dist">Distribution E-mail Address</label> <input id="dist" type="email" value="filings@keystone.example" readonly></p><p><label for="cc">Cc E-mail Address</label> <input id="cc" type="email"></p>
+<h3>Payment</h3>
+<fieldset><legend>*Select One</legend><label><input type="radio" name="pay" value="card" onchange="onPay(this.value)"> Credit Card</label> <label><input type="radio" name="pay" value="dd" onchange="onPay(this.value)"> Drawdown Account</label></fieldset>
+<div id="dd-part" hidden><p><label for="dd">Drawdown Account</label> <select id="dd"><option value="">--Select One--</option><option value="F12">KEYSTONE FILINGS LLC - F12</option></select></p><p>Account Balance $0.00</p></div>
+<p>Card payments redirect to the processor and come back.</p>
+<h3>Payment Authorization</h3><p><label><input type="checkbox" id="auth"> By checking this box I authorize that the total fee listed above will be charged to my credit card or drawdown account.</label></p>
+<p>Refund Policy: DOS does not refund fees.</p>
+<p><button type="button" onclick="history.back()">&lt; Go Back</button> <button type="button" onclick="if (document.getElementById('auth').checked) location.href='filed.html'">File Document</button></p></body></html>

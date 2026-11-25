@@ -73,8 +73,27 @@
         "label": "Articles of Organization filing fee",
         "amountUsd": 200
       },
-      "_source": "NY DOS, verified on the E-Submission LLC Articles fee summary (2026-11-18): base $200. Native online checkout total V.",
-      "_paymentNote": "drawdown (DD) account enabled on Keystone's service-company account; card also offered. Checkout controls V."
+      "_source": "NY DOS: LLC $200 verified on the E-Submission fee summary (2026-11-18) and on the native Payment Information page (portal map 2026-11-24, TOTAL FEE $240 with all three extras); Certificate of Incorporation $125 (same map, total $165 with all three extras).",
+      "_paymentNote": "Paid from the service company's draw-down account, funded with the exact total before each filing (prepay step, docs/portal-maps/ny-dos-corporations.md). Card also offered on the page.",
+      "plain_copy": {
+        "label": "Plain Copy",
+        "amountUsd": 5
+      },
+      "certified_copy": {
+        "label": "Certified Copy",
+        "amountUsd": 10
+      },
+      "certificate_of_standing": {
+        "label": "Certificate of Existence",
+        "amountUsd": 25
+      },
+      "entityFees": {
+        "business_corporation": {
+          "label": "Certificate of Incorporation filing fee",
+          "statutory": 125,
+          "_taxOnShares": "Computed by the page from the share answers. Quoted $0 for shares without par value, as the page showed for 200 no-par shares (portal map 2026-11-24); a run stops at the fee check if the page shows otherwise. Par-value shares are refused until mapped."
+        }
+      }
     },
     "amendment_name_change": {
       "statutory": {
