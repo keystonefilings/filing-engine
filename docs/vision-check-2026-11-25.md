@@ -229,7 +229,7 @@ Rows refer to the status tables above.
 
 ### Step 3: the two Nov 25 decisions
 - [x] V17. Review-page approval: a preview pass takes the screenshot, the client approves it, and the live pass must match it before paying. Client-facing, on every adapter (row 5, decision 1). **Done**: new status `previewing`; the approval email attaches the state's review page and the approval page shows it; the live run compares a fingerprint of the page (dates, times, EINs and session ids ignored) before the click past it and, on a difference, takes a new preview instead of paying. Applies to every adapter with a mapped review screen (FL, IRS, NY formation today; others as their review screens are mapped); `approvalPreview: "payload"` keeps the old data-only approval. Also closed a gap: a name picked by an admin no longer files a filing the client never approved.
-- [ ] V18. Stored cards: card vault provider, add-card flow, default and backup card used at payment screens, routing per filing type actually read (rows 2, 9, 21, decision 2). *Needs: the provider choice and its account.*
+- [ ] V18. Stored cards: card vault provider, add-card flow, default and backup card used at payment screens, routing per filing type actually read (rows 2, 9, 21, decision 2). *Provider chosen Nov 25: **Basis Theory**. Needs: its public and private API keys.*
 
 ### Step 4: partner front end
 - [x] V19. Permanent branded pages `/<partner>/<filing>`, with an editable partner slug shown in setup (row 23). **Done**: `/<firm>/<service>` (for example `/best-accounting/llc-formation-new-york`), listed on the partner's New filing page; "Your web address" in branding setup (reserved site paths and taken addresses refused; the portal and session move with it). Each submission is a new filing that goes through preview and approval; 30 submissions an hour per firm. *Needs `PLATFORM_API_KEY` on the web app.*
@@ -248,13 +248,13 @@ Rows refer to the status tables above.
 - [x] V30. Per-state defaults the adapters read (registered agent, service of process, signer, organizer, portal defaults) (row 4). **Done**: "Defaults per portal" now fill what a filing leaves unset (NY copies, certificate of existence and E-Submission service level; FL certified copy and certificate of status; NJ reminders and CorpWatch), with provenance; Setup gains "Who's named on your filings" (organizer, filer, signer) and "Your registered agent in each state", which only staff could set before. NYS-100 gets its own NY.gov business login (falls back to the NY DOS one); Missouri's login can be connected too.
 - [x] V31. Copy and CC email setting for state websites (row 8). **Done**: "Also send the state's copies to" in enterprise Setup and "Email for the state's copies" in a partner's Your firm step; used for the CC (V28).
 - [x] V32. Staff review of enterprise requests in the dashboard: approve, create the account, send an invite email to set a password (row 13). **Done**: Approve and Decline on the Sign-ups page (platform staff only); approving creates the subscriber and its first user and emails a 7-day link to set their own password.
-- [ ] V33. Subscription billing (Stripe Billing): plans, pricing, enterprise and partner subscriptions (rows 16, 21). *Needs: prices and a Stripe account.*
+- [ ] V33. Subscription billing (Stripe Billing): plans, pricing, enterprise and partner subscriptions (rows 16, 21). *Nov 25: the existing Stripe account is used. Needs: the prices, and a restricted API key.*
 - [x] V34. Docs: full OpenAPI schemas with a `webhooks` section, `llms.txt`, a single-file Markdown download, Python samples, no links to private repo files (row 14). **Done**: `/openapi.json` carries the FilingRequest JSON Schema (generated from the engine's own model, also at `GET /v1/schema/filing-request`) and a `webhooks` section with every event and its signed headers; `/docs.md` is every doc in one Markdown file; `/llms.txt` points AI agents at both; Python samples sit next to the JavaScript ones (the Python webhook check was verified against a real engine signature); the private repo link is gone.
 - [x] V35. API gaps: cancel, approve through the API, pagination, webhook test delivery and log, 409 on idempotency key reuse with a different payload (row 15, risk 6). **Done**: `POST /v1/filings/{id}/cancel` (partners too, for their own), `POST /v1/filings/{id}/approval`, `limit`/`before` on `GET /v1/filings`, `POST /v1/webhooks/test` and `GET /v1/webhooks/deliveries`, and 409 for a reused key with a different request (filings made before this keep the old behavior). All in the API reference.
 - [x] V36. Firm invite links get their own scoped key, not the inviter's session key (risk 5). **Done**: inviting a firm's staff creates their own account, limited to that firm by the engine, with an emailed 7-day link to set their password; no key is in any link. Old invite links no longer sign anyone in.
 - [ ] V37. Sign in with Google (row 13, "eventually").
 - [x] V38. Landing page: remove `noindex` when launching, offer title companies, stop freezing env values at build (rows 9, 10). **Done**: indexing is a setting (`SITE_INDEXABLE=true` at launch); title companies can sign up and are named on the landing and sign-up pages; every page reads its settings when served.
-- [ ] V39. Embedding: decide whether the portal may be framed on a customer's site (`X-Frame-Options: DENY` today) (row 15). *Needs: what "embedded" in the memo meant.*
+- [ ] V39. Embedding: decide whether the portal may be framed on a customer's site (`X-Frame-Options: DENY` today) (row 15). *Nov 25: it means a **drop-in form widget**: a snippet on the customer's site shows our branded filing form inside their page.*
 
 ### Step 6: channels
 - [ ] V40. Email in: inbound address to draft filing to prefilled form link (row 6).
@@ -263,7 +263,7 @@ Rows refer to the status tables above.
 - [ ] V43. SMS through Twilio with 10DLC registration (row 6). *Needs: Twilio and carrier registration.*
 
 ### Step 7: copy and release hygiene
-- [ ] V44. 20-persona copy review of the full site, best recommendations applied (row 29).
+- [ ] V44. 20-persona copy review of the full site, best recommendations applied (row 29). *Nov 25: run as 20 separate reviewers, then merge the best changes.*
 - [x] V45. CI on push to `main`, and a test gate before the Fly deploy (risk 7). **Done**: `test.yml` runs on pull requests, pushes to `main` and before each deploy; `fly-deploy.yml` deploys only after it passes.
 
 ### Found while building
