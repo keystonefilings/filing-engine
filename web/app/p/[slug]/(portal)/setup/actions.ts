@@ -59,13 +59,25 @@ export async function saveBranding(slug: string, _prev: SetupState, fd: FormData
   let logoUrl = text(fd, "logoUrl", 500) || undefined;
   if (logoUrl && !/^https:\/\//.test(logoUrl)) return { error: "Check the highlighted fields.", issues: { logoUrl: "A logo link must start with https://" } };
   // The picture goes first, so the brand saved next keeps it.
-  const { session } = await firmContext(slug);
+  const { session, company } = await firmContext(slug);
   const logoProblem = await applyLogo(session.apiKey, session.clientCompanyId, fd, Boolean(logoUrl));
   if (logoProblem) return { error: logoProblem, issues: { data: logoProblem } };
   if (String(fd.get("logoData") ?? "")) logoUrl = undefined;
+  // A font file goes first too; the choice saved next ("custom") then points at it.
+  const fontData = String(fd.get("fontData") ?? "");
+  if (fontData) {
+    try {
+      await engine(session.apiKey, `/v1/client-companies/${encodeURIComponent(session.clientCompanyId)}/font`, { method: "PUT", body: { data: fontData } });
+    } catch (e) {
+      const msg = e instanceof EngineError ? ((e.body as { issues?: { message: string }[] })?.issues?.[0]?.message ?? "That font didn't upload.") : "That font didn't upload.";
+      return { error: msg, issues: { font: msg } };
+    }
+  }
+  const fontChoice = text(fd, "font", 40) || undefined;
   return save(slug, "branding", {
     brand: {
       slug: text(fd, "slug", 40).toLowerCase() || undefined,
+      ...(fontChoice && (fontChoice !== "custom" || fontData || company.portal?.fontArtifactId) ? { font: fontChoice } : {}),
       displayName: text(fd, "displayName", 80) || undefined,
       logoUrl,
       primaryColor: hex("primaryColor"),

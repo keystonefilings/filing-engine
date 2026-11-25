@@ -41,7 +41,7 @@ export function sessionEnded(e: unknown): boolean {
 
 export interface Account { tenantId: string; name: string; configured: boolean; branding: { displayName?: string; logoUrl?: string; supportEmail?: string }; webhookEndpointCount: number }
 
-export interface PortalBrand { slug: string; displayName?: string; logoUrl?: string; logoArtifactId?: string; primaryColor?: string; secondaryColor?: string; supportEmail?: string; filingKinds?: string[] }
+export interface PortalBrand { slug: string; displayName?: string; logoUrl?: string; logoArtifactId?: string; font?: string; fontArtifactId?: string; primaryColor?: string; secondaryColor?: string; supportEmail?: string; filingKinds?: string[] }
 
 export interface ClientCompany {
   clientCompanyId: string;

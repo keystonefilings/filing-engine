@@ -1,11 +1,12 @@
 "use client";
 
 import { useKeptForm } from "./useKeptForm";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import type { SetupState } from "@/app/p/[slug]/(portal)/setup/actions";
 import type { PaymentMethodRef, PaymentRouting } from "@/lib/engine";
 import { textOn } from "@/lib/brand";
 import { ColorField, LogoField } from "./BrandFields";
+import { FONT_PRESETS } from "@/lib/fonts";
 
 type Action = (prev: SetupState, fd: FormData) => Promise<SetupState>;
 
@@ -44,7 +45,7 @@ export function DetailsForm({ action, v }: { action: Action; v: DetailsValues })
   );
 }
 
-export interface BrandValues { slug?: string; siteUrl?: string; displayName?: string; logoSrc?: string; logoUrl?: string; primaryColor?: string; secondaryColor?: string; supportEmail?: string }
+export interface BrandValues { slug?: string; siteUrl?: string; font?: string; hasCustomFont?: boolean; displayName?: string; logoSrc?: string; logoUrl?: string; primaryColor?: string; secondaryColor?: string; supportEmail?: string }
 
 export function BrandingForm({ action, v, platform }: { action: Action; v: BrandValues; platform: string }) {
   const { state: s, pending, formProps } = useKeptForm(action, null);
@@ -52,6 +53,29 @@ export function BrandingForm({ action, v, platform }: { action: Action; v: Brand
   const [logo, setLogo] = useState<string | undefined>(v.logoSrc);
   const [color, setColor] = useState(v.primaryColor ?? "#1f4fd1");
   const [color2, setColor2] = useState(v.secondaryColor ?? v.primaryColor ?? "#0f766e");
+  const [font, setFont] = useState(v.font ?? "system");
+  const [fontData, setFontData] = useState("");
+  const [fontError, setFontError] = useState("");
+  // The preview shows the chosen font: a preset from Google Fonts, or the file just picked.
+  useEffect(() => {
+    const p = FONT_PRESETS[font];
+    if (p?.family && !document.querySelector(`link[data-font="${font}"]`)) {
+      const l = document.createElement("link");
+      l.rel = "stylesheet"; l.dataset.font = font;
+      l.href = `https://fonts.googleapis.com/css2?family=${encodeURIComponent(p.family).replace(/%20/g, "+")}:wght@400;600&display=swap`;
+      document.head.appendChild(l);
+    }
+    if (font === "custom" && fontData) void new FontFace("FirmFontPreview", `url(${fontData})`).load().then((f) => document.fonts.add(f)).catch(() => setFontError("That file isn't a font we can use."));
+  }, [font, fontData]);
+  const previewStack = font === "custom" ? (fontData ? `"FirmFontPreview", system-ui` : v.hasCustomFont ? `"FirmFont", system-ui` : "system-ui") : FONT_PRESETS[font]?.stack ?? "system-ui";
+  const pickFont = (file: File | undefined) => {
+    setFontError("");
+    if (!file) return;
+    if (file.size > 600 * 1024) { setFontError("The font file must be 600 KB or smaller."); return; }
+    const r = new FileReader();
+    r.onload = () => { setFontData(String(r.result)); setFont("custom"); };
+    r.readAsDataURL(file);
+  };
   return (
     <div className="stack">
       <form {...formProps} className="card">
@@ -69,10 +93,23 @@ export function BrandingForm({ action, v, platform }: { action: Action; v: Brand
           <ColorField id="b-color" name="primaryColor" label="Main color" value={color} onChange={setColor} help="Buttons and the top of the page." />
           <ColorField id="b-color2" name="secondaryColor" label="Second color" value={color2} onChange={setColor2} help="Links and highlights." />
         </div>
+        <div className="field">
+          <label htmlFor="b-font">Font</label>
+          <select id="b-font" name="font" value={font} onChange={(e) => setFont(e.target.value)}>
+            {Object.entries(FONT_PRESETS).map(([id, p]) => <option key={id} value={id}>{p.label}</option>)}
+            {v.hasCustomFont || fontData ? <option value="custom">Your own font (uploaded)</option> : null}
+          </select>
+          <label className="small" style={{ display: "block", marginTop: 8 }}>Or upload your own (WOFF2, WOFF, TTF or OTF, up to 600 KB)
+            <input type="file" accept=".woff2,.woff,.ttf,.otf,font/woff2,font/woff,font/ttf,font/otf" onChange={(e) => pickFont(e.target.files?.[0])} />
+          </label>
+          <input type="hidden" name="fontData" value={fontData} />
+          {fontError ? <span className="err">{fontError}</span> : null}
+          <Issue s={s} k="font" />
+        </div>
         <div className="field"><label htmlFor="b-sup">Support email shown to clients</label><input id="b-sup" name="supportEmail" type="email" defaultValue={v.supportEmail} /><Issue s={s} k="supportEmail" /></div>
         <button className="btn primary" type="submit" disabled={pending}>{pending ? "Saving…" : "Save and continue"}</button>
       </form>
-      <BrandPreview name={name} logo={logo} color={color} color2={color2} platform={platform} />
+      <div style={{ fontFamily: previewStack }}><BrandPreview name={name} logo={logo} color={color} color2={color2} platform={platform} /></div>
     </div>
   );
 }

@@ -14,6 +14,7 @@ body { line-height: 1.55; font-size: 15px; }
 a { color: var(--accent-2, var(--accent)); }
 /* A firm's own pages: its second color runs along the top. */
 .branded .topbar { border-top: 4px solid var(--accent-2, var(--accent)); }
+.branded, .branded input, .branded select, .branded textarea, .branded button { font-family: var(--brand-font, inherit); }
 h1 { font-size: 1.7rem; line-height: 1.2; margin: 0 0 .5rem; }
 h2 { font-size: 1.2rem; margin: 2rem 0 .6rem; }
 h3 { font-size: 1rem; margin: 1.4rem 0 .4rem; }

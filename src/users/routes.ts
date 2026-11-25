@@ -9,6 +9,7 @@ import { mintSessionKey, type SessionClaims } from "./session-token.js";
 import { PORTALS, portalDefaultsProblems } from "./portals.js";
 import { RateLimiter } from "./rate-limit.js";
 import type { ChannelSender } from "../comms/senders.js";
+import { FONT_CHOICES } from "../settings/fonts.js";
 
 /**
  * Dashboard accounts.
@@ -121,6 +122,7 @@ const ProfileBody = z.object({
     displayName: z.string().trim().min(1).max(80).optional(),
     logoUrl: z.string().url().startsWith("https://").optional(),
     primaryColor: z.string().regex(/^#[0-9a-fA-F]{6}$/).optional(),
+    font: z.enum(FONT_CHOICES).optional(),
     secondaryColor: z.string().regex(/^#[0-9a-fA-F]{6}$/).optional(),
     supportEmail: z.string().email().optional(),
   }).optional(),

@@ -5,6 +5,7 @@ import { platformName } from "@/lib/brand";
 import { firmBySlug, kindForServiceSlug } from "@/lib/public-pages";
 import { IntakeForm } from "@/components/IntakeForm";
 import { submitPublicIntake } from "./actions";
+import { BrandFont } from "@/components/BrandFont";
 
 /** A partner firm's permanent page for one service (V19). */
 export async function generateMetadata({ params }: { params: Promise<{ firm: string; service: string }> }) {
@@ -24,6 +25,7 @@ export default async function PublicServicePage({ params }: { params: Promise<{ 
   const nonce = randomUUID();
   return (
     <div className="branded" style={brandStyle(brand)}>
+      <BrandFont font={brand.font} />
       <header className="topbar"><div className="inner"><span className="brand">
         {/* eslint-disable-next-line @next/next/no-img-element */}
         {brand.logoUrl ? <img src={brand.logoUrl} alt="" /> : null}<span>{brand.name}</span></span>

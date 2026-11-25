@@ -230,8 +230,8 @@ Rows refer to the status tables above.
 
 ### Step 4: partner front end
 - [x] V19. Permanent branded pages `/<partner>/<filing>`, with an editable partner slug shown in setup (row 23). **Done**: `/<firm>/<service>` (for example `/best-accounting/llc-formation-new-york`), listed on the partner's New filing page; "Your web address" in branding setup (reserved site paths and taken addresses refused; the portal and session move with it). Each submission is a new filing that goes through preview and approval; 30 submissions an hour per firm. *Needs `PLATFORM_API_KEY` on the web app.*
-- [ ] V20. Partner-branded approval page (Keystone's brand appears today) (row 23).
-- [ ] V21. Fonts: preset choices and upload (row 20).
+- [x] V20. Partner-branded approval page (Keystone's brand appears today) (row 23). **Done**: the approval page shows the firm's name, logo, main color, font and support email; partner firms add "with Keystone Filings".
+- [x] V21. Fonts: preset choices and upload (row 20). **Done**: ten presets (Google Fonts) or an uploaded WOFF2, WOFF, TTF or OTF file (600 KB, checked by its bytes), with a live preview in branding setup; used on the portal, client links, public pages and the approval page.
 - [ ] V22. Partner per-state registered agent and other defaults, and saved defaults skip questions in the forms (rows 25, 27).
 - [ ] V23. Client address book that prefills repeat filings (row 26).
 - [ ] V24. Remove the duplicate questions listed in row 25; "Same as" for people (row 25).

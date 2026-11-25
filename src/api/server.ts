@@ -20,6 +20,7 @@ import { registerUsers, portalSlugFor, type Auth, type PartnerSignupMode } from 
 import { registerBrandLogos } from "./brand-logos.js";
 import { readSessionKey, SESSION_PREFIX } from "../users/session-token.js";
 import { partnerGuard } from "../users/partner-guard.js";
+import { FONT_PRESETS, googleFontHref, type FontPreset } from "../settings/fonts.js";
 
 export interface ApiDeps {
   service: FilingService;
@@ -304,8 +305,22 @@ export function buildServer(deps: ApiDeps): FastifyInstance {
     const a = found.approval;
     const f = await deps.store.getFiling(a.filingId);
     const tenant = await deps.store.getTenant(a.tenantId);
+    // V20: the client sees the firm they work with. A firm with portal branding (a partner, or a
+    // firm a subscriber set up) brands the page; partners are co-branded with the platform.
+    const client = f ? await deps.store.getClientCompany(f.clientCompanyId) : null;
+    const portal = client?.portal;
+    const firmBrand = portal && (portal.displayName || portal.logoUrl || portal.logoArtifactId || client?.partner);
+    const firmLogo = portal?.logoArtifactId ? `${deps.publicBaseUrl}/v1/brand-logos/${portal.logoArtifactId}` : portal?.logoUrl?.startsWith("https://") ? portal.logoUrl : undefined;
     const html = renderReviewPage({
-      brandName: tenant?.branding.displayName ?? tenant?.name, supportEmail: tenant?.branding.supportEmail,
+      brandName: firmBrand ? (portal!.displayName ?? client!.name) : (tenant?.branding.displayName ?? tenant?.name),
+      supportEmail: (firmBrand ? portal!.supportEmail : undefined) ?? tenant?.branding.supportEmail,
+      logoUrl: firmBrand ? firmLogo : undefined, primaryColor: firmBrand ? portal!.primaryColor : undefined,
+      font: firmBrand && portal!.font && portal!.font !== "system"
+        ? portal!.font === "custom"
+          ? (portal!.fontArtifactId ? { stack: FONT_PRESETS.system.stack, fileUrl: `${deps.publicBaseUrl}/v1/brand-fonts/${portal!.fontArtifactId}` } : undefined)
+          : { stack: FONT_PRESETS[portal!.font as FontPreset]?.stack ?? FONT_PRESETS.system.stack, href: googleFontHref(portal!.font) ?? undefined }
+        : undefined,
+      poweredBy: client?.partner ? (tenant?.branding.displayName ?? tenant?.name) : undefined,
       filingId: a.filingId,
       filingTitle: f ? `${f.request.state} ${f.request.type.replace("_", " ")}${f.request.formation ? `: ${f.request.formation.name.baseName} ${f.request.formation.name.designator}` : ""}` : "Filing",
       payload: a.shownPayload, fees: a.fees, feeCapUsd: a.feeCapUsd, expiresAt: a.expiresAt,

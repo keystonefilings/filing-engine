@@ -2,6 +2,7 @@ import { z } from "zod";
 import { Address, ApprovalRecipient, Contact, EinMode, Person } from "../domain/filing.js";
 import { FirmPolicyAnswers } from "./policies.js";
 import { PaymentSettings } from "./payments.js";
+import { FONT_CHOICES } from "./fonts.js";
 
 /**
  * Tenant = a filing service company subscribing to the platform (Scope 1). Keystone is one
@@ -225,6 +226,9 @@ export const ClientCompanySettings = z.object({
     logoUrl: z.string().url().startsWith("https://").optional(),
     /** A logo the firm uploaded (artifact kind brand_logo, served at /v1/brand-logos/:id). Shown ahead of logoUrl. */
     logoArtifactId: z.string().uuid().optional(),
+    /** V21: a preset font, or "custom" for the uploaded fontArtifactId. */
+    font: z.enum(FONT_CHOICES).optional(),
+    fontArtifactId: z.string().uuid().optional(),
     primaryColor: z.string().regex(/^#[0-9a-fA-F]{6}$/, "a hex color like #1f4b99").optional(),
     /** Second brand color: links and highlights. Absent = the main color. */
     secondaryColor: z.string().regex(/^#[0-9a-fA-F]{6}$/, "a hex color like #1f4b99").optional(),

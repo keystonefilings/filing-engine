@@ -5,18 +5,19 @@ import { FILING_KINDS, type FilingKind } from "./intake/forms";
 import { logoSrc, safeColor, textOn } from "./brand";
 import { redirect } from "next/navigation";
 import { sessionEnded } from "./engine";
+import { fontSpec, type BrandFontSpec } from "./fonts";
 
-export interface FirmBrand { name: string; logoUrl?: string; color: string; color2: string; supportEmail?: string }
+export interface FirmBrand { name: string; logoUrl?: string; color: string; color2: string; supportEmail?: string; font?: BrandFontSpec | null }
 
 export function brandOf(c: Pick<ClientCompany, "name" | "portal">): FirmBrand {
   const p: PortalBrand | undefined = c.portal;
   const color = safeColor(p?.primaryColor);
-  return { name: p?.displayName || c.name, logoUrl: logoSrc(p), color, color2: safeColor(p?.secondaryColor, color), supportEmail: p?.supportEmail };
+  return { name: p?.displayName || c.name, logoUrl: logoSrc(p), color, color2: safeColor(p?.secondaryColor, color), supportEmail: p?.supportEmail, font: fontSpec(p) };
 }
 
 /** The CSS variables a firm's pages use: main color (buttons), its text color, second color (links, highlights). */
-export function brandStyle(b: Pick<FirmBrand, "color" | "color2">): Record<string, string> {
-  return { "--accent": b.color, "--accent-text": textOn(b.color), "--accent-2": b.color2 };
+export function brandStyle(b: Pick<FirmBrand, "color" | "color2"> & { font?: BrandFontSpec | null }): Record<string, string> {
+  return { "--accent": b.color, "--accent-text": textOn(b.color), "--accent-2": b.color2, ...(b.font ? { "--brand-font": b.font.stack } : {}) };
 }
 
 /** Filings this firm's portal offers: all of them unless the firm's settings list some. */

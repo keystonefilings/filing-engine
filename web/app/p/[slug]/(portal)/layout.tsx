@@ -2,6 +2,7 @@ import { brandStyle, firmContext } from "@/lib/firm";
 import { platformName } from "@/lib/brand";
 import Link from "next/link";
 import { TopBar } from "@/components/TopBar";
+import { BrandFont } from "@/components/BrandFont";
 
 export default async function PortalLayout({ children, params }: { children: React.ReactNode; params: Promise<{ slug: string }> }) {
   const { slug } = await params;
@@ -18,6 +19,7 @@ export default async function PortalLayout({ children, params }: { children: Rea
   ) : null;
   return (
     <div className="branded" style={brandStyle(brand)}>
+      <BrandFont font={brand.font} />
       <TopBar
         brand={partner ? platformName() : brand.name} href={base} logoUrl={partner ? undefined : brand.logoUrl}
         links={[

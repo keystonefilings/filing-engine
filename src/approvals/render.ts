@@ -47,6 +47,13 @@ export interface ReviewPageModel {
   /** The service company's name and support contact (tenant branding); never the platform's. */
   brandName?: string;
   supportEmail?: string;
+  /** The firm's own look (V20): an https or engine logo URL, and its main color (#rrggbb). */
+  logoUrl?: string;
+  primaryColor?: string;
+  /** V21: the firm's font: a stylesheet to load (Google Fonts) or a font file, and the CSS stack. */
+  font?: { stack: string; href?: string; fileUrl?: string };
+  /** Partner firms are co-branded: "with <platform>". */
+  poweredBy?: string;
   filingId: string;
   filingTitle: string;
   payload: unknown; // already masked
@@ -69,7 +76,10 @@ table{border-collapse:collapse;width:100%}th,td{text-align:left;padding:.4rem .6
 .note{background:#fff8e1;border:1px solid #f0d47a;padding:.8rem 1rem;border-radius:6px;margin:1rem 0}
 button{font:inherit;padding:.6rem 1.2rem;border-radius:6px;border:1px solid #333;background:#fff;cursor:pointer}button.primary{background:#1a5fb4;color:#fff;border-color:#1a5fb4}
 textarea,input{font:inherit;width:100%;padding:.5rem;border:1px solid #bbb;border-radius:6px}</style></head><body>
-${m.brandName ? `<p style="color:#555;margin:0">${esc(m.brandName)}</p>` : ""}<h1>${esc(m.filingTitle)}</h1>
+${m.font?.href ? `<link rel="stylesheet" href="${esc(m.font.href)}">` : ""}${m.font?.fileUrl ? `<style>@font-face{font-family:"FirmFont";src:url("${esc(m.font.fileUrl)}");font-display:swap}</style>` : ""}${m.font ? `<style>body{font-family:${m.font.fileUrl ? `"FirmFont",` : ""}${m.font.stack.replace(/[<>]/g, "")}}</style>` : ""}
+${m.primaryColor && /^#[0-9a-fA-F]{6}$/.test(m.primaryColor) ? `<style>button.primary{background:${m.primaryColor};border-color:${m.primaryColor}}.brandbar{border-top:4px solid ${m.primaryColor}}</style>` : ""}
+<div class="brandbar" style="display:flex;align-items:center;gap:.6rem;padding-top:.6rem">${m.logoUrl ? `<img src="${esc(m.logoUrl)}" alt="" style="max-height:40px;max-width:160px">` : ""}${m.brandName ? `<strong style="color:#333">${esc(m.brandName)}</strong>` : ""}${m.poweredBy ? `<span style="color:#777;font-size:.85em;margin-left:auto">with ${esc(m.poweredBy)}</span>` : ""}</div>
+<h1>${esc(m.filingTitle)}</h1>
 <p>Filing reference ${esc(m.filingId)}. This approval expires ${esc(m.expiresAt)}.</p>
 <div class="note">By approving you confirm every value below is correct and authorize its submission exactly as shown.
 ${m.einInRun ? " The EIN issued during this run will be entered into the state filing; it is the only value added after your approval." : ""}

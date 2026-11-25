@@ -5,6 +5,7 @@ import { platformName } from "@/lib/brand";
 import { listSignatures } from "@/lib/signatures";
 import { IntakeForm } from "@/components/IntakeForm";
 import { submitClientIntake } from "./actions";
+import { BrandFont } from "@/components/BrandFont";
 
 export const metadata = { title: "Your filing" };
 
@@ -26,6 +27,7 @@ export default async function ClientIntakePage({ params }: { params: Promise<{ t
   const consentText = signed ? (await listSignatures(key, link.clientCompanyId)).consentText : undefined;
   return (
     <div className="branded" style={brandStyle(brand)}>
+      <BrandFont font={brand.font} />
       <header className="topbar"><div className="inner"><span className="brand">
         {/* eslint-disable-next-line @next/next/no-img-element */}
         {brand.logoUrl ? <img src={brand.logoUrl} alt="" /> : null}<span>{brand.name}</span></span>
