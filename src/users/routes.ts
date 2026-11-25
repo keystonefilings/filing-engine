@@ -514,6 +514,37 @@ export function registerUsers(app: FastifyInstance, deps: UsersDeps): void {
     return reply.code(201).send({ inquiry, tenantId, user: publicUser(u) });
   });
 
+  // V36: invite a person at one of the subscriber's firms. They get their own account, limited to
+  // that firm (a partner session), and set their own password from the email. No key is in any link.
+  app.post("/v1/client-companies/:id/staff", async (req, reply) => {
+    const tenantId = await requireTenantScope(req, reply);
+    if (!tenantId) return reply;
+    const c = await deps.store.getClientCompany((req.params as { id: string }).id);
+    if (!c || c.tenantId !== tenantId) return reply.code(404).send({ error: "not found" });
+    if (!c.portal?.slug) return reply.code(409).send({ error: "set up the firm's portal first" });
+    const parsed = z.object({ email, name: z.string().trim().min(2).max(120).optional() }).safeParse(req.body);
+    if (!parsed.success) return reply.code(422).send({ error: "enter the person's email" });
+    if (await deps.store.findUserByEmail(parsed.data.email)) return reply.code(409).send({ error: "that email already has an account" });
+    const at = now();
+    const by = (await deps.authOf(req))?.user?.email ?? "api key";
+    const u: UserRecord = {
+      id: randomUUID(), email: parsed.data.email, name: parsed.data.name ?? parsed.data.email.split("@")[0]!, kind: "partner", tenantId,
+      clientCompanyId: c.clientCompanyId, status: "active", passwordHash: await hashPassword(randomBytes(24).toString("base64url")),
+      sessionGen: 0, createdAt: at.toISOString(), createdBy: by,
+    };
+    await deps.store.createUser(u);
+    const secret = randomBytes(32).toString("base64url");
+    await deps.store.updateUser(u.id, { passwordReset: { tokenHash: sha256(secret).toString("hex"), expiresAt: new Date(at.getTime() + 7 * 86_400_000).toISOString(), sessionGen: 0, requestedAt: at.toISOString() } });
+    const link = `${deps.webBaseUrl}/reset-password?token=${encodeURIComponent(`${u.id}.${secret}`)}`;
+    const firmName = c.portal.displayName ?? c.name;
+    void deps.email?.send({ address: u.email, name: u.name }, {
+      subject: `You're invited to ${firmName}'s filing portal`,
+      body: `${by === "api key" ? "You've" : `${by} has`} given you access to ${firmName}'s filing portal. Open the link below to choose your password; it works for 7 days. Then log in with this email.`,
+      link,
+    }).catch((e) => console.error("invite email failed", (e as Error).message));
+    return reply.code(201).send({ user: publicUser(u), link, expiresAt: new Date(at.getTime() + 7 * 86_400_000).toISOString() });
+  });
+
   // ---- Users of a subscriber ----
   // Staff create a subscriber's first enterprise user once its request is approved.
   app.post("/v1/tenants/:id/users", async (req, reply) => {

@@ -50,7 +50,7 @@ export function InviteForm({ action }: { action: (prev: I, fd: FormData) => Prom
     <div className="stack">
       <form {...formProps} className="card row">
         <input name="email" type="email" required placeholder="name@firm.com" aria-label="Staff email" style={{ flex: 1, minWidth: 220 }} />
-        <button className="btn primary" type="submit" disabled={pending}>Make invite link</button>
+        <button className="btn primary" type="submit" disabled={pending}>Invite</button>
       </form>
       {state && !state.ok ? <p className="notice bad">{state.message}</p> : null}
       {state && state.ok ? (
@@ -58,7 +58,7 @@ export function InviteForm({ action }: { action: (prev: I, fd: FormData) => Prom
           <strong>Invite for {state.email}</strong>
           <p className="secret small">{state.link}</p>
           <div className="row"><button type="button" className="btn small" onClick={() => navigator.clipboard?.writeText(state.link)}>Copy link</button>
-            <span className="small muted">Send it to them yourself. It works for 7 days and signs whoever opens it in to this firm&apos;s portal.</span></div>
+            <span className="small muted">We emailed {state.email} this link to set their password (it works for 7 days). Then they log in with their email, to this firm&apos;s portal only. If email isn&apos;t set up here yet, send it to them yourself.</span></div>
         </div>
       ) : null}
     </div>

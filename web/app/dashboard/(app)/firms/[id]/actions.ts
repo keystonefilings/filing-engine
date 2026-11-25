@@ -2,7 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { engine, EngineError, type ClientCompany } from "@/lib/engine";
-import { requireTenant, staffInviteLink } from "@/lib/session";
+import { requireTenant } from "@/lib/session";
 import { FILING_KINDS } from "@/lib/intake/forms";
 import { applyLogo } from "@/lib/logo-upload";
 
@@ -54,12 +54,21 @@ export async function savePortal(id: string, _prev: PortalResult, fd: FormData):
   return { ok: true, message: portal ? `Saved. The portal is at /p/${slug ?? old?.slug}.` : "Saved. This firm has no portal now." };
 }
 
-/** A sign-in link for one person at the firm. It opens that firm's portal only. */
+/**
+ * V36: an account for one person at the firm, limited to that firm's portal. They're emailed a
+ * link to set their own password (7 days); the link is shown here too in case email isn't set up.
+ */
 export async function inviteStaff(id: string, _prev: InviteResult, fd: FormData): Promise<InviteResult> {
   const s = await requireTenant();
   const c = await company(s.apiKey, id);
   if (!c.portal?.slug) return { ok: false, message: "Set up the firm's portal first." };
   const email = String(fd.get("email") ?? "").trim().toLowerCase();
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return { ok: false, message: "Enter the person's email address." };
-  return { ok: true, email, link: staffInviteLink({ apiKey: s.apiKey, tenantId: s.tenantId, clientCompanyId: c.clientCompanyId, slug: c.portal.slug, email }) };
+  try {
+    const r = await engine<{ link: string }>(s.apiKey, `/v1/client-companies/${encodeURIComponent(c.clientCompanyId)}/staff`, { method: "POST", body: { email } });
+    return { ok: true, email, link: r.link };
+  } catch (e) {
+    if (e instanceof EngineError && e.status === 409) return { ok: false, message: (e.body as { error?: string } | null)?.error === "that email already has an account" ? "That email already has an account." : "Set up the firm's portal first." };
+    return { ok: false, message: "The invitation couldn't be made just now. Try again in a minute." };
+  }
 }

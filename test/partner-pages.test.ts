@@ -144,3 +144,23 @@ describe("the firm's registered agent per state (V22)", () => {
     expect(gone.json().clientCompany.registeredAgentsByState?.NJ).toBeUndefined();
   });
 });
+
+describe("inviting a firm's staff (V36)", () => {
+  it("creates their own account limited to that firm, with a link to set a password; no key in any link", async () => {
+    const { ClientCompanySettings } = await import("../src/settings/schema.js");
+    await store.putClientCompany(ClientCompanySettings.parse({ clientCompanyId: "firm-invite", tenantId: "keystone", name: "Invite Firm", portal: { slug: "invite-firm" } }));
+    const r = await app.inject({ method: "POST", url: "/v1/client-companies/firm-invite/staff", headers: { "x-api-key": "k1" }, payload: { email: "jo@invite-firm.test" } });
+    expect(r.statusCode).toBe(201);
+    expect(r.json().link).toMatch(/^http:\/\/web\.test\/reset-password\?token=/);
+    expect(r.json().link).not.toMatch(/k1|kfs_/);
+    expect(mail.at(-1)!.subject).toBe("You're invited to Invite Firm's filing portal");
+    const token = new URL(r.json().link).searchParams.get("token");
+    expect((await app.inject({ method: "POST", url: "/v1/auth/password-reset/confirm", payload: { token, password: PW } })).statusCode).toBe(200);
+    const s = (await app.inject({ method: "POST", url: "/v1/auth/sign-in", payload: { email: "jo@invite-firm.test", password: PW } })).json();
+    expect(s.user).toMatchObject({ kind: "partner", clientCompanyId: "firm-invite" });
+    // Limited to that firm by the engine itself.
+    expect((await app.inject({ method: "GET", url: "/v1/client-companies/firm-invite", headers: { "x-api-key": s.sessionKey } })).statusCode).toBe(200);
+    expect((await app.inject({ method: "GET", url: "/v1/client-companies/acme-cpa", headers: { "x-api-key": s.sessionKey } })).statusCode).toBe(404);
+    expect((await app.inject({ method: "GET", url: "/v1/api-keys", headers: { "x-api-key": s.sessionKey } })).statusCode).toBe(403);
+  });
+});

@@ -48,8 +48,9 @@ export async function signInWithEmail(_prev: FormState, fd: FormData): Promise<F
   const slug = clientCompany.portal?.slug;
   if (!slug) return { error: "Your dashboard isn't set up yet. Contact us and we'll fix it." };
   await writeSession({ kind: "firm", apiKey: sessionKey, tenantId: user.tenantId, clientCompanyId: user.clientCompanyId, slug, email: user.email, signedInWith: "password", expiresAt });
+  // Only partner firms (signed up themselves) have the setup guide; a firm an enterprise set up goes straight in.
   const done = clientCompany.partner?.setupDone ?? [];
-  redirect(`/p/${encodeURIComponent(slug)}${done.length < 3 ? "/setup" : ""}`);
+  redirect(`/p/${encodeURIComponent(slug)}${clientCompany.partner && done.length < 3 ? "/setup" : ""}`);
 }
 
 const TYPES = new Set(["cpa", "payroll", "cfo", "other"]);
