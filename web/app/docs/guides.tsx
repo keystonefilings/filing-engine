@@ -15,7 +15,8 @@ export const GUIDES: Guide[] = [
     body: (api) => (
       <>
         <p>Every request carries your API key in the <code>x-api-key</code> header. Keys belong to your tenant: they see only your filings, client companies, webhooks and usage.</p>
-        <Code>{`curl ${api}/v1/account -H "x-api-key: $KEYSTONE_API_KEY"`}</Code>
+        <Code>{`curl ${api}/v1/account -H "x-api-key: $COFILE_API_KEY"`}</Code>
+        <Code>{`import os, requests\nr = requests.get("${api}/v1/account", headers={"x-api-key": os.environ["COFILE_API_KEY"]})\nprint(r.json())`}</Code>
         <p>Create and revoke keys on the <Link href="/dashboard/keys">dashboard</Link> or with <code>POST /v1/api-keys</code>. A new key is shown once; only its prefix (for example <code>kfe_AbCdEfGh</code>) stays readable afterwards.</p>
         <h2>Rotating a key</h2>
         <ol>
@@ -36,7 +37,7 @@ export const GUIDES: Guide[] = [
       <>
         <p>A filing is one thing to file with one state site: an LLC formation, an EIN, a certificate or a payroll registration. You create it, the client approves exactly what will be filed, and the engine files it.</p>
         <Code>{`curl ${api}/v1/filings \\
-  -H "x-api-key: $KEYSTONE_API_KEY" -H "content-type: application/json" \\
+  -H "x-api-key: $COFILE_API_KEY" -H "content-type: application/json" \\
   -d '${JSON.stringify(EXAMPLE_FILING)}'`}</Code>
         <h2>What happens next</h2>
         <ol>
@@ -63,7 +64,7 @@ export const GUIDES: Guide[] = [
     summary: "What each state and filing needs, from the state-site walkthroughs.",
     body: () => (
       <>
-        <p>The engine takes one request shape for every state; adapters turn it into each site&apos;s own form. These are the filings the portal collects today, with the state fees seen on each site. The full field-by-field list, with the request path each answer fills, is in <code>docs/portal-maps/INTAKE-COVERAGE.md</code> in the repository.</p>
+        <p>The engine takes one request shape for every state; adapters turn it into each site&apos;s own form. These are the filings the portal collects today, with the state fees seen on each site. Every field the engine accepts, with its type and whether it is required, is in the FilingRequest JSON Schema in <a href="/openapi.json">/openapi.json</a> (also at <code>GET /v1/schema/filing-request</code>). </p>
         <div className="table-wrap"><table><thead><tr><th>Filing</th><th>type / state</th><th>Fees</th></tr></thead><tbody>
           {FILING_KINDS.map((k) => <tr key={k.id}><td><strong>{k.title}</strong><div className="muted small">{k.summary}</div></td><td><code>{k.type}</code> / <code>{k.state}</code>{k.type === "ein_only" ? <div className="muted small">any formation state</div> : null}</td><td className="small">{k.feeNote}</td></tr>)}
         </tbody></table></div>
@@ -122,6 +123,16 @@ export function verify(secret, header, rawBody, toleranceSec = 300) {
   const got = Buffer.from(v1);
   return expected.length === got.length && timingSafeEqual(expected, got);
 }`}</Code>
+        <p>The same in Python:</p>
+        <Code>{`import hmac, hashlib, time
+
+def verify(secret: str, header: str, raw_body: bytes, tolerance: int = 300) -> bool:
+    parts = dict(p.split("=", 1) for p in header.split(","))
+    if abs(time.time() - int(parts["t"])) > tolerance:
+        return False
+    expected = hmac.new(secret.encode(), f"{parts['t']}.".encode() + raw_body, hashlib.sha256).hexdigest()
+    return hmac.compare_digest(expected, parts.get("v1", ""))`}</Code>
+        <p>To check your receiver, <code>POST /v1/webhooks/test</code> sends a signed <code>webhook.test</code> event to every endpoint; <code>GET /v1/webhooks/deliveries</code> lists recent deliveries.</p>
         <h2>Retries</h2>
         <p>Answer with any 2xx within a few seconds. Anything else is retried after 1 minute, 5 minutes, 30 minutes, 2 hours and 12 hours, then given up. Use <code>x-cofile-delivery</code> to ignore a delivery you have already handled. <code>GET /v1/filings/{"{id}"}/deliveries</code> shows every attempt.</p>
         <h2>Events</h2>

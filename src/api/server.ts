@@ -23,6 +23,7 @@ import { readSessionKey, SESSION_PREFIX } from "../users/session-token.js";
 import { partnerGuard } from "../users/partner-guard.js";
 import { FONT_PRESETS, googleFontHref, type FontPreset } from "../settings/fonts.js";
 import type { WebhookDispatcher } from "../webhooks/dispatcher.js";
+import { FilingRequest } from "../domain/filing.js";
 
 export interface ApiDeps {
   service: FilingService;
@@ -233,6 +234,13 @@ export function buildServer(deps: ApiDeps): FastifyInstance {
       if (e instanceof OutcomeError) return reply.code(e.status).send({ error: e.message });
       throw e;
     }
+  });
+
+  // V34: the filing request's JSON Schema, generated from the model the engine validates with (public: it's documentation).
+  let requestSchema: unknown;
+  app.get("/v1/schema/filing-request", async (_req, reply) => {
+    requestSchema ??= z.toJSONSchema(FilingRequest, { io: "input", unrepresentable: "any" });
+    return reply.header("cache-control", "public, max-age=3600").send(requestSchema);
   });
 
   // V35: cancel before anything has started at the state.

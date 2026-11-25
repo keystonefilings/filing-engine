@@ -77,3 +77,12 @@ describe("API gaps (V35)", () => {
     expect((await app.inject({ method: "GET", url: "/v1/webhooks/deliveries", headers: h("k2") })).json().deliveries.every((d: { eventType: string }) => d.eventType !== "webhook.test")).toBe(true);
   });
 });
+
+describe("docs (V34)", () => {
+  it("serves the filing request's JSON Schema without a key", async () => {
+    const r = await app.inject({ method: "GET", url: "/v1/schema/filing-request" });
+    expect(r.statusCode).toBe(200);
+    expect(r.json().properties.formation).toBeTruthy();
+    expect(r.json().required).toContain("contact");
+  });
+});

@@ -67,7 +67,7 @@ const RULES: Record<string, Rule> = {
 };
 
 /** Routes anyone may call without a key; a partner session presented there changes nothing. */
-const PUBLIC = /^(GET|POST) (\/healthz|\/approve\/|\/admin\/|\/v1\/auth\/sign-in|\/v1\/auth\/password-reset|\/v1\/auth\/verify-email|\/v1\/signups\/|\/v1\/inquiries$|\/v1\/brand-logos\/|\/v1\/brand-fonts\/)/;
+const PUBLIC = /^(GET|POST) (\/healthz|\/approve\/|\/admin\/|\/v1\/auth\/sign-in|\/v1\/auth\/password-reset|\/v1\/auth\/verify-email|\/v1\/signups\/|\/v1\/inquiries$|\/v1\/brand-logos\/|\/v1\/brand-fonts\/|\/v1\/schema\/)/;
 
 export function partnerGuard(deps: GuardDeps) {
   return async (req: FastifyRequest, reply: FastifyReply) => {

@@ -16,6 +16,7 @@ export default function DocsHome() {
         <li>Add a webhook endpoint so you hear about each step.</li>
       </ol>
       <pre><code>{`curl ${api}/v1/filings -H "x-api-key: $COFILE_API_KEY"`}</code></pre>
+      <p className="small">For your tools and AI coding agents: <a href="/docs.md">all docs in one Markdown file</a>, <a href="/openapi.json">OpenAPI 3.1</a> (with the full FilingRequest schema and every webhook) and <a href="/llms.txt">llms.txt</a>.</p>
       <p className="small muted">Base URL: <code>{api}</code>. All requests and responses are JSON.</p>
       <h2>Guides</h2>
       <div className="grid">

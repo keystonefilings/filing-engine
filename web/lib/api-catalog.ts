@@ -273,7 +273,7 @@ export const FILING_STATUSES: { status: string; meaning: string }[] = [
 ];
 
 /** OpenAPI 3.1 document built from ENDPOINTS. Schemas are summarized; the guides carry the field detail. */
-export function openApiDocument(serverUrl: string): Record<string, unknown> {
+export function openApiDocument(serverUrl: string, extra: { filingRequestSchema?: unknown; events?: [string, string][] } = {}): Record<string, unknown> {
   const paths: Record<string, Record<string, unknown>> = {};
   for (const e of ENDPOINTS) {
     const params = [...e.path.matchAll(/\{(\w+)\}/g)].map((m) => ({ name: m[1], in: "path", required: true, schema: { type: "string" } }));
@@ -284,14 +284,45 @@ export function openApiDocument(serverUrl: string): Record<string, unknown> {
       security: e.auth === "api_key" ? [{ apiKey: [] }] : [],
       responses: Object.fromEntries(e.responses.map((r) => [String(r.status), { description: r.description, ...(r.example !== undefined ? { content: { "application/json": { example: r.example } } } : {}) }])),
     };
-    if (e.body) op.requestBody = { required: true, description: e.body, content: { "application/json": { schema: { type: "object" }, example: e.bodyExample } } };
+    const bodySchema = e.id === "create-filing" && extra.filingRequestSchema ? { $ref: "#/components/schemas/FilingRequest" } : { type: "object" };
+    if (e.body) op.requestBody = { required: true, description: e.body, content: { "application/json": { schema: bodySchema, example: e.bodyExample } } };
     (paths[e.path] ??= {})[e.method.toLowerCase()] = op;
   }
   return {
     openapi: "3.1.0",
     info: { title: "Filing engine API", version: "1", description: "Automated state business filings: LLC formation, EINs, certificates and payroll registration, each approved by the client before it is filed." },
     servers: [{ url: serverUrl }],
-    components: { securitySchemes: { apiKey: { type: "apiKey", in: "header", name: "x-api-key" } } },
+    components: {
+      securitySchemes: { apiKey: { type: "apiKey", in: "header", name: "x-api-key" } },
+      schemas: {
+        ...(extra.filingRequestSchema ? { FilingRequest: extra.filingRequestSchema } : {}),
+        WebhookEvent: {
+          type: "object", required: ["id", "type", "tenantId", "filingId", "occurredAt", "data"],
+          properties: {
+            id: { type: "string", description: "Unique per event; deliveries of one event share it." },
+            type: { type: "string", description: "The event name, e.g. filing.completed." },
+            tenantId: { type: "string" }, filingId: { type: "string" }, runId: { type: "string" },
+            occurredAt: { type: "string", format: "date-time" },
+            data: { type: "object", description: "What the event carries (see each event)." },
+          },
+        },
+      },
+    },
     paths,
+    // Every event we POST to your endpoints, signed (x-cofile-signature: t=<unix>,v1=<hex HMAC-SHA256 of "t.body">).
+    ...(extra.events?.length ? {
+      webhooks: Object.fromEntries(extra.events.map(([name, when]) => [name, {
+        post: {
+          summary: name, description: when,
+          parameters: [
+            { name: "x-cofile-event", in: "header", required: true, schema: { type: "string", const: name } },
+            { name: "x-cofile-delivery", in: "header", required: true, schema: { type: "string" }, description: "Unique per delivery attempt series; use it to ignore repeats." },
+            { name: "x-cofile-signature", in: "header", required: true, schema: { type: "string" }, description: "t=<unix seconds>,v1=<hex HMAC-SHA256 of `${t}.${rawBody}` with your endpoint secret>" },
+          ],
+          requestBody: { required: true, content: { "application/json": { schema: { $ref: "#/components/schemas/WebhookEvent" } } } },
+          responses: { "200": { description: "Any 2xx within a few seconds; anything else is retried after 1m, 5m, 30m, 2h and 12h." } },
+        },
+      }])),
+    } : {}),
   };
 }
