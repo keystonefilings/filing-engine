@@ -246,7 +246,7 @@ export const ClientCompanySettings = z.object({
   }).optional(),
   /** A partner firm that signed up on the landing page: what it told us, and the setup guide's progress. */
   partner: z.object({
-    companyType: z.enum(["cpa", "payroll", "cfo", "other"]).optional(),
+    companyType: z.enum(["cpa", "payroll", "cfo", "title", "other"]).optional(),
     contactName: z.string().max(120).optional(),
     contactEmail: z.string().email().optional(),
     phone: z.string().max(40).optional(),

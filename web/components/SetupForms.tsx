@@ -32,7 +32,7 @@ export function DetailsForm({ action, v }: { action: Action; v: DetailsValues })
       <div className="field"><label htmlFor="d-type">Kind of firm</label>
         <select id="d-type" name="companyType" defaultValue={v.companyType ?? "other"}>
           <option value="cpa">CPA or accounting firm</option><option value="payroll">Payroll company</option>
-          <option value="cfo">Fractional CFO firm</option><option value="other">Something else</option>
+          <option value="cfo">Fractional CFO firm</option><option value="title">Title company</option><option value="other">Something else</option>
         </select></div>
       <div className="field-row n2">
         <div className="field"><label htmlFor="d-cn">Main contact</label><input id="d-cn" name="contactName" type="text" defaultValue={v.contactName} /></div>

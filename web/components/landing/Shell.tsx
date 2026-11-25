@@ -45,7 +45,7 @@ export function Shell({ children, nav = false }: { children: React.ReactNode; na
       {children}
       <footer className="band">
         <div className="wrap">
-          <span>{name} · state filings for CPA, payroll and CFO firms, and filing companies</span>
+          <span>{name} · state filings for CPA, payroll, CFO and title firms, and filing companies</span>
           <span>New York · New Jersey · Florida · IRS</span>
         </div>
       </footer>

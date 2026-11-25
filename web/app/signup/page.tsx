@@ -13,7 +13,7 @@ export default function SignupPage() {
         <div className="auth-card wide">
           <span className="field-label">Partner account</span>
           <h2>Create your firm&apos;s account</h2>
-          <p className="lede">For CPA, payroll and CFO firms filing for their clients. Next you&apos;ll add your branding and choose how state fees are paid.</p>
+          <p className="lede">For CPA, payroll, CFO and title firms filing for their clients. Next you&apos;ll add your branding and choose how state fees are paid.</p>
           <PartnerSignupForm action={signUpPartner} approvalRequired={partnerApprovalRequired()} />
           <p className="hero-note">A filing company or platform? <Link href="/#enterprise">Talk to us about enterprise</Link>.</p>
         </div>

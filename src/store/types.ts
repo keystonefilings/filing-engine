@@ -276,7 +276,7 @@ export interface IntakeLinkRecord {
 
 export interface PartnerSignupDetails {
   companyName: string;
-  companyType: "cpa" | "payroll" | "cfo" | "other";
+  companyType: "cpa" | "payroll" | "cfo" | "title" | "other";
   phone?: string;
   website?: string;
   states?: string[];

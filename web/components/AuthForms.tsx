@@ -85,6 +85,7 @@ export function PartnerSignupForm({ action, approvalRequired }: { action: Action
             <option value="cpa">CPA or accounting firm</option>
             <option value="payroll">Payroll company</option>
             <option value="cfo">Fractional CFO firm</option>
+            <option value="title">Title company</option>
             <option value="other">Something else</option>
           </select><Err s={s} k="companyType" /></label>
       </div>

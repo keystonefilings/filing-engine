@@ -88,7 +88,7 @@ function readResetToken(token: string): { userId: string; secret: string } | nul
 }
 const PartnerSignupBody = z.object({
   companyName: z.string().trim().min(2).max(120),
-  companyType: z.enum(["cpa", "payroll", "cfo", "other"]),
+  companyType: z.enum(["cpa", "payroll", "cfo", "title", "other"]),
   name: z.string().trim().min(2).max(120),
   email,
   password: z.string().max(200),
@@ -112,7 +112,7 @@ const NewUserBody = z.object({ email, name: z.string().trim().min(2).max(120), p
 const ProfileBody = z.object({
   name: z.string().trim().min(2).max(120).optional(),
   partner: z.object({
-    companyType: z.enum(["cpa", "payroll", "cfo", "other"]).optional(),
+    companyType: z.enum(["cpa", "payroll", "cfo", "title", "other"]).optional(),
     contactName: z.string().trim().max(120).optional(),
     contactEmail: z.string().email().optional(),
     phone: z.string().trim().max(40).optional(),

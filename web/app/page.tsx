@@ -53,7 +53,7 @@ export default function Home() {
         <section className="hero band">
           <div className="wrap">
             <div className="hero-copy">
-              <span className="field-label">For CPA, payroll and CFO firms</span>
+              <span className="field-label">For CPA, payroll, CFO and title firms</span>
               <h1>State filings, done on the government sites. Approved before they leave.</h1>
               <p className="lede">{name} fills formation, EIN and payroll registration filings on the live state and IRS websites, under your brand. It reads every form fresh, checks every fee, and submits nothing until your client approves the exact data.</p>
               <div className="hero-actions">
@@ -103,7 +103,7 @@ export default function Home() {
             <div className="paths">
               <article className="path">
                 <span className="field-label">Partner firms</span>
-                <h3>For CPA, payroll and CFO firms</h3>
+                <h3>For CPA, payroll, CFO and title firms</h3>
                 <ul>
                   <li>Create an account, then add your logo and colors.</li>
                   <li>Choose how state fees are paid: one card for everything, or one per filing type, with a backup card.</li>

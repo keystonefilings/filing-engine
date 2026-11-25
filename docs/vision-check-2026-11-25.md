@@ -253,7 +253,7 @@ Rows refer to the status tables above.
 - [x] V35. API gaps: cancel, approve through the API, pagination, webhook test delivery and log, 409 on idempotency key reuse with a different payload (row 15, risk 6). **Done**: `POST /v1/filings/{id}/cancel` (partners too, for their own), `POST /v1/filings/{id}/approval`, `limit`/`before` on `GET /v1/filings`, `POST /v1/webhooks/test` and `GET /v1/webhooks/deliveries`, and 409 for a reused key with a different request (filings made before this keep the old behavior). All in the API reference.
 - [x] V36. Firm invite links get their own scoped key, not the inviter's session key (risk 5). **Done**: inviting a firm's staff creates their own account, limited to that firm by the engine, with an emailed 7-day link to set their password; no key is in any link. Old invite links no longer sign anyone in.
 - [ ] V37. Sign in with Google (row 13, "eventually").
-- [ ] V38. Landing page: remove `noindex` when launching, offer title companies, stop freezing env values at build (rows 9, 10).
+- [x] V38. Landing page: remove `noindex` when launching, offer title companies, stop freezing env values at build (rows 9, 10). **Done**: indexing is a setting (`SITE_INDEXABLE=true` at launch); title companies can sign up and are named on the landing and sign-up pages; every page reads its settings when served.
 - [ ] V39. Embedding: decide whether the portal may be framed on a customer's site (`X-Frame-Options: DENY` today) (row 15). *Needs: what "embedded" in the memo meant.*
 
 ### Step 6: channels

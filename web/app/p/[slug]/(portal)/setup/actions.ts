@@ -52,7 +52,7 @@ export async function saveDetails(slug: string, _prev: SetupState, fd: FormData)
     copyEmail: copyEmail || null,
     ...(fd.has("servicesShown") ? { brand: { filingKinds: services } } : {}),
     partner: {
-      ...(["cpa", "payroll", "cfo", "other"].includes(type) ? { companyType: type } : {}),
+      ...(["cpa", "payroll", "cfo", "title", "other"].includes(type) ? { companyType: type } : {}),
       contactName: text(fd, "contactName", 120) || undefined,
       contactEmail: text(fd, "contactEmail") || undefined,
       phone: text(fd, "phone", 40) || undefined,

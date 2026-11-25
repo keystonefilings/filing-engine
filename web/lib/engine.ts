@@ -107,7 +107,7 @@ export function filingTitle(f: Filing): string {
 
 // ---- Accounts, sign-up and self-service setup ----
 
-export type CompanyType = "cpa" | "payroll" | "cfo" | "other";
+export type CompanyType = "cpa" | "payroll" | "cfo" | "title" | "other";
 
 export interface PublicUser {
   id: string; email: string; name: string; kind: "enterprise" | "partner"; tenantId: string; clientCompanyId?: string;

@@ -53,7 +53,7 @@ export async function signInWithEmail(_prev: FormState, fd: FormData): Promise<F
   redirect(`/p/${encodeURIComponent(slug)}${clientCompany.partner && done.length < 3 ? "/setup" : ""}`);
 }
 
-const TYPES = new Set(["cpa", "payroll", "cfo", "other"]);
+const TYPES = new Set(["cpa", "payroll", "cfo", "title", "other"]);
 const STATES = new Set(["NY", "NJ", "FL"]);
 
 /** Partner sign-up: CPA, payroll and CFO firms. Depending on the platform's setting, the account waits for approval or opens at once. */
