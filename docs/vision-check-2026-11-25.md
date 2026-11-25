@@ -264,7 +264,7 @@ Rows refer to the status tables above.
 
 ### Step 7: copy and release hygiene
 - [ ] V44. 20-persona copy review of the full site, best recommendations applied (row 29).
-- [ ] V45. CI on push to `main`, and a test gate before the Fly deploy (risk 7).
+- [x] V45. CI on push to `main`, and a test gate before the Fly deploy (risk 7). **Done**: `test.yml` runs on pull requests, pushes to `main` and before each deploy; `fly-deploy.yml` deploys only after it passes.
 
 ### Found while building
 - [x] V46. Forms lost everything typed after an error (React 19 clears a form after its action, so a wrong password emptied the email and a sign-up error emptied the form). **Done**: `web/components/useKeptForm.ts` keeps values on every action form; forms that create something still clear after a success.

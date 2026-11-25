@@ -1,11 +1,15 @@
-# Runs on every pull request: the engine's typecheck and full test suite (including the tests that
-# drive a real Chromium against the local fixture sites), and the web app's typecheck, tests and
-# build. Read-only: no secrets, no deploy, nothing leaves the runner.
+# Runs on every pull request and every push to main, and before each deploy (fly-deploy.yml calls
+# it): the engine's typecheck and full test suite (including the tests that drive a real Chromium
+# against the local fixture sites), and the web app's typecheck, tests and build. Read-only: no
+# secrets, no deploy, nothing leaves the runner.
 name: Tests
 
 on:
   pull_request:
+  push:
+    branches: [main]
   workflow_dispatch:
+  workflow_call:
 
 permissions:
   contents: read
