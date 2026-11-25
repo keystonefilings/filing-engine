@@ -123,6 +123,39 @@ fly secrets set --stage --app keystone-filing-engine EMAIL_FROM="CoFile <filings
 `EMAIL_FROM` must be an address on the verified domain, and `WEB_BASE_URL` is where the web
 front end runs: password-reset and log-in links in emails point there.
 
+**Subscriptions (Stripe).** Not required to start. In Stripe:
+
+1. Products: create a product per plan (Enterprise, Partner), each with a recurring price. Copy
+   each price id (`price_...`).
+2. Developers, API keys: create a restricted key with write access to Customers, Checkout
+   Sessions and Customer portal, and read access to Prices.
+3. Developers, Webhooks: add the endpoint `https://<your API>/v1/billing/stripe-webhook` with the
+   events `checkout.session.completed`, `customer.subscription.created`,
+   `customer.subscription.updated`, `customer.subscription.deleted`, `customer.subscription.paused`,
+   `customer.subscription.resumed`, `invoice.payment_failed` and `invoice.paid`. Copy its signing
+   secret (`whsec_...`).
+4. Settings, Billing, Customer portal: turn it on (card updates, invoices, cancelling).
+
+```bash
+read -s STRIPE_SECRET_KEY && read -s STRIPE_WEBHOOK_SECRET && fly secrets set --stage --app keystone-filing-engine STRIPE_SECRET_KEY="$STRIPE_SECRET_KEY" STRIPE_WEBHOOK_SECRET="$STRIPE_WEBHOOK_SECRET"
+```
+
+```bash
+fly secrets set --stage --app keystone-filing-engine STRIPE_PRICE_ENTERPRISE=price_xxx STRIPE_PRICE_PARTNER=price_yyy BILLING_REQUIRED=true
+```
+
+With `BILLING_REQUIRED=true` a live filing needs the payer's subscription to be active, in a
+trial, or being retried by Stripe; practice filings are always free. The platform's own filings,
+and the firms an enterprise subscriber files for, are not billed separately.
+
+**Saved cards (Basis Theory).** Not required to start. Create a Public application (permission
+`token:create`) for the web app's `BASIS_THEORY_PUBLIC_KEY`, and a Private application
+(permission `token:read`) for the worker:
+
+```bash
+read -s BASIS_THEORY_API_KEY && fly secrets set --stage --app keystone-filing-engine BASIS_THEORY_API_KEY="$BASIS_THEORY_API_KEY"
+```
+
 To copy a saved key to the clipboard for a password manager without showing it (then clear the
 clipboard with `Set-Clipboard -Value ' '`, and delete the entry from clipboard history if it is on):
 

@@ -16,6 +16,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
           { href: "/dashboard", label: "Overview" }, { href: "/dashboard/filings", label: "Filings" }, { href: "/dashboard/firms", label: "Firms" },
           { href: "/dashboard/keys", label: "API keys" }, { href: "/dashboard/webhooks", label: "Webhooks" },
           { href: "/dashboard/setup", label: "Setup" }, { href: "/dashboard/team", label: "Team" },
+          ...(isPlatformTenant(s.tenantId) ? [] : [{ href: "/dashboard/billing", label: "Billing" }]),
           ...(isPlatformTenant(s.tenantId) ? [{ href: "/dashboard/partners", label: "Sign-ups" }] : []),
           { href: "/docs", label: "Docs" },
         ]}

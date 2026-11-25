@@ -30,6 +30,16 @@ export function deployProblems(s: DeploySettings): string[] {
   return p;
 }
 
+/** V33: billing switched on without what it needs would refuse every live filing. */
+export function billingProblems(s: { secretKey: string | null; webhookSecret?: string; prices: { enterprise?: string; partner?: string }; required: boolean }): string[] {
+  const p: string[] = [];
+  if (!s.required) return p;
+  if (!s.secretKey) p.push("BILLING_REQUIRED is on but STRIPE_SECRET_KEY is not set: nobody could subscribe, so every live filing would be refused");
+  if (!s.webhookSecret) p.push("BILLING_REQUIRED is on but STRIPE_WEBHOOK_SECRET is not set: payments would never be recorded");
+  if (!s.prices.enterprise && !s.prices.partner) p.push("BILLING_REQUIRED is on but no price is set (STRIPE_PRICE_ENTERPRISE, STRIPE_PRICE_PARTNER)");
+  return p;
+}
+
 /** Everything wrong with this process's settings, all at once, so one pass of fixes is enough. */
 export function startupProblems(role: "api" | "worker", env: NodeJS.ProcessEnv = process.env): string[] {
   const p = [...config.problems];
@@ -42,6 +52,7 @@ export function startupProblems(role: "api" | "worker", env: NodeJS.ProcessEnv =
     role, production: config.production, databaseUrl: config.databaseUrl, dataEncryptionKey: config.dataEncryptionKey, onFly: !!env.FLY_APP_NAME,
     artifactBucket: config.artifactBucket, workerWakeUrl: config.workerWakeUrl, workerPort: config.workerPort, workerWakeToken: config.workerWakeToken,
   }));
+  p.push(...billingProblems(config.stripe));
   if (role === "worker" || config.workerEnabled) {
     p.push(...browserSetupProblems({
       sites: Object.values(ADAPTERS).map((a) => a.site), browserProxy: config.browserProxy, siteProxies: config.siteProxies,

@@ -260,6 +260,29 @@ export interface UserRecord {
   passwordReset?: { tokenHash: string; expiresAt: string; sessionGen: number; requestedAt: string; usedAt?: string };
 }
 
+/**
+ * V33: who pays the platform and where their Stripe subscription stands. Kept apart from settings,
+ * which approvals are bound to: a renewal must never void an approval.
+ */
+export interface BillingAccountRecord {
+  /** "tenant:<tenantId>" (an enterprise subscriber) or "firm:<clientCompanyId>" (a partner firm). */
+  id: string;
+  tenantId: string;
+  clientCompanyId?: string;
+  plan: "enterprise" | "partner";
+  customerId?: string;
+  subscriptionId?: string;
+  /** Stripe's subscription status; "none" before the first checkout. */
+  status: "none" | "incomplete" | "incomplete_expired" | "trialing" | "active" | "past_due" | "canceled" | "unpaid" | "paused";
+  priceId?: string;
+  currentPeriodEnd?: string;
+  cancelAtPeriodEnd?: boolean;
+  lastPaymentFailedAt?: string;
+  /** The Stripe event last applied (seconds), so an older event that arrives late changes nothing. */
+  lastEventAt?: number;
+  updatedAt: string;
+}
+
 /** V26: a link a firm sends one client to fill in one filing (the link itself is a sealed token in the web app). */
 export interface IntakeLinkRecord {
   id: string;
@@ -387,6 +410,9 @@ export interface Store {
   getVaultSecret(key: string): Promise<string | null>;
   putVaultSecret(key: string, tenantId: string, sealed: string): Promise<void>;
   deleteVaultSecret(key: string): Promise<void>;
+  getBillingAccount(id: string): Promise<BillingAccountRecord | null>;
+  getBillingAccountByCustomer(customerId: string): Promise<BillingAccountRecord | null>;
+  putBillingAccount(b: BillingAccountRecord): Promise<BillingAccountRecord>;
   createIntakeLink(l: IntakeLinkRecord): Promise<IntakeLinkRecord>;
   getIntakeLink(id: string): Promise<IntakeLinkRecord | null>;
   listIntakeLinks(clientCompanyId: string): Promise<IntakeLinkRecord[]>;

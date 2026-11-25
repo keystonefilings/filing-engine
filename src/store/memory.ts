@@ -1,7 +1,7 @@
 import { randomUUID } from "node:crypto";
 import {
   ClientCompanyOwnershipError,
-  type ApiKeyRecord, type InquiryRecord, type IntakeLinkRecord, type UserRecord, type SignatureRecord, type ApprovalRecord, type DriftHaltRecord, type FilingRecord, type MessageRecord, type NameResolutionRecord, type ReviewGateRecord, type RunRecord, type Store, type SubmitIntentRecord, type WebhookDeliveryRecord,
+  type ApiKeyRecord, type InquiryRecord, type IntakeLinkRecord, type BillingAccountRecord, type UserRecord, type SignatureRecord, type ApprovalRecord, type DriftHaltRecord, type FilingRecord, type MessageRecord, type NameResolutionRecord, type ReviewGateRecord, type RunRecord, type Store, type SubmitIntentRecord, type WebhookDeliveryRecord,
 } from "./types.js";
 import type { ClientCompanySettings, TenantSettings } from "../settings/schema.js";
 import type { PageSnapshot } from "../resolver/types.js";
@@ -133,6 +133,10 @@ export class MemoryStore implements Store {
   async getVaultSecret(key: string) { return this.vaultSecrets.get(key) ?? null; }
   async putVaultSecret(key: string, _tenantId: string, sealed: string) { this.vaultSecrets.set(key, sealed); }
   async deleteVaultSecret(key: string) { this.vaultSecrets.delete(key); }
+  billingAccounts = new Map<string, BillingAccountRecord>();
+  async getBillingAccount(id: string) { return this.billingAccounts.get(id) ?? null; }
+  async getBillingAccountByCustomer(customerId: string) { return [...this.billingAccounts.values()].find((b) => b.customerId === customerId) ?? null; }
+  async putBillingAccount(b: BillingAccountRecord) { this.billingAccounts.set(b.id, b); return b; }
   async createIntakeLink(l: IntakeLinkRecord) { if (this.intakeLinks.has(l.id)) throw new Error("link exists"); this.intakeLinks.set(l.id, l); return l; }
   async getIntakeLink(id: string) { return this.intakeLinks.get(id) ?? null; }
   async listIntakeLinks(clientCompanyId: string) { return [...this.intakeLinks.values()].filter((l) => l.clientCompanyId === clientCompanyId).sort((a, b) => b.createdAt.localeCompare(a.createdAt)); }

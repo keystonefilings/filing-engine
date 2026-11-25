@@ -20,7 +20,7 @@ const app = buildServer({
   staffKeys: parseStaffKeys(process.env.STAFF_API_KEYS, config.production),
   // Dashboard session keys are signed with the approval-link secret (domain-separated).
   sessionSecret: config.approvalSigningSecret,
-  platformTenantId: process.env.PLATFORM_TENANT_ID || "keystone",
+  platformTenantId: config.platformTenantId, billing: sys.billing,
   // Partner sign-ups wait for approval unless this is set to "automatic".
   partnerSignupMode: process.env.PARTNER_SIGNUP_MODE === "automatic" ? "automatic" : "approval",
   email: sys.email, webBaseUrl: config.webBaseUrl, platformName: config.platformName, webhooks: sys.webhooks, secrets: sys.secrets ?? undefined,

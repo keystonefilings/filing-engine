@@ -171,6 +171,15 @@ create table if not exists vault_secrets (
   updated_at timestamptz not null default now()
 );
 
+-- V33: each paying account's Stripe subscription (apart from settings, which approvals are bound to).
+create table if not exists billing_accounts (
+  id text primary key,
+  tenant_id text not null,
+  customer_id text unique,
+  updated_at timestamptz not null default now(),
+  doc jsonb not null
+);
+
 -- Client links (V26): one link, one client, one filing; listed and revocable by the firm.
 create table if not exists intake_links (
   id text primary key,

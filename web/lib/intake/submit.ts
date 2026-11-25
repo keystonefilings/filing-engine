@@ -84,6 +84,9 @@ export async function submitIntake(kind: FilingKind, fd: FormData, ctx: SubmitCo
       const list = Array.isArray(body?.issues) ? body.issues : Array.isArray(body?.error) ? (body.error as { path: (string | number)[]; message: string }[]).map((i) => ({ path: (i.path ?? []).join("."), message: i.message })) : [];
       return { ok: false, error: "The filing engine found problems with these answers.", issues: list.map((i) => ({ path: i.path, message: i.message })) };
     }
+    if (e instanceof EngineError && e.status === 402) {
+      return { ok: false, error: ctx.publicPath ? "This firm can't take filings online right now. Please contact them directly." : "Your subscription isn't active, so this can't be filed for real. Subscribe under Billing, or send it as a practice filing.", issues: [] };
+    }
     return { ok: false, error: e instanceof EngineError ? e.message : "The filing could not be created. Please try again.", issues: [] };
   }
 }

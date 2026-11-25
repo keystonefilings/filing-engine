@@ -80,10 +80,17 @@ export async function bootstrap(opts: { withExecutor: boolean; workerId?: string
   const { CardCodes } = await import("./payments/card-codes.js");
   const cardVault = config.basisTheoryApiKey ? new BasisTheoryCardVault({ apiKey: config.basisTheoryApiKey }) : undefined;
   const cardCodes = new CardCodes(store);
+  const { BillingService } = await import("./billing/service.js");
+  const { StripeClient } = await import("./billing/stripe.js");
+  const billing = new BillingService({
+    store, stripe: config.stripe.secretKey ? new StripeClient({ secretKey: config.stripe.secretKey, apiUrl: config.stripe.apiUrl }) : undefined,
+    webhookSecret: config.stripe.webhookSecret, prices: config.stripe.prices, required: config.stripe.required,
+    trialDays: config.stripe.trialDays, platformTenantId: config.platformTenantId, webBaseUrl: config.webBaseUrl,
+  });
   const executor = opts.withExecutor ? new RunExecutor({ store, artifacts, harness, drift, vault, reviewGate, registeredAgents, cardVault, cardCodes }) : undefined;
   const limiter = new ConcurrencyLimiter({
     "site:IRS": config.siteConcurrency.IRS, "site:NY": config.siteConcurrency.NY, "site:NJ": config.siteConcurrency.NJ,
   });
-  const service = new FilingService({ store, approvals, webhooks, queue, vault, drift, nameResolution, reviewGate, registeredAgents, notifier, executor, cardCodes, limiter, dryRunDefault: config.dryRunDefault, workerId: opts.workerId });
-  return { store, artifacts, approvals, webhooks, queue, vault, secrets, drift, nameResolution, reviewGate, registeredAgents, notifier, email, harness, executor, service };
+  const service = new FilingService({ store, approvals, webhooks, queue, vault, drift, nameResolution, reviewGate, registeredAgents, notifier, executor, cardCodes, billing, limiter, dryRunDefault: config.dryRunDefault, workerId: opts.workerId });
+  return { store, artifacts, approvals, webhooks, queue, vault, secrets, drift, nameResolution, reviewGate, registeredAgents, notifier, email, harness, executor, service, billing };
 }

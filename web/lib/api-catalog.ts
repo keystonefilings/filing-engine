@@ -49,6 +49,7 @@ export const ENDPOINTS: Endpoint[] = [
       { status: 401, description: "Missing or invalid API key." },
       { status: 403, description: "tenantId in the body is not your tenant." },
       { status: 422, description: "Validation failed. `issues` lists each problem with its path.", example: { error: "validation failed", issues: [{ path: "formation.county", message: "county is required in NY", severity: "error" }] } },
+      { status: 402, description: "A live filing needs an active subscription (practice filings are free).", example: { error: "a subscription is needed to file for real (practice filings are free)", billing: { plan: "enterprise", status: "none" } } },
     ],
   },
   {
@@ -192,6 +193,12 @@ export const ENDPOINTS: Endpoint[] = [
     description: "Type the code into a Basis Theory field in your own page (never send the code itself here) and create a token of type `token` with data `{ cvc }` and `expires_at` within the hour. Send that token's id. Every filing waiting for this card goes back in the queue at once, and the code is used for an hour at most. A firm's own card takes the same body at `/v1/client-companies/{id}/payment-methods/{methodId}/code`.",
     body: "{ tokenId, expiresAt? }", bodyExample: { tokenId: "3f8c5a2e-1b7d-4c9e-8a6f-2d4b9e1c7a50", expiresAt: "2026-11-25T16:00:00Z" },
     responses: [{ status: 200, description: "Kept; the waiting filings are queued.", example: { expiresAt: "2026-11-25T16:00:00.000Z", queued: ["f_123"] } }, { status: 404, description: "No such card for state fees." }, { status: 409, description: "The card isn't held in the card vault." }, { status: 422, description: "Not a token id." }],
+  },
+  {
+    id: "billing", method: "GET", path: "/v1/account/billing", group: "Account", auth: "api_key",
+    summary: "Your subscription",
+    description: "Plan, price and status of the subscription that pays for live filings. With billing required, creating a live filing without a subscription in good standing (active, trialing or past_due) returns 402; practice filings are always free. Subscribe and manage billing in the dashboard.",
+    responses: [{ status: 200, description: "The subscription.", example: { billed: true, plan: "enterprise", status: "active", canFileLive: true, required: true, configured: true, price: { amount: 49900, currency: "usd", interval: "month" }, currentPeriodEnd: "2026-12-25T00:00:00.000Z", cancelAtPeriodEnd: false } }],
   },
   {
     id: "list-keys", method: "GET", path: "/v1/api-keys", group: "API keys", auth: "api_key",

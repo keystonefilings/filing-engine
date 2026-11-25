@@ -5,6 +5,7 @@ import { StatusBadge } from "@/components/StatusBadge";
 import { NEEDS_ACTION } from "@/lib/status";
 import { filingKind } from "@/lib/intake/forms";
 import { waitingForCardCodes } from "@/lib/cards";
+import { billingSummary } from "@/lib/billing";
 
 export const metadata = { title: "Filings" };
 
@@ -14,7 +15,8 @@ export default async function FilingsPage({ params }: { params: Promise<{ slug: 
   const { filings } = await engine<{ filings: Filing[] }>(session.apiKey, `/v1/filings?clientCompanyId=${encodeURIComponent(session.clientCompanyId)}`);
   const base = `/p/${encodeURIComponent(slug)}`;
   const waiting = filings.filter((f) => NEEDS_ACTION.has(f.status)).length;
-  const toPay = (await waitingForCardCodes()).reduce((n, w) => n + w.filings.length, 0);
+  const [codes, billing] = await Promise.all([waitingForCardCodes(), billingSummary()]);
+  const toPay = codes.reduce((n, w) => n + w.filings.length, 0);
   return (
     <div className="stack">
       <div className="row">
@@ -22,6 +24,7 @@ export default async function FilingsPage({ params }: { params: Promise<{ slug: 
         <span className="spacer" />
         <Link className="btn primary" href={`${base}/new`}>New filing</Link>
       </div>
+      {billing?.billed && !billing.canFileLive ? <p className="notice warn">Real filings need an active subscription; practice filings are free. <Link href={`${base}/billing`}>Subscribe</Link></p> : null}
       {toPay ? <p className="notice warn">{toPay === 1 ? "1 approved filing is" : `${toPay} approved filings are`} ready to pay and need your card&apos;s security code. <Link href={`${base}/pay`}>Pay and file</Link></p> : null}
       {waiting ? <p className="notice warn">{waiting === 1 ? "1 filing needs" : `${waiting} filings need`} someone to act.</p> : null}
       {filings.length === 0 ? (

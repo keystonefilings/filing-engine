@@ -27,7 +27,7 @@ export default async function PortalLayout({ children, params }: { children: Rea
           { href: `${base}/new`, label: "New filing" },
           { href: `${base}/client-links`, label: "Client links" },
           { href: `${base}/signatures`, label: "Signatures" },
-          ...(partner ? [{ href: `${base}/setup`, label: "Setup" }] : []),
+          ...(partner ? [{ href: `${base}/setup`, label: "Setup" }, { href: `${base}/billing`, label: "Billing" }] : []),
         ]}
         right={<form action="/logout" method="post" className="row">{cobrand}{session.signedInWith === "password" ? <Link className="small muted" href={`${base}/password`} title="Change password">{session.email}</Link> : <span className="small muted">{session.email}</span>}<button className="btn small" type="submit">Sign out</button></form>}
       />

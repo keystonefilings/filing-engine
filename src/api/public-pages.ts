@@ -1,6 +1,7 @@
 import type { FastifyInstance } from "fastify";
 import type { FilingService } from "../orchestrator/service.js";
 import { IdempotencyConflict, ValidationFailed } from "../orchestrator/service.js";
+import { SubscriptionRequired } from "../billing/service.js";
 import type { ClientCompanySettings } from "../settings/schema.js";
 import type { Store } from "../store/types.js";
 import { RateLimiter } from "../users/rate-limit.js";
@@ -56,6 +57,7 @@ export function registerPublicPages(app: FastifyInstance, deps: { store: Store; 
     } catch (e) {
       if (e instanceof ValidationFailed) return reply.code(422).send({ error: "validation failed", issues: e.issues });
       if (e instanceof IdempotencyConflict) return reply.code(409).send({ error: e.message });
+      if (e instanceof SubscriptionRequired) return reply.code(402).send({ error: "this firm can't take filings online right now" });
       throw e;
     }
   });

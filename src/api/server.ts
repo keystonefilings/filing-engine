@@ -21,6 +21,9 @@ import { registerBrandLogos } from "./brand-logos.js";
 import { registerIntakeLinks } from "./intake-links.js";
 import { registerPublicPages } from "./public-pages.js";
 import { registerCardCodes } from "./card-codes.js";
+import { registerBilling } from "../billing/routes.js";
+import type { BillingService } from "../billing/service.js";
+import { SubscriptionRequired } from "../billing/service.js";
 import { readSessionKey, SESSION_PREFIX } from "../users/session-token.js";
 import { partnerGuard } from "../users/partner-guard.js";
 import { FONT_PRESETS, googleFontHref, type FontPreset } from "../settings/fonts.js";
@@ -57,6 +60,8 @@ export interface ApiDeps {
   webhooks?: WebhookDispatcher;
   /** The site's name (CoFile): the platform tenant's approval pages and partner firms' "with …". */
   platformName?: string;
+  /** V33: subscriptions through Stripe. Absent: no billing routes. */
+  billing?: BillingService;
 }
 
 function filingTitle(f: FilingRecord | null): string {
@@ -148,6 +153,7 @@ export function buildServer(deps: ApiDeps): FastifyInstance {
     } catch (e) {
       if (e instanceof ValidationFailed) return reply.code(422).send({ error: "validation failed", issues: e.issues });
       if (e instanceof IdempotencyConflict) return reply.code(409).send({ error: e.message, filingId: e.filingId });
+      if (e instanceof SubscriptionRequired) return reply.code(402).send({ error: e.message, billing: { plan: e.account.plan, status: e.status } });
       throw e;
     }
   });
@@ -366,6 +372,7 @@ export function buildServer(deps: ApiDeps): FastifyInstance {
   registerSignatures(app, { store: deps.store, tenantOf });
   registerIntakeLinks(app, { store: deps.store, authOf });
   registerCardCodes(app, { store: deps.store, service: deps.service, authOf });
+  if (deps.billing) registerBilling(app, { store: deps.store, billing: deps.billing, authOf });
   registerPublicPages(app, { store: deps.store, service: deps.service, platformTenantId: deps.platformTenantId ?? "keystone" });
   registerUsers(app, {
     store: deps.store, authOf, staffOf, sessionSecret,

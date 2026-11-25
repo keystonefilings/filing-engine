@@ -33,6 +33,7 @@ import { createHash } from "node:crypto";
 import { cardRefsForFiling } from "../payments/card-vault.js";
 import { CODE_MIN_LEFT_MS, cardOwnerFor, sameOwner, type CardCodes, type CardOwner } from "../payments/card-codes.js";
 import type { PaymentMethodRef } from "../settings/payments.js";
+import type { BillingService } from "../billing/service.js";
 
 export interface FilingServiceDeps {
   /** Which adapter files a request (tests inject their own); default: the adapter registry. */
@@ -50,6 +51,8 @@ export interface FilingServiceDeps {
   executor?: RunExecutor; // absent on the API tier
   /** V18: the security codes card owners give for stored cards (payments/card-codes.ts). */
   cardCodes?: CardCodes;
+  /** V33: a live filing needs the payer's subscription in good standing (when billing is required). */
+  billing?: Pick<BillingService, "assertCanFileLive">;
   balances?: BalanceProvider;
   limiter?: ConcurrencyLimiter;
   dryRunDefault: boolean;
@@ -160,6 +163,8 @@ export class FilingService {
     }
     const req = parsed.data;
     if (req.ein && !req.ein.mode) req.ein.mode = client.einMode; // decision 1
+    // V33: practice filings are always free; a live one needs the subscription (SubscriptionRequired).
+    if (!(req.dryRun ?? this.d.dryRunDefault)) await this.d.billing?.assertCanFileLive(tenant, client);
 
     const issues = [...applied.issues, ...validateFiling(req)];
     const now = new Date().toISOString();

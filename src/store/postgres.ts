@@ -4,7 +4,7 @@ import path from "node:path";
 import { randomUUID } from "node:crypto";
 import {
   ClientCompanyOwnershipError,
-  type ApiKeyRecord, type InquiryRecord, type IntakeLinkRecord, type UserRecord, type SignatureRecord, type ApprovalRecord, type DriftHaltRecord, type FilingRecord, type MessageRecord, type NameResolutionRecord, type ReviewGateRecord, type RunRecord, type Store, type SubmitIntentRecord, type WebhookDeliveryRecord,
+  type ApiKeyRecord, type InquiryRecord, type IntakeLinkRecord, type BillingAccountRecord, type UserRecord, type SignatureRecord, type ApprovalRecord, type DriftHaltRecord, type FilingRecord, type MessageRecord, type NameResolutionRecord, type ReviewGateRecord, type RunRecord, type Store, type SubmitIntentRecord, type WebhookDeliveryRecord,
 } from "./types.js";
 import type { ClientCompanySettings, TenantSettings } from "../settings/schema.js";
 import type { PageSnapshot } from "../resolver/types.js";
@@ -249,6 +249,12 @@ export class PostgresStore implements Store {
     await this.pool.query(`insert into vault_secrets (key, tenant_id, sealed) values ($1,$2,$3) on conflict (key) do update set sealed = excluded.sealed, updated_at = now()`, [key, tenantId, sealed]);
   }
   async deleteVaultSecret(key: string) { await this.pool.query(`delete from vault_secrets where key=$1`, [key]); }
+  async getBillingAccount(id: string) { return this.doc<BillingAccountRecord>(`select doc from billing_accounts where id=$1`, [id]); }
+  async getBillingAccountByCustomer(customerId: string) { return this.doc<BillingAccountRecord>(`select doc from billing_accounts where customer_id=$1`, [customerId]); }
+  async putBillingAccount(b: BillingAccountRecord) {
+    await this.pool.query(`insert into billing_accounts (id, tenant_id, customer_id, doc) values ($1,$2,$3,$4) on conflict (id) do update set customer_id = excluded.customer_id, doc = excluded.doc, updated_at = now()`, [b.id, b.tenantId, b.customerId ?? null, b]);
+    return b;
+  }
   async createIntakeLink(l: IntakeLinkRecord) {
     await this.pool.query(`insert into intake_links (id, tenant_id, client_company_id, doc) values ($1,$2,$3,$4)`, [l.id, l.tenantId, l.clientCompanyId, l]);
     return l;
