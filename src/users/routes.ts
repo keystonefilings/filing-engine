@@ -474,6 +474,46 @@ export function registerUsers(app: FastifyInstance, deps: UsersDeps): void {
     return { inquiries: await deps.store.listInquiries() };
   });
 
+  // V32: staff decide an enterprise request. Approve creates the subscriber and its first user,
+  // and emails that person a link (7 days) to set their own password; nobody else ever knows it.
+  app.post("/v1/inquiries/:id/decision", async (req, reply) => {
+    const staff = deps.staffOf(req);
+    let by = staff ?? "";
+    if (!staff) {
+      const tenantId = await requireTenantScope(req, reply);
+      if (!tenantId) return reply;
+      if (tenantId !== deps.platformTenantId) return reply.code(403).send({ error: "platform only" });
+      by = (await deps.authOf(req))?.user?.email ?? "api key";
+    }
+    const parsed = z.object({ action: z.enum(["approve", "decline"]), tenantId: z.string().regex(/^[a-z0-9][a-z0-9-]{1,40}$/).optional() }).safeParse(req.body);
+    if (!parsed.success) return reply.code(422).send({ error: "send action: approve or decline" });
+    const q = await deps.store.getInquiry((req.params as { id: string }).id);
+    if (!q) return reply.code(404).send({ error: "not found" });
+    if (q.status === "approved" || q.status === "declined") return reply.code(409).send({ error: `already ${q.status}` });
+    const at = now().toISOString();
+    if (parsed.data.action === "decline") return { inquiry: await deps.store.updateInquiry(q.id, { status: "declined", decidedAt: at, decidedBy: by }) };
+    if (await deps.store.findUserByEmail(q.email)) return reply.code(409).send({ error: "that email already has an account" });
+    let tenantId = parsed.data.tenantId ?? slugFor(q.company);
+    if (parsed.data.tenantId && (await deps.store.getTenant(tenantId))) return reply.code(409).send({ error: "that account id is taken" });
+    for (let i = 2; tenantId === deps.platformTenantId || (await deps.store.getTenant(tenantId)); i++) tenantId = `${slugFor(q.company)}-${i}`;
+    await deps.store.putTenant(TenantSettings.parse({ tenantId, name: q.company }));
+    const u: UserRecord = {
+      id: randomUUID(), email: q.email, name: q.name, kind: "enterprise", tenantId, status: "active",
+      // A random password nobody knows: the person sets their own from the email.
+      passwordHash: await hashPassword(randomBytes(24).toString("base64url")), sessionGen: 0, createdAt: at, createdBy: by,
+    };
+    await deps.store.createUser(u);
+    const secret = randomBytes(32).toString("base64url");
+    await deps.store.updateUser(u.id, { passwordReset: { tokenHash: sha256(secret).toString("hex"), expiresAt: new Date(now().getTime() + 7 * 86_400_000).toISOString(), sessionGen: 0, requestedAt: at } });
+    void deps.email?.send({ address: u.email, name: u.name }, {
+      subject: "Your account is ready",
+      body: `Welcome, ${u.name}. The enterprise account for ${q.company} is set up. Open the link below to choose your password; it works for 7 days.\n\nAfter that you can add your team, API keys and webhooks from the dashboard.`,
+      link: `${deps.webBaseUrl}/reset-password?token=${encodeURIComponent(`${u.id}.${secret}`)}`,
+    }).catch((e) => console.error("welcome email failed", (e as Error).message));
+    const inquiry = await deps.store.updateInquiry(q.id, { status: "approved", decidedAt: at, decidedBy: by, tenantId });
+    return reply.code(201).send({ inquiry, tenantId, user: publicUser(u) });
+  });
+
   // ---- Users of a subscriber ----
   // Staff create a subscriber's first enterprise user once its request is approved.
   app.post("/v1/tenants/:id/users", async (req, reply) => {

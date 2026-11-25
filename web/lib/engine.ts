@@ -117,7 +117,7 @@ export interface PublicUser {
 
 export interface SignInResult { user: PublicUser; sessionKey: string; expiresAt: string }
 
-export interface Inquiry { id: string; createdAt: string; name: string; company: string; email: string; phone?: string; states?: string; volume?: string; message?: string }
+export interface Inquiry { id: string; createdAt: string; name: string; company: string; email: string; phone?: string; states?: string; volume?: string; message?: string; status?: string; tenantId?: string; decidedBy?: string }
 
 export interface PaymentMethodRef { id: string; label: string; provider: string; brand?: string; last4?: string; expMonth?: number; expYear?: number; purpose: "state_fees" | "subscription" }
 export interface PaymentRouting { mode: "single" | "per_filing"; defaultMethodId?: string; fallbackMethodId?: string; byFilingKind: Record<string, string>; subscriptionMethodId?: string }

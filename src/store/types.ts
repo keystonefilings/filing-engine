@@ -295,7 +295,11 @@ export interface InquiryRecord {
   volume?: string;
   message?: string;
   createdAt: string;
-  status: "new" | "contacted" | "closed";
+  status: "new" | "contacted" | "closed" | "approved" | "declined";
+  /** V32: the staff decision, and the subscriber an approval created. */
+  decidedAt?: string;
+  decidedBy?: string;
+  tenantId?: string;
 }
 
 export interface WebhookDeliveryRecord {
@@ -386,6 +390,8 @@ export interface Store {
   listIntakeLinks(clientCompanyId: string): Promise<IntakeLinkRecord[]>;
   updateIntakeLink(id: string, patch: Partial<IntakeLinkRecord>): Promise<IntakeLinkRecord>;
   createInquiry(i: InquiryRecord): Promise<InquiryRecord>;
+  getInquiry(id: string): Promise<InquiryRecord | null>;
+  updateInquiry(id: string, patch: Partial<InquiryRecord>): Promise<InquiryRecord>;
   listInquiries(): Promise<InquiryRecord[]>;
   // run leases: the worker running a filing holds and renews one; recovery skips live leases
   /** Takes the filing's lease unless another unexpired one holds it. Returns the lease token, or null. */

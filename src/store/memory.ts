@@ -141,6 +141,11 @@ export class MemoryStore implements Store {
     const next = { ...l, ...patch, id: l.id }; this.intakeLinks.set(id, next); return next;
   }
   async createInquiry(i: InquiryRecord) { this.inquiries.set(i.id, i); return i; }
+  async getInquiry(id: string) { return this.inquiries.get(id) ?? null; }
+  async updateInquiry(id: string, patch: Partial<InquiryRecord>) {
+    const i = this.inquiries.get(id); if (!i) throw new Error("inquiry not found");
+    const next = { ...i, ...patch, id: i.id }; this.inquiries.set(id, next); return next;
+  }
   async listInquiries() { return [...this.inquiries.values()].sort((a, b) => b.createdAt.localeCompare(a.createdAt)); }
 
   async acquireRunLease(filingId: string, workerId: string, ttlMs: number) {

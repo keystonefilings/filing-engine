@@ -219,3 +219,25 @@ describe("sign out on one device (V7)", () => {
     expect((await me(phone)).statusCode).toBe(200);
   });
 });
+
+describe("enterprise requests: approve creates the account (V32)", () => {
+  it("creates the subscriber and its first user, who sets their own password from the email", async () => {
+    await post("/v1/inquiries", { name: "Morgan Hale", company: "Hale Filing Services", email: "morgan@hale-filings.test", message: "We file 300 a month" });
+    const list = (await app.inject({ method: "GET", url: "/v1/inquiries", headers: STAFF })).json().inquiries;
+    const q = list.find((i: { email: string }) => i.email === "morgan@hale-filings.test");
+    const d = await post(`/v1/inquiries/${q.id}/decision`, { action: "approve" }, STAFF);
+    expect(d.statusCode).toBe(201);
+    expect(d.json().tenantId).toBe("hale-filing-services");
+    const mail = outbox.sent.find((m) => m.address === "morgan@hale-filings.test")!;
+    expect(mail.msg.subject).toBe("Your account is ready");
+    // Nobody knows the password until Morgan sets it.
+    const token = new URL(mail.msg.link!).searchParams.get("token")!;
+    expect((await post("/v1/auth/password-reset/confirm", { token, password: NEW_PW })).statusCode).toBe(200);
+    const s = await signIn("morgan@hale-filings.test", NEW_PW);
+    expect(s.statusCode).toBe(200);
+    expect(s.json().user).toMatchObject({ kind: "enterprise", tenantId: "hale-filing-services" });
+    expect((await post(`/v1/inquiries/${q.id}/decision`, { action: "decline" }, STAFF)).statusCode).toBe(409);
+    // A subscriber's own key can't decide requests: they're the platform's.
+    expect((await post(`/v1/inquiries/${q.id}/decision`, { action: "approve" }, { "x-api-key": s.json().sessionKey })).statusCode).toBe(403);
+  });
+});

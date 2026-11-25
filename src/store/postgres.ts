@@ -261,6 +261,13 @@ export class PostgresStore implements Store {
     if (!r.rows[0]) throw new Error("link not found");
     return r.rows[0].doc as IntakeLinkRecord;
   }
+  async getInquiry(id: string) { return this.doc<InquiryRecord>(`select doc from inquiries where id=$1`, [id]); }
+  async updateInquiry(id: string, patch: Partial<InquiryRecord>) {
+    const { id: _i, ...rest } = patch;
+    const r = await this.pool.query(`update inquiries set doc = doc || $2::jsonb where id=$1 returning doc`, [id, JSON.stringify(rest)]);
+    if (!r.rows[0]) throw new Error("inquiry not found");
+    return r.rows[0].doc as InquiryRecord;
+  }
   async createInquiry(i: InquiryRecord) {
     await this.pool.query(`insert into inquiries (id, doc) values ($1,$2)`, [i.id, i]);
     return i;
