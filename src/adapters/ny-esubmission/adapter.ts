@@ -7,6 +7,7 @@ import { tenantVaultKey } from "../../settings/accounts.js";
 import type { ScreenIntents } from "../../resolver/types.js";
 import type { ScreenStep, SiteAdapter, StepContext } from "../types.js";
 import { NY_ESUBMISSION_SCREENS } from "../ny-formation/intents.js";
+import { copyCc } from "../copies.js";
 
 /**
  * NY DOS E-Submission (docs/portal-maps/ny-dos-corporations.md, Screen L): the engine fills the
@@ -138,6 +139,9 @@ const filingInformation: ScreenStep = {
     }
     const contact = ctx.filing.request.contact;
     if (contact?.email) await ctx.set("email", contact.email);
+    // V28: CC the firm's copy address, as on the online filing screen (adapters/copies.ts).
+    const cc = copyCc(ctx);
+    if (cc && cc.toLowerCase() !== contact?.email?.toLowerCase()) await ctx.set("ccEmail", cc);
     await ctx.set("customerReference", ctx.filing.request.idempotencyKey.slice(0, 30));
     const levels = { routine: "ROUTINE", "24_hour": "24 HOUR", same_day: "SAME DAY", "2_hour": "2 HOUR" } as const;
     await ctx.set("levelOfService", levels[u.levelOfService]);

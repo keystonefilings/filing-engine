@@ -117,6 +117,8 @@ export const TenantSettings = z.object({
    * to approve before submission. Off in production (the run goes straight through).
    */
   betaReviewGate: z.boolean().default(false),
+  /** V31: where the state's copies should also go (the CC field where a portal has one). */
+  copyEmail: z.string().email().optional(),
   /** Decision 7. review_page: before approval a dry run takes the state's own review page, the
    *  client approves that screenshot, and the live run must reproduce it before paying. payload:
    *  the client approves the data alone (also the fallback where no review screen is mapped). */
@@ -164,6 +166,8 @@ export const ClientCompanySettings = z.object({
   clientCompanyId: z.string().min(1),
   tenantId: z.string().min(1),
   name: z.string().min(1),
+  /** V31: where the state's copies should also go for this firm's filings (the CC field where a portal has one). */
+  copyEmail: z.string().email().optional(),
   /** Default filing state for this client ("state selector", requirement 7). */
   defaultState: z.enum(["NY", "NJ", "MO", "FL"]).optional(),
   /** Decision 1: per-client-company EIN timing. */

@@ -5,6 +5,7 @@ import { nyDrawdownAccount, tenantVaultKey } from "../../settings/accounts.js";
 import { totalUsd } from "../../fees/table.js";
 import { NY_BCL_PAYMENT, NY_SCREENS } from "./intents.js";
 import { portalText, wantsPlainCopy } from "../../domain/portal-intake.js";
+import { copyCc } from "../copies.js";
 
 /**
  * NY DOS formation, signed in as the service company: a domestic LLC's Articles of Organization
@@ -301,7 +302,8 @@ const payment: ScreenStep = {
     const req = ctx.filing.request;
     // The firm's own reference and Cc address when its intake form gave them (intake.portal).
     await ctx.set("customerReference", (portalText(req, "customerReference") ?? ctx.filing.id).slice(0, 40));
-    const cc = portalText(req, "ccEmail");
+    // V28: the firm (not the end client) gets the state's copy; see adapters/copies.ts.
+    const cc = copyCc(ctx);
     if (cc) await ctx.set("ccEmail", cc);
     const ein = ctx.values.ein ?? ctx.filing.ein;
     if (ein && !/^00-0000000$/.test(ein)) await ctx.set("fein", ein);

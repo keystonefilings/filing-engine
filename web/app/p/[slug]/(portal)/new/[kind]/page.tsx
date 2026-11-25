@@ -5,6 +5,15 @@ import { IntakeForm } from "@/components/IntakeForm";
 import { newNonce } from "@/lib/intake/submit";
 import { listSignatures } from "@/lib/signatures";
 import { createFirmFiling } from "./actions";
+import type { ClientCompany } from "@/lib/engine";
+
+/** V28: the firm files this one itself, so its own contact details start in the contact block. */
+function contactPrefill(c: ClientCompany): Record<string, string> {
+  const p = c.partner;
+  if (!p) return {};
+  const [first, ...rest] = (p.contactName ?? "").trim().split(/\s+/);
+  return { "contact.firstName": first ?? "", "contact.lastName": rest.join(" "), "contact.email": p.contactEmail ?? "", "contact.phone": p.phone ?? "" };
+}
 
 export default async function NewKindPage({ params }: { params: Promise<{ slug: string; kind: string }> }) {
   const { slug, kind: kindId } = await params;
@@ -25,6 +34,7 @@ export default async function NewKindPage({ params }: { params: Promise<{ slug: 
         action={createFirmFiling.bind(null, slug, kind.id)}
         signatures={sigs?.signatures.filter((s) => s.active) ?? []}
         consentText={sigs?.consentText}
+        prefill={contactPrefill(company)}
       />
     </div>
   );

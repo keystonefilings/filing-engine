@@ -23,9 +23,11 @@ interface Props {
   signatures?: { id: string; signerName: string; createdAt: string }[];
   /** The consent a signer accepts when saving a new signature (from the engine). */
   consentText?: string;
+  /** Answers filled in from the start (form path -> value), e.g. the firm's own contact details. */
+  prefill?: Record<string, string>;
 }
 
-function initialState(kind: FilingKind): { values: Raw; groups: Record<string, number[]>; next: number } {
+function initialState(kind: FilingKind, prefill: Record<string, string> = {}): { values: Raw; groups: Record<string, number[]>; next: number } {
   const values: Raw = {};
   const groups: Record<string, number[]> = {};
   let next = 0;
@@ -40,12 +42,13 @@ function initialState(kind: FilingKind): { values: Raw; groups: Record<string, n
       for (const i of groups[it.path]) defaults(it.fields, `${it.path}.${i}`);
     }
   }
+  for (const [k, v] of Object.entries(prefill)) if (v && values[k] === undefined) values[k] = v;
   return { values, groups, next };
 }
 
-export function IntakeForm({ kind, nonce, action, submitLabel = "Submit for approval", footnote, signatures = [], consentText }: Props) {
+export function IntakeForm({ kind, nonce, action, submitLabel = "Submit for approval", footnote, signatures = [], consentText, prefill }: Props) {
   const router = useRouter();
-  const init = useMemo(() => initialState(kind), [kind]);
+  const init = useMemo(() => initialState(kind, prefill), [kind, prefill]);
   const [values, setValues] = useState<Raw>(init.values);
   const [groups, setGroups] = useState(init.groups);
   const [counter, setCounter] = useState(init.next);
@@ -132,13 +135,13 @@ export function IntakeForm({ kind, nonce, action, submitLabel = "Submit for appr
     let control: React.ReactNode;
     switch (f.type) {
       case "textarea":
-        control = <textarea {...common} defaultValue={f.defaultValue} maxLength={f.maxLength} />;
+        control = <textarea {...common} defaultValue={prefill?.[name] ?? f.defaultValue} maxLength={f.maxLength} />;
         break;
       case "select":
       case "usState": {
         const options = f.type === "usState" ? US_STATES.map((s) => ({ value: s, label: s })) : f.options ?? [];
         control = (
-          <select {...common} defaultValue={f.defaultValue ?? ""}>
+          <select {...common} defaultValue={prefill?.[name] ?? f.defaultValue ?? ""}>
             {f.defaultValue === undefined || f.type === "usState" ? <option value="">Choose…</option> : null}
             {options.map((o) => <option key={o.value} value={o.value}>{o.label || "(none)"}</option>)}
           </select>
@@ -201,7 +204,7 @@ export function IntakeForm({ kind, nonce, action, submitLabel = "Submit for appr
         const type = f.type === "email" ? "email" : f.type === "tel" ? "tel" : f.type === "number" ? "number" : f.type === "date" ? "date" : f.type === "month" ? "month" : "text";
         const numeric = f.type === "zip" || f.type === "ssn" || f.type === "fein";
         control = (
-          <input {...common} type={type} defaultValue={f.defaultValue} maxLength={f.maxLength} min={f.min} max={f.max} step={f.integer ? 1 : undefined} placeholder={f.placeholder}
+          <input {...common} type={type} defaultValue={prefill?.[name] ?? f.defaultValue} maxLength={f.maxLength} min={f.min} max={f.max} step={f.integer ? 1 : undefined} placeholder={f.placeholder}
             inputMode={numeric ? "numeric" : undefined} autoComplete={f.type === "ssn" || f.type === "fein" ? "off" : undefined}
             spellCheck={f.type === "ssn" ? false : undefined} />
         );
