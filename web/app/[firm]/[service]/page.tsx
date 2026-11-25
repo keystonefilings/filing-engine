@@ -22,7 +22,7 @@ export default async function PublicServicePage({ params }: { params: Promise<{ 
   const kind = kindForServiceSlug(service);
   if (!company || !kind || !offeredKinds(company).some((k) => k.id === kind.id)) notFound();
   const brand = brandOf(company);
-  const { kind: form, prefill } = withFirmDefaults(kind, company);
+  const { kind: form, prefill } = withFirmDefaults(kind, company, { forClient: true });
   // A fresh id per page view: sending the form twice from one view makes one filing.
   const nonce = randomUUID();
   return (

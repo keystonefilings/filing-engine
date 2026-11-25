@@ -86,6 +86,40 @@ export function IntakeForm({ kind, nonce, action, submitLabel = "Submit for appr
     );
   };
 
+  /**
+   * V24: a person (a name with an address next to it: organizer, service of process, responsible
+   * party) can be someone already entered, a member included: their name and address are copied.
+   */
+  const personPrefixes = useMemo(() => new Set(addresses.map((a) => a.prefix.replace(/\.address$/, ""))), [addresses]);
+  const copyPerson = (from: string, to: string) => {
+    const form = formRef.current;
+    if (!form) return;
+    const next: Raw = {};
+    for (const part of ["name", ...ADDRESS_PARTS.map((p) => `address.${p}`)]) {
+      const src = (form.elements.namedItem(`${from}.${part}`) as HTMLInputElement | null)?.value ?? values[`${from}.${part}`];
+      const dst = form.elements.namedItem(`${to}.${part}`) as HTMLInputElement | HTMLSelectElement | null;
+      if (src === undefined || !dst) continue;
+      dst.value = src;
+      next[`${to}.${part}`] = src;
+    }
+    setValues((p) => ({ ...p, ...next }));
+  };
+  const samePerson = (namePath: string) => {
+    const to = namePath.replace(/\.name$/, "");
+    const people = Object.entries(values)
+      .filter(([k, v]) => k.endsWith(".name") && k !== namePath && typeof v === "string" && v.trim() && !/^the (llc|corporation)$/i.test(v.trim()))
+      .map(([k, v]) => ({ prefix: k.replace(/\.name$/, ""), name: String(v).trim() }))
+      .filter((p) => !p.prefix.startsWith("contact") && !p.prefix.startsWith("formation.name"));
+    const unique = people.filter((p, i) => people.findIndex((o) => o.name === p.name) === i).slice(0, 6);
+    if (!unique.length) return null;
+    return (
+      <div className="same-as" key={`same-person-${to}`}>
+        <span className="small muted">Same person as</span>
+        {unique.map((p) => <button key={p.prefix} type="button" className="btn small" onClick={() => copyPerson(p.prefix, to)}>{p.name}</button>)}
+      </div>
+    );
+  };
+
   const fieldIssues = useMemo(() => {
     const m = new Map<string, string>();
     if (result && !result.ok) for (const i of result.issues) if (!m.has(i.path)) m.set(i.path, i.message);
@@ -254,6 +288,10 @@ export function IntakeForm({ kind, nonce, action, submitLabel = "Submit for appr
     if (it.kind === "note") return <p key={k} className="notice" hidden={!vis.holds(it.showIf)}>{it.text}</p>;
     if (it.kind === "group") return renderGroup(it);
     const field = renderField(it, it.path, vis.top.has(it.path));
+    if (it.path.endsWith(".name") && vis.top.has(it.path) && personPrefixes.has(it.path.replace(/\.name$/, ""))) {
+      const copy = samePerson(it.path);
+      if (copy) return <div key={it.path}>{copy}{field}</div>;
+    }
     if (it.path.endsWith(".street1") && vis.top.has(it.path)) {
       const copy = sameAs(it.path);
       if (copy) return <div key={it.path}>{copy}{field}</div>;

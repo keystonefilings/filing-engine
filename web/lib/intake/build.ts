@@ -287,6 +287,16 @@ export function buildRequest(kind: FilingKind, raw: Raw, ctx: BuildContext): Bui
 function postProcess(kind: FilingKind, r: Record<string, unknown>, raw: Raw): void {
   const formation = r.formation as Record<string, unknown> | undefined;
   if (formation && formation.registeredAgentChoice === "filing_company") delete formation.registeredAgent;
+  // V24: "same as the business" covers the phone too (NYS-100 A8, A9), not only the address.
+  const answers = (r.payroll as { stateAnswers?: Record<string, unknown> } | undefined)?.stateAnswers;
+  if (answers?.businessPhone) {
+    if (raw["intake.portal.booksSameAsBusiness"] === "on" && !answers.booksPhone) answers.booksPhone = answers.businessPhone;
+    if (raw["intake.portal.chargesSameAsBusiness"] === "on" && !answers.chargesPhone) answers.chargesPhone = answers.businessPhone;
+  }
+  // V24: the service-of-process notice email defaults to the contact's, so nobody types it twice.
+  const sop = formation?.serviceOfProcess as Record<string, unknown> | undefined;
+  const contactEmail = (r.contact as { email?: string } | undefined)?.email;
+  if (sop && !sop.noticeEmail && contactEmail) sop.noticeEmail = contactEmail;
   // V22: "our saved agent" is the firm's own agent, which the engine takes from the firm's settings.
   if (formation && formation.registeredAgentChoice === "firm_saved") { formation.registeredAgentChoice = "client_provided"; delete formation.registeredAgent; }
 
@@ -300,6 +310,9 @@ function postProcess(kind: FilingKind, r: Record<string, unknown>, raw: Raw): vo
 
   if (kind.type === "ein_only") {
     setPath(r, "ein.formationState", (r.state as string | undefined) ?? kind.state);
+    // V24: the physical state is the state of the physical address the form already asks for.
+    const physical = ((r.ein as Record<string, unknown> | undefined)?.responsibleParty as { address?: { state?: string } } | undefined)?.address?.state;
+    if (physical && !(r.ein as Record<string, unknown>).physicalState) setPath(r, "ein.physicalState", physical);
   }
 
   const payroll = r.payroll as Record<string, unknown> | undefined;

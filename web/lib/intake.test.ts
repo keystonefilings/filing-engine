@@ -76,7 +76,7 @@ test("Florida agent name is assembled and EIN start month becomes a date", () =>
     ...addr("formation.mainBusinessAddress", "FL"), "intake.portal.flMailingSameAsPrincipal": "on",
     "formation.registeredAgentChoice": "client_provided", "intake.portal.flAgentKind": "individual",
     "intake.portal.flAgentFirstName": "Ana", "intake.portal.flAgentLastName": "Diaz", ...addr("formation.registeredAgent.address", "FL"),
-    "intake.portal.flAgentSignerName": "Ana Diaz", "intake.portal.flCorrespondenceName": "Ana", "intake.portal.flCorrespondenceEmail": "ana@example.test",
+    "intake.portal.flAgentSignerName": "Ana Diaz",
     "intake.portal.flSignerName": "Ana Diaz", ...contact, ...auths("fl-llc"),
   }, ctx);
   assert.deepEqual(fl.issues, []);
@@ -223,4 +223,18 @@ test("starting from an earlier client copies the client's details only (V23)", (
   assert.equal(a["formation.name.baseName"], undefined);
   assert.equal(a["formation.members.1.name"], undefined);
   assert.equal(Object.keys(a).some((k) => k.startsWith("ein.")), false);
+});
+
+test("answers given once are reused, not asked again (V24)", () => {
+  const ny = buildRequest(filingKind("ny-llc")!, { "formation.serviceOfProcess.mode": "manual", ...contact }, ctx).request as any;
+  assert.equal(ny.formation.serviceOfProcess.noticeEmail, "pat@example.test");
+  const nys = buildRequest(filingKind("ny-nys100")!, {
+    "payroll.stateAnswers.businessPhone": "5185550100", "intake.portal.booksSameAsBusiness": "on", "intake.portal.chargesSameAsBusiness": "on",
+  }, ctx).request as any;
+  assert.equal(nys.payroll.stateAnswers.booksPhone, "5185550100");
+  assert.equal(nys.payroll.stateAnswers.chargesPhone, "5185550100");
+  const ein = buildRequest(filingKind("irs-ein")!, { ...addr("ein.responsibleParty.address", "NJ") }, ctx).request as any;
+  assert.equal(ein.ein.physicalState, "NJ");
+  // Florida's correspondence is the filing contact: the form no longer asks for it.
+  assert.ok(!allFields(filingKind("fl-llc")!).some((f) => f.path.startsWith("intake.portal.flCorrespondence")));
 });

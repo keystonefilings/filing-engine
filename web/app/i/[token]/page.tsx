@@ -25,7 +25,7 @@ export default async function ClientIntakePage({ params }: { params: Promise<{ t
   const company = await loadCompany(key, link.clientCompanyId);
   const brand = brandOf(company);
   const base = filingKind(link.kind);
-  const { kind, prefill } = base ? withFirmDefaults(base, company) : { kind: base, prefill: {} };
+  const { kind, prefill } = base ? withFirmDefaults(base, company, { forClient: true }) : { kind: base, prefill: {} };
   if (!kind || !offeredKinds(company).some((k) => k.id === kind.id)) {
     return <main className="wrap narrow"><h1>This filing is no longer offered</h1><p>Contact {brand.name}{brand.supportEmail ? ` at ${brand.supportEmail}` : ""}.</p></main>;
   }

@@ -14,7 +14,7 @@ export async function submitClientIntake(token: string, fd: FormData): Promise<I
   const key = intakeKey(link);
   const company = await loadCompany(key, link.clientCompanyId);
   const base = filingKind(link.kind);
-  const kind = base ? withFirmDefaults(base, company).kind : base;
+  const kind = base ? withFirmDefaults(base, company, { forClient: true }).kind : base;
   if (!kind || !offeredKinds(company).some((k) => k.id === kind.id)) return { ok: false, error: "This filing is no longer offered.", issues: [] };
   const record = await linkRecord(key, link.clientCompanyId, link.nonce).catch(() => null);
   if (record && record.state !== "open") return { ok: false, error: CLOSED_TEXT[record.state], issues: [] };

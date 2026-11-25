@@ -15,7 +15,7 @@ export async function submitPublicIntake(firmSlug: string, serviceSlug: string, 
   if (!/^[a-f0-9-]{36}$/.test(nonce)) return { ok: false, error: "Reload the page and try again.", issues: [] };
   if (!takePublicSubmission(company.clientCompanyId)) return { ok: false, error: "This page has had a lot of submissions in the last hour. Try again later, or contact the firm.", issues: [] };
   const email = String(fd.get("contact.email") ?? "").trim();
-  const r = await submitIntake(withFirmDefaults(kind, company).kind, fd, {
+  const r = await submitIntake(withFirmDefaults(kind, company, { forClient: true }).kind, fd, {
     apiKey: key, tenantId: company.tenantId, clientCompanyId: company.clientCompanyId,
     submittedBy: email ? `client:${email}` : "client", source: "client_link", dryRun: !liveFilings(),
     allowSavedSignature: false, idempotencySeed: `${company.clientCompanyId}-public-${nonce}`,

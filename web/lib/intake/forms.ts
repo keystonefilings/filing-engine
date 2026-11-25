@@ -194,7 +194,7 @@ const nyLlc: FilingKind = {
         ...address("formation.serviceOfProcess.person.address", "Mailing address", { required: true, state: "NY", ref: "Screen D2, SOP address", showIf: { path: "formation.serviceOfProcess.mode", equals: "manual" } }),
         f("formation.serviceOfProcess.serviceCompany", "Service company name, as registered with DOS", "text", { required: true, showIf: { path: "formation.serviceOfProcess.mode", equals: "service_company" }, ref: "Screen D2, Select Service Company" }),
         { kind: "note", text: "If you pick a service company, the Department of State gives that company your contact details, including your email.", showIf: { path: "formation.serviceOfProcess.mode", equals: "service_company" } },
-        f("formation.serviceOfProcess.noticeEmail", "Email for service-of-process notices", "email", { required: true, ref: "Screen D2, SOP email statement" }),
+        f("formation.serviceOfProcess.noticeEmail", "Email for service-of-process notices (optional)", "email", { help: "Leave empty to use the contact email below.", ref: "Screen D2, SOP email statement" }),
       ],
     },
     {
@@ -284,7 +284,7 @@ const nyCorp: FilingKind = {
         ...address("formation.serviceOfProcess.person.address", "Mailing address", { required: true, state: "NY", ref: "Screen D1, SOP address", showIf: { path: "formation.serviceOfProcess.mode", equals: "manual" } }),
         f("formation.serviceOfProcess.serviceCompany", "Service company name, as registered with DOS", "text", { required: true, showIf: { path: "formation.serviceOfProcess.mode", equals: "service_company" }, ref: "Screen D1, Select Service Company" }),
         { kind: "note", text: "If you pick a service company, the Department of State gives that company your contact details, including your email.", showIf: { path: "formation.serviceOfProcess.mode", equals: "service_company" } },
-        f("formation.serviceOfProcess.noticeEmail", "Email for service-of-process notices", "email", { required: true, ref: "Screen D1, SOP email statement" }),
+        f("formation.serviceOfProcess.noticeEmail", "Email for service-of-process notices (optional)", "email", { help: "Leave empty to use the contact email below.", ref: "Screen D1, SOP email statement" }),
       ],
     },
     {
@@ -462,14 +462,6 @@ function flCommon(nameRef: string, designators: string[], nameHelp: string): Sec
         f("intake.portal.flAgentSignerName", "Person who accepts for the agent (types the agent signature)", "text", { required: true, help: "Must be a person, even when the agent is a business.", showIf: { path: "formation.registeredAgentChoice", equals: "client_provided" }, ref: "Registered Agent Signature (STOP)" }),
       ],
     },
-    {
-      title: "Correspondence",
-      help: "The acknowledgment, the certificate and annual report reminders go to this email.",
-      items: [
-        f("intake.portal.flCorrespondenceName", "Correspondence name", "text", { required: true, ref: "Correspondence Name" }),
-        f("intake.portal.flCorrespondenceEmail", "Correspondence email", "email", { required: true, ref: "Correspondence E-mail / Re-enter" }),
-      ],
-    },
   ];
 }
 
@@ -620,7 +612,6 @@ const irsEin: FilingKind = {
         f("formation.name.designator", "Ending", "select", { required: true, defaultValue: "LLC", options: opts("LLC", "L.L.C.", "Limited Liability Company"), ref: "Screen 5, Legal name" }),
         f("ein.tradeName", "Trade name / DBA, if different (optional)", "text", { ref: "Screen 5, Trade name" }),
         f("ein.memberCount", "Number of members", "number", { required: true, min: 1, ref: "Screen 2, How many members" }),
-        f("ein.physicalState", "State where the business is physically located", "usState", { required: true, ref: "Screen 2, physical state" }),
         f("ein.county", "County where the LLC is located", "text", { required: true, ref: "Screen 5, County" }),
         f("ein.startDate", "LLC start date (month and year)", "month", { required: true, transform: "monthToDate", ref: "Screen 5, LLC Start Date" }),
         f("ein.closingMonth", "Last month of the accounting year", "select", { defaultValue: "12", options: lv([["1", "January"], ["2", "February"], ["3", "March"], ["4", "April"], ["5", "May"], ["6", "June"], ["7", "July"], ["8", "August"], ["9", "September"], ["10", "October"], ["11", "November"], ["12", "December"]]), ref: "engine (closing month)" }),
@@ -775,10 +766,10 @@ const nyNys100: FilingKind = {
       items: [
         f("intake.portal.booksSameAsBusiness", "Books and records are kept at the business address", "checkbox", { defaultValue: "on", ref: "A8, Location of Books and Records" }),
         ...address("payroll.booksRecordsAddress", "Books and records address (US only)", { required: true, showIf: { path: "intake.portal.booksSameAsBusiness", equals: "" }, ref: "A8" }),
-        f("payroll.stateAnswers.booksPhone", "Phone at the books and records location", "tel", { required: true, ref: "A8, Phone Number" }),
+        f("payroll.stateAnswers.booksPhone", "Phone at the books and records location", "tel", { required: true, showIf: { path: "intake.portal.booksSameAsBusiness", equals: "" }, ref: "A8, Phone Number" }),
         f("intake.portal.chargesSameAsBusiness", "Send the Notice of Potential Charges (LO400) to the business address", "checkbox", { defaultValue: "on", help: "Sent each time a former employee claims unemployment benefits.", ref: "A9, Notice of Potential Charges" }),
         ...address("payroll.stateAnswers.chargesAddress", "Address for the Notice of Potential Charges", { required: true, showIf: { path: "intake.portal.chargesSameAsBusiness", equals: "" }, ref: "A9" }),
-        f("payroll.stateAnswers.chargesPhone", "Phone for the Notice of Potential Charges", "tel", { required: true, ref: "A9, Phone Number" }),
+        f("payroll.stateAnswers.chargesPhone", "Phone for the Notice of Potential Charges", "tel", { required: true, showIf: { path: "intake.portal.chargesSameAsBusiness", equals: "" }, ref: "A9, Phone Number" }),
         yes("payroll.stateAnswers.mailToAgent", "Send all unemployment insurance mail to an agent (C/O)?", "A10, Agent - C/O"),
         f("payroll.stateAnswers.agentAttn", "Agent ATTN (C/O)", "text", { required: true, showIf: { path: "payroll.stateAnswers.mailToAgent", equals: "yes" }, ref: "A10" }),
         ...address("payroll.stateAnswers.agentAddress", "Agent address", { required: true, showIf: { path: "payroll.stateAnswers.mailToAgent", equals: "yes" }, ref: "A10" }),
