@@ -6,6 +6,7 @@ import { engine, EngineError, type PartnerProfile, type PaymentRouting } from "@
 import { firmContext } from "@/lib/firm";
 import { FILING_KINDS } from "@/lib/intake/forms";
 import { applyLogo } from "@/lib/logo-upload";
+import { writeSession } from "@/lib/session";
 
 export type SetupState = { error?: string; issues?: Record<string, string> } | null;
 type Step = "details" | "branding" | "payments";
@@ -20,13 +21,16 @@ async function save(slug: string, step: Step, body: Record<string, unknown>): Pr
       method: "PUT", body: { ...body, partner: { ...(body.partner as PartnerProfile | undefined), setupDone: done } },
     });
   } catch (e) {
-    if (e instanceof EngineError && e.status === 422) {
+    if (e instanceof EngineError && (e.status === 422 || e.status === 409)) {
       const issues = Object.fromEntries(((e.body as { issues?: { path: string; message: string }[] })?.issues ?? []).map((i) => [i.path.split(".").pop() ?? i.path, i.message]));
       return { error: "Check the highlighted fields.", issues };
     }
     return { error: "That didn't save. Try again in a minute." };
   }
-  const base = `/p/${encodeURIComponent(slug)}`;
+  // A new address moves the portal too: the session follows it.
+  const moved = (body.brand as { slug?: string } | undefined)?.slug;
+  if (moved && moved !== slug) await writeSession({ ...session, slug: moved });
+  const base = `/p/${encodeURIComponent(moved ?? slug)}`;
   revalidatePath(base, "layout");
   const next: Record<Step, string> = { details: `${base}/setup/branding`, branding: `${base}/setup/payments`, payments: `${base}/setup` };
   redirect(next[step]);
@@ -61,6 +65,7 @@ export async function saveBranding(slug: string, _prev: SetupState, fd: FormData
   if (String(fd.get("logoData") ?? "")) logoUrl = undefined;
   return save(slug, "branding", {
     brand: {
+      slug: text(fd, "slug", 40).toLowerCase() || undefined,
       displayName: text(fd, "displayName", 80) || undefined,
       logoUrl,
       primaryColor: hex("primaryColor"),

@@ -44,7 +44,7 @@ export function DetailsForm({ action, v }: { action: Action; v: DetailsValues })
   );
 }
 
-export interface BrandValues { displayName?: string; logoSrc?: string; logoUrl?: string; primaryColor?: string; secondaryColor?: string; supportEmail?: string }
+export interface BrandValues { slug?: string; siteUrl?: string; displayName?: string; logoSrc?: string; logoUrl?: string; primaryColor?: string; secondaryColor?: string; supportEmail?: string }
 
 export function BrandingForm({ action, v, platform }: { action: Action; v: BrandValues; platform: string }) {
   const { state: s, pending, formProps } = useKeptForm(action, null);
@@ -56,6 +56,12 @@ export function BrandingForm({ action, v, platform }: { action: Action; v: Brand
     <div className="stack">
       <form {...formProps} className="card">
         <Top s={s} />
+        <div className="field">
+          <label htmlFor="b-slug">Your web address</label>
+          <div className="row" style={{ gap: 4, flexWrap: "nowrap" }}><span className="small muted" style={{ whiteSpace: "nowrap" }}>{(v.siteUrl ?? "").replace(/^https?:\/\//, "")}/</span><input id="b-slug" name="slug" type="text" defaultValue={v.slug} pattern="[a-z0-9](?:[a-z0-9-]{0,38}[a-z0-9])?" maxLength={40} aria-describedby="b-slug-help" /></div>
+          <p className="help" id="b-slug-help">Your pages for clients live here, one per service. Lowercase letters, digits and dashes. Changing it changes those links.</p>
+          <Issue s={s} k="slug" />
+        </div>
         <div className="field"><label htmlFor="b-name">Name your clients see</label><input id="b-name" name="displayName" type="text" value={name} onChange={(e) => setName(e.target.value)} maxLength={80} /></div>
         <LogoField current={v.logoSrc} currentLink={v.logoUrl} onPreview={setLogo} />
         <Issue s={s} k="logoUrl" /><Issue s={s} k="data" />

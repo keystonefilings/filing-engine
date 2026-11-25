@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { firmContext, kindsForState, offeredKinds } from "@/lib/firm";
+import { platformKey, publicPageUrl, SERVICE_SLUGS } from "@/lib/public-pages";
 
 export const metadata = { title: "New filing" };
 
@@ -52,6 +53,15 @@ export default async function NewFilingPage({ params, searchParams }: { params: 
           ))}
         </div>
       )}
+      {company.partner && platformKey() && kinds.some((k) => SERVICE_SLUGS[k.id]) ? (
+        <div className="card">
+          <strong>Your pages for clients</strong>
+          <p className="small muted">Each service has a permanent page with your branding. Put it on your website or send it to any client; every submission becomes a filing here.</p>
+          <ul className="small">
+            {kinds.filter((k) => SERVICE_SLUGS[k.id]).map((k) => <li key={k.id}>{k.title}: <span className="secret">{publicPageUrl(company.portal?.slug ?? slug, k)}</span></li>)}
+          </ul>
+        </div>
+      ) : null}
     </div>
   );
 }

@@ -229,7 +229,7 @@ Rows refer to the status tables above.
 - [ ] V18. Stored cards: card vault provider, add-card flow, default and backup card used at payment screens, routing per filing type actually read (rows 2, 9, 21, decision 2). *Needs: the provider choice and its account.*
 
 ### Step 4: partner front end
-- [ ] V19. Permanent branded pages `/<partner>/<filing>`, with an editable partner slug shown in setup (row 23).
+- [x] V19. Permanent branded pages `/<partner>/<filing>`, with an editable partner slug shown in setup (row 23). **Done**: `/<firm>/<service>` (for example `/best-accounting/llc-formation-new-york`), listed on the partner's New filing page; "Your web address" in branding setup (reserved site paths and taken addresses refused; the portal and session move with it). Each submission is a new filing that goes through preview and approval; 30 submissions an hour per firm. *Needs `PLATFORM_API_KEY` on the web app.*
 - [ ] V20. Partner-branded approval page (Keystone's brand appears today) (row 23).
 - [ ] V21. Fonts: preset choices and upload (row 20).
 - [ ] V22. Partner per-state registered agent and other defaults, and saved defaults skip questions in the forms (rows 25, 27).

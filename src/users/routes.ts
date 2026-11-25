@@ -24,6 +24,18 @@ import type { ChannelSender } from "../comms/senders.js";
  *    change or sign-out-everywhere; and change password for a signed-in person. Both end every session.
  */
 
+/**
+ * A partner firm's address is also its public pages' address (keystonefilings.com/<slug>/<service>),
+ * so it can never be a path the site itself uses.
+ */
+export const RESERVED_SLUGS = new Set([
+  "login", "signup", "docs", "dashboard", "p", "i", "logo", "join", "logout", "forgot-password", "reset-password",
+  "verify-email", "session-ended", "invite-expired", "openapi.json", "api", "admin", "approve", "static", "_next",
+  "favicon.ico", "robots.txt", "sitemap.xml", "pricing", "about", "contact", "help", "support", "terms", "privacy", "security",
+  "keystone", "keystonefilings", "www", "app", "mail", "status",
+]);
+export const SLUG_PATTERN = /^[a-z0-9](?:[a-z0-9-]{0,38}[a-z0-9])?$/;
+
 export type PartnerSignupMode = "approval" | "automatic";
 
 export interface Auth {
@@ -104,6 +116,8 @@ const ProfileBody = z.object({
     setupDone: z.array(z.enum(["details", "branding", "payments"])).optional(),
   }).optional(),
   brand: z.object({
+    /** The firm's address: its portal and its public pages. */
+    slug: z.string().trim().toLowerCase().regex(SLUG_PATTERN, "use 1 to 40 lowercase letters, digits and dashes").optional(),
     displayName: z.string().trim().min(1).max(80).optional(),
     logoUrl: z.string().url().startsWith("https://").optional(),
     primaryColor: z.string().regex(/^#[0-9a-fA-F]{6}$/).optional(),
@@ -125,6 +139,7 @@ export function publicUser(u: UserRecord) {
   };
 }
 
+
 export function slugFor(name: string): string {
   const s = name.toLowerCase().normalize("NFKD").replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "").slice(0, 40).replace(/-+$/, "");
   return s || "firm";
@@ -139,7 +154,7 @@ export async function portalSlugFor(store: Store, tenantId: string, c: { clientC
   const taken = new Set((await store.listClientCompanies(tenantId)).filter((o) => o.clientCompanyId !== c.clientCompanyId).map((o) => o.portal?.slug ?? ""));
   const base = slugFor(c.name);
   let slug = base;
-  for (let i = 2; taken.has(slug); i++) slug = `${base}-${i}`;
+  for (let i = 2; taken.has(slug) || RESERVED_SLUGS.has(slug); i++) slug = `${base}-${i}`;
   return slug;
 }
 
@@ -381,7 +396,7 @@ export function registerUsers(app: FastifyInstance, deps: UsersDeps): void {
     const existing = new Set((await deps.store.listClientCompanies(u.tenantId)).flatMap((c) => [c.clientCompanyId, c.portal?.slug ?? ""]));
     const base = slugFor(s.companyName);
     let slug = base;
-    for (let i = 2; existing.has(slug) || (await deps.store.getClientCompany(`firm-${slug}`)); i++) slug = `${base}-${i}`;
+    for (let i = 2; existing.has(slug) || RESERVED_SLUGS.has(slug) || (await deps.store.getClientCompany(`firm-${slug}`)); i++) slug = `${base}-${i}`;
     const company = ClientCompanySettings.parse({
       clientCompanyId: `firm-${slug}`, tenantId: u.tenantId, name: s.companyName,
       portal: { slug, displayName: s.companyName },
@@ -488,12 +503,17 @@ export function registerUsers(app: FastifyInstance, deps: UsersDeps): void {
     const parsed = ProfileBody.safeParse(req.body);
     if (!parsed.success) return reply.code(422).send({ error: "validation failed", issues: parsed.error.issues.map((i) => ({ path: i.path.join("."), message: i.message })) });
     const b = parsed.data;
+    if (b.brand?.slug && b.brand.slug !== c.portal?.slug) {
+      if (RESERVED_SLUGS.has(b.brand.slug)) return reply.code(422).send({ error: "validation failed", issues: [{ path: "brand.slug", message: "that address is reserved; pick another" }] });
+      const taken = (await deps.store.listClientCompanies(c.tenantId)).some((o) => o.clientCompanyId !== c.clientCompanyId && o.portal?.slug === b.brand!.slug);
+      if (taken) return reply.code(409).send({ error: "validation failed", issues: [{ path: "brand.slug", message: "another firm already uses that address" }] });
+    }
     const next = {
       ...c,
       ...(b.name ? { name: b.name } : {}),
       ...(b.partner ? { partner: { setupDone: [], ...c.partner, ...b.partner } } : {}),
       // A logo link the firm types replaces an uploaded logo (the upload is shown first otherwise).
-      ...(b.brand ? { portal: { ...c.portal, slug: await portalSlugFor(deps.store, c.tenantId, c), ...b.brand, ...(b.brand.logoUrl ? { logoArtifactId: undefined } : {}) } } : {}),
+      ...(b.brand ? { portal: { ...c.portal, ...b.brand, slug: b.brand.slug ?? await portalSlugFor(deps.store, c.tenantId, c), ...(b.brand.logoUrl ? { logoArtifactId: undefined } : {}) } } : {}),
       ...(b.paymentRouting ? { payments: { methods: c.payments?.methods ?? [], routing: b.paymentRouting } } : {}),
     };
     const checked = ClientCompanySettings.safeParse(next);
