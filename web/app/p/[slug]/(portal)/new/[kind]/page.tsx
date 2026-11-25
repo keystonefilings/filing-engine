@@ -7,6 +7,8 @@ import { listSignatures } from "@/lib/signatures";
 import { createFirmFiling } from "./actions";
 import type { ClientCompany } from "@/lib/engine";
 import { withFirmDefaults } from "@/lib/firm-defaults";
+import { answersFrom, pastClients } from "@/lib/past-clients";
+import { engine, type Filing } from "@/lib/engine";
 
 /** V28: the firm files this one itself, so its own contact details start in the contact block. */
 function contactPrefill(c: ClientCompany): Record<string, string> {
@@ -16,12 +18,17 @@ function contactPrefill(c: ClientCompany): Record<string, string> {
   return { "contact.firstName": first ?? "", "contact.lastName": rest.join(" "), "contact.email": p.contactEmail ?? "", "contact.phone": p.phone ?? "" };
 }
 
-export default async function NewKindPage({ params }: { params: Promise<{ slug: string; kind: string }> }) {
+export default async function NewKindPage({ params, searchParams }: { params: Promise<{ slug: string; kind: string }>; searchParams: Promise<{ from?: string }> }) {
   const { slug, kind: kindId } = await params;
+  const { from } = await searchParams;
   const { session, company } = await firmContext(slug);
   const offered = offeredKinds(company).find((k) => k.id === kindId);
   if (!offered) notFound();
   const { kind, prefill: saved } = withFirmDefaults(offered, company);
+  // V23: start from a client this firm filed for before.
+  const clients = await pastClients(session.apiKey, session.clientCompanyId);
+  const earlier = from && /^[0-9a-f-]{36}$/i.test(from) ? await engine<{ filing: Filing }>(session.apiKey, `/v1/filings/${encodeURIComponent(from)}`).then((r) => r.filing).catch(() => null) : null;
+  const fromClient = earlier && earlier.clientCompanyId === session.clientCompanyId ? answersFrom(earlier.request) : {};
   const signed = kind.sections.some((s) => s.items.some((i) => i.kind === "field" && i.type === "signature"));
   const sigs = signed ? await listSignatures(session.apiKey, session.clientCompanyId) : null;
   return (
@@ -30,13 +37,24 @@ export default async function NewKindPage({ params }: { params: Promise<{ slug: 
       <h1>{kind.title}</h1>
       <p className="muted">{kind.summary} Would your client rather fill it in? <Link href={`/p/${encodeURIComponent(slug)}/client-links?kind=${encodeURIComponent(kind.id)}`}>Send them a link</Link>.</p>
       {!liveFilings() ? <p className="notice warn">Test mode: filings from this portal are walked through the state site up to the final step and stopped there. Nothing is filed or paid.</p> : null}
+      {clients.length ? (
+        <form method="get" className="row" style={{ gap: 8 }}>
+          <label htmlFor="from-client" className="small">Start from a client you filed for before</label>
+          <select id="from-client" name="from" defaultValue={from ?? ""}>
+            <option value="">New client</option>
+            {clients.map((c) => <option key={c.filingId} value={c.filingId}>{c.label}</option>)}
+          </select>
+          <button className="btn small" type="submit">Fill in</button>
+        </form>
+      ) : null}
       <IntakeForm
         kind={kind}
         nonce={newNonce()}
         action={createFirmFiling.bind(null, slug, kind.id)}
         signatures={sigs?.signatures.filter((s) => s.active) ?? []}
         consentText={sigs?.consentText}
-        prefill={{ ...contactPrefill(company), ...saved }}
+        prefill={{ ...contactPrefill(company), ...saved, ...fromClient }}
+        key={from ?? "new"}
       />
     </div>
   );

@@ -4,6 +4,7 @@ import { FILING_KINDS, filingKind } from "./intake/forms.ts";
 import { allFields, buildRequest, type Raw } from "./intake/build.ts";
 import { seal, unseal } from "./seal.ts";
 import { withFirmDefaults } from "./firm-defaults.ts";
+import { answersFrom } from "./client-answers.ts";
 
 const ctx = { tenantId: "t1", clientCompanyId: "firm-1", idempotencyKey: "intake-abcdef123", submittedBy: "pat@example.test", source: "firm_portal" as const };
 const addr = (p: string, state = "NY"): Raw => ({ [`${p}.street1`]: "1 Main St", [`${p}.city`]: "Albany", [`${p}.state`]: state, [`${p}.zip`]: "12207" });
@@ -206,4 +207,20 @@ test("a firm's saved agent is offered first and sent as the firm's own agent (V2
   assert.equal(ny.prefill["formation.registeredAgent.address.city"], "Albany");
   // No saved agent: the form is unchanged.
   assert.equal(withFirmDefaults(filingKind("nj-llc")!, {}).kind, filingKind("nj-llc"));
+});
+
+test("starting from an earlier client copies the client's details only (V23)", () => {
+  const a = answersFrom({
+    contact: { firstName: "Sam", lastName: "Rivera", email: "sam@x.test", phone: "555" },
+    formation: { name: { baseName: "Old Co", designator: "LLC" }, mainBusinessAddress: { street1: "1 Main", city: "Albany", state: "NY", zip: "12207" },
+      members: [{ name: "Sam Rivera", address: { street1: "2 Elm", city: "Troy", state: "NY", zip: "12180" } }, { name: "Second" }] },
+    ein: { responsibleParty: { name: "Sam Rivera", ssn: "***-**-6789" } },
+  });
+  assert.equal(a["contact.email"], "sam@x.test");
+  assert.equal(a["formation.mainBusinessAddress.city"], "Albany");
+  assert.equal(a["formation.members.0.name"], "Sam Rivera");
+  assert.equal(a["formation.members.0.address.city"], "Troy");
+  assert.equal(a["formation.name.baseName"], undefined);
+  assert.equal(a["formation.members.1.name"], undefined);
+  assert.equal(Object.keys(a).some((k) => k.startsWith("ein.")), false);
 });
