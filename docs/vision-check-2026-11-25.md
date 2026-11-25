@@ -80,7 +80,17 @@ dry-run only; **Missing** has no implementation.
 |---|---|---|---|
 | 29 | Review the copy with 20 simulated personas and apply the best | Missing | Not started. |
 
-## Decisions needed (the memo changes earlier decisions)
+## Decisions (the memo changes earlier decisions)
+
+**Settled on Nov 25:**
+1. **Approval: yes to the preview, screenshot, then matching live pass described below.** This
+   amends decision 2 (Nov 15).
+2. **Payment: store customers' own cards (option B).** This replaces decision 3's "no cards or ACH
+   in our vault". State prepaid accounts (option C) remain supported wherever a customer has one.
+   The card vault provider (VGS or Basis Theory) is still to be chosen, and the worker host enters
+   PCI scope.
+
+The analysis behind them:
 
 1. **Approval at the review page (memo) vs. approval before the run (decision 2, Nov 15).**
    Decision 2 moved approval before the run because email replies are slow and IRS sessions time out
@@ -186,3 +196,69 @@ payload-hash approval stay as they are.
    - Full OpenAPI schemas, `llms.txt` and a downloadable docs bundle.
 6. **Channels**, in this order: email in, Slack, WhatsApp, SMS.
 7. **20-persona copy review**, once the features the copy describes are real.
+
+## Tracker
+
+Every issue from the memo and from this check, in one list. Tick an item only when it is done in
+code (with tests) or, for items that need a person, when that step has happened. Items marked
+*needs* name what has to come from outside the code (a live walk, a vendor account, a decision).
+Rows refer to the status tables above.
+
+### Step 1: honest and safe
+- [ ] V1. Resend email sender behind `ChannelSender`, wired as the default email sender (row 18). *Needs: Resend API key and DNS verification of the sending domain.*
+- [ ] V2. Password reset (forgot password, then a link to set a new one) and change password (row 12).
+- [ ] V3. EIN CP 575: post-submit screens never halt on first sight; artifacts are collected even when confirmation fails (row 7, risk 1).
+- [ ] V4. NYS-100 browser profile scoped per tenant (risk 2).
+- [ ] V5. SSNs encrypted at rest, plus the purge job `src/domain/filing.ts:46` promises (risk 3).
+- [ ] V6. UI copy matches what works: no promised emails, vaults or subscription cards that don't exist (risk 4, row 9).
+- [ ] V7. Email verification for new sign-ups, and logout revokes the engine session key (row 12).
+- [ ] V8. Error pages in the web app for an engine 401 or 5xx (row 12).
+
+### Step 2: first live filings (adapters)
+- [ ] V9. NY LLC and corporation live on the drawdown account: map the deposit and post-submit pages, `confirmSubmission`, `complete: true` (row 1). *Needs: a supervised live walk.*
+- [ ] V10. FL LLC, profit corporation and LP live on the Sunbiz prepaid account: map the card and post-submit pages (row 1). *Needs: a live walk.*
+- [ ] V11. IRS EIN live: map the Assignment screen; entity types beyond LLC (row 1). *Needs: a live walk.*
+- [ ] V12. NJ formation and standing live: map the NICUSA checkout (row 1). *Needs: a live walk; card storage (V18).*
+- [ ] V13. NJ-REG and NYS-100 adapters rebuilt from the walked maps, not the paper forms (row 1).
+- [ ] V14. MO formation `fill` steps; NY par value; adapters for the mapped NY filings (dissolution, amendment, certificate of change, copies, certificates of status) and NJ for-profit corporation (row 1).
+- [ ] V15. Completion email to the partner or enterprise contact with links to the documents (row 24).
+- [ ] V16. Emit `filing.accepted` and `filing.rejected` (row 15).
+
+### Step 3: the two Nov 25 decisions
+- [ ] V17. Review-page approval: a preview pass takes the screenshot, the client approves it, and the live pass must match it before paying. Client-facing, on every adapter (row 5, decision 1).
+- [ ] V18. Stored cards: card vault provider, add-card flow, default and backup card used at payment screens, routing per filing type actually read (rows 2, 9, 21, decision 2). *Needs: the provider choice and its account.*
+
+### Step 4: partner front end
+- [ ] V19. Permanent branded pages `/<partner>/<filing>`, with an editable partner slug shown in setup (row 23).
+- [ ] V20. Partner-branded approval page (Keystone's brand appears today) (row 23).
+- [ ] V21. Fonts: preset choices and upload (row 20).
+- [ ] V22. Partner per-state registered agent and other defaults, and saved defaults skip questions in the forms (rows 25, 27).
+- [ ] V23. Client address book that prefills repeat filings (row 26).
+- [ ] V24. Remove the duplicate questions listed in row 25; "Same as" for people (row 25).
+- [ ] V25. Partners choose which filings they offer; use the "states you file in" answer (rows 19, 22).
+- [ ] V26. Client links can be listed and revoked; resubmitting returns an error, not the old filing.
+- [ ] V27. "Needs information" filings get a form on the filing page.
+- [ ] V28. The CPA firm's email goes in NY's CC automatically on Keystone-account filings; E-Submission fills CC; the firm's details prefill the contact block (rows 8, 11).
+
+### Step 5: enterprise
+- [ ] V29. Secret store for state logins (replacing `EnvVault`), the Connect form, MFA per portal (rows 3, 17).
+- [ ] V30. Per-state defaults the adapters read (registered agent, service of process, signer, organizer, portal defaults) (row 4).
+- [ ] V31. Copy and CC email setting for state websites (row 8).
+- [ ] V32. Staff review of enterprise requests in the dashboard: approve, create the account, send an invite email to set a password (row 13).
+- [ ] V33. Subscription billing (Stripe Billing): plans, pricing, enterprise and partner subscriptions (rows 16, 21). *Needs: prices and a Stripe account.*
+- [ ] V34. Docs: full OpenAPI schemas with a `webhooks` section, `llms.txt`, a single-file Markdown download, Python samples, no links to private repo files (row 14).
+- [ ] V35. API gaps: cancel, approve through the API, pagination, webhook test delivery and log, 409 on idempotency key reuse with a different payload (row 15, risk 6).
+- [ ] V36. Firm invite links get their own scoped key, not the inviter's session key (risk 5).
+- [ ] V37. Sign in with Google (row 13, "eventually").
+- [ ] V38. Landing page: remove `noindex` when launching, offer title companies, stop freezing env values at build (rows 9, 10).
+- [ ] V39. Embedding: decide whether the portal may be framed on a customer's site (`X-Frame-Options: DENY` today) (row 15). *Needs: what "embedded" in the memo meant.*
+
+### Step 6: channels
+- [ ] V40. Email in: inbound address to draft filing to prefilled form link (row 6).
+- [ ] V41. Slack app (row 6). *Needs: a Slack app registration.*
+- [ ] V42. WhatsApp through the Meta Business Platform (row 6). *Needs: Meta business verification.*
+- [ ] V43. SMS through Twilio with 10DLC registration (row 6). *Needs: Twilio and carrier registration.*
+
+### Step 7: copy and release hygiene
+- [ ] V44. 20-persona copy review of the full site, best recommendations applied (row 29).
+- [ ] V45. CI on push to `main`, and a test gate before the Fly deploy (risk 7).

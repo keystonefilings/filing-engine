@@ -606,3 +606,21 @@ drawdown equivalent). complete:false, dry-run only, until a verified real filing
 - Fix: the page price reader now parses amounts written without a thousands separator
   ("$1000.00"), which FL uses.
 - Tests: 106.
+
+## Q. Vision memo and two decisions (Nov 25)
+
+The Nov 25 voice memo (`docs/vision-memo-2026-11-25-transcript.md`) describes the whole site.
+`docs/vision-check-2026-11-25.md` checks it against the code and holds the tracker (V1-V45)
+for every open issue. Decisions taken the same day:
+
+7. Approval on the real review page (amends decision 2). A preview pass (dry run) drives the
+   portal to its review page, takes a screenshot and stops. The client approves that
+   screenshot together with the payload, through the same signed single-use link. The live
+   pass must reproduce the approved review page (text, fee, payload hash) before it pays, and
+   halts on any difference. Pre-run payload approval stays the mechanism; the screenshot is
+   what the client sees and approves.
+8. Stored customer cards (replaces decision 3's "no cards or ACH in our vault"). Customers
+   store their own cards, a default and a backup used when the first fails, in a card vault
+   built for passing card numbers on (VGS or Basis Theory, to be chosen). The worker
+   detokenizes a card at the payment screen, so the worker host enters PCI scope. State
+   prepaid accounts (NY drawdown, FL Sunbiz E-file) stay supported wherever a customer has one.
