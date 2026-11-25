@@ -35,6 +35,7 @@ export class MemoryStore implements Store {
   users = new Map<string, UserRecord>();
   inquiries = new Map<string, InquiryRecord>();
   intakeLinks = new Map<string, IntakeLinkRecord>();
+  vaultSecrets = new Map<string, string>();
   signatures = new Map<string, SignatureRecord>();
   /** Clock for lease expiry; injectable for tests. */
   now: () => number = () => Date.now();
@@ -129,6 +130,9 @@ export class MemoryStore implements Store {
     const u = this.users.get(id); if (!u) throw new Error("user not found");
     const next = { ...u, ...patch, id: u.id, email: u.email }; this.users.set(id, next); return next;
   }
+  async getVaultSecret(key: string) { return this.vaultSecrets.get(key) ?? null; }
+  async putVaultSecret(key: string, _tenantId: string, sealed: string) { this.vaultSecrets.set(key, sealed); }
+  async deleteVaultSecret(key: string) { this.vaultSecrets.delete(key); }
   async createIntakeLink(l: IntakeLinkRecord) { if (this.intakeLinks.has(l.id)) throw new Error("link exists"); this.intakeLinks.set(l.id, l); return l; }
   async getIntakeLink(id: string) { return this.intakeLinks.get(id) ?? null; }
   async listIntakeLinks(clientCompanyId: string) { return [...this.intakeLinks.values()].filter((l) => l.clientCompanyId === clientCompanyId).sort((a, b) => b.createdAt.localeCompare(a.createdAt)); }

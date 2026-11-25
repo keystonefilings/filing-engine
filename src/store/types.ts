@@ -377,6 +377,10 @@ export interface Store {
   findUserByEmail(email: string): Promise<UserRecord | null>;
   listUsers(tenantId: string): Promise<UserRecord[]>;
   updateUser(id: string, patch: Partial<UserRecord>): Promise<UserRecord>;
+  /** V29: sealed portal logins (settings/db-vault.ts); the store never sees them unsealed. */
+  getVaultSecret(key: string): Promise<string | null>;
+  putVaultSecret(key: string, tenantId: string, sealed: string): Promise<void>;
+  deleteVaultSecret(key: string): Promise<void>;
   createIntakeLink(l: IntakeLinkRecord): Promise<IntakeLinkRecord>;
   getIntakeLink(id: string): Promise<IntakeLinkRecord | null>;
   listIntakeLinks(clientCompanyId: string): Promise<IntakeLinkRecord[]>;

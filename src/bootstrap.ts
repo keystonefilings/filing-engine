@@ -28,8 +28,8 @@ export async function bootstrap(opts: { withExecutor: boolean; workerId?: string
     // Shared database: the cloud tier and the fixed-IP worker meet in Postgres (store + queue).
     const { PostgresStore } = await import("./store/postgres.js");
     const { PgQueue } = await import("./orchestrator/pg-queue.js");
-    const { FieldCipher } = await import("./store/sensitive.js");
-    const pgStore = await PostgresStore.connect(config.databaseUrl, { cipher: FieldCipher.fromSpec(config.dataEncryptionKey) });
+    const { FieldCipher: Cipher } = await import("./store/sensitive.js");
+    const pgStore = await PostgresStore.connect(config.databaseUrl, { cipher: Cipher.fromSpec(config.dataEncryptionKey) });
     store = pgStore;
     queue = new PgQueue(pgStore.connectionPool);
   }
@@ -45,7 +45,12 @@ export async function bootstrap(opts: { withExecutor: boolean; workerId?: string
     store, signingSecret: config.approvalSigningSecret, publicBaseUrl: config.publicBaseUrl, defaultTtlHours: config.approvalTtlHours,
   });
   const webhooks = new WebhookDispatcher(store);
-  const vault = new EnvVault();
+  // V29: logins connected in the dashboard (sealed in the database) first, then environment variables.
+  const { FieldCipher } = await import("./store/sensitive.js");
+  const cipher = FieldCipher.fromSpec(config.dataEncryptionKey);
+  const { DbVault, ChainVault } = await import("./settings/db-vault.js");
+  const secrets = cipher ? new DbVault(store, cipher) : null;
+  const vault = secrets ? new ChainVault([secrets, new EnvVault()]) : new EnvVault();
   const drift = new DriftReviewService(store);
   // The only language model in a filing: name alternatives when a chosen name is taken.
   const generator: NameCandidateGenerator = config.anthropicApiKey
@@ -76,5 +81,5 @@ export async function bootstrap(opts: { withExecutor: boolean; workerId?: string
     "site:IRS": config.siteConcurrency.IRS, "site:NY": config.siteConcurrency.NY, "site:NJ": config.siteConcurrency.NJ,
   });
   const service = new FilingService({ store, approvals, webhooks, queue, vault, drift, nameResolution, reviewGate, registeredAgents, notifier, executor, limiter, dryRunDefault: config.dryRunDefault, workerId: opts.workerId });
-  return { store, artifacts, approvals, webhooks, queue, vault, drift, nameResolution, reviewGate, registeredAgents, notifier, email, harness, executor, service };
+  return { store, artifacts, approvals, webhooks, queue, vault, secrets, drift, nameResolution, reviewGate, registeredAgents, notifier, email, harness, executor, service };
 }

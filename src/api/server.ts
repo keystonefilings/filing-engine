@@ -48,6 +48,8 @@ export interface ApiDeps {
   email?: ChannelSender;
   /** The web front end, for links in account emails. */
   webBaseUrl?: string;
+  /** V29: where connected portal logins are sealed. */
+  secrets?: import("../settings/db-vault.js").DbVault;
   /** Sends webhook test deliveries (V35). */
   webhooks?: WebhookDispatcher;
   /** The site's name (CoFile): the platform tenant's approval pages and partner firms' "with …". */
@@ -356,7 +358,7 @@ export function buildServer(deps: ApiDeps): FastifyInstance {
   registerUsers(app, {
     store: deps.store, authOf, staffOf, sessionSecret,
     platformTenantId: deps.platformTenantId ?? "keystone", partnerSignupMode: deps.partnerSignupMode ?? "approval",
-    email: deps.email, webBaseUrl: deps.webBaseUrl ?? "http://localhost:3000",
+    email: deps.email, webBaseUrl: deps.webBaseUrl ?? "http://localhost:3000", secrets: deps.secrets,
   });
 
   // ---- Approval link (client-facing, decision 2) ----

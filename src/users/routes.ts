@@ -10,6 +10,7 @@ import { PORTALS, portalDefaultsProblems } from "./portals.js";
 import { RateLimiter } from "./rate-limit.js";
 import type { ChannelSender } from "../comms/senders.js";
 import { FONT_CHOICES } from "../settings/fonts.js";
+import { PORTAL_LOGIN_KEYS, type DbVault } from "../settings/db-vault.js";
 
 /**
  * Dashboard accounts.
@@ -60,6 +61,8 @@ export interface UsersDeps {
   email?: ChannelSender;
   /** The web front end; the reset link opens its /reset-password page. */
   webBaseUrl: string;
+  /** V29: where connected portal logins are sealed; absent without DATA_ENCRYPTION_KEY. */
+  secrets?: DbVault;
   now?: () => Date;
 }
 
@@ -559,6 +562,41 @@ export function registerUsers(app: FastifyInstance, deps: UsersDeps): void {
     if (!parsed.success) return reply.code(422).send({ error: "validation failed", issues: parsed.error.issues.map((i) => ({ path: i.path.join("."), message: i.message })) });
     await deps.store.putTenant(TenantSettings.parse({ ...t, payments: parsed.data }));
     return { payments: parsed.data };
+  });
+
+  // V29: connect a state portal login. Write-only: the login is sealed and never sent back.
+  const LoginBody = z.object({ username: z.string().trim().min(1).max(200), password: z.string().min(1).max(500), totpSeed: z.string().trim().regex(/^[A-Z2-7 =]{16,128}$/i, "the authenticator key is the letters and digits the site showed when you set up the app").optional() });
+  app.put("/v1/account/portal-logins/:portal", async (req, reply) => {
+    const tenantId = await requireTenantScope(req, reply);
+    if (!tenantId) return reply;
+    const portal = (req.params as { portal: string }).portal;
+    const where = PORTAL_LOGIN_KEYS[portal];
+    if (!where) return reply.code(404).send({ error: "no such portal login" });
+    if (!deps.secrets) return reply.code(501).send({ error: "connecting logins needs DATA_ENCRYPTION_KEY on the server" });
+    const t = await deps.store.getTenant(tenantId);
+    if (!t) return reply.code(409).send({ error: "tenant settings are not set up yet; ask the platform to configure the tenant first" });
+    const parsed = LoginBody.safeParse(req.body);
+    if (!parsed.success) return reply.code(422).send({ error: "validation failed", issues: parsed.error.issues.map((i) => ({ path: i.path.join("."), message: i.message })) });
+    const keyName = (t[where.setting] as string | undefined) || where.fallback;
+    const vaultKey = `${tenantId}/${keyName}`;
+    await deps.secrets.put(vaultKey, tenantId, { username: parsed.data.username, password: parsed.data.password, ...(parsed.data.totpSeed ? { totpSeed: parsed.data.totpSeed.replace(/[\s=]/g, "").toUpperCase() } : {}) });
+    const a = await deps.authOf(req);
+    const next = TenantSettings.parse({ ...t, [where.setting]: keyName, portalLogins: { ...t.portalLogins, [portal]: { vaultKey, connectedAt: now().toISOString(), connectedBy: a?.user?.email ?? "api key" } } });
+    await deps.store.putTenant(next);
+    return { portal, connectedAt: next.portalLogins[portal]!.connectedAt, connectedBy: next.portalLogins[portal]!.connectedBy };
+  });
+
+  app.delete("/v1/account/portal-logins/:portal", async (req, reply) => {
+    const tenantId = await requireTenantScope(req, reply);
+    if (!tenantId) return reply;
+    const portal = (req.params as { portal: string }).portal;
+    const t = await deps.store.getTenant(tenantId);
+    const entry = t?.portalLogins[portal];
+    if (!t || !entry) return reply.code(404).send({ error: "that login isn't connected" });
+    await deps.secrets?.remove(entry.vaultKey);
+    const { [portal]: _gone, ...rest } = t.portalLogins;
+    await deps.store.putTenant(TenantSettings.parse({ ...t, portalLogins: rest }));
+    return { portal, disconnected: true };
   });
 
   app.put("/v1/account/portal-defaults/:portal", async (req, reply) => {

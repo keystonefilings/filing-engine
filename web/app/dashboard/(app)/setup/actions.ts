@@ -1,5 +1,6 @@
 "use server";
 
+import type { LoginState } from "@/components/PortalLoginForm";
 import { revalidatePath } from "next/cache";
 import { engine, EngineError, type AccountSetup, type PaymentRouting } from "@/lib/engine";
 import { requireTenant } from "@/lib/session";
@@ -49,4 +50,29 @@ export async function saveDefaults(portal: string, _prev: Saved, fd: FormData): 
   try { await engine(s.apiKey, `/v1/account/portal-defaults/${encodeURIComponent(portal)}`, { method: "PUT", body }); } catch (e) { return { error: problem(e) }; }
   revalidatePath("/dashboard/setup");
   return { ok: true };
+}
+
+/** V29: connect a state portal login (sealed by the engine, never returned). */
+export async function connectLogin(portal: string, _prev: LoginState, fd: FormData): Promise<LoginState> {
+  const s = await requireTenant();
+  const body = {
+    username: String(fd.get("username") ?? "").trim(), password: String(fd.get("password") ?? ""),
+    ...(String(fd.get("totpSeed") ?? "").trim() ? { totpSeed: String(fd.get("totpSeed")).trim() } : {}),
+  };
+  if (!body.username || !body.password) return { error: "Enter the username and password." };
+  try {
+    await engine(s.apiKey, `/v1/account/portal-logins/${encodeURIComponent(portal)}`, { method: "PUT", body });
+  } catch (e) {
+    if (e instanceof EngineError && e.status === 422) return { error: ((e.body as { issues?: { message: string }[] })?.issues?.[0]?.message) ?? "Check the login details." };
+    if (e instanceof EngineError && e.status === 501) return { error: "Connecting logins isn't switched on for this site yet." };
+    return { error: "That didn't save. Try again in a minute." };
+  }
+  revalidatePath("/dashboard/setup");
+  return { ok: true };
+}
+
+export async function disconnectLogin(portal: string): Promise<void> {
+  const s = await requireTenant();
+  await engine(s.apiKey, `/v1/account/portal-logins/${encodeURIComponent(portal)}`, { method: "DELETE" }).catch(() => undefined);
+  revalidatePath("/dashboard/setup");
 }

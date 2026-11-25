@@ -244,7 +244,7 @@ Rows refer to the status tables above.
 - [x] V28. The CPA firm's email goes in NY's CC automatically on Keystone-account filings; E-Submission fills CC; the firm's details prefill the contact block (rows 8, 11). **Done**: `src/adapters/copies.ts` picks the CC (the filing's own address, the firm's copy address, a partner's contact email, the subscriber's copy address) for NY online filing and E-Submission; a partner's own filings start with its contact details. The copy-address settings exist (`copyEmail` on firm and subscriber); their screens come with V31.
 
 ### Step 5: enterprise
-- [ ] V29. Secret store for state logins (replacing `EnvVault`), the Connect form, MFA per portal (rows 3, 17).
+- [x] V29. Secret store for state logins (replacing `EnvVault`), the Connect form, MFA per portal (rows 3, 17). **Done**: logins connected in Setup (username, password, optional authenticator key) are sealed with AES-256-GCM under `DATA_ENCRYPTION_KEY` in `vault_secrets`, write-only through the API, per tenant; the engine reads them before environment variables; Disconnect removes them. *Still to do with the live walks (V9, V12): adapters typing the stored login and authenticator code on each portal's sign-in screen; today sign-ins use browser sessions saved by hand.*
 - [ ] V30. Per-state defaults the adapters read (registered agent, service of process, signer, organizer, portal defaults) (row 4).
 - [ ] V31. Copy and CC email setting for state websites (row 8).
 - [ ] V32. Staff review of enterprise requests in the dashboard: approve, create the account, send an invite email to set a password (row 13).

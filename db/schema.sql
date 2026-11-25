@@ -163,6 +163,14 @@ create table if not exists users (
 );
 create index if not exists users_tenant_idx on users (tenant_id);
 
+-- Portal logins (V29): sealed with AES-256-GCM (DATA_ENCRYPTION_KEY) before they reach this table.
+create table if not exists vault_secrets (
+  key text primary key,
+  tenant_id text not null,
+  sealed text not null,
+  updated_at timestamptz not null default now()
+);
+
 -- Client links (V26): one link, one client, one filing; listed and revocable by the firm.
 create table if not exists intake_links (
   id text primary key,

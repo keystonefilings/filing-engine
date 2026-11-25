@@ -241,6 +241,14 @@ export class PostgresStore implements Store {
     if (!r.rows[0]) throw new Error("user not found");
     return r.rows[0].doc as UserRecord;
   }
+  async getVaultSecret(key: string) {
+    const r = await this.pool.query(`select sealed from vault_secrets where key=$1`, [key]);
+    return (r.rows[0]?.sealed as string | undefined) ?? null;
+  }
+  async putVaultSecret(key: string, tenantId: string, sealed: string) {
+    await this.pool.query(`insert into vault_secrets (key, tenant_id, sealed) values ($1,$2,$3) on conflict (key) do update set sealed = excluded.sealed, updated_at = now()`, [key, tenantId, sealed]);
+  }
+  async deleteVaultSecret(key: string) { await this.pool.query(`delete from vault_secrets where key=$1`, [key]); }
   async createIntakeLink(l: IntakeLinkRecord) {
     await this.pool.query(`insert into intake_links (id, tenant_id, client_company_id, doc) values ($1,$2,$3,$4)`, [l.id, l.tenantId, l.clientCompanyId, l]);
     return l;
