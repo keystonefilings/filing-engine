@@ -19,7 +19,7 @@ function Top({ s }: { s: SetupState }) {
   return s?.error ? <p className="notice bad" role="alert">{s.error}</p> : null;
 }
 
-export interface DetailsValues { name: string; companyType?: string; contactName?: string; contactEmail?: string; phone?: string; website?: string; services?: { id: string; title: string; state: string; offered: boolean }[] }
+export interface DetailsValues { name: string; companyType?: string; contactName?: string; contactEmail?: string; phone?: string; website?: string; copyEmail?: string; services?: { id: string; title: string; state: string; offered: boolean }[] }
 
 const STATE_NAMES: Record<string, string> = { NY: "New York", NJ: "New Jersey", FL: "Florida", MO: "Missouri" };
 
@@ -41,6 +41,12 @@ export function DetailsForm({ action, v }: { action: Action; v: DetailsValues })
       <div className="field-row n2">
         <div className="field"><label htmlFor="d-ce">Contact email</label><input id="d-ce" name="contactEmail" type="email" defaultValue={v.contactEmail} /><Issue s={s} k="contactEmail" /></div>
         <div className="field"><label htmlFor="d-web">Website</label><input id="d-web" name="website" type="url" defaultValue={v.website} placeholder="https://" /><Issue s={s} k="website" /></div>
+      </div>
+      <div className="field">
+        <label htmlFor="d-copy">Email for the state&apos;s copies (optional)</label>
+        <input id="d-copy" name="copyEmail" type="email" defaultValue={v.copyEmail} />
+        <p className="help">When we file on our state accounts, New York sends its copies to us and copies you in. Leave empty to use your contact email.</p>
+        <Issue s={s} k="copyEmail" />
       </div>
       {v.services?.length ? (
         <fieldset className="field">

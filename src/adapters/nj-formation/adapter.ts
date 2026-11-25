@@ -235,8 +235,10 @@ const payment: ScreenStep = {
     const understand = ctx.page.getByRole("button", { name: /^I Understand$/i });
     if (await understand.isVisible().catch(() => false)) await understand.click(); // e-check disclaimer modal
     const d = ctx.client.checkboxDefaults;
-    await ctx.set("annualReportReminders", d.njAnnualReportReminders);
-    await ctx.set("corpWatchAlerts", d.njCorpWatchAlerts);
+    // V30: the subscriber's NJ portal defaults (Setup) decide, else the firm's settings.
+    const pd = (ctx.tenant.portalDefaults as Record<string, Record<string, unknown> | undefined> | undefined)?.["nj-portal"];
+    await ctx.set("annualReportReminders", typeof pd?.annualReportReminders === "boolean" ? pd.annualReportReminders : d.njAnnualReportReminders);
+    await ctx.set("corpWatchAlerts", typeof pd?.corpWatchAlerts === "boolean" ? pd.corpWatchAlerts : d.njCorpWatchAlerts);
   },
   async advance(ctx) {
     await ctx.submit("Pay Now", () => ctx.clickButton(/^pay now$/i));

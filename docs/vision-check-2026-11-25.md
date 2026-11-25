@@ -245,8 +245,8 @@ Rows refer to the status tables above.
 
 ### Step 5: enterprise
 - [x] V29. Secret store for state logins (replacing `EnvVault`), the Connect form, MFA per portal (rows 3, 17). **Done**: logins connected in Setup (username, password, optional authenticator key) are sealed with AES-256-GCM under `DATA_ENCRYPTION_KEY` in `vault_secrets`, write-only through the API, per tenant; the engine reads them before environment variables; Disconnect removes them. *Still to do with the live walks (V9, V12): adapters typing the stored login and authenticator code on each portal's sign-in screen; today sign-ins use browser sessions saved by hand.*
-- [ ] V30. Per-state defaults the adapters read (registered agent, service of process, signer, organizer, portal defaults) (row 4).
-- [ ] V31. Copy and CC email setting for state websites (row 8).
+- [x] V30. Per-state defaults the adapters read (registered agent, service of process, signer, organizer, portal defaults) (row 4). **Done**: "Defaults per portal" now fill what a filing leaves unset (NY copies, certificate of existence and E-Submission service level; FL certified copy and certificate of status; NJ reminders and CorpWatch), with provenance; Setup gains "Who's named on your filings" (organizer, filer, signer) and "Your registered agent in each state", which only staff could set before. NYS-100 gets its own NY.gov business login (falls back to the NY DOS one); Missouri's login can be connected too.
+- [x] V31. Copy and CC email setting for state websites (row 8). **Done**: "Also send the state's copies to" in enterprise Setup and "Email for the state's copies" in a partner's Your firm step; used for the CC (V28).
 - [ ] V32. Staff review of enterprise requests in the dashboard: approve, create the account, send an invite email to set a password (row 13).
 - [ ] V33. Subscription billing (Stripe Billing): plans, pricing, enterprise and partner subscriptions (rows 16, 21). *Needs: prices and a Stripe account.*
 - [ ] V34. Docs: full OpenAPI schemas with a `webhooks` section, `llms.txt`, a single-file Markdown download, Python samples, no links to private repo files (row 14).

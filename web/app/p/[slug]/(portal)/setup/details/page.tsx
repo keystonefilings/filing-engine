@@ -17,7 +17,7 @@ export default async function DetailsPage({ params }: { params: Promise<{ slug: 
     <div className="narrow stack">
       <p className="small muted">Step 1 of 3</p>
       <h1>Your firm</h1>
-      <DetailsForm action={saveDetails.bind(null, slug)} v={{ name: company.name, companyType: p.companyType, contactName: p.contactName, contactEmail: p.contactEmail, phone: p.phone, website: p.website,
+      <DetailsForm action={saveDetails.bind(null, slug)} v={{ name: company.name, companyType: p.companyType, contactName: p.contactName, contactEmail: p.contactEmail, phone: p.phone, website: p.website, copyEmail: company.copyEmail as string | undefined,
         services: FILING_KINDS.map((k) => ({ id: k.id, title: k.title, state: k.type === "ein_only" ? "US" : k.state, offered: offered.has(k.id) })) }} />
     </div>
   );

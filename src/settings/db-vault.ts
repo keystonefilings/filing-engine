@@ -32,8 +32,10 @@ export class ChainVault implements Vault {
 }
 
 /** Which tenant setting names each portal's login in the vault, and its key when unset. */
-export const PORTAL_LOGIN_KEYS: Record<string, { setting: "nyGovCredentialKey" | "njAccountCredentialKey" | "flSunbizAccountCredentialKey"; fallback: string }> = {
+export const PORTAL_LOGIN_KEYS: Record<string, { setting: "nyGovCredentialKey" | "nyPayrollCredentialKey" | "njAccountCredentialKey" | "flSunbizAccountCredentialKey" | "moAccountCredentialKey"; fallback: string }> = {
   "ny-dos": { setting: "nyGovCredentialKey", fallback: "NYGOV" },
+  "ny-gov": { setting: "nyPayrollCredentialKey", fallback: "NYGOV_BUSINESS" },
+  "mo-sos": { setting: "moAccountCredentialKey", fallback: "MO" },
   "nj-portal": { setting: "njAccountCredentialKey", fallback: "NJ" },
   "fl-sunbiz": { setting: "flSunbizAccountCredentialKey", fallback: "FL_SUNBIZ" },
 };

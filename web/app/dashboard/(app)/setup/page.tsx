@@ -4,6 +4,9 @@ import { FILING_KINDS } from "@/lib/intake/forms";
 import { DefaultsForm, RoutingForm } from "@/components/EnterpriseSetupForms";
 import { connectLogin, disconnectLogin, saveDefaults, saveRouting } from "./actions";
 import { PortalLoginForm } from "@/components/PortalLoginForm";
+import { FilingDefaultsForm } from "@/components/FilingDefaultsForm";
+import { AgentsForm } from "@/components/AgentsForm";
+import { saveFilingDefaults, saveTenantAgents } from "./actions";
 
 export const metadata = { title: "Setup" };
 
@@ -48,6 +51,13 @@ export default async function SetupPage() {
           </tbody>
         </table>
       </div>
+
+      <h2>Who&apos;s named on your filings</h2>
+      <p className="muted">Used when a client&apos;s firm leaves these to you. A filing that names someone else always wins.</p>
+      <FilingDefaultsForm action={saveFilingDefaults} v={setup.filingDefaults ?? {}} />
+      <h3>Your registered agent in each state</h3>
+      <p className="muted">When a client asks you to provide the agent, this is the agent named.</p>
+      <AgentsForm action={saveTenantAgents} states={["NY", "NJ", "FL"]} agents={setup.filingDefaults?.registeredAgents ?? {}} />
 
       <h2>Defaults per portal</h2>
       <p className="muted">Used on every filing at that portal unless the filing says otherwise.</p>

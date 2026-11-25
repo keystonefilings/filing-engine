@@ -46,8 +46,10 @@ export async function saveDetails(slug: string, _prev: SetupState, fd: FormData)
   const known = new Set(FILING_KINDS.map((k) => k.id));
   const services = fd.getAll("services").map(String).filter((id) => known.has(id));
   if (fd.has("servicesShown") && !services.length) return { error: "Pick at least one service.", issues: { services: "Pick at least one service to offer." } };
+  const copyEmail = text(fd, "copyEmail").toLowerCase();
   return save(slug, "details", {
     name,
+    copyEmail: copyEmail || null,
     ...(fd.has("servicesShown") ? { brand: { filingKinds: services } } : {}),
     partner: {
       ...(["cpa", "payroll", "cfo", "other"].includes(type) ? { companyType: type } : {}),

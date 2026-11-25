@@ -132,6 +132,8 @@ const ProfileBody = z.object({
     filingKinds: z.array(z.string().regex(/^[a-z0-9-]{2,40}$/)).max(60).optional(),
   }).optional(),
   paymentRouting: PaymentRouting.optional(),
+  /** V31: where the state's copies of this firm's filings also go (null clears; else its contact email). */
+  copyEmail: z.string().trim().toLowerCase().email().nullable().optional(),
   /** V22: the firm's registered agent per state (null removes one). */
   registeredAgents: z.partialRecord(z.enum(["NY", "NJ", "FL", "MO"]), z.union([z.object({
     name: z.string().trim().min(2).max(160),
@@ -529,6 +531,7 @@ export function registerUsers(app: FastifyInstance, deps: UsersDeps): void {
       // A logo link the firm types replaces an uploaded logo (the upload is shown first otherwise).
       ...(b.brand ? { portal: { ...c.portal, ...b.brand, slug: b.brand.slug ?? await portalSlugFor(deps.store, c.tenantId, c), ...(b.brand.logoUrl ? { logoArtifactId: undefined } : {}) } } : {}),
       ...(b.paymentRouting ? { payments: { methods: c.payments?.methods ?? [], routing: b.paymentRouting } } : {}),
+      ...(b.copyEmail !== undefined ? { copyEmail: b.copyEmail ?? undefined } : {}),
       ...(b.registeredAgents ? { registeredAgentsByState: Object.fromEntries(Object.entries({ ...c.registeredAgentsByState, ...b.registeredAgents }).filter(([, v]) => v)) } : {}),
     };
     const checked = ClientCompanySettings.safeParse(next);
@@ -549,6 +552,7 @@ export function registerUsers(app: FastifyInstance, deps: UsersDeps): void {
       payments: t?.payments ?? { methods: [], routing: PaymentRouting.parse({}) },
       portalLogins: Object.fromEntries(Object.entries(t?.portalLogins ?? {}).map(([k, v]) => [k, { connectedAt: v.connectedAt, connectedBy: v.connectedBy }])),
       portalDefaults: t?.portalDefaults ?? {},
+      filingDefaults: { organizer: t?.organizer, filer: t?.filer, signer: t?.signer, copyEmail: t?.copyEmail, registeredAgents: t?.registeredAgentProvisioning?.selfByState ?? {} },
       portals: PORTALS,
     };
   });
@@ -597,6 +601,35 @@ export function registerUsers(app: FastifyInstance, deps: UsersDeps): void {
     const { [portal]: _gone, ...rest } = t.portalLogins;
     await deps.store.putTenant(TenantSettings.parse({ ...t, portalLogins: rest }));
     return { portal, disconnected: true };
+  });
+
+  // V30: who is named on the subscriber's filings: organizer, filer, signer, and its own
+  // registered agent per state (used when a client asks the filing company for the agent).
+  const AddressIn = z.object({ street1: z.string().trim().min(2).max(120), street2: z.string().trim().max(120).optional(), city: z.string().trim().min(2).max(80), state: z.string().regex(/^[A-Z]{2}$/), zip: z.string().regex(/^\d{5}(-\d{4})?$/) });
+  const PersonIn = z.object({ name: z.string().trim().min(2).max(160), title: z.string().trim().max(80).optional(), address: AddressIn.optional() });
+  const FilingDefaultsBody = z.object({
+    organizer: PersonIn.nullable().optional(), filer: PersonIn.nullable().optional(), signer: PersonIn.nullable().optional(),
+    /** V31: also CC'd on the state's copies (adapters/copies.ts); null clears it. */
+    copyEmail: z.string().trim().toLowerCase().email().nullable().optional(),
+    registeredAgents: z.partialRecord(z.enum(["NY", "NJ", "FL", "MO"]), z.union([z.object({ name: z.string().trim().min(2).max(160), email: z.string().email().optional(), address: AddressIn }), z.null()])).optional()
+      .refine((m) => !m || Object.entries(m).every(([st, a]) => !a || a.address.state === st), { message: "each agent's address must be in its own state" }),
+  });
+  app.put("/v1/account/filing-defaults", async (req, reply) => {
+    const tenantId = await requireTenantScope(req, reply);
+    if (!tenantId) return reply;
+    const t = await deps.store.getTenant(tenantId);
+    if (!t) return reply.code(409).send({ error: "tenant settings are not set up yet; ask the platform to configure the tenant first" });
+    const parsed = FilingDefaultsBody.safeParse(req.body);
+    if (!parsed.success) return reply.code(422).send({ error: "validation failed", issues: parsed.error.issues.map((i) => ({ path: i.path.join("."), message: i.message })) });
+    const b = parsed.data;
+    const pick = <K extends "organizer" | "filer" | "signer">(k: K) => (b[k] === undefined ? t[k] : b[k] ?? undefined);
+    const selfByState = b.registeredAgents
+      ? Object.fromEntries(Object.entries({ ...t.registeredAgentProvisioning?.selfByState, ...b.registeredAgents }).filter(([, v]) => v))
+      : t.registeredAgentProvisioning?.selfByState;
+    const next = TenantSettings.parse({ ...t, organizer: pick("organizer"), filer: pick("filer"), signer: pick("signer"), registeredAgentProvisioning: { ...t.registeredAgentProvisioning, selfByState },
+      copyEmail: b.copyEmail === undefined ? t.copyEmail : b.copyEmail ?? undefined });
+    await deps.store.putTenant(next);
+    return { organizer: next.organizer, filer: next.filer, signer: next.signer, copyEmail: next.copyEmail, registeredAgents: next.registeredAgentProvisioning?.selfByState ?? {} };
   });
 
   app.put("/v1/account/portal-defaults/:portal", async (req, reply) => {

@@ -111,6 +111,6 @@ export const nyPayrollAdapter: SiteAdapter = {
   entryUrl: () => process.env.NY_PAYROLL_URL ?? "https://www.businessexpress.ny.gov",
   // The subscriber's NY.gov business login (persistent context), kept apart from its NY DOS account (ny:<tenant>).
   profileKey: (ctx) => `nygov:${ctx.tenant.tenantId}`,
-  credentialKey: (ctx) => tenantVaultKey(ctx.tenant, ctx.tenant.nyGovCredentialKey),
+  credentialKey: (ctx) => tenantVaultKey(ctx.tenant, ctx.tenant.nyPayrollCredentialKey ?? ctx.tenant.nyGovCredentialKey),
   steps: [employerInformation, liabilityInformation, requiredAddresses, businessInformation, affirmation],
 };

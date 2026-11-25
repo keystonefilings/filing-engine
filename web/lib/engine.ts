@@ -131,8 +131,12 @@ export interface AccountSetup {
   payments: PaymentSettings;
   portalLogins: Record<string, { connectedAt: string; connectedBy?: string }>;
   portalDefaults: Record<string, Record<string, string | number | boolean>>;
+  /** V30: who the subscriber names on its filings, and its own registered agent per state. */
+  filingDefaults?: { organizer?: NamedPerson; filer?: NamedPerson; signer?: NamedPerson; copyEmail?: string; registeredAgents: Record<string, { name: string; email?: string; address?: { street1: string; street2?: string; city: string; state: string; zip: string } } | undefined> };
   portals: PortalInfo[];
 }
+
+export interface NamedPerson { name: string; title?: string; address?: { street1: string; street2?: string; city: string; state: string; zip: string } }
 
 export interface PartnerProfile {
   companyType?: CompanyType; contactName?: string; contactEmail?: string; phone?: string; website?: string;

@@ -219,5 +219,38 @@ export function applyPolicies(raw: unknown, tenant: TenantSettings, client: Clie
     req.standing.form = p.standingDefaultForm; provenance["standing.form"] = "firm policy";
   }
 
+  applyPortalDefaults(req, tenant, provenance);
   return { request: req, issues, provenance };
+}
+
+/**
+ * V30: the subscriber's "Defaults per portal" (Setup) fill what a filing leaves unset: New York's
+ * copies, certificate of existence and E-Submission service level, Florida's certified copy and
+ * certificate of status. A value on the filing always wins; each fill is recorded in provenance.
+ */
+export function applyPortalDefaults(req: Obj, tenant: TenantSettings, provenance: Record<string, string>): void {
+  const defaults = (tenant.portalDefaults ?? {}) as Record<string, Record<string, unknown> | undefined>;
+  const state = req.state as string | undefined;
+  const portal = state === "NY" ? defaults["ny-dos"] : state === "FL" ? defaults["fl-sunbiz"] : undefined;
+  if (!portal) return;
+  const setIfUnset = (path: string[], v: unknown) => {
+    if (v === undefined) return;
+    let o = req as Obj;
+    for (const k of path.slice(0, -1)) { if (o[k] === undefined || o[k] === null) o[k] = {}; o = o[k] as Obj; }
+    const leaf = path[path.length - 1]!;
+    if (o[leaf] !== undefined) return;
+    o[leaf] = v;
+    provenance[path.join(".")] = `portal default (${state === "NY" ? "ny-dos" : "fl-sunbiz"})`;
+  };
+  if (req.type === "formation") {
+    const certs = ["formation", "additionalCertificates"];
+    setIfUnset([...certs, "certifiedCopy"], portal.certifiedCopy);
+    if (state === "NY") {
+      setIfUnset([...certs, "plainCopy"], portal.plainCopy);
+      setIfUnset([...certs, "certificateOfStanding"], portal.certificateOfExistence);
+    } else {
+      setIfUnset([...certs, "certificateOfStanding"], portal.certificateOfStatus);
+    }
+  }
+  if (req.type === "paper_upload" && state === "NY") setIfUnset(["paperUpload", "levelOfService"], portal.expedite);
 }

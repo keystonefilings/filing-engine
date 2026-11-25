@@ -84,6 +84,8 @@ export const TenantSettings = z.object({
   defaultApprovers: z.array(ApprovalRecipient).default([]),
   /** Vault key for the ny.gov service-company login (username/password/totp). Company-wide. */
   nyGovCredentialKey: z.string().default("NYGOV"),
+  /** V29: the NY.gov business account for NYS-100, if it isn't the same login as NY DOS's. */
+  nyPayrollCredentialKey: z.string().optional(),
   /** The service company's own Missouri SOS online-filing login (vault key, scoped to this tenant). */
   moAccountCredentialKey: z.string().optional(),
   /** Payment method chosen at the Missouri checkout: credit_card or echeck. */
