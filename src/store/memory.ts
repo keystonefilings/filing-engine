@@ -1,7 +1,7 @@
 import { randomUUID } from "node:crypto";
 import {
   ClientCompanyOwnershipError,
-  type ApiKeyRecord, type SignatureRecord, type ApprovalRecord, type DriftHaltRecord, type FilingRecord, type MessageRecord, type NameResolutionRecord, type ReviewGateRecord, type RunRecord, type Store, type SubmitIntentRecord, type WebhookDeliveryRecord,
+  type ApiKeyRecord, type InquiryRecord, type UserRecord, type SignatureRecord, type ApprovalRecord, type DriftHaltRecord, type FilingRecord, type MessageRecord, type NameResolutionRecord, type ReviewGateRecord, type RunRecord, type Store, type SubmitIntentRecord, type WebhookDeliveryRecord,
 } from "./types.js";
 import type { ClientCompanySettings, TenantSettings } from "../settings/schema.js";
 import type { PageSnapshot } from "../resolver/types.js";
@@ -32,6 +32,8 @@ export class MemoryStore implements Store {
   reviewGates = new Map<string, ReviewGateRecord>();
   leases = new Map<string, { workerId: string; token: string; expiresAt: number }>();
   apiKeys = new Map<string, ApiKeyRecord>();
+  users = new Map<string, UserRecord>();
+  inquiries = new Map<string, InquiryRecord>();
   signatures = new Map<string, SignatureRecord>();
   /** Clock for lease expiry; injectable for tests. */
   now: () => number = () => Date.now();
@@ -114,6 +116,20 @@ export class MemoryStore implements Store {
     const k = this.apiKeys.get(id);
     if (k) this.apiKeys.set(id, { ...k, lastUsedAt: at });
   }
+
+  async createUser(u: UserRecord) {
+    for (const x of this.users.values()) if (x.email === u.email) throw new Error("email already in use");
+    this.users.set(u.id, u); return u;
+  }
+  async getUser(id: string) { return this.users.get(id) ?? null; }
+  async findUserByEmail(email: string) { for (const u of this.users.values()) if (u.email === email) return u; return null; }
+  async listUsers(tenantId: string) { return [...this.users.values()].filter((u) => u.tenantId === tenantId); }
+  async updateUser(id: string, patch: Partial<UserRecord>) {
+    const u = this.users.get(id); if (!u) throw new Error("user not found");
+    const next = { ...u, ...patch, id: u.id, email: u.email }; this.users.set(id, next); return next;
+  }
+  async createInquiry(i: InquiryRecord) { this.inquiries.set(i.id, i); return i; }
+  async listInquiries() { return [...this.inquiries.values()].sort((a, b) => b.createdAt.localeCompare(a.createdAt)); }
 
   async acquireRunLease(filingId: string, workerId: string, ttlMs: number) {
     const cur = this.leases.get(filingId);

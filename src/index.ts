@@ -17,6 +17,11 @@ const app = buildServer({
   nameResolution: sys.nameResolution, reviewGate: sys.reviewGate,
   apiKeys: parseApiKeys(process.env.API_KEYS, config.production),
   staffKeys: parseStaffKeys(process.env.STAFF_API_KEYS, config.production),
+  // Dashboard session keys are signed with the approval-link secret (domain-separated).
+  sessionSecret: config.approvalSigningSecret,
+  platformTenantId: process.env.PLATFORM_TENANT_ID || "keystone",
+  // Partner sign-ups wait for approval unless this is set to "automatic".
+  partnerSignupMode: process.env.PARTNER_SIGNUP_MODE === "automatic" ? "automatic" : "approval",
 });
 
 setInterval(() => void sys.webhooks.processDue(), 15_000).unref();

@@ -151,3 +151,21 @@ create table if not exists signatures (
   doc jsonb not null
 );
 create index if not exists signatures_company_idx on signatures (tenant_id, client_company_id);
+
+-- Dashboard sign-in (src/users): enterprise staff and partner firms' staff. Only an scrypt hash of each
+-- password is kept. Partner sign-ups wait here with status 'pending' until approved.
+create table if not exists users (
+  id uuid primary key,
+  email text not null unique,
+  tenant_id text not null,
+  created_at timestamptz not null default now(),
+  doc jsonb not null
+);
+create index if not exists users_tenant_idx on users (tenant_id);
+
+-- Enterprise contact-form requests from the landing page.
+create table if not exists inquiries (
+  id uuid primary key,
+  created_at timestamptz not null default now(),
+  doc jsonb not null
+);

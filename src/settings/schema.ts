@@ -1,6 +1,7 @@
 import { z } from "zod";
 import { Address, ApprovalRecipient, Contact, EinMode, Person } from "../domain/filing.js";
 import { FirmPolicyAnswers } from "./policies.js";
+import { PaymentSettings } from "./payments.js";
 
 /**
  * Tenant = a filing service company subscribing to the platform (Scope 1). Keystone is one
@@ -138,6 +139,15 @@ export const TenantSettings = z.object({
     whatsapp: z.object({ providerKey: z.string(), fromNumber: z.string() }).optional(),
     sms: z.object({ providerKey: z.string(), fromNumber: z.string() }).optional(),
   }).prefault({}),
+  /** Saved cards (vault references) for state fees and the subscription, and which pays what (src/settings/payments.ts). */
+  payments: PaymentSettings.optional(),
+  /**
+   * The subscriber's state portal logins, one per portal (portal ids in src/users/portals.ts): the vault key
+   * holding it and when it was connected. The login itself lives only in the vault.
+   */
+  portalLogins: z.record(z.string(), z.object({ vaultKey: z.string().min(1), connectedAt: z.string(), connectedBy: z.string().optional() })).default({}),
+  /** Defaults per portal and filing type that the subscriber picks in its dashboard (e.g. copies to order, expedite level). */
+  portalDefaults: z.record(z.string(), z.record(z.string(), z.union([z.string(), z.number(), z.boolean()]))).default({}),
 });
 export type TenantSettings = z.infer<typeof TenantSettings>;
 
@@ -214,5 +224,17 @@ export const ClientCompanySettings = z.object({
     /** Filing kinds the firm offers its clients (web/lib/intake ids); absent = all. */
     filingKinds: z.array(z.string()).optional(),
   }).optional(),
+  /** A partner firm that signed up on the landing page: what it told us, and the setup guide's progress. */
+  partner: z.object({
+    companyType: z.enum(["cpa", "payroll", "cfo", "other"]).optional(),
+    contactName: z.string().max(120).optional(),
+    contactEmail: z.string().email().optional(),
+    phone: z.string().max(40).optional(),
+    website: z.string().url().startsWith("https://").optional(),
+    /** Setup guide steps the firm has finished. */
+    setupDone: z.array(z.enum(["details", "branding", "payments"])).default([]),
+  }).optional(),
+  /** The firm's saved cards for state fees and which pays which filing (src/settings/payments.ts). */
+  payments: PaymentSettings.optional(),
 });
 export type ClientCompanySettings = z.infer<typeof ClientCompanySettings>;

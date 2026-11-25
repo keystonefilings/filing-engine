@@ -15,6 +15,9 @@ import type { NameResolutionService, NameDecision } from "../name-resolution/ser
 import type { ReviewGateService, ReviewGateDecision } from "../review-gate/service.js";
 import { renderNameResolutionPage } from "../name-resolution/render.js";
 import { renderReviewGatePage } from "../review-gate/render.js";
+import { registerUsers, type Auth, type PartnerSignupMode } from "../users/routes.js";
+import { readSessionKey, SESSION_PREFIX } from "../users/session-token.js";
+import { partnerGuard } from "../users/partner-guard.js";
 
 export interface ApiDeps {
   service: FilingService;
@@ -30,6 +33,12 @@ export interface ApiDeps {
   /** Platform staff keys (STAFF_API_KEYS): key -> staff identity, presented in x-api-key. Only staff
    *  change tenant settings and decide drift reviews. None = those routes refuse every caller. */
   staffKeys?: Record<string, string>;
+  /** Signs dashboard session keys (src/users). Defaults to a development value outside tests. */
+  sessionSecret?: string;
+  /** The platform's own tenant: partner firms that sign up on the landing page join it. */
+  platformTenantId?: string;
+  /** Whether partner sign-ups wait for approval (default) or are approved at once. */
+  partnerSignupMode?: PartnerSignupMode;
 }
 
 function filingTitle(f: FilingRecord | null): string {
@@ -54,16 +63,30 @@ export function buildServer(deps: ApiDeps): FastifyInstance {
   });
 
   const presented = (req: { headers: Record<string, unknown> }) => String(req.headers["x-api-key"] ?? "");
-  /** The caller's tenant: a key from API_KEYS, or a key the tenant issued itself (stored hashed). */
-  const tenantOf = async (req: { headers: Record<string, unknown> }): Promise<string | null> => {
+  const sessionSecret = deps.sessionSecret ?? "dev-only-session-secret";
+  /**
+   * The caller: a key from API_KEYS, a key the tenant issued itself (stored hashed), or a signed-in
+   * person's session key. A partner's session is limited to its firm (partnerGuard below).
+   */
+  const authOf = async (req: { headers: Record<string, unknown> }): Promise<Auth | null> => {
     const key = presented(req);
+    if (key.startsWith(SESSION_PREFIX)) {
+      const c = readSessionKey(sessionSecret, key);
+      if (!c) return null;
+      const u = await deps.store.getUser(c.sub);
+      if (!u || u.status !== "active" || u.sessionGen !== c.gen || u.tenantId !== c.tenantId || u.kind !== c.kind) return null;
+      if (u.kind === "partner") return u.clientCompanyId && u.clientCompanyId === c.clientCompanyId ? { tenantId: u.tenantId, user: u, partnerOf: u.clientCompanyId } : null;
+      return { tenantId: u.tenantId, user: u };
+    }
     const fromEnv = lookupKey(deps.apiKeys, key);
-    if (fromEnv) return fromEnv;
+    if (fromEnv) return { tenantId: fromEnv };
     const stored = await tenantFromStoredKey(deps.store, key);
     if (!stored) return null;
     void deps.store.touchApiKey(stored.keyId, new Date().toISOString()).catch(() => {});
-    return stored.tenantId;
+    return { tenantId: stored.tenantId };
   };
+  /** The caller's tenant (any of the three kinds of key). */
+  const tenantOf = async (req: { headers: Record<string, unknown> }): Promise<string | null> => (await authOf(req))?.tenantId ?? null;
   const staffOf = (req: { headers: Record<string, unknown> }): string | null => lookupKey(deps.staffKeys ?? {}, presented(req));
   /** Platform-staff routes: the staff identity, or null after answering 401 (no key) / 403 (a tenant's key). */
   const requireStaff = async (req: { headers: Record<string, unknown> }, reply: FastifyReply): Promise<string | null> => {
@@ -73,6 +96,9 @@ export function buildServer(deps: ApiDeps): FastifyInstance {
     void reply.code(tenant ? 403 : 401).send({ error: tenant ? "platform staff only" : "invalid api key" });
     return null;
   };
+
+  // A partner's session reaches only its own firm's filings, signatures and settings.
+  app.addHook("preHandler", partnerGuard({ store: deps.store, artifacts: deps.artifacts, authOf }));
 
   app.get("/healthz", async () => ({ ok: true }));
   app.get("/v1/events", async () => ({ events: EVENT_TYPES }));
@@ -191,6 +217,10 @@ export function buildServer(deps: ApiDeps): FastifyInstance {
 
   registerSelfService(app, { store: deps.store, tenantOf });
   registerSignatures(app, { store: deps.store, tenantOf });
+  registerUsers(app, {
+    store: deps.store, authOf, staffOf, sessionSecret,
+    platformTenantId: deps.platformTenantId ?? "keystone", partnerSignupMode: deps.partnerSignupMode ?? "approval",
+  });
 
   // ---- Approval link (client-facing, decision 2) ----
   app.get("/approve/:token", async (req, reply) => {
