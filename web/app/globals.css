@@ -101,3 +101,28 @@ legend { font-weight: 700; padding: 0 6px; }
 .sigpad canvas { display: block; width: 100%; max-width: 520px; height: 150px; background: #fff; border: 1px dashed var(--border); border-radius: 8px; cursor: crosshair; }
 .sigpad .row { max-width: 520px; justify-content: space-between; margin-top: 6px; }
 .consent { background: var(--surface-2, var(--surface)); border: 1px solid var(--border); border-radius: 8px; padding: 10px 12px; font-size: 0.9rem; }
+
+/* Simplified filing pages: folded sections, optional questions, questions side by side, "Same as". */
+details.fold { border: 1px solid var(--border); border-radius: var(--radius); background: var(--surface); margin: 0 0 18px; }
+details.fold > summary { cursor: pointer; padding: 14px 18px; font-weight: 700; list-style-position: inside; }
+details.fold[open] > summary { border-bottom: 1px solid var(--border); }
+details.fold > fieldset { border: 0; margin: 0; background: none; }
+details.more { margin: 4px 0 14px; }
+details.more > summary { cursor: pointer; color: var(--accent); font-size: .92rem; margin-bottom: 10px; }
+.field-row { display: grid; gap: 0 12px; }
+.field-row.n2 { grid-template-columns: minmax(0, 2fr) minmax(0, 1fr); }
+.field-row.n3 { grid-template-columns: minmax(0, 2fr) minmax(0, 1fr) minmax(0, 1fr); }
+@media (max-width: 560px) { .field-row.n2, .field-row.n3 { grid-template-columns: minmax(0, 1fr); } }
+.same-as { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin: 0 0 8px; }
+
+/* Setup guide and pickers */
+.steps-list { list-style: none; padding: 0; margin: 0; display: grid; gap: 10px; }
+.steps-list li { display: flex; gap: 12px; align-items: center; padding: 14px 16px; border: 1px solid var(--border); border-radius: var(--radius); background: var(--surface); }
+.steps-list .dot { width: 22px; height: 22px; border-radius: 50%; border: 2px solid var(--border); flex: none; }
+.steps-list .done .dot { background: var(--ok); border-color: var(--ok); }
+.pick { display: grid; gap: 14px; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); }
+.pick a { display: block; padding: 18px; border: 1px solid var(--border); border-radius: var(--radius); background: var(--surface); text-decoration: none; color: inherit; }
+.pick a:hover { border-color: var(--accent); }
+.pick strong { display: block; font-size: 1.05rem; }
+.cobrand { display: inline-flex; align-items: center; gap: 8px; font-size: .86rem; color: var(--muted); }
+.cobrand img { height: 22px; width: auto; }
