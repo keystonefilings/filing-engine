@@ -1,5 +1,5 @@
 import { cache } from "react";
-import { engine, type ClientCompany, type PortalBrand } from "./engine";
+import { engine, type ClientCompany, type PartnerProfile, type PortalBrand } from "./engine";
 import { requireFirm, type FirmSession } from "./session";
 import { FILING_KINDS, type FilingKind } from "./intake/forms";
 import { logoSrc, safeColor, textOn } from "./brand";
@@ -21,9 +21,13 @@ export function brandStyle(b: Pick<FirmBrand, "color" | "color2"> & { font?: Bra
 }
 
 /** Filings this firm's portal offers: all of them unless the firm's settings list some. */
-export function offeredKinds(c: Pick<ClientCompany, "portal">): FilingKind[] {
+export function offeredKinds(c: Pick<ClientCompany, "portal"> & { partner?: PartnerProfile }): FilingKind[] {
   const only = c.portal?.filingKinds;
-  return only && only.length ? FILING_KINDS.filter((k) => only.includes(k.id)) : FILING_KINDS;
+  if (only && only.length) return FILING_KINDS.filter((k) => only.includes(k.id));
+  // A partner that hasn't chosen yet offers what it files: its sign-up states, plus the federal EIN.
+  const states = c.partner?.states;
+  if (states?.length) return FILING_KINDS.filter((k) => k.type === "ein_only" || (states as string[]).includes(k.state));
+  return FILING_KINDS;
 }
 
 export const loadCompany = cache(async (apiKey: string, clientCompanyId: string): Promise<ClientCompany> => {

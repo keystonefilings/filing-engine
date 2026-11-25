@@ -243,6 +243,8 @@ export const ClientCompanySettings = z.object({
     contactEmail: z.string().email().optional(),
     phone: z.string().max(40).optional(),
     website: z.string().url().startsWith("https://").optional(),
+    /** The states it said it files in at sign-up: the default services it offers (V25). */
+    states: z.array(z.enum(["NY", "NJ", "FL", "MO"])).optional(),
     /** Setup guide steps the firm has finished. */
     setupDone: z.array(z.enum(["details", "branding", "payments"])).default([]),
   }).optional(),

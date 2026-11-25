@@ -125,6 +125,8 @@ const ProfileBody = z.object({
     font: z.enum(FONT_CHOICES).optional(),
     secondaryColor: z.string().regex(/^#[0-9a-fA-F]{6}$/).optional(),
     supportEmail: z.string().email().optional(),
+    /** V25: the services (filing kinds) the firm offers its clients; empty = all. */
+    filingKinds: z.array(z.string().regex(/^[a-z0-9-]{2,40}$/)).max(60).optional(),
   }).optional(),
   paymentRouting: PaymentRouting.optional(),
 });
@@ -402,7 +404,7 @@ export function registerUsers(app: FastifyInstance, deps: UsersDeps): void {
     const company = ClientCompanySettings.parse({
       clientCompanyId: `firm-${slug}`, tenantId: u.tenantId, name: s.companyName,
       portal: { slug, displayName: s.companyName },
-      partner: { companyType: s.companyType, contactName: u.name, contactEmail: u.email, phone: s.phone, website: s.website, setupDone: [] },
+      partner: { companyType: s.companyType, contactName: u.name, contactEmail: u.email, phone: s.phone, website: s.website, states: s.states, setupDone: [] },
     });
     await deps.store.putClientCompany(company);
     return deps.store.updateUser(u.id, { status: "active", clientCompanyId: company.clientCompanyId, decidedAt: now().toISOString(), decidedBy: by });

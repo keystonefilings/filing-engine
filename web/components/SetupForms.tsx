@@ -19,7 +19,9 @@ function Top({ s }: { s: SetupState }) {
   return s?.error ? <p className="notice bad" role="alert">{s.error}</p> : null;
 }
 
-export interface DetailsValues { name: string; companyType?: string; contactName?: string; contactEmail?: string; phone?: string; website?: string }
+export interface DetailsValues { name: string; companyType?: string; contactName?: string; contactEmail?: string; phone?: string; website?: string; services?: { id: string; title: string; state: string; offered: boolean }[] }
+
+const STATE_NAMES: Record<string, string> = { NY: "New York", NJ: "New Jersey", FL: "Florida", MO: "Missouri" };
 
 export function DetailsForm({ action, v }: { action: Action; v: DetailsValues }) {
   const { state: s, pending, formProps } = useKeptForm(action, null);
@@ -40,6 +42,22 @@ export function DetailsForm({ action, v }: { action: Action; v: DetailsValues })
         <div className="field"><label htmlFor="d-ce">Contact email</label><input id="d-ce" name="contactEmail" type="email" defaultValue={v.contactEmail} /><Issue s={s} k="contactEmail" /></div>
         <div className="field"><label htmlFor="d-web">Website</label><input id="d-web" name="website" type="url" defaultValue={v.website} placeholder="https://" /><Issue s={s} k="website" /></div>
       </div>
+      {v.services?.length ? (
+        <fieldset className="field">
+          <legend>Services you offer your clients</legend>
+          <input type="hidden" name="servicesShown" value="1" />
+          <p className="help">Only these show in your portal and on your pages for clients. You can change them any time.</p>
+          {Array.from(new Set(v.services.map((k) => k.state))).map((st) => (
+            <div key={st} style={{ marginTop: 8 }}>
+              <strong className="small">{st === "US" ? "Federal" : STATE_NAMES[st] ?? st}</strong>
+              {v.services!.filter((k) => k.state === st).map((k) => (
+                <label key={k.id} className="check"><input type="checkbox" name="services" value={k.id} defaultChecked={k.offered} /> {k.title}</label>
+              ))}
+            </div>
+          ))}
+          <Issue s={s} k="services" />
+        </fieldset>
+      ) : null}
       <button className="btn primary" type="submit" disabled={pending}>{pending ? "Saving…" : "Save and continue"}</button>
     </form>
   );

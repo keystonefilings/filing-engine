@@ -133,5 +133,6 @@ export interface AccountSetup {
 
 export interface PartnerProfile {
   companyType?: CompanyType; contactName?: string; contactEmail?: string; phone?: string; website?: string;
+  states?: string[];
   setupDone?: ("details" | "branding" | "payments")[];
 }

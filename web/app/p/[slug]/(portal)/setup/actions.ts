@@ -42,8 +42,12 @@ export async function saveDetails(slug: string, _prev: SetupState, fd: FormData)
   let website = text(fd, "website") || undefined;
   if (website && !/^https:\/\//.test(website)) website = `https://${website.replace(/^https?:\/\//, "")}`;
   const type = text(fd, "companyType", 20);
+  const known = new Set(FILING_KINDS.map((k) => k.id));
+  const services = fd.getAll("services").map(String).filter((id) => known.has(id));
+  if (fd.has("servicesShown") && !services.length) return { error: "Pick at least one service.", issues: { services: "Pick at least one service to offer." } };
   return save(slug, "details", {
     name,
+    ...(fd.has("servicesShown") ? { brand: { filingKinds: services } } : {}),
     partner: {
       ...(["cpa", "payroll", "cfo", "other"].includes(type) ? { companyType: type } : {}),
       contactName: text(fd, "contactName", 120) || undefined,
