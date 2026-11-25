@@ -74,6 +74,15 @@ export const ENDPOINTS: Endpoint[] = [
     ],
   },
   {
+    id: "preview", method: "POST", path: "/v1/filings/{id}/preview", group: "Filings", auth: "api_key",
+    summary: "Take the state's review page again",
+    description: "Where the client approves the state's own review page, a preview run takes it before the approval link is sent. If a preview failed, was blocked, or its site-change review is done, this starts a new one; the approval link follows when it ends.",
+    responses: [
+      { status: 202, description: "The filing, now `previewing`.", example: { filing: { id: "f_123", status: "previewing" } } },
+      { status: 409, description: "The filing is not failed, blocked or waiting for a site-change review." },
+    ],
+  },
+  {
     id: "record-outcome", method: "POST", path: "/v1/filings/{id}/outcome", group: "Filings", auth: "api_key",
     summary: "Record the state's answer",
     description: "For a `submitted` filing whose state answers later (New York's receipt email, a Florida examiner's review). `accepted` attaches up to five documents (PDF, PNG or JPEG, base64, 10 MB each), then sends `filing.accepted` and `filing.completed`; the completion email carries the documents. `rejected` sends `filing.rejected` with the reason.",

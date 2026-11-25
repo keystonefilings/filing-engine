@@ -201,6 +201,21 @@ export function buildServer(deps: ApiDeps): FastifyInstance {
     }
   });
 
+  // Decision 7: take the state's review page again (after a preview failed, was blocked, or its drift review is done).
+  app.post("/v1/filings/:id/preview", async (req, reply) => {
+    const staff = staffOf(req);
+    const auth = staff ? null : await authOf(req);
+    if (!staff && !auth) return reply.code(401).send({ error: "invalid api key" });
+    const f = await deps.store.getFiling((req.params as { id: string }).id);
+    if (!f || (!staff && f.tenantId !== auth!.tenantId)) return reply.code(404).send({ error: "not found" });
+    try {
+      return reply.code(202).send({ filing: publicFiling(await deps.service.requestPreview(f.id)) });
+    } catch (e) {
+      if (e instanceof OutcomeError) return reply.code(e.status).send({ error: e.message });
+      throw e;
+    }
+  });
+
   app.get("/v1/filings/:id/deliveries", async (req, reply) => {
     const tenantId = await tenantOf(req);
     const f = await deps.store.getFiling((req.params as { id: string }).id);
@@ -274,6 +289,15 @@ export function buildServer(deps: ApiDeps): FastifyInstance {
   });
 
   // ---- Approval link (client-facing, decision 2) ----
+  // Decision 7: the review-page screenshot, for whoever holds a usable approval link.
+  app.get("/approve/:token/review.png", async (req, reply) => {
+    const found = await deps.approvals.lookup((req.params as { token: string }).token);
+    if (!found.ok || !found.approval.review?.artifactId) return reply.code(404).send({ error: "not found" });
+    const got = await deps.artifacts.get(found.approval.review.artifactId);
+    if (!got || got.meta.filingId !== found.approval.filingId) return reply.code(404).send({ error: "not found" });
+    return reply.header("cache-control", "private, no-store").type(got.meta.contentType).send(got.body);
+  });
+
   app.get("/approve/:token", async (req, reply) => {
     const found = await deps.approvals.lookup((req.params as { token: string }).token);
     if (!found.ok) return reply.code(410).type("text/html").send(`<p>This approval link is ${found.reason.replace("_", " ")}.</p>`);
@@ -287,6 +311,7 @@ export function buildServer(deps: ApiDeps): FastifyInstance {
       payload: a.shownPayload, fees: a.fees, feeCapUsd: a.feeCapUsd, expiresAt: a.expiresAt,
       einInRun: !!f?.request.ein && f.request.ein.mode === "in_run",
       postUrl: `${deps.publicBaseUrl}/approve/${a.token}`, requireCode: !!a.oneTimeCode,
+      reviewImageUrl: a.review?.artifactId ? `${deps.publicBaseUrl}/approve/${a.token}/review.png` : undefined,
     });
     return reply.type("text/html").send(html);
   });

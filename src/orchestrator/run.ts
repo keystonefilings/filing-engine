@@ -19,6 +19,7 @@ import { checkLiveFees, type FeeLine } from "../fees/table.js";
 import type { Vault } from "../settings/vault.js";
 import { labelScore } from "../resolver/match.js";
 import { signatureForApprovedFiling } from "../signatures/apply.js";
+import { reviewFingerprint } from "./review-fingerprint.js";
 
 export interface RunDeps {
   store: Store;
@@ -45,6 +46,10 @@ export interface RunInput {
   expectedFees: FeeLine[];
   /** Set on the re-run after an admin approved the beta review-gate: proceed past the gate. */
   reviewGateApproved?: boolean;
+  /** Decision 7, dry run: capture the state's review page (screenshot and fingerprint) for the client to approve. */
+  previewCapture?: boolean;
+  /** Decision 7, live run: the review page the client approved; the run stops before paying unless it matches. */
+  approvedReview?: { screenKey: string; fingerprint: string };
   /** Fence before every irreversible click: throws when this worker no longer holds the filing's lease. */
   assertLease?: () => Promise<void>;
 }
@@ -52,12 +57,20 @@ export interface RunInput {
 export type RunOutcome =
   | { kind: "submitted"; run: RunRecord; ein?: string }
   /** einPlaceholder: the dry run used PLACEHOLDER_EIN in memory; nothing was applied for or stored. */
-  | { kind: "dry_run_stop"; run: RunRecord; stoppedBefore: string; ein?: string; einPlaceholder?: boolean }
+  | { kind: "dry_run_stop"; run: RunRecord; stoppedBefore: string; ein?: string; einPlaceholder?: boolean; review?: CapturedReview }
+  | { kind: "review_mismatch"; run: RunRecord; screenKey: string }
   | { kind: "drift_halt"; run: RunRecord; haltId: string; requiresClientReapproval: boolean }
   | { kind: "name_unavailable"; run: RunRecord; requestedName: { baseName: string; designator: string; name: string }; purpose?: string; site: string }
   | { kind: "review_gate"; run: RunRecord; recordId: string; screenKey: string; screenshotArtifactId?: string }
   | { kind: "failed"; run: RunRecord; stage: string; error: string }
   | { kind: "needs_reconciliation"; run: RunRecord; error: string };
+
+export interface CapturedReview { screenKey: string; site: string; fingerprint: string; artifactId?: string; capturedAt: string }
+
+/** The live review page is not the one the client approved (decision 7). Thrown before the click past it. */
+export class ReviewMismatch extends Error {
+  constructor(readonly screenKey: string) { super(`the state's review page (${screenKey}) differs from the one the client approved`); }
+}
 
 /** The run's irreversible clicks: at most one open (clicked, unconfirmed) at a time. */
 interface SubmitTracker {
@@ -98,6 +111,7 @@ export class RunExecutor {
     let page: Page | undefined;
     let credential: StepContext["credential"] = null;
     let artifactsCollected = false;
+    let review: CapturedReview | undefined;
     try {
       // Inside the try: a browser that cannot be opened (a Steel session refused, a launch that
       // fails) ends this run as failed and is reported, instead of leaving the filing "running".
@@ -123,6 +137,15 @@ export class RunExecutor {
         await this.driftCheck(page, step.screen, input, run, recorder, !!tracker.open);
         await step.fill(ctx);
         await recorder.record(page, step.screen.screenKey, "filled");
+        if (step.reviewScreen && input.dryRun && input.previewCapture && !review) {
+          review = await this.captureReview(page, input, run, recorder, step.screen.screenKey);
+        } else if (step.reviewScreen && !input.dryRun && input.approvedReview?.screenKey === step.screen.screenKey) {
+          if (reviewFingerprint(await page.locator("body").innerText()) !== input.approvedReview.fingerprint) {
+            await recorder.record(page, step.screen.screenKey, "review page differs from the one the client approved");
+            throw new ReviewMismatch(step.screen.screenKey);
+          }
+          await recorder.noteOnly(step.screen.screenKey, "review page matches the one the client approved");
+        }
         if (step.reviewScreen && this.deps.reviewGate && input.tenant.betaReviewGate && !input.dryRun && !input.reviewGateApproved) {
           stage = "review_gate";
           const screenshotArtifactId = await this.captureReviewShot(page, input, run, recorder, step.screen.screenKey);
@@ -182,8 +205,12 @@ export class RunExecutor {
       if (err instanceof DryRunStop) {
         const done = await store.updateRun(run.id, { status: "completed", endedAt: new Date().toISOString(), error: err.message });
         return einPlaceholder
-          ? { kind: "dry_run_stop", run: done, stoppedBefore: err.action, einPlaceholder: true }
-          : { kind: "dry_run_stop", run: done, stoppedBefore: err.action, ein: values.ein };
+          ? { kind: "dry_run_stop", run: done, stoppedBefore: err.action, einPlaceholder: true, review }
+          : { kind: "dry_run_stop", run: done, stoppedBefore: err.action, ein: values.ein, review };
+      }
+      if (err instanceof ReviewMismatch) {
+        const done = await store.updateRun(run.id, { status: "halted_review", endedAt: new Date().toISOString(), error: err.message });
+        return { kind: "review_mismatch", run: done, screenKey: err.screenKey };
       }
       if (err instanceof DriftHalt) {
         const halt = await store.getDriftHalt(err.haltId);
@@ -366,6 +393,21 @@ export class RunExecutor {
     tracker.confirmed.push({ ...open, evidence });
     tracker.open = null;
     await recorder.noteOnly(`${adapter.key}.confirmed`, `submission confirmed: ${evidence.detail}`);
+  }
+
+  /** Decision 7: the state's review page, as the client will see it, and its fingerprint (never its text). */
+  private async captureReview(page: Page, input: RunInput, run: RunRecord, recorder: StepRecorder, screenKey: string): Promise<CapturedReview> {
+    const fingerprint = reviewFingerprint(await page.locator("body").innerText());
+    let artifactId: string | undefined;
+    try {
+      const png = await recorder.screenshot(page, screenKey); // masked when the screen shows an SSN/ITIN
+      const meta = await this.deps.artifacts.put({ filingId: input.filing.id, runId: run.id, kind: "screenshot", label: "State review page", contentType: "image/png" }, png);
+      artifactId = meta.id;
+      const f = await this.deps.store.getFiling(input.filing.id);
+      await this.deps.store.updateFiling(input.filing.id, { artifacts: [...(f?.artifacts ?? []), { id: meta.id, kind: "screenshot", label: "State review page" }] });
+    } catch { /* the fingerprint alone still guards the live run */ }
+    await recorder.noteOnly(screenKey, "review page captured for the client's approval");
+    return { screenKey, site: input.adapter.site, fingerprint, artifactId, capturedAt: new Date().toISOString() };
   }
 
   /** Beta review-gate: capture the review screen as an artifact for the admin to inspect. */

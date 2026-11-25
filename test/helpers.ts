@@ -18,6 +18,8 @@ export async function seededStore() {
     organizer: { name: "Keystone Filings LLC", address: { street1: "1 Main St", city: "Brooklyn", state: "NY", zip: "11201" } },
     filer: { name: "Keystone Filings LLC", address: { street1: "1 Main St", city: "Brooklyn", state: "NY", zip: "11201" } },
     webhookEndpoints: [{ url: "https://hooks.example.test/filings", secret: "endpoint-secret-0123456789" }],
+    // These tests are about the data-only approval; test/review-preview.test.ts covers decision 7.
+    approvalPreview: "payload",
   }));
   await store.putClientCompany(ClientCompanySettings.parse({
     clientCompanyId: "acme-cpa", tenantId: "keystone", name: "Acme CPA",

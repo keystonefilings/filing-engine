@@ -56,6 +56,8 @@ export interface ReviewPageModel {
   einInRun: boolean;
   postUrl: string;
   requireCode: boolean;
+  /** Decision 7: the state's own review page, filled in with this filing (an image URL). */
+  reviewImageUrl?: string;
 }
 
 export function renderReviewPage(m: ReviewPageModel): string {
@@ -72,6 +74,7 @@ ${m.brandName ? `<p style="color:#555;margin:0">${esc(m.brandName)}</p>` : ""}<h
 <div class="note">By approving you confirm every value below is correct and authorize its submission exactly as shown.
 ${m.einInRun ? " The EIN issued during this run will be entered into the state filing; it is the only value added after your approval." : ""}
 No draft is saved on any government site: the filing is submitted in one pass after your approval.</div>
+${m.reviewImageUrl ? `<h2>The state's review page</h2><p>This is the state's own review page, filled in with your filing. The filing goes ahead only if the state shows exactly this page again.</p><p><img src="${esc(m.reviewImageUrl)}" alt="The state's review page for this filing" style="max-width:100%;border:1px solid #ddd;border-radius:6px"></p>` : ""}
 <h2>Filing details</h2><table>${rows(m.payload)}</table>
 <h2>Fees</h2><table>${m.fees.map((f) => `<tr><th>${esc(f.label)}</th><td>$${f.amountUsd.toFixed(2)}</td></tr>`).join("")}
 <tr><th>Total</th><td><strong>$${total.toFixed(2)}</strong></td></tr>

@@ -225,7 +225,7 @@ Rows refer to the status tables above.
 - [x] V16. Emit `filing.accepted` and `filing.rejected` (row 15). **Done**: `filing.accepted` on the NJ/IRS path; `POST /v1/filings/{id}/outcome` records a later answer (NY receipt, FL examiner, rejection) with the state's documents. Reading the NY receipt inbox automatically comes with email in (V40).
 
 ### Step 3: the two Nov 25 decisions
-- [ ] V17. Review-page approval: a preview pass takes the screenshot, the client approves it, and the live pass must match it before paying. Client-facing, on every adapter (row 5, decision 1).
+- [x] V17. Review-page approval: a preview pass takes the screenshot, the client approves it, and the live pass must match it before paying. Client-facing, on every adapter (row 5, decision 1). **Done**: new status `previewing`; the approval email attaches the state's review page and the approval page shows it; the live run compares a fingerprint of the page (dates, times, EINs and session ids ignored) before the click past it and, on a difference, takes a new preview instead of paying. Applies to every adapter with a mapped review screen (FL, IRS, NY formation today; others as their review screens are mapped); `approvalPreview: "payload"` keeps the old data-only approval. Also closed a gap: a name picked by an admin no longer files a filing the client never approved.
 - [ ] V18. Stored cards: card vault provider, add-card flow, default and backup card used at payment screens, routing per filing type actually read (rows 2, 9, 21, decision 2). *Needs: the provider choice and its account.*
 
 ### Step 4: partner front end

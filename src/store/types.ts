@@ -36,6 +36,8 @@ export interface ApprovalRecord {
   filingId: string;
   tenantId: string;
   payloadHash: string;
+  /** Decision 7: the state's review page the client approved (a hash of its text, never the text). */
+  review?: { screenKey: string; site: string; fingerprint: string; artifactId?: string; capturedAt: string };
   settingsSnapshot: SettingsSnapshot;
   shownPayload: unknown; // masked payload as rendered
   fees: { label: string; amountUsd: number }[];

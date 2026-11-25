@@ -116,6 +116,10 @@ export const TenantSettings = z.object({
    * to approve before submission. Off in production (the run goes straight through).
    */
   betaReviewGate: z.boolean().default(false),
+  /** Decision 7. review_page: before approval a dry run takes the state's own review page, the
+   *  client approves that screenshot, and the live run must reproduce it before paying. payload:
+   *  the client approves the data alone (also the fallback where no review screen is mapped). */
+  approvalPreview: z.enum(["review_page", "payload"]).default("review_page"),
   /** Name-unavailability flow: generate alternatives, admin picks an available one. */
   nameResolution: z.object({
     enabled: z.boolean().default(true),

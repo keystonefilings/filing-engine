@@ -3,6 +3,7 @@ export const EVENT_TYPES = [
   "filing.validated",
   "filing.invalid",
   "filing.information_required",
+  "filing.previewing",
   "filing.awaiting_approval",
   "filing.approved",
   "filing.changes_requested",

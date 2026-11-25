@@ -7,6 +7,7 @@ export type FilingStatus =
   | "created"
   | "invalid"
   | "awaiting_information"  // pre-flight completeness check found missing required info
+  | "previewing"         // decision 7: a dry run takes the state's review page for the client to approve
   | "awaiting_approval"
   | "changes_requested"
   | "approved"
@@ -26,24 +27,25 @@ export type FilingStatus =
   | "needs_reconciliation"; // submit intent recorded, outcome unknown; never auto re-run
 
 const TRANSITIONS: Record<FilingStatus, FilingStatus[]> = {
-  created: ["invalid", "awaiting_approval", "awaiting_information"],
+  created: ["invalid", "awaiting_approval", "awaiting_information", "previewing"],
   invalid: ["created"],
-  awaiting_information: ["awaiting_approval", "invalid", "aborted"],
+  awaiting_information: ["awaiting_approval", "invalid", "aborted", "previewing"],
+  previewing: ["awaiting_approval", "awaiting_drift_review", "awaiting_name_resolution", "failed", "blocked", "aborted"],
   awaiting_approval: ["approved", "changes_requested", "aborted"],
   changes_requested: ["awaiting_approval", "aborted"],
   approved: ["queued", "blocked", "awaiting_approval"],
-  blocked: ["queued", "aborted", "awaiting_approval"],
+  blocked: ["queued", "aborted", "awaiting_approval", "previewing"],
   queued: ["running", "blocked", "aborted"],
   running: ["awaiting_drift_review", "awaiting_name_resolution", "awaiting_review_gate", "ein_filed", "submitted", "failed", "aborted", "needs_reconciliation", "blocked"],
-  awaiting_drift_review: ["queued", "awaiting_approval", "aborted"],
-  awaiting_name_resolution: ["queued", "aborted"],
+  awaiting_drift_review: ["queued", "awaiting_approval", "aborted", "previewing"],
+  awaiting_name_resolution: ["queued", "aborted", "previewing", "awaiting_approval"],
   awaiting_review_gate: ["queued", "aborted"],
   ein_filed: ["submitted", "failed", "needs_reconciliation", "awaiting_drift_review", "awaiting_review_gate"],
   submitted: ["accepted", "rejected", "completed"],
   accepted: ["completed"],
   rejected: ["created"],
   completed: [],
-  failed: ["queued", "aborted"],
+  failed: ["queued", "aborted", "previewing"],
   aborted: [],
   needs_reconciliation: ["completed", "failed"],
 };

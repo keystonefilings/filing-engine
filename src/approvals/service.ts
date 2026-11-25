@@ -41,7 +41,7 @@ export class ApprovalService {
     return [{ channel: "email" as const, address: req.contact.email, name: `${req.contact.firstName} ${req.contact.lastName}` }];
   }
 
-  async create(filing: FilingRecord, tenant: TenantSettings, client: ClientCompanySettings, fees: FeeLine[]): Promise<ApprovalRecord> {
+  async create(filing: FilingRecord, tenant: TenantSettings, client: ClientCompanySettings, fees: FeeLine[], review?: ApprovalRecord["review"]): Promise<ApprovalRecord> {
     // Supersede any pending approval for this filing.
     if (filing.currentApprovalId) {
       const prev = await this.deps.store.getApproval(filing.currentApprovalId);
@@ -55,6 +55,7 @@ export class ApprovalService {
       filingId: filing.id,
       tenantId: filing.tenantId,
       payloadHash: this.payloadHash(filing.request),
+      ...(review ? { review } : {}),
       settingsSnapshot: takeSettingsSnapshot(tenant, client),
       shownPayload: maskSensitive(filing.request),
       fees,

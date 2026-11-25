@@ -5,6 +5,7 @@ const LABELS: Record<string, [string, Tone]> = {
   created: ["Received", ""],
   invalid: ["Needs correcting", "bad"],
   awaiting_information: ["Needs information", "warn"],
+  previewing: ["Getting the state's review page", ""],
   awaiting_approval: ["Waiting for approval", "warn"],
   changes_requested: ["Changes requested", "warn"],
   approved: ["Approved", "ok"],
@@ -36,6 +37,7 @@ export function nextStep(s: string): string | undefined {
   switch (s) {
     case "invalid": return "Something in the filing doesn't meet the state's rules. Start a corrected filing.";
     case "awaiting_information": return "Fill in what's missing below and the filing moves on to approval.";
+    case "previewing": return "We're filling in the state's form up to its review page. The approver then gets that page to check and approve.";
     case "awaiting_approval": return "The approver has a link to check exactly what will be filed and approve it.";
     case "changes_requested": return "The approver asked for changes. Start a corrected filing.";
     case "awaiting_name_resolution": return "The state says the name is taken. Your filing company will offer alternatives.";

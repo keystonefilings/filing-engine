@@ -43,6 +43,13 @@ export class Notifier {
       : await this.clientRecipients(event, filing, tenant, client);
     const screenshotUrl = rendered.screenshotArtifactId ? `${this.deps.publicBaseUrl}/v1/artifacts/${rendered.screenshotArtifactId}` : undefined;
     let attachments: NonNullable<import("./senders.js").OutboundMessage["attachments"]> | undefined;
+    if (event.type === "filing.awaiting_approval" && typeof event.data.reviewShotArtifactId === "string" && this.deps.artifacts) {
+      const shot = await this.deps.artifacts.get(event.data.reviewShotArtifactId).catch(() => null);
+      if (shot && shot.meta.filingId === filing.id) {
+        attachments = [{ filename: "State review page.png", contentType: shot.meta.contentType, content: shot.body }];
+        rendered.body += "\n\nAttached is the state's own review page, filled in with this filing. It goes ahead only if the state shows exactly this page again.";
+      }
+    }
     if (event.type === "filing.completed") {
       const docs = await this.documents(filing);
       attachments = docs.files;

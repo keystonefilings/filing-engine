@@ -27,8 +27,12 @@ import { njAccount, moAccount, flAccount } from "../settings/accounts.js";
 import { applyPolicies } from "../settings/policies.js";
 import type { ClientCompanySettings, TenantSettings } from "../settings/schema.js";
 import type { ArtifactStore } from "../artifacts/store.js";
+import type { CapturedReview } from "./run.js";
+import type { SiteAdapter } from "../adapters/types.js";
 
 export interface FilingServiceDeps {
+  /** Which adapter files a request (tests inject their own); default: the adapter registry. */
+  adapterFor?: (req: FilingRequestT) => SiteAdapter | null;
   store: Store;
   approvals: ApprovalService;
   webhooks: WebhookDispatcher;
@@ -202,18 +206,60 @@ export class FilingService {
         await this.emit("filing.invalid", fi, { issues: invalid });
         return { filing: fi, issues: invalid, existing: false };
       }
-      await this.d.store.updateFiling(filing.id, { registeredAgentResolution: raResolution });
+      filing = await this.d.store.updateFiling(filing.id, { registeredAgentResolution: raResolution });
     }
     await this.emit("filing.validated", filing, { warnings: issues });
-    const approval = await this.d.approvals.create(filing, tenant, client, fees);
+    // Decision 7: where the portal's review screen is mapped, the client approves the state's own
+    // review page, taken by a preview run first; the approval link follows when the preview ends.
+    if (this.wantsPreview(filing.request, tenant)) {
+      const f = await this.startPreview(filing);
+      return { filing: f, issues, existing: false };
+    }
+    const r = await this.requestApproval(filing, tenant, client, fees);
+    return { filing: r.filing, approvalLink: r.link, issues, existing: false };
+  }
+
+  private adapterOf(req: FilingRequestT): SiteAdapter | null {
+    return this.d.adapterFor ? this.d.adapterFor(req) : adapterFor(req);
+  }
+
+  /** Decision 7 applies to live filings whose portal has a mapped review screen. */
+  private wantsPreview(req: FilingRequestT, tenant: TenantSettings): boolean {
+    if ((tenant.approvalPreview ?? "review_page") !== "review_page" || (req.dryRun ?? this.d.dryRunDefault)) return false;
+    return !!this.adapterOf(req)?.steps.some((s) => s.reviewScreen);
+  }
+
+  /** Queues the preview run (a dry run of a filing in "previewing"; see runLeased). */
+  private async startPreview(filing: FilingRecord, reason?: string): Promise<FilingRecord> {
+    const f = await this.transition(filing, "previewing");
+    await this.emit("filing.previewing", f, reason ? { reason } : {});
+    await this.d.queue.enqueue({ kind: "run_filing", filingId: f.id, tenantId: f.tenantId, dryRun: true });
+    return f;
+  }
+
+  /** Preview again (staff or the subscriber): after a preview failed, was blocked or its drift review is done. */
+  async requestPreview(filingId: string): Promise<FilingRecord> {
+    const filing = await this.d.store.getFiling(filingId);
+    if (!filing) throw new OutcomeError(404, "filing not found");
+    if (!["failed", "blocked", "awaiting_drift_review"].includes(filing.status)) throw new OutcomeError(409, `the filing is ${filing.status}; a preview starts from failed, blocked or awaiting_drift_review`);
+    return this.startPreview(filing, "preview requested again");
+  }
+
+  /** Creates the approval (with the captured review page, if any) and sends the link. */
+  private async requestApproval(filing: FilingRecord, tenant: TenantSettings, client: ClientCompanySettings, fees: FeeLine[], extra: { review?: CapturedReview; reason?: string } = {}): Promise<{ filing: FilingRecord; link: string }> {
+    const req = filing.request;
+    const approval = await this.d.approvals.create(filing, tenant, client, fees, extra.review);
     const f = await this.transition(filing, "awaiting_approval", { currentApprovalId: approval.id });
     const link = this.d.approvals.linkFor(approval);
+    const ra = filing.registeredAgentResolution;
     await this.emit("filing.awaiting_approval", f, {
       approvalLink: link, expiresAt: approval.expiresAt, recipients: approval.recipients, fees, feeCapUsd: approval.feeCapUsd,
       einInRun: !!req.ein && req.ein.mode === "in_run",
-      registeredAgent: raResolution ? { source: raResolution.source, provider: raResolution.provider, costUsd: raResolution.costUsd, pending: raResolution.pendingProcurement ?? false } : undefined,
+      registeredAgent: ra ? { source: ra.source, provider: ra.provider, costUsd: ra.costUsd, pending: ra.pendingProcurement ?? false } : undefined,
+      ...(extra.review ? { reviewPage: true, reviewShotArtifactId: extra.review.artifactId } : {}),
+      ...(extra.reason ? { reason: extra.reason } : {}),
     });
-    return { filing: f, approvalLink: link, issues, existing: false };
+    return { filing: f, link };
   }
 
   /** Supply missing info for a filing in awaiting_information; re-check and proceed to approval when complete. */
@@ -335,8 +381,10 @@ export class FilingService {
     if (!tenant || !client) return;
     const approval = filing.currentApprovalId ? await store.getApproval(filing.currentApprovalId) : null;
     const dryRun = dryRequested;
-    const adapter = adapterFor(filing.request);
+    const adapter = this.adapterOf(filing.request);
     const priorStatus = filing.status;
+    // A dry run of a filing in "previewing" is the decision-7 preview: it captures the review page.
+    const preview = dryRun && filing.status === "previewing";
 
     const pf = await preflight({
       filing, approval, tenant, client, adapter, einAdapter: irsEinAdapter, approvals: this.d.approvals, vault: this.d.vault,
@@ -358,6 +406,8 @@ export class FilingService {
       const outcome = await executor.execute({
         filing: running, approval, tenant, client, adapter, einAdapter: irsEinAdapter, dryRun, expectedFees: approval?.fees ?? fees,
         reviewGateApproved: !!running.reviewGate, assertLease,
+        previewCapture: preview,
+        approvedReview: !dryRun && approval?.review ? { screenKey: approval.review.screenKey, fingerprint: approval.review.fingerprint } : undefined,
       });
       const latest = (await store.getFiling(filing.id))!;
       switch (outcome.kind) {
@@ -382,6 +432,20 @@ export class FilingService {
             dryRun: true, stoppedBefore: outcome.stoppedBefore, steps: outcome.run.steps.length,
             ...(outcome.einPlaceholder ? { einPlaceholder: true } : { ein: outcome.ein }),
           }, outcome.run.id);
+          if (preview) {
+            // The preview's end is the approval's start: with the review page when it was reached,
+            // or with the data alone when the run stopped before it.
+            await this.requestApproval(f, tenant, client, fees, outcome.review
+              ? { review: outcome.review }
+              : { reason: "the state's review page could not be captured; approve the data shown" });
+          }
+          break;
+        }
+        case "review_mismatch": {
+          // Nothing was paid or submitted. The client approves the page the state shows now.
+          const blocked = await this.transition(latest, "blocked", { currentRunId: outcome.run.id, lastError: "the state's review page changed since it was approved; a new preview and approval are on the way" });
+          await this.emit("filing.blocked", blocked, { blockers: [blocked.lastError!], screenKey: outcome.screenKey }, outcome.run.id);
+          await this.startPreview(blocked, "the state's review page changed since approval");
           break;
         }
         case "drift_halt": {
@@ -451,6 +515,14 @@ export class FilingService {
     }
     await this.emit("filing.drift_resolved", filing, { haltId, status: halt.status, requiresClientReapproval: halt.requiresClientReapproval });
     if (filing.status !== "awaiting_drift_review") return halt; // dry run or already moved on
+    const tenantNow = await this.d.store.getTenant(filing.tenantId);
+    const approvalNow = filing.currentApprovalId ? await this.d.store.getApproval(filing.currentApprovalId) : null;
+    // Halted during a preview (nothing approved yet), or the client must approve again where the
+    // review page is what they approve: take a new preview first.
+    if (tenantNow && this.wantsPreview(filing.request, tenantNow) && (approvalNow?.status !== "approved" || halt.requiresClientReapproval)) {
+      await this.startPreview(filing, halt.requiresClientReapproval ? "form changed: new required field" : "site change reviewed");
+      return halt;
+    }
     if (halt.requiresClientReapproval) {
       const tenant = (await this.d.store.getTenant(filing.tenantId))!;
       const client = (await this.d.store.getClientCompany(filing.clientCompanyId))!;
@@ -484,9 +556,21 @@ export class FilingService {
       const req = JSON.parse(JSON.stringify(filing.request)) as typeof filing.request;
       if (req.formation) { req.formation.name.baseName = rec.chosen.baseName; req.formation.name.designator = rec.chosen.designator; }
       const updated = await this.d.store.updateFiling(filing.id, { request: req, payloadHash: this.d.approvals.payloadHash(req) });
+      const prior = filing.currentApprovalId ? await this.d.store.getApproval(filing.currentApprovalId) : null;
+      if (prior?.status !== "approved") {
+        // Halted during the decision-7 preview: the client hasn't approved anything yet, so an admin
+        // can't approve for them. The new name goes through a new preview and the client's approval.
+        const reloaded = (await this.d.store.getFiling(filing.id))!;
+        if (reloaded.status === "awaiting_name_resolution") {
+          await this.emit("filing.name_resolved", reloaded, { resolutionId: rec.id, chosenName: rec.chosen.name, by: rec.decidedBy });
+          if (this.wantsPreview(reloaded.request, tenant)) await this.startPreview(reloaded, `name changed to ${rec.chosen.name}`);
+          else await this.requestApproval(reloaded, tenant, client, this.feesFor(req, tenant, client), { reason: `name changed to ${rec.chosen.name}` });
+        }
+        return result;
+      }
       let fees: FeeLine[];
       try { fees = this.feesFor(req, tenant, client); }
-      catch { const prior = filing.currentApprovalId ? await this.d.store.getApproval(filing.currentApprovalId) : null; fees = prior?.fees ?? []; }
+      catch { fees = prior?.fees ?? []; }
       await this.d.approvals.adminReauthorize(updated, tenant, client, fees, rec.decidedBy ?? "admin");
       const reloaded = (await this.d.store.getFiling(filing.id))!;
       if (reloaded.status === "awaiting_name_resolution") {

@@ -138,6 +138,8 @@ describe("FilingService name-resolution decision", () => {
       requested: { baseName: created.request.formation!.name.baseName, designator: created.request.formation!.name.designator },
       purpose: created.request.formation!.purpose,
     });
+    // The client approved, and the live run then found the name taken.
+    await store.updateApproval(created.currentApprovalId!, { status: "approved" });
     await store.updateFiling(created.id, { status: "awaiting_name_resolution" });
 
     const choice = rec.options[0]!;
