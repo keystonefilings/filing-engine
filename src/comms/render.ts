@@ -37,7 +37,9 @@ export function renderMessage(event: WebhookEvent, filing: FilingRecord): Render
     case "filing.changes_requested":
       return { audience: "client", subject: `Changes requested: ${t}`, body: `Changes were requested${str("comment") ? `: ${str("comment")}` : "."}` };
     case "filing.completed":
-      return { audience: "client", subject: `Completed: ${t}`, body: "This filing is complete. Documents are available." };
+      return { audience: "client", subject: `Completed: ${t}`, body: `This filing is complete${str("reference") ? ` (state reference ${str("reference")})` : ""}.` };
+    case "filing.rejected":
+      return { audience: "client", subject: `Rejected by the state: ${t}`, body: `The state rejected this filing${str("reason") ? `: ${str("reason")}` : "."} Nothing more will be filed until it is corrected and sent again.` };
     case "filing.name_options_ready":
       return { audience: "admin", subject: `Choose a name: ${t}`, body: "The requested name is unavailable. Open the link to pick an available alternative or enter one.", link };
     case "filing.review_gate":

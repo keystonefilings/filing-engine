@@ -49,6 +49,7 @@ export class ResendEmailSender implements ChannelSender {
         body: JSON.stringify({
           from: this.opts.from, to: [recipient], subject: msg.subject.replace(/[\r\n]+/g, " "), text, html,
           ...(this.opts.replyTo ? { reply_to: this.opts.replyTo } : {}),
+          ...(msg.attachments?.length ? { attachments: msg.attachments.map((a) => ({ filename: a.filename, content: a.content.toString("base64"), content_type: a.contentType })) } : {}),
         }),
         signal: AbortSignal.timeout(this.opts.timeoutMs ?? 15_000),
       });

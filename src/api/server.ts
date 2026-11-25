@@ -5,7 +5,7 @@ import { registerSelfService, tenantFromStoredKey } from "./self-service.js";
 import { registerSignatures } from "./signatures.js";
 import { z } from "zod";
 import type { FilingService } from "../orchestrator/service.js";
-import { ValidationFailed } from "../orchestrator/service.js";
+import { OutcomeError, ValidationFailed } from "../orchestrator/service.js";
 import type { ApprovalService } from "../approvals/service.js";
 import { renderReviewPage, maskSensitive } from "../approvals/render.js";
 import { ClientCompanyOwnershipError, type Store, type FilingRecord } from "../store/types.js";
@@ -52,6 +52,20 @@ function filingTitle(f: FilingRecord | null): string {
   const n = f.request.formation ? `: ${f.request.formation.name.baseName} ${f.request.formation.name.designator}` : "";
   return `${f.request.state} ${f.request.type.replace(/_/g, " ")}${n}`;
 }
+
+const OutcomeBody = z.object({
+  outcome: z.enum(["accepted", "rejected"]),
+  /** The state's reference: filing receipt or document number. */
+  reference: z.string().trim().max(120).optional(),
+  /** Why the state rejected it (shown to the client). */
+  reason: z.string().trim().max(1000).optional(),
+  documents: z.array(z.object({
+    label: z.string().trim().min(1).max(120),
+    kind: z.enum(["filing_receipt", "formation_document", "standing_certificate", "other"]).default("formation_document"),
+    contentType: z.enum(["application/pdf", "image/png", "image/jpeg"]),
+    data: z.string().max(14_000_000).describe("base64"),
+  })).max(5).optional(),
+}).refine((b) => b.outcome === "accepted" || !b.documents?.length, { message: "documents go with an accepted filing", path: ["documents"] });
 
 const DriftDecisionBody = z.discriminatedUnion("action", [
   // decidedBy comes from the authenticated staff key, never from the body.
@@ -164,6 +178,27 @@ export function buildServer(deps: ApiDeps): FastifyInstance {
     if (!r.ok) return reply.code(r.reason === "not_awaiting_information" ? 409 : r.reason === "not_found" ? 404 : 422).send({ error: r.reason, issues: (r as { issues?: unknown }).issues });
     if (!r.complete) return reply.code(200).send({ complete: false, missing: r.missing });
     return reply.code(200).send({ complete: true, filing: publicFiling(r.filing!), approvalLink: r.approvalLink });
+  });
+
+  // The state's answer to a submitted filing (NY receipt email, FL examiner, a rejection): platform
+  // staff, or the subscriber whose filing it is. Partner sessions can't (partner-guard has no rule).
+  app.post("/v1/filings/:id/outcome", async (req, reply) => {
+    const staff = staffOf(req);
+    const auth = staff ? null : await authOf(req);
+    if (!staff && !auth) return reply.code(401).send({ error: "invalid api key" });
+    const f = await deps.store.getFiling((req.params as { id: string }).id);
+    if (!f || (!staff && f.tenantId !== auth!.tenantId)) return reply.code(404).send({ error: "not found" });
+    const parsed = OutcomeBody.safeParse(req.body);
+    if (!parsed.success) return reply.code(422).send({ error: "validation failed", issues: parsed.error.issues.map((i) => ({ path: i.path.join("."), message: i.message })) });
+    const docs = (parsed.data.documents ?? []).map((d) => ({ label: d.label, kind: d.kind, contentType: d.contentType, body: Buffer.from(d.data, "base64") }));
+    if (docs.some((d) => d.body.length === 0 || d.body.length > 10 * 1024 * 1024)) return reply.code(422).send({ error: "each document must be 1 byte to 10 MB" });
+    try {
+      const done = await deps.service.recordOutcome(f.id, { ...parsed.data, documents: docs, by: staff ?? auth?.user?.email ?? "api key" }, deps.artifacts);
+      return { filing: publicFiling(done) };
+    } catch (e) {
+      if (e instanceof OutcomeError) return reply.code(e.status).send({ error: e.message });
+      throw e;
+    }
   });
 
   app.get("/v1/filings/:id/deliveries", async (req, reply) => {

@@ -26,6 +26,7 @@ import { LeaseLost } from "../browser/guard.js";
 import { njAccount, moAccount, flAccount } from "../settings/accounts.js";
 import { applyPolicies } from "../settings/policies.js";
 import type { ClientCompanySettings, TenantSettings } from "../settings/schema.js";
+import type { ArtifactStore } from "../artifacts/store.js";
 
 export interface FilingServiceDeps {
   store: Store;
@@ -62,6 +63,33 @@ export class FilingService {
   private readonly limiter: ConcurrencyLimiter;
   constructor(private readonly d: FilingServiceDeps) {
     this.limiter = d.limiter ?? new ConcurrencyLimiter({});
+  }
+
+  /**
+   * The state's answer to a submitted filing, when it comes later (the NY receipt email, a Florida
+   * examiner's review, a rejection). Accepted: documents attached here go on the filing, then
+   * filing.accepted and filing.completed (whose email carries them). Rejected: filing.rejected.
+   */
+  async recordOutcome(filingId: string, input: { outcome: "accepted" | "rejected"; reference?: string; reason?: string; by: string; documents?: { label: string; kind: string; contentType: string; body: Buffer }[] }, artifacts?: ArtifactStore): Promise<FilingRecord> {
+    const f = await this.d.store.getFiling(filingId);
+    if (!f) throw new OutcomeError(404, "filing not found");
+    if (f.status !== "submitted") throw new OutcomeError(409, `the filing is ${f.status}; only a submitted filing takes the state's answer`);
+    if (input.outcome === "rejected") {
+      const rejected = await this.transition(f, "rejected", { lastError: input.reason ?? "rejected by the state" });
+      await this.emit("filing.rejected", rejected, { reason: input.reason, reference: input.reference, recordedBy: input.by });
+      return rejected;
+    }
+    let withDocs = f;
+    for (const d of input.documents ?? []) {
+      if (!artifacts) throw new OutcomeError(500, "documents can't be stored here");
+      const meta = await artifacts.put({ filingId: f.id, kind: d.kind as never, label: d.label, contentType: d.contentType }, d.body);
+      withDocs = await this.d.store.updateFiling(f.id, { artifacts: [...withDocs.artifacts, { id: meta.id, kind: d.kind, label: d.label }] });
+    }
+    const accepted = await this.transition(withDocs, "accepted");
+    await this.emit("filing.accepted", accepted, { reference: input.reference, recordedBy: input.by });
+    const done = await this.transition(accepted, "completed");
+    await this.emit("filing.completed", done, { artifacts: done.artifacts, ein: done.ein, reference: input.reference });
+    return done;
   }
 
   private async emit(type: EventType, filing: FilingRecord, data: Record<string, unknown> = {}, runId?: string) {
@@ -340,7 +368,9 @@ export class FilingService {
           // NJ returns documents at once and the IRS assigns the EIN on the spot; NY waits for the
           // receipt email (inbox module, build order 3).
           if (adapter.site === "NJ" || adapter.site === "IRS") {
-            const done = await this.transition(await this.transition(f, "accepted"), "completed");
+            const accepted = await this.transition(f, "accepted");
+            await this.emit("filing.accepted", accepted, { site: adapter.site, ein: accepted.ein }, outcome.run.id);
+            const done = await this.transition(accepted, "completed");
             await this.emit("filing.completed", done, { artifacts: done.artifacts, ein: done.ein }, outcome.run.id);
           }
           break;
@@ -564,4 +594,8 @@ function deepMerge(base: Record<string, unknown>, patch: Record<string, unknown>
       : v;
   }
   return out;
+}
+
+export class OutcomeError extends Error {
+  constructor(readonly status: number, message: string) { super(message); }
 }

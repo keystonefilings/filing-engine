@@ -221,8 +221,8 @@ Rows refer to the status tables above.
 - [ ] V12. NJ formation and standing live: map the NICUSA checkout (row 1). *Needs: a live walk; card storage (V18).*
 - [ ] V13. NJ-REG and NYS-100 adapters rebuilt from the walked maps, not the paper forms (row 1).
 - [ ] V14. MO formation `fill` steps; NY par value; adapters for the mapped NY filings (dissolution, amendment, certificate of change, copies, certificates of status) and NJ for-profit corporation (row 1).
-- [ ] V15. Completion email to the partner or enterprise contact with links to the documents (row 24).
-- [ ] V16. Emit `filing.accepted` and `filing.rejected` (row 15).
+- [x] V15. Completion email to the partner or enterprise contact with links to the documents (row 24). **Done**: the completion email attaches the documents (15 MB cap; never screenshots or the SS-4), links to the filing page for portal firms, and goes where H1 says (a partner firm by default).
+- [x] V16. Emit `filing.accepted` and `filing.rejected` (row 15). **Done**: `filing.accepted` on the NJ/IRS path; `POST /v1/filings/{id}/outcome` records a later answer (NY receipt, FL examiner, rejection) with the state's documents. Reading the NY receipt inbox automatically comes with email in (V40).
 
 ### Step 3: the two Nov 25 decisions
 - [ ] V17. Review-page approval: a preview pass takes the screenshot, the client approves it, and the live pass must match it before paying. Client-facing, on every adapter (row 5, decision 1).

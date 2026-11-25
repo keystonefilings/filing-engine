@@ -74,6 +74,18 @@ export const ENDPOINTS: Endpoint[] = [
     ],
   },
   {
+    id: "record-outcome", method: "POST", path: "/v1/filings/{id}/outcome", group: "Filings", auth: "api_key",
+    summary: "Record the state's answer",
+    description: "For a `submitted` filing whose state answers later (New York's receipt email, a Florida examiner's review). `accepted` attaches up to five documents (PDF, PNG or JPEG, base64, 10 MB each), then sends `filing.accepted` and `filing.completed`; the completion email carries the documents. `rejected` sends `filing.rejected` with the reason.",
+    body: "{ outcome, reference?, reason?, documents? }",
+    bodyExample: { outcome: "accepted", reference: "DOS-2026-1188", documents: [{ label: "Filing receipt", kind: "filing_receipt", contentType: "application/pdf", data: "JVBERi0xLjQK..." }] },
+    responses: [
+      { status: 200, description: "The filing, now `completed` or `rejected`.", example: { filing: { id: "f_123", status: "completed" } } },
+      { status: 409, description: "The filing is not `submitted`." },
+      { status: 422, description: "The body is invalid, or a document is empty or over 10 MB." },
+    ],
+  },
+  {
     id: "dry-run", method: "POST", path: "/v1/filings/{id}/dry-run", group: "Filings", auth: "api_key",
     summary: "Queue a dry run",
     description: "Walks the state site up to the final submit and stops. Nothing is filed and no fee is paid.",

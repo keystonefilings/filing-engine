@@ -5,6 +5,8 @@ export interface OutboundMessage {
   body: string;
   link?: string;
   screenshotUrl?: string;
+  /** Files sent with the message (email only): the filing's documents. */
+  attachments?: { filename: string; contentType: string; content: Buffer }[];
 }
 
 /**

@@ -69,7 +69,7 @@ export async function bootstrap(opts: { withExecutor: boolean; workerId?: string
   if (config.production && !config.email.resendApiKey) {
     console.warn("RESEND_API_KEY is not set: approval links, password resets and notices are recorded, not emailed");
   }
-  const notifier = new Notifier({ store, senders: { email }, defaultSender: new LogChannelSender("email"), publicBaseUrl: config.publicBaseUrl });
+  const notifier = new Notifier({ store, senders: { email }, defaultSender: new LogChannelSender("email"), publicBaseUrl: config.publicBaseUrl, artifacts, webBaseUrl: config.webBaseUrl });
   const harness = new BrowserHarness({ chromiumPath: config.chromiumPath, proxyServer: config.browserProxy, siteProxies: config.siteProxies, steel: config.steel, profileDir: config.browserProfileDir });
   const executor = opts.withExecutor ? new RunExecutor({ store, artifacts, harness, drift, vault, reviewGate, registeredAgents }) : undefined;
   const limiter = new ConcurrencyLimiter({
