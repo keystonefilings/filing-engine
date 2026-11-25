@@ -107,9 +107,21 @@ export const ENDPOINTS: Endpoint[] = [
   {
     id: "put-client-company", method: "PUT", path: "/v1/client-companies/{id}", group: "Client companies", auth: "api_key",
     summary: "Create or update a client company",
-    description: "Includes the firm's onboarding answers, approvers and white-label portal settings (`portal.slug`, `displayName`, `logoUrl`, `primaryColor`, `supportEmail`, `filingKinds`).",
-    body: "ClientCompanySettings", bodyExample: { name: "Acme CPA", defaultState: "NJ", portal: { slug: "acme", displayName: "Acme CPA Filings", primaryColor: "#1f4fd1" } },
-    responses: [{ status: 200, description: "Saved.", example: { ok: true } }, { status: 409, description: "The id or portal slug is already used by another firm." }, { status: 422, description: "Invalid settings." }],
+    description: "Includes the firm's onboarding answers, approvers and white-label portal settings (`portal.slug`, `displayName`, `logoUrl`, `primaryColor`, `secondaryColor`, `supportEmail`, `filingKinds`). Leave `portal.slug` out and the firm keeps its address, or gets one made from its name.",
+    body: "ClientCompanySettings", bodyExample: { name: "Acme CPA", defaultState: "NJ", portal: { displayName: "Acme CPA Filings", primaryColor: "#1f4fd1", secondaryColor: "#0f766e" } },
+    responses: [{ status: 200, description: "Saved.", example: { ok: true, portalSlug: "acme-cpa" } }, { status: 409, description: "The id or portal slug is already used by another firm." }, { status: 422, description: "Invalid settings." }],
+  },
+  {
+    id: "put-client-company-logo", method: "PUT", path: "/v1/client-companies/{id}/logo", group: "Client companies", auth: "api_key",
+    summary: "Upload a firm's logo",
+    description: "A PNG, JPEG or WebP picture of 512 KB or less, base64 in `data` (a `data:` URL is fine). SVG isn't accepted. The logo is shown ahead of `portal.logoUrl` and replaces it.",
+    bodyExample: { data: "data:image/png;base64,iVBORw0KGgo…" },
+    responses: [{ status: 200, description: "Saved, with the logo's id.", example: { logoArtifactId: "6f1c…" } }, { status: 404, description: "Not found, or not yours." }, { status: 422, description: "Not a PNG, JPEG or WebP picture, or too large." }],
+  },
+  {
+    id: "delete-client-company-logo", method: "DELETE", path: "/v1/client-companies/{id}/logo", group: "Client companies", auth: "api_key",
+    summary: "Remove a firm's logo",
+    responses: [{ status: 200, description: "Removed." }, { status: 404, description: "Not found, or not yours." }],
   },
   {
     id: "account", method: "GET", path: "/v1/account", group: "Account", auth: "api_key",

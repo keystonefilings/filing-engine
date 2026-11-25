@@ -219,7 +219,11 @@ export const ClientCompanySettings = z.object({
     slug: z.string().regex(/^[a-z0-9](?:[a-z0-9-]{0,46}[a-z0-9])?$/, "lowercase letters, digits and dashes"),
     displayName: z.string().min(1).max(80).optional(),
     logoUrl: z.string().url().startsWith("https://").optional(),
+    /** A logo the firm uploaded (artifact kind brand_logo, served at /v1/brand-logos/:id). Shown ahead of logoUrl. */
+    logoArtifactId: z.string().uuid().optional(),
     primaryColor: z.string().regex(/^#[0-9a-fA-F]{6}$/, "a hex color like #1f4b99").optional(),
+    /** Second brand color: links and highlights. Absent = the main color. */
+    secondaryColor: z.string().regex(/^#[0-9a-fA-F]{6}$/, "a hex color like #1f4b99").optional(),
     supportEmail: z.string().email().optional(),
     /** Filing kinds the firm offers its clients (web/lib/intake ids); absent = all. */
     filingKinds: z.array(z.string()).optional(),

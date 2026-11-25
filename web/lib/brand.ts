@@ -13,6 +13,21 @@ export function safeColor(c: string | undefined, fallback = "#1f4fd1"): string {
   return c && /^#[0-9a-fA-F]{3}([0-9a-fA-F]{3})?$/.test(c) ? c : fallback;
 }
 
+/** Text color that reads on a brand color: dark on light colors, white on dark ones. */
+export function textOn(hex: string): string {
+  const h = hex.replace("#", "");
+  const full = h.length === 3 ? h.split("").map((c) => c + c).join("") : h;
+  const [r, g, b] = [0, 2, 4].map((i) => parseInt(full.slice(i, i + 2), 16) / 255).map((c) => (c <= 0.03928 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4));
+  const lum = 0.2126 * r! + 0.7152 * g! + 0.0722 * b!;
+  return lum > 0.4 ? "#111111" : "#ffffff";
+}
+
+/** Where a firm's logo is shown from: its uploaded picture (served by this site), else its https link. */
+export function logoSrc(p: { logoArtifactId?: string; logoUrl?: string } | undefined): string | undefined {
+  if (p?.logoArtifactId && /^[0-9a-f-]{36}$/i.test(p.logoArtifactId)) return `/logo/${p.logoArtifactId}`;
+  return safeLogo(p?.logoUrl);
+}
+
 /** Only https image URLs are shown as logos. */
 export function safeLogo(u: string | undefined): string | undefined {
   if (!u) return undefined;

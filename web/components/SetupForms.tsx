@@ -3,6 +3,8 @@
 import { useActionState, useState } from "react";
 import type { SetupState } from "@/app/p/[slug]/(portal)/setup/actions";
 import type { PaymentMethodRef, PaymentRouting } from "@/lib/engine";
+import { textOn } from "@/lib/brand";
+import { ColorField, LogoField } from "./BrandFields";
 
 type Action = (prev: SetupState, fd: FormData) => Promise<SetupState>;
 
@@ -41,39 +43,47 @@ export function DetailsForm({ action, v }: { action: Action; v: DetailsValues })
   );
 }
 
-export interface BrandValues { displayName?: string; logoUrl?: string; primaryColor?: string; supportEmail?: string }
+export interface BrandValues { displayName?: string; logoSrc?: string; logoUrl?: string; primaryColor?: string; secondaryColor?: string; supportEmail?: string }
 
 export function BrandingForm({ action, v, platform }: { action: Action; v: BrandValues; platform: string }) {
   const [s, run, pending] = useActionState(action, null);
   const [name, setName] = useState(v.displayName ?? "");
-  const [logo, setLogo] = useState(v.logoUrl ?? "");
+  const [logo, setLogo] = useState<string | undefined>(v.logoSrc);
   const [color, setColor] = useState(v.primaryColor ?? "#1f4fd1");
-  const logoOk = /^https:\/\/\S+$/.test(logo);
+  const [color2, setColor2] = useState(v.secondaryColor ?? v.primaryColor ?? "#0f766e");
   return (
     <div className="stack">
       <form action={run} className="card">
         <Top s={s} />
         <div className="field"><label htmlFor="b-name">Name your clients see</label><input id="b-name" name="displayName" type="text" value={name} onChange={(e) => setName(e.target.value)} maxLength={80} /></div>
-        <div className="field"><label htmlFor="b-logo">Logo address</label><input id="b-logo" name="logoUrl" type="url" value={logo} onChange={(e) => setLogo(e.target.value)} placeholder="https://yourfirm.com/logo.png" />
-          <p className="help">A link to your logo on your own website, starting with https. Uploading a file comes later.</p><Issue s={s} k="logoUrl" /></div>
+        <LogoField current={v.logoSrc} currentLink={v.logoUrl} onPreview={setLogo} />
+        <Issue s={s} k="logoUrl" /><Issue s={s} k="data" />
         <div className="field-row n2">
-          <div className="field"><label htmlFor="b-color">Main color</label><input id="b-color" name="primaryColor" type="color" value={color} onChange={(e) => setColor(e.target.value)} style={{ height: 40, padding: 2 }} /></div>
-          <div className="field"><label htmlFor="b-sup">Support email shown to clients</label><input id="b-sup" name="supportEmail" type="email" defaultValue={v.supportEmail} /><Issue s={s} k="supportEmail" /></div>
+          <ColorField id="b-color" name="primaryColor" label="Main color" value={color} onChange={setColor} help="Buttons and the top of the page." />
+          <ColorField id="b-color2" name="secondaryColor" label="Second color" value={color2} onChange={setColor2} help="Links and highlights." />
         </div>
+        <div className="field"><label htmlFor="b-sup">Support email shown to clients</label><input id="b-sup" name="supportEmail" type="email" defaultValue={v.supportEmail} /><Issue s={s} k="supportEmail" /></div>
         <button className="btn primary" type="submit" disabled={pending}>{pending ? "Saving…" : "Save and continue"}</button>
       </form>
-      <div className="card" style={{ ["--accent" as string]: color }}>
-        <p className="small muted" style={{ marginTop: 0 }}>Preview of a client&apos;s page</p>
-        <div className="row">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          {logoOk ? <img src={logo} alt="" style={{ height: 28, width: "auto" }} /> : null}
-          <strong>{name || "Your firm"}</strong>
-          <span className="spacer" />
-          <span className="small muted">with {platform}</span>
-        </div>
-        <p className="small" style={{ marginBottom: 8 }}>Please fill in your LLC formation details.</p>
-        <button type="button" className="btn primary small">Send</button>
+      <BrandPreview name={name} logo={logo} color={color} color2={color2} platform={platform} />
+    </div>
+  );
+}
+
+/** How a client's page will look with these choices. */
+export function BrandPreview({ name, logo, color, color2, platform }: { name: string; logo?: string; color: string; color2: string; platform?: string }) {
+  return (
+    <div className="card" style={{ ["--accent" as string]: color, ["--accent-text" as string]: textOn(color), ["--accent-2" as string]: color2, borderTop: `4px solid ${color2}` }}>
+      <p className="small muted" style={{ marginTop: 0 }}>Preview of a client&apos;s page</p>
+      <div className="row">
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        {logo ? <img src={logo} alt="" style={{ height: 28, width: "auto" }} /> : null}
+        <strong>{name || "Your firm"}</strong>
+        <span className="spacer" />
+        {platform ? <span className="small muted">with {platform}</span> : null}
       </div>
+      <p className="small" style={{ marginBottom: 8 }}>Please fill in your LLC formation details. <a href="#" onClick={(e) => e.preventDefault()}>What you&apos;ll need</a></p>
+      <button type="button" className="btn primary small">Send</button>
     </div>
   );
 }

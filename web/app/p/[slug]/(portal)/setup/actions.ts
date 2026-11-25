@@ -5,6 +5,7 @@ import { redirect } from "next/navigation";
 import { engine, EngineError, type PartnerProfile, type PaymentRouting } from "@/lib/engine";
 import { firmContext } from "@/lib/firm";
 import { FILING_KINDS } from "@/lib/intake/forms";
+import { applyLogo } from "@/lib/logo-upload";
 
 export type SetupState = { error?: string; issues?: Record<string, string> } | null;
 type Step = "details" | "branding" | "payments";
@@ -50,12 +51,20 @@ export async function saveDetails(slug: string, _prev: SetupState, fd: FormData)
 }
 
 export async function saveBranding(slug: string, _prev: SetupState, fd: FormData): Promise<SetupState> {
-  const color = text(fd, "primaryColor", 7);
+  const hex = (k: string) => { const c = text(fd, k, 7); return /^#[0-9a-fA-F]{6}$/.test(c) ? c : undefined; };
+  let logoUrl = text(fd, "logoUrl", 500) || undefined;
+  if (logoUrl && !/^https:\/\//.test(logoUrl)) return { error: "Check the highlighted fields.", issues: { logoUrl: "A logo link must start with https://" } };
+  // The picture goes first, so the brand saved next keeps it.
+  const { session } = await firmContext(slug);
+  const logoProblem = await applyLogo(session.apiKey, session.clientCompanyId, fd, Boolean(logoUrl));
+  if (logoProblem) return { error: logoProblem, issues: { data: logoProblem } };
+  if (String(fd.get("logoData") ?? "")) logoUrl = undefined;
   return save(slug, "branding", {
     brand: {
       displayName: text(fd, "displayName", 80) || undefined,
-      logoUrl: text(fd, "logoUrl") || undefined,
-      primaryColor: /^#[0-9a-fA-F]{6}$/.test(color) ? color : undefined,
+      logoUrl,
+      primaryColor: hex("primaryColor"),
+      secondaryColor: hex("secondaryColor"),
       supportEmail: text(fd, "supportEmail") || undefined,
     },
   });

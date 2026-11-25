@@ -1,4 +1,4 @@
-import { firmContext } from "@/lib/firm";
+import { brandStyle, firmContext } from "@/lib/firm";
 import { platformName } from "@/lib/brand";
 import { TopBar } from "@/components/TopBar";
 
@@ -16,7 +16,7 @@ export default async function PortalLayout({ children, params }: { children: Rea
     </span>
   ) : null;
   return (
-    <div style={{ ["--accent" as string]: brand.color }}>
+    <div className="branded" style={brandStyle(brand)}>
       <TopBar
         brand={partner ? platformName() : brand.name} href={base} logoUrl={partner ? undefined : brand.logoUrl}
         links={[
