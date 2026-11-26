@@ -222,7 +222,8 @@ Built and tested; each switches on when its accounts and keys are set (steps in 
 - **Twilio:** a number with A2P 10DLC registration, and a WhatsApp sender (Meta verification) (V42-V43).
 - **Live walks with you:** NY drawdown deposit and post-submit pages, Sunbiz checkout, the IRS
   Assignment screen, the NJ checkout (V9-V12); the checkout walks also let the adapters type saved
-  cards (V18).
+  cards (V18). Also the pages V14 couldn't map: each NY record filing's confirmation, the NJ
+  corporation's last pages, and Missouri.
 
 ### Step 1: honest and safe
 - [x] V1. Resend email sender behind `ChannelSender`, wired as the default email sender (row 18). **Done in code** (`src/comms/resend.ts`; approval links, password resets and partner approvals). *To turn on: a Resend API key and DNS verification of the sending domain (`docs/deploy-fly.md`, step 3).*
@@ -240,7 +241,7 @@ Built and tested; each switches on when its accounts and keys are set (steps in 
 - [ ] V11. IRS EIN live: map the Assignment screen; entity types beyond LLC (row 1). *Needs: a live walk.* Also: once the IRS adapter is complete, a dry run of a formation with an in-run EIN stops at the IRS click and never previews the state's later screens; the preview needs to continue past the EIN with the placeholder.
 - [ ] V12. NJ formation and standing live: map the NICUSA checkout (row 1). *Needs: a live walk; card storage (V18).*
 - [ ] V13. NJ-REG and NYS-100 adapters rebuilt from the walked maps, not the paper forms (row 1).
-- [ ] V14. MO formation `fill` steps; NY par value; adapters for the mapped NY filings (dissolution, amendment, certificate of change, copies, certificates of status) and NJ for-profit corporation (row 1).
+- [x] V14. MO formation `fill` steps; NY par value; adapters for the mapped NY filings (dissolution, amendment, certificate of change, copies, certificates of status) and NJ for-profit corporation (row 1). **Done as far as the maps go** (all stay dry-run only until their walks): NY par value (form fields; the Tax on Shares quoted from the shares, 1/20 of 1% of total par value, rule in config/fees.json; per-filing price lines no longer read as site changes, while the fee check still compares every line before paying); NJ for-profit corporation (directors, incorporators, stock; new form `nj-corp`); NY dissolution, name change (amendment), certificate of change, copies and certificate of status (five adapters sharing the NY DOS login and draw-down payment, five new forms, fees from the map); Missouri fill steps from the state's guide (tested on replica pages only). E-Submission now uses the account set in settings and checks the balance. *Left for walks: each NY flow's page after Submit, the plain-copy choice, a corporation's name change and change, the par amount field, the NJ corporation's signatures, review and payment pages, and Missouri's real pages (list in src/adapters/mo-formation/adapter.ts).*
 - [x] V15. Completion email to the partner or enterprise contact with links to the documents (row 24). **Done**: the completion email attaches the documents (15 MB cap; never screenshots or the SS-4), links to the filing page for portal firms, and goes where H1 says (a partner firm by default).
 - [x] V16. Emit `filing.accepted` and `filing.rejected` (row 15). **Done**: `filing.accepted` on the NJ/IRS path; `POST /v1/filings/{id}/outcome` records a later answer (NY receipt, FL examiner, rejection) with the state's documents. Reading the NY receipt inbox automatically comes with email in (V40).
 
