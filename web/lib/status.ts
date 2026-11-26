@@ -38,7 +38,7 @@ export function nextStep(s: string): string | undefined {
     case "invalid": return "Something in the filing doesn't meet the state's rules. Start a corrected filing.";
     case "awaiting_information": return "Fill in what's missing below and the filing moves on to approval.";
     case "previewing": return "We're filling in the state's form up to its review page. The approver then gets that page to check and approve.";
-    case "awaiting_approval": return "The approver has a link to check exactly what will be filed and approve it.";
+    case "awaiting_approval": return "The proof is ready: check exactly what will be filed and approve it.";
     case "changes_requested": return "The approver asked for changes. Start a corrected filing.";
     case "awaiting_name_resolution": return "The state says the name is taken. Your filing company will offer alternatives.";
     case "rejected": return "The state rejected the filing. Your filing company will be in touch with the reason.";

@@ -3,7 +3,7 @@ import type { FastifyInstance } from "fastify";
 import { buildServer } from "../src/api/server.js";
 import { FsArtifactStore } from "../src/artifacts/store.js";
 import { logoType, MAX_LOGO_BYTES } from "../src/api/brand-logos.js";
-import { seededStore, wire } from "./helpers.js";
+import { seededStore, wire, njFormationRequest } from "./helpers.js";
 import type { OutboundMessage } from "../src/comms/senders.js";
 
 const mail: OutboundMessage[] = [];
@@ -99,5 +99,28 @@ describe("uploaded logos", () => {
     expect(p.secondaryColor).toBe("#445566");
     expect(p.logoUrl).toBe("https://logo-test.test/logo.png");
     expect(p.logoArtifactId).toBeUndefined();
+  });
+});
+
+describe("the firm approves its own clients' filings from its filing desk (Nov 26)", () => {
+  it("lets a partner approve its own filing, gets the proof itself, and can't touch another firm's", async () => {
+    const r = await app.inject({ method: "POST", url: "/v1/signups/partner", payload: { companyName: "Approve Test CPA", companyType: "cpa", name: "Kim Lee", email: "kim@approve-test.test", password: PW, states: ["NJ"] } });
+    expect(r.statusCode).toBeLessThan(300);
+    const token = new URL(mail.filter((m) => m.subject === "Confirm your email for CoFile").at(-1)!.link!).searchParams.get("token");
+    expect((await app.inject({ method: "POST", url: "/v1/auth/verify-email", payload: { token } })).statusCode).toBe(200);
+    const key = (await app.inject({ method: "POST", url: "/v1/auth/sign-in", payload: { email: "kim@approve-test.test", password: PW } })).json().sessionKey as string;
+    const firm = "firm-approve-test-cpa";
+    const created = await app.inject({ method: "POST", url: "/v1/filings", headers: as(key), payload: { ...njFormationRequest(), tenantId: "keystone", clientCompanyId: firm, contact: { firstName: "Ana", lastName: "Ortiz", phone: "2015550100", email: "ana@bakery.test" }, dryRun: true } });
+    expect(created.statusCode).toBeLessThan(300);
+    const filing = created.json().filing;
+    expect(filing.status).toBe("awaiting_approval");
+    const approval = (await store.getApproval(filing.currentApprovalId))!;
+    expect(approval.recipients.map((x) => x.address)).toEqual(["kim@approve-test.test"]); // the firm, not ana@
+    // Another firm's filing: not found. Its own: approved.
+    const other = await app.inject({ method: "POST", url: "/v1/filings", headers: as("k1"), payload: njFormationRequest() });
+    expect((await app.inject({ method: "POST", url: `/v1/filings/${other.json().filing.id}/approval`, headers: as(key), payload: { decision: "approve", approvedBy: "Kim Lee" } })).statusCode).toBe(404);
+    const ok = await app.inject({ method: "POST", url: `/v1/filings/${filing.id}/approval`, headers: as(key), payload: { decision: "approve", approvedBy: "Kim Lee" } });
+    expect(ok.statusCode).toBe(200);
+    expect(["approved", "queued"]).toContain(ok.json().filing.status);
   });
 });

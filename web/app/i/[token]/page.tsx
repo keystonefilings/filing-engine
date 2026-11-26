@@ -40,11 +40,11 @@ export default async function ClientIntakePage({ params }: { params: Promise<{ t
         {brand.logoUrl ? <img src={brand.logoUrl} alt="" /> : null}<span>{brand.name}</span></span>
         {company.partner ? <><span className="spacer" /><span className="small muted">with {platformName()}</span></> : null}</div></header>
       <main className="wrap narrow stack">
-        {!liveFilings(kind.id) ? <p className="notice warn">This page is in rehearsal for now. You can fill it in and see your proof, but nothing will be filed with the state and nothing will be charged, now or later, even after you approve it. To file for real, contact {brand.name}.</p> : null}
+        {!liveFilings(kind.id) ? <p className="notice warn">This page is in rehearsal for now. You can fill it in, but nothing will be filed with the state and nothing will be charged, now or later, even after you approve it. To file for real, contact {brand.name}.</p> : null}
         <h1>{kind.title}{link.label ? <span className="muted" style={{ fontWeight: 400 }}> · {link.label}</span> : null}</h1>
-        <p className="muted">{kind.summary} After you send this, you&apos;ll get a link to check exactly what will be filed, and nothing is filed until it&apos;s approved.</p>
+        <p className="muted">{kind.summary} After you send this, {brand.name} checks every detail and approves it. Nothing is filed until they do.</p>
         <IntakeForm kind={kind} nonce={link.nonce} action={submitClientIntake.bind(null, token)} submitLabel={`Send to ${brand.name}`} consentText={consentText} prefill={prefill} filerName={company.filerName} forClient={brand.name}
-          footnote={<><p className="small">Next, you&apos;ll get a proof to check. Nothing is filed until it&apos;s approved.</p><p className="small muted">By sending, you agree to {platformName()}&apos;s <a href="/terms" target="_blank" rel="noopener">Terms of Service</a>; your details are handled under its <a href="/privacy" target="_blank" rel="noopener">Privacy Policy</a>.</p></>} />
+          footnote={<><p className="small">Next, {brand.name} checks it and approves the filing. Nothing is filed until they do.</p><p className="small muted">By sending, you agree to {platformName()}&apos;s <a href="/terms" target="_blank" rel="noopener">Terms of Service</a>; your details are handled under its <a href="/privacy" target="_blank" rel="noopener">Privacy Policy</a>.</p></>} />
         {brand.supportEmail ? <p className="small muted">Questions? Email <a href={`mailto:${brand.supportEmail}`}>{brand.supportEmail}</a>.</p> : null}
       </main>
     </div>

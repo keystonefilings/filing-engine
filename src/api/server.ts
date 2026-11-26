@@ -285,9 +285,10 @@ export function buildServer(deps: ApiDeps): FastifyInstance {
   app.post("/v1/filings/:id/approval", async (req, reply) => {
     const auth = await authOf(req);
     if (!auth) return reply.code(401).send({ error: "invalid api key" });
-    if (auth.partnerOf) return reply.code(403).send({ error: "partners approve through the approval link" });
     const f = await deps.store.getFiling((req.params as { id: string }).id);
     if (!f || f.tenantId !== auth.tenantId) return reply.code(404).send({ error: "not found" });
+    // A partner firm approves its own clients' filings (Nov 26), never another firm's.
+    if (auth.partnerOf && f.clientCompanyId !== auth.partnerOf) return reply.code(404).send({ error: "not found" });
     const parsed = z.object({ decision: z.enum(["approve", "request_changes"]), approvedBy: z.string().trim().min(2).max(200), comment: z.string().max(2000).optional(), code: z.string().max(20).optional() }).safeParse(req.body);
     if (!parsed.success) return reply.code(422).send({ error: "send decision and approvedBy (who approved)" });
     try {

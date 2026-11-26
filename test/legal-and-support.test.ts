@@ -128,3 +128,20 @@ describe("fee figures confirmed on the live checkouts (decision 16)", () => {
     expect(home).toContain("By card, New Jersey&apos;s standing certificate costs $52 for an LLC and $27 for a corporation");
   });
 });
+
+describe("the firm approves its clients' filings (Yakov, Nov 26)", () => {
+  it("sends a partner firm's proof to the firm, not to its end client", async () => {
+    const { ApprovalService } = await import("../src/approvals/service.js");
+    const { ClientCompanySettings, TenantSettings } = await import("../src/settings/schema.js");
+    const approvals = new ApprovalService({ store, signingSecret: "s".repeat(32), publicBaseUrl: "http://api.test", defaultTtlHours: 168 });
+    const tenant = TenantSettings.parse({ tenantId: "keystone", name: "CoFile" });
+    const partner = ClientCompanySettings.parse({ clientCompanyId: "best", tenantId: "keystone", name: "Best Accounting", partner: { companyType: "cpa", contactName: "Pat Rivera", contactEmail: "pat@best.test" } });
+    const req = { ...njFormationRequest(), contact: { firstName: "Ana", lastName: "Ortiz", phone: "2015550100", email: "ana@bakery.test" } } as never;
+    expect(approvals.resolveRecipients(req, partner, tenant)).toEqual([{ channel: "email", address: "pat@best.test", name: "Pat Rivera" }]);
+    // Approvers set on the firm still win; a non-partner firm keeps the old default.
+    const withApprovers = ClientCompanySettings.parse({ ...partner, approvers: [{ channel: "email", address: "ops@best.test", name: "Ops" }] });
+    expect(approvals.resolveRecipients(req, withApprovers, tenant)[0]!.address).toBe("ops@best.test");
+    const firm = ClientCompanySettings.parse({ clientCompanyId: "acme", tenantId: "keystone", name: "Acme" });
+    expect(approvals.resolveRecipients(req, firm, tenant)[0]!.address).toBe("ana@bakery.test");
+  });
+});

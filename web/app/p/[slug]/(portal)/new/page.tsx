@@ -59,7 +59,7 @@ export default async function NewFilingPage({ params, searchParams }: { params: 
     <div className="stack">
       <p className="small"><Link href={`${base}/new`}>All states</Link></p>
       <h1>{st.name}: what are you filing?</h1>
-      <p className="muted">Fill it in yourself, or send your client a link to fill it in. Either way, your client approves the proof before anything is filed or paid. Filing types go live one at a time; until then they run as rehearsals.</p>
+      <p className="muted">Fill it in yourself, or send your client a link to fill it in. Either way, you approve the proof before anything is filed or paid. Filing types go live one at a time; until then they run as rehearsals.</p>
       {kinds.length === 0 ? <p className="notice">No {st.name} filings are offered here yet.</p> : (
         <div className="pick">
           {kinds.map((k) => (

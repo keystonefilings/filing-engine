@@ -36,6 +36,9 @@ export class ApprovalService {
   resolveRecipients(req: FilingRequest, client: ClientCompanySettings, tenant: TenantSettings) {
     if (req.approvalRecipients?.length) return req.approvalRecipients;
     if (client.approvers.length) return client.approvers;
+    // Yakov (Nov 26): the end client hands the job to its CPA, CFO or payroll firm, and the firm
+    // approves the proof. A partner firm's filings go to the firm, never to its client.
+    if (client.partner?.contactEmail) return [{ channel: "email" as const, address: client.partner.contactEmail, name: client.partner.contactName ?? client.portal?.displayName ?? client.name }];
     // Default: the named signer/organizer has no address in the request; fall back to the filing contact.
     if (tenant.defaultApprovers.length) return tenant.defaultApprovers;
     return [{ channel: "email" as const, address: req.contact.email, name: `${req.contact.firstName} ${req.contact.lastName}` }];
