@@ -539,3 +539,306 @@ Three document sheets slide in from the right edge, 120ms apart, rotate from 6°
 
 The hero motion tells the visitor in two seconds that the product *is* a page their client approves, carrying the firm's name. The relay shows "three steps" as one effortless gesture. The taken-apart proof shows "every detail and every fee" without a paragraph of reassurance. The relight is "your name on the door," made physical: your color fills everything, and CoFile doesn't change. The papers landing is "the papers come back to you," the satisfying end. None of the motion is about stopping, waiting or verifying.
 
+---
+
+## 9. The home page, section by section
+
+Default light on the home page: Harbor teal `#0F766E`, until the visitor picks another color in section 4. All copy below is the locked copy from `web/app/page.tsx`, placed as written.
+
+### 9.0 The frame: beta notice and header
+
+**Beta notice.** A slim bar above the header, Porcelain deep `#ECEEF1`, not sticky (it scrolls away with the page).
+
+- Desktop: 40px tall, one line, centered within the 1264px column. Left: the **Beta** pill (dashed rehearsal outline, 24px tall, 13px… no: 14px, 600). Then the text in 14px Ink 2: "CoFile is in beta. Any filing can run as a free rehearsal on the state's real website. It stops before the last button, so nothing is filed or paid. Filing types go live one at a time. Questions or problems? hello@cofile.app". The email is an underlined link. If it wraps at laptop widths, the bar grows to two lines; never truncated.
+- Phone: the pill on its own line, the text wrapping to four lines at 14/20, padding 12px 20px. About 108px. Acceptable, because it isn't sticky.
+- On firm pages the product's own wording for firm pages applies ("This service is in beta…"), in the same visual form.
+
+**Header.** Sticky, glass, 72px, compressing to 60px after 80px of scroll.
+
+```
+Desktop
+┌────────────────────────────────────────────────────────────────────────────────────┐
+│ CoFile▪      How it works   For firms   What we file   For platforms   Log in  [Run a free rehearsal] │
+└────────────────────────────────────────────────────────────────────────────────────┘
+  wordmark 22px    nav 16px 500 Graphite, 32px apart             text btn   primary M (48px)
+
+Phone
+┌──────────────────────────────────────┐
+│ CoFile▪                 Log in   ☰   │  60px; ☰ opens a full-height glass sheet with
+└──────────────────────────────────────┘  the four nav links at 28px, then both buttons
+```
+
+- Wordmark at 22px with its dot in the active light (Spectrum until the hero settles, then Harbor teal).
+- Nav: "How it works", "For firms", "What we file", "For platforms". The active section (by scroll position) gets a 2px `--firm-line` underline offset 8px.
+- Right: "Log in" as a text button; "Run a free rehearsal" as the primary Graphite button (48px).
+- Phone: after the hero's CTAs scroll out of view, a **bottom CTA bar** slides up: glass, 76px tall including the safe area, with "Run a free rehearsal" full-width (56px). It hides again while the close section is visible, so there are never two of the same button on screen.
+
+### 9.1 Hero
+
+**Copy:**
+- Kicker: "For CPA, payroll, fractional CFO and title firms"
+- h1: "Your client approves the proof. Then CoFile files it."
+- Sub: "CoFile fills in your clients' LLC and corporation formations, EINs and employer registrations on the official New York, New Jersey, Florida and IRS websites, with your firm's name and logo on every page your client sees. First, your client gets one page showing every detail, every fee and, where possible, the state's own review page, filled in."
+- Buttons: "Run a free rehearsal" · "See what your client sees"
+- Note: "In beta. A rehearsal fills in every screen of the state's real website and stops before the last button, so nothing is filed and nothing is paid. You'll set up your firm's filing desk first."
+- The sample proof (all its words as in the copy), with the caption "Sample proof · test details · not a real business".
+
+**Desktop (1440).** Height: 100vh minus the header, minimum 760px, maximum 920px. Copy in columns 1–5, the stage in columns 6–12 bleeding 120px past the right edge of the content column.
+
+```
+┌──────────────────────────────────────────────────────────────────────────────────────────┐
+│                                                       ░░▒▒▓▓▓ Harbor glow 32% ▓▓▒▒░░       │
+│  (●) For CPA, payroll, fractional                 ╭────────────────────────────────────────┐
+│      CFO and title firms                          │ [H&P] HARBOR & PINE CPA  example firm       with CoFile▪ │
+│                                                   ├────────────────────────────────────────┤
+│  Your client                                      │ Two Sisters Bakery LLC          ┆Rehearsal┆│
+│  approves the proof.                              │ New Jersey LLC formation. Please approve │
+│  Then CoFile                                      │ by Dec 3, 5:00 PM Eastern.               │
+│  files it.                                     ①  │ Business name     TWO SISTERS BAKERY LLC │
+│                                                   │ Members           Ana Ortiz, Lucia Ortiz (50/50) │
+│  CoFile fills in your clients' LLC and            │ Main business     88 Grove St, Jersey City NJ 07302 │
+│  corporation formations, EINs and employer     ②  │ Formation filing fee              $100.00 │
+│  registrations on the official New York, …        │ NJ portal fee, by card              $3.50 │
+│                                                   │ Total to the state                $103.50 │
+│  [ Run a free rehearsal ]  ( See what your     ③  │ ┌ New Jersey's own review page, filled in ┐ │
+│                              client sees ↓ )      │ │ Business Name   TWO SISTERS BAKERY      │ │
+│                                                   │ │ Designator      LLC                     │ │
+│  ┆ In beta. A rehearsal fills in every screen     │ └─────────────────────────────────────────┘ │
+│    of the state's real website and stops …     ④  │ [ Approve for filing ]  Nothing is submitted │
+│                                                   │                         or paid until you…  │
+│                                                   ╰──────────────────────────╮  ╭──────────╮
+│                                                                              │  │  phone   │
+│                                  Sample proof · test details · not a real business  ╰──────────╯
+└──────────────────────────────────────────────────────────────────────────────────────────┘
+```
+
+- **Kicker** in a glass pill (36px tall, 15px 500), led by an 8px dot in `--firm` (the same rounded-square dot as the wordmark).
+- **h1** at Display 1 (80px), Graphite, broken by hand: "Your client / approves the proof. / Then CoFile / files it." Behind "the proof" sits a `--firm-mark` highlighter band (the same mark the proof uses for highlights), 0.38em tall, at the lower third of the x-height. That ties the headline to the object on the right.
+- **Sub** at Lede (22px), Ink 2, max width 34em.
+- **Buttons**, 56px, 16px apart: "Run a free rehearsal" primary Graphite; "See what your client sees" secondary glass with a 16px down-arrow icon, which scrolls smoothly to `#proof`.
+- **Note** at Small (15px), Slate, max width 30em, led by a 12px dashed rehearsal glyph (a dashed rounded square). Not an alert box: just a well-set note.
+- **The stage:** the proof sheet, 600px wide, in 3D at `rotateX(4deg) rotateY(-6deg)`, with Harbor & Pine's Door (wide logo on white, "example firm" in a 14px Slate tag, "with CoFile" at the right), then the body. Values in Suisse Int'l Mono; "TWO SISTERS BAKERY LLC" and the address carry highlighter marks; the fees use tabular figures with a hairline above the total. The state page inset (block 3) is drawn as foreign UI (7.3). The approve button is in `--firm-fill` with the firm's font. **Callout pins 1–4**: 24px Graphite circles with white Mono numerals, sitting 20px outside the sheet's left edge, centered on each block. (The pins have no legend: the proof section explains each block.)
+- **The phone**, 300px wide, overlaps the sheet's bottom-right corner by 25% and is tilted the other way (`rotateY(8deg)`). It shows the same proof at phone size, scrolled to the title and the approve button, a reminder that clients approve on their phones.
+- **Caption** centered under the stage, 14px Slate.
+
+**Phone (390).**
+
+```
+┌──────────────────────────────────┐
+│ (●) For CPA, payroll, fractional │  kicker pill wraps to two lines
+│     CFO and title firms          │
+│                                  │
+│ Your client                      │  Display 1 at 40px
+│ approves the                     │
+│ proof. Then                      │
+│ CoFile files it.                 │
+│                                  │
+│ CoFile fills in your clients' …  │  Lede 19px
+│                                  │
+│ [    Run a free rehearsal     ]  │  56px, full width
+│ (  See what your client sees ↓ ) │  56px, full width
+│ ┆ In beta. A rehearsal fills …   │  Small 15px
+│                                  │
+│ ░▒▓ glow ▓▒░                      │
+│╭────────────────────────────────╮│  the proof, flat (no tilt), 12px side
+││ [H&P] Harbor & Pine CPA        ││  margins, at true phone scale: this IS
+││ example firm      with CoFile▪ ││  what the client would see on this phone
+││ Two Sisters Bakery LLC ┆Rehears││
+││ …                              ││
+│╰────────────────────────────────╯│
+│ Sample proof · test details · …  │
+└──────────────────────────────────┘
+```
+
+On phones the separate phone device is dropped: the visitor is already holding one. Pins sit inside the sheet's left padding (20px circles).
+
+**Dark mode:** the page goes to Graphite night with a richer Harbor glow (28%); the sheet stays white. It looks like a lit print in a dark room.
+
+### 9.2 Process: "You start it. Your client approves it. CoFile files it."
+
+**Copy:** h2 "You start it. Your client approves it. CoFile files it." · lede "Three steps, and your client is in charge of the middle one." · three steps, each a bold title and a paragraph, exactly as written.
+
+**Desktop.** Full width. The h2 sits on one line at Display 2 (56px) across 12 columns, with the middle sentence, "Your client approves it.", set in `--firm-ink`: the lede says the client is in charge of the middle step, so the middle step gets the color. Lede below in Ink 2.
+
+```
+┌──────────────────────────────────────────────────────────────────────────────────────┐
+│ You start it. Your client approves it. CoFile files it.                               │
+│ Three steps, and your client is in charge of the middle one.                          │
+│                                                                                       │
+│                           ░░▒▒▓ glow ▓▒▒░░                                             │
+│  ╭───────────────────╮        ╭──────────────────────╮        ╭───────────────────╮    │
+│  │ ╭─form──╮         │        │      ╭──────────╮     │        │ ┌ foreign UI ──┐  │    │
+│  │ │╭─link─╮│ fanned │●━━━━━━━│      │  phone   │     │━━━━━━━●│ │ ▓▓▓▓▓▓▓      │  │    │
+│  │ ││╭text╮││        │        │      │  proof   │     │        │ │ ▓▓▓▓░░░      │  │    │
+│  │ saved answers:    │        │      │ [Approve]│     │        │ └──────────────┘  │    │
+│  │ ▒Registered agent │        │      ╰──────────╯     │        │ ● Filing now      │    │
+│  │ ▒Organizer ▒Signer│        │   (raised 24px, lit)  │        │ ● Submitted to …  │    │
+│  ╰───────────────────╯        ╰──────────────────────╯        │ ● Accepted by …   │    │
+│                                                                ╰───────────────────╯    │
+│  You start it.                 Your client approves it.        CoFile files it.         │
+│  Fill in a short form          They get the proof: one page    It fills in the state's   │
+│  yourself, send your client    with your firm's name at the    own website screen by     │
+│  a link, or forward the …      top, showing every detail …     screen, checks the fee …  │
+└──────────────────────────────────────────────────────────────────────────────────────┘
+```
+
+- Three cards in columns 1–4, 5–8, 9–12; white sheets, radius 20, e1 elevation. The **middle card is raised** (translateY −24px, e3 elevation, the firm glow behind it) and 8% taller.
+- **Card 1** ("You start it."): three mini UIs fanned at −6°, 0°, 6°: a short form (four field skeletons), a link chip in Mono (`cofile.app/p/harborpine`), and a text bubble. Below them, four small field chips that fill with `--firm-wash` as the relay passes, carrying the words from the step's copy: "registered agent", "organizer", "signer", "addresses".
+- **Card 2** ("Your client approves it."): the phone at 220px wide showing the proof, firm Door and approve button visible.
+- **Card 3** ("CoFile files it."): a foreign-UI state screen filling in, and beside it a three-dot stage ticker using the product's real status words: "Filing now", "Submitted to the state", "Accepted by the state". This is the visual for "You hear about each stage."
+- **The relay line** (2px `--firm-line`, with a 6px `--firm` dot) connects the cards at mid-height, behind them.
+- Step titles at Title (24px 600), paragraphs at Body (18px), in columns under each card.
+
+**Phone.** h2 on three lines (one sentence per line, the middle one in `--firm-ink`), lede, then the three cards stacked full width, each followed by its title and paragraph. The relay line runs vertically down the left margin (x = 10px), connecting the cards; the middle card has the glow and is not raised (no room), but gets a 2px `--firm-line` outline instead.
+
+**Motion:** M2, the relay.
+
+### 9.3 The proof: "Your client sees what the state will see, before the state does."
+
+**Copy:** h2 · lede ("You've approved a proof before: business cards, letterhead, an invitation at the printer. Nothing went to press until you said so. The proof does the same for a filing. …") · six list items, exactly as written.
+
+**Desktop.** A two-column scroll scene, about 160vh. Columns 1–5 hold the h2 (Display 2), the lede and then the six items, spaced so each can reach the middle of the viewport in turn. Columns 6–12 hold the proof sheet, sticky at 120px from the top, flat (no tilt here), 640px wide, with the full proof structure from the product: the Door, rehearsal band, title, deadline, consent panel, state's review page, filing details, state fees, the one button.
+
+```
+┌───────────────────────────────────────────────────────────────────────────────────┐
+│ Your client sees what the state       ╭──────────────────────────────────────────╮ │
+│ will see, before the state does.      │ [H&P] Harbor & Pine CPA     with CoFile▪ │ │
+│                                       │ Two Sisters Bakery LLC                    │ │
+│ You've approved a proof before:       │ ┌consent panel (--firm-wash)───────────┐ │ │
+│ business cards, letterhead, an …      │ │ By approving, you confirm every …    │ │ │ ← item 4 layer
+│                                       │ └──────────────────────────────────────┘ │ │
+│ ▪ Every name, address and answer,  ◀──│ ┌ The state's review page ───────────┐   │ │ ← item 3 layer
+│   in the order the state asks …       │ └────────────────────────────────────┘   │ │
+│                                       │ Filing details                            │ │ ← item 1 layer
+│ ▪ Every fee in dollars and cents,     │ Business name   TWO SISTERS BAKERY LLC    │ │
+│   from a verified fee table           │ …                                         │ │
+│                                       │ State fees                                │ │ ← item 2 layer
+│ ▪ Where the state's website allows    │ Total                         $103.50     │ │
+│   it, a picture of the state's own …  │                                           │ │
+│ ▪ Each statement your client is …     │ [ Approve, and authorize submission and   │ │ ← item 5 layer
+│ ▪ One button. Until it's pressed, …   │   payment ]   ( Request changes )         │ │
+│ ▪ For CPAs: it does for a business    │               with CoFile▪               │ │ ← item 6: whole sheet
+│   filing what the 8879 does for a …   ╰──────────────────────────────────────────╯ │
+└───────────────────────────────────────────────────────────────────────────────────┘
+```
+
+- List bullets are the **dot** (8px rounded square in `--firm`) instead of check marks. Item text at Body 18px. The active item goes to Graphite with its dot growing to 10px; inactive items sit at Slate.
+- Item → layer mapping: 1 → Filing details; 2 → State fees; 3 → the state's review page; 4 → the consent panel (the product's statement, "By approving, you confirm every detail below is correct and authorize its submission exactly as shown, and payment of the fees shown, up to the total shown ($103.50). Government fees generally can't be refunded once paid, even if the filing is rejected."); 5 → the buttons; 6 → the whole sheet.
+- Item 6 ("For CPAs: …") is set a little differently: "For CPAs:" in 600, and the item gets 32px more space above it, so it lands as a quiet aside to accountants.
+- No seal, no stamp, no "approved" graphic anywhere. The sheet itself is the reassurance.
+
+**Phone.** No sticky scene. h2, lede, then the six items as a vertical list, each with a 4:3 crop of its layer of the proof directly above it (a white card, radius 16, the layer at 100% and the rest of the sheet blurred and faded behind). Item 6 gets the whole sheet in miniature. Optional: P3 ("Approving at the counter") as a full-width 1:1 photo between the lede and the list, with the proof composited on Lucia's phone. Alt text `[copy needed]`.
+
+**Motion:** M3.
+
+### 9.4 Firms: "Your name on the door. Ours in small print." The relight
+
+**Copy:** h2 "Your name on the door. Ours in small print." · lede ("Your client needs an LLC. Who do they call? You. They always have. …") · four list items, exactly as written.
+
+**The h2, typeset as the joke.** One `<h2>`, two lines:
+
+- "Your name on the door." at Display 2 (56px desktop / 32px phone), Graphite, 600.
+- "Ours in small print." at the Small print style (24px desktop / 19px phone), Slate, 400, set on the next line and right-aligned to the end of the first line on desktop (left-aligned on phones), as if it were a footnote to the line above.
+
+**Desktop.**
+
+```
+┌────────────────────────────────────────────────────────────────────────────────────────┐
+│ Your name on the door.                                          ╭──────────────────────╮ │
+│                         Ours in small print.                    │  P1 "the door":      │ │
+│                                                                 │  HARBOR & PINE CPA   │ │
+│ Your client needs an LLC. Who do they call? You. They always    │  on glass, morning   │ │
+│ have. Until now, saying yes meant someone on staff typing …     │  light               │ │
+│                                                                 ╰──────────────────────╯ │
+│                                ░░░░▒▒▒▒▓▓▓▓ the firm's light ▓▓▓▓▒▒▒▒░░░░                │
+│ ╭─ cofile.app/p/harborpine ──────────────────────────────────╮                           │
+│ │ [H&P] Harbor & Pine CPA                       with CoFile▪ │   ╭────────────────────╮  │
+│ │ Filings                                    [ New filing ]  │   │ proof sheet        │  │
+│ │ Two Sisters Bakery LLC   ┆Rehearsal┆  Waiting for approval │   │ [H&P] Harbor & Pine│  │
+│ │ …                    ╭──────────────╮                      │   │ Two Sisters Bakery │  │
+│ ╰──────────────────────│ phone: form  │──────────────────────╯   │ [ Approve … ]      │  │
+│                        │ [H&P] Harbor │                          ╰────────────────────╯  │
+│                        │ New Jersey   │                                                  │
+│                        │ LLC formation│                                                  │
+│                        │[Send to Harbor & Pine CPA]                                      │
+│                        ╰──────────────╯                                                  │
+│              (●)  (●)  (●)  (●)  (●)  (●)  (●)  (●)  (●)  (◍)        #0f766e              │
+│                                                                                           │
+│  ▪ Your filing desk carries   ▪ Send one client a link,  ▪ Your client sees your  ▪ Name your own │
+│    your firm's name, logo…      keep a permanent filing…   firm on the form and…    registered…   │
+└────────────────────────────────────────────────────────────────────────────────────────┘
+```
+
+- **Top:** h2 and lede in columns 1–8. Photo P1 ("the door") in columns 9–12, 4:5, radius 20: the firm's name on its own glass door, with nothing of CoFile in sight. It says the headline without saying it.
+- **The stage** (12 columns, bleeding to both viewport edges at ≥ 1440): three surfaces, all live components in Harbor & Pine's brand:
+  1. *The filing desk* in a browser window (`cofile.app/p/harborpine`), 760px wide: the Door, the "Filings" list with Two Sisters Bakery LLC and a couple of rows of test details, the "New filing" button in the firm's color.
+  2. *The client's form* on the phone, 280px wide, overlapping the window's bottom edge: the Door, "New Jersey LLC formation", three fields and the button "Send to Harbor & Pine CPA" (the product's own label pattern, "Send to {firm}").
+  3. *The proof* as a sheet, 400px wide, at the right.
+  Each surface has "with CoFile" in its place, Graphite, 14px.
+- **The color dial**, centered under the stage: ten 36px circular swatches, 14px apart, in a glass tray (radius 999, 64px tall): the product's own nine ready colors (`#1f4fd1`, `#0f766e`, `#15803d`, `#b45309`, `#b91c1c`, `#7e22ce`, `#be185d`, `#334155`, `#111827`), then a tenth **Spectrum** swatch that opens the native color picker for any hex. The active swatch gets a 2px white gap and a 2px Graphite ring. Its hex shows to the right in Mono 15px Slate (data, not copy). Each swatch's accessible name is its hex. The tray has no visible label; if the product team wants one, `[copy needed]`.
+- **Optional, phase 2:** a small "try your own logo" control in the tray that previews the stage with the visitor's logo, processed only in the browser and never uploaded. Label `[copy needed]`. Strongest possible version of "this is for my firm," but it needs a copy decision.
+- **The four list items** in a 4-column row under the dial, dot bullets, Body 18px. On hover (desktop), each item highlights the part of the stage it describes: item 1 → the desk's Door; item 2 → the form on the phone and the window's address bar; item 3 → the "with CoFile" lockups, which get a soft ring; item 4 → the registered agent field on the form.
+
+**Phone.**
+
+```
+┌──────────────────────────────────┐
+│ Your name on the door.           │  32px
+│ Ours in small print.             │  19px Slate
+│                                  │
+│ Your client needs an LLC. …      │
+│                                  │
+│ ╭──────────────────────────────╮ │  P1 at 4:5, full width
+│ │   HARBOR & PINE CPA (glass)  │ │
+│ ╰──────────────────────────────╯ │
+│ ░▒▓ glow ▓▒░                      │
+│ ╭────────────╮                   │  stage, simplified: the phone form
+│ │ phone form │  ╭proof╮           │  (60% width) overlapping the proof
+│ │ [Send to …]│  │     │           │  sheet (55% width)
+│ ╰────────────╯  ╰─────╯           │
+│ ◀ (●)(●)(●)(●)(●)(●)(●)(●)(●)(◍) ▶│  dial scrolls horizontally, 44px targets
+│                                  │
+│ ▪ Your filing desk carries …     │
+│ ▪ Send one client a link, …      │
+│ ▪ Your client sees your firm …   │
+│ ▪ Name your own registered …     │
+└──────────────────────────────────┘
+```
+
+**Motion:** M4, the relight. This is the moment the whole site is built for.
+
+### 9.5 Requests: "Clients don't fill in forms. They text you."
+
+**Copy:** h2 · lede ("That's how requests really arrive. Send it on as it is, by email, text, WhatsApp or Slack. CoFile's AI reads the message and drafts the filing, and your saved answers fill in the rest. …") · the bubble "Need an LLC for the bakery. It's me and my sister, 50/50, in Jersey City." with its caption "Ana Ortiz · text message · example" · the arrow line "↳ read into a drafted New Jersey LLC formation for your team to check".
+
+**Desktop.**
+
+```
+┌────────────────────────────────────────────────────────────────────────────────────┐
+│ Clients don't fill in              ╭────────────────────╮                            │
+│ forms. They text you.              │ P2 Ana at the      │                            │
+│                                    │ counter, blue hour │  ╭─ drafted filing (desk) ─╮│
+│ That's how requests really         │   ╭──────────────╮ │  │ New Jersey LLC formation││
+│ arrive. Send it on as it is, by    │   │ phone        │ │  │ Members                 ││
+│ email, text, WhatsApp or Slack. …  │   │ ╭──────────╮ │ │  │ ▒Ana Ortiz, Lucia Ortiz ││
+│                                    │   │ │Need an LLC│ │━━━━━▶│ (50/50)            ││
+│                                    │   │ │for the …  │ │ │  │ Main business address   ││
+│                                    │   │ ╰──────────╯ │ │  │ ▒Jersey City NJ         ││
+│                                    │   ╰──────────────╯ │  │ Registered agent ░saved ││
+│                                    ╰────────────────────╯  ╰─────────────────────────╯│
+│                                    Ana Ortiz · text message · example                 │
+│                                    ↳ read into a drafted New Jersey LLC formation for │
+│                                      your team to check                               │
+└────────────────────────────────────────────────────────────────────────────────────┘
+```
+
+- Copy in columns 1–5. In columns 6–12, a three-layer composition: photo P2 (4:5, radius 20) in the back; the phone composited onto Ana's hands but also pulled forward as a clean device in front (so the message is legible); and to the right, the **drafted filing card** from the firm's desk (white sheet, 360px).
+- **The bubble:** a generic incoming message bubble (`#E9EBEF`, radius 22 with a 6px tail, Graphite 17px text), not a copy of any messaging app's design. The caption "Ana Ortiz · text message · example" sits beneath in 14px Slate.
+- **The arrow line** "↳ read into a drafted New Jersey LLC formation for your team to check" set in Mono 15px Slate, following the curved path (2px `--firm-line`) from the bubble to the drafted card.
+- **The drafted card:** title "New Jersey LLC formation", with fields read from the message in `--firm-mark` highlight (Members: Ana Ortiz, Lucia Ortiz (50/50); the Jersey City address field partly filled) and fields from saved answers in `--firm-wash` with a small dot marker (Registered agent). The visual difference between "read from the message" and "from your saved answers" is shown by highlight vs. wash; no new label needed (if the product adds a legend: `[copy needed]`).
+- The channels in the lede (email, text, WhatsApp, Slack) are words, not logos. We don't place third-party logos.
+
+**Phone.** h2, lede, then the phone with the bubble full width (photo P2 cropped 1:1 behind it at 40% opacity under a Porcelain scrim, or dropped if it hurts legibility), the caption, the arrow line running downward, and the drafted card below.
+
+**Motion:** typing dots → bubble → phrases fly into fields (8.4).
+
