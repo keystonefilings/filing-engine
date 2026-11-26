@@ -5,7 +5,7 @@ type R = { ok: true; link: string; kindTitle: string; label?: string; days?: num
 
 function mailto(r: Extract<R, { ok: true }>): string {
   const subject = `Please fill in your ${r.kindTitle}`;
-  const body = `Hi,\n\nPlease fill in the details for your ${r.kindTitle} here:\n${r.link}\n\nAfter you send it you'll get a link to check exactly what will be filed, and nothing is filed until it's approved.\n\nThanks${r.from ? `,\n${r.from}` : ""}`;
+  const body = `Hi,\n\nPlease fill in the details for your ${r.kindTitle} here:\n${r.link}\n\nAfter you send it, we check every detail and approve it before anything is filed.\n\nThanks${r.from ? `,\n${r.from}` : ""}`;
   return `mailto:?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
 }
 

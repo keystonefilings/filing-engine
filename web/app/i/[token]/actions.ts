@@ -27,5 +27,5 @@ export async function submitClientIntake(token: string, fd: FormData): Promise<I
   });
   if (!r.ok) return r;
   if (record) await markLinkUsed(key, link.clientCompanyId, link.nonce, r.result.filing.id);
-  return { ok: true, message: "We have your answers. You'll get an email with a link to check exactly what will be filed and approve it before anything is sent to the state." };
+  return { ok: true, message: "We have your answers. Your firm checks every detail and the fees and approves the filing before anything is sent to the state." };
 }

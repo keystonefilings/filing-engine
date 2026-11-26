@@ -12,8 +12,8 @@ export function generateMetadata() {
   const name = platformName();
   return {
     // absolute: the layout's "%s · name" template doesn't apply to a page in the layout's own segment.
-    title: { absolute: `Your client approves the proof. Then ${name} files it.` },
-    description: `${name} fills in your clients' LLC and corporation formations, EINs and employer registrations on the official state and IRS websites, with your firm's name on every page your client sees. Nothing is filed until your client approves the proof.`,
+    title: { absolute: `You approve the proof. Then ${name} files it.` },
+    description: `${name} fills in your clients' LLC and corporation formations, EINs and employer registrations on the official state and IRS websites, with your firm's name on every page your client sees. Nothing is filed until you approve the proof.`,
   };
 }
 
@@ -70,11 +70,11 @@ export default function Home() {
           <div className="wrap nx-hero-grid">
             <div>
               <span className="nx-kicker">For CPA, payroll, fractional CFO and title firms</span>
-              <h1>Your client approves the proof. Then {name} files it.</h1>
-              <p className="nx-sub">{name} fills in your clients&apos; LLC and corporation formations, EINs and employer registrations on the official New York, New Jersey, Florida and IRS websites, with your firm&apos;s name and logo on every page your client sees. First, your client gets one page showing every detail, every fee and, where possible, the state&apos;s own review page, filled in.</p>
+              <h1>You approve the proof. Then {name} files it.</h1>
+              <p className="nx-sub">{name} fills in your clients&apos; LLC and corporation formations, EINs and employer registrations on the official New York, New Jersey, Florida and IRS websites, with your firm&apos;s name and logo on every page your client sees. Your client hands you the job; before anything is filed, you get one page showing every detail, every fee and, where possible, the state&apos;s own review page, filled in.</p>
               <div className="nx-ctas">
                 <Link className="btn btn-primary" href="/signup">Run a free rehearsal</Link>
-                <a className="btn btn-quiet" href="#proof">See what your client sees</a>
+                <a className="btn btn-quiet" href="#proof">See the proof</a>
               </div>
               <p className="nx-note">In beta. A rehearsal fills in every screen of the state&apos;s real website and stops before the last button, so nothing is filed and nothing is paid. You&apos;ll set up your firm&apos;s filing desk first.</p>
             </div>
@@ -111,11 +111,11 @@ export default function Home() {
 
         <section className="nx-sec band" id="process">
           <div className="wrap">
-            <h2>You start it. Your client approves it. {name} files it.</h2>
-            <p className="lede">Three steps, and your client is in charge of the middle one.</p>
+            <h2>Your client asks. You approve it. {name} files it.</h2>
+            <p className="lede">Three steps. Your client hands the job to you, and you sign off before anything is filed.</p>
             <div className="nx-steps">
-              <div><strong>You start it.</strong><p>Fill in a short form yourself, send your client a link, or forward the email or text they sent you. Your saved answers fill in the rest: registered agent, organizer, signer, addresses.</p></div>
-              <div><strong>Your client approves it.</strong><p>They get the proof: one page with your firm&apos;s name at the top, showing every detail and every fee.</p></div>
+              <div><strong>Your client asks.</strong><p>They fill in a short form from your link, or text or email you, and you forward it; or you fill it in yourself. Your saved answers fill in the rest: registered agent, organizer, signer, addresses.</p></div>
+              <div><strong>You approve it.</strong><p>You get the proof: one page with your firm&apos;s name at the top, showing every detail and every fee.</p></div>
               <div><strong>{name} files it.</strong><p>It fills in the state&apos;s own website screen by screen, checks the fee again before paying, and brings back the state&apos;s documents. You hear about each stage.</p></div>
             </div>
           </div>
@@ -124,16 +124,16 @@ export default function Home() {
         <section className="nx-sec band" id="proof">
           <div className="wrap nx-two">
             <div>
-              <h2>Your client sees what the state will see, before the state does.</h2>
-              <p className="lede">You&apos;ve approved a proof before: business cards, letterhead, an invitation at the printer. Nothing went to press until you said so. The proof does the same for a filing. Your client gets a link to one page with your firm&apos;s name and logo at the top. Approving it locks in exactly what&apos;s on it. If anything has to change later, it comes back to them to approve again.</p>
+              <h2>You see what the state will see, before the state does.</h2>
+              <p className="lede">You&apos;ve approved a proof before: business cards, letterhead, an invitation at the printer. Nothing went to press until you said so. The proof does the same for a filing. You get one page with your firm&apos;s name and logo at the top, on your filing desk and by email. Approving it locks in exactly what&apos;s on it. If anything has to change later, it comes back to you to approve again.</p>
             </div>
             <ul className="nx-list">
               <li><Tick /><span>Every name, address and answer, in the order the state asks for them</span></li>
               <li><Tick /><span>Every fee in dollars and cents, from a verified fee table</span></li>
               <li><Tick /><span>Where the state&apos;s website allows it, a picture of the state&apos;s own review page, filled in</span></li>
-              <li><Tick /><span>Each statement your client is making, such as letting the filing company sign or pay</span></li>
+              <li><Tick /><span>Each statement on the form, and who made it, such as letting the filing company sign or pay</span></li>
               <li><Tick /><span>One button. Until it&apos;s pressed, nothing is submitted and nothing is paid.</span></li>
-              <li><Tick /><span>For CPAs: it does for a business filing what the 8879 does for a return.</span></li>
+              <li><Tick /><span>Like reviewing a return before you e-file it: nothing goes to the state until you&apos;ve signed off.</span></li>
             </ul>
           </div>
         </section>
@@ -147,7 +147,7 @@ export default function Home() {
             <ul className="nx-list">
               <li><Tick /><span>Your filing desk carries your firm&apos;s name, logo and color.</span></li>
               <li><Tick /><span>Send one client a link, keep a permanent filing page for each filing you offer, or put the filing button on your own website.</span></li>
-              <li><Tick /><span>Your client sees your firm on the form and on the proof. The only sign of us is a small &ldquo;with {name}&rdquo;.</span></li>
+              <li><Tick /><span>Your client sees your firm on the form and in every email. The only sign of us is a small &ldquo;with {name}&rdquo;.</span></li>
               <li><Tick /><span>Name your own registered agent in each state, or use ours, provided through Registered Agents, Inc.</span></li>
             </ul>
           </div>
@@ -157,7 +157,7 @@ export default function Home() {
           <div className="wrap nx-two">
             <div>
               <h2>Clients don&apos;t fill in forms. They text you.</h2>
-              <p className="lede">That&apos;s how requests really arrive. Send it on as it is, by email, text, WhatsApp or Slack. {name}&apos;s AI reads the message and drafts the filing, and your saved answers fill in the rest. Someone at your firm checks the draft. Then it goes to your client as a proof, like any other filing. A message alone never reaches the state.</p>
+              <p className="lede">That&apos;s how requests really arrive. Send it on as it is, by email, text, WhatsApp or Slack. {name}&apos;s AI reads the message and drafts the filing, and your saved answers fill in the rest. Someone at your firm checks the draft, and you approve it as a proof, like any other filing. A message alone never reaches the state.</p>
             </div>
             <div className="nx-chat">
               <div className="nx-bubble">Need an LLC for the bakery. It&apos;s me and my sister, 50/50, in Jersey City.<small>Ana Ortiz · text message · example</small></div>
@@ -173,7 +173,7 @@ export default function Home() {
               <p className="lede">A state filing can&apos;t be taken back, so {name} would rather stop and ask than guess.</p>
             </div>
             <ul className="nx-list">
-              <li><Tick /><span>The fee your client approves comes from a verified fee table. {name} reads it again on the state&apos;s payment screen. If the two differ, it stops before paying and tells you why.</span></li>
+              <li><Tick /><span>The fee you approve comes from a verified fee table. {name} reads it again on the state&apos;s payment screen. If the two differ, it stops before paying and tells you why.</span></li>
               <li><Tick /><span>It reads the fine print. By card, New Jersey&apos;s standing certificate costs $52 for an LLC and $27 for a corporation, so {name} checks the business type on the state&apos;s record before it pays.</span></li>
               <li><Tick /><span>If a state has changed its form since {name} last verified it, the filing stops before anything is submitted, and you see what changed.</span></li>
               <li><Tick /><span>A filing is never sent twice on its own. If one is interrupted, a person checks what the state received first.</span></li>
@@ -244,7 +244,7 @@ export default function Home() {
             <ol className="nx-catch">
               <li>We&apos;re in beta. Filing types go live one at a time, and until then they run as rehearsals.</li>
               <li>Rehearsals are free. Live filing is paid per filing or by plan, and you see your plan and its price on your Billing page before you&apos;re charged.</li>
-              <li>State fees belong to the state. Your client sees them on the proof, they&apos;re paid with the card or account you chose, and states generally don&apos;t refund them. That&apos;s why we check them twice.</li>
+              <li>State fees belong to the state. You see them on the proof, they&apos;re paid with the card or account you chose, and states generally don&apos;t refund them. That&apos;s why we check them twice.</li>
               <li>New York requires a new LLC to publish a notice of its formation within 120 days. That&apos;s a separate step with its own costs, and it isn&apos;t part of the filing.</li>
               <li>We&apos;re not a law firm or a government agency, and we don&apos;t give legal or tax advice. You do the advising. We do the typing.</li>
             </ol>
@@ -284,7 +284,7 @@ export default function Home() {
         <section className="nx-close band">
           <div className="wrap">
             <h2>Run one rehearsal. Then decide.</h2>
-            <p className="lede">Open your firm&apos;s filing desk, add your logo, and rehearse a real filing on the state&apos;s own website. It&apos;s free, and nothing is filed. You&apos;ll see exactly what your client would see, and you&apos;ll know whether we&apos;ve earned your name on the door.</p>
+            <p className="lede">Open your firm&apos;s filing desk, add your logo, and rehearse a real filing on the state&apos;s own website. It&apos;s free, and nothing is filed. You&apos;ll see the proof you&apos;d approve, and you&apos;ll know whether we&apos;ve earned your name on the door.</p>
             <div className="nx-ctas"><Link className="btn btn-primary" href="/signup">Run a free rehearsal</Link><span className="nx-small nx-muted">Questions first? <a href={`mailto:${supportEmail()}`}>{supportEmail()}</a></span></div>
             <p className="nx-tagline"><FolderTab /> Approve the proof. Then it&apos;s filed.</p>
           </div>

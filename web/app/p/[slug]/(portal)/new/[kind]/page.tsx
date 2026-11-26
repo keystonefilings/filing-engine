@@ -67,7 +67,7 @@ export default async function NewKindPage({ params, searchParams }: { params: Pr
         signatures={sigs?.signatures.filter((s) => s.active) ?? []}
         consentText={sigs?.consentText}
         filerName={company.filerName}
-        footnote={<p className="small muted">Nothing is filed until your client approves the proof.</p>}
+        footnote={<p className="small muted">Next you get the proof to approve. Nothing is filed until you do.</p>}
         prefill={{ ...(Object.keys(fromEmail).some((k) => k.startsWith("contact.")) ? {} : contactPrefill(company)), ...saved, ...fromClient, ...fromEmail }}
         key={from ?? email ?? "new"}
       />
