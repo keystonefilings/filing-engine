@@ -15,7 +15,16 @@ import { BetaBanner } from "@/components/BetaBanner";
 export const dynamic = "force-dynamic";
 
 export function generateMetadata(): Metadata {
-  return { title: { default: platformName(), template: `%s · ${platformName()}` }, robots: { index: process.env.SITE_INDEXABLE === "true" } };
+  return {
+    title: { default: platformName(), template: `%s · ${platformName()}` }, robots: { index: process.env.SITE_INDEXABLE === "true" },
+    // CoFile's own icons (owner's identity package). Set as metadata, not as app/icon files, so the pages a firm's
+    // clients see can replace them with the firm's monogram (lib/firm-icon.ts; decision 12).
+    icons: {
+      icon: [{ url: "/cofile/identity/cofile-favicon.svg", type: "image/svg+xml" }, { url: "/cofile/identity/favicon.ico", sizes: "16x16 32x32 48x48" }],
+      apple: [{ url: "/cofile/identity/apple-touch-icon-180.png", sizes: "180x180" }],
+    },
+    manifest: "/cofile/identity/site.webmanifest",
+  };
 }
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

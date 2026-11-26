@@ -1,3 +1,5 @@
+import type { Metadata } from "next";
+import { clientPageMetadata, NEUTRAL_CLIENT_METADATA } from "@/lib/firm-icon";
 import { randomUUID } from "node:crypto";
 import { notFound } from "next/navigation";
 import { brandOf, liveFilings, offeredKinds } from "@/lib/firm";
@@ -41,8 +43,9 @@ export async function PublicIntake({ tenantId, firm, service, embed = false }: {
     : <ClientPage brand={brand}>{body}</ClientPage>;
 }
 
-export async function publicTitle(tenantId: string, firm: string, service: string): Promise<string> {
+/** The tab for a firm's page for one filing: the filing and the firm, the firm's monogram, nothing of CoFile (10B.1.9). */
+export async function publicMetadata(tenantId: string, firm: string, service: string): Promise<Metadata> {
   const company = await firmBySlug(firm, tenantId);
   const kind = kindForServiceSlug(service);
-  return company && kind ? `${kind.title} · ${brandOf(company).name}` : "Not found";
+  return company && kind ? clientPageMetadata(kind.title, brandOf(company)) : { ...NEUTRAL_CLIENT_METADATA, title: { absolute: "Not found" } };
 }

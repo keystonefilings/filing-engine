@@ -160,3 +160,8 @@ body:has(.client2) > .beta-banner { display: none; }
 .client2.is-red .intake2 .notice.bad { outline: 1px solid #1D2130; outline-offset: 0; }
 .client2.is-red .intake2 [aria-invalid="true"] { border-color: var(--text) !important; box-shadow: inset 3px 0 0 var(--madder); }
 }
+
+@layer components {
+.client2-vignette { display: block; width: 120px; height: auto; }
+@media (max-width: 599px) { .client2-vignette { width: 96px; } }
+}

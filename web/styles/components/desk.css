@@ -258,3 +258,10 @@
   .edom2-row.is-head { display: none; }
 }
 }
+
+/* Quiet empty states with their engraving (V6, V7): the vignette above the product's own sentence */
+@layer components {
+.desk2-quiet { display: grid; justify-items: start; gap: 16px; padding: 32px; background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-sheet); }
+.desk2-quiet p { margin: 0; color: var(--text-2); }
+.signed2-vignette { margin: 0 0 24px !important; line-height: 0; }
+}

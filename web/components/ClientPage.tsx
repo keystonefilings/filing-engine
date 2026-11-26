@@ -32,7 +32,9 @@ export function ClientPage({ brand, embed, children }: { brand: FirmBrand; embed
 export function NeutralPage({ children }: { children: ReactNode }) {
   return (
     <Register value="firm" firmStyle={brandStyle({ color: "#1D2130", color2: "#1D2130" })}>
-      <main className="client2"><Sheet size="page" className="client2-sheet">{children}</Sheet></main>
+      {/* The empty envelope, drawn in Graphite (V11): decorative, the words carry it */}
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <main className="client2"><Sheet size="page" className="client2-sheet"><img className="client2-vignette" src="/cofile/vignettes/v11-empty-envelope-small-graphite.svg" alt="" width={120} height={120} />{children}</Sheet></main>
     </Register>
   );
 }

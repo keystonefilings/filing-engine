@@ -1,3 +1,5 @@
+import type { Metadata } from "next";
+import { clientPageMetadata, NEUTRAL_CLIENT_METADATA } from "@/lib/firm-icon";
 import { intakeKey, readClientIntake } from "@/lib/session";
 import { filingKind } from "@/lib/intake/forms";
 import { brandOf, liveFilings, loadCompany, offeredKinds } from "@/lib/firm";
@@ -10,7 +12,17 @@ import { submitClientIntake } from "./actions";
 import { CLOSED_TEXT, linkRecord } from "@/lib/intake-links";
 import { withFirmDefaults } from "@/lib/firm-defaults";
 
-export const metadata = { title: "Your filing" };
+/** The tab names the filing and the firm, with the firm's monogram, never CoFile (10B.1.9). */
+export async function generateMetadata({ params }: { params: Promise<{ token: string }> }): Promise<Metadata> {
+  const link = readClientIntake((await params).token);
+  if (!link) return { ...NEUTRAL_CLIENT_METADATA, title: { absolute: "Your filing" } };
+  try {
+    const company = await loadCompany(intakeKey(link), link.clientCompanyId);
+    return clientPageMetadata(filingKind(link.kind)?.title ?? "Your filing", brandOf(company));
+  } catch {
+    return { ...NEUTRAL_CLIENT_METADATA, title: { absolute: "Your filing" } };
+  }
+}
 
 export default async function ClientIntakePage({ params }: { params: Promise<{ token: string }> }) {
   const { token } = await params;

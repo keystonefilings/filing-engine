@@ -1,3 +1,4 @@
+import { Vignette } from "@/components/Vignette";
 import "@/styles/components/desk.css";
 import { firmContext } from "@/lib/firm";
 import { listSignatures } from "@/lib/signatures";
@@ -31,7 +32,7 @@ export default async function SignaturesPage({ params }: { params: Promise<{ slu
             </tbody>
           </table>
         </div>
-      ) : <p className="notice">No saved signatures yet.</p>}
+      ) : <div className="desk2-quiet"><Vignette name="v06-fountain-pen" size={120} /><p>No saved signatures yet.</p></div>}
       <h2>Add a signature</h2>
       <SignatureForm action={addSignature.bind(null, slug)} consentText={consentText} />
     </div>

@@ -26,15 +26,12 @@
 @media (hover: hover) { a.shell2-email:hover { text-decoration-thickness: 2px; text-decoration-color: var(--link); } }
 .shell2-email.is-plain { color: var(--text-2); text-decoration: none; }
 
-/* The lockup (3.3): plate, then wordmark; plate height = 1.15 × the wordmark's cap height; gap 0.6 × plate */
-.lockup2 { --lockup-h: 28px; flex: none; display: inline-flex; align-items: center; gap: calc(var(--lockup-h) * 0.6); color: var(--text); }
-.lockup2 .nameplate2 { flex: none; display: block; }
-.lockup2-word { white-space: nowrap; font-family: var(--font-display); font-weight: 600; font-size: calc(var(--lockup-h) / 1.15 / 0.683); line-height: 1; letter-spacing: 0.01em; transform: translateY(-0.04em); }
-.lockup2-i { position: relative; display: inline-block; }
-.lockup2-dot { position: absolute; left: 50%; top: 0.12em; width: 0.13em; height: 0.13em; background: var(--brass-line); transform: translateX(-50%) rotate(45deg); }
-@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .reg-cofile .lockup2 .nameplate2 { color: var(--brass); } :root:not([data-theme="light"]) .reg-cofile .lockup2-dot { background: var(--brass); } }
-:root[data-theme="dark"] .reg-cofile .lockup2 .nameplate2 { color: var(--brass); }
-:root[data-theme="dark"] .reg-cofile .lockup2-dot { background: var(--brass); }
+/* The lockup (3.3): the drawn artwork, the Display master at 28 px and up, the Small master below */
+.lockup2 { --lockup-h: 28px; flex: none; display: inline-flex; align-items: center; color: var(--text); line-height: 0; }
+.lockup2 img { display: block; height: var(--lockup-h); width: auto; }
+.lockup2-s { display: none; }
+.lockup2.is-small .lockup2-d { display: none; }
+.lockup2.is-small .lockup2-s { display: block; }
 
 /* The account label: whose desk it is (3.5): logo 24 px tall (at most 160 wide), then the name, never wrapping */
 .acct2 { display: inline-flex; align-items: center; gap: 8px; min-width: 0; flex: 0 1 auto; }
@@ -77,6 +74,8 @@
 .shell2-top.is-compact .shell2-head { position: sticky; top: 0; z-index: 20; }
 .shell2-top.is-compact .shell2-head > .shell2-in { min-height: 64px; gap: 12px; }
 .shell2-top.is-compact .lockup2 { --lockup-h: 24px; }
+.shell2-top.is-compact .lockup2 .lockup2-d, .shell2-head.is-sheet .lockup2 .lockup2-d { display: none; }
+.shell2-top.is-compact .lockup2 .lockup2-s, .shell2-head.is-sheet .lockup2 .lockup2-s { display: block; }
 .shell2-top.is-compact .shell2-user { display: none; }
 .shell2-top.is-compact .shell2-menu { display: inline-flex; }
 .shell2-top.is-compact .shell2-nav { height: 0; min-height: 0; border: 0; overflow: hidden; visibility: hidden; }
@@ -85,6 +84,8 @@
   .shell2-head { position: sticky; top: 0; z-index: 20; }
   .shell2-head > .shell2-in { min-height: 64px; gap: 12px; }
   .lockup2 { --lockup-h: 24px; }
+  .lockup2 .lockup2-d { display: none; }
+  .lockup2 .lockup2-s { display: block; }
   .shell2-user { display: none; }
   .shell2-menu { display: inline-flex; }
   .shell2-nav { height: 0; min-height: 0; border: 0; overflow: hidden; visibility: hidden; }
