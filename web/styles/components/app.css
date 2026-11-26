@@ -1,0 +1,110 @@
+/* Pages inside the shell (the desk now, the dashboard next) in CoFile's look (merged spec 10B, 10C.1, 6.3).
+   The product's own markup keeps its classes (.card, .btn, .notice, .badge, tables, fields); these rules give them
+   the new look inside .shell2-content, reading semantic tokens only, so dark mode and a platform's white label
+   follow the register. Pages rebuilt with the new components need none of this. */
+@layer components {
+.shell2-content {
+  /* Today's names, pointed at the register's tokens */
+  --border: var(--line); --muted: var(--text-2); --accent: var(--text); --accent-2: var(--text); --accent-text: var(--page);
+  --surface-2: var(--page-2); --bad: var(--madder); --ok: var(--done); --warn: var(--ochre); --code-bg: var(--page-2);
+  --radius: var(--r-sheet); --shadow: none;
+  padding-block: 48px 0; font: 400 1.0625rem/1.625rem var(--font-sans); color: var(--text);
+}
+.shell2-content .narrow { max-width: 720px; margin-inline: auto; }
+
+/* Type: page title in Miller Display (page-title 32/38), h2 in Miller Text, h3 and legends in Founders Medium */
+.shell2-content h1 { margin: 0 0 32px; font: 400 2rem/2.375rem var(--font-display); letter-spacing: 0; color: var(--text); text-wrap: balance; }
+.shell2.is-white .shell2-content h1 { font-family: var(--font-firm, var(--font-sans-display)); font-weight: 600; }
+.shell2-content h1 + p.muted, .shell2-content h1 + .muted { margin-top: -8px; margin-bottom: 32px; max-width: 68ch; font-size: 1.0625rem; line-height: 1.625rem; }
+.shell2-content h2 { margin: 48px 0 16px; font: 400 1.625rem/2rem var(--font-serif); color: var(--text); }
+.shell2-content h3 { margin: 32px 0 12px; font: 500 1.375rem/1.75rem var(--font-sans-display); color: var(--text); }
+.shell2-content .card > h2:first-child, .shell2-content .card > h3:first-child { margin-top: 0; }
+.shell2-content p { margin: 0 0 16px; }
+.shell2-content .muted { color: var(--text-2); }
+.shell2-content .small { font-size: 0.9375rem; line-height: 1.4375rem; }
+.shell2-content .stack > * + * { margin-top: 24px; }
+.shell2-content .row { gap: 12px 16px; }
+@media (max-width: 599px) { .shell2-content { padding-top: 32px; } .shell2-content h1 { font-size: 1.75rem; line-height: 2.125rem; margin-bottom: 24px; } }
+
+/* Links: Plate Ink, underlined 1 px in Brass Line; thicker and Plate Ink on hover (4.8) */
+.shell2-content a:not(.btn):not(.btn2) { color: var(--link); text-decoration: underline; text-decoration-color: var(--link-line); text-decoration-thickness: 1px; text-underline-offset: 3px; }
+@media (hover: hover) { .shell2-content a:not(.btn):not(.btn2):hover { text-decoration-thickness: 2px; text-decoration-color: var(--link); } }
+.shell2-content :focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+
+/* Cards: white sheets with a 1 px Rule border and no shadow on the Cotton ground (10B.3.1) */
+.shell2-content .card { padding: 32px; background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-sheet); box-shadow: none; }
+@media (max-width: 599px) { .shell2-content .card { padding: 20px; } }
+
+/* Buttons: today's .btn kinds as the dashboard's (10C.1): primary is Ink (the page's Brass is set with .is-main),
+   plain is Outline, danger is Danger; 48 px, small 40 px; the bevelled corners of 6.4 */
+.shell2-content .btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 48px; padding: 12px 24px; font: 500 1rem/1.25rem var(--font-sans); color: var(--text); background: transparent; border: 1px solid var(--line-strong); border-radius: 4px; corner-shape: bevel; text-decoration: none; cursor: pointer; transition: background-color var(--t-quick) var(--ease-press), border-color var(--t-quick) var(--ease-press); }
+@supports not (corner-shape: bevel) { .shell2-content .btn { border-radius: 3px; } }
+@media (hover: hover) { .shell2-content .btn:hover { background: var(--row); border-color: var(--text); filter: none; } }
+.shell2-content .btn:active { transform: translateY(1px); }
+.shell2-content .btn.primary { background: var(--ink); color: var(--cotton); border-color: transparent; }
+@media (hover: hover) { .shell2-content .btn.primary:hover { background: #2B3045; } }
+.shell2-content .btn.primary.is-main { background: var(--action); color: var(--action-on); }
+@media (hover: hover) { .shell2-content .btn.primary.is-main:hover { background: var(--action-hover); } }
+.shell2-content .btn.danger { color: var(--madder); border-color: var(--madder); }
+.shell2-content .btn.small { min-height: 40px; padding: 8px 16px; font-size: 0.9375rem; }
+.shell2-content button[disabled], .shell2-content .btn[aria-disabled="true"] { opacity: 1; background: var(--page-2); color: var(--text-2); border-color: var(--line); cursor: not-allowed; }
+@media (max-width: 599px) { .shell2-content .btn.primary.is-main { width: 100%; min-height: 56px; } }
+/* A white-label desk uses its brand's fill where CoFile uses Ink and Brass */
+.shell2.is-white .shell2-content .btn.primary { background: var(--action); color: var(--action-on); border-color: var(--action-border); }
+
+/* Status badges as chips (4.3): words with a tone, never color alone */
+.shell2-content .badge { display: inline-flex; align-items: center; gap: 6px; min-height: 28px; padding: 3px 10px; font: 500 0.875rem/1.25rem var(--font-sans); color: var(--iron); background: var(--surface); border: 1px solid var(--iron); border-radius: 4px; corner-shape: bevel; white-space: nowrap; }
+.shell2-content .badge.ok { color: #fff; background: var(--done); border-color: transparent; }
+.shell2-content .badge.warn { color: var(--ochre); background: var(--ochre-tint); border-color: transparent; }
+.shell2-content .badge.bad { color: var(--madder); background: var(--madder-tint); border-color: transparent; }
+.shell2-content .badge::before { content: ""; flex: none; width: 8px; height: 8px; border-radius: 50%; border: 1.5px solid currentColor; }
+.shell2-content .badge.ok::before { background: currentColor; }
+.shell2-content .badge.warn::before { border: 0; width: 8px; height: 8px; border-radius: 0; background: currentColor; transform: rotate(45deg); }
+.shell2-content .badge.bad::before { border: 0; width: 10px; height: 3px; border-radius: 0; background: currentColor; }
+
+/* Notices as slips (11.6): a tint, a 2 px rule in the tone, no border */
+.shell2-content .notice { margin: 0 0 24px; padding: 16px 20px; color: var(--text); background: var(--page-2); border: 0; border-radius: var(--r-sheet); box-shadow: inset 2px 0 0 var(--line-strong); }
+.shell2-content .notice.ok { background: var(--done-tint); box-shadow: inset 2px 0 0 var(--done); }
+.shell2-content .notice.warn { background: var(--ochre-tint); box-shadow: inset 2px 0 0 var(--ochre); }
+.shell2-content .notice.bad { background: var(--madder-tint); box-shadow: inset 2px 0 0 var(--madder); }
+.shell2-content :is(.notice.ok, .notice.warn, .notice.bad) { color: #1D2130; }
+.shell2-content :is(.notice.ok, .notice.warn, .notice.bad) a:not(.btn) { color: #1D2130; }
+
+/* Tables: the dashboard's (10C.1): Medium heads in Graphite over a Rule Strong line, Rule hairlines, rows that wash */
+.shell2-content .table-wrap { overflow-x: auto; background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-sheet); }
+.shell2-content table { width: 100%; border-collapse: collapse; font: 400 1rem/1.5rem var(--font-sans); font-variant-numeric: tabular-nums; }
+.shell2-content th { padding: 12px 16px; font: 500 0.9375rem/1.25rem var(--font-sans); color: var(--text-2); text-align: left; border-bottom: 1px solid var(--line-strong); background: var(--page-2); }
+.shell2-content td { padding: 14px 16px; border-bottom: 1px solid var(--line); vertical-align: top; }
+.shell2-content tr:last-child > td { border-bottom: 0; }
+@media (hover: hover) { .shell2-content tbody tr:hover > td { background: var(--row); } }
+
+/* Fields: 48 px, Rule Strong border, white (Night on the dark desk), focus ring in Plate Ink (11.2) */
+.shell2-content :where(input[type=text], input[type=email], input[type=tel], input[type=number], input[type=date], input[type=month], input[type=password], input[type=url], input:not([type]), select, textarea):where(:not(.input2, .select2, .textarea2)) {
+  min-height: 48px; padding: 10px 14px; font: 400 1.0625rem/1.5rem var(--font-sans); color: var(--field-ink, var(--text)); background-color: var(--field-bg, #fff); border: 1px solid var(--line-strong); border-radius: var(--r-sheet);
+}
+.shell2-content textarea:not(.textarea2) { min-height: 120px; }
+.shell2-content :where(input, select, textarea):focus { outline: 2px solid var(--focus); outline-offset: 1px; border-color: var(--focus); }
+.shell2-content form .field { margin: 0 0 20px; }
+.shell2-content form label, .shell2-content .label { margin-bottom: 8px; font: 500 1rem/1.375rem var(--font-sans); color: var(--text); }
+.shell2-content .help { margin: 6px 0 0; font-size: 0.9375rem; line-height: 1.375rem; color: var(--text-2); }
+.shell2-content .req { color: var(--madder); }
+.shell2-content .choice { gap: 12px; font-weight: 400; }
+.shell2-content .choice input, .shell2-content .check input { accent-color: var(--ink); width: 20px; height: 20px; margin-top: 2px; }
+.shell2-content fieldset:not(.intake2 fieldset) { margin: 0 0 24px; padding: 20px 0 0; background: none; border: 0; border-top: 1px solid var(--line); border-radius: 0; }
+.shell2-content fieldset:not(.intake2 fieldset) > legend { padding: 0; font: 500 1.375rem/1.75rem var(--font-sans-display); }
+.shell2-content code { font-family: var(--font-mono); font-size: 0.9em; background: var(--page-2); border-radius: 2px; }
+.shell2-content .secret { font-family: var(--font-mono); background: var(--page-2); border: 1px dashed var(--line-strong); border-radius: var(--r-sheet); }
+.shell2-content .consent { background: var(--page-2); border: 1px solid var(--line); border-radius: var(--r-sheet); }
+.shell2-content .sigpad canvas { border-color: var(--line-strong); border-radius: var(--r-sheet); }
+
+/* The stage track under a status (4.3): five 8 px dots, reached ones Plate Ink, then the step in 13 px Graphite */
+.shell2-content .stage { gap: 8px; margin-top: 6px; font: 400 0.8125rem/1rem var(--font-sans); color: var(--text-2); font-variant-numeric: tabular-nums; }
+.shell2-content .stage-dots { gap: 4px; }
+.shell2-content .stage-dots i { width: 8px; height: 8px; background: var(--line); }
+.shell2-content .stage-dots i.on { background: var(--text); }
+}
+
+@layer components {
+/* Selects draw the chevron, not the browser's arrow (11.2) */
+.shell2-content select:not(.select2) { appearance: none; padding-right: 44px; background-image: var(--chevron, url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1.5l5 5 5-5' fill='none' stroke='%231D2130' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E")); background-repeat: no-repeat; background-position: right 16px center; }
+}

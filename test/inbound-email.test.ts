@@ -78,6 +78,9 @@ describe("emailing a filing request in", () => {
     expect(mail.address).toBe("pat@acme.test");
     expect(mail.msg.link).toBe(`http://web.test/p/acme/from-email/${msg.id}`);
     expect(mail.msg.body).toMatch(/Nothing is filed until you send it/);
+    // Acme isn't a partner firm, so its approvers may be other people: the proof "is approved".
+    expect(mail.msg.body).toMatch(/until you send it and the proof is approved\./);
+    expect(mail.msg.body).not.toMatch(/your client approves/);
     // Resend retries a delivery: the same message is stored once.
     await deliver({ email_id: "em_1", from: "pat@acme.test", to: ["file@in.cofile.app"], subject: "New LLC for Sam" });
     expect([...store.inbound.values()].filter((m) => m.providerId === "em_1")).toHaveLength(1);
@@ -98,6 +101,17 @@ describe("emailing a filing request in", () => {
   it("reads an HTML-only message", async () => {
     await deliver({ email_id: "em_html", from: "pat@acme.test", to: ["file@in.cofile.app"], subject: "html" });
     expect((await store.findInboundByProvider("em_html"))!.text).toBe("Form an LLC");
+  });
+
+  it("tells a partner firm that it approves the proof itself", async () => {
+    const acme = (await store.getClientCompany("acme-cpa"))!;
+    await store.putClientCompany({ ...acme, partner: { contactEmail: "pat@acme.test", setupDone: [] } });
+    try {
+      await deliver({ email_id: "em_partner", from: "pat@acme.test", to: ["file@in.cofile.app"], subject: "New LLC" });
+      expect(outbox.sent.at(-1)!.msg.body).toMatch(/until you send it and you approve the proof\./);
+    } finally {
+      await store.putClientCompany(acme);
+    }
   });
 
   it("lets the firm read the message and save what was read from it, and nobody else", async () => {

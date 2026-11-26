@@ -7,7 +7,7 @@ import type { ChannelSender } from "../comms/senders.js";
  * V40: filing requests emailed in. A firm's user writes to the inbound address (file@in.cofile.app)
  * with what to file; Resend receives it and calls our webhook. We keep the text (sealed) for the
  * sender's firm and email back a link to a form filled in from it. Nothing is filed from an email:
- * the firm checks the form and sends it, and the client approves as always.
+ * the firm checks the form and sends it, and the proof is approved as always.
  *
  * Only a known, active firm user's address is answered, and the answer goes to that address, so a
  * forged sender learns nothing and gets nothing. Unknown senders get no reply (no backscatter).

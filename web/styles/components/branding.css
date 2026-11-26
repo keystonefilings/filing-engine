@@ -1,0 +1,89 @@
+/* Branding (merged spec 10B.7): the form on the left, the sample sheet of the firm's client surfaces on the right. */
+@layer components {
+.brand2-step { margin: 0 0 8px; font: 400 0.9375rem/1.4375rem var(--font-sans); color: var(--text-2); }
+.brand2-page h1 { margin-bottom: 16px; }
+.brand2-lede { max-width: 68ch; margin-bottom: 32px !important; }
+.brand2 { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); gap: 0 24px; align-items: start; }
+.brand2-form { grid-column: 1 / span 5; }
+.brand2-form > .field { margin-bottom: 28px; }
+.brand2-panel { grid-column: 7 / span 6; position: sticky; top: 76px; padding: 24px; background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-sheet); }
+@media (max-height: 759px) { .brand2-panel { position: static; } }
+.brand2-caption { margin: 0 0 12px; font: 400 0.875rem/1.25rem var(--font-sans); color: var(--text-2); }
+.brand2-suite { display: flex; flex-wrap: wrap; gap: 12px; align-items: start; }
+.brand2-thumbs { display: grid; gap: 16px; }
+.brand2-thumb { display: grid; gap: 6px; padding: 0; text-align: left; background: none; border: 0; cursor: pointer; }
+.brand2-thumb:focus-visible { outline: 2px solid var(--focus); outline-offset: 4px; border-radius: 2px; }
+@media (hover: hover) { .brand2-thumb:hover .pv2-mat { box-shadow: 0 0 0 1px var(--line-strong); } }
+.brand2-thumb-caption { font: 400 0.875rem/1.25rem var(--font-sans); color: var(--text-2); }
+.brand2-large .pv2-mat, .brand2-thumb .pv2-mat { animation: pv2-in 200ms var(--ease-settle); }
+@keyframes pv2-in { from { opacity: 0.4; } }
+@media (prefers-reduced-motion: reduce) { .brand2-large .pv2-mat, .brand2-thumb .pv2-mat { animation: none; } }
+
+/* The address field in two parts: the site on Cotton 2, the slug in mono */
+.addr2 { display: flex; align-items: stretch; min-height: 52px; background: var(--field-bg, #fff); border: 1px solid var(--line-strong); border-radius: var(--r-sheet); overflow: hidden; }
+.addr2:focus-within { outline: 2px solid var(--focus); outline-offset: 1px; }
+.addr2-site { display: flex; align-items: center; padding: 0 12px; font: 400 1.125rem/1.5rem var(--font-sans); color: var(--text-2); background: var(--page-2); border-right: 1px solid var(--line); white-space: nowrap; }
+.shell2-content .addr2 input { flex: 1; min-width: 0; min-height: 50px; border: 0; border-radius: 0; font: 400 1.125rem/1.5rem var(--font-mono); outline: none; }
+
+/* The ink match's line: the chosen color, and the one the button uses when the match changed it */
+.ink2 { display: flex; align-items: flex-start; gap: 12px; margin-top: 16px; }
+.ink2-chip { display: grid; gap: 4px; justify-items: start; }
+.ink2-aa { display: grid; place-items: center; width: 56px; height: 40px; font: 500 1.125rem/1 var(--font-sans-display); border: 1px solid transparent; border-radius: 3px; corner-shape: bevel; }
+.ink2-chip code { padding: 0; font: 400 0.875rem/1.25rem var(--font-mono); color: var(--text-2); background: none; }
+.ink2-arrow { align-self: center; margin-top: -20px; color: var(--text-2); }
+
+/* The font control: a listbox whose options are set in their own faces */
+.fontp2 { position: relative; }
+.fontp2-button { display: flex; align-items: center; width: 100%; min-height: 56px; padding: 0 44px 0 16px; font-size: 1.125rem; line-height: 1.5rem; text-align: left; color: var(--field-ink, var(--text)); background: var(--field-bg, #fff) var(--chevron, url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1.5l5 5 5-5' fill='none' stroke='%231D2130' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E")) no-repeat right 16px center; border: 1px solid var(--line-strong); border-radius: var(--r-sheet); cursor: pointer; }
+.fontp2-button:focus-visible { outline: 2px solid var(--focus); outline-offset: 1px; }
+.fontp2-list { position: absolute; z-index: 30; left: 0; right: 0; top: calc(100% + 4px); max-height: 336px; margin: 0; padding: 4px 0; overflow-y: auto; list-style: none; background: var(--surface); border: 1px solid var(--line-strong); border-radius: var(--r-sheet); box-shadow: 0 12px 32px rgba(29,33,48,.16); }
+.fontp2-list:focus { outline: none; }
+.fontp2-list li { display: flex; align-items: center; justify-content: space-between; min-height: 48px; padding: 8px 16px; font-size: 1.125rem; line-height: 1.5rem; color: var(--text); cursor: pointer; }
+.fontp2-list li.is-active { background: var(--row); }
+.fontp2-list li[aria-selected="true"]::after { content: ""; width: 12px; height: 7px; border: solid var(--text); border-width: 0 0 2px 2px; transform: translateY(-2px) rotate(-45deg); }
+.fontp2-upload { display: grid; gap: 8px; margin-top: 12px; font: 400 0.9375rem/1.4375rem var(--font-sans) !important; color: var(--text-2) !important; }
+
+/* The previews: each surface on its mat of the firm's wash, scaled from the 390 px phone layout */
+.pv2-mat { position: relative; overflow: hidden; background: var(--firm-wash); border-radius: var(--r-sheet); color-scheme: light; }
+.pv2-scaled { width: 390px; padding: 20px 20px 0; transform-origin: top left; }
+.pv2-sheet { display: grid; align-content: start; gap: 12px; min-height: 100%; padding: 28px 20px; background: #fff; color: #1D2130; box-shadow: var(--e-sheet); }
+.pv2-sheet .letterhead2 { margin-bottom: 8px; }
+.pv2-sheet .letterhead2-logo { max-height: 44px; }
+.pv2-text { margin: 4px 0 8px; font: 400 1.125rem/1.75rem var(--font-sans); }
+.pv2-link { color: var(--firm-ink); text-decoration: underline; text-underline-offset: 3px; }
+.pv2-title { margin: 4px 0 4px; font: 600 1.75rem/2.125rem var(--font-firm, var(--font-sans-display)); }
+.pv2-headline { margin: 8px 0 0; font: 600 1.375rem/1.75rem var(--font-firm, var(--font-sans-display)); }
+.pv2-bar { display: block; height: 10px; border-radius: 1px; background: #DDD7CB; }
+.pv2-gap { display: block; height: 8px; }
+.pv2-label { display: block; width: 32%; height: 10px; margin-top: 12px; border-radius: 1px; background: #8A8578; opacity: .5; }
+.pv2-field { display: block; height: 56px; border: 1px solid #8A8578; border-radius: var(--r-sheet); background: #fff; }
+.pv2-button { display: flex; align-items: center; justify-content: center; min-height: 56px; margin-top: 16px; padding: 0 16px; font: 600 1.125rem/1.5rem var(--font-firm, var(--font-sans-display)); color: var(--firm-on); background: var(--firm-fill); border: 1px solid var(--firm-fill-border, transparent); box-shadow: inset 4px 0 0 var(--firm-fill-edge, transparent); border-radius: 6px; corner-shape: bevel; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.pv2-sheet.is-email { text-align: left; }
+.pv2-sheet.is-email .letterhead2 { margin-bottom: 16px; }
+
+/* Phones: no panel; a live strip under the header, and the three previews in a sheet */
+.brand2-strip { display: none; }
+.brand2-sheet { width: 100%; max-width: none; height: 100dvh; max-height: none; margin: 0; padding: 0; border: 0; background: var(--page); color: var(--text); }
+.brand2-sheet::backdrop { background: rgba(20,22,30,.4); }
+.brand2-sheet-head { display: flex; align-items: center; justify-content: space-between; min-height: 64px; padding: 0 20px; border-bottom: 1px solid var(--line); font: 500 1.0625rem/1.5rem var(--font-sans); }
+.brand2-carousel { display: flex; overflow-x: auto; scroll-snap-type: x mandatory; gap: 0; padding: 24px 0 40px; }
+.brand2-slide { flex: 0 0 100%; display: grid; justify-items: center; gap: 10px; margin: 0; scroll-snap-align: center; }
+.brand2-slide figcaption { font: 400 0.875rem/1.25rem var(--font-sans); color: var(--text-2); }
+
+@media (max-width: 1023px) {
+  .brand2 { grid-template-columns: minmax(0, 1fr); gap: 32px; }
+  .brand2-form, .brand2-panel { grid-column: 1; }
+  .brand2-panel { position: static; }
+}
+@media (max-width: 759px) {
+  .brand2-panel { display: none; }
+  .brand2-strip { order: -1; position: sticky; top: 64px; z-index: 10; display: grid; gap: 8px; width: calc(100% + 2 * var(--shell-pad)); height: 120px; margin: 0 calc(-1 * var(--shell-pad)) 8px; padding: 12px var(--shell-pad); overflow: hidden; text-align: left; background: var(--surface); border: 0; border-bottom: 1px solid var(--line); cursor: pointer; }
+  .brand2-strip.is-hidden { display: none; }
+  .brand2-strip-caption { display: flex; justify-content: space-between; align-items: center; font: 400 0.875rem/1.25rem var(--font-sans); color: var(--text-2); }
+  .brand2-chevron { width: 12px; height: 8px; background: currentColor; mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1.5l5 5 5-5' fill='none' stroke='black' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center / contain no-repeat; }
+  .brand2-strip-page { display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 12px; padding: 8px 12px; background: #fff; border-radius: var(--r-sheet); color: #1D2130; zoom: 0.8; }
+  .brand2-strip-page .letterhead2 { gap: 8px; min-width: 0; }
+  .brand2-strip-page .pv2-button { margin: 0; min-height: 44px; }
+  .brand2-form .btn.primary.is-main { width: 100%; min-height: 56px; }
+}
+}

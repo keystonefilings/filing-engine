@@ -1,0 +1,44 @@
+/* Chips and status (merged spec 4.3, 11.6). Status is never color alone: glyph, words and color travel together. */
+@layer components {
+.chip2 {
+  display: inline-flex; align-items: flex-start; gap: 6px; min-height: 30px; padding: 6px 12px;
+  font-family: var(--font-sans); font-size: 0.875rem; line-height: 1.125rem; font-weight: 500;
+  border: 1px solid transparent; border-radius: 6px; corner-shape: bevel; position: relative;
+  vertical-align: middle; max-width: 100%;
+}
+@supports not (corner-shape: bevel) { .chip2 { border-radius: 3px; } }
+.chip2.is-compact { min-height: 24px; padding: 3px 8px; border-radius: 4px; }
+@supports not (corner-shape: bevel) { .chip2.is-compact { border-radius: 2px; } }
+.chip2 > svg { flex: none; width: 12px; height: 12px; margin-top: 3px; }
+.chip2.is-rehearsal > svg.ghost { width: 14px; height: 14px; margin-top: 2px; }
+
+.chip2.is-done { background: #2E6B57; color: #fff; }
+.chip2.is-done-quiet { background: var(--done-tint); color: var(--done); }
+.chip2.is-turn { background: var(--ochre-tint); color: var(--ochre); }
+.reg-firm .chip2.is-turn { background: #fff; color: var(--firm-ink); border-color: var(--firm-ink); }
+.reg-firm .chip2.is-turn > svg { color: var(--firm); }
+.chip2.is-attention { background: var(--ochre-tint); color: var(--ochre); }
+.chip2.is-inhand { background: var(--surface, #fff); color: var(--iron); border-color: var(--iron); }
+.chip2.is-problem { background: var(--madder-tint); color: var(--madder); }
+.chip2.is-rehearsal { background: transparent; color: var(--text); }
+.chip2.is-neutral { background: var(--surface, #fff); color: var(--text); border-color: var(--line-strong); }
+.chip2.is-quiet { background: var(--cotton-2); color: var(--graphite); }
+.chip2.is-mono { background: var(--cotton-2); color: var(--text); font-family: var(--font-mono); font-weight: 400; font-size: 0.9375rem; line-height: 1.375rem; padding: 2px 8px; min-height: 0; }
+/* The rehearsal's dashed outline is drawn in SVG, so the dashes are the same in every browser */
+.chip2 > .dash { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; pointer-events: none; margin: 0; }
+.chip2 > .dash rect { fill: none; stroke: currentColor; stroke-width: 1.5; stroke-dasharray: 4 3; vector-effect: non-scaling-stroke; }
+
+/* Count badge */
+.count2 { display: inline-grid; place-content: center; min-width: 22px; height: 22px; padding: 0 6px; margin-left: 6px; background: var(--ochre-tint); color: var(--ochre); font-size: 0.875rem; font-weight: 500; font-variant-numeric: tabular-nums; border-radius: 4px; corner-shape: bevel; }
+
+/* The stage track (11.7): five dots and the step line */
+.stage2 { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 8px; margin-top: 6px; }
+.stage2-dots { display: inline-flex; gap: 4px; }
+.stage2-dots i { width: 8px; height: 8px; border-radius: 50%; background: var(--rule); }
+.stage2-dots i.on { background: var(--ink); }
+.stage2-text { font-size: 0.8125rem; line-height: 1.125rem; color: var(--graphite); font-variant-numeric: tabular-nums; }
+@media (forced-colors: active) {
+  .stage2-dots i { background: Canvas; border: 1px solid CanvasText; }
+  .stage2-dots i.on { background: CanvasText; }
+}
+}

@@ -1,0 +1,55 @@
+# Building pages in the merged design
+
+How to build a page of the Plate & Proof redesign (`docs/design-specs/merged/`) in this app. Read
+`web/design/README.md` first for tokens, registers, fonts and the ink match.
+
+## The rules that don't bend
+
+- **The copy is locked.** Use the words in the live pages (`app/**`, `components/**`) and in the
+  spec's quoted copy exactly. Never invent marketing words. Where the spec says `[copy needed]`,
+  use a short neutral stand-in and add it to the "Stand-in words in the build" table in
+  `docs/design-specs/merged/COPY-NEEDED.md`.
+- **The owner's decisions** (`docs/design-specs/merged/DECISIONS.md`) override anything older in
+  the parts. Among them: CoFile's look on everything a firm uses, the firm's brand alone on
+  everything its clients see; no "with CoFile" anywhere a client looks; one Brass button per screen;
+  no photographs of CoFile's people for now; the owner's photography in place of the shoot.
+- **One Brass button per screen** on CoFile's pages. On the public site, mark a page's own Brass
+  "Run a free rehearsal" with `data-brass-cta` so the header's copy stays an outline and the phone
+  bar stays away while it is on screen. A Brass button drawn inside a picture doesn't count.
+- **No invented text in pictures**: Rule bars where the copy gives no words (spec D1.1).
+- **Never color alone**: status always has a glyph and words (`components/ui/glyphs.tsx`, `Chip`).
+
+## Where things are
+
+| Need | Use |
+|---|---|
+| CoFile's public page frame (beta slip, header, phone menu and bar, footer) | `components/site/SiteShell.tsx` |
+| The desk and dashboard frame (lockup, account label, nav, phone menu sheet) | `components/shell/AppShell.tsx` |
+| A page a firm's client sees, in the firm's brand | `components/ClientPage.tsx` |
+| The mark and lockup | `components/shell/Lockup.tsx`, `NamePlate.tsx` |
+| Buttons (`action` is Brass in CoFile's look, the firm's fill on its pages; `ink`, `outline`, `quiet`, `danger`) | `components/ui/Button.tsx` (`.btn2 .is-action` …) |
+| Chips and status, the stage track | `components/ui/Chip.tsx`, `components/StageTrack.tsx` |
+| Fields | `components/ui/Field.tsx`; the filing form in `.intake2` (`styles/components/intake.css`) |
+| Sheets, Letterhead, Firm Rule, notices (slips) | `components/ui/Sheet.tsx` |
+| A live preview of a firm's client page | `components/desk/ClientPagePreview.tsx` |
+| Photographs with their sizes, and the plate's box for the typed name | `lib/photography.ts` (files in `public/cofile/photography/`) |
+| Type sizes as classes | `styles/type.css` (generated from `design/tokens.json`) |
+| Tokens and registers | `styles/tokens.css`, `styles/registers.css` (read semantic tokens: `--page`, `--surface`, `--text`, `--text-2`, `--line`, `--action`, `--link`, …) |
+| The component gallery | `/design` and `/design/site` (with `DESIGN_GALLERY=true`) |
+
+Put a page's own styles in a new file under `styles/components/`, inside `@layer components { }`,
+and import it from the page. Don't edit shared files (`components/ui/*`, the shells, `tokens.css`,
+`registers.css`, `app/layout.tsx`, `app/globals.css`) without a reason you state in the commit; if a
+shared piece needs a change, prefer a local variant.
+
+## Checking your work
+
+1. `npx tsc --noEmit -p .` and `npm test` in `web/`.
+2. Build and serve: `ENGINE_API_URL=http://127.0.0.1:8080 PORTAL_SESSION_SECRET=<32+ chars> DESIGN_GALLERY=true npx next build && npx next start -p <port>`.
+3. Screenshot every page you touched at 390 and 1440 wide, light and dark, full page, with Playwright
+   (`require('playwright')` works from any directory; `chromium.launch()`), and look at them. Check
+   for horizontal overflow (`document.documentElement.scrollWidth > innerWidth`) and console errors.
+4. The licensed fonts are not in git (the repository is public). For true screenshots copy them in:
+   `cp /home/user/filing-engine/web/public/fonts/*.woff2 web/public/fonts/` (if present).
+5. Pages that need data need the engine: `PORT=<port> API_KEYS=<24+ char key>:acme STAFF_API_KEYS=<key>:ops@acme APPROVAL_SIGNING_SECRET=<32+ chars> npx tsx src/index.ts`
+   from the repo root (in-memory store); seed with the API (`x-api-key` header).

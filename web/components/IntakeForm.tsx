@@ -1,12 +1,13 @@
 "use client";
 
-import { useMemo, useRef, useState, useTransition } from "react";
+import { useEffect, useMemo, useRef, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { US_STATES, type Field, type FilingKind, type Group, type Item, type Note } from "@/lib/intake/forms";
 import { AUTH_PREFIX, visibility, type Raw } from "@/lib/intake/build";
 import { NEW_SIGNATURE } from "@/lib/intake/signature-field";
 import { ADDRESS_PARTS, addressBlocks, planSections, type Block } from "@/lib/intake/simplify";
 import { SignaturePad } from "./SignaturePad";
+import { FirmRule } from "./ui/Sheet";
 
 export type IntakeResult =
   | { ok: true; redirectTo?: string; message?: string; title?: string }
@@ -19,6 +20,8 @@ interface Props {
   submitLabel?: string;
   /** Shown above the submit button. */
   footnote?: React.ReactNode;
+  /** The page shows the fee note under its summary (client pages, merged spec 10B.24), so the form leaves it out. */
+  feeNoteAbove?: boolean;
   /** The company's saved signatures, for a form that is signed. */
   signatures?: { id: string; signerName: string; createdAt: string }[];
   /** The consent a signer accepts when saving a new signature (from the engine). */
@@ -65,7 +68,7 @@ function initialState(kind: FilingKind, prefill: Record<string, string> = {}): {
   return { values, groups, next, prefill: mapped };
 }
 
-export function IntakeForm({ kind, nonce, action, submitLabel = "Create the proof", footnote, signatures = [], consentText, prefill, filerName, forClient }: Props) {
+export function IntakeForm({ kind, nonce, action, submitLabel = "Create the proof", footnote, signatures = [], consentText, prefill, filerName, forClient, feeNoteAbove }: Props) {
   const router = useRouter();
   const init = useMemo(() => initialState(kind, prefill), [kind, prefill]);
   const startValues = init.prefill;
@@ -78,6 +81,21 @@ export function IntakeForm({ kind, nonce, action, submitLabel = "Create the proo
   const plan = useMemo(() => planSections(kind), [kind]);
   const addresses = useMemo(() => addressBlocks(kind), [kind]);
   const formRef = useRef<HTMLFormElement>(null);
+  const sentRef = useRef<HTMLHeadingElement>(null);
+  const errorRef = useRef<HTMLDivElement>(null);
+  const sent = !!result?.ok && !result.redirectTo;
+  // A client's "Thank you" replaces the form under the firm's Letterhead: back to the top, focus on its title (10B.24.3).
+  useEffect(() => {
+    if (!sent || !forClient) return;
+    window.scrollTo({ top: 0 });
+    sentRef.current?.focus({ preventScroll: true });
+  }, [sent, forClient]);
+  // The error summary takes focus and the page scrolls to it, so the problems are the first thing read (10B.12.2).
+  useEffect(() => {
+    if (!result || result.ok) return;
+    errorRef.current?.focus({ preventScroll: true });
+    errorRef.current?.scrollIntoView({ block: "start", behavior: "instant" as ScrollBehavior });
+  }, [result]);
 
   /** Copies an address already entered into another one ("Same as"). */
   const copyAddress = (from: string, to: string) => {
@@ -176,6 +194,15 @@ export function IntakeForm({ kind, nonce, action, submitLabel = "Create the proo
   };
   const removeItem = (g: Group, id: number) => setGroups((p) => ({ ...p, [g.path]: (p[g.path] ?? []).filter((x) => x !== id) }));
 
+  if (sent && forClient) {
+    return (
+      <div className="intake2-sent" role="status">
+        <h1 ref={sentRef} tabIndex={-1} className="client2-title">{result!.title ?? "Thank you."}</h1>
+        <div className="intake2-sent-rule"><FirmRule draw /></div>
+        <p className="client2-summary">{result!.message}</p>
+      </div>
+    );
+  }
   if (result?.ok && !result.redirectTo) {
     return <div className="notice ok"><strong>{result.title ?? "Thank you."}</strong> {result.message}</div>;
   }
@@ -184,7 +211,9 @@ export function IntakeForm({ kind, nonce, action, submitLabel = "Create the proo
     const id = `f-${name.replace(/[^a-zA-Z0-9]/g, "-")}`;
     const value = values[name] ?? "";
     const issue = fieldIssues.get(name);
-    const common = { id, name, disabled: !shown, "aria-required": f.required === true ? true : undefined, "aria-invalid": issue ? true : undefined, "aria-describedby": f.help || issue ? `${id}-help` : undefined };
+    // Decision 38: an answer the form filled in (the firm's saved agent) is marked until someone changes it.
+    const filled = startValues[name] !== undefined && (values[name] ?? startValues[name]) === startValues[name];
+    const common = { id, name, disabled: !shown, "aria-required": f.required === true ? true : undefined, "aria-invalid": issue ? true : undefined, "aria-describedby": f.help || issue ? `${id}-help` : undefined, "data-filled": filled ? "" : undefined };
     const label = <>{f.label}{f.required === true ? <span className="req" aria-hidden>*</span> : null}</>;
     let control: React.ReactNode;
     switch (f.type) {
@@ -348,9 +377,13 @@ export function IntakeForm({ kind, nonce, action, submitLabel = "Create the proo
     <form ref={formRef} onSubmit={onSubmit} onChange={onChange} noValidate>
       <input type="hidden" name="_nonce" value={nonce} />
       {result && !result.ok ? (
-        <div className="notice bad" role="alert">
+        <div ref={errorRef} tabIndex={-1} className="notice bad" role="alert">
           <strong>{result.error ?? "Please fix these and submit again."}</strong>
-          {result.issues.length ? <ul className="issues">{result.issues.slice(0, 20).map((i, n) => <li key={n}>{i.message}</li>)}</ul> : null}
+          {result.issues.length ? <ul className="issues">{result.issues.slice(0, 20).map((i, n) => {
+            // Each problem links to its field when the form has one (10B.12.2).
+            const target = i.path ? `f-${i.path.replace(/[^a-zA-Z0-9]/g, "-")}` : "";
+            return <li key={n}>{target && typeof document !== "undefined" && document.getElementById(target) ? <a href={`#${target}`}>{i.message}</a> : i.message}</li>;
+          })}</ul> : null}
         </div>
       ) : null}
       <p className="help" style={{ marginTop: 0 }}>Fields marked * are required.</p>
@@ -401,7 +434,7 @@ export function IntakeForm({ kind, nonce, action, submitLabel = "Create the proo
       {footnote}
       <div className="row">
         <button className="btn primary" type="submit" disabled={pending}>{pending ? "Sending…" : submitLabel}</button>
-        {kind.feeNote ? <span className="small muted">{kind.feeNote}</span> : null}
+        {kind.feeNote && !feeNoteAbove ? <span className="small muted">{kind.feeNote}</span> : null}
       </div>
       {kind.feeAside ? <p className="small muted">{kind.feeAside}</p> : null}
     </form>
