@@ -1,6 +1,7 @@
 import "@/styles/components/intake.css";
 import type { ReactNode } from "react";
 import { brandStyle, type FirmBrand } from "@/lib/firm";
+import { inkMatch } from "@/lib/design/ink";
 import { BrandFont } from "./BrandFont";
 import { Chip } from "./ui/Chip";
 import { BETA_CLIENT_TEXT, betaOn } from "@/lib/beta";
@@ -15,7 +16,8 @@ export function ClientPage({ brand, embed, children }: { brand: FirmBrand; embed
   return (
     <Register value="firm" firmStyle={brandStyle(brand)}>
       <BrandFont font={brand.font} />
-      <main className={["client2", embed && "is-embed"].filter(Boolean).join(" ")}>
+      {/* A red-family firm's errors never rely on hue, so they never look like its button (3.6) */}
+      <main className={["client2", embed && "is-embed", inkMatch(brand.color, brand.color2).flags.redFamily && "is-red"].filter(Boolean).join(" ")}>
         <Sheet size="page" className="client2-sheet">
           {embed ? null : <Letterhead name={brand.name} logoUrl={brand.logoUrl} />}
           {embed || !betaOn() ? null : <p className="client2-beta" role="note"><Chip tone="rehearsal" compact>Beta</Chip><span>{BETA_CLIENT_TEXT}</span></p>}

@@ -36,7 +36,7 @@ export default async function ClientIntakePage({ params }: { params: Promise<{ t
   return (
     <ClientPage brand={brand}>
       {!liveFilings(kind.id) ? <Notice tone="rehearsal">This page is in rehearsal for now. You can fill it in, but nothing will be filed with the state and nothing will be charged, now or later, even after you approve it. To file for real, contact {brand.name}.</Notice> : null}
-      <h1 className="client2-title">{kind.title}{link.label ? <span className="client2-for"><span className="sep"> · </span>{link.label}</span> : null}</h1>
+      <h1 className="client2-title">{kind.title}{link.label ? <span className="client2-for">{"\u00A0· "}{link.label}</span> : null}</h1>
       <p className="client2-summary">{kind.summary} After you send this, {brand.name} checks every detail and approves it. Nothing is filed until they do.</p>
       {kind.feeNote ? <p className="client2-fee">{kind.feeNote}</p> : null}
       <div className="intake2">

@@ -5,8 +5,7 @@
 .client2 { min-height: 100vh; padding: 48px 24px 96px; background: var(--page); }
 .client2-sheet { display: grid; gap: 24px; }
 .client2-title { font-family: var(--font-firm, var(--font-sans-display)); font-weight: 600; font-size: clamp(1.75rem, 1.5214rem + 0.9524vw, 2rem); line-height: clamp(2.125rem, 1.8964rem + 0.9524vw, 2.375rem); color: #1D2130; text-wrap: balance; }
-.client2-title .client2-for { display: block; font-weight: 400; color: var(--text-2); }
-.client2-title .client2-for .sep { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+.client2-title .client2-for { font-weight: 400; color: var(--text-2); }
 .client2-summary { font-size: 1.125rem; line-height: 1.75rem; color: #1D2130; max-width: 64ch; }
 .client2-fee { margin-top: -8px; font-size: 0.9375rem; line-height: 1.4375rem; color: var(--text-2); font-variant-numeric: tabular-nums; max-width: 64ch; }
 .client2-note { font-size: 1rem; line-height: 1.5rem; }
@@ -131,4 +130,33 @@ body:has(.client2) > .beta-banner { display: none; }
 .client2-beta { display: flex; gap: 12px; align-items: baseline; margin-top: -8px; padding: 0 0 12px; border-bottom: 1px solid var(--line); font-size: 0.9375rem; line-height: 1.4375rem; color: var(--text-2); }
 .client2-beta > .chip2 { flex: none; position: relative; top: -1px; }
 @media (max-width: 599px) { .client2-beta { flex-direction: column; gap: 8px; } }
+}
+
+/* Sent: the form gives way to the firm's "Thank you" under the same Letterhead (10B.24.3). Everything else under
+   the Letterhead and the beta strip steps aside, so the thank-you is the page. */
+@layer components {
+.client2-sheet:has(.intake2-sent) > :not(.letterhead2, .client2-beta, .intake2) { display: none; }
+.intake2-sent { display: grid; gap: 20px; padding-top: 8px; }
+.intake2-sent .client2-title:focus { outline: none; }
+.intake2-sent .client2-title:focus-visible { outline: 2px solid var(--focus); outline-offset: 4px; }
+.intake2-sent-rule { width: 160px; }
+.intake2-sent .client2-title { animation: sent-press var(--t-quick, 160ms) var(--ease-settle) both; }
+@keyframes sent-press { from { opacity: 0; transform: translateY(4px); } }
+@media (prefers-reduced-motion: reduce) { .intake2-sent .client2-title, .intake2-sent .firmrule2::before, .intake2-sent .firmrule2::after { animation: none; } }
+}
+@layer components {
+.intake2 .notice.bad { scroll-margin-top: 24px; }
+.intake2 .notice.bad:focus { outline: none; }
+.intake2 .notice.bad:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+}
+
+/* The error summary is a Problem slip (11.6): Madder tint, a 2 px Madder rule, the bar glyph; issues link to their fields.
+   On a red-family firm it adds a Plate Ink outline, and invalid fields swap the Madder border for Plate Ink with a
+   Madder rule, so no error looks like the firm's own color (3.6, 10B.2.2). */
+@layer components {
+.intake2 .notice { border: 0; }
+.intake2 .notice.bad { box-shadow: inset 2px 0 0 var(--madder); }
+.intake2 .issues a { color: inherit; text-decoration: underline; text-decoration-color: var(--madder); text-underline-offset: 3px; }
+.client2.is-red .intake2 .notice.bad { outline: 1px solid #1D2130; outline-offset: 0; }
+.client2.is-red .intake2 [aria-invalid="true"] { border-color: #1D2130 !important; box-shadow: inset 3px 0 0 var(--madder); }
 }
