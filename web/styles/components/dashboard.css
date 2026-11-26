@@ -1,0 +1,347 @@
+/* The platform's dashboard (merged spec 10C.2 to 10C.15) inside the shell it shares with the desk, in CoFile's look.
+   app.css gives the product's own classes the shared look; these rules draw the pages the spec draws specially.
+   Reads semantic tokens only, so dark mode follows the register. */
+@layer components {
+
+/* ---- Page frame: wide pages use the 1200 px grid; narrow pages a centred 720 px column (10C.2) ---- */
+.dash2 .narrow { max-width: 720px; margin-inline: auto; }
+.dash2 h2[id] { scroll-margin-top: 80px; }
+.dash2-notices { display: grid; gap: 16px; margin-bottom: 48px; }
+.dash2 .notice2 { margin-bottom: 24px; }
+.dash2 :is(.dash2-notices, .stack) > .notice2, .dash2 .dash2-result > .notice2 { margin-bottom: 0; }
+.dash2 .notice2 a { font-weight: 500; }
+.dash2 .notice2 ul { margin: 8px 0 0; padding-left: 20px; }
+.dash2 form > .notice2:first-child, .dash2 form > .dash2-result:first-child { margin-bottom: 24px; }
+.dash2-result:focus { outline: none; }
+/* Empty states (10C.2): the engraved vignette 120 px wide, 32 px over the product's line */
+.dash2-empty { display: grid; justify-items: start; gap: 32px; max-width: 640px; }
+.dash2-empty > .notice2 { justify-self: stretch; margin: 0; }
+.shell2-content .dash2-empty > p { margin: 0; font-size: 1.0625rem; line-height: 1.625rem; }
+.dash2-empty.is-lead { margin-bottom: 24px; }
+.dash2-empty-row { display: grid; justify-items: start; gap: 16px; padding-block: 8px; }
+.dash2-sub { display: block; margin-top: 2px; font: 400 0.9375rem/1.4375rem var(--font-sans); color: var(--text-2); }
+.dash2 .dash2-id { display: block; margin-top: 2px; padding: 0; font: 400 0.875rem/1.25rem var(--font-mono); color: var(--text-2); background: none; overflow-wrap: anywhere; }
+.dash2 .dash2-path { padding: 0; font: 400 0.9375rem/1.375rem var(--font-mono); color: var(--text); background: none; overflow-wrap: anywhere; }
+.dash2-strong { font-weight: 500; }
+.dash2-when { font-variant-numeric: tabular-nums; }
+.dash2 .dash2-mono, .dashlogin2 .dash2-mono { font-family: var(--font-mono); }
+.dash2 input[readonly] { background: var(--page-2); border-color: var(--line); }
+/* A field's control fills its column (the shared rules size it by its content) */
+.dash2 .field > :is(input:not([type=checkbox], [type=radio], [type=color], [type=file], [type=hidden]), select, textarea) { box-sizing: border-box; width: 100%; }
+.dash2 .choice { align-items: flex-start; padding-block: 12px; }
+.dash2 .choice input { margin-top: 2px; }
+.dash2 .choices { gap: 0; }
+.dash2 .field-row.n2 { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0 24px; }
+.dash2 .field-row.n3 { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) 120px; gap: 0 24px; }
+@media (max-width: 599px) { .dash2 :is(.field-row.n2, .field-row.n3) { grid-template-columns: minmax(0, 1fr); } }
+/* A card that is a fieldset keeps its legend inside the sheet, as a title */
+.shell2-content .dash2 fieldset.card { margin: 0; padding: 32px; background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-sheet); }
+.shell2-content .dash2 fieldset.card > legend { float: left; width: 100%; margin: 0 0 16px; padding: 0; font: 500 1.375rem/1.75rem var(--font-sans-display); color: var(--text); }
+.shell2-content .dash2 fieldset.card > legend strong { font-weight: inherit; }
+.shell2-content .dash2 fieldset.card > legend .small { font: 400 0.9375rem/1.4375rem var(--font-sans); color: var(--text-2); }
+.shell2-content .dash2 fieldset.card > legend + * { clear: both; }
+@media (max-width: 599px) { .shell2-content .dash2 fieldset.card { padding: 20px; } }
+
+/* The page's one Brass button, where the product's shared form draws a plain primary (10C.1) */
+.shell2-content .dash2 :is(.dash2-pay.is-one, .dash2-billing, .dash2-pw) .btn.primary { background: var(--action); color: var(--action-on); }
+@media (hover: hover) { .shell2-content .dash2 :is(.dash2-pay.is-one, .dash2-billing, .dash2-pw) .btn.primary:hover { background: var(--action-hover); } }
+@media (max-width: 599px) {
+  .shell2-content .dash2 :is(.dash2-pay.is-one, .dash2-billing, .dash2-pw) .btn.primary { width: 100%; min-height: 56px; }
+  .dash2 .btn.primary.is-main { width: 100%; }
+}
+
+/* ---- The plate field: shown once, meant to be copied (10C.2) ---- */
+.plate2 { display: flex; align-items: flex-start; gap: 12px; margin-top: 12px; padding: 12px 12px 12px 16px; background: var(--page-2); border: 1px solid var(--line-strong); border-radius: 4px; corner-shape: bevel; }
+@supports not (corner-shape: bevel) { .plate2 { border-radius: 2px; } }
+.shell2-content .plate2-value { flex: 1 1 auto; min-width: 0; padding: 0; font: 400 1.0625rem/1.5rem var(--font-mono); color: var(--text); background: none; white-space: pre-wrap; overflow-wrap: anywhere; word-break: break-all; }
+.plate2.is-small .plate2-value { font-size: 0.9375rem; line-height: 1.375rem; }
+.shell2-content .plate2-copy { flex: none; background: var(--surface); }
+@media (max-width: 599px) { .plate2 { flex-direction: column; align-items: stretch; } .shell2-content .plate2-copy { width: 100%; min-height: 48px; } }
+
+/* ---- A form on one line: a field and its button (API keys' create row, Invite staff) ---- */
+.shell2-content .dash2 .dash2-inline { display: flex; flex-wrap: wrap; align-items: center; gap: 12px 16px; padding: 20px; }
+.dash2-inline > input { flex: 1 1 260px; min-width: 0; }
+@media (max-width: 599px) { .shell2-content .dash2 .dash2-inline { flex-direction: column; align-items: stretch; } .dash2-inline .btn { width: 100%; min-height: 56px; } }
+
+/* ---- Tables (10C.2): a sheet holding the table edge to edge; head 44 px on Cotton 2; rows of at least 56 px ---- */
+.dash2-table { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-sheet); overflow-x: auto; }
+.shell2-content .dash2-table table { width: 100%; border-collapse: collapse; font: 400 1rem/1.375rem var(--font-sans); font-variant-numeric: tabular-nums; }
+.shell2-content .dash2-table thead th { height: 44px; padding: 0 16px; vertical-align: middle; font: 500 0.875rem/1.125rem var(--font-sans); color: var(--text-2); text-align: left; white-space: nowrap; background: var(--page-2); border-bottom: 1px solid var(--line); }
+.shell2-content .dash2-table tbody :is(th, td) { padding: 14px 16px; vertical-align: top; text-align: left; background: none; border-bottom: 1px solid var(--line); }
+.shell2-content .dash2-table tbody th { font-weight: 500; color: var(--text); }
+.shell2-content .dash2-table tbody tr { height: 56px; }
+.shell2-content .dash2-table tbody tr:last-child > * { border-bottom: 0; }
+@media (hover: hover) { .shell2-content .dash2-table tbody tr:hover > * { background: var(--row); } }
+.shell2-content .dash2-table tr.is-empty > td { color: var(--text-2); vertical-align: middle; }
+.shell2-content .dash2-table :is(th, td).is-num { text-align: right; font-variant-numeric: tabular-nums; }
+.shell2-content .dash2-table td.is-action { width: 1%; text-align: right; white-space: nowrap; }
+.shell2-content .dash2-table .small { font-size: 0.9375rem; line-height: 1.4375rem; }
+.dash2-lines { line-height: 1.4375rem; }
+/* Phones: every table becomes a stack of blocks, each line led by its column head */
+@media (max-width: 599px) {
+  .dash2-table { background: none; border: 0; overflow: visible; }
+  .shell2-content .dash2-table :is(table, tbody, tr) { display: block; }
+  .shell2-content .dash2-table thead { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
+  .shell2-content .dash2-table tbody tr { height: auto; padding: 16px; background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-sheet); }
+  .shell2-content .dash2-table tbody tr + tr { margin-top: 12px; }
+  .shell2-content .dash2-table tbody :is(th, td) { display: block; padding: 0; border: 0; }
+  .shell2-content .dash2-table tbody th { font-size: 1.0625rem; line-height: 1.5rem; }
+  .shell2-content .dash2-table tbody td { margin-top: 10px; }
+  .shell2-content .dash2-table td[data-label]::before { content: attr(data-label); display: block; margin-bottom: 2px; font: 500 0.875rem/1.125rem var(--font-sans); color: var(--text-2); }
+  .shell2-content .dash2-table :is(th, td).is-num { text-align: left; }
+  .shell2-content .dash2-table td.is-action { width: auto; margin-top: 16px; text-align: left; white-space: normal; }
+  .shell2-content .dash2-table td.is-action :is(form, .btn) { width: 100%; }
+  .shell2-content .dash2-table td.is-action .btn { min-height: 48px; }
+  .shell2-content .dash2-table tr.is-empty > td { margin: 0; }
+}
+
+/* ---- Overview (10C.4): three figures, three quiet charts ---- */
+.dash2-tiles, .dash2-charts { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 24px; }
+.dash2-charts { align-items: start; margin-top: 24px; }
+.dash2-tile, .dash2-chart { padding: 24px; background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-sheet); }
+.dash2-tile { display: flex; flex-direction: column; min-height: 152px; }
+.dash2-tile-label { font: 500 0.9375rem/1.4375rem var(--font-sans); color: var(--text-2); }
+.dash2-stat { margin-top: 16px; font: 400 2.5rem/2.75rem var(--font-display); font-variant-numeric: lining-nums tabular-nums; color: var(--text); }
+.dash2-tile-sub { margin-top: 8px; font: 400 0.9375rem/1.4375rem var(--font-sans); color: var(--text-2); }
+.shell2-content .dash2 .dash2-chart-title { margin: 0 0 8px; font: 500 1.375rem/1.75rem var(--font-sans-display); }
+.shell2-content .dash2-bars { display: block; width: 100%; border-collapse: collapse; font-variant-numeric: tabular-nums; }
+.shell2-content .dash2-bars tbody { display: block; }
+.shell2-content .dash2-bars tr { display: grid; gap: 6px; min-height: 56px; padding: 4px 0; }
+.shell2-content .dash2-bars th { display: flex; align-items: center; gap: 8px; padding: 0; font: 400 1rem/1.375rem var(--font-sans); color: var(--text); text-align: left; background: none; border: 0; }
+.shell2-content .dash2-bars th.is-current { font-weight: 500; }
+.shell2-content .dash2-bars td { display: flex; align-items: center; gap: 12px; padding: 0; background: none; border: 0; }
+@media (hover: hover) { .shell2-content .dash2-bars tbody tr:hover > td { background: none; } }
+.dash2-track { flex: 1 1 auto; height: 10px; background: var(--page-2); }
+.dash2-track > span { display: block; height: 100%; min-width: 2px; background: var(--text); opacity: 0.8; }
+.dash2-value { flex: none; min-width: 3ch; text-align: right; font: 500 1rem/1.375rem var(--font-sans); font-variant-numeric: tabular-nums; }
+.dash2-glyph { display: inline-grid; place-items: center; width: 12px; height: 12px; }
+.dash2-glyph svg { width: 12px; height: 12px; }
+.dash2-glyph.is-done { color: var(--done); } .dash2-glyph.is-turn, .dash2-glyph.is-attention { color: var(--ochre); }
+.dash2-glyph.is-problem { color: var(--madder); } .dash2-glyph.is-inhand { color: var(--iron); }
+.dash2 .dash2-asof { margin: 24px 0 0; font: 400 0.9375rem/1.4375rem var(--font-sans); color: var(--text-2); }
+@media (max-width: 1023px) {
+  .dash2-tile { min-height: 120px; }
+  .dash2-stat { font-size: 2rem; line-height: 2.25rem; }
+  .dash2-charts { grid-template-columns: minmax(0, 1fr); }
+}
+@media (max-width: 599px) {
+  .dash2-tiles { grid-template-columns: minmax(0, 1fr); gap: 12px; }
+  .dash2-tile { min-height: 96px; padding: 16px 20px; }
+  .dash2-stat { margin-top: 4px; }
+  .dash2-tile-sub { margin-top: 2px; }
+  .dash2-chart { padding: 20px; }
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .reg-cofile .dash2-track { background: var(--night-raised); } }
+:root[data-theme="dark"] .reg-cofile .dash2-track { background: var(--night-raised); }
+
+/* ---- Filings (10C.5): the desk's ledger, with the firm in place of "Sent by" ---- */
+.dash2-filter { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; margin-bottom: 32px; }
+.dash2-filter select { flex: 1 1 240px; max-width: 320px; }
+.dash2 .ledger2.is-dash { overflow: clip; }
+.dash2 .ledger2.is-dash thead th { position: sticky; top: 53px; z-index: 2; }
+.shell2:has(.shell2-top.is-compact) .dash2 .ledger2.is-dash thead th { top: 65px; }
+/* The spec's 34/20/16/18/12 squeezes the status chip and its track; the status takes the desk's wider share */
+.dash2 .ledger2.is-dash thead th:nth-child(1) { width: 30%; } .dash2 .ledger2.is-dash thead th:nth-child(2) { width: 18%; }
+.dash2 .ledger2.is-dash thead th:nth-child(3) { width: 16%; } .dash2 .ledger2.is-dash thead th:nth-child(4) { width: 24%; }
+.dash2 .ledger2.is-dash thead th:nth-child(5) { width: 12%; }
+.dash2 .ledger2.is-dash .ledger2-title { margin-right: 8px; font: 500 1rem/1.375rem var(--font-sans); color: var(--text); }
+.dash2 .ledger2.is-dash .ledger2-name .chip2 { margin-top: 0; vertical-align: 1px; }
+.shell2-content .dash2 .ledger2.is-dash .ledger2-id { display: block; margin-top: 4px; padding: 0; font: 400 0.875rem/1.25rem var(--font-mono); color: var(--text-2); background: none; overflow-wrap: anywhere; }
+/* One hairline between rows (the desk's top border), none of app.css's per-cell bottom borders */
+.shell2-content .dash2 .ledger2.is-dash tbody :is(th, td) { border-bottom: 0; }
+.dash2 .ledger2.is-dash .ledger2-by { font-size: 0.9375rem; line-height: 1.4375rem; }
+.dash2 .ledger2.is-dash .ledger2-status .chip2 { margin-bottom: 0; }
+.dash2 .ledger2.is-dash .ledger2-pay { display: block; margin-top: 6px; font-size: 0.9375rem; line-height: 1.4375rem; }
+.dash2 .ledger2.is-dash tr.is-empty > td { padding: 16px; height: 56px; color: var(--text-2); }
+@media (max-width: 759px) {
+  .dash2 .ledger2.is-dash { overflow: visible; }
+  .dash2 .ledger2.is-dash .ledger2-by { order: 1; }
+  .dash2 .ledger2.is-dash .ledger2-type { order: 2; }
+  .dash2 .ledger2.is-dash .ledger2-id { margin-top: 4px; }
+  .dash2 .ledger2.is-dash tr.is-empty { display: block; }
+  .dash2 .ledger2.is-dash tr.is-empty > td { display: block; height: auto; padding: 0; }
+}
+
+/* ---- Ready to pay (10C.6): one card per saved card waiting, 640 px ---- */
+.dash2-pay .card { max-width: 640px; }
+.shell2-content .dash2-pay .card > strong:first-child { display: block; padding-bottom: 16px; border-bottom: 1px solid var(--line); font: 500 1.375rem/1.75rem var(--font-sans-display); color: var(--text); }
+.dash2-pay .card > strong:first-child .muted { font: 400 1rem/1.375rem var(--font-sans); }
+.shell2-content .dash2-pay .card > .notice { margin: 16px 0 0; }
+.shell2-content .dash2-pay .card > ul { display: grid; gap: 8px; margin: 16px 0 0; padding: 0; list-style: none; font: 500 1rem/1.5rem var(--font-sans); }
+.dash2-pay .card > ul li { position: relative; padding-left: 20px; }
+.dash2-pay .card > ul li::before { content: ""; position: absolute; left: 1px; top: 0.6em; width: 7px; height: 7px; background: var(--ochre); transform: rotate(45deg); }
+.dash2-pay .card > ul li .muted { font-weight: 400; }
+.dash2-pay .bt-field { box-sizing: border-box; width: 160px; height: 48px; padding: 12px 14px; background: var(--field-bg, #fff); border: 1px solid var(--line-strong); border-radius: var(--r-sheet); }
+.dash2-pay > .stack > .help { margin-top: 32px; }
+@media (max-width: 599px) { .dash2-pay .bt-field { width: 100%; max-width: 200px; } .dash2-pay .card .btn.primary { width: 100%; min-height: 56px; } }
+
+/* ---- Firms (10C.7): every row led by the firm's own mark ---- */
+.dash2-firm { display: flex; align-items: flex-start; gap: 12px; }
+.dash2-firm-text { display: grid; min-width: 0; }
+.dash2-firm-text a { font-weight: 500; }
+.dash2-mark { flex: none; display: inline-grid; place-items: center; height: 32px; min-width: 32px; max-width: 112px; }
+.dash2-mark.is-logo img { display: block; height: 32px; width: auto; max-width: 112px; object-fit: contain; }
+.dash2-mark.is-mono { width: 32px; font: 600 0.8125rem/1 var(--font-sans-display); letter-spacing: 0.02em; color: var(--page); background: var(--text); border-radius: 4px; corner-shape: bevel; }
+.dash2-mark.is-mono.is-firm { color: var(--firm-on); background: var(--firm-fill); }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .reg-cofile .dash2-mark.is-logo { box-sizing: content-box; padding: 4px 6px; background: #fff; clip-path: polygon(4px 0, calc(100% - 4px) 0, 100% 4px, 100% calc(100% - 4px), calc(100% - 4px) 100%, 4px 100%, 0 calc(100% - 4px), 0 4px); } }
+:root[data-theme="dark"] .reg-cofile .dash2-mark.is-logo { box-sizing: content-box; padding: 4px 6px; background: #fff; clip-path: polygon(4px 0, calc(100% - 4px) 0, 100% 4px, 100% calc(100% - 4px), calc(100% - 4px) 100%, 4px 100%, 0 calc(100% - 4px), 0 4px); }
+
+/* ---- A firm (10C.8): the settings beside a live preview of its client page from 1024 px ---- */
+.dash2-firm-page { max-width: 720px; margin-inline: auto; }
+.dash2 .dash2-back { margin: 0 0 24px; font: 400 0.9375rem/1.4375rem var(--font-sans); }
+.dash2-firm-page > h2:first-of-type { margin-top: 32px; }
+.dashfirm2 { display: grid; grid-template-columns: minmax(0, 1fr); gap: 32px; }
+.dashfirm2-on { margin-bottom: 24px; }
+.dashfirm2-on .choice { padding-bottom: 4px; }
+.dashfirm2-on .help { margin-left: 32px; }
+.dash2 .dashfirm2-form b { font-weight: 500; }
+.dash2 .dashfirm2-form > .field, .dash2 .dashfirm2-form > .field-row { margin-bottom: 28px; }
+.dash2 .dashfirm2-form > .field-row > .field { margin-bottom: 0; }
+.dashfirm2-public { margin-bottom: 16px; }
+.dashfirm2-public .small { display: block; margin-top: 4px; }
+@media (min-width: 600px) { .dashfirm2-kinds .choices { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0 24px; } }
+.dashfirm2-preview { display: grid; justify-items: center; padding: 24px; background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-sheet); }
+.dash2 .dashfirm2-caption { justify-self: start; margin: 0 0 12px; font: 400 0.875rem/1.25rem var(--font-sans); color: var(--text-2); }
+.dashfirm2-preview .pv2-mat { max-width: 100%; }
+@media (min-width: 1024px) {
+  .dash2-firm-page { max-width: none; }
+  .dashfirm2.has-preview { grid-template-columns: minmax(0, 7fr) minmax(0, 5fr); gap: 24px; align-items: start; }
+  .dashfirm2-preview { position: sticky; top: 77px; }
+  /* The sections under the form keep to the form's columns, c1 to c7 */
+  .dash2-firm-page > :is(.dash2-public, .stack) { max-width: calc((100% - 24px) * 7 / 12); }
+}
+.dash2-public { margin-top: 32px; }
+.shell2-content .dash2-public h3 { margin: 0 0 8px; }
+.dash2-public > p { margin-bottom: 16px; }
+.dash2-disclosure { border-top: 1px solid var(--line); }
+.dash2-disclosure + .dash2-disclosure { margin-top: 8px; }
+.dash2-disclosure > summary { position: relative; display: block; min-height: 48px; padding: 12px 0 12px 24px; font: 500 1rem/1.5rem var(--font-sans); color: var(--text); cursor: pointer; list-style: none; }
+.dash2-disclosure > summary::-webkit-details-marker { display: none; }
+.dash2-disclosure > summary::before, .dash2-events > summary::before { content: ""; position: absolute; left: 2px; top: 20px; width: 7px; height: 7px; border: solid var(--text); border-width: 0 1.5px 1.5px 0; transform: rotate(-45deg); transition: transform var(--t-quick) var(--ease-settle); }
+.dash2-disclosure[open] > summary::before, .dash2-events[open] > summary::before { transform: translateY(-2px) rotate(45deg); }
+.dash2-disclosure > summary:focus-visible, .dash2-events > summary:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; border-radius: 2px; }
+.dash2-url { font: 400 0.9375rem/1.375rem var(--font-mono); overflow-wrap: anywhere; word-break: break-all; }
+.dash2-disclosure[open] > .plate2 { margin: 0 0 16px; }
+.dash2-invite { display: grid; gap: 4px; }
+.dash2-invite strong { font-weight: 500; }
+
+/* ---- API keys (10C.9) ---- */
+.dash2-keys .dash2-table { margin-top: 32px; }
+.shell2-content .dash2-keys tr.is-revoked > th, .shell2-content .dash2-keys tr.is-revoked .dash2-path { color: var(--text-2); }
+
+/* ---- Webhooks (10C.10): an endpoint card each ---- */
+.dash2-hooks { display: grid; gap: 24px; }
+.dash2-hint code { font-family: var(--font-mono); }
+.dash2-events > summary { position: relative; display: flex; align-items: center; min-height: 48px; padding-left: 24px; font: 500 1rem/1.5rem var(--font-sans); cursor: pointer; list-style: none; }
+.dash2-events > summary::-webkit-details-marker { display: none; }
+.dash2-events > summary::before { top: 19px; }
+.dash2-event-list { display: grid; padding: 0 0 8px; }
+.dash2-event-list .choice { padding-block: 8px; }
+.shell2-content .dash2-event { display: block; padding: 0; font: 500 0.9375rem/1.375rem var(--font-mono); color: var(--text); background: none; overflow-wrap: anywhere; }
+.dash2-event-list .help { display: block; margin: 2px 0 0; }
+.dash2-remove { margin-top: 16px; border-top: 1px solid var(--line); }
+.dash2-actions { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 12px 16px; }
+.dash2-secret { margin-top: 16px; }
+.dash2-secret-url { font: 400 0.9375rem/1.4375rem var(--font-mono); overflow-wrap: anywhere; }
+@media (max-width: 599px) { .dash2-actions { flex-direction: column; align-items: stretch; } .dash2-actions .btn { width: 100%; min-height: 56px; } }
+
+/* ---- Setup (10C.11): a narrow form book, a contents rail from 1280 px ---- */
+.dash2-setup-main { max-width: 720px; margin-inline: auto; }
+.dash2-setup-rail { display: none; }
+@media (min-width: 1280px) {
+  .dash2-setup { display: grid; grid-template-columns: minmax(0, 720px) 320px; justify-content: space-between; align-items: start; }
+  .dash2-setup-main { margin: 0; }
+  .dash2-setup-rail { display: block; position: sticky; top: 77px; }
+}
+.rail2 ul { margin: 0; padding: 0; list-style: none; }
+.shell2-content .rail2 a { position: relative; display: flex; align-items: center; min-height: 40px; padding-left: 16px; font: 400 0.9375rem/1.4375rem var(--font-sans); color: var(--text-2); text-decoration: none; }
+.shell2-content .rail2 a[aria-current] { color: var(--text); }
+.shell2-content .rail2 a[aria-current]::before { content: ""; position: absolute; left: 0; top: 8px; bottom: 8px; width: 2px; background: var(--brass-line); }
+@media (hover: hover) { .shell2-content .rail2 a:hover { color: var(--text); text-decoration: underline; text-decoration-color: var(--link-line); text-underline-offset: 3px; } }
+.shell2-content .dash2-setup-main > ul.small { margin: 0 0 24px; padding: 0; border-top: 1px solid var(--line); font-size: 1rem; }
+.shell2-content .dash2-setup-main > ul.small > li { justify-content: space-between; min-height: 56px; margin: 0 !important; padding: 8px 0; border-bottom: 1px solid var(--line); }
+.dash2-setup-main > .card.stack { margin-bottom: 24px; }
+.shell2-content .dash2-setup-main .card > strong:first-child { display: block; font: 500 1.375rem/1.75rem var(--font-sans-display); }
+.dash2-setup .bt-field { box-sizing: border-box; min-height: 48px; padding: 12px 14px; background: var(--field-bg, #fff); border: 1px solid var(--line-strong); border-radius: var(--r-sheet); }
+.dash2-routing { margin-bottom: 0; }
+.dash2-routing fieldset { margin-top: 8px; }
+.dash2-logins { margin-bottom: 0; }
+.dash2-connected { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+.dash2-connect > summary { list-style: none; }
+.dash2-connect > summary::-webkit-details-marker { display: none; }
+.dash2-connect-form { display: grid; gap: 12px; width: min(360px, 100%); margin-top: 12px; }
+.shell2-content .dash2-connect-form label { display: grid; gap: 6px; margin: 0; font: 500 1rem/1.375rem var(--font-sans); }
+.dash2-connect-form .btn { justify-self: start; }
+.dash2-login .muted { color: var(--text-2); }
+.dash2-people > .stack, .dash2-people { margin-top: 0; }
+.shell2-content .dash2 .dash2-person .field-row.n3 { grid-template-columns: minmax(0, 1fr) 80px 120px; }
+.dash2-person input[name$=".state"], .dash2-person input[name$=".zip"] { font-family: var(--font-mono); }
+.dash2-setup-main form.stack > fieldset.card + fieldset.card { margin-top: 16px; }
+.dash2-defaults { display: grid; gap: 16px; }
+.shell2-content .dash2 .dash2-portal-defaults { padding: 20px; }
+.shell2-content .dash2 .dash2-portal-defaults > strong:first-child { font: 500 1.0625rem/1.5rem var(--font-sans); }
+.dash2-portal-defaults input[type=number] { font-family: var(--font-mono); font-variant-numeric: tabular-nums; max-width: 160px; }
+@media (max-width: 599px) {
+  .shell2-content .dash2 .dash2-person .field-row.n3 { grid-template-columns: minmax(0, 1fr) 80px 120px; }
+  .dash2-connect-form { width: 100%; }
+}
+
+/* ---- Team (10C.12) ---- */
+.dash2-team-form .field-row { margin-bottom: 0; }
+
+/* ---- Password (10C.13): a 480 px column ---- */
+.dash2-password { max-width: 480px; margin-inline: auto; }
+.dash2-password > .card, .dash2-password > .dash2-pw + .card { margin-top: 32px; }
+.shell2-content .dash2-password > .card > strong:first-child { display: block; font: 500 1.375rem/1.75rem var(--font-sans-display); }
+.dash2-password #phone-code { width: 200px; max-width: 100%; font: 400 1.5rem/2rem var(--font-mono); letter-spacing: 0.3em; }
+.dash2-pw-line { font-size: 1.0625rem; line-height: 1.625rem; }
+.shell2-content .dash2-pw form > .help { margin: 4px 0 24px; }
+.shell2-content .dash2-pw form > .notice { margin: 24px 0 0; }
+
+/* ---- Billing (10C.14): the plan card, its price in Miller ---- */
+.shell2-content .dash2-billing .card > .row:first-child > strong { font: 500 1.375rem/1.75rem var(--font-sans-display); }
+.shell2-content .dash2 .dash2-billing .card.stack > * + * { margin-top: 16px; }
+.shell2-content .dash2 .dash2-billing .card.stack > .notice { margin-bottom: 0; }
+.shell2-content .dash2 .dash2-billing .card.stack > .help { margin-top: 24px; }
+/* "No subscription yet" is the neutral chip: no glyph, Graphite words on a Rule Strong edge */
+.shell2-content .dash2-billing .badge:not(.ok, .warn, .bad) { color: var(--text-2); border-color: var(--line-strong); }
+.shell2-content .dash2-billing .badge:not(.ok, .warn, .bad)::before { display: none; }
+.shell2-content .dash2-billing .card > .row:first-child + p:not(.notice):not(.small) { font: 400 2.25rem/2.625rem var(--font-display); font-variant-numeric: lining-nums tabular-nums; }
+@media (max-width: 599px) {
+  .shell2-content .dash2-billing .card > .row:first-child { flex-direction: column; align-items: flex-start; }
+  .shell2-content .dash2-billing .card > .row:first-child + p:not(.notice):not(.small) { font-size: 1.75rem; line-height: 2.125rem; }
+  .dash2-billing .card .row form, .dash2-billing .card .row .btn { width: 100%; }
+}
+
+/* ---- Sign-ups (10C.15) ---- */
+.dash2-signups .dash2-table { margin-bottom: 8px; }
+.dash2-decide { display: flex; gap: 8px; }
+.dash2-message { min-width: 22ch; max-width: 40ch; white-space: normal; }
+.shell2-content .dash2-signups .chip2 code { padding: 0; font: inherit; font-family: var(--font-mono); background: none; }
+@media (max-width: 599px) { .dash2-decide { flex-direction: column; } .dash2-decide :is(form, .btn) { width: 100%; } .dash2-message { max-width: none; } }
+
+/* ---- Log in with an API key (10C.3): the lockup centred over one 480 px card ---- */
+.dashlogin2 { min-height: 100vh; background: var(--page); color: var(--text); }
+.shell2-content.dashlogin2-in { box-sizing: content-box; max-width: 480px; margin: 0 auto; padding: 64px 20px 96px; }
+.dashlogin2 .dashlogin2-in a.dashlogin2-mark { display: flex; justify-content: center; margin-bottom: 48px; color: var(--text); text-decoration: none; }
+.dashlogin2 .dashlogin2-in a.dashlogin2-mark:focus-visible { outline: 2px solid var(--focus); outline-offset: 4px; border-radius: 2px; }
+.shell2-content.dashlogin2-in h1 { margin: 0 0 24px; font: 400 2.25rem/2.625rem var(--font-display); }
+.shell2-content.dashlogin2-in h1 + p.muted { margin: 0 0 32px; }
+.shell2-content .dashlogin2-card { padding: 32px; box-shadow: var(--e-sheet); }
+.dashlogin2-card .btn { width: 100%; }
+.dashlogin2-card .help { margin-top: 16px; }
+.dashlogin2 .dashlogin2-alt { margin: 24px 0 0; }
+body:has(.dashlogin2) > .beta-banner { display: none; }
+.dashlogin2-beta { background: var(--page-2); border-bottom: 1px solid var(--line); }
+.dashlogin2-beta > div { box-sizing: border-box; display: grid; grid-template-columns: auto 1fr; gap: 12px; align-items: baseline; max-width: 1296px; margin-inline: auto; padding: 12px 48px; font: 400 0.9375rem/1.4375rem var(--font-sans); color: var(--text-2); text-wrap: pretty; }
+.dashlogin2-beta .chip2 { position: relative; top: -1px; }
+.dashlogin2-beta a { color: var(--link); text-decoration: underline; text-decoration-color: var(--link-line); text-underline-offset: 3px; }
+@media (max-width: 599px) { .dashlogin2-beta > div { grid-template-columns: minmax(0, 1fr); gap: 6px; justify-items: start; padding-inline: 20px; } }
+@media (max-width: 599px) {
+  .shell2-content.dashlogin2-in { padding-top: 40px; }
+  .dashlogin2 .dashlogin2-in a.dashlogin2-mark { justify-content: flex-start; margin-bottom: 40px; }
+  .shell2-content.dashlogin2-in h1 { font-size: 1.75rem; line-height: 2.125rem; }
+  .shell2-content .dashlogin2-card { padding: 0; background: none; border: 0; box-shadow: none; }
+  .dashlogin2-card .btn { min-height: 56px; }
+}
+}

@@ -30,9 +30,11 @@ export interface ShellUser { email: string; passwordHref?: string; logoutAction?
  * current page underlined in Brass Line; the beta strip; the content; a footer. On phones, one sticky 64 px row and a
  * menu sheet. `white` draws a platform's white-label desk instead: its letterhead and Firm Rule, nothing of CoFile.
  */
-export function AppShell({ home, account, white, user, links, footer, children }: {
+export function AppShell({ home, account, white, platform, user, links, footer, children }: {
   home: string;
   account?: { name: string; logoUrl?: string };
+  /** A deployment's own platform name (PLATFORM_NAME): set in type in place of CoFile's lockup, never inside our mark (10C.1). */
+  platform?: string;
   /** A platform's white label: its name, logo and ink-matched colors (firmVars) in place of CoFile's. */
   white?: { name: string; logoUrl?: string; style: CSSProperties };
   user: ShellUser;
@@ -45,7 +47,7 @@ export function AppShell({ home, account, white, user, links, footer, children }
         {/* eslint-disable-next-line @next/next/no-img-element */}
         {white.logoUrl ? <img className="shell2-brand-logo" src={white.logoUrl} alt={white.name} /> : <span className="shell2-brand-name">{white.name}</span>}
       </span>
-    : <Lockup height={28} />;
+    : platform && platform !== "CoFile" ? <span className="shell2-platform">{platform}</span> : <Lockup height={28} />;
   const head = (
     <>
       <Link className="shell2-home" href={home}>{mark}</Link>

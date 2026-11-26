@@ -2,10 +2,13 @@ import Link from "next/link";
 import { EVENT_NAMES } from "./events";
 import { FILING_STATUSES, EXAMPLE_FILING } from "@/lib/api-catalog";
 import { FILING_KINDS } from "@/lib/intake/forms";
+import { CodeBlock } from "@/components/docs/CodeBlock";
+import { StatusChip } from "@/components/ui/Chip";
+import type { CodeLang } from "@/lib/docs/highlight";
 
 export interface Guide { slug: string; title: string; summary: string; body: (api: string) => React.ReactNode }
 
-const Code = ({ children }: { children: string }) => <pre><code>{children.trim()}</code></pre>;
+const Code = ({ children, lang }: { children: string; lang: CodeLang }) => <CodeBlock code={children} lang={lang} />;
 
 export const GUIDES: Guide[] = [
   {
@@ -15,8 +18,8 @@ export const GUIDES: Guide[] = [
     body: (api) => (
       <>
         <p>Every request carries your API key in the <code>x-api-key</code> header. Keys belong to your tenant: they see only your filings, client companies, webhooks and usage.</p>
-        <Code>{`curl ${api}/v1/account -H "x-api-key: $COFILE_API_KEY"`}</Code>
-        <Code>{`import os, requests\nr = requests.get("${api}/v1/account", headers={"x-api-key": os.environ["COFILE_API_KEY"]})\nprint(r.json())`}</Code>
+        <Code lang="bash">{`curl ${api}/v1/account -H "x-api-key: $COFILE_API_KEY"`}</Code>
+        <Code lang="python">{`import os, requests\nr = requests.get("${api}/v1/account", headers={"x-api-key": os.environ["COFILE_API_KEY"]})\nprint(r.json())`}</Code>
         <p>Create and revoke keys on the <Link href="/dashboard/keys">dashboard</Link> or with <code>POST /v1/api-keys</code>. A new key starts with <code>cofile_</code> and is shown once; only its prefix (for example <code>cofile_AbCdEfGh</code>) stays readable afterwards. Keys issued earlier start with <code>kfe_</code> and keep working.</p>
         <h2>Rotating a key</h2>
         <ol>
@@ -36,7 +39,7 @@ export const GUIDES: Guide[] = [
     body: (api) => (
       <>
         <p>A filing is one thing to file with one state site: an LLC formation, an EIN, a certificate or a payroll registration. You create it, the client approves exactly what will be filed, and the engine files it.</p>
-        <Code>{`curl ${api}/v1/filings \\
+        <Code lang="bash">{`curl ${api}/v1/filings \\
   -H "x-api-key: $COFILE_API_KEY" -H "content-type: application/json" \\
   -d '${JSON.stringify(EXAMPLE_FILING)}'`}</Code>
         <h2>What happens next</h2>
@@ -50,10 +53,11 @@ export const GUIDES: Guide[] = [
         <h2>Idempotency</h2>
         <p><code>idempotencyKey</code> (8 characters or more) makes retries safe: sending the same key again returns the original filing with status <code>200</code> and creates nothing. Use one key per filing you mean to make, such as your own order id.</p>
         <h2>Dry runs</h2>
-        <p>Set <code>&quot;dryRun&quot;: true</code>, or call <code>POST /v1/filings/{"{id}"}/dry-run</code>, to walk the state site up to the final submit and stop. Nothing is filed and no fee is paid. Use it to test a new integration.</p>
+        <p>Set <code className="is-rehearsal">&quot;dryRun&quot;: true</code>, or call <code className="is-rehearsal">POST /v1/filings/{"{id}"}/dry-run</code>, to walk the state site up to the final submit and stop. Nothing is filed and no fee is paid. Use it to test a new integration.</p>
         <h2>Statuses</h2>
         <div className="table-wrap"><table><thead><tr><th>Status</th><th>Meaning</th></tr></thead><tbody>
-          {FILING_STATUSES.map((s) => <tr key={s.status}><td><code>{s.status}</code></td><td>{s.meaning}</td></tr>)}
+          {/* Each machine status with the plain-language chip a firm sees for it (10C.16) */}
+          {FILING_STATUSES.map((s) => <tr key={s.status}><td><code>{s.status}</code><span className="docs2-chip"><StatusChip status={s.status} quiet /></span></td><td>{s.meaning}</td></tr>)}
         </tbody></table></div>
       </>
     ),
@@ -103,7 +107,7 @@ export const GUIDES: Guide[] = [
       <>
         <p>Add up to 10 https endpoints on the <Link href="/dashboard/webhooks">dashboard</Link> or with <code>PUT /v1/webhook-endpoints</code>. Each endpoint can listen to every event or a chosen few. Each has its own signing secret, shown once when it is generated.</p>
         <h2>The request</h2>
-        <Code>{`POST /your/endpoint
+        <Code lang="http">{`POST /your/endpoint
 content-type: application/json
 x-cofile-event: filing.completed
 x-cofile-delivery: 6f1c…
@@ -112,7 +116,7 @@ x-cofile-signature: t=1764000000,v1=5d41402abc4b2a76b9719d911017c592…
 {"id":"evt_…","type":"filing.completed","tenantId":"your-tenant","filingId":"f_…","occurredAt":"2026-11-24T15:30:00.000Z","data":{…}}`}</Code>
         <h2>Verifying the signature</h2>
         <p><code>v1</code> is the hex HMAC-SHA256 of <code>{"<t>.<raw body>"}</code> with your endpoint secret. Check it against the raw body before parsing, and reject timestamps more than five minutes old.</p>
-        <Code>{`import { createHmac, timingSafeEqual } from "node:crypto";
+        <Code lang="javascript">{`import { createHmac, timingSafeEqual } from "node:crypto";
 
 export function verify(secret, header, rawBody, toleranceSec = 300) {
   const m = /t=(\\d+),v1=([0-9a-f]+)/.exec(header ?? "");
@@ -124,7 +128,7 @@ export function verify(secret, header, rawBody, toleranceSec = 300) {
   return expected.length === got.length && timingSafeEqual(expected, got);
 }`}</Code>
         <p>The same in Python:</p>
-        <Code>{`import hmac, hashlib, time
+        <Code lang="python">{`import hmac, hashlib, time
 
 def verify(secret: str, header: str, raw_body: bytes, tolerance: int = 300) -> bool:
     parts = dict(p.split("=", 1) for p in header.split(","))
@@ -149,7 +153,7 @@ def verify(secret: str, header: str, raw_body: bytes, tolerance: int = 300) -> b
     body: () => (
       <>
         <p>Errors are JSON with an <code>error</code> message. Validation errors (422) also carry <code>issues</code>, one entry per problem, each with a <code>path</code>, <code>message</code> and <code>severity</code>.</p>
-        <Code>{`{ "error": "validation failed", "issues": [ { "path": "formation.county", "message": "county is required in NY", "severity": "error" } ] }`}</Code>
+        <Code lang="json">{`{ "error": "validation failed", "issues": [ { "path": "formation.county", "message": "county is required in NY", "severity": "error" } ] }`}</Code>
         <div className="table-wrap"><table><thead><tr><th>Code</th><th>Meaning</th></tr></thead><tbody>
           <tr><td>400</td><td>The request body is not valid JSON.</td></tr>
           <tr><td>401</td><td>No API key, or the key is revoked or unknown.</td></tr>

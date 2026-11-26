@@ -4,6 +4,7 @@ import { useKeptForm } from "./useKeptForm";
 import { useState } from "react";
 import type { Saved } from "@/app/dashboard/(app)/setup/actions";
 import type { PaymentMethodRef, PaymentRouting, PortalDefaultField } from "@/lib/engine";
+import { Notice } from "./ui/Sheet";
 
 type Action = (prev: Saved, fd: FormData) => Promise<Saved>;
 
@@ -15,8 +16,8 @@ export const NJ_PORTAL_PAYMENT_KINDS: { id: string; title: string }[] = [
 ];
 
 function Result({ s }: { s: Saved }) {
-  if (s?.error) return <p className="notice bad" role="alert">{s.error}</p>;
-  if (s?.ok) return <p className="notice ok" role="status">Saved.</p>;
+  if (s?.error) return <Notice tone="problem" role="alert">{s.error}</Notice>;
+  if (s?.ok) return <Notice tone="done" role="status">Saved.</Notice>;
   return null;
 }
 
@@ -35,7 +36,7 @@ export function RoutingForm({ action, methods, routing, kinds, njLoginConnected 
   const fee = methods.filter((m) => m.purpose === "state_fees");
   const subs = methods.filter((m) => m.purpose === "subscription");
   return (
-    <form {...formProps} className="card">
+    <form {...formProps} className="card dash2-routing">
       <Result s={s} />
       <div className="field"><label>Card for your subscription</label><CardSelect name="subscriptionMethodId" value={routing.subscriptionMethodId} cards={subs} label="Subscription card" /></div>
       <fieldset>
@@ -75,7 +76,7 @@ export function RoutingForm({ action, methods, routing, kinds, njLoginConnected 
 export function DefaultsForm({ title, fields, values, action }: { title: string; fields: PortalDefaultField[]; values: Record<string, string | number | boolean>; action: Action }) {
   const { state: s, pending, formProps } = useKeptForm(action, null);
   return (
-    <form {...formProps} className="card">
+    <form {...formProps} className="card dash2-portal-defaults">
       <strong>{title}</strong>
       <Result s={s} />
       <div style={{ marginTop: 10 }}>

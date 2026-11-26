@@ -32,6 +32,8 @@
 .lockup2-s { display: none; }
 .lockup2.is-small .lockup2-d { display: none; }
 .lockup2.is-small .lockup2-s { display: block; }
+/* A deployment's own platform name in place of the lockup: Founders Grotesk Medium 20/24, no plate (10C.1) */
+.shell2-platform { font: 500 1.25rem/1.5rem var(--font-sans-display); color: var(--text); white-space: nowrap; }
 
 /* The account label: whose desk it is (3.5): logo 24 px tall (at most 160 wide), then the name, never wrapping */
 .acct2 { display: inline-flex; align-items: center; gap: 8px; min-width: 0; flex: 0 1 auto; }
