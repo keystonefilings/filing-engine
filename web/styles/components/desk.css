@@ -117,3 +117,144 @@
   .setup2-card { grid-template-columns: 1fr; }
 }
 }
+
+/* A filing's page (10B.13): the record, its stage rule, the proof card as the page's hero, a rail for the papers */
+@layer components {
+.filing2 { max-width: 720px; margin-inline: auto; }
+.filing2.has-rail { max-width: 1088px; display: grid; grid-template-columns: minmax(0, 720px) 320px; gap: 48px; align-items: start; }
+@media (max-width: 1279px) { .filing2.has-rail { max-width: 720px; grid-template-columns: minmax(0, 1fr); gap: 32px; } }
+.filing2-main { display: grid; gap: 24px; min-width: 0; }
+.filing2-main > * { margin: 0; }
+.filing2-back { font-size: 0.9375rem; }
+.filing2-main h1 { margin: 0; }
+.filing2-chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: -12px !important; }
+.filing2-meta { margin-top: -12px !important; font-size: 0.9375rem; line-height: 1.4375rem; color: var(--text-2); }
+.filing2-main h2 { margin: 0 0 12px; font: 500 1.375rem/1.75rem var(--font-sans-display); }
+
+/* The stage rule: stops evenly spaced on a line; reached ink, the firm's turn the Ochre lozenge, a stop the Madder bar */
+.stagerule2 { display: grid; grid-template-columns: repeat(var(--stops), minmax(0, 1fr)); list-style: none; margin: 8px 0 0 !important; padding: 0; }
+.stagerule2 li { position: relative; display: grid; gap: 10px; justify-items: start; padding-right: 8px; }
+.stagerule2 li::before { content: ""; position: absolute; left: 6px; right: -6px; top: 5px; height: 1px; background: var(--line); }
+.stagerule2 li:last-child::before { display: none; }
+.stagerule2 li.is-inked:not(:last-child)::before { height: 2px; top: 5px; background: var(--text); }
+.stagerule2.is-rehearsal li::before { height: 0; background: none; border-top: 1.5px dashed var(--line-strong); }
+.stagerule2.is-rehearsal li.is-inked:not(:last-child)::before { border-top-color: var(--text); }
+.stagerule2-stop { position: relative; z-index: 1; width: 12px; height: 12px; border-radius: 50%; background: var(--page); }
+.stagerule2 .is-ahead .stagerule2-stop::after { content: ""; position: absolute; inset: 3px; border-radius: 50%; background: var(--line-strong); }
+.stagerule2 .is-reached .stagerule2-stop { background: var(--done); }
+.stagerule2 .is-turn .stagerule2-stop { border-radius: 0; background: var(--ochre); transform: rotate(45deg) scale(0.9); }
+.stagerule2 .is-stopped .stagerule2-stop { width: 14px; height: 4px; margin-top: 4px; border-radius: 0; background: var(--madder); }
+.stagerule2-label { font: 400 0.875rem/1.25rem var(--font-sans); color: var(--text-2); }
+.stagerule2 .is-turn .stagerule2-label, .stagerule2 .is-reached:last-of-type .stagerule2-label { font-weight: 500; color: var(--text); }
+@media (max-width: 599px) {
+  .stagerule2 { grid-template-columns: 1fr; gap: 0; }
+  .stagerule2 li { grid-template-columns: 12px 1fr; align-items: center; gap: 12px; min-height: 36px; }
+  .stagerule2 li::before { left: 5px; right: auto; top: 18px; bottom: -18px; width: 1px; height: auto; }
+  .stagerule2 li.is-inked:not(:last-child)::before { width: 2px; height: auto; }
+  .stagerule2.is-rehearsal li::before { border-top: 0; border-left: 1.5px dashed var(--line-strong); }
+}
+
+/* "Your proof is ready": the page's one hero, a Plate Ink border and a 2 px Brass Line rule along its top */
+.filing2-proof { position: relative; padding: 32px; background: var(--surface); border: 1px solid var(--text); border-radius: var(--r-sheet); box-shadow: inset 0 2px 0 var(--brass-line); }
+.filing2-proof p { margin: 0 0 16px; max-width: 60ch; }
+.filing2-proof p:last-child { margin: 0; }
+.filing2-open { min-height: 56px !important; gap: 10px; }
+.filing2-open svg { width: 16px; height: 16px; flex: none; }
+.filing2-sent { font-size: 0.9375rem; line-height: 1.4375rem; color: var(--text-2); }
+@media (max-width: 599px) { .filing2-proof { padding: 20px; } .filing2-open { width: 100%; } }
+.filing2-note { font-size: 0.9375rem; line-height: 1.4375rem; color: var(--text-2); }
+
+/* "Still needed": the firm's turn, a 3 px Ochre edge as on the overview's waiting rows */
+.filing2-needed { padding: 24px; background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-sheet); box-shadow: inset 3px 0 0 var(--ochre); }
+
+/* Progress on the state site: a quiet disclosure, steps on a Rule line, times in mono */
+.filing2-progress { border-top: 1px solid var(--line); }
+.filing2-progress > summary { display: flex; align-items: center; gap: 8px; min-height: 48px; font: 500 1.0625rem/1.5rem var(--font-sans); cursor: pointer; list-style: none; }
+.filing2-progress > summary::-webkit-details-marker { display: none; }
+.filing2-progress > summary::before { content: ""; width: 8px; height: 8px; border: solid var(--text); border-width: 0 1.5px 1.5px 0; transform: rotate(-45deg); transition: transform var(--t-quick) var(--ease-settle); }
+.filing2-progress[open] > summary::before { transform: rotate(45deg); }
+.filing2-progress > summary span { font-weight: 400; color: var(--text-2); }
+.filing2-progress ol { list-style: none; margin: 8px 0 0 3px; padding: 0 0 0 20px; border-left: 1px solid var(--line); }
+.filing2-progress li { position: relative; display: flex; justify-content: space-between; gap: 16px; padding: 6px 0; font-size: 0.9375rem; line-height: 1.375rem; }
+.filing2-progress li::before { content: ""; position: absolute; left: -24.5px; top: 13px; width: 7px; height: 7px; border-radius: 50%; border: 1.5px solid var(--iron); background: var(--page); }
+.filing2-progress li.is-last::before { border-color: var(--done); background: var(--done); }
+.filing2-progress time { flex: none; font: 400 0.875rem/1.25rem var(--font-mono); color: var(--text-2); font-variant-numeric: tabular-nums; }
+
+/* The rail: the papers that came back as document cards, the EIN set big, Google Docs */
+.filing2-rail { display: grid; gap: 24px; min-width: 0; }
+.filing2-rail h2 { margin: 0 0 12px; font: 500 1.375rem/1.75rem var(--font-sans-display); }
+.filing2-docs { display: grid; grid-template-columns: repeat(2, 128px); gap: 16px; list-style: none; margin: 0; padding: 0; }
+.filing2-docs li { display: grid; gap: 4px; }
+.filing2-docs a { display: grid; gap: 8px; color: var(--link); text-decoration: none; }
+.filing2-doc { display: grid; align-content: start; gap: 8px; width: 128px; height: 166px; padding: 20px 16px; background: #fff; border: 1px solid var(--line); border-radius: var(--r-sheet); }
+.filing2-doc i { display: block; height: 6px; width: 100%; border-radius: 1px; background: #DDD7CB; }
+.filing2-doc i:first-child { width: 62%; height: 8px; margin-bottom: 6px; background: #8A8578; opacity: .55; }
+@media (hover: hover) { .filing2-docs a:hover .filing2-doc { border-color: var(--line-strong); } }
+.filing2-doc-label { font: 500 0.9375rem/1.375rem var(--font-sans); text-decoration: underline; text-decoration-color: var(--link-line); text-underline-offset: 3px; overflow-wrap: anywhere; }
+.filing2-doc-kind { font-size: 0.875rem; line-height: 1.25rem; color: var(--text-2); }
+.filing2-ein { margin: 0; padding: 20px; border: 1px solid var(--line); border-radius: var(--r-sheet); font-size: 0.9375rem; line-height: 1.375rem; color: var(--text-2); }
+.filing2-ein strong { display: block; margin-top: 4px; font: 400 2rem/2.5rem var(--font-mono); color: var(--text); letter-spacing: 0.02em; }
+.filing2-google { display: grid; gap: 8px; justify-items: start; margin: 0; font-size: 0.9375rem; line-height: 1.4375rem; color: var(--text-2); }
+@media (max-width: 599px) { .filing2-docs { grid-template-columns: repeat(2, minmax(0, 150px)); } .filing2-doc { width: 100%; } }
+}
+
+/* A desk page whose primary button is its one main action: Brass (10B.3.1; the dashboard's button kinds) */
+@layer components {
+.desk2-one .btn.primary:not(.small) { background: var(--action); color: var(--action-on); border-color: transparent; }
+@media (hover: hover) { .desk2-one .btn.primary:not(.small):hover { background: var(--action-hover); } }
+@media (max-width: 599px) { .desk2-one form .btn.primary:not(.small) { width: 100%; min-height: 56px; } }
+}
+
+/* Signed out (10B.20) and a desk page that fails or isn't there (10B.21) */
+@layer components {
+.signed2 { min-height: 100vh; display: grid; justify-items: center; align-content: start; gap: 48px; padding: 96px 20px; background: var(--page); color: var(--text); }
+.signed2.is-neutral { --page: #FFFDF8; background: #F7F6F2; color: #1D2130; }
+.signed2-mark { color: var(--text); }
+.signed2-card { box-sizing: border-box; width: 100%; max-width: 560px; padding: 48px; background: var(--surface, #fff); border: 1px solid var(--line, #DDD7CB); border-radius: var(--r-sheet); font: 400 1.125rem/1.75rem var(--font-sans); }
+.signed2-card h1 { margin: 0 0 20px; font: 400 2.25rem/2.625rem var(--font-display); text-wrap: balance; }
+.signed2.is-neutral .signed2-card h1 { font: 600 1.75rem/2.125rem var(--font-sans-display); }
+.signed2-card p { margin: 0 0 16px; }
+.signed2-card p:last-child { margin: 0; }
+.signed2-card a { color: var(--link, #1D2130); text-decoration: underline; text-decoration-color: var(--link-line, currentColor); text-underline-offset: 3px; }
+.signed2-acct { margin-bottom: 24px !important; }
+@media (max-width: 599px) { .signed2 { padding: 48px 0 0; gap: 32px; } .signed2-card { padding: 32px 20px; border-left: 0; border-right: 0; border-radius: 0; } .signed2-card h1 { font-size: 1.75rem; line-height: 2.125rem; } }
+.desk2-fail { max-width: 560px; margin: 48px auto 0; padding: 48px; background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-sheet); }
+.desk2-fail h1 { margin-bottom: 16px; }
+.desk2-fail-actions { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 24px !important; }
+.desk2-fail-ref { margin-top: 24px !important; font-size: 0.9375rem; color: var(--text-2); }
+@media (max-width: 599px) { .desk2-fail { padding: 24px; margin-top: 16px; } }
+}
+
+/* The email-domain step (10B.5.1): the inbox row live at the head, the domain, the records with Copy, their states */
+@layer components {
+.setup2-card + .setup2-card { margin-top: 16px; }
+.setup2-domain { font: 400 0.9375rem/1.375rem var(--font-mono); background: none; padding: 0; color: var(--text); }
+.edom2-page h1 { margin-bottom: 16px; }
+.edom2-page > .muted { margin-bottom: 32px; max-width: 64ch; }
+.edom2 { display: grid; gap: 24px; }
+.edom2-inbox { display: flex; align-items: center; gap: 14px; padding: 16px 20px; background: #fff; color: #1D2130; border: 1px solid var(--line); border-radius: var(--r-sheet); color-scheme: light; }
+.edom2-dot { display: grid; place-items: center; width: 40px; height: 40px; border-radius: 50%; background: #F3F0E8; font: 500 1.0625rem/1 var(--font-sans); }
+.edom2-inbox strong { display: block; font: 500 1rem/1.375rem var(--font-sans); }
+.edom2-inbox code { display: block; padding: 0; background: none; font: 400 0.875rem/1.25rem var(--font-mono); color: #555867; }
+.edom2-form { display: grid; gap: 8px; }
+.edom2-form > label { margin: 0; }
+.edom2-field { display: flex; flex-wrap: wrap; gap: 12px; }
+.shell2-content .edom2-field input { flex: 1 1 260px; min-height: 52px; font: 400 1.125rem/1.5rem var(--font-mono); }
+.edom2-field .btn { min-height: 52px; }
+.edom2-change { margin: 0; }
+.edom2-records h2 { margin: 0 0 12px; font: 500 1.375rem/1.75rem var(--font-sans-display); }
+.edom2-table { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-sheet); overflow: hidden; }
+.edom2-row { display: grid; grid-template-columns: 64px minmax(0, 1fr) minmax(0, 1.6fr) 140px; gap: 12px; align-items: center; padding: 12px 16px; }
+.edom2-row + .edom2-row { border-top: 1px solid var(--line); }
+.edom2-row.is-head { min-height: 44px; padding-block: 0; font: 500 0.875rem/1.125rem var(--font-sans); color: var(--text-2); background: var(--page-2); }
+.edom2-type { font: 500 0.9375rem/1.25rem var(--font-mono); }
+.edom2-plate { display: flex; align-items: center; gap: 8px; min-width: 0; padding: 6px 6px 6px 10px; background: var(--page-2); border: 1px solid var(--line); border-radius: var(--r-sheet); }
+.edom2-plate code { flex: 1; min-width: 0; padding: 0; background: none; font: 400 0.875rem/1.25rem var(--font-mono); overflow-wrap: anywhere; }
+.edom2-plate .btn.small { flex: none; min-height: 32px; padding: 4px 10px; }
+.edom2-fold > summary { min-height: 44px; display: flex; align-items: center; cursor: pointer; font-weight: 500; }
+.edom2-off { margin: 0; }
+@media (max-width: 759px) {
+  .edom2-row { grid-template-columns: 1fr; gap: 8px; }
+  .edom2-row.is-head { display: none; }
+}
+}

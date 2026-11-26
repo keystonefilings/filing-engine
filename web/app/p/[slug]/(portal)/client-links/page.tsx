@@ -1,3 +1,4 @@
+import "@/styles/components/desk.css";
 import { firmContext, offeredKinds } from "@/lib/firm";
 import { ClientLinkForm } from "@/components/ClientLinkForm";
 import Link from "next/link";
@@ -15,7 +16,7 @@ export default async function ClientLinksPage({ params, searchParams }: { params
   const base = `/p/${encodeURIComponent(slug)}`;
   const STATE: Record<string, string> = { open: "Waiting for the client", used: "Used", revoked: "Turned off", expired: "Expired" };
   return (
-    <div className="narrow stack">
+    <div className="narrow stack desk2-one">
       <h1>Send a client a link</h1>
       <p className="muted">Your client fills in the filing on a page with {brand.name}&apos;s name and logo. It then appears here under Filings, and you get the proof to approve before anything is filed. Filing types that aren&apos;t live yet run as rehearsals: they stop before the last button, and nothing is filed or paid.</p>
       <ClientLinkForm action={makeClientLink.bind(null, slug)} kinds={offeredKinds(company).map((k) => ({ id: k.id, title: k.title }))}

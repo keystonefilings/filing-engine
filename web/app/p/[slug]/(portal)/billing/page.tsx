@@ -1,3 +1,4 @@
+import "@/styles/components/desk.css";
 import { notFound } from "next/navigation";
 import { firmContext } from "@/lib/firm";
 import { billingSummary, openBillingPortal, startCheckout } from "@/lib/billing";
@@ -14,7 +15,7 @@ export default async function BillingPage({ params, searchParams }: { params: Pr
   const [summary, q, agents] = await Promise.all([billingSummary(), searchParams, agentServices()]);
   if (summary && !summary.billed) notFound();
   return (
-    <div className="stack">
+    <div className="stack desk2-one">
       <h1>Billing</h1>
       {q.switched === "1" ? <p className="notice ok" role="status">Your plan is changing. Stripe adjusts this period&apos;s charge for the change, and this page shows the new plan in a moment.</p> : null}
       {!summary ? <p className="notice bad">Billing couldn&apos;t be loaded. Try again shortly.</p>

@@ -2,6 +2,8 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { firmContext } from "@/lib/firm";
 import { Glyph } from "@/components/ui/glyphs";
+import { Chip } from "@/components/ui/Chip";
+import { loadEmailDomain } from "@/lib/email-domain";
 import "@/styles/components/desk.css";
 
 export const metadata = { title: "Set up your account" };
@@ -23,6 +25,7 @@ export default async function SetupPage({ params }: { params: Promise<{ slug: st
   const done = new Set(company.partner.setupDone ?? []);
   const base = `/p/${encodeURIComponent(slug)}`;
   const next = STEPS.find((s) => !done.has(s.id));
+  const mail = (await loadEmailDomain(slug)).emailDomain;
   return (
     <div className="narrow setup2">
       <h1>{next ? "Set up your account" : "You're set up"}</h1>
@@ -43,6 +46,16 @@ export default async function SetupPage({ params }: { params: Promise<{ slug: st
       <div className="setup2-card">
         <span className="setup2-what"><strong>Registered agents <span className="muted">(optional)</span></strong><span>Save the agent you use in each state, and your forms offer it so nobody types it again.</span></span>
         <Link className="btn small" href={`${base}/setup/agents`}>{Object.keys(company.registeredAgentsByState ?? {}).length ? "Change agents" : "Add agents"}</Link>
+      </div>
+      {/* The email-domain card (decision 37, 10B.5.1): its words are stand-ins until the copy owner writes them */}
+      <div className="setup2-card is-next-card">
+        <span className="setup2-what">
+          <strong>Your email domain <span className="muted">(optional)</span>{mail && mail.status !== "verified" ? <> <Chip tone="inhand" compact>Waiting for records</Chip></> : null}</strong>
+          {mail?.status === "verified"
+            ? <span><code className="setup2-domain">{mail.domain}</code> <Chip tone="done" compact>Connected</Chip></span>
+            : <span>Send your clients&apos; emails from your own address.</span>}
+        </span>
+        <Link className="btn small" href={`${base}/setup/email`}>{mail ? "Change" : "Connect"}</Link>
       </div>
       {!next ? <p className="setup2-start"><Link className="btn primary is-main" href={`${base}/new`}>Start a filing</Link></p> : null}
     </div>

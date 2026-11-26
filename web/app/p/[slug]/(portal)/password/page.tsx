@@ -1,3 +1,4 @@
+import "@/styles/components/desk.css";
 import { ChangePasswordForm } from "@/components/AuthForms";
 import { changePassword } from "@/lib/accounts";
 import { confirmPhoneCode, phoneStatus, removePhone, sendPhoneCode } from "@/lib/phone";
@@ -11,12 +12,12 @@ export default async function PortalPasswordPage({ params }: { params: Promise<{
   const s = await requireFirm(slug);
   const phone = await phoneStatus();
   return (
-    <>
+    <div className="narrow desk2-one">
       <h1>Password</h1>
       {personalSession(s)
         ? <ChangePasswordForm action={changePassword} />
         : <p className="muted">You opened this dashboard from an invite link, so there is no password to change.</p>}
       {phone?.numbers ? <PhoneForm status={phone} send={sendPhoneCode} confirm={confirmPhoneCode} remove={removePhone} /> : null}
-    </>
+    </div>
   );
 }

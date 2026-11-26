@@ -38,7 +38,7 @@ export function MissingInfoForm({ action, inputs, startOverHref }: { action: (pr
               )}
             </div>
           ))}
-          <button className="btn primary" type="submit" disabled={pending}>{pending ? "Sending…" : "Send the answers"}</button>
+          <button className="btn primary is-main" type="submit" disabled={pending}>{pending ? "Sending…" : "Send the answers"}</button>
           {s?.error ? <p className="notice bad" role="alert">{s.error}</p> : s?.message ? <p className="notice ok" role="status">{s.message}</p> : null}
         </form>
       ) : null}
