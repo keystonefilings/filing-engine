@@ -1,6 +1,5 @@
 import type { CSSProperties } from "react";
 import { Glyph } from "@/components/ui/glyphs";
-import { FirmLogo } from "@/components/ui/Sheet";
 import { Lockup } from "@/components/shell/Lockup";
 
 /** The rehearsal's cues, from the stand-in's log (components/landing/Visuals.tsx, RehearsalLog). Example data. */
@@ -25,7 +24,8 @@ export function RunSheet({ name }: { name: string }) {
     <div className="rs2 sheet">
       <div className="rs2-top">
         <span aria-hidden="true"><Lockup height={20} name={name} /></span>
-        <FirmLogo name="Harbor & Pine CPA" />
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <span className="rs2-account"><img src="/cofile/example-firm/harbor-pine-symbol.svg" width={24} height={24} alt="" />Harbor &amp; Pine CPA</span>
       </div>
       <div className="rs2-rule" aria-hidden="true" />
       <p className="rs2-head"><Glyph kind="ghost" /><span>Rehearsal · New Jersey LLC formation</span></p>

@@ -93,7 +93,7 @@
   .stage2-grid { row-gap: 40px; }
   .stage2 { max-width: none; }
   .stage2 > .rs2 { --rs-pad: 20px; width: auto; max-width: none; margin: -64px 0 0; }
-  .rs2-top .firmlogo2 { white-space: nowrap; }
+  .rs2-account { white-space: nowrap; }
   .stage2 .play2-caption { width: auto; max-width: none; margin-left: 0; }
 }
 
@@ -105,7 +105,8 @@
 /* The run sheet: a white page of CoFile's desk on the stage (Home 7, L7) */
 .rs2 { --rs-pad: 32px; position: relative; overflow: hidden; padding: var(--rs-pad) var(--rs-pad) 32px; box-shadow: var(--e-sheet-dark); color: #1D2130; }
 .rs2-top { display: flex; align-items: center; justify-content: space-between; gap: 12px; min-height: 44px; }
-.rs2-top .firmlogo2 { font: 500 0.9375rem/1.25rem var(--font-sans); }
+.rs2-account { display: inline-flex; align-items: center; gap: 8px; font: 500 0.9375rem/1.25rem var(--font-sans); color: #1D2130; }
+.rs2-account img { flex: none; width: 24px; height: 24px; }
 .rs2-rule { height: 1px; background: #1D2130; margin-top: 20px; }
 .rs2-head { display: flex; align-items: flex-start; gap: 8px; margin-top: 30px; font: 500 1.125rem/1.5rem var(--font-sans); }
 .rs2-head > svg { flex: none; width: 14px; height: 14px; margin-top: 4px; }

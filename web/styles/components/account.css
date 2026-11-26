@@ -85,4 +85,26 @@
   .acct2-kicker { margin-bottom: 12px; }
   .acct2-body { margin-top: 24px; }
 }
+
+/* The single card, centred; a vignette 24 px above it, its left edge on the card's text edge (10A.8) */
+.acct2-single > .acct2-vig { max-width: 480px; margin: 0 auto 24px; padding-inline: 32px; box-sizing: border-box; line-height: 0; }
+@media (max-width: 639px) { .acct2-single > .acct2-vig { margin-bottom: 16px; padding-inline: 20px; } }
+
+/* Log in (10A.11): the card on c1, the door from the step in c7–c12, centred on the card; the card alone below 1024 px */
+.acct2-split { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); column-gap: 24px; align-items: center; }
+.acct2-split > .acct2-card { grid-column: 1 / span 6; max-width: 480px; margin: 0; }
+.acct2-panel { grid-column: 7 / span 6; display: grid; place-items: center; }
+@media (max-width: 1023px) {
+  .acct2-split { display: block; }
+  .acct2-split > .acct2-card { margin-inline: auto; }
+  .acct2-panel { display: none; }
+}
+.acct2-rule { height: 0; margin: 8px 0; border: 0; border-top: 1px solid var(--line); }
+.acct2-foot { padding-top: 24px; margin-top: 8px; border-top: 1px solid var(--line); }
+
+/* Google's own sign-in button, to its branding guidelines: the white theme, its "G", its words. Never Brass. */
+.gsi2 { display: flex; align-items: center; justify-content: center; gap: 12px; min-height: 48px; padding: 0 12px; background: #FFFFFF; color: #1F1F1F; border: 1px solid #747775; border-radius: 4px;
+  font: 500 0.875rem/1.25rem Roboto, "Helvetica Neue", Arial, sans-serif; letter-spacing: 0.25px; text-decoration: none; }
+.gsi2-g { flex: none; }
+@media (hover: hover) { .gsi2:hover { background: #F8F9FA; text-decoration: none; } }
 }
