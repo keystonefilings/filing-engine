@@ -1234,18 +1234,19 @@ change by themselves when a type goes live.)
 ### 10.2 Sign-up, log in and account pages
 
 All share one layout, **the reply card**: masthead (without the section links), then a two-column
-page at `lg`: the form on a sheet across columns 1 to 6, and a quiet column 8 to 12 holding the
-page's lede and, on sign-up, a miniature of the filing desk's brand bar. On phones, lede then form.
+page at `lg`. Columns 1 to 5 hold the page's heading (these pages use an `h2`, set at `h1` size),
+its lede and, on sign-up, a miniature of the filing desk's brand bar; columns 7 to 12 hold the form
+on a sheet at elevation 1. The heading is read before the form, as on a magazine's reply card. On
+phones: heading, lede, form.
 
-- **`/signup`**, "Set up your firm's filing desk". The lede sits above the form. Fields in the code's
-  order: "Firm name", the kind of firm (a radio list, not a select, because five options fit and older
+- **`/signup`**, "Set up your firm's filing desk". Fields in the code's order: "Firm name", the kind of firm (a radio list, not a select, because five options fit and older
   readers find selects fiddly), "Your name", "Work email", "Password" and "Password again" as a pair
   with the help "At least 12 characters. A short sentence works well." under the label, "Phone
   (optional)" and "Website (optional)" as a pair, "States you file in", the volume radios, then the
   agreement checkbox ("I agree to the Terms of Service and the Privacy Policy", both links open in
   a new tab with an external-link glyph), then "Create account" (`ink lg`, full width). Under it, the
-  hero note "Building a filing product? …" in `caption`. A live preview strip on the right column
-  shows the firm name the user types in a brand bar, with "with CoFile" at its end: they see their
+  hero note "Building a filing product? …" in `caption`. A live preview strip in the left column, under
+  the lede, shows the firm name the user types in a brand bar, with "with CoFile" at its end: they see their
   name on the door before they've finished the form.
 - **`/signup/sent`**, "Check your email": a single centered sheet, the large email icon in blue, the
   H2, the note "No email after a few minutes? Check spam, or …".
@@ -1320,8 +1321,8 @@ across).
   - **Registered agents**: one ruled block per state the firm files in, the saved agent shown as a
     small address card, "Change" or "Add".
   - **Payment**: the card list as rows (brand, last four in `mono`, label, which filing types it
-    pays), the routing choice ("one card for everything, or one per filing type, with a backup") as
-    two large radio cards, and the Basis Theory sentence set as an editor's note with a vault icon.
+    pays), the routing choice (one card for everything, or one per filing type, with a backup, as the
+    Setup step describes it) as two large radio cards with the page's own labels, and the Basis Theory sentence set as an editor's note with a vault icon.
 - **New filing.** Three steps, each a full page with a breadcrumb rule ("All states" links back).
   1. "Which state is the business in?": three large typographic tiles, New York, New Jersey and
      Florida, set in Record Display 32 px on sheets (a row of three at `md` and up, stacked on
@@ -1362,7 +1363,7 @@ across).
 The form page at `lg`:
 
 ```
- ┌ PARTS ──────────┐  New Jersey LLC formation
+ ┌─────────────────┐  New Jersey LLC formation
  │ 1 The business  │  ──────────────────────────────────────────────────────────────
  │ 2 Members       │  1  {section title}
  │ 3 Agent         │     Business name                          Ending
@@ -1380,8 +1381,8 @@ The form page at `lg`:
                       [ Send the proof to my client ]
 ```
 
-(Part names in this wireframe are placeholders for the form's own section titles, which come from
-each filing type's definition in `lib/intake/forms`.)
+(Part names and the "Same as" chip in this wireframe are placeholders for the form's own section
+titles and labels, which come from each filing type's definition in `lib/intake/forms`.)
 - **Filing detail.** The `FilingRecord` timeline (9.5) is the page. Header: back link "← Filings",
   title in `h1` serif (the business name is the headline of its own record), status chip, rehearsal
   chip, the meta line in `ui-small`. The `nextStep()` sentence as an editor's note. Then, at `lg`, two
@@ -2221,5 +2222,8 @@ These are suggestions for the copy owners. None of them is used in the design.
 18. **Raw JSON field names on the proof.** `humanKey()` turns field paths into labels ("Base name",
     "Formation › Members 1 › Name"). Labels like these are copy the client reads at the moment of
     approval; a reviewed label map per filing type would read better than the automatic one.
+19. **Branding help text.** "Button text is white, so choose a dark color." and "Choose a color
+    that's easy to read on white." become untrue once the theme compiler (section 11) picks the
+    button's text color and darkens links itself. They need new wording when it ships.
 
 Approve the proof. Then it's filed. ▪
