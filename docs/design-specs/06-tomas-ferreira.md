@@ -462,7 +462,7 @@ Atkinson Next, takes the headings. CoFile's voice disappears and only its small 
 
 | Role | Face | Desktop | Phone | Weight | Tracking |
 |---|---|---|---|---|---|
-| Display (home hero h1) | Fraunces | 80/84 | 44/48 | 440 | −1.5% |
+| Display (home hero h1) | Fraunces | 72/76 | 44/48 | 440 | −1.5% |
 | Page h1 (pages behind the home page) | Fraunces | 64/68 | 40/44 | 440 | −1.2% |
 | Section h2 | Fraunces | 52/56 | 34/38 | 440 | −1% |
 | Price numeral (the "$45", plan prices) | Fraunces | 96/96 in the Pricing h2, 56/60 on plan cards | 56/60 and 44/48 | 480 | −2% |
@@ -525,7 +525,7 @@ does, from the line to the thing it describes.
 
 | # | Section | Desktop layout |
 |---|---|---|
-| 1 | Hero | Text cols 1–5 (the hero gets one more column for the long headline), picture cols 6–12, the picture bleeding off the right edge by 64 px |
+| 1 | Hero | Text cols 1–6 (the hero gets two more columns for the long headline), picture cols 7–12, the picture bleeding off the right edge by 120 px |
 | 2 | Firms | Picture cols 1–7, text cols 9–12 |
 | 3 | Requests | Text cols 1–4, picture cols 6–12 |
 | 4 | The proof | Picture cols 1–7, text cols 9–12 |
@@ -958,8 +958,8 @@ DESKTOP 1440 × 900 (below the 44 px beta strip and 72 px header)
 ```
 
 **Type and buttons.** Kicker in Atkinson Next 650, 16 px, Slate, with the 10 px Doorlight in Lamp.
-The h1 in Fraunces 80/84, weight 440, SOFT 20, Ink; balance breaks it into four lines in five
-columns. The sub in the lede style, 22/34, Slate, max 30 em. Then "Run a free rehearsal" (primary,
+The h1 in Fraunces 72/76, weight 440, SOFT 20, Ink; balance breaks it into four lines across six
+columns (about 608 px). The sub in the lede style, 22/34, Slate, max 30 em. Then "Run a free rehearsal" (primary,
 Lamp, 56 px on the hero) and "See pricing" as a quiet arrow link (Ink, 17 px, 650, a 1 px underline
 that grows to 2 px on hover, and a → that moves 3 px). 24 px between them.
 
