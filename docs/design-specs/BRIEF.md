@@ -75,9 +75,15 @@ image's alt text, say), mark it `[copy needed]`.
 
 ## The home page (locked order and words)
 
-About 330 words. Each section is a short text column beside a **picture**. The pictures are plain
-HTML stand-ins today (`web/components/landing/Visuals.tsx`, each labeled as an example) and are
+About 330 words. Today each section is a short text column beside a **picture**. The pictures are
+plain HTML stand-ins (`web/components/landing/Visuals.tsx`, each labeled as an example) and are
 **yours to design**: they are the core of this job.
+
+**All visuals are yours, including where they go and how many there are.** The seven stand-ins
+below are only what's there today, not a requirement. Use more pictures or fewer, put them in
+different places, merge or split them, drop one, add new ones (in sections that have none, between
+sections, behind the type, on the other pages), or change how text and pictures sit together. The
+only fixed things are the words and their order.
 
 | # | Section | The copy (headline) | The picture to design (today's stand-in) |
 |---|---|---|---|
@@ -127,8 +133,9 @@ branded pages: that is where people decide. Then carry the visual language throu
    commission (by kind of artist or studio, not named people), shot lists and briefs.
 8. **Motion**: the moments that move, how, and why they sell the copy.
 9. **The home page, section by section**: for each of the 9 sections, the full visual treatment
-   with the real copy placed, and **each of the seven pictures designed in full** (what it shows,
-   composition, style, states, motion), desktop and phone layouts (ASCII wireframes welcome).
+   with the real copy placed, and **every picture you use designed in full** (what it shows,
+   composition, style, states, motion), whether it replaces a stand-in or is your own addition,
+   with desktop and phone layouts (ASCII wireframes welcome).
 10. **The other pages**: the seven pages behind the home page, then every other surface above.
 11. **Components**: the look of buttons, fields, cards, the proof, chips, price cards, tables,
     navigation.

@@ -2,9 +2,9 @@
 
 **Letterhead in Daylight**
 
-Jun Watanabe, interaction designer, Tokyo. Spec 04 of 10. Written against BRIEF.md v2 (Nov 26, 2026) and the locked copy in `web/app/page.tsx`.
+Jun Watanabe, interaction designer, Tokyo. Spec 04 of 10. Written against BRIEF.md v3 (Nov 26, 2026) and the round 3 copy: `web/app/page.tsx`, the seven pages behind it (How it works, For firms, What we file, Pricing, Security, Questions, For platforms) and the picture stand-ins in `web/components/landing/Visuals.tsx`.
 
-Every word quoted on these pages comes from the repo. Where a design needs a word that doesn't exist yet, I mark it `[copy needed]`. I have changed nothing in the copy, its order or its tone. Everything else, I have redrawn.
+Every word quoted on these pages comes from the repo. Where a design needs a word that doesn't exist yet, I mark it `[copy needed]`. I have changed nothing in the copy, its order, its prices or its tone. Everything else, I have redrawn. The home page now has about 330 words, so the pictures carry it, and most of this spec is about those pictures.
 
 ---
 
@@ -14,11 +14,11 @@ I trained as an industrial designer, so I think about the hand before the screen
 
 What I bring to CoFile:
 
-- **Paper, as stationery rather than storage.** A firm's letterhead is something it is proud of. I want every page a client sees to feel like that letterhead.
+- **Paper, as stationery rather than storage.** A firm's letterhead is something it is proud of. I want every page a client sees, and the proof the firm approves, to feel like that letterhead.
 - **Light.** One consistent light source on the whole site, real shadows, real time of day. Light is how a screen feels calm without being empty.
 - **Ma (間).** Meaningful empty space. The empty space on the page is where the firm's name goes.
 - **Motion that has weight.** Paper lifts before it moves, settles when it lands, folds along a crease. Nothing bounces or flashes.
-- **Mobile first, by conviction.** The client who approves the proof is standing in a bakery at six in the morning with flour on her hands. I design that screen first and the desktop second.
+- **Mobile first, by conviction.** The client who fills in the firm's form is standing in a bakery at six in the morning with flour on her hands. The firm owner who approves the proof is often on her phone too, between two meetings. I design those screens first and the desktop second.
 
 ---
 
@@ -26,27 +26,35 @@ What I bring to CoFile:
 
 ### The one idea
 
-**Every page your client sees is your firm's own letterhead, lying on a calm desk in daylight. CoFile is the paper underneath and one small line at the foot.**
+**Your firm's own letterhead, lying on a calm desk in daylight. Every page your client sees is a sheet of it, and so is the proof you approve. CoFile is the paper underneath and one small line at the foot.**
 
-Think of a sheet of good letterhead on a desk by a window in the morning. At the head is the firm's name and its color. The sheet itself is quiet, generous and well made. At the very foot, where a fine printer puts its imprint, is a small line: "with CoFile". That picture is the brand. Each part of it answers part of the copy's story:
+Think of a sheet of good letterhead on a desk by a window in the morning. At the head is the firm's name and its color. The sheet itself is quiet, generous and well made. At the very foot, where a fine printer puts its imprint, is a small line: "with CoFile". That picture is the brand.
+
+The firm's **filing desk** is then exactly what its name says: a real desk in that same light, where the firm's sheets come and go. The hero shows it. Every other picture on the home page is one sheet on that desk at a different hour of the day.
+
+Each part of the picture answers part of the copy's story:
 
 | The selling story (locked copy) | What the picture does |
 |---|---|
-| **Your firm, your client, your name.** "Your name on the door. Ours in small print." | The head of every sheet is kept empty for the firm: its logo, its painted color edge, its font. CoFile's mark is literally a blank letterhead, a sheet whose head is left for you. "with CoFile" sits at the foot like a printer's imprint. |
-| **Effortless for everyone.** "You start it. Your client approves it. CoFile files it." | One sheet travels across one desk. It is filled in (typed by CoFile), handed to the client, folded like a letter and sent. Daylight and air make it feel easy. Nothing on the page shouts. |
-| **A client experience to be proud of.** "Your client sees what the state will see, before the state does." | The proof is the most beautifully made sheet on the site: a printer's proof on fine paper, with the firm's name at the top, every value typed in a typewriter face, the fees totalled the way an accountant totals them, and one button. |
-| **It does the work and brings the results home.** "The papers come back to you." | The letter goes out folded in thirds and comes back as an envelope addressed to the firm, holding the state's documents bound with a paper band (an obi) that bears the client's business name. |
-| **Try it free, for real.** "Rehearse on the real stage." | Rehearsals have their own warm color, kaki (persimmon), the color of first light. The main button, "Run a free rehearsal", is the same color, so "try it" is always the warmest thing on the page. |
+| **Say yes, under your own name.** "Your client needs an LLC. Say yes, under your own name." | The hero is the firm's filing desk in the morning, its name at the head in its own color, its clients' filings lying on it as paper slips. The first thing a firm owner sees is their own kind of name, looking proud. |
+| **Your brand on everything.** "Your name on the door. Ours in small type." | The head of every sheet is kept empty for the firm: its logo, a painted color edge, its font. CoFile's mark is literally a blank letterhead, a sheet whose head is left for you. "with CoFile" sits at the foot like a printer's imprint, in small type. |
+| **Nobody retypes anything.** "Your client sends a text. Nobody retypes it." | The client's words lift out of the text bubble and settle onto the draft as typed values. No hands on a keyboard anywhere in the picture. Saved answers arrive in their own quiet ink. |
+| **You stay in charge.** "Nothing is filed or paid until you approve the proof." | The proof is a printer's proof of the firm's own work, on fine paper, its letterhead at the top, every value typed, the fees totalled the way an accountant totals them, and one button. Firm owners have approved proofs of their business cards and letterhead before; this looks and feels like that. One press and the sheet folds in thirds like a letter and goes. |
+| **It's done, and the papers come back.** "Then it's filed, and the papers come back to you." | The letter comes back as an envelope addressed to the firm, holding the state's document and the IRS letter, bound with a paper band (an obi) that carries the client's business name. |
+| **The filings your clients already ask for.** New York, New Jersey, Florida and the IRS. | Four cards laid side by side on the desk, one per place, each listing its filings with a small sheet glyph that fills as a filing type gets closer to live. |
+| **Try it free.** "In beta: rehearse a filing, free." "Run one rehearsal. Then decide." | Rehearsals have their own warm color, kaki (persimmon), the color of first light. The main button, "Run a free rehearsal", is the same color, so "try it" is always the warmest thing on the page. |
+| **Simple prices.** "$45 a filing. EIN included with a formation." | A rate card, printed on thick cotton card stock the way a good stationer prints its prices: large, plain figures, nothing hidden in small type except our name. |
+| **People behind it.** "Built and run by filing professionals. When a filing needs a person, one of them takes over." | The filing professionals are photographed at their own desks, in the same daylight, and appear small and warm wherever that line appears. |
 
 ### One working day
 
 The light on the site follows one good working day. At the top of the home page it is early morning: low light from the left, cool shadows, a window frame softly crossing the desk. As you scroll, the light climbs to midday and then turns into late-afternoon gold from the right. By the close, "Run one rehearsal. Then decide.", the sun is low and warm on a blank sheet of letterhead waiting for your firm's name.
 
-The story reads in that light: you start a filing in the morning, your client approves it before lunch, and the papers come back to your desk in the afternoon. Nobody is told this. It is felt, the way you feel the time of day in a room.
+The home page reads in that light: your client's text arrives in the morning, you approve the proof before lunch, and the papers come back to your desk in the afternoon. Nobody is told this. It is felt, the way you feel the time of day in a room. The pages behind the home page each keep one hour: How it works and For firms are mid-morning, What we file and Pricing are midday, Security and Questions are a calm, even overcast light, For platforms is late afternoon.
 
 ### What the concept is not
 
-It is not a filing cabinet, a folder, a seal, a stamp, a lock or a vault. I resisted the hanko, the Japanese approval seal, even though it is the most obvious thing for me to draw: a seal says "verified", and this brand is about "yours". The checks and the security sections are designed carefully and quietly, where the copy puts them, in a slightly smaller room. The light, the brand and the motion belong to the firm, its client and the ease.
+It is not a filing cabinet, a folder, a seal, a stamp, a lock or a vault. I resisted the hanko, the Japanese approval seal, even though it is the most obvious thing for me to draw: a seal says "verified", and this brand is about "yours". On the home page, security is one quiet line and a link at the foot of the pricing section; the checks live on How it works and the details on the Security page. They are designed carefully, in a slightly smaller room. The light, the brand and the motion belong to the firm, its clients and the ease.
 
 ---
 
@@ -106,23 +114,23 @@ A portrait sheet of paper whose top third is solid ink: a letterhead with the he
 - **Horizontal**: mark height = 1.3 × the wordmark's cap height. Gap = 0.45 × mark width. The mark's bottom edge sits on the baseline, so the head of the sheet rises above the cap height, a small sheet standing on the line of type.
 - **Stacked**: mark above, centered, gap = 0.5 × head height, wordmark below at 1.6 × the mark's width.
 - **Top bar size**: wordmark cap height 15 px on desktop, 14 px on phone.
-- **The tagline lockup**, used only at the close of the home page: mark, then "Approve the proof. Then it's filed." set in GT Alpina Regular 20 px. No wordmark.
+- **No tagline lockup.** The round 3 copy has no tagline, so the mark and wordmark never carry one.
 
-### 3.4 The "with CoFile" imprint
+### 3.4 "Ours in small type": the "with CoFile" imprint
 
-This is the most important piece of the identity, because it is the only sign of us a firm's client will ever see. It works like a fine printer's imprint at the foot of a sheet: present, quiet, never competing.
+"Your name on the door. Ours in small type." This imprint is that line made visible, and it is the most important piece of the identity, because it is the only sign of us a firm's client will ever see. It works like a fine printer's imprint at the foot of a sheet: present, quiet, never competing.
 
 - **Text**: "with" in Whitney Book, lowercase, followed by the CoFile wordmark drawing (not typed), x-heights aligned.
-- **Size**: "with" at 14 px. The wordmark is scaled so its cap height is 10 px. Never larger on any client-facing surface, on any screen size.
+- **Size**: "with" at 14 px. The wordmark is scaled so its cap height is 10 px. Never larger on any firm or client surface, on any screen size. This is the literal "small type": 14 px is also the smallest size anywhere on the site, so nothing of ours is ever bigger than the least important word on the firm's page.
 - **Color**: Usuzumi (#5E6166) on paper. Never the firm's color, never kaki.
-- **Placement on a client sheet** (proof, intake form, emails, decision page): centered at the foot of the sheet, 40 px below the last content. Above it, a 1 px Kage hairline 40 px wide, 12 px above the text. Nothing else in the foot.
+- **Placement on a sheet the client sees** (the firm's filing page, the client intake form, client link pages, emails to the client) **and on the proof the firm approves**: centered at the foot of the sheet, 40 px below the last content. Above it, a 1 px Kage hairline 40 px wide, 12 px above the text. Nothing else in the foot.
 - **Placement on the filing desk** (firm staff): in the top bar, right after the firm's name, separated by a middle dot: `[logo] Harbor & Pine CPA · with CoFile`.
 - **In the embed widget**, the existing words "Filed with CoFile" at the widget's foot, same style.
-- **Motion rule**: on every surface where the firm's brand animates (the setup preview, the home-page demo), the imprint is the one element that never moves. Everything around it may change. It stays exactly where it is, the same size, the same grey.
+- **Motion rule**: on every surface where the firm's brand animates (the setup preview, the two-firms picture on the home page), the imprint is the one element that never moves. Everything around it may change. It stays exactly where it is, the same size, the same grey.
 
 ### 3.5 How a firm's logo sits on its pages: the head of the sheet
 
-Every firm-facing and client-facing sheet has a **head**: a band at the top kept for the firm, in the same proportion as the mark's head. This is where a firm's brand lives, and the rules below exist so that any firm, with any logo, any color and any of the twelve fonts, looks as good as Harbor & Pine.
+Every firm-facing and client-facing sheet has a **head**: a band at the top kept for the firm, in the same proportion as the mark's head. This is where a firm's brand lives, and the rules below exist so that any firm, with any logo, any color and any of the ten preset fonts (or its own uploaded font), looks as good as Harbor & Pine CPA and Northgate Payroll do in the home-page pictures.
 
 ```
  ┌═════════════════════════════════════════════════┐  ← painted edge, 4 px, firm main color
@@ -174,7 +182,7 @@ Shadows are cool and the light is warm, as in real daylight: shadows on a sunny 
 | Token | Name | Hex | Use | Contrast note |
 |---|---|---|---|---|
 | `--ground` | **Morning** | `#ECEEED` | The desk: page background on CoFile's own pages | Sumi on it 13.8:1 |
-| `--ground-shade` | Shade | `#E3E6E6` | The "smaller rooms": support sections (checks, catch, security), table headers | |
+| `--ground-shade` | Shade | `#E3E6E6` | The "smaller rooms": the checks on How it works, the Security page's ground, table headers | |
 | `--paper` | **Washi** | `#FCFBF8` | Every sheet: the proof, forms, cards, emails | Sumi on it 15.6:1 |
 | `--paper-back` | Paper back | `#F4F3EF` | Insets on a sheet, the back of a folding sheet, code blocks | |
 | `--ink` | **Sumi** | `#22211F` | Text, the mark, secondary button borders | |
@@ -198,7 +206,7 @@ In dark mode the window is dark and a warm desk lamp takes over. The desk goes d
 | `--ground` | `#16171A` | Night desk |
 | `--ground-shade` | `#1B1D20` | Support rooms |
 | `--surface` | `#1F2125` | Desk furniture: nav, dashboard panels, list rows |
-| `--paper` | `#ECEAE4` | **Client paper stays paper**, dimmed so it doesn't glare: the proof, forms, the letterhead preview, emails |
+| `--paper` | `#ECEAE4` | **Paper stays paper**, dimmed so it doesn't glare: the proof, the client's forms and link pages, the letterhead preview, emails, the home-page pictures |
 | `--paper-back` | `#E2E0D9` | |
 | `--ink-on-ground` | `#ECEAE5` | Text on the dark desk, 14.9:1 |
 | `--ink` | `#22211F` | Text on paper, unchanged |
@@ -215,8 +223,9 @@ The light layer in dark mode is a warm pool from a lamp at the upper right, `rad
 
 ### 4.4 How color is used
 
-- **On CoFile's own pages** (home, sign-up, log in, docs, legal): Morning desk, Washi sheets, Sumi ink. Kaki appears in exactly three roles: the primary button, the rehearsal chip and the proofreader's numerals on sample proofs. If you squint at the home page you should see grey, white, black, and a few warm points of persimmon that all mean "try it".
-- **On the firm's pages** (filing desk, service pages, intake form, the proof, emails): the same Morning desk and Washi sheets, Sumi ink, and the firm's colors as set out in 3.5. No kaki, no ai, no CoFile color. Status dots are the one semantic exception on the filing desk, which is staff-facing.
+- **On CoFile's own pages** (home, How it works, For firms, What we file, Pricing, Security, Questions, For platforms, sign-up, log in, docs, legal): Morning desk, Washi sheets, Sumi ink. Kaki appears in exactly three roles: the primary button, the rehearsal chip and the proofreader's numerals on sample proofs. If you squint at the home page you should see grey, white, black, two example firms' colors inside the pictures, and a few warm points of persimmon that all mean "try it".
+- **Inside the home-page pictures**, the example firms' own colors lead: Harbor & Pine CPA in a deep harbor teal (`#1E5A5C`, with a second color of `#C9A45C`, a weathered brass), Northgate Payroll in a confident brick red (`#A8452F`, second color `#2E3A4C`, slate). These are the firms' colors, invented by the brand designer who draws their logos (see 7.6). They prove that CoFile's quiet palette makes room for any firm's color.
+- **On the firm's pages** (filing desk, the proof, filing pages, intake form, client link pages, emails): the same Morning desk and Washi sheets, Sumi ink, and the firm's colors as set out in 3.5. No kaki, no ai, no CoFile color. Status dots are the one semantic exception on the filing desk, which is staff-facing.
 - **Rehearsal on the firm's pages** can't use kaki, so it uses a neutral "trial print" treatment that works with any firm color: a chip with a 1 px dashed Sumi border, and a notice on a faint diagonal hatch (1 px lines of Sumi at 5% opacity, 6 px apart, 45°), the way a printer marks a test sheet.
 - **The coverage stages** are told by a glyph and a word, never by color alone (see 11.6).
 - **Shadows** are always mixed from Sky shadow (`#2A3550`) and always fall away from the current light (see 8.2).
@@ -254,7 +263,8 @@ Sizes are in px at the default browser text size and are set in rem, so they gro
 |---|---|---|---|---|---|---|
 | `display-1` | Alpina Regular | 72 / 76 | 56 / 62 | 40 / 46 | −0.015em | The hero H1 |
 | `display-2` | Alpina Regular | 52 / 58 | 42 / 48 | 32 / 38 | −0.01em | Section headings (H2) |
-| `display-3` | Alpina Regular | 34 / 42 | 30 / 38 | 26 / 33 | −0.005em | The close's tagline, proof titles, page titles on the desk |
+| `figure-xl` | Alpina Regular, tabular lining figures | 64 / 64 | 56 / 56 | 48 / 48 | −0.02em | The price figures on the rate card and the Pricing page ("$25", "$15", "$250") |
+| `display-3` | Alpina Regular | 34 / 42 | 30 / 38 | 26 / 33 | −0.005em | Proof titles, plan names, page titles on the desk, state names on the coverage cards |
 | `heading` | Whitney Semibold | 22 / 30 | 21 / 29 | 20 / 28 | 0 | H3, card titles, step leads |
 | `lede` | Whitney Book | 22 / 34 | 21 / 32 | 19 / 30 | 0 | Section ledes, the hero sub |
 | `body` | Whitney Book | 19 / 30 | 18 / 29 | 18 / 28 | 0 | Body text, list items |
@@ -284,10 +294,10 @@ Sizes are in px at the default browser text size and are set in rem, so they gro
 
 There is one layout idea under everything: **the page is a desk; some things lie on it as sheets.**
 
-- What CoFile says to the firm (headlines, ledes, lists) is printed directly on the desk.
-- What the firm's client will see (the proof, the form, an email, the letterhead) is always a **sheet**: Washi paper, a 4 px corner radius, a real shadow, a little rotation when it is resting casually (never on a working page).
+- What CoFile says to the firm (headlines, ledes, the short lists) is printed directly on the desk.
+- Everything that carries the firm's name (the filing desk, the client's form and link pages, the proof the firm approves, an email, the state's papers coming back) is always a **sheet**: Washi paper, a 4 px corner radius, a real shadow, a little rotation when it is resting casually (never on a working page).
 
-So on the home page you can always see, at a glance, which parts are "your client's experience". They are objects. They have weight. You want to pick them up.
+So on the home page you can always see, at a glance, which parts are "yours". They are objects. They have weight. You want to pick them up. With only about 330 words, the sheets are the page: each section is a short column of words on the desk beside one large sheet.
 
 ### 6.2 Grid
 
