@@ -1,0 +1,39 @@
+/* Page not found and Something went wrong (merged spec 10A.16). Reads semantic tokens inside .reg-cofile. */
+@layer components {
+
+/* ── Page not found: the blank plate engraved large, flush left in c4–c9 ─────────────────────────────────── */
+.nf2 { padding-block: 128px 160px; }
+.nf2-in { max-width: calc((100% - 11 * 24px) / 12 * 6 + 5 * 24px); margin-left: calc((100% - 11 * 24px) / 12 * 3 + 3 * 24px); }
+.nf2-h1 { margin-top: 48px; color: var(--text); }
+.nf2-lede { margin-top: 16px; color: var(--text); }
+.nf2-btn { margin-top: 48px; }
+@media (max-width: 1023px) { .nf2 { padding-block: 96px 128px; } .nf2-in { max-width: 588px; margin-left: 0; } }
+@media (max-width: 639px) { .nf2 { padding-block: 64px 80px; } .nf2-h1 { margin-top: 32px; } .nf2-btn { width: 100%; margin-top: 32px; } }
+
+/* ── Something went wrong: a minimal header, one calm card ────────────────────────────────────────────────── */
+.err2 { --site-pad: 120px; min-height: 100vh; background: var(--page); color: var(--text); }
+@media (max-width: 1439px) { .err2 { --site-pad: max(48px, calc((100vw - 1200px) / 2)); } }
+@media (max-width: 1023px) { .err2 { --site-pad: 40px; } }
+@media (max-width: 639px) { .err2 { --site-pad: 20px; } }
+.err2-head { border-bottom: 1px solid var(--line); }
+.err2-in { box-sizing: border-box; display: flex; align-items: center; height: 76px; max-width: calc(1200px + 2 * var(--site-pad)); margin-inline: auto; padding-inline: var(--site-pad); }
+.err2-home { display: inline-flex; color: var(--text); text-decoration: none; }
+.err2-main { padding: 96px var(--site-pad) 128px; }
+.err2-ctas { display: flex; flex-wrap: wrap; gap: 16px; margin-top: 32px; }
+.err2-ref { margin-top: 24px; }
+.err2-digest { font: 400 0.9375rem/1.375rem var(--font-mono); padding: 0 4px; background: var(--page-2); color: var(--text); border-radius: var(--r-sheet); user-select: all; overflow-wrap: anywhere; }
+@media (max-width: 639px) {
+  .err2-in { height: 64px; }
+  .err2-in .lockup2 { --lockup-h: 24px; }
+  .err2-main { padding-block: 32px 64px; }
+  .err2-ctas { flex-direction: column; gap: 12px; margin-top: 24px; }
+  .err2-ctas .btn2 { width: 100%; }
+}
+/* The root layout's beta notice stays above it, set as the site's quiet slip */
+body:has(.err2) > .beta-banner {
+  display: block; text-align: left; padding: 12px max(20px, calc((100vw - 1200px) / 2)); background: var(--cotton-2); color: var(--graphite);
+  border-bottom: 1px solid var(--rule); font: 400 0.9375rem/1.4375rem var(--font-sans);
+}
+body:has(.err2) > .beta-banner strong { display: inline-block; margin-right: 10px; padding: 0 7px; font-weight: 500; color: var(--ink); border: 1.5px dashed var(--ink); border-radius: 3px; }
+body:has(.err2) > .beta-banner a { color: var(--ink); text-decoration-color: var(--brass-line); text-underline-offset: 3px; }
+}
