@@ -5,6 +5,7 @@ import { parseApiKeys, parseStaffKeys } from "./api/keys.js";
 import { exitOnStartupProblems } from "./startup-check.js";
 import { purgeSensitive } from "./store/sensitive.js";
 import { GoogleIdTokens } from "./users/google.js";
+import { ResendDomains } from "./comms/resend-domains.js";
 
 /**
  * Cloud tier: API + approval pages + webhook delivery. With WORKER_ENABLED=true the
@@ -25,6 +26,8 @@ const app = buildServer({
   google: config.googleClientId ? new GoogleIdTokens({ clientId: config.googleClientId }) : undefined,
   // Partner sign-ups wait for approval unless this is set to "automatic".
   partnerSignupMode: process.env.PARTNER_SIGNUP_MODE === "automatic" ? "automatic" : "approval",
+  emailDomains: config.email.resendApiKey ? new ResendDomains({ apiKey: config.email.resendApiKey, apiBase: config.email.resendApiBase }) : undefined,
+  platformEmailDomains: [config.email.from.replace(/^.*@/, "").replace(/>.*$/, "").trim().toLowerCase()].filter(Boolean),
   email: sys.email, webBaseUrl: config.webBaseUrl, platformName: config.platformName, webhooks: sys.webhooks, secrets: sys.secrets ?? undefined,
 });
 

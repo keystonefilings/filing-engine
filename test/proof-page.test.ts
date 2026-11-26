@@ -97,6 +97,14 @@ describe("filing titles", () => {
 });
 
 describe("type on the proof", () => {
+  it("loads CoFile's faces from the web app in CoFile's look only", () => {
+    const cofile = renderReviewPage({ ...base, look: "cofile", firmName: "F", fontBase: "https://cofile.app/" });
+    expect(cofile).toContain('src:url("https://cofile.app/fonts/miller-text-400.woff2")');
+    expect(cofile).toContain('font-family:"Founders Grotesk"');
+    const white = renderReviewPage({ ...base, look: "white", brandName: "P", primaryColor: "#1D4E63", fontBase: "https://cofile.app/" });
+    expect(white).not.toContain("/fonts/miller-text");
+  });
+
   it("uses CoFile's serif only in CoFile's look", () => {
     const cofile = renderReviewPage({ ...base, look: "cofile", firmName: "F" });
     const white = renderReviewPage({ ...base, look: "white", brandName: "P", primaryColor: "#1D4E63" });

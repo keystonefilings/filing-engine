@@ -27,7 +27,7 @@
 .logof2-grid img { display: block; max-width: 100%; max-height: 80px; }
 .logof2-sheet { display: flex; align-items: center; gap: 12px; min-height: 104px; padding: 12px 16px; background: #fff; color: #1D2130; border: 1px solid var(--line); color-scheme: light; }
 .logof2-sheet img { display: block; max-height: 40px; max-width: 60%; width: auto; object-fit: contain; }
-.logof2-name { font: 600 1rem/1.25rem var(--font-firm, var(--font-sans-display)); min-width: 0; overflow-wrap: anywhere; }
+.logof2-name { font: 600 1rem/1.25rem var(--font-firm, var(--font-sans-display)); min-width: 0; overflow-wrap: break-word; }
 .logof2-file { display: block; }
 .logof2-bay.has-logo .logof2-file { grid-column: 1 / -1; }
 .logof2-file input[type="file"] { font: 400 0.9375rem/1.25rem var(--font-sans); color: var(--text-2); max-width: 100%; }

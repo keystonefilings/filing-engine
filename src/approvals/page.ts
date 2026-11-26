@@ -21,6 +21,26 @@ export interface PageLook {
   secondaryColor?: string;
   font?: { stack: string; href?: string; fileUrl?: string };
   supportEmail?: string;
+  /**
+   * CoFile's look: the web app's address, where its licensed fonts are served (web/lib/licensed-fonts.ts), so the proof
+   * sets in Miller and Founders Grotesk like the desk. Where the files aren't there, the faces fall back as before.
+   */
+  fontBase?: string;
+}
+
+/** CoFile's faces from the web app, with the same metric overrides it uses (web/lib/licensed-fonts.ts). */
+function cofileFaces(base: string): string {
+  const b = base.replace(/\/+$/, "");
+  const face = (family: string, file: string, weight: string, style: string, asc: string, desc: string) =>
+    `@font-face{font-family:"${family}";src:url("${esc(b)}/fonts/${file}.woff2") format("woff2");font-weight:${weight};font-style:${style};font-display:swap;ascent-override:${asc};descent-override:${desc};line-gap-override:0%}`;
+  return `<style>${[
+    face("Miller Text", "miller-text-400", "400", "normal", "95%", "25%"),
+    face("Miller Text", "miller-text-400-italic", "400", "italic", "95%", "25%"),
+    face("Miller Text", "miller-text-600", "500 700", "normal", "95%", "25%"),
+    face("Founders Grotesk", "founders-grotesk-400", "400", "normal", "81.5%", "18.5%"),
+    face("Founders Grotesk", "founders-grotesk-500", "500", "normal", "81.5%", "18.5%"),
+    face("Founders Grotesk", "founders-grotesk-600", "600 700", "normal", "81.5%", "18.5%"),
+  ].join("")}</style>`;
 }
 
 export function esc(s: unknown): string {
@@ -133,7 +153,7 @@ export const DASH = `<svg class="dash" aria-hidden="true" preserveAspectRatio="n
 export function pageTop(p: PageLook, title: string): string {
   const fontLinks = p.look === "white" && p.font
     ? `${p.font.href ? `<link rel="stylesheet" href="${esc(p.font.href)}">` : ""}${p.font.fileUrl ? `<style>@font-face{font-family:"FirmFont";src:url("${esc(p.font.fileUrl)}");font-display:swap}</style>` : ""}`
-    : "";
+    : p.look === "cofile" && p.fontBase ? cofileFaces(p.fontBase) : "";
   let head = "";
   if (p.look === "cofile") {
     const named = [p.firmName, p.clientName].filter(Boolean).map(esc).join(" · ");
