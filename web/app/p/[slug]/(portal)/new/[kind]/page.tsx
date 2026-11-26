@@ -1,4 +1,6 @@
 import Link from "next/link";
+import "@/styles/components/intake.css";
+import "@/styles/components/desk.css";
 import { notFound } from "next/navigation";
 import { firmContext, liveFilings, offeredKinds } from "@/lib/firm";
 import { IntakeForm } from "@/components/IntakeForm";
@@ -51,7 +53,7 @@ export default async function NewKindPage({ params, searchParams }: { params: Pr
       {emailed ? <p className="notice">Filled in from your message &ldquo;{emailed.subject || "(no subject)"}&rdquo;. Check every answer and add what&apos;s missing.</p> : null}
       {!liveFilings(kind.id) ? <p className="notice warn">Rehearsal: {kind.title} isn&apos;t live yet, so this filing is a rehearsal. {platformName()} fills in every screen of the state&apos;s real website and stops before the last button. Nothing is filed or paid. Each filing type goes live once it&apos;s verified on the state&apos;s website. To ask when this one will, email <a href={`mailto:${supportEmail()}`}>{supportEmail()}</a>.</p> : null}
       {clients.length ? (
-        <form method="get" className="row" style={{ gap: 8 }}>
+        <form method="get" className="row desk2-from">
           <label htmlFor="from-client" className="small">Start from a client you filed for before</label>
           <select id="from-client" name="from" defaultValue={from ?? ""}>
             <option value="">New client</option>
@@ -60,6 +62,7 @@ export default async function NewKindPage({ params, searchParams }: { params: Pr
           <button className="btn small" type="submit">Fill in</button>
         </form>
       ) : null}
+      <div className="intake2">
       <IntakeForm
         kind={kind}
         nonce={newNonce()}
@@ -71,6 +74,7 @@ export default async function NewKindPage({ params, searchParams }: { params: Pr
         prefill={{ ...(Object.keys(fromEmail).some((k) => k.startsWith("contact.")) ? {} : contactPrefill(company)), ...saved, ...fromClient, ...fromEmail }}
         key={from ?? email ?? "new"}
       />
+      </div>
     </div>
   );
 }

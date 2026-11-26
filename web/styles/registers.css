@@ -19,6 +19,7 @@
   --select: var(--ink); --select-on: #fff; --select-fill: var(--brass-tint); --select-line: var(--ink);
   --row: var(--cotton-2); --halo: var(--brass-tint); --bullet: var(--brass-line);
   --turn: var(--ochre); --turn-tint: var(--ochre-tint);
+  --filled: var(--brass-tint); --filled-edge: var(--brass-line);
   --font-firm: var(--font-sans-display);
   background: var(--page); color: var(--text);
 }
@@ -38,6 +39,7 @@
   --select: var(--firm-fill); --select-on: var(--firm-on); --select-fill: var(--firm-row); --select-line: var(--firm-select-line, var(--firm-fill));
   --row: var(--firm-row); --halo: color-mix(in srgb, var(--firm-tint) 50%, transparent);
   --bullet: var(--firm); --turn: var(--firm-ink); --turn-tint: #fff;
+  --filled: var(--firm-row); --filled-edge: var(--firm);
   background: var(--page); color: var(--text);
   /* A firm's pages stay on light paper in dark mode: its logo and colors were chosen for white (4.6). */
   color-scheme: light;

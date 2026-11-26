@@ -1,0 +1,91 @@
+/* The filing desk's own pieces (merged spec 10B.4 to 10B.7), in CoFile's look inside the shell. */
+@layer components {
+/* Head: the page title and the page's one Brass button on one baseline */
+.desk2-head { display: flex; align-items: center; gap: 16px 24px; flex-wrap: wrap; margin-bottom: 32px; }
+.desk2-head h1 { margin: 0; flex: 1 1 auto; }
+@media (max-width: 599px) { .desk2-head { flex-direction: column; align-items: stretch; } }
+.desk2-notices { display: grid; gap: 16px; margin-bottom: 32px; }
+.desk2-notices a { font-weight: 500; }
+
+/* The ledger: a white sheet, the table edge to edge; head 44 px on Cotton 2; rows 16 px padded, hairlines between */
+.ledger2 { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-sheet); overflow: hidden; }
+.ledger2 table { width: 100%; border-collapse: collapse; font: 400 1rem/1.375rem var(--font-sans); table-layout: fixed; }
+.ledger2 thead th { height: 44px; padding: 0 16px; vertical-align: middle; font: 500 0.875rem/1.125rem var(--font-sans); color: var(--text-2); text-align: left; background: var(--page-2); border-bottom: 1px solid var(--line); }
+.ledger2 thead th:nth-child(1) { width: 24%; } .ledger2 thead th:nth-child(2) { width: 22%; } .ledger2 thead th:nth-child(3) { width: 16%; }
+.ledger2 thead th:nth-child(4) { width: 26%; } .ledger2 thead th:nth-child(5) { width: 12%; }
+.ledger2 .is-date, .ledger2-date { text-align: right; }
+.ledger2 tbody tr { position: relative; transition: background-color var(--t-quick) var(--ease-settle); }
+.ledger2 tbody tr + tr > * { border-top: 1px solid var(--line); }
+.ledger2 tbody :is(th, td) { padding: 16px; vertical-align: top; text-align: left; font-weight: 400; background: none; }
+.ledger2 tbody .ledger2-date { text-align: right; }
+@media (hover: hover) { .ledger2 tbody tr:hover { background: var(--row); } }
+.ledger2 tbody tr:has(a:focus-visible) { outline: 2px solid var(--focus); outline-offset: -2px; }
+.ledger2 tbody tr.is-turn > :first-child { box-shadow: inset 3px 0 0 var(--ochre); }
+/* The name is the row's link, stretched over the whole row */
+.ledger2-name { display: table-cell; }
+.ledger2-name a { font: 500 1rem/1.375rem var(--font-sans); color: var(--link); text-decoration: underline; text-decoration-color: var(--link-line); text-decoration-thickness: 1px; text-underline-offset: 3px; margin-right: 8px; }
+.ledger2-name a::after { content: ""; position: absolute; inset: 0; }
+.ledger2-name a:focus-visible { outline: none; }
+.ledger2-name .chip2 { margin-top: 4px; }
+.ledger2-who { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 8px; }
+.ledger2-detail { display: block; margin-top: 2px; font-size: 0.9375rem; line-height: 1.4375rem; color: var(--text-2); overflow-wrap: anywhere; }
+.ledger2-team { color: var(--text-2); }
+.ledger2-type { font-size: 0.9375rem; line-height: 1.4375rem; }
+.ledger2-status .stage { display: flex; margin-top: 6px; }
+.ledger2-date { font-size: 0.9375rem; color: var(--text-2); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.shell2-content .stage .small { font-size: inherit; line-height: inherit; }
+
+/* Phone: each row a card, 12 px apart, the whole card the link; waiting cards keep the Ochre edge */
+@media (max-width: 759px) {
+  .ledger2 { background: none; border: 0; overflow: visible; }
+  .ledger2 table, .ledger2 tbody { display: block; }
+  .ledger2 thead { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
+  .ledger2 tbody tr { display: grid; grid-template-columns: 1fr auto; gap: 4px 12px; padding: 16px; background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-sheet); }
+  .ledger2 tbody tr + tr { margin-top: 12px; }
+  .ledger2 tbody tr + tr > * { border-top: 0; }
+  .ledger2 tbody :is(th, td) { display: block; padding: 0; }
+  .ledger2 tbody tr.is-turn { box-shadow: inset 3px 0 0 var(--ochre); }
+  .ledger2 tbody tr.is-turn > :first-child { box-shadow: none; }
+  .ledger2-name { grid-column: 1 / -1; }
+  .ledger2-name a { font-size: 1.0625rem; line-height: 1.5rem; }
+  .ledger2-type { grid-column: 1 / -1; order: 1; color: var(--text-2); }
+  .ledger2-by { grid-column: 1 / -1; order: 2; font-size: 0.9375rem; }
+  .ledger2-status { grid-column: 1; order: 3; margin-top: 8px; }
+  .ledger2-date { grid-column: 2; order: 4; margin-top: 12px; }
+}
+
+/* The empty desk: the promise, and the firm's own client page live in its brand beside it (10B.4.2) */
+.desk2-empty { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 1fr) minmax(0, 5fr); align-items: start; padding: 48px; background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-sheet); }
+.desk2-empty-text { grid-column: 1; }
+.desk2-empty-text p { margin: 0 0 32px; font: 400 1.125rem/1.75rem var(--font-sans); color: var(--text); max-width: 34ch; }
+.desk2-empty-actions { display: flex; flex-wrap: wrap; gap: 16px; }
+.desk2-empty-picture { grid-column: 3; justify-self: center; }
+@media (max-width: 899px) {
+  .desk2-empty { grid-template-columns: minmax(0, 1fr); gap: 32px; padding: 24px; }
+  .desk2-empty-picture { grid-column: 1; width: 100%; display: flex; justify-content: center; }
+  .desk2-empty-picture .preview2 { width: 320px !important; }
+  .desk2-empty-actions { flex-direction: column; }
+  .desk2-empty-actions .btn { width: 100%; min-height: 56px; }
+}
+
+/* A preview of a client page: the firm's sheet, cropped by a straight edge, inert */
+.preview2 { position: relative; overflow: hidden; border-radius: var(--r-sheet); box-shadow: var(--e-sheet); pointer-events: none; user-select: none; }
+.preview2-page { height: 100%; }
+.preview2-sheet.sheet2.is-page { display: grid; align-content: start; gap: 12px; height: 100%; padding: 24px 20px; border-radius: 0; box-shadow: none; }
+.preview2 .letterhead2 { margin-bottom: 8px; }
+.preview2 .letterhead2-name { font-size: 1.25rem; line-height: 1.625rem; }
+.preview2 .letterhead2-logo { max-height: 40px; }
+.preview2-title { margin: 4px 0 0; font: 600 1.5rem/1.875rem var(--font-firm, var(--font-sans-display)); color: #1D2130; }
+.preview2-bar { display: block; height: 10px; border-radius: 1px; background: var(--rule); }
+.preview2-label { display: block; width: 32%; height: 10px; margin-top: 12px; border-radius: 1px; background: var(--rule-strong); opacity: .55; }
+.preview2-field { display: block; height: 48px; border: 1px solid var(--rule-strong); border-radius: var(--r-sheet); background: #fff; }
+.preview2-button { display: flex; align-items: center; justify-content: center; min-height: 52px; margin-top: 16px; padding: 0 16px; font: 600 1.0625rem/1.375rem var(--font-firm, var(--font-sans-display)); color: var(--action-on); background: var(--action); border: 1px solid var(--action-border); box-shadow: inset 4px 0 0 var(--action-edge); border-radius: 6px; corner-shape: bevel; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+}
+
+@layer components {
+/* "Start from a client you filed for before": the label over a select and its button */
+.desk2-from { align-items: end; gap: 8px 12px; padding: 20px; background: var(--page-2); border-radius: var(--r-sheet); }
+.desk2-from > label { flex-basis: 100%; margin: 0; }
+.desk2-from > select { flex: 1 1 260px; }
+.desk2-from > .btn { min-height: 48px; }
+}
