@@ -243,6 +243,9 @@ Built and tested; each switches on when its accounts and keys are set (steps in 
   a ticked type is stopped at approval, never paid another way. NJ's portal fee for a saved method
   is quoted at the card or eCheck figure until the signed-in checkout is walked (the payment page's
   fee check stops a run that differs); which option the signed-in page shows is part of that walk.
+- **Copy and branding, round 2 (Yakov, Nov 26):** the 20 personas wrote the site as for their own
+  client; the merged direction waits on five choices (docs/copy-review-2026-11-26.md, Persona
+  review): rehearsal or practice filing, "the proof", "your filing desk", "free", and the new look.
 - **Florida EIN (Yakov, Nov 26):** done. A Florida formation's EIN is applied for only once the
   state accepts the formation (any `in_run` request becomes `after_acceptance`). When the acceptance
   is recorded (or a state accepts at once, as NJ does, for a formation asking for that order), the

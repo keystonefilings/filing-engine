@@ -278,3 +278,15 @@ Options:
 
 **Recommendation:** Add required PDF upload fields to the form.
 
+## Persona review (Nov 26)
+
+**Round 1** (what confused them, would they act): the same 20 personas (10 marketers and buyers, 10 creative writers) read the rendered site. The consensus fixes are applied: the banner and hero say where a practice filing stops, the coverage note, per-type "files for real" tags on the portal, the client pages' practice notice and wording, "the filing company" definition, billing, NY's publication requirement, the EIN order (Florida waits for acceptance), "test" to "practice", and smaller wording.
+
+**Round 2** (Yakov's brief: how would you write the copy and branding had this been for your client): each persona wrote a full site; a creative director merged them into one direction: approval first ("Your client approves the proof. Then CoFile files it."), the firm as the hero ("Your name on the door. Ours in small print."), the checks as proof rather than pitch ("Checked twice. Filed once."), requests by text featured, the beta said once, and a paper-and-ink identity with a manila folder-tab logo. It is shown as a page for review. Five choices come before the site is rewritten:
+
+1. What to call a practice filing: rehearsal (director), practice filing (most votes, 7 to 5), test run, dry run.
+2. What to call the approval page: the proof (7), sign-off page (5), approval page (5).
+3. Rename the portal "your filing desk" (16 of 20).
+4. Allow "free" for rehearsals on the public site (15 of 20 led with "Run a free rehearsal"); decision 1 keeps price wording off for now.
+5. Adopt the new look (paper and ink, Source Serif 4 headlines with IBM Plex Sans and Mono, the folder-tab logo, real product screens instead of stock photos).
+
