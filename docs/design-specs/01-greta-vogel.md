@@ -16,7 +16,7 @@ Three habits from forms work shape every page:
 
 1. **Printed matter and written matter are different inks.** On a well-made paper form, everything the authority printed (boxes, labels, line numbers) is in one colored ink, and everything the citizen writes is in black. You can see at a glance what was asked and what was answered. I carry this onto the screen.
 2. **Every line has a number.** "Line 7 is wrong" is a sentence a nervous person can say on the telephone. A number is the shortest possible name for a thing.
-3. **The declaration sits directly above the signature.** Never at the top of the page, never in a footnote. You read what you are promising, and then you sign, in that order and in that place.
+3. **The declaration sits directly above the signature.** Never in a footnote, never far away. You read what you are promising, and then you sign, in that order and in that place. (On the proof, the locked wording of the declaration says "every detail below", which ties it to the top of the page for now; 10.4 shows how the design keeps the act and its terms together anyway, and Appendix B asks for the one word that would let the declaration move.)
 
 ---
 
@@ -39,7 +39,7 @@ Why this fits CoFile: CoFile's promise is "stop and ask rather than guess", and 
 | Problem | Answer in this design | Where |
 |---|---|---|
 | Co-branding at scale | The firm's color becomes the *print* color of its forms, computed for contrast; ink, the signals and the decisive button never change | 4.2, 9.1, 11 |
-| Trust for an irreversible act | The proof is a numbered form; the declaration sits directly above the one ink button at the end; amounts follow accounting rules; nothing sticky, nothing celebratory | 9.4, 10.4 |
+| Trust for an irreversible act | The proof is a numbered form; the declaration opens it, as its words require, and the amount it binds is restated in the signature block directly above the one ink button at the end; amounts follow accounting rules; no sticky button, nothing celebratory | 9.4, 10.4 |
 | Honest beta | "Live" is the only full green disc on the site; rehearsal is the hold symbol in amber; coverage stages are ordinal quarters of a disc | 4.3, 9.10, 10.1 |
 | Two readers on one site | One system, two densities: 18px reading for firms and clients, 16px with mono for developers; the same numbering from intake to API | 5.2, 10.8, 10.10 |
 | Forms that ask little | State order, required first, optional folded, saved answers marked, field widths that say how long an answer is, help before the box | 9.2, 10.5 |
@@ -453,11 +453,12 @@ The proof is the most important component and is specified in full in 10.4. As a
 ├───────────────────────────────────────────────────────────────────┤
 │ ‖ Rehearsal notice (only when a rehearsal)                        │
 │ H1 · reference and deadline                                       │
+│ ▌   Declaration           consent text ("every detail below")     │
 │     The state's review page (where possible), numbered callouts   │
 │     Filing details        1 … n, numbered rows                    │
 │     State fees            amounts, total with rules               │
-│     Declaration           consent text, directly above the button │
-│ ═══ heavy rule                                                    │
+│ ═══ heavy rule: the signature block                               │
+│     Maximum you authorize (or Total), restated · one-time code    │
 │     [ Approve, and authorize submission and payment ]             │
 │ ─── rule                                                          │
 │     What should change? · [ Request changes ]                     │
@@ -695,6 +696,12 @@ The page people sign. Designed for a 360px phone first. All text 7:1 or better. 
 │ 5:00 PM Eastern. After that, this  │
 │ link stops working and you'll need │
 │ a new one.                         │
+│                                    │
+│ ▌  By approving, you confirm every │  declaration, print bar,
+│ ▌  detail below is correct and     │  t-body-l ink
+│ ▌  authorize its submission …      │
+│ ▌  Government sites don't save     │
+│ ▌  drafts, so once you approve …   │
 ├────────────────────────────────────┤
 │    The state's review page         │
 │    This is a picture of the state's│
@@ -721,13 +728,10 @@ The page people sign. Designed for a 360px phone first. All text 7:1 or better. 
 │    Maximum you authorize   $103.50 │
 │    (if the state asks for more, we │
 │    stop before paying)             │
-├────────────────────────────────────┤
-│ ▌  By approving, you confirm every │  declaration, print bar
-│    detail below is correct and …   │
-│    Government sites don't save     │
-│    drafts, so once you approve …   │
-│    [ One-time code sent to you   ] │
-│ ══════════════════════════════════ │  2px ink
+│ ══════════════════════════════════ │  2px ink: the signature block
+│    Maximum you authorize   $103.50 │  restated, 75 Bold
+│    One-time code sent to you       │  only when required
+│    [                             ] │
 │ ┌────────────────────────────────┐ │
 │ │ Approve, and authorize         │ │  decisive, ink, 72px (2 lines)
 │ │ submission and payment         │ │
@@ -745,12 +749,12 @@ The page people sign. Designed for a 360px phone first. All text 7:1 or better. 
 
 Rules for the build:
 
-- **Order.** Rehearsal notice; H1 with reference and deadline; the state's review page (only where possible; absent for IRS filings); Filing details; State fees; the declaration; the decision. The consent paragraph (from `approvalConsent()` with the EIN sentences and "Government sites don't save drafts…") moves from the top of the page to **directly above the button**. A short reminder at the top is not needed: the rehearsal notice and the deadline are the two facts the reader needs before reading.
+- **Order.** Rehearsal notice; H1 with reference and deadline; the declaration; the state's review page (only where possible; absent for IRS filings); Filing details; State fees; the signature block. I would put the declaration directly above the button. Its locked wording says "you confirm every detail below is correct", and a declaration must never say something untrue about its own page, so it stays where its words are true: before the details. It is set as a declaration rather than as a yellow note: `t-body-l` ink, a 4px print-colored bar at its left, no tinted box. (Appendix B, copy note 22.)
 - **The state's review page.** Full sheet width, 1px hairline frame, numbered callouts drawn by the engine on the capture as 24px print-colored squares with paper numerals, matching the line numbers in Filing details. Tapping the picture opens a full-screen viewer (paper, 1px ink border, pinch and double-tap zoom to 200%, close button top right). Alt text unchanged.
 - **Filing details.** On phones, label above value. At 720px, a two-column table: line number in the reference column, label (40%), value (60%). Nested values (members, addresses) are grouped under a sub-label in 65 Medium with their sub-lines numbered as in 9.12 (9.1, 9.2). The SSN sentence sits directly above the first masked value, not at the top of the table. Values in sans; masked numbers in mono.
 - **The authorizations** the client is making appear as the last group of Filing details, each statement in full in `t-body-l`, each with the marked box (they were checked on the intake form). They are statements, so they read as sentences, not table cells.
 - **State fees.** The fee table with accounting rules (5.3). "Nothing is charged on this page. These fees are paid to the state when the filing is submitted." above it in ink-2.
-- **The declaration and the decision.** The declaration in `t-body-l` ink with a 4px print-colored left bar. Then the one-time code field if required (single input, `inputmode="numeric"`, mono 24px, letter-spacing 0.3em, `autocomplete="one-time-code"`). Then a 2px ink rule. Then the decisive button. Then a 1px rule, and the second path: the comment field and "Request changes". Separating the two paths keeps the textarea out of the space between the declaration and the button.
+- **The signature block.** Opened by a 2px ink rule. First the one number the declaration binds, restated from State fees with its own label: "Maximum you authorize" when there is a fee cap, otherwise "Total", in `t-heading` tabular 75 Bold, right-aligned. Then the one-time code field if required ("One-time code sent to you"; single input, `inputmode="numeric"`, mono 24px, letter-spacing 0.3em, `autocomplete="one-time-code"`). Then the decisive button. Then a 1px rule, and the second path: the comment field and "Request changes". Separating the two paths keeps the textarea out of the space between the amount and the button. The reader's last sight before pressing is the money and the words on the button, which together carry the whole of the consent.
 - **Sticky total.** Once the H1 has scrolled out of view, a 44px strip pins to the top (hidden while the State fees table itself is on screen): the firm's name at the left and "Total $103.50" at the right in tabular 75 Bold. It shows money, not a button.
 - **The H1** today reads "NJ formation: TWO SISTERS BAKERY LLC", built from engine field names. The design sets whatever the engine supplies; Appendix B asks for the filing type's own title.
 
@@ -1310,7 +1314,7 @@ The pages people sign go first.
 2. **Paper and manila as decoration.** Cream ground, manila tint, a folder-tab mark and a rotated "stamp" (`.stamp`, `rotate(-4deg)`) imitate an office. The product is not old paper; it is an accurate form. Real paper is white, and white gives older readers the contrast they need.
 3. **Three typefaces.** A serif for headlines, a sans, a mono. The headlines do not need a second voice, and the switch costs a font download and the page's unity.
 4. **Mono for entered values and amounts.** On the sample proof the client's name, members and address are in mono, as though a machine wrote them. They are the client's words; they belong in the reading face. Amounts need tabular figures and decimal alignment, which a good sans provides, not a typewriter face.
-5. **The declaration at the top of the proof.** The consent paragraph is printed above everything, then the reader scrolls through the picture, the details and the fees, and finds the button at the bottom far from what it commits them to. The declaration belongs directly above the signature.
+5. **The declaration far from the button.** The consent paragraph is printed above everything, styled as a yellow note, then the reader scrolls through the picture, the details and the fees, and finds the button at the bottom far from what it commits them to. The declaration belongs directly above the signature. Its wording ("every detail below") keeps it at the top today; my design restates the bound amount in the signature block as a stopgap, and asks for the word to change.
 6. **The firm's color on the approve button.** `brandedTop()` paints the approve button in the firm's primary color. Across thousands of firms the decisive button would be thousands of colors, some pale with white text, some red. The button that commits a client should look the same everywhere.
 7. **Amber for waiting.** `StatusBadge` gives "Waiting for approval", "Needs information" and "On hold" the same amber as a rehearsal. Amber should mean the planned hold, and nothing else.
 8. **HTTP methods in status colors.** In the docs GET is green and DELETE red. A DELETE is not a stop.
@@ -1353,3 +1357,4 @@ The design above uses the copy as it is. These are the words I would raise with 
 19. **Coverage legend title**, if one is wanted above the five discs; the design works without one.
 20. **Address lookup:** a label and a one-line hint for the proposed address line on forms.
 21. **Annotation numbers on the home page:** the hero's callouts 1 to 4 have no legend in the copy. The design makes their meaning visible by position and leader lines; a four-word caption for each would help readers who skim.
+22. **"every detail below"** in the approval consent (`approvalConsent()`). Changing "below" to "on this page" would let the declaration sit directly above the button, where a declaration belongs. Counsel is already reviewing this text; the change is one word and does not alter what is consented to.

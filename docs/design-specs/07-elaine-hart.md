@@ -1792,9 +1792,10 @@ column at `xl`.
   with API status names in `mono` next to the plain labels, so a developer sees exactly what the
   firm and the client see.
 - **`/docs/reference`** ("API reference"): grouped endpoints. Each endpoint opens with its method in a
-  mono chip (GET `ink` outline, POST `ink` fill, PUT and PATCH `blue` outline, DELETE `stop` outline:
-  never green, which is reserved), the path in `mono` 18 px, a two-column layout at `lg`: parameters
-  and schema tables on the left, request and response examples sticky on the right.
+  mono chip (GET `ink` outline, POST `ink` fill, PUT and PATCH `ink-2` dashed outline, DELETE
+  `stop` outline: never green, which is reserved, and never blue, which is for annotation), the path in `mono` 18 px, the summary in semibold and the description in `body`, then the
+  page's "Query", "Body: …" and "Responses" blocks (layout at `xl` in the wireframe below). "No API
+  key needed." becomes a small open-lock glyph and the sentence, in `ink-2`.
 - **`/openapi.json`, `/llms.txt`, `/docs.md`:** served as files. Links to them carry a file glyph and
   the format in `mono`. When opened in a browser, `/llms.txt` and `/docs.md` render in a plain
   monospaced reader page (sheet, 72-character measure) with a "download" text link **[copy needed]**.
@@ -1802,28 +1803,33 @@ column at `xl`.
 **API reference at `xl`:**
 
 ```
-┌──────────────┬──────────────────────────────────────────┬─────────────────────────────────┐
-│ API docs     │ ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ │                                 │
-│ Quick start  │ API reference                            │                                 │
-│ Authentication│ ──────────────────────────────────────── │                                 │
-│ Filings and  │ {group}                                  │                                 │
-│  the lifecycle│ [POST] /v1/filings                       │  REQUEST                         │
-│ …            │ {description}                            │  ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓ │
-│ ──────────── │ BODY                                     │  ┃ curl …/v1/filings \          ┃ │
-│ API reference│ name        type      required  notes    │  ┃  -H "x-api-key: $COFILE_…"  ┃ │
-│  {group}     │ ──────────────────────────────────────── │  ┃  -d '{ "dryRun": true, … }' ┃ │
-│   POST /v1/… │ dryRun      boolean   no        …        │  ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛ │
-│   GET  /v1/… │ …                                        │  RESPONSE 201                     │
-│ ──────────── │                                          │  ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓ │
-│ openapi.json │                                          │  ┃ { "id": "…", "status": … }   ┃ │
-│ llms.txt     │                                          │  ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛ │
-│ docs.md      │                                          │  (sticky while this endpoint      │
-│              │                                          │   is in view)                     │
-└──────────────┴──────────────────────────────────────────┴─────────────────────────────────┘
+┌───────────────┬──────────────────────────────────────────┬──────────────────────────────────┐
+│ API docs      │ ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ │                                  │
+│ Quick start   │ API reference                            │                                  │
+│ Authentication│ Send your key in x-api-key. Also         │                                  │
+│ …             │ available as OpenAPI 3.1.                │                                  │
+│ ───────────── │ ════════════════════════════════════════ │                                  │
+│ {group}       │ {group}                                  │                                  │
+│  {summary}    │ [POST] /v1/filings                  ⧉    │ BODY: {type}                     │
+│  {summary}    │ {Summary.} {description}                 │ ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓ │
+│ {group}       │                                          │ ┃ { "dryRun": true, …  }       ┃ │
+│  {summary}    │ QUERY                                    │ ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛ │
+│ ───────────── │ clientCompanyId: {description}           │ RESPONSES                        │
+│ openapi.json  │                                          │ 201 {description}                │
+│ llms.txt      │ RESPONSES                                │ ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓ │
+│ docs.md       │ 201 {description}                        │ ┃ { "id": "…", "status": … }   ┃ │
+│               │ 422 {description}                        │ ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛ │
+│               │                                          │ (sticky while the endpoint is in │
+│               │                                          │  view)                           │
+└───────────────┴──────────────────────────────────────────┴──────────────────────────────────┘
 ```
 
-(Group names, descriptions and schema rows come from the reference page's own data; the column
-heads of the field table follow whatever the reference already prints.)
+(The labels are the reference's own: "Query", "Body: {type}", "Responses", "No API key needed.";
+group names, summaries, descriptions and examples come from its endpoint data. At `xl` the prose
+and the lists of query parameters and response codes sit in the middle column, and the JSON
+examples, the body example and each response's example, move to the sticky right column, so the
+example is always beside the description it belongs to. At `lg` and below the examples return
+inline under their labels, as today.)
 
 - **Endpoint anchors:** every endpoint has a permanent anchor and a "copy link" glyph on hover beside
   its path, for developers pasting links into tickets.
@@ -1982,7 +1988,9 @@ light and dark. One shared package used by the web app and by the engine's proof
    If not, lower its OKLCH lightness in 0.02 steps (scaling chroma to stay in gamut) until white
    reaches 4.8:1. If that shifts the color by more than 0.12 in OKLab distance from the original (it
    no longer looks like their color), keep the original and set the label in `ink` instead, provided
-   that is at least 4.5:1. The button always gets a 1 px border in its darker shade when its contrast
+   that is at least 4.5:1. If neither works (a mid-tone where neither white nor ink reaches 4.5:1),
+   the darkened color is used however far it moved: contrast wins over fidelity on a button that
+   authorizes a payment. The button always gets a 1 px border in its darker shade when its contrast
    against the sheet is under 3:1, so a pale button still has an edge.
 3. **Signal guard.** If the resulting button color has OKLCH chroma of 0.08 or more and a hue
    between 15 and 45 degrees (the stop red zone) or 55 and 90 degrees (the hold amber zone), forward
@@ -2014,7 +2022,7 @@ light and dark. One shared package used by the web app and by the engine's proof
 
 ### 11.4 The torture set
 
-Twenty-four reference firms live in Storybook and Figma and every change is tested against them:
+Twenty-five reference firms live in Storybook and Figma and every change is tested against them:
 pale yellow (#F5E663), pure red (#FF0000), the stop-red twin (#B3261E), safety orange, neon green
 (#39FF14), a navy within 0.05 of editor's blue, black, white (#FFFFFF), a mid-gray, a white logo on
 transparent, a wide 6:1 logo, a tall square seal-style logo, a 78-character firm name, a script
@@ -2101,7 +2109,7 @@ make room:
 ### 13.1 Stack and files
 
 - **Design:** Figma with variables in three collections (color modes light and dark; firm theme,
-  with the 24 torture firms as modes; type scale for desktop and mobile). Files: `Foundations`,
+  with the 25 torture-set firms as modes; type scale for desktop and mobile). Files: `Foundations`,
   `Components`, `Proof`, `Public pages`, `Filing desk`, `Dashboard`, `Docs`, `Email`, `Graphics`.
 - **Tokens:** W3C design-token JSON in `packages/tokens`, built with Style Dictionary into CSS custom
   properties for `web/` and a TypeScript module for the engine, so `src/approvals/render.ts` stops
@@ -2125,7 +2133,7 @@ Wordmark (positive, reversed, one-color; SVG and PDF); the Full Stop mark (three
 favicons (16, 32, 48 SVG and ICO, 180 Apple touch, 192 and 512 maskable); Open Graph template;
 "with CoFile" lockups (light, dark; 11 to 14 px); the end mark; 34 icons; graphics G1 to G8 as
 components; photographs P1 to P3 with captions; email header and footer frames for both frames;
-the rehearsal hatch as an SVG pattern and a CSS gradient; the 24 torture-set themes.
+the rehearsal hatch as an SVG pattern and a CSS gradient; the 25 torture-set themes.
 
 ### 13.3 What to commission
 
