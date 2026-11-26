@@ -2518,3 +2518,156 @@ The Questions rows (10.6): 72px minimum, the question in Headline 4, the drawn "
   from corners.
 
 ---
+
+## 12. Craft notes
+
+**Dark mode.** A night edition (4.2): Night Paper, Night Ink, Night Gold, the same rules and type.
+Pictures of pages stay light (dimmed paper), photographs are untouched, and firms' colors switch to
+their `--firm-ink-dark` versions for links and rules. Logos get the Coated White logo plate. It
+follows the system setting, with a toggle in the footer `[copy needed]`; the choice is kept in
+`localStorage`.
+
+**Phones.** Most clients and many firm owners will see this on a phone first. 20px margins; text
+first, then the picture, then the details; 56px full-width buttons; 44px minimum touch targets;
+nothing sticky at the bottom; photographs recropped by the photographer, plates redrawn as their
+real phone layouts; sideways scrolling only inside a picture, with the next item's edge visible.
+The gilding engine renders at half resolution on phones and falls back to stills on low-power
+devices and slow connections.
+
+**Older eyes.** This audience is 40 to 65 and reads with glasses on the end of their nose. Body text
+is 18px on phones and 20px on desktop; nothing anyone needs is under 15px; Press Black on Coated
+White is 17:1; no gray lighter than Caption Gray for text, ever; no weight lighter than Regular; no
+text set over photographs; links underlined; focus always visible; every status shown by shape and
+words, not color alone; pages hold up at 200% zoom with no sideways scrolling; motion respects
+reduced-motion settings.
+
+**Spanish.** Plan for text 25 to 35% longer. Headlines keep the one-sentence-per-line rule and wrap
+within each line; if a banner line overflows its measure, the Banner style steps down from 88px to
+76px (a container-query fit check) rather than breaking a word. Buttons wrap to two lines rather than
+truncate. The header's navigation moves into the menu below 1280px when the page is in Spanish.
+Chips and table cells wrap. `hyphens: auto` with `lang="es"` for body text only, never for headlines
+or names. Door Roman and every web font are subset with Spanish accents, and the gilding engine
+handles ñ and accented capitals.
+
+---
+
+## 13. Production
+
+### 13.1 Tools
+
+- **Design:** Figma, with one library and variable modes for CoFile light, CoFile dark, Firm light,
+  Firm dark and White label. Firm tokens are driven by a small plugin that runs the same OKLCH
+  derivation as the code (3.5), so designers see exactly what a firm's color will become.
+- **Tokens:** exported with Style Dictionary to CSS custom properties; the firm derivation in code
+  with an OKLCH color library, unit-tested against WCAG contrast for every token pair.
+- **Components:** built and reviewed in Storybook with a **sample-firm switcher**: twelve fictional
+  firms with deliberately awkward brands (a white logo, a 9:1 wordmark, a square seal-shaped logo, a
+  bright yellow, a near-black, a pastel, a script font, a condensed font, a name 40 characters long,
+  no logo at all). Every component and page is screenshot-tested against all twelve.
+- **Pictures:** product plates rendered from the real components (HTML where interactive, SVG
+  exports otherwise); photographs as AVIF and WebP in responsive sizes; graphics as SVG.
+- **Gilding engine:** WebGL (a lightweight library such as OGL or three.js), custom shaders, Door
+  Roman layers as signed-distance-field textures, the photographed light brackets as lookups.
+- **Motion:** prototyped in After Effects and the browser, built with CSS, the Web Animations API
+  and SVG stroke animation; no animation runtime heavier than that except the gilding engine.
+- **Cinemagraph:** a 2-second H.264 and AV1 MP4 under 1.2MB, with a poster frame.
+- **Email:** built in MJML, tested across the major desktop, web and mobile mail clients,
+  including Outlook's Windows renderer and dark modes.
+
+### 13.2 What to commission
+
+| Commission | Kind of studio or artist | Delivers |
+|---|---|---|
+| Wordmark and Door Roman | A lettering artist who draws newspaper mastheads and sign alphabets | The wordmark (3.1) in all versions; Door Roman in three layers with Spanish accents |
+| The doors | A traditional sign painter and gilder | Gold-leaf lettering of "Harbor & Pine CPA" and "Northgate Payroll" on two real glass doors; a lettering reference sheet for the engine |
+| Photography | An editorial documentary photographer, with producer, casting, location scout, prop stylist, digital tech and retoucher | PH-01 to PH-07 and PH-09, every frame in four crops, clean plates, light brackets, the dusk cinemagraph passes |
+| Still life | A still-life photographer | PH-08 and PH-10 |
+| Graphics | An editorial information-graphics designer from a newspaper graphics desk | Every explanatory graphic (7.5) and the chart style for the dashboard |
+| Spot illustrations | An editorial spot illustrator working in brush and ink | The ten spots (7.7), in a gold-accent and a one-color version |
+| Gilding engine and loupe | A creative-technology studio | The WebGL engine (7.6), the loupe (9.2), fallbacks, performance budget |
+| Motion | A motion designer with editorial and interface experience | Prototypes and specs for M1 to M10 |
+| Example brands | A small identity studio | The H&P monogram, Northgate's gate mark, a Best Accounting sample logo, and the twelve awkward sample firms for testing |
+| Type licenses | Commercial Type, Klim Type Foundry, Grilli Type | Web, app and desktop licenses (5.1) |
+
+### 13.3 The asset list
+
+| Group | Assets |
+|---|---|
+| Identity | Wordmark (SVG, PNG; full color, reversed, one color); end mark; favicon set (16, 32, 48, 180, 512); app icons; Open Graph images for the home page and the seven pages |
+| Type | Publico Headline and Text, National 2 and Narrow, GT America Mono (WOFF2, subset); Door Roman (three layers, SDF textures) |
+| Photography | PH-01 *The call* (+ clean plate); PH-02 *Two doors* (two doors, corridor wide, brackets); PH-03 *The counter*; PH-04 *The hand-off*; PH-05 *Your door at dusk* (clean plate, lights off/on, brackets); PH-06 *The filing professionals* (reportage + byline squares per person); PH-07 *You approve it*; PH-08 *The printer's proof*; PH-09 *The partner at the door*; PH-10 *The clipped page*; each in 16:9, 3:2, 4:5 and 1:1 |
+| Plates | The desk (desktop and phone); two client pages (Harbor & Pine, Northgate); the draft; the proof and payment strip; the record and two document cards; seven contact-sheet frames; the state review page redraw; the cutaway's neutral product page |
+| Graphics | Callouts and leader lines; the loupe; the markets panel; the contact sheet and log; the stage track; the timeline; the units squares; the triptych route line; the cutaway; dashboard chart styles |
+| Illustration | Ten spots, two versions each |
+| Motion and code | The gilding engine; the dusk cinemagraph; M1 to M10 specs |
+| Email | The firm's template and CoFile's template (HTML and plain text), each event's variant |
+| Testing | Twelve sample firms (logos, colors, fonts) |
+
+### 13.4 The shoot
+
+- **Week before:** the gilder letters the two example doors on location (a day and a half each, with
+  drying time).
+- **Day 1, the corridor:** PH-02 (both doors, the wide), PH-05 (afternoon clean plates, then dusk,
+  lights off and on), PH-09 (the partner in her doorway), all light brackets.
+- **Day 2, Harbor & Pine's office** (a dressed real office): PH-01, its clean plate, PH-07.
+- **Day 3, the bakery:** PH-03 at 5 a.m., PH-04 mid-afternoon.
+- **Day 4, CoFile's workplace:** PH-06, reportage in the morning, portraits in the afternoon.
+- **Day 5, the studio:** PH-08 and PH-10.
+
+### 13.5 The order to build in
+
+1. **Foundations (weeks 1 to 3):** tokens, type, grid, the nameplate component and the firm color
+   derivation, tested against the twelve sample firms. Everything else depends on these.
+2. **Core components (weeks 2 to 5):** buttons, fields, chips, tables, notices, cards, in Storybook.
+3. **The proof and the client's pages (weeks 4 to 7):** the proof, the decision page, filing pages
+   for each service, client link pages and the intake form. The firm's and the client's experience
+   come first, because they're the product.
+4. **The filing desk (weeks 6 to 9).**
+5. **Emails (weeks 7 to 9).**
+6. **The home page (weeks 7 to 11)**, with plates and graphics first. Until the photographs arrive,
+   the pictures run as their plates alone on Newsprint, never with stock.
+7. **Photography (weeks 3 to 8, in parallel):** casting, locations, the gilder, the shoot,
+   retouching, screen composites.
+8. **The gilding engine (weeks 4 to 10, in parallel):** its still fallbacks ship first, the engine
+   when it's ready.
+9. **The seven pages behind the home page (weeks 10 to 12).**
+10. **Account pages, Terms, Privacy, errors and spots (weeks 11 to 12).**
+11. **Platforms: dashboard, docs, white-label page, widget (weeks 11 to 14).**
+12. **Last:** the motion pass, then dark mode, Spanish, accessibility and performance audits. Budget:
+    the home page's largest image painted in under 2 seconds on a mid-range phone on 4G; the hero
+    photograph under 180KB as AVIF; the gilding engine under 120KB compressed plus about 600KB of
+    textures, all loaded lazily.
+
+---
+
+## 14. What I'd strip from today's visuals, and why
+
+I've kept every word and its order. Everything I'm stripping is visual.
+
+- **The folder-tab mark with a check cut into it.** A folder says "paperwork"; a check says
+  "verified". It's the wrong story twice, and as a colored, illustrated mark it competes with the
+  firm's logo on the firm's own pages. It's replaced by a wordmark and an end mark that step back.
+- **The manila and cream paper colors.** A cream page reads as stationery and makes every firm's
+  logo look a little dirty. Coated White makes them look printed on good stock.
+- **Green as the house accent.** Green buttons and green ticks everywhere say "approved, checked,
+  safe", which is exactly the register the brief steers away from, and green collides with every
+  firm whose color is green. Our accent is gold, and it leaves the room on firms' pages.
+- **IBM Plex Sans, IBM Plex Mono and Source Serif 4.** Competent and generic; Plex is a technology
+  company's corporate face, and nothing in this pairing says front page, headline or pride.
+- **A green tick before every list item.** Dozens of identical ticks flatten the hierarchy and turn
+  selling points into a compliance checklist. Short lists get square bullets or none.
+- **The same two-column band for every section.** A page with no pacing stops being read after the
+  third band. The home page now alternates layouts the way a feature well does.
+- **Pictures drawn as small boxes of interface.** Today's stand-ins are boxes with chips in them:
+  they look like widgets, not pictures, and there isn't a single person on the site. The new
+  pictures have people, doors, light and paper, and the interface plates are set as documents.
+- **The 4px colored stripe at the top of the proof.** A firm's brand reduced to a stripe. It becomes
+  a proper nameplate.
+- **Status chips told apart by color alone,** and rounded pills. They become square labels with a
+  shape for each meaning.
+- **Buttons inside pictures that look clickable.** In the new pictures, sample buttons sit on paper
+  plates, aren't focusable and show no hover beyond the proof's, so nobody tries to press a picture.
+
+---
+
+*Elaine Hart*■

@@ -41,7 +41,7 @@ The owner has left the pictures to me: how many, where, and how they sit with th
 
 - **One object, set large.** Each picture shows one thing (a sheet, a pair of pages, a board) big enough to read every word without zooming.
 - **Cropped with intent.** Where a page is long, it runs off the edge of its field rather than being shrunk. A cropped sheet says "there is more, and it is real"; a shrunken one says "screenshot".
-- **On a flat field.** White sheets on Poster Yellow, Ink, Ground or the firm's colour. No device frames, no browser chrome, no perspective, no shadows except one 1 px hairline where a white sheet meets white.
+- **On a flat field.** White sheets on Poster Yellow, Ink, Ground or the firm's colour. No device frames, no browser chrome, no perspective, no shadows; a 1 px hairline edge only where a white sheet meets white.
 - **Always labelled.** Each keeps its small example caption ("Example · test details · not a real firm" and the like), set at 16 px under the picture, never hidden.
 - **Live, not flat images.** Because they are HTML, they stay sharp on any screen, can move (section 8), can be read by screen readers and can be translated.
 
@@ -57,7 +57,7 @@ The owner has left the pictures to me: how many, where, and how they sit with th
 
 | The copy sells | How Large Type shows it |
 |---|---|
-| **1. Say yes, under your own name.** | The hero is a yellow poster: "Your client needs an LLC. Say yes, under your own name." set at 100 px, beside Harbor & Pine CPA's filing desk, with the firm's name in its own typeface and "with CoFile" at 13 px. |
+| **1. Say yes, under your own name.** | The hero is a yellow poster: "Your client needs an LLC. Say yes, under your own name." set at 104 px, beside Harbor & Pine CPA's filing desk, with the firm's name in its own typeface and "with CoFile" at 13 px. |
 | **2. Your brand on everything.** | Section 2 sets "Your name on the door." in very large type and "Ours in small type." in, literally, small type on the same line. Beside it, two colour fields, pine and oxblood, each holding the same client page in a different firm's brand. |
 | **3. Nobody retypes anything.** | Ana Ortiz's text message is set as large as a headline. The words that matter are marked with a yellow highlighter, and the same words reappear, marked the same way, in the drafted filing below. The saved answers are already sitting there. |
 | **4. You stay in charge.** | The proof is a printer's proof: a clean sheet with crop marks, the firm's name at the top, every detail and fee in aligned figures, one button in the firm's colour. The firm owner signs it off the way they once signed off letterhead at the printer. |

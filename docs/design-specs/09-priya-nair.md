@@ -79,7 +79,7 @@ months from now, under their own name.
    a single border of gold, and it is the most elegant thing I know. Firm pages work the same way:
    a white ground, one confident band of the house color, and the house color on the one button
    that matters. Any color looks good used like this, even a difficult one.
-4. **Real product, real people.** The seven pictures are the actual product, built from the same
+4. **Real product, real people.** The product pictures are the actual product, built from the same
    components as the filing desk and rendered live with sample data in a firm's colors. The
    photographs are documentary pictures of the people it serves and the filing professionals who
    run it. No abstract illustrations of "automation", no robots, no shields.

@@ -1778,3 +1778,138 @@ Two families: **the firm's** (anything about a filing, sent to the firm's people
 
 ---
 
+## 11. Components
+
+Each component is specified for **CoFile's pages** (the theatre) and, where it differs, for the **firm's pages** (the house).
+
+### 11.1 Buttons
+
+| Button | Where | Look | States |
+|---|---|---|---|
+| **The ticket** | **Only** "Run a free rehearsal", on every CoFile page and in the header | Marigold `#FFB21E` fill, Ink label (Marquee width 96, weight 720, 18 px). Height 56 px (44 px in the phone header), padding 0 32 px, 6 px corner radius, and **two 8 px semicircle notches** cut into the left and right edges at their vertical middles. A 1 px Ink 30% dashed perforation sits 20% in from the right end, visible only on press. | Hover: Marigold Deep `#F5A300`, 2 px lift, shadow `0 8px 16px -8px rgba(23,20,31,.4)` (120 ms). Press: 1 px down, perforation flashes (200 ms). Focus: 3 px Ink outline at 3 px offset, following the notched shape. Disabled: never; it's always available. |
+| **Inverted ticket** | The ticket on Marigold grounds (the Proof poster, the Close, the page closes) | Ink fill, Paper label, Marigold perforation | As above, with hover lightening the Ink to `#2A2433`. |
+| Primary | Other main actions on CoFile pages ("Create account", "Log in", "Send", "Confirm my email") | Marigold fill, Ink label (Atkinson 700, 18 px), 52 px tall, 10 px radius, no notches | Hover Marigold Deep; focus 3 px Ink ring; disabled `#E9DFC9` fill with `#8A8290` label. |
+| Secondary | "See pricing", "Questions", "See what…", "Continue with Google" | Transparent, 2 px Ink outline, Ink label, 52–56 px, 10 px radius, optional → | Hover: Ink 6% fill, and the arrow slides 4 px right. |
+| Text link | "For firms", "How it works", "See all plans", inline links | Ink text with a 3 px Marigold underline 4 px below the baseline (on Marigold grounds: a 3 px Ink underline) | Hover: underline thickens to 5 px (120 ms). |
+| **Firm primary** | Every main action on the firm's pages | The firm's (adjusted) main color fill, white label (firm font if set, else Atkinson 700), 52 px tall (56–60 px on the proof and forms), 10 px radius | Hover: L −0.06. Focus: 3 px ring in the firm color at 24% plus a 2 px white inner ring. Pending: label plus a 2 px white running bar. |
+| Firm secondary | "Request changes", "Send a client a link", "Copy link" | White, 1.5 px Field Border, House Ink label | Hover: House Canvas fill. |
+| Small | Table actions, "Same as" chips | 40 px tall, 15 px label, 8 px radius | — |
+| Destructive | "Turn off", "Revoke", "Remove", "Log out" (not red) | White, 1.5 px Brick `#A3261B` outline, Brick label ("Log out" stays neutral secondary) | Hover: Brick 6% fill. |
+
+Every button label may wrap to two lines (for Spanish), and the button grows in height rather than truncating its text.
+
+### 11.2 Fields
+
+- **Text, email, password, select:** 56 px tall, 18 px Atkinson Next text, a 1.5 px Field Border (`#8F8B84` on firm pages, `#8C8375` on Paper), a 10 px radius and 16 px horizontal padding.
+  - The label sits above at `label` (16 px, 600), with 8 px to the field. Help text sits below at `help` (15 px, Ink 2). "*" marks required fields, as the copy's "Fields marked * are required." says.
+  - **Focus:** a 2 px border in the brand color (Ink on CoFile pages, the firm's main color on firm pages) plus a 4 px halo at 24% tint.
+  - **Error:** a 2 px Brick border, with the message below at 15 px in Brick after a ◆ glyph, linked by `aria-describedby`.
+  - **Filled by "Same as" or a forwarded message:** a 200 ms flash of 12% tint.
+- **Textarea:** 4 rows minimum, the same styling, resizable vertically.
+- **Select:** a custom chevron (2 px Ink), with native behavior kept.
+- **Checkbox:** 28 px, 2 px Field Border, 6 px radius. Checked, it fills with the brand color and shows a white tick. The tick is fine *here*, as a control, never as a decorative "verified" motif.
+- **Checkbox card** (authorizations, "I agree to…"): a full-width bordered card holding the checkbox and its statement. Checked, it gets a 6% tint and a 2 px brand border.
+- **Choice cards** (state picker, filing type picker, plan picker): white cards with a 1.5 px House Rule border and a 16 px radius. Hover lifts 2 px and borders in the brand color. The selected one has a 2 px brand border and a ● marker at top right.
+- **File drop** (logo, font): a dashed 1.5 px Field Border zone, 160 px tall, centered help text, and a brand-color dashed border while dragging. Uploaded files show as a preview tile with a "Remove logo" text button.
+- **Color field** (`ColorField`): a 48 px color well, a 110 px hex input in Atkinson Mono, and the ready colors as 32 px swatches with 48 px hit areas, the selected one ringed 2 px in Ink. Plus the adjusted-shade swatch (§10.9).
+- **One-time code:** a single 64 px field, Atkinson Mono 28 px, letter-spaced, centered, with `autocomplete="one-time-code"`.
+- **Signature pad:** §10.9.
+- **The vault's card fields** are styled through the vault's style API to match the text fields exactly.
+
+### 11.3 Cards and notices
+
+- **House card:** white, 1 px House Rule, 16 px radius, 32 / 20 px padding, no shadow. A shadow appears only on lifted states and the proof sheet.
+- **Poster card:** Poster Paper on Marigold, or white on Paper, no border, 16 px radius, shadow `0 24px 48px -20px rgba(36,21,48,.35)`. Used for the raised middle step and the inquiry form.
+- **Playbill:** §9.6 (an Ink header band over a Paper sheet).
+- **Stage-door card:** a 520 px centered card with a 6 px Ink top rule, for the auth and short-message pages.
+- **Notices:** full-width, 12 px radius, 16 px padding, `body` text, with a 4 px left bar and a leading shape glyph:
+  - Neutral: House Canvas and an Ink bar, ○.
+  - Your turn: firm 12% tint and a firm bar, ◐.
+  - Waiting: `#FFF1D6` and an Ochre bar, ◐.
+  - Done: `#E3F1E8` and a green bar, ●.
+  - Problem: `#FBE4E0` and a Brick bar, ◆.
+  - Rehearsal: white with a 1.5 px dashed Ink border and no bar.
+
+### 11.4 Chips
+
+- **Status chip:** 30 px tall, padding 0 12 px, a full pill radius, the shape glyph (10 px) and then the label in Atkinson 600 at 15 px. Tone colors are in §4.4. Labels never truncate; the chip wraps to a second line if it must.
+- **Rehearsal / Beta / Test / "For your team to check":** the same size, white (or Marigold Wash on CoFile pages) with a 1.5 px dashed Ink border, label in Marquee credit caps at 13 px... **14 px minimum**, never smaller.
+- **Source tags** ("from the text", "already filled"): 24 px tall with a 6 px radius, Atkinson 600 at 13–14 px, a 12 px glyph, and a tinted fill (§9.3).
+- **Coverage marks** ● ◐ ○: 20 px, with `aria-label` (§4.4).
+- **Count badge:** a 20 px firm-color pill with white tabular numerals at 13 px, min width 20 px.
+- **Place tag:** a 1.5 px Ink outline, 4 px radius, and credit caps (§10.3).
+- **Method chip** (docs): §10.12.
+
+### 11.5 The proof
+
+The proof component appears in three places: live on the firm's proof page (§10.10), on the home page's press table (§9.4) and in How it works' annotated stage (§10.1). It's one component with three densities:
+
+| Density | Width | Title | Values | Use |
+|---|---|---|---|---|
+| Full | 820 px max | 44 px | 18 px | The real proof page |
+| Picture | 600 px | 40 px | 17 px | Home §9.4 |
+| Annotated | 640 px, inside a scroll window | 40 px | 17 px | How it works §10.1 |
+
+Its anatomy, top to bottom: marquee rule → header (logo, firm name, credit) → rehearsal note → title (type prefix + business name) → reference and deadline → consent panel → state's review page → filing details (grouped) → state fees (total big) → decision (code, comment, two stacked buttons) → questions line. Detailed in §10.10. In the picture densities, marketing marks (proofreader's numbers, the highlighter) live in a separate annotation layer that the real proof never has.
+
+### 11.6 The stage meter
+
+Four segments, each 22 × 8 px with 3 px gaps and 2 px radii, in Ink (filled) or Ink at 15% (empty):
+
+| Status | Segments | Extra |
+|---|---|---|
+| Live | 4 of 4 | The last segment is Marigold, with a 2 px Ink outline |
+| Rehearsed to the payment screen | 3 of 4 | — |
+| Screens recorded, rehearsal next | 2 of 4 | — |
+| Offered, not yet rehearsed | 1 of 4 | — |
+| Planned | 0 of 4 | Dashed outline segments |
+
+The written label always follows. The meter is a picture of the journey to live, not a replacement for the words.
+
+### 11.7 Price cards
+
+- **The ticket strip** (home §9.8): Ink Night, four stubs, notched perforations, Marigold Box Office values, Plum Mist labels. Specified in §9.8.
+- **Plan tickets** (Pricing §10.4, and the firm's Billing page in house style): a vertical ticket with a stub (plan name), a notched perforation, the price at 64 px in Box Office figures, the period at 18 px, the annual line in `small`, then items with º bullets and the P8 portrait on the takeover line. The featured ticket (Growth, CoFile pages only) is Marigold. On the firm's Billing page, the current plan is outlined in the firm color, and the buttons are firm primary small.
+- **Perforation** spec: §7.6.
+
+### 11.8 The text bubble, the run sheet and the stage track
+
+- **Text bubble:** Paper-white `#FFFDF8`, 22 px radius, a 6 px tail at bottom left, 20 / 24 px padding, Atkinson at 21 px (17 px inside the product), and a soft shadow. Its caption sits beneath in credit caps. It's used on the home page, How it works and the firm's request page. It's never styled like any real messaging app.
+- **Run sheet:** a Paper card, 8 px radius. The header line is in credit caps with an italic right note; lines sit on Rule hairlines, the step in Atkinson 600 and the result in Atkinson 400, Ink 2, with an optional row of screen frames on top. It's used for the home rehearsal, What we file, and the firm's "Progress on the state site".
+- **Stage track:** stops (a 14 px ring, filled ● when reached), a 2 px connecting line, and labels in credit caps. Horizontal on desktop, vertical on phones. It's used for the home "After" picture and the filing detail journey.
+
+### 11.9 Tables
+
+- **CoFile tables** (coverage, dashboard): a Paper sheet. The header row is in credit caps (15 px) on an Ink band in Paper text (coverage) or in Ink 2 on Paper (dashboard). Rows are 56–60 px with 1 px Rule hairlines, no zebra stripes, `body` 17–18 px, numbers tabular and right-aligned. The header is sticky under the site header.
+- **Firm tables** (filings, client links, signatures): a white sheet with a 16 px radius. The header is Atkinson 600 at 15 px in House Ink 2; rows are 64 px on House Rule hairlines. Your turn rows get the 6% firm tint. Links are in the firm's Second color.
+- **Phones:** every table becomes a stack of cards. The first column becomes the card title, and the other columns become label/value pairs, with chips at the top right.
+- **Filing details on the proof:** two columns, 40 / 60, with group headings (§10.10).
+
+### 11.10 Navigation
+
+- **Public header:** §9.0.
+- **Phone menu sheet:** full height, Poster Paper with grain. The links are at `title` size (28 px) with 64 px rows, then "Log in", then the ticket at the bottom. It closes with a 48 px close icon (`[copy needed: its accessible name]`). It slides in from the right in 360 ms.
+- **Firm desk header and tabs:** §10.9.
+- **Dashboard sidebar:** §10.12.
+- **Docs nav:** §10.12.
+- **Breadcrumb back links** ("← Filings", "← Other filings", "All states"): `label` size, in the firm's Second color, with the arrow sliding 3 px left on hover.
+- **The "skip to content" link** is visible on focus: a Marigold chip at the top left (a firm-color chip on firm pages), with words `[copy needed]` if the product doesn't already have them.
+
+### 11.11 Accordions and disclosures
+
+`details` everywhere (Questions, "Not this filing? Choose another", "Your message", "Progress on the state site", "More options"):
+
+- The summary is at least 56 px tall (72 px on Questions), with the º ring toggle on the right that fills when open (200 ms).
+- The content expands with a 260 ms height and opacity transition. The open state sits on a Paper (or white) panel with 24 px padding.
+- They're native `details` / `summary`, so they work without JavaScript.
+
+### 11.12 Brand pieces as components
+
+- `<Credit size="14|15|16" />`: the "with CoFile" lockup (§3.3).
+- `<FirmMark logo name color font scale="header|presenting" />`: the Headliner frame (§3.4), including the initial tile and the logo plate.
+- `<Lockup />` and `<Monogram size />`: §3.1–3.2.
+- `<Billing setup headliner credit />`: the billing-block headline, rendering one heading element with styled spans (§5.4).
+- `<ExampleLabel>`: the italic picture label (§7.1).
+
+---
+

@@ -1681,8 +1681,10 @@ PHONE 390: Night
 Every page behind the home page opens the same way: the kicker (with its Lamp Doorlight), the h1 in
 Fraunces 64/68, the lede at 22/34, on Shade, with the light layer at that page's hour behind the
 type. The head is 480 to 560 px tall on desktop. Where I give a page a head picture, it sits on
-cols 8–12 (or full width below the lede on phones). Each page closes with the same close pattern as
-the home page (a full-bleed band, its own headline, the Lamp button), lit for that page's hour.
+cols 7–12 or 8–12 (or full width below the lede on phones). The pages whose copy has a closing
+section (How it works, For firms, What we file, Pricing) close with the home page's close pattern
+(a full-bleed band, its own headline, the Lamp button), lit for that page's hour. Security,
+Questions and For platforms end where their copy ends, straight into the footer.
 
 ---
 
