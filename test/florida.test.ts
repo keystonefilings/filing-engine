@@ -117,3 +117,39 @@ describe("Florida profit corporation and limited partnership", () => {
     expect(corp.reduce((s, l) => s + l.amountUsd, 0)).toBe(70 + 8.75 + 52.5);
   });
 });
+
+describe("Florida professional entities (decision 18)", () => {
+  const FL_ADDR3 = { street1: "200 S Orange Ave", city: "Orlando", state: "FL", zip: "32801" };
+  const corp = (designator: string, extra: Record<string, unknown> = {}) => FilingRequest.parse(flFiling({
+    formation: {
+      entityType: "LLC", floridaEntityType: "profit_corporation", name: { baseName: "Rivera Dental", designator },
+      mainBusinessAddress: FL_ADDR3, registeredAgent: { name: "Tessa Agentsson", address: FL_ADDR3 },
+      stockShares: 100, incorporator: { name: "Sam Rivera", address: FL_ADDR3 }, ...extra,
+    },
+  }));
+  const llc = (designator: string, extra: Record<string, unknown> = {}) => {
+    const base = flFiling() as { formation: Record<string, unknown> };
+    return FilingRequest.parse({ ...base, formation: { ...base.formation, name: { baseName: "Fields Accounting", designator }, ...extra } });
+  };
+  const errorsAt = (req: FilingRequest, path: string) => validateFiling(req).filter((i) => i.severity === "error" && i.path === path);
+
+  it("accepts PLLC, P.L.L.C. and Chartered for an LLC, and needs its professional purpose", () => {
+    for (const d of ["PLLC", "P.L.L.C.", "Professional Limited Liability Company", "Chartered"]) {
+      expect(errorsAt(llc(d), "formation.name")).toEqual([]);
+      expect(errorsAt(llc(d), "formation.purpose")[0]?.message).toMatch(/professional LLC .* must state its professional purpose/);
+      expect(hasErrors(validateFiling(llc(d, { purpose: "The practice of public accounting" })))).toBe(false);
+    }
+    expect(errorsAt(llc("LLC"), "formation.purpose")).toEqual([]); // an ordinary LLC needn't
+    expect(errorsAt(llc("Partners"), "formation.name")).toHaveLength(1);
+  });
+
+  it("accepts P.A., Professional Association and Chartered for a corporation, and needs its professional purpose", () => {
+    for (const d of ["P.A.", "Professional Association", "Chartered"]) {
+      expect(errorsAt(corp(d), "formation.name")).toEqual([]);
+      expect(errorsAt(corp(d), "formation.purpose")[0]?.message).toMatch(/professional association .* must state its professional purpose/);
+      expect(hasErrors(validateFiling(corp(d, { purpose: "The practice of dentistry" })))).toBe(false);
+    }
+    for (const d of ["Inc.", "Inc", "Corp.", "Corporation", "Incorporated", "Company", "Co."]) expect(hasErrors(validateFiling(corp(d)))).toBe(false);
+    expect(errorsAt(corp("Group"), "formation.name")).toHaveLength(1);
+  });
+});

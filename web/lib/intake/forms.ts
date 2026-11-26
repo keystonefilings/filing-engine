@@ -577,11 +577,11 @@ const flLlc: FilingKind = {
   map: FL,
   feeNote: "State fees $125 (filing $100 + registered agent designation $25). Optional: certificate of status $5, certified copy $30.",
   sections: [
-    ...flCommon("LLC Name", ["LLC", "L.L.C.", "Limited Liability Company"], "A professional LLC uses PLLC or P.L.L.C. and must give a professional purpose."),
+    ...flCommon("LLC Name", ["LLC", "L.L.C.", "Limited Liability Company", "PLLC", "P.L.L.C.", "Professional Limited Liability Company", "Chartered"], "A professional LLC (licensed professionals such as doctors, lawyers or accountants) ends with PLLC, P.L.L.C., Professional Limited Liability Company or Chartered, and must state its professional purpose below."),
     {
       title: "Purpose and managers",
       items: [
-        f("formation.purpose", "Purpose (optional; required for a professional LLC)", "textarea", { maxLength: 240, ref: "Purpose" }),
+        f("formation.purpose", "Purpose (optional; required for a professional LLC)", "textarea", { maxLength: 240, help: "A professional LLC states the one profession it practices, for example \"the practice of accounting\".", ref: "Purpose" }),
         {
           kind: "group", path: "formation.authorizedPersons", label: "Managers and authorized representatives (optional)", itemLabel: "Person", min: 0, max: 6, ref: "Manager / member blocks 1 to 6",
           help: "Banks often ask for these. MGR = manager, AMBR = authorized member, AP = authorized person, AR = authorized representative.",
@@ -616,12 +616,12 @@ const flCorp: FilingKind = {
   map: FL,
   feeNote: "State fees $70 (filing $35 + registered agent designation $35). Optional: certificate of status $8.75, certified copy $8.75.",
   sections: [
-    ...flCommon("Corporate Name", ["Inc.", "Corp.", "Corporation", "Incorporated", "Company", "Co."], "A professional association uses P.A., Chartered or Professional Association."),
+    ...flCommon("Corporate Name", ["Inc.", "Corp.", "Corporation", "Incorporated", "Company", "Co.", "P.A.", "Professional Association", "Chartered"], "A professional association (licensed professionals such as doctors, lawyers or accountants) ends with P.A., Professional Association or Chartered, and must state its professional purpose: untick \"any and all lawful business\" below."),
     {
       title: "Shares, purpose and incorporator",
       items: [
         f("formation.stockShares", "Number of authorized shares", "number", { required: true, min: 1, ref: "Corporate Stock Shares" }),
-        f("intake.portal.flAnyLawfulBusiness", "Purpose is \"any and all lawful business\"", "checkbox", { defaultValue: "on", help: "Uncheck for a professional association, which must state a specific purpose.", ref: "Any and all lawful business checkbox" }),
+        f("intake.portal.flAnyLawfulBusiness", "Purpose is \"any and all lawful business\"", "checkbox", { defaultValue: "on", help: "Untick for a professional association (P.A., Professional Association or Chartered), which must state its professional purpose.", ref: "Any and all lawful business checkbox" }),
         f("formation.purpose", "Specific purpose", "textarea", { required: true, maxLength: 240, showIf: { path: "intake.portal.flAnyLawfulBusiness", equals: "" }, ref: "Purpose" }),
         f("formation.incorporator.name", "Incorporator name", "text", { required: true, help: "Typed as the incorporator's electronic signature.", ref: "Incorporator Name" }),
         ...address("formation.incorporator.address", "Incorporator address", { required: true, ref: "Incorporator Address" }),

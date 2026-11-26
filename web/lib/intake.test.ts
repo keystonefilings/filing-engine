@@ -415,3 +415,27 @@ test("decision 15: the EIN form lists every state, and the filing is for the sta
   const f = k.sections.flatMap((s) => s.items).find((i) => i.kind === "field" && i.path === "ein.formationState") as { type: string } | undefined;
   assert.equal(f?.type, "usState");
 });
+
+
+test("decision 18: the Florida forms offer professional endings and ask a professional entity for its purpose", () => {
+  const endings = (id: string) => allFields(filingKind(id)!).find((f) => f.path === "formation.name.designator")!.field.options!.map((o) => o.value);
+  for (const e of ["PLLC", "P.L.L.C.", "Chartered"]) assert.ok(endings("fl-llc").includes(e), e);
+  for (const e of ["P.A.", "Professional Association", "Chartered"]) assert.ok(endings("fl-corp").includes(e), e);
+  const help = (id: string) => allFields(filingKind(id)!).find((f) => f.path === "formation.name.baseName")!.field.help!;
+  assert.match(help("fl-llc"), /PLLC, P\.L\.L\.C\., Professional Limited Liability Company or Chartered/);
+  assert.match(help("fl-corp"), /P\.A\., Professional Association or Chartered/);
+
+  const llc = (designator: string, purpose = "") => buildRequest(filingKind("fl-llc")!, {
+    "formation.name.baseName": "Fields Accounting", "formation.name.designator": designator, "formation.purpose": purpose,
+  }, ctx).issues.filter((i) => i.path === "formation.purpose");
+  assert.equal(llc("PLLC").length, 1);
+  assert.equal(llc("PLLC", "The practice of public accounting").length, 0);
+  assert.equal(llc("LLC").length, 0);
+
+  const corp = (designator: string, anyLawful: string) => buildRequest(filingKind("fl-corp")!, {
+    "formation.name.baseName": "Rivera Dental", "formation.name.designator": designator, "intake.portal.flAnyLawfulBusiness": anyLawful,
+  }, ctx).issues.filter((i) => i.path === "intake.portal.flAnyLawfulBusiness");
+  assert.equal(corp("P.A.", "on").length, 1);
+  assert.equal(corp("P.A.", "").length, 0);
+  assert.equal(corp("Inc.", "on").length, 0);
+});

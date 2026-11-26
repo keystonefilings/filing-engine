@@ -268,6 +268,7 @@ export function buildRequest(kind: FilingKind, raw: Raw, ctx: BuildContext): Bui
 
   deepMerge(request, structuredClone(kind.constants));
   postProcess(kind, request, raw);
+  floridaProfessionalPurpose(kind, raw, issues);
 
   const out = deleteEmpty(request) as Record<string, unknown>;
   out.tenantId = ctx.tenantId;
@@ -282,6 +283,19 @@ export function buildRequest(kind: FilingKind, raw: Raw, ctx: BuildContext): Bui
   intake.portal = { ...portal, kind: kind.id, source: ctx.source, submittedBy: ctx.submittedBy, authorizations: granted };
   out.intake = intake;
   return { request: out, issues };
+}
+
+/** Decision 18: a Florida PLLC or professional association must state its professional purpose. */
+const FL_PROFESSIONAL_ENDINGS: Record<string, string[]> = { "fl-llc": ["PLLC", "P.L.L.C.", "Professional Limited Liability Company", "Chartered"], "fl-corp": ["P.A.", "Professional Association", "Chartered"] };
+function floridaProfessionalPurpose(kind: FilingKind, raw: Raw, issues: BuildIssue[]): void {
+  const endings = FL_PROFESSIONAL_ENDINGS[kind.id];
+  const ending = String(raw["formation.name.designator"] ?? "");
+  if (!endings || !endings.includes(ending)) return;
+  if (kind.id === "fl-corp" && raw["intake.portal.flAnyLawfulBusiness"] === "on") {
+    issues.push({ path: "intake.portal.flAnyLawfulBusiness", message: `A name ending in ${ending} is a professional association: untick "any and all lawful business" and state its professional purpose` });
+  } else if (!String(raw["formation.purpose"] ?? "").trim() && !issues.some((i) => i.path === "formation.purpose")) {
+    issues.push({ path: "formation.purpose", message: `A name ending in ${ending} is a professional ${kind.id === "fl-llc" ? "LLC" : "association"}: state its professional purpose` });
+  }
 }
 
 /** Per-kind tidy-up the declarative form can't express. */

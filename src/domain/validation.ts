@@ -1,5 +1,5 @@
 import type { FilingRequest } from "./filing.js";
-import { hasLlcIndicator, fullLegalName, hasCorpIndicator } from "./name.js";
+import { hasLlcIndicator, fullLegalName, hasCorpIndicator, hasFlLlcEnding, hasFlCorpEnding, isFlProfessionalName } from "./name.js";
 
 export interface ValidationIssue {
   path: string;
@@ -137,10 +137,16 @@ export function validateFiling(req: FilingRequest): ValidationIssue[] {
       if (!raFromTenant && !agent?.address) err("formation.registeredAgent", "FL requires a registered agent with an address");
       else if (agent?.address && agent.address.state !== "FL") err("formation.registeredAgent.address.state", "FL registered agent must have a Florida address");
       if (f.purpose && f.purpose.length > 240) err("formation.purpose", "FL purpose is limited to 240 characters");
+      if (isFlProfessionalName(legal, flType) && !f.purpose?.trim()) {
+        err("formation.purpose", flType === "llc"
+          ? "a Florida professional LLC (PLLC, P.L.L.C. or Chartered) must state its professional purpose (s.621.12 F.S.)"
+          : "a Florida professional association (P.A. or Chartered) must state its professional purpose instead of \"any and all lawful business\" (s.621.12 F.S.)");
+      }
       if (flType === "llc") {
-        if (!hasLlcIndicator(legal)) err("formation.name", "FL requires an LLC indicator in the name");
+        if (!hasFlLlcEnding(legal)) err("formation.name", "FL requires an LLC ending in the name (LLC, L.L.C., Limited Liability Company, or PLLC, P.L.L.C. or Chartered for a professional LLC)");
         if (f.authorizedPersons.length > 6) err("formation.authorizedPersons", "FL online filing lists at most 6 authorized persons");
       } else if (flType === "profit_corporation") {
+        if (!hasFlCorpEnding(legal)) err("formation.name", "FL requires a corporate ending in the name (Corporation, Company, Incorporated, Corp., Inc. or Co., or P.A. or Chartered for a professional association)");
         if (!f.stockShares) err("formation.stockShares", "FL profit corporation requires the number of authorized shares");
         if (!f.incorporator?.address) err("formation.incorporator", "FL profit corporation requires an incorporator with an address");
         if (f.authorizedPersons.length > 6) err("formation.authorizedPersons", "FL online filing lists at most 6 officers/directors");

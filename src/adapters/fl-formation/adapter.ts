@@ -1,4 +1,4 @@
-import { renderName, hasLlcIndicator } from "../../domain/name.js";
+import { renderName, hasFlLlcEnding } from "../../domain/name.js";
 import type { ScreenStep, SiteAdapter, StepContext } from "../types.js";
 import { FL_SCREENS, FL_CORP_FORM, FL_LP_FORM } from "./intents.js";
 import { flAccount } from "../../settings/accounts.js";
@@ -105,7 +105,7 @@ const llcForm: ScreenStep = {
   async fill(ctx) {
     const f = formation(ctx);
     const name = renderName(f.name, "FL").nameField;
-    if (!hasLlcIndicator(name)) throw new Error("FL LLC name needs an LLC indicator");
+    if (!hasFlLlcEnding(name)) throw new Error("FL LLC name needs an LLC ending (LLC, L.L.C., Limited Liability Company, PLLC, P.L.L.C. or Chartered)");
     await fillEffectiveAndCerts(ctx);
     await ctx.setByName("corp_name", name);
     await fillPrincipalAndAgent(ctx);
