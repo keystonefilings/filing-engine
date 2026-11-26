@@ -139,6 +139,9 @@ export interface FirmInk {
   fillBorder: string | null;
   /** A 4 px left edge in the firm's color on a Plate Ink button, for a near-white Main (rule e), else null. */
   fillEdge: string | null;
+  /** The edge of a selected choice, a checked box and a radio dot: the fill if it reaches 3:1 on white
+   *  (WCAG's minimum for a control's edge), else the link ink. */
+  selectLine: string;
   /** Links, focus rings, the "your turn" chip: at least 4.5:1 on white. */
   ink: string;
   /** The page under the firm's sheets. */
@@ -217,7 +220,9 @@ export function inkMatch(main: string, second?: string | null): FirmInk {
   const tint = oklchToHexClamped({ l: 0.94, c: Math.min(m.c * 0.35, 0.045), h: m.h });
   const inkDark = stepL({ ...m, c: Math.min(m.c, 0.14) }, 1, (h) => contrast(h, NIGHT_CARD) >= 4.5);
 
-  return { firm, firm2, fill, fillHover, on, fillBorder, fillEdge, ink, wash, row, tint, inkDark, deepened: fill !== firm, flags };
+  const selectLine = contrast(fill, WHITE) >= 3 ? fill : ink;
+
+  return { firm, firm2, fill, fillHover, on, fillBorder, fillEdge, selectLine, ink, wash, row, tint, inkDark, deepened: fill !== firm, flags };
 }
 
 /** The custom properties a firm's client pages (and previews of them) carry, from one ink match. */
@@ -230,6 +235,7 @@ export function firmVars(k: FirmInk): Record<string, string> {
     "--firm-on": k.on,
     "--firm-fill-border": k.fillBorder ?? "transparent",
     "--firm-fill-edge": k.fillEdge ?? "transparent",
+    "--firm-select-line": k.selectLine,
     "--firm-ink": k.ink,
     "--firm-wash": k.wash,
     "--firm-row": k.row,

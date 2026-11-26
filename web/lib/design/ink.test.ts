@@ -78,6 +78,7 @@ test("every pair the ink match emits passes, for 1,000 random colors and the pro
     assert.ok(contrast(k.on, k.fill) >= need, `${c}: button label ${k.on} on ${k.fill}`);
     assert.ok(contrast(k.on, k.fillHover) >= 4.5, `${c}: hover label ${k.on} on ${k.fillHover}`);
     assert.ok(contrast(k.ink, WHITE) >= 4.5, `${c}: link ${k.ink} on white`);
+    assert.ok(contrast(k.selectLine, WHITE) >= 3, `${c}: selection edge ${k.selectLine} on white`);
     assert.ok(contrast(k.inkDark, NIGHT_CARD) >= 4.5, `${c}: dark link ${k.inkDark} on Night Card`);
     for (const bg of [k.wash, k.row, k.tint]) assert.ok(contrast(PLATE_INK, bg) >= 12, `${c}: Plate Ink on ${bg}`);
   }

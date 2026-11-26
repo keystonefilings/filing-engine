@@ -16,7 +16,7 @@
   --action-border: transparent; --action-edge: transparent;
   --link: var(--ink); --link-line: var(--brass-line);
   --focus: var(--ink); --focus-gap: #fff;
-  --select: var(--ink); --select-on: #fff; --select-fill: var(--brass-tint);
+  --select: var(--ink); --select-on: #fff; --select-fill: var(--brass-tint); --select-line: var(--ink);
   --row: var(--cotton-2); --halo: var(--brass-tint); --bullet: var(--brass-line);
   --turn: var(--ochre); --turn-tint: var(--ochre-tint);
   --font-firm: var(--font-sans-display);
@@ -24,9 +24,9 @@
 }
 /* CoFile's own cards and panels on the dark page use Night Card, not white (4.6). */
 @media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) .reg-cofile { --surface: var(--night-card); --action-on: var(--night); --focus-gap: var(--night); --row: var(--night-2); --halo: rgba(217,168,74,.18); --select-fill: rgba(217,168,74,.18); }
+  :root:not([data-theme="light"]) .reg-cofile { --surface: var(--night-card); --action-on: var(--night); --focus-gap: var(--night); --row: var(--night-2); --halo: rgba(217,168,74,.18); --select-fill: rgba(217,168,74,.18); --field-bg: var(--night); --field-ink: var(--night-ink); --select: var(--night-ink); --select-on: var(--night); --select-line: var(--night-ink); --filled: rgba(217,168,74,.18); --filled-edge: var(--brass); --chevron: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1.5l5 5 5-5' fill='none' stroke='%23ECE8DF' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E"); }
 }
-:root[data-theme="dark"] .reg-cofile { --surface: var(--night-card); --action-on: var(--night); --focus-gap: var(--night); --row: var(--night-2); --halo: rgba(217,168,74,.18); --select-fill: rgba(217,168,74,.18); }
+:root[data-theme="dark"] .reg-cofile { --surface: var(--night-card); --action-on: var(--night); --focus-gap: var(--night); --row: var(--night-2); --halo: rgba(217,168,74,.18); --select-fill: rgba(217,168,74,.18); --field-bg: var(--night); --field-ink: var(--night-ink); --select: var(--night-ink); --select-on: var(--night); --select-line: var(--night-ink); --filled: rgba(217,168,74,.18); --filled-edge: var(--brass); --chevron: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1.5l5 5 5-5' fill='none' stroke='%23ECE8DF' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E"); }
 
 .reg-firm, .reg-white {
   --page: var(--firm-wash); --page-2: var(--firm-wash); --surface: #fff; --text: var(--ink); --text-2: var(--graphite);
@@ -35,7 +35,7 @@
   --action-border: var(--firm-fill-border, transparent); --action-edge: var(--firm-fill-edge, transparent);
   --link: var(--firm-ink); --link-line: var(--firm-ink);
   --focus: var(--firm-ink); --focus-gap: #fff;
-  --select: var(--firm-fill); --select-on: var(--firm-on); --select-fill: var(--firm-row);
+  --select: var(--firm-fill); --select-on: var(--firm-on); --select-fill: var(--firm-row); --select-line: var(--firm-select-line, var(--firm-fill));
   --row: var(--firm-row); --halo: color-mix(in srgb, var(--firm-tint) 50%, transparent);
   --bullet: var(--firm); --turn: var(--firm-ink); --turn-tint: #fff;
   background: var(--page); color: var(--text);
@@ -56,6 +56,15 @@
   --madder: #9A2D2D; --madder-tint: #F8E6E3; --iron: #3F434F;
   --brass-line: #A87A1E; --brass-ink: #7A5714;
   --surface: #fff; --text: #1D2130; --text-2: #555867; --line: #DDD7CB; --line-strong: #8A8578;
+}
+/* Semantic tokens are worked out where the register sets them, so a white sheet inside CoFile's look on a
+   dark page re-states the light ones: links, focus, selection and rows read on white paper. */
+.reg-cofile .sheet {
+  --page-2: #F3F0E8; --link: #1D2130; --link-line: #A87A1E; --focus: #1D2130; --focus-gap: #fff;
+  --select: #1D2130; --select-on: #fff; --select-fill: #F6EBD0; --select-line: #1D2130;
+  --row: #F3F0E8; --halo: #F6EBD0; --bullet: #A87A1E; --turn: #855A0C; --turn-tint: #F7EDD8; --action-on: #1D2130;
+  --cotton: #FBFAF6; --cotton-2: #F3F0E8; --field-bg: #fff; --field-ink: #1D2130;
+  --filled: #F6EBD0; --filled-edge: #A87A1E; --chevron: initial;
 }
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) .sheet { box-shadow: var(--e-sheet-dark); }
