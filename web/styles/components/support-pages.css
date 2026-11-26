@@ -1,0 +1,59 @@
+/* Security and Questions (merged spec 10A.5, 10A.6): support pages, plain well-set type and no pictures. Security's
+   five as ledger rows; Questions' fourteen as an index of disclosures, each a details row with a lozenge.
+   Reads semantic tokens. */
+@layer components {
+
+/* ── Security: the five, a ledger (10A.5.2) ───────────────────────────────────────────────────────────────── */
+.sec2 { border-top: 1px solid var(--text); }
+.sec2-row { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); column-gap: 24px; align-items: baseline; padding-block: 32px; border-bottom: 1px solid var(--line); }
+.sec2-h3 { grid-column: 1 / span 4; color: var(--text); }
+.sec2-p { grid-column: 5 / span 7; max-width: 64ch; color: var(--text); }
+.sec2-links { max-width: calc((100% - 11 * 24px) / 12 * 8 + 7 * 24px); color: var(--text); }
+@media (max-width: 1023px) {
+  .sec2-row { grid-template-columns: repeat(8, minmax(0, 1fr)); }
+  .sec2-h3 { grid-column: 1 / span 3; }
+  .sec2-p { grid-column: 4 / span 5; }
+  .sec2-links { max-width: 34em; }
+}
+@media (max-width: 639px) {
+  .sec2-row { grid-template-columns: minmax(0, 1fr); row-gap: 12px; padding-block: 24px; }
+  .sec2-h3, .sec2-p { grid-column: 1; }
+}
+
+/* ── Questions: the fourteen (10A.6.2) ────────────────────────────────────────────────────────────────────── */
+.faq2 { max-width: calc((100% - 11 * 24px) / 12 * 8 + 7 * 24px); border-top: 1px solid var(--text); }
+@media (max-width: 1023px) { .faq2 { max-width: none; } }
+.faq2-row { border-bottom: 1px solid var(--line); background: transparent; }
+.faq2-row > summary {
+  display: flex; align-items: center; justify-content: space-between; gap: 24px; min-height: 72px; padding: 20px 4px 20px 0;
+  list-style: none; cursor: pointer; color: var(--text); transition: background-color var(--t-quick) var(--ease-press);
+}
+.faq2-row > summary::-webkit-details-marker { display: none; }
+@media (hover: hover) { .faq2-row > summary:hover { background: var(--page-2); } }
+.faq2-row > summary:focus-visible { outline: 2px solid var(--focus); outline-offset: 0; box-shadow: none; }
+.faq2-q { flex: 1 1 auto; min-width: 0; }
+/* The lozenge: the list mark grown; an outline when closed, filled Brass Line when open. No plus, minus or chevron. */
+.faq2-mark { flex: none; display: grid; place-items: center; width: 48px; height: 48px; margin: -14px -12px -14px 0; }
+.faq2-mark::before { content: ""; width: 13px; height: 13px; border: 1.5px solid var(--text); transform: rotate(45deg); }
+.faq2-row[open] .faq2-mark::before { background: var(--brass-line); border-color: var(--brass-line); }
+.faq2-a { padding: 4px 0 32px; }
+.faq2-a p { max-width: 34em; color: var(--text); }
+.faq2-row > summary + .faq2-a { margin-top: 0; }
+/* Opening takes 240 ms on height where the browser can animate details; none with reduced motion */
+@supports (interpolate-size: allow-keywords) {
+  .faq2 { interpolate-size: allow-keywords; }
+  .faq2-row::details-content { height: 0; overflow: clip; transition: height 240ms var(--ease-settle), content-visibility 240ms allow-discrete; }
+  .faq2-row[open]::details-content { height: auto; }
+  @media (prefers-reduced-motion: reduce) { .faq2-row::details-content { transition: none; } }
+}
+/* Arriving at an anchor: a Cotton 2 wash that fades over 2 s */
+.faq2-row.is-arrived { animation: faq2-wash 2s var(--ease-settle) both; }
+@keyframes faq2-wash { from { background: var(--page-2); } to { background: transparent; } }
+@media (max-width: 639px) {
+  .faq2-row > summary { min-height: 64px; gap: 16px; padding-block: 16px; }
+}
+@media print {
+  .faq2-mark { display: none; }
+  .faq2-row::details-content { height: auto; content-visibility: visible; }
+}
+}

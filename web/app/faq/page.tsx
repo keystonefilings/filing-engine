@@ -1,7 +1,10 @@
 import Link from "next/link";
-import { PageHead, Shell } from "@/components/landing/Shell";
+import { SiteShell } from "@/components/site/SiteShell";
+import { PageHead } from "@/components/site-pages/PageHead";
+import { FaqAnchors } from "@/components/site-pages/FaqAnchors";
 import { platformName, supportEmail } from "@/lib/brand";
 import { PRICING, usd } from "@/lib/pricing";
+import "@/styles/components/support-pages.css";
 
 export function generateMetadata() {
   return {
@@ -30,24 +33,23 @@ export default function Faq() {
     ["live", "Which filing types are live for my account?", <>While types are switching on, it can differ by account. Write to <a href={`mailto:${email}?subject=${encodeURIComponent("Which filing types are live for my account?")}`}>{email}</a> and we&apos;ll tell you each one by name.</>],
   ];
   return (
-    <Shell nav>
-      <main>
-        <PageHead kicker="Questions" title="Questions, answered.">
-          <p className="lede">Something else? <a href={`mailto:${email}`}>{email}</a></p>
-        </PageHead>
-        <section className="nx-sec band">
-          <div className="wrap">
-            <div className="r3-faq">
-              {qa.map(([id, q, a]) => (
-                <details key={id} id={id}>
-                  <summary>{q}</summary>
-                  <p>{a}</p>
-                </details>
-              ))}
-            </div>
+    <SiteShell>
+      <PageHead kicker="Questions" title="Questions, answered.">
+        <p className="t-lede pg2-lede">Something else? <a href={`mailto:${email}`}>{email}</a></p>
+      </PageHead>
+      <section className="pg2-band is-support">
+        <div className="site2-in">
+          <div className="faq2">
+            {qa.map(([id, q, a]) => (
+              <details key={id} id={id} className="faq2-row">
+                <summary><span className="t-display-s faq2-q">{q}</span><span className="faq2-mark" aria-hidden="true" /></summary>
+                <div className="faq2-a"><p className="t-body">{a}</p></div>
+              </details>
+            ))}
           </div>
-        </section>
-      </main>
-    </Shell>
+          <FaqAnchors />
+        </div>
+      </section>
+    </SiteShell>
   );
 }
