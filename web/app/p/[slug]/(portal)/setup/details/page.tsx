@@ -1,3 +1,4 @@
+import "@/styles/components/desk.css";
 import { notFound } from "next/navigation";
 import { firmContext } from "@/lib/firm";
 import { DetailsForm } from "@/components/SetupForms";
@@ -14,7 +15,7 @@ export default async function DetailsPage({ params }: { params: Promise<{ slug: 
   const p = company.partner;
   const offered = new Set(offeredKinds(company).map((k) => k.id));
   return (
-    <div className="narrow stack">
+    <div className="narrow stack desk2-one">
       <p className="small muted">Step 1 of 3</p>
       <h1>Your firm</h1>
       <DetailsForm action={saveDetails.bind(null, slug)} v={{ name: company.name, companyType: p.companyType, contactName: p.contactName, contactEmail: p.contactEmail, phone: p.phone, website: p.website, copyEmail: company.copyEmail as string | undefined,

@@ -197,3 +197,10 @@
 .filing2-google { display: grid; gap: 8px; justify-items: start; margin: 0; font-size: 0.9375rem; line-height: 1.4375rem; color: var(--text-2); }
 @media (max-width: 599px) { .filing2-docs { grid-template-columns: repeat(2, minmax(0, 150px)); } .filing2-doc { width: 100%; } }
 }
+
+/* A desk page whose primary button is its one main action: Brass (10B.3.1; the dashboard's button kinds) */
+@layer components {
+.desk2-one .btn.primary:not(.small) { background: var(--action); color: var(--action-on); border-color: transparent; }
+@media (hover: hover) { .desk2-one .btn.primary:not(.small):hover { background: var(--action-hover); } }
+@media (max-width: 599px) { .desk2-one form .btn.primary:not(.small) { width: 100%; min-height: 56px; } }
+}
