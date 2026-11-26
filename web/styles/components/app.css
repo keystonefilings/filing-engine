@@ -79,7 +79,7 @@
 @media (hover: hover) { .shell2-content tbody tr:hover > td { background: var(--row); } }
 
 /* Fields: 48 px, Rule Strong border, white (Night on the dark desk), focus ring in Plate Ink (11.2) */
-.shell2-content :where(input[type=text], input[type=email], input[type=tel], input[type=number], input[type=date], input[type=month], input[type=password], input[type=url], input:not([type]), select, textarea):not(.input2):not(.select2):not(.textarea2) {
+.shell2-content :where(input[type=text], input[type=email], input[type=tel], input[type=number], input[type=date], input[type=month], input[type=password], input[type=url], input:not([type]), select, textarea):where(:not(.input2, .select2, .textarea2)) {
   min-height: 48px; padding: 10px 14px; font: 400 1.0625rem/1.5rem var(--font-sans); color: var(--field-ink, var(--text)); background-color: var(--field-bg, #fff); border: 1px solid var(--line-strong); border-radius: var(--r-sheet);
 }
 .shell2-content textarea:not(.textarea2) { min-height: 120px; }
