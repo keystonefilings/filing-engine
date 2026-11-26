@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { firmContext, kindsForState, offeredKinds } from "@/lib/firm";
+import { firmContext, kindsForState, liveFilings, offeredKinds } from "@/lib/firm";
 import { firmPageUrl, publicKind, SERVICE_SLUGS, widgetSnippet } from "@/lib/public-pages";
 import { requestWays } from "@/lib/inbound";
 
@@ -37,11 +37,16 @@ export default async function NewFilingPage({ params, searchParams }: { params: 
         ) : null}
         <div className="pick">
           {STATES.map((s) => {
-            const n = kindsForState(all, s.id).length;
+            const kinds = kindsForState(all, s.id);
+            const own = kinds.filter((k) => k.type !== "ein_only").length;
+            const ein = kinds.length > own;
+            const label = own === 0
+              ? (ein ? `Federal EIN only. To offer ${s.name} filings, choose them in Setup.` : "None offered yet")
+              : `${own === 1 ? "1 filing type" : `${own} filing types`}${ein ? ", plus the federal EIN" : ""}`;
             return (
               <Link key={s.id} href={`${base}/new?state=${s.id}`}>
                 <strong>{s.name}</strong>
-                <span className="small muted">{n === 1 ? "1 filing type" : `${n} filing types`}</span>
+                <span className="small muted">{label}</span>
               </Link>
             );
           })}
@@ -60,6 +65,7 @@ export default async function NewFilingPage({ params, searchParams }: { params: 
           {kinds.map((k) => (
             <Link key={k.id} href={`${base}/new/${k.id}`}>
               <strong>{k.title}</strong>
+              <span className="small" style={{ display: "block", marginBottom: 4 }}>{liveFilings(k.id) ? <span className="badge ok">Files for real</span> : <span className="badge">Practice filing: stops before the final step</span>}</span>
               <span className="small muted">{k.summary}</span>
               {k.feeNote ? <span className="small" style={{ display: "block", marginTop: 6 }}>{k.feeNote}</span> : null}
             </Link>

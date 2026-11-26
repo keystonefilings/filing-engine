@@ -56,7 +56,7 @@ export function AddCard({ publicKey, save, purpose = "state_fees" }: { publicKey
       </div>
       <button type="button" className="btn primary" onClick={add} disabled={state.pending}>{state.pending ? "Saving…" : "Save card"}</button>
       {state.error ? <p className="notice bad" role="alert">{state.error}</p> : state.done ? <p className="notice ok" role="status">{state.done}</p> : null}
-      <p className="help">The card is held by Basis Theory, a card vault, never by us. We never keep the security code: when filings are ready to pay, we ask you for it and use it for an hour at most.</p>
+      <p className="help">Saved cards are held by Basis Theory, a card vault, never in our database. We never keep the security code: when filings are ready to pay, we ask the card&apos;s owner for it and use it for an hour at most.</p>
     </div>
   );
 }

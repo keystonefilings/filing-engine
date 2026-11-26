@@ -30,7 +30,7 @@ export default async function Overview() {
       {payCount ? <p className="notice warn">{payCount === 1 ? "1 approved filing is" : `${payCount} approved filings are`} ready to pay and need a card&apos;s security code. <Link href="/dashboard/pay">Pay and file</Link></p> : null}
       {!account.configured ? <p className="notice warn">Your account settings haven&apos;t been set up by the platform yet, so filings can&apos;t be approved or run. Ask the platform team to configure tenant <code>{account.tenantId}</code>.</p> : null}
       <div className="grid">
-        <div className="card"><div className="muted small">Filings</div><div className="stat">{usage.filings.total}</div><div className="small muted">{usage.filings.live} live, {usage.filings.total - usage.filings.live} test</div></div>
+        <div className="card"><div className="muted small">Filings</div><div className="stat">{usage.filings.total}</div><div className="small muted">{usage.filings.live} live, {usage.filings.total - usage.filings.live} practice</div></div>
         <div className="card"><div className="muted small">Webhook deliveries</div><div className="stat">{usage.webhooks.delivered ?? 0}</div><div className="small muted">{usage.webhooks.pending ?? 0} pending, {usage.webhooks.dead ?? 0} failed</div></div>
         <div className="card"><div className="muted small">API keys</div><div className="stat">{usage.apiKeys.live}</div><div className="small muted"><Link href="/dashboard/keys">Manage keys</Link></div></div>
       </div>

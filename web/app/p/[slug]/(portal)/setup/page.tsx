@@ -7,7 +7,7 @@ export const metadata = { title: "Set up your account" };
 const STEPS = [
   { id: "details", title: "Your firm", text: "Name, kind of firm and who to contact.", start: "Set up your firm" },
   { id: "branding", title: "Branding", text: "Your logo and color on the pages your clients see.", start: "Set up branding" },
-  { id: "payments", title: "Payment", text: "Which card pays state fees, per filing or one for all, with a backup.", start: "Set up payment" },
+  { id: "payments", title: "Payment", text: "Which card pays state fees: one card for everything, or one per filing type, with a backup.", start: "Set up payment" },
 ] as const;
 
 export default async function SetupPage({ params }: { params: Promise<{ slug: string }> }) {
@@ -20,7 +20,7 @@ export default async function SetupPage({ params }: { params: Promise<{ slug: st
   return (
     <div className="narrow stack">
       <h1>{next ? "Set up your account" : "You're set up"}</h1>
-      <p className="muted">{next ? "Three short steps. You can change any of them later." : "You can change any of these at any time."}</p>
+      <p className="muted">{next ? "Three short steps, plus registered agents if you want them. You can change any of them later." : "You can change any of these at any time."}</p>
       <ol className="steps-list">
         {STEPS.map((s) => (
           <li key={s.id} className={done.has(s.id) ? "done" : undefined}>

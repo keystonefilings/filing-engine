@@ -18,7 +18,7 @@ export function BetaBanner({ name, email }: { name: string; email: string }) {
     <div className="beta-banner" role="note">
       <strong>Beta</strong>
       <span>
-        {own ? `${name} is in beta.` : "This service is in beta."} Practice filings run end to end on the government sites; not every filing type files for real yet.
+        {own ? `${name} is in beta.` : "This service is in beta."} Practice filings run end to end on the government sites and stop before the final step, so nothing is filed or paid. Not every filing type files for real yet.
         {own ? <> Questions or problems? <a href={`mailto:${email}`}>{email}</a></> : null}
       </span>
     </div>

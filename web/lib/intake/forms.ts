@@ -141,7 +141,7 @@ const yes = (path: string, label: string, ref: string, extra: Partial<Field> = {
 function contactSection(ref: string): Section {
   return {
     title: "Filing contact",
-    help: "Who the filing company and the state contact about this filing. Receipts and state notices go to this email.",
+    help: "The person the filing company and the state contact about this filing. Receipts and state notices go to their email.",
     items: [
       f("contact.firstName", "First name", "text", { required: true, ref }),
       f("contact.lastName", "Last name", "text", { required: true, ref }),
@@ -163,8 +163,8 @@ const nyLlc: FilingKind = {
   state: "NY",
   constants: { formation: { entityType: "LLC" } },
   map: NY_DOS,
-  feeNote: "State filing fee $200, paid only after the filing is approved. Optional: plain copy $5, certified copy $10, certificate of existence (proof the LLC exists and is in good standing) $25.",
-  feeAside: "New York also requires a new LLC to publish a notice of its formation within 120 days. That's a separate step with its own costs and isn't part of this filing.",
+  feeNote: "State filing fee $200, paid only after the filing is approved. Optional: plain copy $5, certified copy $10, certificate of existence (the Department of State's certificate that the LLC exists on its records) $25.",
+  feeAside: "Within 120 days after the LLC is formed, New York requires it to publish a notice of its formation once a week for six weeks in two newspapers chosen by the county clerk of the county above, then file a Certificate of Publication with the Department of State. If it doesn't, its authority to do business in New York is suspended until it does. This isn't part of this filing, and the newspapers charge separately.",
   sections: [
     {
       title: "Name",
@@ -196,7 +196,7 @@ const nyLlc: FilingKind = {
       ref: "Screen D2: Service of Process",
       help: "New York's Secretary of State accepts legal papers (service of process) for the LLC, for example if it is sued, and mails a copy to this name and address. Use an address where mail is read promptly.",
       items: [
-        f("formation.serviceOfProcess.mode", "Send legal papers to", "radio", { required: true, defaultValue: "manual", options: lv([["manual", "A name and address I enter (often \"The LLC\" at its address)"], ["service_company", "A service company that receives legal papers for businesses (if you've hired one)"]]), ref: "Screen D2, SOP Select One" }),
+        f("formation.serviceOfProcess.mode", "Send legal papers to", "radio", { required: true, defaultValue: "manual", options: lv([["manual", "A name and address I enter (often \"The LLC\" itself, at its business address; it appears in New York's public records)"], ["service_company", "A service company that receives legal papers for businesses (if you've hired one)"]]), ref: "Screen D2, SOP Select One" }),
         f("formation.serviceOfProcess.person.name", "Name", "text", { required: true, defaultValue: "THE LLC", showIf: { path: "formation.serviceOfProcess.mode", equals: "manual" }, ref: "Screen D2, SOP Name" }),
         ...address("formation.serviceOfProcess.person.address", "Mailing address", { required: true, state: "NY", ref: "Screen D2, SOP address", showIf: { path: "formation.serviceOfProcess.mode", equals: "manual" } }),
         f("formation.serviceOfProcess.serviceCompany", "Service company name, as registered with DOS", "text", { required: true, showIf: { path: "formation.serviceOfProcess.mode", equals: "service_company" }, ref: "Screen D2, Select Service Company" }),
@@ -229,7 +229,7 @@ const nyLlc: FilingKind = {
       items: address("formation.mainBusinessAddress", "", { ref: "used for the EIN application" }),
     },
     {
-      title: "Copies and payment details",
+      title: "Copies and receipts",
       ref: "Screen F: Payment Information",
       items: [
         f("formation.additionalCertificates.certifiedCopy", "Certified copy ($10)", "checkbox", { ref: "Screen F, Additional Services" }),
@@ -288,7 +288,7 @@ const nyCorp: FilingKind = {
       ref: "Screen D1: Service of Process",
       help: "New York's Secretary of State accepts legal papers (service of process) for the corporation, for example if it is sued, and mails a copy to this name and address. Use an address where mail is read promptly.",
       items: [
-        f("formation.serviceOfProcess.mode", "Send legal papers to", "radio", { required: true, defaultValue: "manual", options: lv([["manual", "A name and address I enter (often \"The Corporation\" at its address)"], ["service_company", "A service company that receives legal papers for businesses (if you've hired one)"]]), ref: "Screen D1, SOP Select One" }),
+        f("formation.serviceOfProcess.mode", "Send legal papers to", "radio", { required: true, defaultValue: "manual", options: lv([["manual", "A name and address I enter (often \"The Corporation\" itself, at its business address; it appears in New York's public records)"], ["service_company", "A service company that receives legal papers for businesses (if you've hired one)"]]), ref: "Screen D1, SOP Select One" }),
         f("formation.serviceOfProcess.person.name", "Name", "text", { required: true, defaultValue: "THE CORPORATION", showIf: { path: "formation.serviceOfProcess.mode", equals: "manual" }, ref: "Screen D1, SOP Name" }),
         ...address("formation.serviceOfProcess.person.address", "Mailing address", { required: true, state: "NY", ref: "Screen D1, SOP address", showIf: { path: "formation.serviceOfProcess.mode", equals: "manual" } }),
         f("formation.serviceOfProcess.serviceCompany", "Service company name, as registered with DOS", "text", { required: true, showIf: { path: "formation.serviceOfProcess.mode", equals: "service_company" }, ref: "Screen D1, Select Service Company" }),
@@ -318,7 +318,7 @@ const nyCorp: FilingKind = {
       items: address("formation.mainBusinessAddress", "", { ref: "used for the EIN application" }),
     },
     {
-      title: "Copies and payment details",
+      title: "Copies and receipts",
       ref: "Screen F: Payment Information",
       items: [
         f("formation.additionalCertificates.certifiedCopy", "Certified copy ($10)", "checkbox", { ref: "Screen F, Additional Services" }),
@@ -1189,7 +1189,7 @@ const AN = "paperUpload.assumedName";
 const nyAssumedName: FilingKind = {
   id: "ny-assumed-name",
   title: "New York Certificate of Assumed Name (DBA)",
-  summary: "Registers a name the business trades under other than its real name (form DOS-1338-f, GBL §130), uploaded through E-Submission.",
+  summary: "Registers a name a corporation, LLC or limited partnership trades under other than its real name (form DOS-1338-f, GBL §130), uploaded through E-Submission. Sole proprietors and general partnerships file with their county clerk instead.",
   type: "paper_upload",
   state: "NY",
   constants: { paperUpload: { form: "ny_assumed_name" } },

@@ -32,14 +32,14 @@ export function BillingPanel({ summary, subscribe, manage, justSubscribed }: {
       {summary.currentPeriodEnd && subscribed ? <p className="small muted" style={{ margin: 0 }}>{summary.cancelAtPeriodEnd ? "Ends" : "Renews"} {new Date(summary.currentPeriodEnd).toLocaleDateString()}.</p> : null}
       {summary.lastPaymentFailedAt ? <p className="notice warn">The last payment failed. Update the card under Manage billing.</p> : null}
       {summary.required && !summary.canFileLive ? <p className="notice warn">Real filings need an active subscription. Practice filings are always free.</p> : null}
-      {!summary.configured ? <p className="notice">Subscriptions aren&apos;t switched on for this site yet.</p> : (
+      {!summary.configured ? <p className="notice">You can&apos;t subscribe from this page yet. To ask about filing for real, email <a href="mailto:hello@cofile.app">hello@cofile.app</a>.</p> : (
         <div className="row">
           {!subscribed ? <form action={doSubscribe}><button className="btn primary" type="submit" disabled={subPending}>{subPending ? "Opening Stripe…" : "Subscribe"}</button></form> : null}
           {summary.hasCustomer ? <form action={doManage}><button className="btn" type="submit" disabled={manPending}>{manPending ? "Opening…" : "Manage billing"}</button></form> : null}
         </div>
       )}
       {subState.error || manState.error ? <p className="notice bad" role="alert">{subState.error ?? manState.error}</p> : null}
-      <p className="help">Your subscription lets you file for real; practice filings are always free. State fees aren&apos;t included: they&apos;re shown on each approval page and paid with the cards you chose in Setup. Stripe handles subscription payments; card changes, receipts and canceling are under Manage billing.</p>
+      <p className="help">Your subscription lets you file for real; practice filings are always free. State fees aren&apos;t included: they&apos;re shown on each approval page and paid with the cards you chose in Setup. Stripe handles subscription payments{summary.hasCustomer ? "; card changes, receipts and canceling are under Manage billing" : ""}.</p>
     </div>
   );
 }

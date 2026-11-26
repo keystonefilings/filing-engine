@@ -15,7 +15,7 @@ export function AgentsForm({ action, states, agents }: { action: (prev: AgentsSt
         const a = agents[st];
         return (
           <fieldset key={st} className="card">
-            <legend><strong>{NAMES[st] ?? st}</strong>{st === "NY" ? <span className="small muted"> (optional in New York)</span> : null}</legend>
+            <legend><strong>{NAMES[st] ?? st}</strong>{st === "NY" ? <span className="small muted"> (optional: New York doesn&apos;t require one)</span> : null}</legend>
             <div className="field"><label htmlFor={`ra-${st}-name`}>Agent name</label><input id={`ra-${st}-name`} name={`${st}.name`} defaultValue={a?.name} placeholder="Leave empty for none" /></div>
             {st === "NJ" ? <div className="field"><label htmlFor={`ra-${st}-email`}>Agent email (optional)</label><input id={`ra-${st}-email`} name={`${st}.email`} type="email" defaultValue={a?.email} /></div> : null}
             <div className="field"><label htmlFor={`ra-${st}-s1`}>Street address in {NAMES[st] ?? st}</label><input id={`ra-${st}-s1`} name={`${st}.street1`} defaultValue={a?.address?.street1} /></div>

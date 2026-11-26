@@ -11,7 +11,7 @@ the filing for the adapters; the engine has no first-class field for them yet.
 
 Articles of Organization for a domestic LLC, filed online with the NY Department of State. Walkthrough: [ny-dos-corporations.md](./ny-dos-corporations.md). Engine type `formation`, state `NY`.
 
-Fees: State filing fee $200, paid only after the filing is approved. Optional: plain copy $5, certified copy $10, certificate of existence (proof the LLC exists and is in good standing) $25.
+Fees: State filing fee $200, paid only after the filing is approved. Optional: plain copy $5, certified copy $10, certificate of existence (the Department of State's certificate that the LLC exists on its records) $25.
 
 | Section | Field | Request path | Required | Walkthrough |
 |---|---|---|---|---|
@@ -60,11 +60,11 @@ Fees: State filing fee $200, paid only after the filing is approved. Optional: p
 | Principal business address (optional) | city | `formation.mainBusinessAddress.city` | with its group | used for the EIN application |
 | Principal business address (optional) | state | `formation.mainBusinessAddress.state` | with its group | used for the EIN application |
 | Principal business address (optional) | ZIP code | `formation.mainBusinessAddress.zip` | with its group | used for the EIN application |
-| Copies and payment details | Certified copy ($10) | `formation.additionalCertificates.certifiedCopy` |  | Screen F, Additional Services |
-| Copies and payment details | Certificate of existence ($25) | `formation.additionalCertificates.certificateOfStanding` |  | Screen F, Additional Services |
-| Copies and payment details | Plain copy ($5) | `formation.additionalCertificates.plainCopy` |  | Screen F, Additional Services |
-| Copies and payment details | Your reference number (optional) | `intake.portal.customerReference` |  | Screen F, Customer Reference Number |
-| Copies and payment details | Copy receipts to this email (optional) | `intake.portal.ccEmail` |  | Screen F, Cc E-mail Address |
+| Copies and receipts | Certified copy ($10) | `formation.additionalCertificates.certifiedCopy` |  | Screen F, Additional Services |
+| Copies and receipts | Certificate of existence ($25) | `formation.additionalCertificates.certificateOfStanding` |  | Screen F, Additional Services |
+| Copies and receipts | Plain copy ($5) | `formation.additionalCertificates.plainCopy` |  | Screen F, Additional Services |
+| Copies and receipts | Your reference number (optional) | `intake.portal.customerReference` |  | Screen F, Customer Reference Number |
+| Copies and receipts | Copy receipts to this email (optional) | `intake.portal.ccEmail` |  | Screen F, Cc E-mail Address |
 | Filing contact | First name | `contact.firstName` | yes | Screen F, E-mail Address |
 | Filing contact | Last name | `contact.lastName` | yes | Screen F, E-mail Address |
 | Filing contact | Email | `contact.email` | yes | Screen F, E-mail Address |
@@ -122,11 +122,11 @@ Fees: State filing fee $125, plus New York's tax on shares: 5 cents for each sha
 | Principal business address (optional) | city | `formation.mainBusinessAddress.city` | with its group | used for the EIN application |
 | Principal business address (optional) | state | `formation.mainBusinessAddress.state` | with its group | used for the EIN application |
 | Principal business address (optional) | ZIP code | `formation.mainBusinessAddress.zip` | with its group | used for the EIN application |
-| Copies and payment details | Certified copy ($10) | `formation.additionalCertificates.certifiedCopy` |  | Screen F, Additional Services |
-| Copies and payment details | Certificate of existence ($25) | `formation.additionalCertificates.certificateOfStanding` |  | Screen F, Additional Services |
-| Copies and payment details | Plain copy ($5) | `formation.additionalCertificates.plainCopy` |  | Screen F, Additional Services |
-| Copies and payment details | Your reference number (optional) | `intake.portal.customerReference` |  | Screen F, Customer Reference Number |
-| Copies and payment details | Copy receipts to this email (optional) | `intake.portal.ccEmail` |  | Screen F, Cc E-mail Address |
+| Copies and receipts | Certified copy ($10) | `formation.additionalCertificates.certifiedCopy` |  | Screen F, Additional Services |
+| Copies and receipts | Certificate of existence ($25) | `formation.additionalCertificates.certificateOfStanding` |  | Screen F, Additional Services |
+| Copies and receipts | Plain copy ($5) | `formation.additionalCertificates.plainCopy` |  | Screen F, Additional Services |
+| Copies and receipts | Your reference number (optional) | `intake.portal.customerReference` |  | Screen F, Customer Reference Number |
+| Copies and receipts | Copy receipts to this email (optional) | `intake.portal.ccEmail` |  | Screen F, Cc E-mail Address |
 | Filing contact | First name | `contact.firstName` | yes | Screen F, E-mail Address |
 | Filing contact | Last name | `contact.lastName` | yes | Screen F, E-mail Address |
 | Filing contact | Email | `contact.email` | yes | Screen F, E-mail Address |
@@ -820,7 +820,7 @@ Not covered yet:
 
 ## New York Certificate of Assumed Name (DBA) (`ny-assumed-name`)
 
-Registers a name the business trades under other than its real name (form DOS-1338-f, GBL §130), uploaded through E-Submission. Walkthrough: [ny-dos-corporations.md](./ny-dos-corporations.md). Engine type `paper_upload`, state `NY`.
+Registers a name a corporation, LLC or limited partnership trades under other than its real name (form DOS-1338-f, GBL §130), uploaded through E-Submission. Sole proprietors and general partnerships file with their county clerk instead. Walkthrough: [ny-dos-corporations.md](./ny-dos-corporations.md). Engine type `paper_upload`, state `NY`.
 
 Fees: $25 for an LLC or LP. A corporation pays $25 plus $100 for each New York City county and $25 for each other county.
 

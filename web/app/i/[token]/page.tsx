@@ -1,6 +1,6 @@
 import { intakeKey, readClientIntake } from "@/lib/session";
 import { filingKind } from "@/lib/intake/forms";
-import { brandOf, brandStyle, loadCompany, offeredKinds } from "@/lib/firm";
+import { brandOf, brandStyle, liveFilings, loadCompany, offeredKinds } from "@/lib/firm";
 import { platformName } from "@/lib/brand";
 import { listSignatures } from "@/lib/signatures";
 import { IntakeForm } from "@/components/IntakeForm";
@@ -40,9 +40,10 @@ export default async function ClientIntakePage({ params }: { params: Promise<{ t
         {brand.logoUrl ? <img src={brand.logoUrl} alt="" /> : null}<span>{brand.name}</span></span>
         {company.partner ? <><span className="spacer" /><span className="small muted">with {platformName()}</span></> : null}</div></header>
       <main className="wrap narrow stack">
+        {!liveFilings(kind.id) ? <p className="notice warn">Practice mode: this page runs practice filings only. Nothing you send from it will be filed with the state or paid, now or later, even after you approve it. To file for real, contact {brand.name}.</p> : null}
         <h1>{kind.title}{link.label ? <span className="muted" style={{ fontWeight: 400 }}> · {link.label}</span> : null}</h1>
         <p className="muted">{kind.summary} After you send this, you&apos;ll get a link to check exactly what will be filed, and nothing is filed until it&apos;s approved.</p>
-        <IntakeForm kind={kind} nonce={link.nonce} action={submitClientIntake.bind(null, token)} submitLabel="Send for approval" consentText={consentText} prefill={prefill} filerName={company.filerName}
+        <IntakeForm kind={kind} nonce={link.nonce} action={submitClientIntake.bind(null, token)} submitLabel="Send for approval" consentText={consentText} prefill={prefill} filerName={company.filerName} forClient={brand.name}
           footnote={<p className="small muted">By sending, you agree to {platformName()}&apos;s <a href="/terms" target="_blank" rel="noopener">Terms of Service</a>; your details are handled under its <a href="/privacy" target="_blank" rel="noopener">Privacy Policy</a>.</p>} />
         {brand.supportEmail ? <p className="small muted">Questions? Email <a href={`mailto:${brand.supportEmail}`}>{brand.supportEmail}</a>.</p> : null}
       </main>

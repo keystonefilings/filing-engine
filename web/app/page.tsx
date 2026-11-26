@@ -34,7 +34,7 @@ const TRACE: [string, string, string | undefined, string, string?][] = [
   ["15.9s", "Members / managers", "1 member added", "filled"],
   ["24.6s", "Signatures", "Signer added, signature box checked", "filled"],
   ["26.0s", "Review", undefined, "matched"],
-  ["28.3s", "Payment", "Fee check: $100.00 + $3.50 matches the approval", "verified"],
+  ["28.3s", "Payment", "Fee check: $100.00 state fee + $3.50 NJ portal fee matches the approval", "verified"],
   ["28.9s", "Pay Now", undefined, "held", "halt"],
 ];
 
@@ -68,12 +68,12 @@ export default function Home() {
             <div className="hero-copy">
               <span className="field-label">For CPA, payroll, fractional CFO and title firms</span>
               <h1>LLC formations, EINs and employer registrations, filed on the government sites. Nothing is filed until your client approves.</h1>
-              <p className="lede">{name} fills in and submits LLC and corporation formations, EINs and employer registrations on the live state and IRS websites, with your name and logo on the pages your clients see. It reads every form fresh, checks every fee, and submits nothing until your client approves the exact data.</p>
+              <p className="lede">{name} fills in and submits LLC and corporation formations, EINs and employer registrations on the live state and IRS websites, with your name and logo on the pages your clients see. It reads each form as the state shows it on every run, checks every fee, and submits nothing until your client approves the exact details.</p>
               <div className="hero-actions">
                 <Link className="btn btn-primary" href="/signup">Create a partner account</Link>
                 <a className="btn btn-quiet" href="#enterprise">Enterprise and API</a>
               </div>
-              <p className="hero-note">Starting with New York, New Jersey, Florida and the IRS. Not every filing type is live yet; see <a href="#coverage">Coverage</a>.</p>
+              <p className="hero-note">Starting with New York, New Jersey, Florida and the IRS. Not every filing type is live yet; until one is, it runs as a practice filing that stops before the final step. See <a href="#coverage">Coverage</a>.</p>
             </div>
 
             <figure className="trace" aria-labelledby="trace-label" style={{ margin: 0 }}>
@@ -91,7 +91,7 @@ export default function Home() {
                 ))}
               </ol>
               <div className="trace-foot">
-                <span id="trace-label">Example practice run: 13 live screens of New Jersey&apos;s LLC formation, filled in with test details and stopped before Pay Now. Nothing was filed.</span>
+                <span id="trace-label">Example practice run: all 13 screens of New Jersey&apos;s live LLC formation (some grouped together here), filled in with test details and stopped before Pay Now. Nothing was filed.</span>
                 <span className="stamp">Stopped before Pay Now</span>
               </div>
             </figure>
@@ -145,14 +145,14 @@ export default function Home() {
             <div className="section-head">
               <span className="field-label">How a filing runs</span>
               <h2>One pass from intake to filed documents.</h2>
-              <p className="lede">State sites keep no drafts, so every filing is a single run from the first screen to the last. Everything is checked before it starts.</p>
+              <p className="lede">State sites keep no drafts, so the filing itself is a single run from the first screen to the last. Everything is checked before it starts.</p>
             </div>
             <div className="steps">
               <div className="step"><h3>Intake</h3><p>You or your client fill in a short form. Your saved answers fill the rest: agent, organizer, signer, addresses.</p></div>
-              <div className="step"><h3>Approval</h3><p>The client gets a link showing every detail and the fees and, where possible, a picture of the state&apos;s own review page, filled in. Approving locks in exactly those details.</p></div>
+              <div className="step"><h3>Approval</h3><p>The client gets a link showing every detail and the fees and, where possible, a picture of the state&apos;s own review page, filled in by an earlier run that stops at that page and submits nothing. Approving locks in exactly those details. If the state&apos;s page has changed when the filing runs, it stops before paying, and your client may be asked to approve again.</p></div>
               <div className="step"><h3>Pre-flight</h3><p>Site hours, logins, account balance and fee table are checked before a browser opens.</p></div>
               <div className="step"><h3>Run</h3><p>{name} reads each screen live, fills it in by label and keeps a screenshot and a copy of every page.</p></div>
-              <div className="step"><h3>EIN in the same pass</h3><p>If the state form needs an EIN, {name} can apply for it once the name check passes, save the IRS letter and enter the EIN on the form. It can also apply after the state accepts the formation, as the IRS advises.</p></div>
+              <div className="step"><h3>EIN in the same pass</h3><p>{name} can apply for the EIN after the state accepts the formation, as the IRS advises, and save the IRS letter; in Florida it always waits for the state to accept. If a New York or New Jersey form itself asks for an EIN, {name} can instead apply once the name check passes and enter the EIN on the form.</p></div>
               <div className="step"><h3>Filed</h3><p>{name} submits once your client approves (and, when a saved card pays, once its security code is entered), during the state site&apos;s hours. Some states answer at once; others answer later, such as New York&apos;s receipt email or a Florida examiner&apos;s review. The state&apos;s documents are saved and sent to you when they arrive, and each stage is reported back to you.</p></div>
             </div>
           </div>
@@ -181,7 +181,7 @@ export default function Home() {
               </article>
               <article className="control">
                 <h3>Checks the price before paying</h3>
-                <p>Fees are quoted at approval from a verified fee table and read again on the payment screen. NJ charges $52 by card for an LLC&apos;s standing certificate and $27 for a corporation&apos;s ($50 and $25, plus its $2 portal fee), so {name} also confirms the entity type on the state record.</p>
+                <p>Fees are quoted at approval from a verified fee table and read again on the payment screen. Some depend on the kind of business: by card, New Jersey&apos;s standing certificate costs $52 for an LLC and $27 for a corporation, each including NJ&apos;s $2 portal fee. So {name} also checks the business type on the state&apos;s record.</p>
                 <div className="exhibit" role="img" aria-label="Example fee checks">
                   <div className="exhibit-head"><span>NJ standing certificate · by card</span><span>Fee check</span></div>
                   <div className="exhibit-body">
@@ -193,7 +193,7 @@ export default function Home() {
               </article>
               <article className="control">
                 <h3>Built not to submit twice</h3>
-                <p>A record is written before the final click. If our system stops in the middle of a filing, it&apos;s never re-run on its own: our team checks what the state received first.</p>
+                <p>A record is written before the final click. If our system stops in the middle of a filing, the filing is never re-run automatically: our team first checks what the state received.</p>
               </article>
               <article className="control">
                 <h3>Shows where every value came from</h3>
@@ -242,7 +242,7 @@ export default function Home() {
               </table>
             </div>
             <p className="table-note">Verified up to payment: {name} completed every screen on the live government site with a test entry and stopped before paying. Screens mapped: the live site&apos;s screens were recorded on a walk-through, but a full test run hasn&apos;t been verified yet. Not yet verified: offered in the portal, but not yet verified on the live site. Planned: not built yet. A filing type is switched to live filing only after its payment step is mapped, so not every type here can be filed for real yet. Until then, it can only be run as a practice filing.</p>
-            <p className="table-note">Which types file for real depends on your account while they switch live one by one. <a href={`mailto:${supportEmail()}?subject=${encodeURIComponent("Which filing types are live for my account?")}`}>Ask us which types are live for your account</a>.</p>
+            <p className="table-note">The statuses above don&apos;t say whether a type files for real: filing types are switched to live filing one at a time. <a href={`mailto:${supportEmail()}?subject=${encodeURIComponent("Which filing types are live for my account?")}`}>Ask us which types are live for your account</a>.</p>
           </div>
         </section>
 
@@ -253,7 +253,7 @@ export default function Home() {
               <h2>Sensitive data stays where it belongs.</h2>
             </div>
             <div className="sec">
-              <div><h3>Encrypted, masked SSNs</h3><p>Social Security numbers are encrypted, masked on approval pages, in API responses and in recorded screens, and deleted after 30 days.</p></div>
+              <div><h3>Encrypted, masked SSNs</h3><p>Social Security numbers are encrypted, masked on approval pages, in API responses, in logs and in recorded screens, used only for the filing they belong to, and deleted 30 days after that filing finishes.</p></div>
               <div><h3>Cards in a vault, logins encrypted</h3><p>Saved cards are held by Basis Theory, a card vault, never in our database. When filings are ready to pay, we ask the card&apos;s owner for its security code and keep it for an hour at most. State logins are encrypted as soon as they arrive, kept apart from every other account and read only when a filing runs.</p></div>
               <div><h3>Single-use approval links</h3><p>Signed, expiring links, bound to the exact data shown. An optional one-time code adds a second check.</p></div>
               <div><h3>Signatures only on approval</h3><p>A saved signature is applied only to a filing the client has approved.</p></div>

@@ -27,6 +27,8 @@ interface Props {
   prefill?: Record<string, string>;
   /** Who "the filing company" in the authorizations is, e.g. "Best Accounting, filing through CoFile". */
   filerName?: string;
+  /** On a client's own page (a public firm page or a client link), the firm's name; unset on the firm's portal. */
+  forClient?: string;
 }
 
 /**
@@ -63,7 +65,7 @@ function initialState(kind: FilingKind, prefill: Record<string, string> = {}): {
   return { values, groups, next, prefill: mapped };
 }
 
-export function IntakeForm({ kind, nonce, action, submitLabel = "Submit for approval", footnote, signatures = [], consentText, prefill, filerName }: Props) {
+export function IntakeForm({ kind, nonce, action, submitLabel = "Send for approval", footnote, signatures = [], consentText, prefill, filerName, forClient }: Props) {
   const router = useRouter();
   const init = useMemo(() => initialState(kind, prefill), [kind, prefill]);
   const startValues = init.prefill;
@@ -231,7 +233,7 @@ export function IntakeForm({ kind, nonce, action, submitLabel = "Submit for appr
             </select>
             <p className="help" id={`${id}-help`}>
               {issue ? <span style={{ color: "var(--bad)" }}>{issue}. </span> : null}
-              It goes on the state form only after this filing is approved, never on a preview. It must be the signer named above.
+              It goes on the state form only after this filing is approved, never on a preview. {forClient ? "Only the signer named above may draw it." : "Only the signer named above may draw it; if they aren't with you, send them a client link so they sign it themselves."}
             </p>
             {choice === NEW_SIGNATURE.choice && shown ? (
               <div style={{ marginTop: 10 }}>
@@ -386,7 +388,9 @@ export function IntakeForm({ kind, nonce, action, submitLabel = "Submit for appr
       })}
       <fieldset>
         <legend>Authorizations</legend>
-        <p className="help" style={{ marginTop: 0 }}>The state form asks for these. Each statement is made by the person who checks its box, so a statement that begins &quot;I am&quot; should be checked by the person named; if that&apos;s your client, send them a client link instead.{filerName ? <> Here, &quot;the filing company&quot; means {filerName}, the company that enters this filing on the government site.</> : null} Each one is shown again on the approval page before anything is filed.</p>
+        <p className="help" style={{ marginTop: 0 }}>{forClient
+          ? <>The state form asks for these. Check a box only if the statement is true for you; if a statement names someone else, ask {forClient} before you send this.</>
+          : <>The state form asks for these. Each statement is made by the person who checks its box, so a statement that begins &quot;I am&quot; should be checked by the person named; if that&apos;s your client, send them a client link instead.</>}{filerName ? <> Here, &quot;the filing company&quot; means {filerName}.</> : null} Each one is shown again on the approval page before anything is filed.</p>
         {kind.authorizations.map((a) => (
           <label key={a.id} className="auth">
             <input type="checkbox" name={`${AUTH_PREFIX}${a.id}`} />

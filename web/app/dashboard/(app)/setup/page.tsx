@@ -25,7 +25,7 @@ export default async function SetupPage() {
       {!setup.configured ? <p className="notice warn">Your account settings haven&apos;t been set up yet, so nothing here can be saved. We&apos;ll do that with you first.</p> : null}
 
       <h2>Payment methods</h2>
-      <p className="muted">Your subscription and state filing fees can be paid by different cards. Cards are held by Basis Theory, a card vault, never by us; a card is read only when it pays a state. When filings are ready to pay with a saved card, we ask the card&apos;s owner for its security code on the Ready to pay page and keep it for an hour at most.</p>
+      <p className="muted">Your subscription and state filing fees can be paid by different cards. Saved cards are held by Basis Theory, a card vault, never in our database; a card is used only to pay a state. When filings are ready to pay with a saved card, we ask the card&apos;s owner for its security code on the Ready to pay page and keep it for an hour at most.</p>
       <SavedCards methods={setup.payments.methods} />
       {process.env.BASIS_THEORY_PUBLIC_KEY ? <AddCard publicKey={process.env.BASIS_THEORY_PUBLIC_KEY} save={saveCard} /> : <p className="notice">Saving cards isn&apos;t turned on for your account yet. Email {supportEmail()} to turn it on.</p>}
       <RoutingForm action={saveRouting} methods={setup.payments.methods} routing={setup.payments.routing} kinds={FILING_KINDS.map((k) => ({ id: k.id, title: k.title }))} />
@@ -59,7 +59,7 @@ export default async function SetupPage() {
       </div>
 
       <h2>Who&apos;s named on your filings</h2>
-      <p className="muted">Used when a client&apos;s firm leaves these to you. A filing that names someone else always wins.</p>
+      <p className="muted">Used when a client&apos;s firm doesn&apos;t name its own. A name given on a filing always takes priority.</p>
       <FilingDefaultsForm action={saveFilingDefaults} v={setup.filingDefaults ?? {}} />
       <h3>Your registered agent in each state</h3>
       <p className="muted">When a client asks you to provide the agent, this is the agent named.</p>
