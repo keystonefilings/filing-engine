@@ -95,7 +95,7 @@ Construction notes for the lettering artist (all measurements in units of the ca
 - **Colour:** Ink (#121212) on Paper or on Poster Yellow; Paper (#FFFFFF) on Ink. Never yellow on white, never in a firm's colour, never in a gradient, never outlined.
 - **Clear space:** 1 H on all sides.
 - **Minimum size:** cap height 9 px on screen (about a 13 px font size); 3 mm cap height in print.
-- **Header size:** 22 px font size on desktop, 20 px on phones. On a page whose pitch is set at 132 px, a 22 px wordmark makes the point without a word.
+- **Header size:** 22 px font size on desktop, 20 px on phones. On a page whose pitch is set at more than 100 px, a 22 px wordmark makes the point without a word.
 
 **Do not:** stretch it, set it in capitals ("COFILE"), split it ("Co File"), put it in a box, give it a tagline lockup, or make a giant wordmark across the footer. That fashionable device would contradict the copy.
 
@@ -129,7 +129,7 @@ Where the mark appears: the favicon and app icon; the avatar on CoFile's own ema
 The copy says it twice: "Ours in small type", and on For firms, "The only sign of us is a small 'with CoFile'." So this is a line of small type, not a badge.
 
 - **Set as:** "with" in Suisse Int'l Regular, then a word space of 0.28 em, then "CoFile" in the wordmark lettering at the same cap height.
-- **Size:** 13 px on the web (desktop and phone), 12 px in emails. Never larger than 15 px, and never more than a quarter of the firm logo's height.
+- **Size:** 13 px on the web (desktop and phone), 12 px in emails. Never larger than 15 px, and its cap height never more than a quarter of the firm logo's height.
 - **Colour:** Graphite #54544F on white (7.6:1 contrast, so it is small but perfectly readable). On a dark desk header in dark mode: #A9A9A3. Never in a colour, never in the firm's colour, never with the Cº mark, never in a pill or box.
 - **Position:** at the right end of the firm's header bar, vertically centred on the logo. On phones narrower than 340 px it drops below the header as a right-aligned line. In the embed widget the existing copy "Filed with CoFile" sits at the bottom left of the form at 12 px. On the proof it sits at the top right of the brand bar. In client emails it is in the footer.
 - **Link:** on the client's pages and in client emails, it is not a link. A client should never be pulled away from their firm. On the firm's own filing desk it may link to CoFile's help address.
@@ -147,7 +147,7 @@ Every firm page starts with a name plate: a white header bar, the firm's logo or
 |---|---|
 | **Wide wordmark** (ratio 2.5 or more), for example Northgate Payroll's or Best Accounting's | Logo alone, 36 px tall on desktop, 32 px on phone, maximum 220 px wide (180 px on phone). The firm's name is kept as hidden text for screen readers, not repeated on screen. |
 | **Medium** (1.6 to 2.5) | Logo 44 px tall (36 px phone), maximum 180 px wide. Name hidden as above. The branding page preview lets the firm see the result. |
-| **Symbol or square** (under 1.6), for example Harbor & Pine's pine-and-wave symbol | Logo 44 px tall (36 px phone), then 12 px of space, then the firm's name set in the firm's font at 20 px (18 px phone), weight 600 if the font has it, else 500, in Ink. |
+| **Symbol or square** (under 1.6), for example Harbor & Pine's pine-and-wave symbol | Logo 44 px tall (36 px phone), then 12 px of space, then the firm's name set in the firm's font at 22 px (18 px phone), in Ink: serif faces in their Regular, sans faces at the weight nearest 600. |
 | **No logo** | The firm's name is typeset as a name plate (rules below). |
 
 All logos keep clear space of half their height on each side. A logo is never recoloured, outlined, placed in a circle or given a shadow.
@@ -195,14 +195,14 @@ Six colours carry the whole of CoFile's own site. Three of them do almost all th
 | **Poster Yellow** | `#FFC933` | Ink on it 12.2:1 | The colour of yes. Full-bleed fields for the hero (1) and the close (9); the "You approve it." block on How it works; the highlighter marking what came from a client's text; display type on the black stage (7); the bar of the Cº mark on Ink; the focus ring on Ink fields. Never on a firm's page. |
 | **Graphite** | `#54544F` | 7.6:1 on Paper | Secondary text, captions, table headers, "with CoFile". Deliberately dark: older eyes lose pale grey first. |
 | **Hairline** | `#D9D9D4` | | Rules between table rows, card edges, the dividers in lists. Decorative only, never the only boundary of a control. |
-| **Ground** | `#F2F2EF` | Ink on it 16.8:1 | Quiet panels: the pricing strip, the Security page, code panels in the docs, the grey surround the proof sheet sits on at desktop width, read-only fields. |
+| **Ground** | `#F2F2EF` | Ink on it 16.8:1 | Quiet panels: the light table under the proof (home section 4), the Security page, code panels in the docs, the grey surround the proof sheet sits on at desktop width, read-only fields. |
 
 Functional colours, used in small doses and never as the only signal (a word always goes with them):
 
 | Name | Hex | Use |
 |---|---|---|
 | **Live Green** | `#0A7D45` | The "Live" chip (white text, 5.2:1), the square beside statuses such as "Completed" and "Accepted by the state", the Live square on the state boards and in the What we file timetable. |
-| **Amber** | `#B86E00` | The square and the 4 px bar of notices that need someone to act ("Waiting for approval", "Needs information"). Not used for text; the words stay in Ink. |
+| **Amber** | `#B86E00` | The 4 px bar of notices that need someone to act, and on CoFile's dashboard the square beside statuses such as "Waiting for approval" (on a firm's desk those squares take the firm's colour). Not used for text; the words stay in Ink. |
 | **Signal Red** | `#B3261E` | Errors: the bar and square, and the error message text under a field (6.5:1). Used only for things that went wrong, never for "Rehearsal" or for anything the copy presents as a feature. |
 
 ### 4.2 Dark mode
@@ -227,11 +227,11 @@ On a dark screen, a full field of yellow glares. So in dark mode the yellow fiel
 ### 4.3 How colour is used
 
 - **One colour per field.** A section is white, yellow, black or the firm's colour. Never two colours side by side in one field, never a gradient, never a tint of yellow as a background.
-- **Rough proportions on the home page:** 60% Paper, 18% Poster Yellow, 14% Ink, 8% firm colour (the twin fields of section 2).
-- **Text is always Ink or Paper.** Colour is for fields, rules, the highlighter and one button. No coloured headlines on white.
+- **Rough proportions on the home page:** 52% Paper, 16% Poster Yellow, 12% Ink, 12% firm colour (the twin fields of section 2 and the Pine field of section 5), 8% Ground (the light table of section 4).
+- **Text is Ink or Paper,** with three exceptions: the yellow headline and results on the black stage, status words that take the colour of their square, and links in a firm's second colour on its own pages. Colour is otherwise for fields, rules, the highlighter and buttons. No coloured headlines on white.
 - **Photography is black and white.** It never introduces a second colour.
 - **On the firm's pages,** the palette is Paper, Ink, Graphite, Hairline and the firm's two colours. CoFile contributes no colour at all.
-- **The highlighter** is a band of Poster Yellow behind Ink text, 0.92 em tall and offset 0.08 em below the text's centre, so it looks like a felt-tip pass and not like a selection box. It marks only the words that came from a client's text and the places they land in the draft, in CoFile's own marketing pictures. On a firm's real proof there is no highlighter: every value is equal.
+- **The highlighter** is a band of Poster Yellow behind Ink text, 0.92 em tall and offset 0.08 em below the text's centre, so it looks like a felt-tip pass and not like a selection box. It marks only words that travel or matter, and only in CoFile's own marketing pictures: the client's words and the places they land in the draft, the filled-in details on the sample proof, and `"dryRun": true` in the docs. On a firm's real proof there is no highlighter: every value is equal.
 
 ---
 
@@ -271,7 +271,7 @@ A scale of about 1.3 (close to a perfect fourth), with two jumps where the poste
 ### 5.3 How the type is set
 
 - **Flush left, ragged right, always.** Nothing is centred and nothing is justified. Numbers in tables are right-aligned on the decimal.
-- **Headline breaks are set by hand** on desktop for the poster headlines (the hero, firms, pricing and close, and the h1 of each inner page; breaks are given in sections 9 and 10), using breaks that apply at 1024 px and wider only. Everywhere else headlines use `text-wrap: balance` and paragraphs `text-wrap: pretty`.
+- **Headline breaks are set by hand** on desktop for the poster headlines (the hero, firms, pricing and close, and the h1 of each inner page; breaks are given in sections 9 and 10), using breaks that apply at 1024 px and wider, unless a section says otherwise (the hero's breaks hold from 360 px). Everywhere else headlines use `text-wrap: balance` and paragraphs `text-wrap: pretty`.
 - **Measure:** body text at most 64 characters per line; ledes at most 34 em.
 - **Weight carries emphasis.** Medium for leads and labels, Semibold only for totals and the firm's typeset name. No Light or Thin anywhere: they vanish for older eyes.
 - **Sentence case everywhere.** No letter-spaced capitals for kickers or labels. The kicker "For CPA, payroll, fractional CFO and title firms" is set in Medium at body size, not as a tiny capitalised label.
@@ -287,7 +287,7 @@ A scale of about 1.3 (close to a perfect fourth), with two jumps where the poste
 On the firm's pages, the firm's font takes the firm's name, the h1 and section headings; Suisse Int'l takes everything else. To make any font sit well:
 
 - The firm font is size-matched to Suisse's x-height (CSS `size-adjust`) so a serif with a small x-height doesn't look timid next to the sans body.
-- Headings in the firm font use weight 600 if available, else 500, else 400; tracking by class as in section 3.4.
+- Headings in the firm font: serif faces in their Regular (their designers drew them for it), sans faces at the weight nearest 600; tracking by class as in section 3.4.
 - If the firm font is a script or decorative face (detected from the Google Fonts category, or flagged in setup review), it is used for the firm's name only and the headings fall back to Suisse.
 - The proof's h1 (the client's business name) is set in the firm's font. It is the one place where the firm's typeface and the client's name meet in large type.
 
@@ -334,7 +334,7 @@ Full-bleed fields (yellow, black, firm colour, photographs) run to the window ed
 
 The home page is a sequence of posters and pages, as in a good annual report: a bold spread, then a reading spread, then a bold one again.
 
-1. **Poster field.** A full-bleed colour field (Poster Yellow, Ink or the firm's colour). Headline in `display-1` or `display-2`, spanning up to all twelve columns. Padding s9 top and bottom (s7 on phones). One image or object at most. Used for the hero, the twin fields of section 2, rehearsals and the close, and the heads of the inner pages.
+1. **Poster field.** A full-bleed colour field (Poster Yellow, Ink or the firm's colour). Headline in `display-1` or `display-2`, spanning up to all twelve columns. Padding s9 top and bottom (s7 on phones). One image or object at most. Used for the hero, the twin fields of section 2, the papers of section 5, rehearsals, the close and the head of For platforms.
 2. **Reading section.** White. A 2 px Ink rule across the full content width marks the top, like the section rule of a newspaper. Headline `display-2` in columns 1–9, lede in 1–6, the list or figure in 8–12. Padding s8 (s6 + s7 on phones). Used for the text half of firms, requests, the proof, after, coverage and pricing.
 3. **Quiet section.** The support material: "Checks before every filing." on How it works, the Security page, Questions and "What's separate." on Pricing. Same grid as a reading section, with `display-3` headlines, a 1 px rule instead of 2 px, and no motion. The Security page sits on Ground. They are easy to find and comfortable to read, and they do not shout.
 
@@ -563,7 +563,7 @@ Desktop 1440
 **Type and placement**
 
 - Kicker: `body` 20 px Medium, Ink, sentence case, 48 px above the headline.
-- Headline: `display-1`, 104 px on a 1440 screen (fluid from 46 px), line height 0.95, set in four hand-broken lines at every width from 360 px: **"Your client / needs an LLC. / Say yes, under / your own name."** The break puts "Say yes," at the start of a line, where the eye lands after the first full stop.
+- Headline: `display-1`, held at 104 px on a 1440 screen (fluid from 46 px) so that "Say yes, under" fits columns 1–7, line height 0.95, set in four hand-broken lines at every width from 360 px: **"Your client / needs an LLC. / Say yes, under / your own name."** The break puts "Say yes," at the start of a line, where the eye lands after the first full stop.
 - Sub: `lede` 26 px, columns 1–6, 40 px under the headline.
 - Buttons, 40 px under the sub: "Run a free rehearsal" as the primary Ink button (64 px tall in the hero, 28 px side padding, 20 px Medium); "See pricing" as a text link with an arrow, 20 px Medium, underlined, 32 px to its right.
 - The note, 32 px under the buttons: `body` 20 px in Ink, not grey and not small. It is one of the page's selling points ("People behind it"), so it is set as a sentence a person says, at full size.
@@ -572,7 +572,7 @@ Desktop 1440
 **Picture 1: the filing desk (replaces `DeskVisual`).** Harbor & Pine CPA's real filing desk, at 1:1 desktop scale.
 
 - **Sheet:** white, 600 px wide, starting on column 8 and running to the right edge of the window, where it is cut (the desk continues; the reader sees there is more). It begins 24 px below the top of the headline and runs 160 px below the bottom of the yellow field into section 2, where its caption sits on white.
-- **Name plate:** 72 px white bar. The Harbor & Pine pine-and-wave symbol at 44 px, then "Harbor & Pine CPA" in Libre Caslon Text Regular at 24 px with its italic ampersand. "with CoFile" at 13 px Graphite on the right, 40 px from the sheet's visible edge. A 4 px Pine rule under the bar.
+- **Name plate:** 72 px white bar. The Harbor & Pine pine-and-wave symbol at 44 px, then "Harbor & Pine CPA" in Libre Caslon Text Regular at 22 px with its italic ampersand. "with CoFile" at 13 px Graphite on the right, 40 px from the sheet's visible edge. A 4 px Pine rule under the bar.
 - **Under the rule:** "Filing desk" at 16 px Graphite (the stand-in's label), then "Client filings" in Libre Caslon at 34 px, and the "New filing" button on the same baseline at the right (Pine fill, white 18 px Medium text, 48 px tall).
 - **Rows:** four rows, 96 px each, separated by 1 px Hairlines. In each: the business name at 22 px Medium in Suisse Int'l (the client is the lead), the filing type under it at 16 px Graphite, and the status at the right: a 12 px square and the label at 16 px Medium.
   - "Two Sisters Bakery LLC" / "New Jersey LLC formation" / "Proof ready to approve": the one row that asks for the firm's yes. It carries a 4 px Pine bar at its left edge, its square is Pine and its label is Pine, Medium.

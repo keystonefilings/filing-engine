@@ -190,7 +190,7 @@ used everywhere.
 | Typeface | Always CoFile Sans, never the firm's font. It is our label, sewn in with our thread |
 | Place | The far right of the firm's header row, baseline-aligned with the firm name; the footer of the proof and of every email; the bottom of the embedded widget |
 | Link | Not a link on client pages (a client shouldn't be led away from their firm). On the firm's own desk it links to cofile.app in a new tab |
-| Enterprise white-label | Hidden entirely: those accounts show only their own brand (the legal line that names CoFile's Terms stays, as the copy has it) |
+| Platforms' white-label pages | Wherever the product leaves it out today (the proof, the desk and the client links of firms a platform invited), nothing of CoFile shows. Wherever the product keeps a mention (the public filing page's header and legal line, the widget's "Filed with CoFile"), it is this same mark |
 
 The widget's existing words "Filed with CoFile" use the same tag and styling.
 
@@ -324,7 +324,7 @@ most often the firm's own: a proof ready to approve. It is warm, not alarming.
 | Seam | `#30353B` | Hairlines |
 | Pebble Dark | `#6B7178` | Field borders |
 | Chalk Text | `#EEECE7` | Text (15.6 : 1 on Night) |
-| Slate Dark | `#A8AEB6` | Secondary text (8.4 : 1 on Night) |
+| Slate Dark | `#A8AEB6` | Secondary text (8.2 : 1 on Night) |
 | Iris Dark | `#A99BFF` | Rehearsal |
 | Leaf / Marigold / Brick Dark | `#5CCB8E` / `#F2B65A` / `#FF8A7A` | Status text; their tints are the same hues at 16% over Graphite 2 |
 
@@ -960,7 +960,7 @@ tone-on-tone (Pine lifted 6% in OKLCH lightness), like a watermark in dyed card.
 `e3` shadow. Its left 48px hangs over the Chalk, so the desk straddles CoFile's ground and the
 firm's color: CoFile underneath, the firm on top.
 
-*The desk card, designed in full* (this is the real desk shell from section 10.9, at 0.9):
+*The desk card, designed in full* (this is the real desk shell from section 10.15, at 0.9):
 
 - A 4px Pine band across the top.
 - Sidebar, 176px wide, Chalk ground: the nameplate (the H&P mid logo at 36px with "Harbor & Pine
@@ -1220,7 +1220,7 @@ business".
 
 *Composition.* A Pine-wash panel (6%), radius 28, bleeding off the left edge, 640px tall. On it,
 the proof page: 500px wide, Paper, radius 16, `e3`. This is the product's proof component
-(section 10.22) at real size, trimmed to these blocks:
+(section 10.26) at real size, trimmed to these blocks:
 
 | Block | Design |
 |---|---|
@@ -1578,7 +1578,7 @@ Graphite `#1B1F24` band, Chalk Text type, 64px padding, the Reverse mark at the 
  doesn't give legal or tax advice.                       Terms · Privacy · Security · FAQ · hello@cofile.app
 ```
 
-Row one at 16px; the legal line at 14/22 in Slate Dark `#A8AEB6` (8.9 : 1 on Graphite); links
+Row one at 16px; the legal line at 14/22 in Slate Dark `#A8AEB6` (7.4 : 1 on Graphite); links
 underlined. Phone: everything stacks, links in a row that wraps, 48px tap targets.
 
 ---
@@ -1908,7 +1908,7 @@ Desktop
 │   Billing                │                                                              │
 │                          │                                                              │
 │ ──────────────────────── │                                                              │
-│ ana@harborpine.example   │                                                              │
+│ (signed-in email)        │                                                              │
 │ Log out                  │                                                              │
 │ ▪ with CoFile            │  Questions? Email …                                          │
 └──────────────────────────┴──────────────────────────────────────────────────────────────┘
@@ -1971,7 +1971,7 @@ Desktop
 │ Your clients see your name, logo …  │  │[logo] Your name │                   │
 │                                     │  │Start your New … │                   │
 │ Your web address                    │  │[Send to …     ] │                   │
-│ cofile.app/ [harbor-and-pine     ]  │  └─────────────────┘                   │
+│ cofile.app/ [ (the firm's slug) ]  │  └─────────────────┘                   │
 │ Name your clients see [          ]  │  ┌ the proof ─────────────────────┐    │
 │ Logo  [ drop a picture or browse ]  │  │▬▬▬▬ band ▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬│    │
 │ Main color  [■][#1f5c4b] ■■■■■■■■■  │  │[logo] Name         ▪ with CoFile   │
@@ -2261,8 +2261,8 @@ Phone
 └────────────────────────────────────────────┘
 ```
 
-("Best Accounting" stands for the firm's display name; the slug in the brief's example is all the
-copy gives us.)
+("Best Accounting" stands in for the firm's display name, `[copy needed: a sample display name for
+the bestaccounting example]`; the brief's example gives only the slug.)
 
 - Paper ground, the client page layout (680px on desktop, centered, with the title band and header
   full bleed).
@@ -2585,8 +2585,7 @@ thumbnail, never on it.
 
 A Paper area 180px tall (140px on phone), full width, 1px Pebble border, radius 12. A 1px Pebble
 baseline at 72% of the height with a 14px "×" glyph at its left end in Slate. Ink is Graphite, a
-2.5px pressure-smoothed stroke. A small secondary "clear" button at the top right (label as the
-component has it). The consent statement under it as an authorization row.
+2.5px pressure-smoothed stroke. A small secondary "Clear signature" button at the top right. The consent statement under it as an authorization row.
 
 ### 11.18 Focus and states
 
@@ -2720,11 +2719,10 @@ message if an uploaded font lacks them]`.
 | **The paper-and-ink palette** (the cream grounds, the manila and the warm off-whites, `#F7F3EA` and `#FFFDF8` on the proof, `#FBEFD5` notes) | Cream tints every firm's color yellow and makes every firm look like it's on old parchment. Firm pages need a true white so the house color reads as the firm chose it |
 | **Three typefaces** (Source Serif 4, IBM Plex Sans, IBM Plex Mono) | Too many voices, and IBM Plex Sans and Source Serif are both in the firm font menu, so CoFile and a firm could look identical. One family with one mono, not in the menu |
 | **The green ticks on every list** (`Tick`) | Repetitive, and a check on every line reads as verification, not benefit. Small Graphite tags carry lists in CoFile's voice and leave color to the firms |
-| **Rehearsals shown as yellow warnings** (`notice warn`, the `nx-reh` chip) | A free rehearsal is the offer. It gets Iris, a calm invitation, everywhere it appears |
+| **Rehearsals shown as warnings** (the product's rehearsal notices use the `notice warn` style) | A free rehearsal is the offer. It gets Iris, a calm invitation, everywhere it appears |
 | **The fixed green `#1F6B4F` and blue `#1f4fd1` buttons** on the proof and in emails | They are CoFile's colors imposed on the firm's pages. Every button on a firm page is the firm's color, through the house engine |
 | **`textOn()`'s luminance threshold** for button text | It picks white or black by a cut-off, not by contrast. The engine checks the real ratio and derives a legible button in the firm's own hue |
 | **CoFile's name leading the partner desk's top bar**, with the firm's logo squeezed in on the right | The copy says the desk carries the firm's name, logo and color. The firm's nameplate leads; CoFile moves to the foot of the sidebar |
 | **The single brand bar and a logo capped at 40 × 160px** on the proof | Logos come in every shape. The nameplate trims, classifies and tiles them so each one looks intended |
 | **The sample visuals as tables in boxes** (the stand-ins in `Visuals.tsx`) | They describe the pictures without showing them. Each becomes a live, finished picture of a firm's real working day |
-| **Mono-everything** (every value, label and log line in IBM Plex Mono) | Mono now means one thing: what the state will see. Everything else is in the sans |
-| **Uppercase, letterspaced labels and kickers** | Hard for older readers. Sentence case everywhere; only the state's own values are in capitals |
+| **Mono for every value on the proof**, fees included (`render.ts` sets every table cell in IBM Plex Mono) | Mono now means one thing: what the state will see. Fees go in the sans with tabular figures |
