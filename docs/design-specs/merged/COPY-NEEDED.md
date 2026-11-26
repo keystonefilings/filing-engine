@@ -45,6 +45,9 @@ one string in the code.
 | Branding: the logo bay's two captions | "as uploaded", "on your pages" (the spec's own suggestion) | 10B.7.3 |
 | Branding on phones: the preview sheet's title | "Previews" | 10B.7.6 |
 | Branding: the ink match line's spoken text | "Buttons print as {hex}", "Buttons print as {hex}, from {hex}" (no visible explanation line yet) | 10B.7.4 |
+| Desk: the not-found page's button back to Filings | "Filings" | 10B.21 |
+| Setup: the email-domain card | "Your email domain" (optional), "Send your clients' emails from your own address.", "Connect" / "Change", chips "Waiting for records" and "Connected" | 10B.5 |
+| The email-domain page (every word) | title "Your email domain"; lede "Emails to your clients go out under your firm's name. Until you connect your own domain, they come from a CoFile address; once it's connected, they come from yours."; "Your domain"; "Connect domain"; "Check again"; "Add these records where your domain's DNS is managed"; heads "Type", "Name", "Value", "State"; chips "Not found yet", "Found"; "Copy" / "Copied"; "Connected. Your clients' emails now come from {address}."; "Your clients' emails keep coming from the CoFile address under your firm's name until the records are found."; "The records stopped resolving. …"; "Disconnect" and its confirmation; errors "Enter a domain like yourfirm.com.", "That domain can't be used for sending.", "Connecting a domain isn't available yet."; the inbox row's name "How your clients see your emails" | 10B.5.1 |
 
 ## Part 1: the foundation
 

@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import "@/styles/components/brandfields.css";
+import { prepareLogoPixels } from "@/lib/logo-process";
 
 /** Colors offered with one tap; any other comes from the picker or a typed hex code. */
 export const SWATCHES = ["#1f4fd1", "#0f766e", "#15803d", "#b45309", "#b91c1c", "#7e22ce", "#be185d", "#334155", "#111827"];
@@ -42,26 +43,45 @@ const MAX_SEND = 380 * 1024;
 const MAX_SIDE = 600;
 const TYPES = ["image/png", "image/jpeg", "image/webp"];
 
-function readAsDataUrl(f: Blob): Promise<string> {
-  return new Promise((resolve, reject) => { const r = new FileReader(); r.onload = () => resolve(String(r.result)); r.onerror = () => reject(r.error); r.readAsDataURL(f); });
-}
 
-/** A small picture as a data URL: the file itself when it's already small, else redrawn at most 600 px wide or high. */
+/**
+ * A logo ready for the pages (merged spec 3.5.1), as a data URL: a white box around it read away (from the edges
+ * inward, so white inside the logo stays), its empty margin trimmed, at most 600 px wide or high. PNG or WebP keep the
+ * transparency; a JPEG fallback is flattened onto white.
+ */
 export async function shrinkLogo(file: File): Promise<string> {
   if (!TYPES.includes(file.type)) throw new Error("Choose a PNG, JPEG or WebP picture.");
   const url = URL.createObjectURL(file);
   try {
     const img = await new Promise<HTMLImageElement>((resolve, reject) => { const i = new Image(); i.onload = () => resolve(i); i.onerror = () => reject(new Error("That picture couldn't be opened.")); i.src = url; });
-    const scale = Math.min(1, MAX_SIDE / Math.max(img.naturalWidth, img.naturalHeight));
-    if (scale === 1 && file.size <= MAX_SEND) return readAsDataUrl(file);
+    // Read the full picture once at a working size (the 600 px result needs no more), clear its box and find its margin.
+    const work = Math.min(1, 1600 / Math.max(img.naturalWidth, img.naturalHeight));
+    const src = document.createElement("canvas");
+    src.width = Math.max(1, Math.round(img.naturalWidth * work));
+    src.height = Math.max(1, Math.round(img.naturalHeight * work));
+    const sctx = src.getContext("2d", { willReadFrequently: true });
+    if (!sctx) throw new Error("That picture couldn't be opened.");
+    sctx.drawImage(img, 0, 0, src.width, src.height);
+    const pixels = sctx.getImageData(0, 0, src.width, src.height);
+    const box = prepareLogoPixels(pixels.data, src.width, src.height);
+    sctx.putImageData(pixels, 0, 0);
+    const scale = Math.min(1, MAX_SIDE / Math.max(box.width, box.height));
     const canvas = document.createElement("canvas");
-    canvas.width = Math.max(1, Math.round(img.naturalWidth * scale));
-    canvas.height = Math.max(1, Math.round(img.naturalHeight * scale));
-    canvas.getContext("2d")?.drawImage(img, 0, 0, canvas.width, canvas.height);
-    for (const [type, q] of [["image/png", undefined], ["image/webp", 0.9], ["image/jpeg", 0.88]] as const) {
+    canvas.width = Math.max(1, Math.round(box.width * scale));
+    canvas.height = Math.max(1, Math.round(box.height * scale));
+    const ctx = canvas.getContext("2d");
+    if (!ctx) throw new Error("That picture couldn't be opened.");
+    ctx.drawImage(src, box.x, box.y, box.width, box.height, 0, 0, canvas.width, canvas.height);
+    for (const [type, q] of [["image/png", undefined], ["image/webp", 0.9]] as const) {
       const d = canvas.toDataURL(type, q);
       if (d.startsWith(`data:${type}`) && d.length * 0.75 <= MAX_SEND) return d;
     }
+    const flat = document.createElement("canvas");
+    flat.width = canvas.width; flat.height = canvas.height;
+    const fctx = flat.getContext("2d")!;
+    fctx.fillStyle = "#fff"; fctx.fillRect(0, 0, flat.width, flat.height); fctx.drawImage(canvas, 0, 0);
+    const jpeg = flat.toDataURL("image/jpeg", 0.88);
+    if (jpeg.length * 0.75 <= MAX_SEND) return jpeg;
     throw new Error("That picture is too large. Try a smaller one.");
   } finally {
     URL.revokeObjectURL(url);
@@ -80,6 +100,8 @@ export function LogoField({ current, currentLink, onPreview, name }: { current?:
   const [removed, setRemoved] = useState(false);
   const [err, setErr] = useState("");
   const [over, setOver] = useState(false);
+  // A wide logo is a wordmark that already spells the name, so the typed name stays hidden beside it (3.5.2).
+  const [wide, setWide] = useState(false);
   const [showLink, setShowLink] = useState(Boolean(currentLink));
   const shown = removed ? undefined : data || (/^https:\/\/\S+$/.test(link) ? link : undefined) || current;
 
@@ -111,8 +133,8 @@ export function LogoField({ current, currentLink, onPreview, name }: { current?:
             <figure className="logof2-half is-page">
               <span className="logof2-sheet">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={shown} alt="" />
-                {name ? <span className="logof2-name">{name}</span> : null}
+                <img src={shown} alt="" onLoad={(e) => setWide(e.currentTarget.naturalWidth >= 2.5 * e.currentTarget.naturalHeight)} />
+                {name && !wide ? <span className="logof2-name">{name}</span> : null}
               </span>
               <figcaption>on your pages</figcaption>
             </figure>

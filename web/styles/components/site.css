@@ -83,8 +83,12 @@ body:has(.site2) > .beta-banner { display: none; }
 .site2-foot-states span { padding-inline: 0.3em; }
 .site2-foot-legal { max-width: 60ch; font: 400 0.9375rem/1.4375rem var(--font-sans); color: var(--text-2); }
 .site2-foot-links { display: grid; gap: 24px; align-content: start; font: 400 0.9375rem/1.4375rem var(--font-sans); }
+.site2-foot-links > p { display: flex; flex-wrap: wrap; align-items: center; }
 .site2-foot-links span[aria-hidden] { color: var(--text-2); padding-inline: 8px; }
-.site2-foot a { color: var(--link); text-decoration: underline; text-decoration-color: var(--link-line); text-underline-offset: 3px; display: inline-block; padding-block: 12px; margin-block: -12px; }
+.site2-foot a { color: var(--link); text-decoration: underline; text-decoration-color: var(--link-line); text-underline-offset: 3px; }
+/* Each link's hit area 48 px tall, without overlapping the next line when the row wraps */
+.site2-foot-links > p > a { display: inline-flex; align-items: center; min-height: 48px; }
+.site2-foot-links { margin-top: -12px; }
 @media (hover: hover) { .site2-foot a:hover { text-decoration-thickness: 2px; text-decoration-color: var(--link); } }
 @media (max-width: 767px) { .site2-foot { padding-top: 48px; } .site2-foot-grid { grid-template-columns: 1fr; gap: 24px; } .site2-rule { margin-bottom: 32px; } }
 @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .site2-foot { background: #1A1D27; } }
