@@ -3,7 +3,7 @@ import { DraftSheet } from "./TextToDraft";
 import { Photo } from "./Photo";
 
 /** Stand-in words (COPY-NEEDED, D7, 7.11): alt text for C8 and C11, and the saved agent picture's accessible name. */
-const OWNER_ALT = "A firm owner reading a proof on her laptop";
+const OWNER_ALT = "A firm owner reading a proof on a laptop";
 const ENGRAVER_ALT = "An engraver polishing a brass plate engraved Harbor & Pine CPA";
 const AGENT_NAME = "The saved registered agent and answers on an example draft";
 

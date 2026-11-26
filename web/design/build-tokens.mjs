@@ -43,7 +43,7 @@ const layoutVars = [
 ].join("\n");
 
 const tokensCss = `${header}
-/* Layer order for every new stylesheet. Legacy styles (globals.css, landing.css) are unlayered for now and
+/* Layer order for every new stylesheet. Legacy styles (globals.css) are unlayered for now and
    only reach pages not yet rebuilt; new styles apply inside a register (.reg-cofile, .reg-firm, .reg-white). */
 @layer legacy, tokens, base, components, pictures, utilities;
 

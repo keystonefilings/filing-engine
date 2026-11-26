@@ -18,8 +18,8 @@ export function generateMetadata() {
 
 /** Stand-in words (COPY-NEEDED, D7): the three step photographs' alt text, the printer's proof's alt text. */
 const ALT = {
-  ask: "A baker typing a text message on her phone",
-  approve: "A firm owner reading a proof on her laptop",
+  ask: "A baker typing a text message on a phone",
+  approve: "A firm owner reading a proof on a laptop",
   files: "An envelope addressed to Harbor & Pine CPA on a walnut desk",
   printer: "A printer's proof of letterhead, initialled in pencil",
 };

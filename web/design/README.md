@@ -23,8 +23,8 @@ The merged design spec (`docs/design-specs/merged/`) as code. Phase 0 of the bui
   firm's clients carries the firm's branding, and nothing of CoFile appears on it.
 - **Components read only semantic tokens** (`--action`, `--link`, `--surface`, `--text`…), never a
   palette token, a firm token or a hex value. The register a page sits in decides the colors.
-- **Cascade layers:** `legacy, tokens, base, components, pictures, utilities`. Today's stylesheets
-  (`app/globals.css`, `app/landing.css`) sit in `legacy`, the lowest layer, so a rebuilt page always wins
+- **Cascade layers:** `legacy, tokens, base, components, pictures, utilities`. The old stylesheet
+  (`app/globals.css`) sits in `legacy`, the lowest layer, so a rebuilt page always wins
   and a page not yet rebuilt looks exactly as before (checked: 20 screenshots identical, Nov 26).
 - **Fonts**: Miller Text and Founders Grotesk, from the owner's desktop files (Nov 26), subset to Latin and compressed
   to WOFF2. **The files are never committed: this repository is public.** They live in `public/fonts` on the machine

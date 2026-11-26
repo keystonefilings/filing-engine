@@ -93,7 +93,7 @@ function Leaders() {
 
 const LABEL = "Ana Ortiz · text message · example";
 /** Stand-in words (COPY-NEEDED, D7): Ana's photograph's alt text. */
-const ANA_ALT = "A baker reading a text message on her phone at the counter";
+const ANA_ALT = "A baker reading a text message on a phone at the counter";
 
 /** Home 3 (L3, M3 3.4 s): Ana's photograph, her text at reading size, the leaders and the draft on the firm's desk. */
 export function TextToDraft() {

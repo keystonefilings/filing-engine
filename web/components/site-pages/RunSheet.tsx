@@ -2,7 +2,7 @@ import type { CSSProperties } from "react";
 import { Glyph } from "@/components/ui/glyphs";
 import { Lockup } from "@/components/shell/Lockup";
 
-/** The rehearsal's cues, from the stand-in's log (components/landing/Visuals.tsx, RehearsalLog). Example data. */
+/** The rehearsal's cues, from the stand-in's log (the old landing page's rehearsal log). Example data. */
 export const CUES: [string, string][] = [
   ["Business name", "filled"],
   ["Name check", "passed"],

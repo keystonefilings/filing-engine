@@ -48,6 +48,23 @@ one string in the code.
 | Desk: the not-found page's button back to Filings | "Filings" | 10B.21 |
 | Setup: the email-domain card | "Your email domain" (optional), "Send your clients' emails from your own address.", "Connect" / "Change", chips "Waiting for records" and "Connected" | 10B.5 |
 | The email-domain page (every word) | title "Your email domain"; lede "Emails to your clients go out under your firm's name. Until you connect your own domain, they come from a CoFile address; once it's connected, they come from yours."; "Your domain"; "Connect domain"; "Check again"; "Add these records where your domain's DNS is managed"; heads "Type", "Name", "Value", "State"; chips "Not found yet", "Found"; "Copy" / "Copied"; "Connected. Your clients' emails now come from {address}."; "Your clients' emails keep coming from the CoFile address under your firm's name until the records are found."; "The records stopped resolving. …"; "Disconnect" and its confirmation; errors "Enter a domain like yourfirm.com.", "That domain can't be used for sending.", "Connecting a domain isn't available yet."; the inbox row's name "How your clients see your emails" | 10B.5.1 |
+| Every moving picture: the replay control's name and tooltip (home, How it works, What we file) | "Play again" | D7, 10A.0.5 |
+| Home hero: the waiting row's hidden hint; the client page's group name | "Goes to the sample proof below"; "The page Harbor & Pine CPA's clients see" | 9.1 |
+| Home 2: the two door photographs | "A brass name plate engraved Harbor & Pine CPA beside a blue door", "A steel name plate engraved Northgate Payroll beside a glass door" | 9.2 |
+| Home 2: the wipe handle | name "Compare the two firms' pages"; spoken values "{n}% of Harbor & Pine CPA's page in Northgate Payroll's brand", "{n}% of Northgate Payroll's page in Harbor & Pine CPA's brand", "Each page in its own firm's brand" | 9.2 |
+| Home 3: the bakery photograph (C5) | "A baker reading a text message on a phone at the counter" | 9.3 |
+| Home 4: the three points beside the sample proof | "Outlines the state's review page on the sample proof.", "Outlines the fees, the total and the payment screen's total on the sample proof.", "Outlines the Approve for filing button on the sample proof." | 9.4 |
+| Home: the stage photograph (C7) | "An empty stage lit by a single ghost light" | 9.7 |
+| The Close (home and For firms) | field label "Your firm's name"; hidden description "As you type, each letter is engraved on the blank plate in the photograph."; plate alt "A blank brass name plate beside a blue door", and with a name "A brass name plate engraved {name} beside a blue door" | 9.9, 10A.2.6 |
+| How it works: the step photographs | "A baker typing a text message on a phone"; "A firm owner reading a proof on a laptop" (also For firms' C8); "An envelope addressed to Harbor & Pine CPA on a walnut desk"; "A printer's proof of letterhead, initialled in pencil"; "An opened envelope with its papers on a walnut desk" | 10A.1 |
+| How it works: the five points beside the sample proof | "Outlines the {part} on the sample proof." for the business's details, the fees and the total, the state's review page, the statements, the Approve for filing button | 10A.1.3 |
+| For firms | engraver photograph (C11) "An engraver polishing a brass plate engraved Harbor & Pine CPA"; the saved-agent picture "The saved registered agent and answers on an example draft"; the studio's group name "Try your firm's name and color"; its thumbnails reuse Branding's stand-ins above | 10A.2 |
+| Terms and Privacy: the contents list's name | "Contents" | 10A.15, 10A.17 |
+| Pictures left without words: the What we file stage photograph (inside the figure "Example rehearsal log"), the sign-up plate photographs, the For platforms picture | decorative for now (no alt text written) | 10A |
+| Dashboard and docs: the copy buttons' confirmation | "Copied" (shown and announced) | 10C |
+| Docs: each code block's accessible name | the language: "bash", "http", "javascript", "json", "python" | 10C |
+| Dashboard: the hidden heads of the action columns | "Approve" (Partners), "Revoke" (API keys) | 10C |
+| The EIN email to a client, when the IRS letter isn't among the papers | subject "EIN issued: {filing}"; sentence "The IRS has issued the EIN for this filing." | 10D.18 |
 
 ## Part 1: the foundation
 
