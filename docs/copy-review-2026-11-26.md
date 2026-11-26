@@ -292,3 +292,26 @@ Options:
 
 **Decided by Yakov (Nov 26): all five.** Applied: a practice filing is a **rehearsal** in everything customers read (the API keeps `dryRun`; the docs say a dry run is a rehearsal); the page the client approves is **the proof** (its button keeps the decision-3 wording, which awaits counsel); the firm's portal is **its filing desk**; **"free"** is said for rehearsals on CoFile's own pages (not on a firm's client pages, where the firm sets its own prices; plan prices are shown only on the Billing page); and the **new look**: paper and ink with a manila accent, green for approved, live and the button that moves a filing forward (a firm's own color replaces it on its pages), amber for a rehearsal, red for a stop; Source Serif 4 headings with IBM Plex Sans and Mono; the folder-tab mark replacing the seal. The home page is the merged direction, with Missouri left out (not offered yet), Florida's EIN after acceptance, and coverage labels that show Live from the per-type live switch.
 
+## Who approves (Yakov, Nov 26)
+
+The end client doesn't approve the filing: it hands that job to its CPA, CFO or payroll firm, and the firm approves the proof. A partner firm's filings now send the proof to the firm (its contact from sign-up, unless approvers are set on the firm), never to the end client; the firm can also open the proof and approve from the filing on its filing desk (a partner session may approve its own firm's filings, not another's). The copy says so: "You approve the proof. Then CoFile files it." on the home page; the client's pages say the firm checks every detail and approves before anything is filed; the firm's form button is "Create the proof".
+
+
+## Round 3: benefits first, fewer words (Nov 26)
+
+The owner sent the same 20 reviewers back with two notes: their last edits were amazing; now (1) focus even more on what CoFile sells and the benefits it brings, less on security (still kept), and (2) cut the words, so the site is more visual than copy (the visuals are designed later). No strict word limit.
+
+All 20 led with what the firm can sell and keep instead of the proof, put pricing on the home page, and cut security to one line with a link. They took the home page from about 2,000 words to 240-310 each; the merged page is about 330.
+
+Owner's calls on the merged page:
+
+1. Publish prices: yes. A price strip on the home page and a public Pricing page. The figures live in `web/lib/pricing.ts`; `web/lib/pricing.test.ts` fails if they drift from `config/partner-pricing.json`.
+2. Add the pages the cut text moved to: yes. How it works, For firms, What we file, Pricing, Security, Questions (FAQ) and For platforms. Old `/#…` links point at them, and their slugs are reserved for firms.
+3. Beta banner: keep it on the home page.
+4. The filing desk as the hero picture, "See pricing" as the second button, "ours in small type": yes.
+
+Added by the owner: the site says CoFile is built and run by filing professionals, and that a person takes over when a filing needs one; that line ends every pricing card.
+
+Fixed while moving text: the Security card said a saved signature goes only on a filing "the client has approved"; since the firm approves, it now says "a filing that has been approved".
+
+The home page's pictures are plain HTML stand-ins in `web/components/landing/Visuals.tsx`, each labeled as an example, for the designer to replace.

@@ -65,7 +65,7 @@ function initialState(kind: FilingKind, prefill: Record<string, string> = {}): {
   return { values, groups, next, prefill: mapped };
 }
 
-export function IntakeForm({ kind, nonce, action, submitLabel = "Send the proof to my client", footnote, signatures = [], consentText, prefill, filerName, forClient }: Props) {
+export function IntakeForm({ kind, nonce, action, submitLabel = "Create the proof", footnote, signatures = [], consentText, prefill, filerName, forClient }: Props) {
   const router = useRouter();
   const init = useMemo(() => initialState(kind, prefill), [kind, prefill]);
   const startValues = init.prefill;

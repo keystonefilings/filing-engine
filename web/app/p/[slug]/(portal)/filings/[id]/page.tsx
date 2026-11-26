@@ -62,15 +62,15 @@ export default async function FilingPage({ params, searchParams }: { params: Pro
           : f.lastError ? <p className="notice bad">{f.lastError}</p> : null
       ) : null}
       {approvalLink ? (
-        <div className="card">
-          <strong>Link to the proof</strong>
-          <p className="small muted">
+        <div className="card stack">
+          <strong>Your proof is ready</strong>
+          <p className="small" style={{ margin: 0 }}>Check every detail and fee exactly as they&apos;ll go to the state, then approve it or ask for changes. Nothing is filed until you approve.</p>
+          <p style={{ margin: 0 }}><a className="btn primary" href={approvalLink} target="_blank" rel="noopener">Open the proof and approve it</a></p>
+          <p className="small muted" style={{ margin: 0 }}>
             {emailedTo.length
-              ? <>We emailed this link to {Array.from(new Set(emailedTo)).join(", ")}. If they can&apos;t find it, you can pass it on.</>
-              : <>This link hasn&apos;t been emailed{approvalSends.some((m) => m.status === "failed") ? " (sending failed)" : ""}. Send it to the person who approves the filing.</>}
-            {" "}It shows exactly what will be filed and the fees.
+              ? <>We also emailed the link to {Array.from(new Set(emailedTo)).join(", ")}.</>
+              : <>The link wasn&apos;t emailed{approvalSends.some((m) => m.status === "failed") ? " (sending failed)" : ""}; open it here.</>}
           </p>
-          <p className="secret small">{approvalLink}</p>
         </div>
       ) : null}
       {signer ? <p className="small muted">The signer&apos;s saved signature is placed on the state form only once this filing is approved.</p> : null}

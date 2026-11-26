@@ -16,6 +16,28 @@ export function FolderTab({ size = 30 }: { size?: number }) {
 /** Kept for pages that still import it. */
 export const Seal = FolderTab;
 
+/** The public pages (round 3, Nov 26): the home page's cut text moved to these. */
+export const NAV: [string, string][] = [
+  ["/how-it-works", "How it works"],
+  ["/for-firms", "For firms"],
+  ["/what-we-file", "What we file"],
+  ["/pricing", "Pricing"],
+  ["/platforms", "For platforms"],
+];
+
+/** A public page's opening: kicker, title and a short lede. */
+export function PageHead({ kicker, title, children }: { kicker?: string; title: string; children?: React.ReactNode }) {
+  return (
+    <section className="r3-head band">
+      <div className="wrap">
+        {kicker ? <span className="nx-kicker">{kicker}</span> : null}
+        <h1>{title}</h1>
+        {children ? <div className="r3-head-lede">{children}</div> : null}
+      </div>
+    </section>
+  );
+}
+
 /** The public pages' frame: header with Log in and partner sign-up, and the footer. */
 export function Shell({ children, nav = false }: { children: React.ReactNode; nav?: boolean }) {
   const name = platformName();
@@ -29,10 +51,7 @@ export function Shell({ children, nav = false }: { children: React.ReactNode; na
           <Link className="mark" href="/" aria-label={`${name} home`}><FolderTab /><span className="mark-name">{name}</span></Link>
           {nav ? (
             <nav className="nav" aria-label="Sections">
-              <a href="/#process">How it works</a>
-              <a href="/#firms">For firms</a>
-              <a href="/#coverage">What we file</a>
-              <a href="/#enterprise">For platforms</a>
+              {NAV.map(([href, label]) => <Link key={href} href={href}>{label}</Link>)}
             </nav>
           ) : null}
           <div className="actions">
@@ -46,10 +65,11 @@ export function Shell({ children, nav = false }: { children: React.ReactNode; na
         <div className="wrap">
           <span>{name} · the filing desk behind your firm</span>
           <span>New York · New Jersey · Florida · IRS</span>
+          <span>Building a filing product? <Link href="/platforms">{name} for platforms</Link></span>
         </div>
         <div className="wrap legal-line">
           <span>{name} is not a law firm or a government agency, isn&apos;t affiliated with any state or the IRS, and doesn&apos;t give legal or tax advice.</span>
-          <span><a href="/terms">Terms</a> · <a href="/privacy">Privacy</a> · <a href="/#security">Security</a> · <a href={`mailto:${supportEmail()}`}>{supportEmail()}</a></span>
+          <span><a href="/terms">Terms</a> · <a href="/privacy">Privacy</a> · <a href="/security">Security</a> · <a href="/faq">FAQ</a> · <a href={`mailto:${supportEmail()}`}>{supportEmail()}</a></span>
         </div>
       </footer>
     </div>

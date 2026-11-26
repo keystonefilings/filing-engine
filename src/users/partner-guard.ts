@@ -45,6 +45,7 @@ const RULES: Record<string, Rule> = {
   "GET /v1/filings/:id": ownFiling,
   "POST /v1/filings/:id/information": ownFiling,
   "POST /v1/filings/:id/cancel": ownFiling,
+  "POST /v1/filings/:id/approval": ownFiling,
   "GET /v1/filings/:id/messages": ownFiling,
   "GET /v1/artifacts/:id": async ({ req, firm, deps }) => {
     const a = await deps.artifacts.get(params(req).id ?? "");

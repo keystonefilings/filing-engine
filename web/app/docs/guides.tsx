@@ -25,7 +25,7 @@ export const GUIDES: Guide[] = [
           <li>Revoke the old key. Revoking takes effect at once and can&apos;t be undone.</li>
         </ol>
         <h2>Keep keys on your server</h2>
-        <p>A key can create filings that, once your client approves them, are submitted to a state and paid for. Never build it into a web page, a mobile app or a public repository. The CPA and payroll portal on this site calls the API from the server for the same reason.</p>
+        <p>A key can create filings that, once they're approved, are submitted to a state and paid for. Never build it into a web page, a mobile app or a public repository. The CPA and payroll portal on this site calls the API from the server for the same reason.</p>
       </>
     ),
   },
@@ -64,7 +64,7 @@ export const GUIDES: Guide[] = [
     summary: "What each state and filing needs, from the state-site walkthroughs.",
     body: () => (
       <>
-        <p>The engine takes one request shape for every state; adapters turn it into each site&apos;s own form. These are the filings the API and the portal take today, with the state fees seen on each site. Not every type can be filed live yet, because some states&apos; checkouts are still being mapped; see <Link href="/#coverage">Coverage</Link> on the home page. Every field the engine accepts, with its type and whether it is required, is in the FilingRequest JSON Schema in <a href="/openapi.json">/openapi.json</a> (also at <code>GET /v1/schema/filing-request</code>). </p>
+        <p>The engine takes one request shape for every state; adapters turn it into each site&apos;s own form. These are the filings the API and the portal take today, with the state fees seen on each site. Not every type can be filed live yet, because some states&apos; checkouts are still being mapped; see <Link href="/what-we-file">What we file</Link>. Every field the engine accepts, with its type and whether it is required, is in the FilingRequest JSON Schema in <a href="/openapi.json">/openapi.json</a> (also at <code>GET /v1/schema/filing-request</code>). </p>
         <div className="table-wrap"><table><thead><tr><th>Filing</th><th>type / state</th><th>Fees</th></tr></thead><tbody>
           {FILING_KINDS.map((k) => <tr key={k.id}><td><strong>{k.title}</strong><div className="muted small">{k.summary}</div></td><td><code>{k.type}</code> / {k.type === "ein_only" ? "the state where the LLC was formed" : <code>{k.state}</code>}</td><td className="small">{k.feeNote}</td></tr>)}
         </tbody></table></div>
@@ -83,10 +83,10 @@ export const GUIDES: Guide[] = [
   {
     slug: "approvals",
     title: "Approvals",
-    summary: "How the client approves, and what you can show them.",
+    summary: "How a filing is approved, and what the approver sees.",
     body: () => (
       <>
-        <p>Nothing is submitted or paid until the client approves it. Where the client approves the state&apos;s own review page, a preview run first fills in the state site up to that page, without submitting. When a filing is ready, the engine creates an approval and sends its link to the approvers on the client company (or those in <code>approvalRecipients</code>). The link is also returned as <code>approvalLink</code> when you create the filing, and from <code>GET /v1/filings/{"{id}"}</code> while it is open.</p>
+        <p>Nothing is submitted or paid until the approver approves it: by default the firm (a partner firm always approves its clients&apos; filings), or the approvers you set. Where the approver sees the state&apos;s own review page, a preview run first fills in the state site up to that page, without submitting. When a filing is ready, the engine creates an approval and sends its link to the approvers on the client company (or those in <code>approvalRecipients</code>). The link is also returned as <code>approvalLink</code> when you create the filing, and from <code>GET /v1/filings/{"{id}"}</code> while it is open.</p>
         <p>The proof (the approval page) shows the full request as it will be filed, with sensitive numbers masked, the state fees and your fee cap. Approving authorizes submitting the filing exactly as shown and paying the fees shown, up to the fee cap (or the total when there is none), with a warning that government fees generally can&apos;t be refunded; the approval records which consent was agreed (<code>consentVersion</code>). Where possible, it also shows a screenshot of the state&apos;s own review page, filled in with this filing; a preview run (status <code>previewing</code>) captures it before the link is sent. The live run goes ahead only if the state shows exactly that page again; if it has changed, the run stops before paying. If you collect approval in your own app, show the same screenshot: <code>filing.awaiting_approval</code> carries <code>data.reviewShotArtifactId</code>, which you download with <code>GET /v1/artifacts/{"{id}"}</code>. The client approves or asks for changes, and can add a comment. Approval links expire; the page says so and a new filing gets a new link.</p>
         <h2>Changes requested</h2>
         <p>The filing moves to <code>changes_requested</code> and <code>filing.changes_requested</code> carries the comment. Correct the request and create a new filing with a new idempotency key.</p>

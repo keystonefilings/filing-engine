@@ -16,7 +16,7 @@ export default function SignupPage() {
           <h2>Set up your firm&apos;s filing desk</h2>
           <p className="lede">For firms that file for their clients. Confirm your email, put your name and logo on the door, and choose which card pays the state&apos;s fees. Your first filing can be a free rehearsal: nothing filed, nothing paid.</p>
           <PartnerSignupForm action={signUpPartner} approvalRequired={partnerApprovalRequired()} />
-          <p className="hero-note">Building a filing product? <Link href="/#enterprise">See {platformName()} for platforms</Link>.</p>
+          <p className="hero-note">Building a filing product? <Link href="/platforms">See {platformName()} for platforms</Link>.</p>
         </div>
       </main>
     </Shell>
