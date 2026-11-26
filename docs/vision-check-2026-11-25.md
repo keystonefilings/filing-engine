@@ -220,14 +220,15 @@ Built and tested; each switches on when its accounts and keys are set (steps in 
 - **Google:** an OAuth client for "Continue with Google" (V37).
 - **Slack:** a Slack app with the `/file` command (V41).
 - **Twilio:** a number with A2P 10DLC registration, and a WhatsApp sender (Meta verification) (V42-V43).
-- **Copy decisions:** of the 19 questions from the copy review (docs/copy-review-2026-11-26.md), price
-  wording, the filing company, the terms and privacy pages, the support address (hello@cofile.app),
-  the approval consent (now covering fee payment) the saved-signature consent (limited
-  and revocable) and first-person declarations were decided and done on Nov 26; the rest (EIN designee, filing
-  statuses, leaving practice mode, the agent option, turnaround times, hosts, fees, key prefix,
-  Florida professional entities, the Certificate of Existence upload) wait for you. Have counsel
-  review the Terms and Privacy Policy (governing law, liability cap, legal entity name) and the
-  approval consent, saved-signature consent and declaration wording.
+- **Copy decisions:** of the 19 questions from the copy review (docs/copy-review-2026-11-26.md),
+  these were decided and done on Nov 26: price wording, the filing company, the Terms and Privacy
+  pages, the support address (hello@cofile.app), the approval consent (now covering fee payment),
+  the saved-signature consent (limited and revocable), first-person declarations, the EIN owner
+  route and the coverage table. Still waiting for you: leaving practice mode, the agent option,
+  turnaround times, the production hosts, the remaining fee figures, the API key prefix, Florida
+  professional entities and the Certificate of Existence upload. Have counsel review the Terms and
+  Privacy Policy (governing law, liability cap, legal entity name) and the approval consent,
+  saved-signature consent and declaration wording.
 - **Live walks with you:** NY drawdown deposit and post-submit pages, Sunbiz checkout, the IRS
   Assignment screen, the NJ checkout (V9-V12); the checkout walks also let the adapters type saved
   cards (V18). Also the pages V13 and V14 couldn't map: each NY record filing's confirmation, the NJ

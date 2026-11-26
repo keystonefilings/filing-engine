@@ -58,8 +58,12 @@ export const ResponsibleParty = z.object({
 /** IRS EIN interview answers, from the live owner-route walk (docs/walks/ny-irs-2026-11-18.md). */
 export const EinRequest = z.object({
   mode: EinMode,
-  /** Who submits the interview: an owner/member, or Keystone as the authorized third-party designee. */
-  applicantRole: z.enum(["owner", "third_party_designee"]).default("third_party_designee"),
+  /**
+   * Who the IRS interview says is applying. Decision 6 (Nov 26): one of the owners, on the owner's
+   * authorization. The third-party designee route stays available to API callers and still needs
+   * the signed Form SS-4 authorization (ss4AuthorizationArtifactId).
+   */
+  applicantRole: z.enum(["owner", "third_party_designee"]).default("owner"),
   responsibleParty: ResponsibleParty.optional(),
   memberCount: z.number().int().positive().optional(),
   reason: z.enum(["new_business", "hired_employees", "banking", "changed_organization", "purchased_business"]).default("new_business"),

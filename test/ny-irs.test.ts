@@ -24,11 +24,11 @@ describe("IRS EIN map (from the 2026-11-18 walk)", () => {
     expect(IRS_SCREENS.review.intents.some((i) => i.key === "noticeDelivery")).toBe(true);
   });
 
-  it("defaults the applicant role to third-party designee and requires SS-4 + identity for a designee EIN", () => {
+  it("applies as one of the owners by default (decision 6); the designee route still requires SS-4 + identity", () => {
     const parsed = EinRequest.parse({ mode: "in_run" });
-    expect(parsed.applicantRole).toBe("third_party_designee");
+    expect(parsed.applicantRole).toBe("owner");
     expect(parsed.noticeDelivery).toBe("digital");
-    const req = FilingRequest.parse(njFormationRequest({ ein: { mode: "in_run", responsibleParty: { name: "Sam Rivera", ssn: "123-45-6789", title: "Member", address: { street1: "22 River Rd", city: "Hoboken", state: "NJ", zip: "07030" }, phone: "2015550100" } } as never }));
+    const req = FilingRequest.parse(njFormationRequest({ ein: { mode: "in_run", applicantRole: "third_party_designee", responsibleParty: { name: "Sam Rivera", ssn: "123-45-6789", title: "Member", address: { street1: "22 River Rd", city: "Hoboken", state: "NJ", zip: "07030" }, phone: "2015550100" } } as never }));
     const paths = validateFiling(req).map((i) => i.path);
     expect(paths).toContain("ein.ss4AuthorizationArtifactId");
     expect(paths).toContain("ein.formationState");

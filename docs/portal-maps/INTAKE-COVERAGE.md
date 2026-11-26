@@ -484,8 +484,6 @@ Fees: No IRS fee. The IRS issues one EIN per responsible party per day, and the 
 | Responsible party | Physical location of the LLC: city | `ein.responsibleParty.address.city` | yes | Screen 4, Addresses |
 | Responsible party | Physical location of the LLC: state | `ein.responsibleParty.address.state` | yes | Screen 4, Addresses |
 | Responsible party | Physical location of the LLC: ZIP code | `ein.responsibleParty.address.zip` | yes | Screen 4, Addresses |
-| Responsible party | Who submits the application | `ein.applicantRole` | yes | Screen 3, Your role |
-| Responsible party | I have signed, or will sign, the third-party designee authorization | `intake.portal.ss4AuthorizationSigned` | when shown | Rules: third-party designee |
 | Responsible party | Mail should go to a different address | `intake.portal.mailElsewhere` |  | Screen 4, different mailing address |
 | Responsible party | Mailing address: street address | `ein.mailingAddress.street1` | when shown | Screen 4, mailing address (branch not walked) |
 | Responsible party | Mailing address: suite, unit or floor | `ein.mailingAddress.street2` |  | Screen 4, mailing address (branch not walked) |
@@ -512,7 +510,7 @@ Fees: No IRS fee. The IRS issues one EIN per responsible party per day, and the 
 
 Authorizations the client grants (and confirms again on the approval page):
 
-- **irs-designee** (Rules: third-party designee): As the responsible party, I authorize the filing company to apply for this EIN on the LLC's behalf with the details above.
+- **irs-owner-application** (Screen 3, Your role: one of the owners): I am the responsible party named above and one of the LLC's owners or members, or its managing member. I authorize the filing company to complete and submit this EIN application for me, as one of the owners, with the details above.
 
 Not covered yet:
 

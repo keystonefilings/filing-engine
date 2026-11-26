@@ -687,7 +687,7 @@ const irsEin: FilingKind = {
   summary: "Employer Identification Number (EIN) from the IRS, applied for online. The IRS charges no fee.",
   type: "ein_only",
   state: "NY",
-  constants: { ein: { mode: "in_run" }, formation: { entityType: "LLC", effectiveDate: "upon_filing" } },
+  constants: { ein: { mode: "in_run", applicantRole: "owner" }, formation: { entityType: "LLC", effectiveDate: "upon_filing" } },
   map: IRS,
   feeNote: "No IRS fee. The IRS issues one EIN per responsible party per day, and the online service has set hours.",
   sections: [
@@ -716,9 +716,6 @@ const irsEin: FilingKind = {
         f("ein.responsibleParty.title", "Role in the LLC", "text", { required: true, defaultValue: "Member", ref: "Screen 3, role" }),
         f("ein.responsibleParty.phone", "Phone (digits only)", "tel", { required: true, ref: "Screen 4, Phone number" }),
         ...address("ein.responsibleParty.address", "Physical location of the LLC", { required: true, noPoBox: true, ref: "Screen 4, Addresses", help: "Must be a U.S. address; no P.O. box." }),
-        f("ein.applicantRole", "Who submits the application", "radio", { required: true, defaultValue: "third_party_designee", options: lv([["third_party_designee", "The filing company, as third-party designee"], ["owner", "The responsible party named below"]]), ref: "Screen 3, Your role" }),
-        { kind: "note", text: "As a third-party designee the filing company needs a signed authorization (Form SS-4 designee section) from the responsible party before it applies.", showIf: { path: "ein.applicantRole", equals: "third_party_designee" } },
-        f("intake.portal.ss4AuthorizationSigned", "I have signed, or will sign, the third-party designee authorization", "checkbox", { required: true, showIf: { path: "ein.applicantRole", equals: "third_party_designee" }, ref: "Rules: third-party designee" }),
         f("intake.portal.mailElsewhere", "Mail should go to a different address", "checkbox", { ref: "Screen 4, different mailing address" }),
         ...address("ein.mailingAddress", "Mailing address", { required: true, showIf: { path: "intake.portal.mailElsewhere", equals: "on" }, ref: "Screen 4, mailing address (branch not walked)" }),
       ],
@@ -757,7 +754,7 @@ const irsEin: FilingKind = {
     { ...contactSection("engine contact"), help: "Who the filing company contacts about this application. Updates about it go to this email." },
   ],
   authorizations: [
-    { id: "irs-designee", ref: "Rules: third-party designee", text: "As the responsible party, I authorize the filing company to apply for this EIN on the LLC's behalf with the details above." },
+    { id: "irs-owner-application", ref: "Screen 3, Your role: one of the owners", text: "I am the responsible party named above and one of the LLC's owners or members, or its managing member. I authorize the filing company to complete and submit this EIN application for me, as one of the owners, with the details above." },
   ],
   gaps: [
     "Only the LLC path is mapped; other legal structures, the multi-member branch and the mailing-address branch were not walked.",

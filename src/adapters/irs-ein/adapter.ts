@@ -182,7 +182,7 @@ const designee: ScreenStep = {
     return /designee|third[- ]party/i.test(text);
   },
   async fill(ctx) {
-    // Keystone (the service company) is the designee: its own contact and address.
+    // Only when a request asks for the designee route: the service company is the designee, with its own contact and address.
     const contact = ctx.tenant.contact;
     const who = ctx.tenant.filer ?? ctx.tenant.organizer;
     if (!contact || !who?.address) throw new Error("the third-party designee needs the service company's contact (tenant.contact) and address (tenant.filer or tenant.organizer)");

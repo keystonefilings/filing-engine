@@ -3,7 +3,7 @@ import { Shell } from "@/components/landing/Shell";
 import { TraceScan } from "@/components/landing/TraceScan";
 import { InquiryForm } from "@/components/AuthForms";
 import { sendInquiry } from "@/lib/accounts";
-import { platformName } from "@/lib/brand";
+import { platformName, supportEmail } from "@/lib/brand";
 
 // Adapted from the designed page in site/landing.html.
 
@@ -40,7 +40,7 @@ const TRACE: [string, string, string | undefined, string, string?][] = [
 
 const COVERAGE: [string, string, "live" | "map" | "", string][] = [
   ["LLC formation", "New Jersey", "live", "Verified up to payment"],
-  ["Standing certificate", "New Jersey", "live", "Verified up to payment"],
+  ["Standing certificate (through the API; not in the portal yet)", "New Jersey", "live", "Verified up to payment"],
   ["LLC formation", "Florida", "live", "Verified up to payment"],
   ["Profit corporation formation", "Florida", "live", "Verified up to payment"],
   ["Limited partnership formation", "Florida", "live", "Verified up to payment"],
@@ -242,6 +242,7 @@ export default function Home() {
               </table>
             </div>
             <p className="table-note">Verified up to payment: {name} completed every screen on the live government site with a test entry and stopped before paying. Screens mapped: the live site&apos;s screens were recorded on a walk-through, but a full test run hasn&apos;t been verified yet. Not yet verified: offered in the portal, but not yet verified on the live site. Planned: not built yet. A filing type is switched to live filing only after its payment step is mapped, so not every type here can be filed for real yet. Until then, it can only be run as a practice filing.</p>
+            <p className="table-note">Which types file for real depends on your account while they switch live one by one. <a href={`mailto:${supportEmail()}?subject=${encodeURIComponent("Which filing types are live for my account?")}`}>Ask us which types are live for your account</a>.</p>
           </div>
         </section>
 
