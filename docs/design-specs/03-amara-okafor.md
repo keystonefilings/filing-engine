@@ -1272,6 +1272,8 @@ Status families, the consent panel, the proof's order, field sizes and type size
 7. **The partner desk puts CoFile's name top left and the firm's in the corner.** It should be the other way round.
 8. **The contrast fix only handles button text** (`textOn` flips to `#111` above luminance 0.4). Nothing checks the second color used for links, and nothing stops a red approve button from reading as "stop".
 9. **The marketing nav disappears under 860 px** (`display: none`) with no menu to replace it.
+10. **The proof and the client pages load fonts from Google Fonts,** including the firm's chosen font. That tells a third party every time a client opens their filing. Self-host everything (§5.4).
+11. **The proof's styles live inside `render.ts` as inline strings,** separate from the web app's CSS, so the proof and the desk have already drifted apart (different paper, different button). One token source and one theme package (§11.2) keep the client's most important page in step with everything else.
 
 ## Appendix B: copy notes
 
@@ -1286,7 +1288,18 @@ These are suggestions only. None of them appear in the design above.
 7. The home sample proof's button reads **"Approve for filing"**, while the real proof reads "Approve, and authorize submission and payment". If "See what your client sees" is meant literally, the sample should carry the real label.
 8. The main color help text, **"Button text is white, so choose a dark color."**, becomes untrue once the automatic fixes in §11.3 land.
 9. The proof's H1 is assembled from raw parts (state code, type with an underscore replaced, name). Using the filing type's title ("New Jersey LLC formation") would read better.
-10. **New words this design needs** (marked ⟨copy to come⟩): the phone overflow menu label; the footer "reduce motion" and theme switches; a "Go back" action on the code-mismatch page; the Spanish switch; the explanation when CoFile adjusts a firm's color or font; body text for the "filing submitted" and "EIN issued" emails (the status labels exist, the emails don't); the status page and the rehearsal report.
+10. **New words this design needs** (marked ⟨copy to come⟩ in the spec):
+    - the phone overflow menu label on the desk (§9.9);
+    - the screen reader confirmation after a "Same as" fill (§9.2);
+    - confirmation dialog text for Revoke, Disconnect, Turn off and Abort filing (§9.12);
+    - the theme switch and language switch labels, and the footer "reduce motion" switch (§9.12, §10.1, §12);
+    - the explanation shown when CoFile adjusts a firm's color (§10.3, §11.3), the offer to remove a logo's background box and the low-resolution logo warning (§11.4);
+    - the Branding preview's intake/proof toggle labels (§10.3);
+    - a "Go back" action on the code-mismatch page (§10.5);
+    - the label of the intake's "pre-filled" summary row (§10.5);
+    - the drift review view for staff (§10.6);
+    - subject, body and button for the "filing submitted" and "EIN issued" emails (the status labels exist, the emails don't) (§10.9);
+    - the status page and the rehearsal report (§10.10).
 11. The rehearsal timeline ends on **"held, on purpose"**, borrowed from the home page's log. Confirm it can be used as a product label.
 12. The **"Completed" email's button says "Open"** (the default when no label is set). The copy review already flagged bare "Open" buttons. Something like "See the documents" would match what the email is for.
 13. The **"More information needed" email has no link or button.** It asks the client to send details "to whoever is preparing this filing for you", which is a dead end on a phone. A link to the client's intake (when one exists) or a reply-to the firm would close it.

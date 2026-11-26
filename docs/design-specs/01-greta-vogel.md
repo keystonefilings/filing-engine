@@ -191,7 +191,7 @@ Computed with the WCAG 2.2 relative-luminance formula.
 | Button text on button | 18.4:1 | 15.7:1 | AAA |
 | Field-line on paper | 3.7:1 | 4.0:1 | 3:1 non-text |
 
-The proof is held to **7:1 for all text** (AAA). That rules out ink-3 on the proof except for the "with CoFile" line, which is not content.
+The proof is held to **7:1 for all text** (AAA), including labels in the firm's print color (Section 11 computes them to 7:1 on client pages). That rules out ink-3 on the proof except for the "with CoFile" line, which is not content. The proof has no firm-colored buttons: its decisive button is ink (18.4:1) and "Request changes" is a secondary button in ink.
 
 The three signals were also checked under simulated protanopia, deuteranopia and tritanopia: go and stop separate by lightness and, more importantly, by symbol (disc versus barred square). A reader who sees no color at all loses nothing.
 
@@ -989,7 +989,7 @@ Green is deliberately not protected: many accounting firms are green, a green-pr
 
 **Step 2: print color.**
 
-- Normal: hold h and C (C capped at 0.20), lower L in steps of 0.01 until contrast against `--paper` is at least **4.5:1** (labels are 14 to 16px Medium). If the chosen color already passes, use it unchanged. `--print-tint` = the print color at L 0.96, C × 0.25.
+- Normal: hold h and C (C capped at 0.20), lower L in steps of 0.01 until contrast against `--paper` reaches the target: **7:1 on client pages** (intake, the proof, service pages, the widget, client emails), where every word is held to AAA, and **4.5:1 in the desk** (14px Medium labels for staff). If the chosen color already passes, use it unchanged. The two results are separate tokens, so a firm's desk can be closer to its exact color than its clients' pages. `--print-tint` = the print color at L 0.96, C × 0.25.
 - Protected: `--print` = neutral print `#3E4451` (9.8:1), `--print-tint` = `#EEEFF2`. The firm's color is still used for the band, and for the firm's typed name in the header when it reaches 4.5:1, so the brand remains on the page.
 - Dark mode: raise L from the light print value until contrast against dark paper `#1A1A19` is at least 4.5:1, capping L at 0.86 so the color does not become white. Protected colors use `#AEB4C2`.
 
@@ -1021,18 +1021,18 @@ Green is deliberately not protected: many accounting firms are green, a green-pr
 
 ### 11.4 Examples
 
-| Firm's main color | Class | Print (light) | Forward button | Notes |
-|---|---|---|---|---|
-| `#1F4FD1` cobalt | Normal | `#1F4FD1` (6.8:1, unchanged) | Fill `#1F4FD1`, white text | Passes as chosen |
-| `#8EC5FF` pale sky | Normal | about `#2F6DB5` (5.3:1) | Fill `#8EC5FF`, ink text, 1px ink border | The band stays pale sky |
-| `#0F766E` teal | Normal | `#0F766E` (5.5:1) | Fill `#0F766E`, white text | |
-| `#E0201B` signal red | Protected | `#3E4451` | Ink | Band and logo plate keep the red |
-| `#F4C430` saffron | Protected | `#3E4451` | Ink | Saffron is a hold hue; band keeps it |
-| `#334155` slate | Neutral | `#334155` (10.4:1) | Fill `#334155`, white text | |
+| Firm's main color | Class | Print, desk (4.5:1) | Print, client pages (7:1) | Forward button | Notes |
+|---|---|---|---|---|---|
+| `#1F4FD1` cobalt | Normal | `#1F4FD1` (6.8:1, unchanged) | about `#1D49C4` (7.5:1) | Fill `#1F4FD1`, white text (6.8:1) | The band keeps the exact cobalt |
+| `#8EC5FF` pale sky | Normal | about `#2F6DB5` (5.3:1) | about `#245892` (7.3:1) | Fill `#8EC5FF`, ink text (10.2:1), 1px ink border | The band stays pale sky |
+| `#0F766E` teal | Normal | `#0F766E` (5.5:1) | about `#0A6159` (7.3:1) | Fill `#0F766E`, white text (5.5:1) | |
+| `#E0201B` signal red | Protected | `#3E4451` | `#3E4451` | Ink | Band and the firm's name keep the red |
+| `#F4C430` saffron | Protected | `#3E4451` | `#3E4451` | Ink | Saffron is a hold hue; the band keeps it |
+| `#334155` slate | Neutral | `#334155` (10.4:1) | `#334155` | Fill `#334155`, white text | Passes everywhere |
 
 ### 11.5 The ready colors
 
-Today's nine swatches include an amber and a red. They are replaced by twelve colors that pass every step unchanged, so a firm that picks from the row never sees a correction: Form Blue `#2F4C80`, Navy `#1E3A6E`, Cobalt `#1F4FD1`, Indigo `#3B3C9E`, Teal `#0F6670`, Pine `#1E5E46`, Moss `#3F5F2A`, Plum `#6B2E6B`, Aubergine `#4A2350`, Mulberry `#7A2257`, Slate `#3E4451`, Graphite `#2B2B2B`. Any other color can still be typed or picked.
+Today's nine swatches include an amber and a red. They are replaced by twelve colors that pass every step unchanged, at 7:1 on paper, so a firm that picks from the row never sees a correction: Form Blue `#2F4C80`, Navy `#1E3A6E`, Cobalt `#1D49C4`, Indigo `#3B3C9E`, Teal `#0A5E66`, Pine `#1E5E46`, Moss `#3F5F2A`, Plum `#6B2E6B`, Aubergine `#4A2350`, Mulberry `#7A2257`, Slate `#3E4451`, Graphite `#2B2B2B`. Any other color can still be typed or picked.
 
 ### 11.6 What a firm can never change
 
@@ -1049,7 +1049,7 @@ Type sizes; the grid; radii; the order and structure of the proof; the decisive 
 
 ### 12.1 Accessibility
 
-**Standard:** WCAG 2.2 AA on every surface; AAA contrast (7:1) for all text on the proof and client pages. Tested with VoiceOver on iOS Safari, TalkBack on Android Chrome, NVDA with Firefox and Chrome, and JAWS with Chrome (many CPA offices run Windows with JAWS or ZoomText), at 200% and 400% zoom, and with Windows high-contrast themes.
+**Standard:** WCAG 2.2 AA on every surface; AAA contrast (7:1) for all text on the proof and client pages, with two stated exceptions: the label of a firm-colored forward button (computed to 4.5:1 at least, because that is where the firm's own color lives), and the 13px "with CoFile" line (5.3:1), which is not content. Tested with VoiceOver on iOS Safari, TalkBack on Android Chrome, NVDA with Firefox and Chrome, and JAWS with Chrome (many CPA offices run Windows with JAWS or ZoomText), at 200% and 400% zoom, and with Windows high-contrast themes.
 
 **Structure.** One H1 per page; landmarks for header, navigation (named "Sections" on the home page, "Docs" in the docs), main and footer; a skip link (Appendix B). Every page has its own title (the copy review found identical titles; the design keeps them distinct).
 
