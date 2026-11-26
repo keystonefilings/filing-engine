@@ -1,0 +1,88 @@
+/* The account pages and their forms (merged spec 10A.0.6, 10A.8–10A.14): the shop's order pad, one white card on
+   Cotton; labels above fields, errors under them, the form's message as a notice slip above its one Brass button.
+   Also the platforms inquiry's fields (10A.7.2). Reads semantic tokens. */
+@layer components {
+
+/* ── The notice slip (10A.0.6) ────────────────────────────────────────────────────────────────────────────── */
+.slip2 { --tone: var(--text); display: grid; grid-template-columns: auto minmax(0, 1fr); column-gap: 12px; align-items: start;
+  padding: 16px; background: var(--surface); color: var(--text); border: 1px solid var(--line); border-radius: var(--r-sheet);
+  box-shadow: inset 4px 0 0 var(--tone); padding-left: 20px; font: 400 1.0625rem/1.5rem var(--font-sans); outline: none; }
+.slip2 > svg { width: 12px; height: 12px; margin-top: 6px; color: var(--tone); }
+.slip2.is-plain { grid-template-columns: minmax(0, 1fr); }
+.slip2.is-done { --tone: var(--done); }
+.slip2.is-attention { --tone: var(--ochre); }
+.slip2.is-problem { --tone: var(--madder); }
+.slip2:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+.slip2 a { color: var(--link); }
+.slip2-empty { position: absolute; width: 1px; height: 1px; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); }
+@media (prefers-reduced-motion: no-preference) { .slip2 { animation: slip2-in 440ms var(--ease-settle) both; } }
+@keyframes slip2-in { from { opacity: 0; transform: translateY(-2px); } }
+
+/* ── Forms ────────────────────────────────────────────────────────────────────────────────────────────────── */
+.acct2-form { display: grid; gap: 24px; min-width: 0; }
+.acct2-form .field2-error { font-weight: 400; }
+.acct2-form .input2[aria-invalid="true"], .acct2-form .select2[aria-invalid="true"] { border-width: 2px; box-shadow: none; padding-inline: 15px; }
+.acct2-pw { display: grid; gap: 8px; }
+.acct2-forgot { font: 400 0.9375rem/1.4375rem var(--font-sans); }
+.acct2-act { display: grid; gap: 16px; }
+.acct2-submit { --h: 56px; }
+/* Pending: the component's own word, the pressed look held, never the disabled look */
+.acct2-submit[aria-busy="true"]:disabled { background: var(--action); color: var(--action-on); border-color: var(--action-border); cursor: progress; }
+.acct2-note { font: 400 0.9375rem/1.4375rem var(--font-sans); color: var(--text-2); }
+.acct2-after { font: 500 1.0625rem/1.5rem var(--font-sans); }
+.acct2-done { display: grid; gap: 16px; }
+.acct2-done .btn2 { --h: 56px; }
+.acct2-hp { position: absolute; left: -10000px; width: 1px; height: 1px; overflow: hidden; }
+
+/* Sign-up's groups: a 1 px Rule with 24 px each side between them; no group headings */
+.acct2-group { display: grid; gap: 24px; padding-bottom: 24px; border-bottom: 1px solid var(--line); min-width: 0; }
+.acct2-group.is-last { padding-bottom: 0; border-bottom: 0; gap: 8px; }
+.acct2-pair-wrap { display: grid; gap: 8px; }
+.acct2-pair { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 24px; align-items: start; }
+.acct2-states { margin: 0; padding: 0; border: 0; min-width: 0; }
+.acct2-states legend { padding: 0; margin-bottom: 4px; }
+.acct2-checks { display: flex; flex-wrap: wrap; column-gap: 24px; }
+.acct2-checks .check2 { min-height: 48px; }
+.acct2-narrow { max-width: 236px; }
+.acct2-terms { margin-block: -12px; }
+.acct2-terms span { font: 400 1.0625rem/1.5rem var(--font-sans); }
+@media (max-width: 599px) {
+  .acct2-form { gap: 20px; }
+  .acct2-group { gap: 20px; padding-bottom: 20px; }
+  .acct2-pair { grid-template-columns: minmax(0, 1fr); gap: 20px; }
+  .acct2-checks { flex-direction: column; }
+  .acct2-narrow { max-width: none; }
+}
+/* The inquiry's pairs hold side by side from 1024 px */
+@media (max-width: 1023px) { .acct2-pair.is-wide { grid-template-columns: minmax(0, 1fr); } }
+
+/* ── The account pages: one layout (10A.8) ────────────────────────────────────────────────────────────────── */
+.acct2-head { position: sticky; top: 0; z-index: 40; background: var(--page); }
+.acct2-head-row { display: flex; align-items: center; justify-content: space-between; gap: 24px; height: 76px; }
+.acct2-head-link { font: 400 1.0625rem/1.5rem var(--font-sans); color: var(--text); white-space: nowrap; }
+.acct2-head-link.is-quiet { text-decoration: none; position: relative; }
+.acct2-head-link.is-quiet::after { content: ""; position: absolute; left: 0; right: 0; bottom: -6px; height: 1px; background: transparent; transition: background-color var(--t-quick) var(--ease-settle); }
+@media (hover: hover) { .acct2-head-link.is-quiet:hover::after { background: var(--text); } }
+@media (max-width: 639px) { .acct2-head-row { height: 64px; } }
+
+.acct2-main { padding-block: 96px 128px; }
+@media (max-width: 1023px) { .acct2-main { padding-block: 72px 96px; } }
+@media (max-width: 639px) { .acct2-main { padding-block: 32px 64px; } }
+
+.acct2-card { box-sizing: border-box; width: 100%; max-width: 480px; margin-inline: auto; padding: 32px; background: var(--surface); color: var(--text); border-radius: var(--r-sheet); box-shadow: var(--e-sheet); }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .acct2-card { box-shadow: var(--e-sheet-dark); } }
+:root[data-theme="dark"] .acct2-card { box-shadow: var(--e-sheet-dark); }
+.acct2-kicker { display: flex; align-items: baseline; gap: 12px; margin: 0 0 16px; }
+.acct2-kicker::before { content: ""; flex: none; width: 24px; height: 1.5px; background: var(--brass-line); transform: translateY(-0.3em); }
+.acct2-h1 { color: var(--text); text-wrap: balance; }
+.acct2-lede { margin-top: 16px; color: var(--text); }
+.acct2-body { margin-top: 32px; display: grid; gap: 16px; }
+.acct2-body > .acct2-note { margin-top: 0; }
+.acct2-card > .acct2-note { margin-top: 16px; }
+.acct2-card .acct2-lede + .acct2-note { margin-top: 24px; }
+@media (max-width: 639px) {
+  .acct2-card { padding: 20px; }
+  .acct2-kicker { margin-bottom: 12px; }
+  .acct2-body { margin-top: 24px; }
+}
+}
