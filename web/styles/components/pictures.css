@@ -72,7 +72,11 @@
   .pdh-acct { gap: 6px; font-size: 0.9375rem; line-height: 1.25rem; }
   .pdh-acct img { width: 20px; height: 20px; }
   .pdesk .pdh, .pdraft .pdh { padding-inline: 16px; gap: 8px; }
+  /* The lockup sets its height inline (--lockup-h), so its image is sized here directly */
+  :is(.pdesk, .pdraft) .pdh .lockup2 img { height: 24px; width: auto; }
+  :is(.prec, .prun) .pdh .lockup2 img { height: 16px; width: auto; }
 }
+@media (min-width: 600px) and (max-width: 809px) { .pdesk .pdh .lockup2 img { height: 24px; width: auto; } }
 /* Inside a white sheet the lockup is the light export, at night too: the sheet is paper (4.6) */
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) .reg-cofile .sheet .ident-dark { display: none !important; }
