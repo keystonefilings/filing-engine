@@ -2041,7 +2041,8 @@ upload, a condensed display upload, and the ten presets. A theme ships only if a
   reading content.
 - **Targets:** 44 × 44 px minimum; 8 px between adjacent targets.
 - **Structure:** one `h1` per page, headings in order, landmarks (`banner`, `nav`, `main`,
-  `contentinfo`), the proof's four parts as `section`s labelled by their headings. The fee table is a
+  `contentinfo`), the proof's three headed parts as `section`s labelled by their headings and the
+  decision as a `form` labelled by its approve button. The fee table is a
   real `table` with a `caption` taken from "State fees". Status chips are text; glyphs and the ladder
   are `aria-hidden`. Callout markers are `aria-hidden` duplicates of list text that is always present.
 - **Forms:** labels bound to inputs, help bound with `aria-describedby`, an error summary at the
@@ -2059,8 +2060,9 @@ upload, a condensed display upload, and the ten presets. A theme ships only if a
 **The proof, as a screen reader hears it.** The order is the visual order, which is the copy's
 order:
 
-1. Page title (the code's "{firm}: approve filing"), then the banner landmark: the firm's name
-   (the logo's `alt` is empty because the name follows as text) and "with CoFile".
+1. Page title (the code's "{firm}: approve filing"), the neutral beta notice (a `note`), then the
+   banner landmark: the firm's name (the logo's `alt` is empty because the name follows as text)
+   and "with CoFile".
 2. On rehearsals, the rehearsal note, exposed as a `note` region, before the heading.
 3. `h1` with the filing title; the reference and deadline paragraph.
 4. The terms block, as a `region` labelled by its first words, read in full.
@@ -2132,7 +2134,7 @@ make room:
 Wordmark (positive, reversed, one-color; SVG and PDF); the Full Stop mark (three colorways);
 favicons (16, 32, 48 SVG and ICO, 180 Apple touch, 192 and 512 maskable); Open Graph template;
 "with CoFile" lockups (light, dark; 11 to 14 px); the end mark; 34 icons; graphics G1 to G8 as
-components; photographs P1 to P3 with captions; email header and footer frames for both frames;
+components; photographs P1 to P3 with captions; header and footer artwork for both email frames;
 the rehearsal hatch as an SVG pattern and a CSS gradient; the 25 torture-set themes.
 
 ### 13.3 What to commission
@@ -2152,13 +2154,14 @@ the rehearsal hatch as an SVG pattern and a CSS gradient; the 25 torture-set the
 1. **Weeks 1 to 4: the record.** Tokens, stopgap fonts, wordmark and mark, the `ProofSheet`
    component used by both the home page sample and the real proof, the theme compiler, the client
    email frame. Ship the proof first: it is the page that has to be right.
-2. **Weeks 5 to 10: the front page.** The home page with G1 to G7, the masthead and colophon, auth
+2. **Weeks 5 to 10: the front page.** The home page with G1 to G8, the masthead and colophon, auth
    pages, legal pages, 404 and error.
 3. **Weeks 11 to 16: the working pages.** Filing desk (timeline, tables, chips, Setup with live
    preview), dashboard, docs, service pages, white-label pages and the embed; Spanish; photography.
 4. **Weeks 17 to 36: the type.** The commissioned Record family replaces the stopgaps (no layout
    changes; metrics are specified to match), a full accessibility audit, older-reader and
-   Spanish-reader testing, and a corrections pass.
+   Spanish-reader testing, and a corrections pass. If the copy owners want them, the two proposed
+   surfaces (10.12) are built in this phase, on components that already exist by then.
 
 ---
 
