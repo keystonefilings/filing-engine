@@ -1,181 +1,135 @@
-# Design brief: CoFile website (cofile.app)
+# Design brief: the visual design of cofile.app
 
-The shared brief handed to ten independent designers, Nov 26, 2026. Each writes a full design spec
-for the whole site as they would design it with every tool, studio, foundry, illustrator, motion
-house and technology available. They are not limited to what is easy to build.
+Version 2, Nov 26, 2026. It replaces the first brief; the first round of specs was discarded
+(it is in git history only).
 
-## What is fixed and what is open
+Ten designers each write, in their own voice, how they would design the CoFile website if every
+graphic tool, studio, photographer, illustrator, 3D and motion house, type foundry and technology
+were at their disposal.
 
-| | Status |
+## The job: visuals only
+
+| | |
 |---|---|
-| **The name** | **CoFile**, at cofile.app (API at api.cofile.app). Never "Keystone" or "Keystone Filings" anywhere a customer can see. |
-| **The copy** | **Locked.** Headlines, body text, button labels, legal and consent wording, status names and terms are final. Designers lay out, order, emphasize, chunk, illustrate and animate the existing words; they do not rewrite them. If a designer thinks a word is a problem, they say so in a short "copy notes" appendix, not in the design. Mockups quote the real copy. |
-| **The brand** | **Fully open.** Logo, wordmark, mark, color, type, grid, imagery, illustration, photography, 3D, motion, sound, icons, tone of the visuals. The current "paper and ink with manila, green/amber/red, Source Serif 4 + IBM Plex, folder-tab mark" look is only where things stand today; keep, change or discard any of it. |
-| **The product and pages** | Fixed in what they do (below). Designers may propose how each page is structured, laid out and navigated, and may propose new surfaces (for example a status page or a filing timeline) if their design needs them. |
+| **Locked** | **The copy, the marketing tone and the selling brand.** Every headline, paragraph, button label and the order of the story are final, and so is what CoFile sells and how it sounds. You don't rewrite, reorder the argument, or add messages. |
+| **Yours, completely** | **Everything visual.** Strip the current look entirely: today's colors, fonts, folder-tab mark, layout and styling are not a starting point and don't need to survive. Logo and wordmark, color, type, grid, art direction, photography, illustration, 3D, motion, iconography, texture, the look of every component and page. |
+| **The goal** | **Bring out the copy.** Your design exists to make the words land: to make a busy firm owner feel "this is for my firm, my clients will love it, I want to try it" and click "Run a free rehearsal". |
 
-## What CoFile is
+## What the copy sells (read it this way)
 
-CoFile fills in government filings (LLC and corporation formations, EINs, employer registrations,
-copies and certificates) on the official New York, New Jersey, Florida and IRS websites, screen by
-screen, using a browser it drives itself. Before anything is filed, the business owner approves
-**the proof**: one page showing every detail, every fee, and where possible the state's own review
-page filled in. Only after approval does CoFile submit and pay, and it checks the fee again on the
-state's payment screen and stops if anything differs. A state filing can't be taken back, so the
-whole product is built on "stop and ask rather than guess".
+The copy is in `web/app/page.tsx`. Its selling story, in its own words:
 
-It is **in beta**. Filing types switch to live one at a time. Until a type is live it runs as a
-**rehearsal**: the whole filing performed on the state's real website, stopping before the last
-button. Rehearsals are free. Nothing in the design may imply that every filing is live today.
+1. **Your firm, your client, your name.** "Your name on the door. Ours in small print." The firm
+   keeps the client relationship and looks great doing it: its own name, logo and color on the
+   filing desk, the forms and the proof. CoFile is a small "with CoFile".
+2. **Effortless for everyone.** "You start it. Your client approves it. CoFile files it." Three
+   steps. "Clients don't fill in forms. They text you": a text message becomes a drafted filing.
+   Saved answers fill in the rest.
+3. **A client experience to be proud of.** The proof: "Your client sees what the state will see,
+   before the state does." One page with the firm's name at the top, every detail and fee, one
+   button. Like approving a proof at the printer.
+4. **It does the work and brings the results home.** CoFile fills in the state's own website screen
+   by screen, and "The papers come back to you": documents, the EIN letter, one record.
+5. **Try it free, for real.** "Rehearse on the real stage." A free rehearsal on the state's real
+   website. "Run one rehearsal. Then decide."
 
-### Two products on one engine
+**Security, the checks and "the catch" are support, not the pitch.** The copy has sections for
+them ("Checked twice. Filed once.", "Every filing service has a catch", "Security") and they stay
+where the copy puts them, designed well and easy to find. But they are reassurance for the reader
+who goes looking, not the visual story. Don't build the brand, the logo, the signature idea, the
+hero or the motion around stopping, holding, matching, verifying, hashes, seals of approval,
+locks, vaults or what CoFile doesn't do. Build them around the firm, its clients and the ease.
 
-1. **Partner firms (the main public audience):** CPA firms, payroll companies, fractional CFOs and
-   title companies. They sign up, set up their firm's **filing desk** (name, logo, colors, fonts,
-   registered agent per state, payment cards), then file for their clients. Their clients see the
-   firm's brand, not CoFile's: the only sign of CoFile is a small "with CoFile".
-2. **Enterprise (platforms and filing companies):** they put CoFile underneath their own product
-   through an API, signed webhooks, a white-label setup and an embeddable widget, with their own
-   state logins, agents, signers and defaults. They request access through a form; staff set them up.
+## Who's looking
 
-### The people who see the site
+- **Firm owners and staff** at CPA, payroll, fractional CFO and title firms: often 40 to 65,
+  proud of their practice and their client relationships, not technical. The site has to make
+  them want their name on it.
+- **Their clients**, small-business owners (a bakery, a contractor, a first-time founder), often on
+  a phone. They see only the firm's branded form, the proof and emails.
+- **Enterprise buyers and developers** at platforms and filing companies: "Building a filing
+  product? Put CoFile underneath it." They read the API docs.
 
-- **Firm owners and staff** (CPA, payroll, CFO, title): busy, cautious, protective of their client
-  relationships, often 40 to 65, many not technical. They need to trust it before they put their name on it.
-- **Their clients**, the business owners: often first-time founders, on a phone, sometimes
-  Spanish-first, sometimes older. They meet only the firm's branded intake form, the proof and emails.
-- **Enterprise buyers and developers**: product managers, engineers, AI-agent builders, procurement
-  and security reviewers. They read the API docs and the security story.
-- **Internal staff** at CoFile (platform tenant): partner sign-ups, enterprise requests, drift reviews.
+## The product in one paragraph
 
-## The words (current, locked)
+CoFile fills in business filings (LLC and corporation formations, EINs, employer registrations,
+copies and certificates) on the official New York, New Jersey, Florida and IRS websites. A firm
+starts a filing (a short form, a link to the client, or a forwarded text or email), the client
+approves the proof, and CoFile files it and brings back the state's documents. Partner firms get a
+**filing desk** at `cofile.app/p/<firm>` branded with their logo, colors and font, permanent
+branded pages for each service they offer, and client links. Enterprise accounts get a dashboard,
+an API, webhooks, a white-label setup and an embeddable widget. CoFile is in beta: filing types go
+live one at a time, and until then they run as **rehearsals** that are free. The site states no
+prices.
 
-| Term | Meaning |
-|---|---|
-| **the proof** | The client's approval page: every detail, every fee, where possible the state's own review page filled in, and one button. "You've approved a proof before: business cards, letterhead, an invitation at the printer." |
-| **rehearsal** | A filing run on the real state website that stops before the last button. Free. "Rehearse on the real stage." |
-| **file for real / live filing** | Actually submitted and paid. Needs a subscription. |
-| **filing desk** | A partner firm's branded area at `/p/<slug>`. Enterprise accounts have a **dashboard**. |
-| **filing type** vs **filing** | "New York LLC formation" is a filing type; one submission is a filing. |
-| **Ready to pay** | The page where the card's security code is entered when approved filings are ready to pay (kept an hour at most). |
-| **stops before paying** | What happens when the state's page has changed. Never promise "will be submitted" or "filed right away". |
-| Coverage labels | "Live", "Rehearsed to the payment screen", "Screens recorded, rehearsal next", "Offered, not yet rehearsed", "Planned". |
-| Status colors today | Green = approved, live and the button that moves a filing forward; amber = a rehearsal's planned hold; red = a stop. (The meanings are useful; the colors are open.) |
-| log in / log out | Not "sign in". |
+## The words to use in mockups (locked)
 
-## The home page copy, in order (locked)
+**CoFile** (never any other name) · **the proof** (the client's approval page) · **rehearsal** ·
+**file for real** · **filing desk** (a firm's area; enterprise has a **dashboard**) · **log in** ·
+coverage labels "Live", "Rehearsed to the payment screen", "Screens recorded, rehearsal next",
+"Offered, not yet rehearsed", "Planned". Quote the real copy from the repo; don't write new
+headlines, labels or captions. Where a design needs a word that doesn't exist (an image's alt text,
+say), mark it `[copy needed]`.
 
-Read the real file: `web/app/page.tsx`. Its sections, in order:
+## The home page, section by section (locked order and words)
 
-1. **Hero.** Kicker "For CPA, payroll, fractional CFO and title firms". H1 "Your client approves the
-   proof. Then CoFile files it." Sub, CTAs "Run a free rehearsal" and "See what your client sees",
-   beta note. A **sample proof** for "Two Sisters Bakery LLC" (example firm "Harbor & Pine CPA",
-   NJ LLC formation, fees $100.00 + $3.50 = $103.50, numbered callouts 1 to 4, "Approve for filing").
-2. **Process.** "You start it. Your client approves it. CoFile files it." Three steps.
-3. **The proof.** "Your client sees what the state will see, before the state does." Six checks,
-   including "it does for a business filing what the 8879 does for a return".
-4. **Firms.** "Your name on the door. Ours in small print."
-5. **Requests.** "Clients don't fill in forms. They text you." A text-message bubble from Ana Ortiz
-   read into a drafted filing.
-6. **Checks.** "Checked twice. Filed once."
-7. **After.** "The papers come back to you." Documents, EIN letter, one record.
-8. **Rehearsals.** "Rehearse on the real stage." An example rehearsal log ending "Pay Now: held, on purpose".
-9. **Coverage.** "New York, New Jersey, Florida and the IRS." A table of 16 filing types with status labels.
-10. **The catch.** "Every filing service has a catch. Here's ours." Five numbered honesty points.
-11. **Security.** Five blocks (SSNs, cards in Basis Theory and logins encrypted, single-use proof
-    links, signatures only on approval, separate accounts).
-12. **Enterprise.** "Building a filing product? Put CoFile underneath it." List plus the inquiry form.
-13. **Close.** "Run one rehearsal. Then decide." Tagline "Approve the proof. Then it's filed."
+1. **Hero**: "For CPA, payroll, fractional CFO and title firms" / "Your client approves the proof.
+   Then CoFile files it." / sub / "Run a free rehearsal" and "See what your client sees" / beta
+   note / a sample proof for "Two Sisters Bakery LLC" from the example firm "Harbor & Pine CPA".
+2. **Process**: "You start it. Your client approves it. CoFile files it."
+3. **The proof**: "Your client sees what the state will see, before the state does."
+4. **Firms**: "Your name on the door. Ours in small print."
+5. **Requests**: "Clients don't fill in forms. They text you." (Ana Ortiz's text about the bakery)
+6. **Checks**: "Checked twice. Filed once." (support)
+7. **After**: "The papers come back to you."
+8. **Rehearsals**: "Rehearse on the real stage."
+9. **Coverage**: "New York, New Jersey, Florida and the IRS." (a table of 16 filing types)
+10. **The catch**: "Every filing service has a catch. Here's ours." (support)
+11. **Security** (support)
+12. **Enterprise**: "Building a filing product? Put CoFile underneath it." with the inquiry form
+13. **Close**: "Run one rehearsal. Then decide." / "Approve the proof. Then it's filed."
 
-Also on every public page: a slim beta notice (neutral, with no CoFile name, on firms' white-label
-pages), and a footer saying CoFile is not a law firm or a government agency, with Terms, Privacy and
-hello@cofile.app. No prices are shown publicly.
+Plus a slim beta notice and a footer (not a law firm or a government agency; Terms, Privacy,
+hello@cofile.app).
 
-## Every surface to design
+## The surfaces to design
 
-Routes are in `web/app` (Next.js). The design spec should cover all of these.
+Weight your spec toward the public site, the firm's branded pages and the proof: that is where
+people decide. Then carry the visual language through the rest.
 
-**Public site:** `/` home; `/signup` (firm sign-up, sets up the filing desk) and `/signup/sent`;
-`/login` (one login, routes each user to their desk or dashboard; Google sign-in); `/forgot-password`,
-`/reset-password`, `/verify-email`, `/invite-expired`, `/join/<token>`; `/terms`, `/privacy`;
-404 and error pages.
+- **Public site**: home (in the most detail), sign-up, log-in, password and verification pages,
+  Terms and Privacy, 404 and errors.
+- **The firm's branded pages** (the firm's brand leads, CoFile is "with CoFile"): the filing desk
+  (overview, setup with logo, colors and font, new filing by state then type, filing detail, client
+  links, requests from email or text, signatures, Ready to pay, billing), permanent service pages
+  such as `cofile.app/bestaccounting/llc-filing-new-york`, the client intake form, and the proof.
+  Show how your visual system makes any firm's logo and color look their best.
+- **Enterprise**: the dashboard, API docs, the white-label hosted page and the embed widget.
+- **Emails**: the proof is ready, documents back, EIN issued, sign-up and account emails.
 
-**Partner filing desk** (`/p/<slug>`, co-branded with the firm's logo, colors and font):
-home/overview; **Setup** guide (details, branding with logo, colors and font presets or upload,
-registered agents per state, payments); **New filing** (pick the state, then the filing type, then a
-short form with paired fields, optional questions folded, "Same as" for addresses and people);
-filing detail (timeline from draft to proof to filed, documents, EIN letter); **Client links**
-(send a client a link to fill in the form themselves); **From email** (a request forwarded by
-email/text read into a draft for staff to check); **Signatures** (saved signatures, NY forms);
-**Ready to pay**; **Billing**; password; signed out.
+## What each spec contains
 
-**Permanent branded service pages:** `/<firm>/<service>`, for example
-`cofile.app/bestaccounting/llc-filing-new-york`: a firm's public page for one filing it offers.
+1. Who you are, briefly, and what you bring to this.
+2. **The visual concept**: the one idea, and how it brings out the copy's selling story.
+3. **Identity**: logo, wordmark, mark (precise enough for an illustrator to draw), the "with
+   CoFile" mark, and how a firm's logo sits on its pages.
+4. **Color**: the palette with hex values, light and dark, and how color is used.
+5. **Typography**: typefaces (any foundry, or commissioned), the scale, sizes, weights and pairing.
+6. **Layout**: grid, spacing, rhythm, how pages breathe on desktop and phone.
+7. **Art direction**: photography, illustration, 3D, product imagery, texture. What you'd
+   commission (by kind of artist or studio, not named people), shot lists and briefs, and what the
+   pictures show.
+8. **Motion**: the moments that move, how, and why they sell the copy.
+9. **The home page, section by section**: for each of the 13 sections, the full visual treatment,
+   with the real copy placed, desktop and phone layouts (ASCII wireframes welcome), imagery and
+   motion.
+10. **The other pages**: every surface above, with layouts and visual treatment.
+11. **Components**: the look of buttons, fields, cards, the proof, chips, tables, navigation.
+12. **Craft notes**: dark mode, phones, readable for older eyes, Spanish text length. Short.
+13. **Production**: tools, the asset list, what to commission, the order to build in.
+14. **What I'd strip from today's visuals**, and why (visuals only).
 
-**Client-facing pages** (firm's brand, CoFile nearly invisible): the intake form at `/i/<token>`;
-**the proof** (approval page, served by the engine at api.cofile.app; the approve button reads
-"Approve, and authorize submission and payment", with consents and a no-refund warning on state
-fees); approval errors and expired links.
-
-**Enterprise dashboard** (`/dashboard`): overview, API keys, webhooks, filings, firms (and firm
-detail), setup (payment routing, state portal logins for NY DOS, NYS-100, NJ, IRS, FL, and portal
-defaults), Ready to pay, billing, team, password. The platform tenant also sees partner sign-ups and
-enterprise requests.
-
-**White-label surfaces:** `/e/<tenant>/<firm>/<service>` (an enterprise's hosted page) and
-`/embed/...` with `embed.js` (the widget a site embeds; no beta banner here).
-
-**Developer docs:** `/docs` (guides), `/docs/reference` (API reference, 25 endpoints),
-`/openapi.json`, `/llms.txt` and `/docs.md` (readable by AI agents, downloadable).
-
-**Emails:** approval request ("your proof is ready"), security code needed (link to Ready to pay),
-missing information, filing submitted, documents back, EIN issued, sign-up and verification, password
-reset, invitations. Sent through Resend.
-
-## The hard design problems
-
-1. **Co-branding at scale.** Thousands of firms pick their own logo, colors and font. Their pages
-   must still look professional, pass contrast (a firm may choose a light color behind white button
-   text), and keep the status colors meaningful. Design the theming system, not just one theme.
-2. **Trust for an irreversible act.** People approve a legal filing and authorize paying a state fee
-   that can't be refunded. The proof has to be unmistakable on a phone.
-3. **Honest beta.** Make "rehearsal" feel like a strength, and make which filing types are live
-   impossible to misread.
-4. **Two very different readers on one site:** a 60-year-old CPA and a developer evaluating an API.
-5. **Forms that ask for as little as possible** for legal filings with many fields.
-6. **Accessibility and plain reading:** older readers, phones, Spanish-first readers, screen readers.
-
-## What each spec must contain
-
-Write it as the designer would hand it to a build team. Cover at least:
-
-1. Who you are and how that shapes this design (short).
-2. The concept: the one idea the whole design hangs on, and why it fits CoFile.
-3. Brand identity: logo, wordmark and mark (describe precisely enough for an illustrator to draw),
-   usage rules, the "with CoFile" co-brand mark.
-4. Color: full token set with hex values, light and dark, status colors, contrast notes.
-5. Typography: typefaces (any foundry, or commissioned), scale with sizes and line heights, numerals,
-   mono for codes and fees.
-6. Layout: grid, breakpoints, spacing scale, radii, elevation.
-7. Imagery: photography, illustration, 3D, data visuals; what to commission and from whom (by kind,
-   not real named people).
-8. Motion and interaction: principles, durations and easings, signature moments, reduced motion.
-9. Components: buttons, fields, the proof card, status chips, timeline, tables, navigation, banners,
-   empty states, toasts, the coverage table.
-10. Page by page: every surface above, with layout, what goes where, mobile behavior, and how the
-    locked copy sits on the page.
-11. The white-label theming system: what a firm controls, guardrails, automatic contrast fixes.
-12. Accessibility, localization (Spanish) and dark mode.
-13. Production: tools and stack, design-system files, asset list, what to commission, phases.
-14. Appendix: what you would push back on in the current site, and copy notes (if any).
-
-Be specific: real hex values, real sizes, real durations, real component states. Prose plus tables
-and ASCII wireframes where they help. Original work only: draw on genres and traditions, but don't
-recreate any other company's brand or site.
-
-## Files worth reading
-
-- `web/app/page.tsx` (the locked home page copy) and `web/app/landing.css`, `web/app/globals.css` (today's look)
-- `docs/scope.md` (the two products and who owns what)
-- `docs/copy-review-2026-11-26.md` (the copy decisions; "Words to use" is partly superseded by the table above)
-- `web/app/p/[slug]/(portal)/` (the filing desk pages), `web/components/IntakeForm.tsx`, `src/approvals/render.ts` (the proof)
-- `web/app/dashboard/(app)/` (enterprise dashboard), `web/app/docs/` (developer docs)
+Be specific: real hex values, sizes, durations, photo and illustration briefs. No word budget:
+write it as fully as you'd hand it to a build team and the studios you'd commission. Original work
+only: draw on genres and traditions, but don't recreate any other company's brand or site, and
+nothing may imitate a government seal, the IRS or an official government mark.
