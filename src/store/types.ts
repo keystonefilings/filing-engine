@@ -284,7 +284,13 @@ export interface BillingAccountRecord {
   /** Stripe's subscription status; "none" before the first checkout. */
   status: "none" | "incomplete" | "incomplete_expired" | "trialing" | "active" | "past_due" | "canceled" | "unpaid" | "paused";
   priceId?: string;
+  /** The current period's start: partner plans count their filings by month from it. */
+  currentPeriodStart?: string;
+  /** When the current price (plan) began: last month's unused filings roll over only from a month on this plan. */
+  planSince?: string;
   currentPeriodEnd?: string;
+  /** Partner pricing (Nov 26): each live filing counted, and what it was charged (last three months). */
+  usage?: { filingId: string; at: string; kind: "filing" | "ein_only" | "record"; units: number; chargedUsd: number; plan: string; invoiceItemId?: string; note?: string }[];
   cancelAtPeriodEnd?: boolean;
   lastPaymentFailedAt?: string;
   /** The Stripe event last applied (seconds), so an older event that arrives late changes nothing. */

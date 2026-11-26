@@ -106,6 +106,8 @@ export const config = {
     apiUrl: process.env.STRIPE_API_URL || undefined,
     webhookSecret: process.env.STRIPE_WEBHOOK_SECRET || undefined,
     prices: { enterprise: process.env.STRIPE_PRICE_ENTERPRISE || undefined, partner: process.env.STRIPE_PRICE_PARTNER || undefined },
+    /** Partner pricing (Nov 26): "payg=price_..,starter=price_..,starter_annual=price_..,growth=..,unlimited=.." (config/partner-pricing.json). */
+    partnerPrices: process.env.STRIPE_PARTNER_PRICES || undefined,
     trialDays: process.env.STRIPE_TRIAL_DAYS ? Number(process.env.STRIPE_TRIAL_DAYS) : undefined,
     /** On: a live filing needs a subscription in good standing. Off until prices are set. */
     required: env("BILLING_REQUIRED", "false") === "true",

@@ -1,0 +1,13 @@
+{
+  "_note": "Partner firm pricing (Nov 26, from the recommendations on Yakov's structure). Every figure is here, so a change needs no release. Prices are charged in Stripe: each plan's Stripe price is named in STRIPE_PARTNER_PRICES (plan=price_id, plan_annual=price_id); usage charges go on the firm's next Stripe invoice. Practice filings are always free and never count. State fees and the registered agent service are separate.",
+  "payAsYouGo": { "filing": 45, "ein_only": 25, "record": 15 },
+  "units": { "filing": 1, "ein_only": 0.5, "record": 0.3333333333333333 },
+  "rolloverMonths": 1,
+  "annualMonthsFree": 2,
+  "plans": [
+    { "id": "payg", "name": "Pay as you go", "monthlyUsd": 0, "included": 0, "blurb": "Pay only for each live filing." },
+    { "id": "starter", "name": "Starter", "monthlyUsd": 250, "annualUsd": 2500, "included": 6, "extraUsd": 40, "blurb": "6 filings a month." },
+    { "id": "growth", "name": "Growth", "monthlyUsd": 500, "annualUsd": 5000, "included": 15, "extraUsd": 33, "blurb": "15 filings a month." },
+    { "id": "unlimited", "name": "Unlimited", "monthlyUsd": 1000, "annualUsd": 10000, "included": 60, "extraUsd": 15, "fairUse": true, "priorityHelp": true, "blurb": "Unlimited filings (fair use: 60 a month, then $15 each), with priority human help." }
+  ]
+}

@@ -42,7 +42,9 @@ export function registerBilling(app: FastifyInstance, deps: { store: Store; bill
       if (!o?.ref) return reply.code(404).send({ error: "not found" });
       if (!o.who.email) return reply.code(422).send({ error: "an email address is needed for the receipts" });
       try {
-        return { url: await billing.checkout(o.ref as BillingAccountRef, o.who, o.back) };
+        const b = (req.body ?? {}) as { plan?: unknown; annual?: unknown };
+        const choice = typeof b.plan === "string" && /^[a-z0-9_-]{1,30}$/.test(b.plan) ? { plan: b.plan, annual: b.annual === true } : undefined;
+        return { url: await billing.checkout(o.ref as BillingAccountRef, o.who, o.back, choice) };
       } catch (e) {
         req.log.warn({ err: (e as Error).message }, "stripe checkout failed");
         return reply.code(503).send({ error: "billing isn't available right now" });

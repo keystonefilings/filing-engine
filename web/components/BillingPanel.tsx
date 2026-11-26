@@ -15,15 +15,17 @@ const STATUS: Record<string, string> = {
 };
 
 /** V33: the account's plan, with Stripe's checkout and customer portal behind the buttons. */
-export function BillingPanel({ summary, subscribe, manage, justSubscribed }: {
+export function BillingPanel({ summary, subscribe, manage, justSubscribed, plans = false }: {
   summary: { plan: string | null; status?: string; canFileLive: boolean; required?: boolean; configured?: boolean; price?: { amount: number | null; currency: string; interval?: string; intervalCount?: number; name?: string } | null; currentPeriodEnd?: string; cancelAtPeriodEnd?: boolean; hasCustomer?: boolean; lastPaymentFailedAt?: string };
   subscribe: () => Promise<{ error?: string }>; manage: () => Promise<{ error?: string }>; justSubscribed?: boolean;
+  /** Partner plans are chosen below (PlanPicker): no Subscribe button here. */
+  plans?: boolean;
 }) {
   const [subState, doSubscribe, subPending] = useActionState(async () => subscribe(), {} as { error?: string });
   const [manState, doManage, manPending] = useActionState(async () => manage(), {} as { error?: string });
   const status = summary.status ?? "none";
   const subscribed = !["none", "incomplete_expired", "canceled"].includes(status);
-  const plan = summary.plan === "enterprise" ? "Enterprise" : "Partner";
+  const plan = summary.plan === "enterprise" ? "Enterprise" : (summary as { currentPlan?: { name: string } | null }).currentPlan?.name ?? "Partner";
   return (
     <div className="card stack" style={{ maxWidth: 560 }}>
       <div className="row"><strong>{plan} plan</strong><span className="spacer" /><span className={`badge ${status === "active" || status === "trialing" ? "ok" : status === "none" ? "" : "warn"}`}>{STATUS[status] ?? status}</span></div>
@@ -34,7 +36,7 @@ export function BillingPanel({ summary, subscribe, manage, justSubscribed }: {
       {summary.required && !summary.canFileLive ? <p className="notice warn">Real filings need an active subscription. Practice filings are always free.</p> : null}
       {!summary.configured ? <p className="notice">You can&apos;t subscribe from this page yet. To ask about filing for real, email <a href="mailto:hello@cofile.app">hello@cofile.app</a>.</p> : (
         <div className="row">
-          {!subscribed ? <form action={doSubscribe}><button className="btn primary" type="submit" disabled={subPending}>{subPending ? "Opening Stripe…" : "Subscribe"}</button></form> : null}
+          {!subscribed && !plans ? <form action={doSubscribe}><button className="btn primary" type="submit" disabled={subPending}>{subPending ? "Opening Stripe…" : "Subscribe"}</button></form> : null}
           {summary.hasCustomer ? <form action={doManage}><button className="btn" type="submit" disabled={manPending}>{manPending ? "Opening…" : "Manage billing"}</button></form> : null}
         </div>
       )}

@@ -86,6 +86,7 @@ export async function bootstrap(opts: { withExecutor: boolean; workerId?: string
     address: config.email.inboundAddress, apiBase: config.email.resendApiBase, email, webBaseUrl: config.webBaseUrl, platformName: config.platformName,
   });
   const { BillingService } = await import("./billing/service.js");
+  const { parsePriceMap } = await import("./billing/pricing.js");
   const { StripeClient } = await import("./billing/stripe.js");
   const stripe = config.stripe.secretKey ? new StripeClient({ secretKey: config.stripe.secretKey, apiUrl: config.stripe.apiUrl }) : undefined;
   const { AgentServices } = await import("./registered-agents/agent-services.js");
@@ -96,6 +97,7 @@ export async function bootstrap(opts: { withExecutor: boolean; workerId?: string
   const billing = new BillingService({
     store, stripe,
     webhookSecret: config.stripe.webhookSecret, prices: config.stripe.prices, required: config.stripe.required,
+    partnerPrices: parsePriceMap(config.stripe.partnerPrices),
     trialDays: config.stripe.trialDays, platformTenantId: config.platformTenantId, webBaseUrl: config.webBaseUrl,
   });
   const executor = opts.withExecutor ? new RunExecutor({ store, artifacts, harness, drift, vault, reviewGate, registeredAgents, cardVault, cardCodes }) : undefined;

@@ -196,6 +196,23 @@ cancellation emails `OPS_EMAIL` to place it in their portal by hand. When they s
 documentation (ask your wholesale contact), add its order endpoint as `thirdParty.http` and the key
 as `thirdParty.apiCredentialKey`: the engine then orders through the API and stops emailing.
 
+**Partner pricing (Nov 26).** Partner firms choose pay as you go or a plan on their Billing page.
+The figures are in `config/partner-pricing.json`: pay as you go $45 a filing (a formation's EIN
+included), $25 a standalone EIN, $15 a copy or certificate; Starter $250 a month for 6 filings
+(extras $40), Growth $500 for 15 ($33), Unlimited $1,000 (fair use 60, then $15; priority human
+help); yearly plans cost ten months; unused filings carry over one month; a standalone EIN counts
+as half a filing and a record as a third; rehearsals never count. In Stripe, create one product per
+plan with its prices: Pay as you go at $0 a month, and each plan monthly and yearly. Then name them:
+
+```bash
+fly secrets set --app keystone-filing-engine STRIPE_PARTNER_PRICES="payg=price_...,starter=price_...,starter_annual=price_...,growth=price_...,growth_annual=price_...,unlimited=price_...,unlimited_annual=price_..."
+```
+
+Each live filing is counted when it reaches the state; pay-as-you-go charges and extras past a
+plan go on the firm's next Stripe invoice. Switching plans changes the subscription in place, with
+Stripe's proration. In Stripe's customer portal settings, leave plan switching off (the Billing
+page does it) and keep cancellation on.
+
 **Subscriptions (Stripe).** Not required to start. In Stripe:
 
 1. Products: create a product per plan (Enterprise, Partner), each with a recurring price. Copy

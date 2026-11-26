@@ -54,7 +54,7 @@ export interface FilingServiceDeps {
   /** Decision 9: our registered agent service, started when a filing that used it is submitted. */
   agentServices?: Pick<import("../registered-agents/agent-services.js").AgentServices, "start">;
   /** V33: a live filing needs the payer's subscription in good standing (when billing is required). */
-  billing?: Pick<BillingService, "assertCanFileLive">;
+  billing?: Pick<BillingService, "assertCanFileLive"> & Partial<Pick<BillingService, "recordLiveFiling">>;
   balances?: BalanceProvider;
   limiter?: ConcurrencyLimiter;
   /** Where uploaded supporting documents are kept, to check a filing names only its own company's (decision 19). */
@@ -584,6 +584,7 @@ export class FilingService {
         case "submitted": {
           const f = await this.transition(latest, "submitted", { currentRunId: outcome.run.id, ein: outcome.ein ?? latest.ein });
           await this.d.agentServices?.start(f, tenant, client).catch((e: Error) => console.error("agent service start failed", f.id, e.message));
+          await this.d.billing?.recordLiveFiling?.(f, tenant, client).catch((e: Error) => console.error("filing usage not recorded", f.id, e.message));
           if (outcome.ein) await this.emit("filing.ein_filed", f, { ein: outcome.ein }, outcome.run.id);
           await this.emit("filing.submitted", f, { site: adapter.site, artifacts: f.artifacts }, outcome.run.id);
           // NJ returns documents at once and the IRS assigns the EIN on the spot; NY waits for the

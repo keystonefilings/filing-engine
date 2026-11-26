@@ -39,6 +39,14 @@ export class StripeClient {
     return this.get(`/v1/prices/${encodeURIComponent(id)}`);
   }
 
+  /** Partner plans (Nov 26): move a subscription to another price in place (Stripe prorates the change). */
+  async changeSubscriptionPrice(subscriptionId: string, price: string): Promise<{ id: string }> {
+    const sub = await this.get<{ items?: { data?: { id: string }[] } }>(`/v1/subscriptions/${encodeURIComponent(subscriptionId)}`);
+    const item = sub.items?.data?.[0]?.id;
+    if (!item) throw new Error("the subscription has no item to change");
+    return this.post(`/v1/subscriptions/${encodeURIComponent(subscriptionId)}`, { "items[0][id]": item, "items[0][price]": price, proration_behavior: "create_prorations" });
+  }
+
   async createCustomer(c: { email: string; name: string; account: string }): Promise<{ id: string }> {
     return this.post("/v1/customers", { email: c.email, name: c.name, "metadata[account]": c.account });
   }
