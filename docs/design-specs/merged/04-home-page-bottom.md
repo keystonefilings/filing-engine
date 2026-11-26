@@ -33,9 +33,16 @@ The copy is locked. Every quoted line is the round 3 copy in `web/app/page.tsx`,
   then rests in its final frame; the final frame is the page's default markup, so a reader without
   JavaScript, with reduced motion, or arriving by a deep link (`#after`, `#pricing`) sees it complete
   (D2).
-- **Sheets in pictures** follow the Letterhead rules (3.5) with Harbor & Pine's tokens (4.7): the
-  square symbol, the typeset name in Lora 600 with the italic "&" and small-cap "CPA", the Firm
-  Rule, and the Imprint where 3.4 puts it for that kind of page. They stay pure white in dark mode.
+- **Sheets in pictures** are pages of CoFile's filing desk (the record in 9.5, the run sheet in
+  9.7), so they wear CoFile's look, the same for every firm, with Harbor & Pine as the account
+  (decision 2; the desk takes the dashboard's treatment, 10C). At the head of each, the desk's
+  header row: CoFile's horizontal lockup at the left, its lozenge in Brass Line as in the desk's own
+  header (10C.2), and at the right end the account label, Harbor & Pine's square symbol at 24 px
+  tall with "Harbor & Pine CPA" in Founders Grotesk Text Medium; under the row, CoFile's 1 px Plate
+  Ink rule (10C.1). The firm's name and logo are content there, never the sheet's letterhead: no
+  Firm Rule, no Lora, no Harbor or Pine ink, and no "with CoFile" (the Imprint is retired, decision
+  12). The lockup is `aria-hidden` inside a picture; the account label reads as text. Sheets stay
+  pure white in dark mode.
 - **One Brass button per screen** (4.8). None of these bands has a button except the Close, so the
   header's "Run a free rehearsal" is the Brass one through 9.5 to 9.8; 9.9 says what happens at the
   Close.
@@ -51,9 +58,9 @@ update at each stage" · inside the picture, the stand-in's record: the stages "
 "EIN letter (CP 575)", "EIN 00-0000000" · label "Example record · sample documents".
 
 **The idea: the order comes home** (Hal). One band up the firm approved the proof. Here the
-finished job comes back to it the way a stationer's order does: the record of the filing lies on
-the firm's own desk with every stage inked, and an envelope addressed to the firm opens beside it
-and gives up the two papers, which settle onto the record. The photograph makes it a real desk at
+finished job comes back to it the way a stationer's order does: the record of the filing, a page of
+CoFile's filing desk, lies on the firm's own desk with every stage inked, and CoFile's envelope
+addressed to the firm opens beside it and gives up the two papers, which settle onto the record. The photograph makes it a real desk at
 the end of a working day; the record, the envelope and the papers are live HTML and SVG. It is the
 reward of the story half of the page, so it is calm and complete: nothing stamps, nothing
 celebrates.
@@ -78,8 +85,9 @@ celebrates.
 
 ### The picture: "The order comes home"
 
-**What it shows.** Harbor & Pine's filed record for Two Sisters Bakery LLC lying on a walnut desk
-with its three stages inked; beside it an opened envelope addressed to Harbor & Pine CPA; and the
+**What it shows.** Harbor & Pine's filed record for Two Sisters Bakery LLC, a page of CoFile's desk
+with Harbor & Pine as the account, lying on a walnut desk with its three stages inked; beside it an
+opened CoFile envelope addressed to Harbor & Pine CPA; and the
 two papers that came back in it, the state's Certificate of Formation and the IRS letter, lying
 side by side on the record. It reads in one glance as "done, and it's all here".
 
