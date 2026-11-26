@@ -43,6 +43,7 @@
 .acct2-states legend { padding: 0; margin-bottom: 4px; }
 .acct2-checks { display: flex; flex-wrap: wrap; column-gap: 24px; }
 .acct2-checks .check2 { min-height: 48px; }
+.acct2-checks .check2 span, .check2.acct2-terms span { font: 400 1.0625rem/1.5rem var(--font-sans); }
 .acct2-narrow { max-width: 236px; }
 .acct2-terms { margin-block: -12px; }
 .acct2-terms span { font: 400 1.0625rem/1.5rem var(--font-sans); }
