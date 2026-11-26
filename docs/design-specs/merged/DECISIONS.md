@@ -18,6 +18,7 @@ All 39 were decided with the owner, one by one; each decision's own entry ends w
 - **The EIN (34):** in the documents-back email, with a number-only email if the IRS letter is ever missing.
 - **Email sender (37):** emails to clients go out under the firm's name, from the firm's own domain once connected.
 - **Filled-in answers (38):** marked in CoFile's colors on the desk.
+- **Added by the owner:** the filing desk shows which of the firm's clients sent each filing and where each one is up to (a "Sent by" column and a five-step track). Built in the product on Nov 26; the spec's desk ledger (10B.4) is being updated to match.
 
 ## At a glance
 

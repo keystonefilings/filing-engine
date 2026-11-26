@@ -19,6 +19,17 @@ Found by the merge writers, checked against the code and fixed at the owner's re
   The API docs and catalog still say "the client approves"; that is left as is, since a
   platform's approvers are set per account.
 
+## Words added with the owner's request (Nov 26), to confirm
+
+The owner asked that a firm see, on its filing desk, which of its clients sent filings and where each
+one is up to. The product now shows it with these words, chosen to match the copy; the copy owner
+may change them:
+
+- Column heading **"Sent by"**; a **"Your client"** chip on filings a client sent through their
+  link; **"Your team"** when the person isn't known.
+- The five steps under each status: **"Details", "Proof", "Filing", "With the state", "Done"**,
+  shown as "2 of 5 · Proof" (read aloud as "Step 2 of 5: Proof").
+
 ## Part 1: the foundation
 
 From [`01-foundation.md`](01-foundation.md).

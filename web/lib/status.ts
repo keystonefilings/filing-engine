@@ -30,6 +30,26 @@ export function statusLabel(s: string): { label: string; tone: Tone } {
   return { label, tone };
 }
 
+/**
+ * Where a filing is up to, as five steps a firm reads at a glance (owner, Nov 26: firms see which of
+ * their clients sent filings and where each one is up to). Rejected, failed and stopped filings
+ * have no step: their status says what happened.
+ */
+export const STAGES = ["Details", "Proof", "Filing", "With the state", "Done"] as const;
+const STAGE_OF: Record<string, number> = {
+  created: 0, invalid: 0, awaiting_information: 0,
+  previewing: 1, awaiting_approval: 1, changes_requested: 1,
+  approved: 2, blocked: 2, queued: 2, running: 2, awaiting_drift_review: 2, awaiting_name_resolution: 2,
+  awaiting_review_gate: 2, ein_filed: 2, needs_reconciliation: 2,
+  submitted: 3, accepted: 3,
+  completed: 4,
+};
+/** The step a filing has reached (0-based) and its name, or null when it stopped. */
+export function stageOf(status: string): { step: number; label: (typeof STAGES)[number] } | null {
+  const step = STAGE_OF[status];
+  return step === undefined ? null : { step, label: STAGES[step]! };
+}
+
 /** Statuses where someone at the firm or the client has to act. */
 export const NEEDS_ACTION = new Set(["invalid", "awaiting_information", "awaiting_approval", "changes_requested", "awaiting_name_resolution", "rejected", "failed"]);
 
