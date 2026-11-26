@@ -6,7 +6,7 @@ export function GET() {
   const site = publicUrl(), name = platformName();
   const body = `# ${name}
 
-> State business filings by API: LLC and corporation formation, EINs, certificates and payroll registration, each approved by the client before it is filed.
+> State business filings by API: LLC and corporation formation, EINs, certificates and payroll registration, each approved before it is filed.
 
 ## Docs
 - [The whole API in one Markdown file](${site}/docs.md): authentication, the filing lifecycle, every endpoint with examples, webhooks and signature verification (JavaScript and Python).

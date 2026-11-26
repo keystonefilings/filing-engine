@@ -316,3 +316,97 @@
 .lp .nx-fees td:last-child {width: 30%;}
 /* Coverage: sentence-case headers, no all caps. */
 .lp thead th {text-transform: none; letter-spacing: 0; font: 500 .8rem/1.3 var(--sans);}
+
+/* Round 3 (Nov 26): shorter home page, the pages behind it, and the pictures' stand-ins. */
+.lp .r3-short {margin-top: 18px;}
+.lp .r3-gap {gap: 14px;}
+.lp .r3-more {margin-top: 18px; font-weight: 500;}
+.lp .r3-note {margin-top: 14px; max-width: 80ch;}
+.lp .r3-head {padding-block: 56px 40px;}
+.lp .r3-head h1 {font: 600 clamp(32px, 4.4vw, 50px)/1.1 var(--display); letter-spacing: -.01em; margin: 12px 0 0; max-width: 24ch; text-wrap: balance;}
+.lp .r3-head-lede {margin-top: 16px;}
+/* The filing desk */
+.lp .r3-logo {display: inline-grid; place-items: center; width: 26px; height: 26px; margin-right: 8px; border-radius: 4px; background: #F7F3EA; color: #2D5B4F; font: 600 10px var(--mono); vertical-align: middle;}
+.lp .r3-desk-body {padding: 14px 16px; display: grid; gap: 10px;}
+.lp .r3-desk-head {display: flex; justify-content: space-between; align-items: center; gap: 10px;}
+.lp .r3-mini {min-height: 32px; padding: 0 12px; font-size: 13px;}
+.lp .r3-rows {list-style: none; margin: 0; padding: 0; display: grid;}
+.lp .r3-rows li {display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 10px 0; border-top: 1px dashed var(--line); flex-wrap: wrap;}
+.lp .r3-rows b {display: block; font-weight: 600; font-size: 15px;}
+.lp .r3-rows small {color: var(--ink-2); font-size: 13px;}
+.lp .r3-with {font: 12px var(--mono); color: var(--ink-3); text-align: right;}
+/* Two firms, one page */
+.lp .r3-two {margin: 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px;}
+.lp .r3-two figcaption {grid-column: 1 / -1; font: 12px var(--mono); color: var(--ink-2);}
+.lp .r3-page {border: 1px solid var(--line); border-radius: 8px; overflow: hidden; background: var(--surface); box-shadow: var(--shadow); min-width: 0;}
+.lp .r3-page-bar {padding: 10px 14px; color: #F7F3EA; font-weight: 600; font-size: 14px;}
+.lp .r3-firm-a .r3-page-bar, .lp .r3-firm-a .r3-btn {background: #2D5B4F;}
+.lp .r3-firm-b .r3-page-bar, .lp .r3-firm-b .r3-btn {background: #3E3A6B;}
+.lp .r3-page-body {padding: 14px; display: grid; gap: 8px;}
+.lp .r3-page-body strong {font: 600 16px var(--display);}
+.lp .r3-field {border: 1px solid var(--line); border-radius: 4px; padding: 6px 8px; font-size: 12px; color: var(--ink-3); background: var(--paper);}
+.lp .r3-btn {justify-self: start; padding: 6px 12px; border-radius: 4px; color: #F7F3EA; font-size: 13px; font-weight: 600;}
+.lp .r3-page-body small {font: 11px var(--mono); color: var(--ink-3); text-align: right;}
+@media (max-width: 480px) {.lp .r3-two {grid-template-columns: 1fr;}}
+/* A text becomes a filing */
+.lp .r3-text {margin: 0; display: grid; gap: 8px;}
+.lp .r3-down {font-size: 22px; color: var(--ink-3); padding-left: 24px;}
+.lp .r3-form {background: var(--surface); border: 1px solid var(--line); border-radius: 8px; box-shadow: var(--shadow); padding: 14px 16px; display: grid; gap: 4px; min-width: 0;}
+.lp .r3-form-head {display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap; padding-bottom: 6px;}
+.lp .r3-form-row {display: grid; grid-template-columns: minmax(0, .9fr) minmax(0, 1.3fr) auto; gap: 10px; padding: 6px 0; border-top: 1px dashed var(--line); font-size: 14px; align-items: baseline;}
+.lp .r3-form-row > span:first-child {color: var(--ink-2);}
+.lp .r3-from {font: 11px var(--mono); padding: 2px 6px; border-radius: 4px; white-space: nowrap;}
+.lp .r3-from-text {background: var(--tint); color: var(--ink);}
+.lp .r3-from-saved {background: var(--ok-bg); color: var(--ok);}
+@media (max-width: 520px) {.lp .r3-form-row {grid-template-columns: minmax(0, 1fr); gap: 2px;}}
+/* The proof's payment match */
+.lp .r3-match {display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap; padding: 10px 16px; border-top: 1px solid var(--line); background: var(--paper); font-size: 14px;}
+/* The papers come back */
+.lp .r3-papers {margin: 0; display: grid; gap: 14px;}
+.lp .r3-papers figcaption {font: 12px var(--mono); color: var(--ink-2);}
+.lp .r3-stages {list-style: none; margin: 0; padding: 0; display: flex; gap: 18px; flex-wrap: wrap;}
+.lp .r3-stages li {display: flex; align-items: center; gap: 6px; font-weight: 600;}
+.lp .r3-docs {display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px;}
+.lp .r3-doc {background: var(--surface); border: 1px solid var(--line); border-radius: 6px; box-shadow: var(--shadow); padding: 18px 16px; display: grid; gap: 8px; min-height: 150px; align-content: start; min-width: 0;}
+.lp .r3-doc strong {font: 600 17px var(--display);}
+.lp .r3-doc-k {font: 500 11px var(--mono); letter-spacing: .08em; text-transform: uppercase; color: var(--ink-3);}
+@media (max-width: 480px) {.lp .r3-docs {grid-template-columns: 1fr;}}
+/* The four places */
+.lp .r3-tiles {display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px; margin-top: 24px;}
+.lp .r3-tile {background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 16px; display: grid; gap: 10px; align-content: start; min-width: 0;}
+.lp .r3-tile strong {font: 600 19px var(--display);}
+.lp .r3-tile ul {list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; font-size: 14px; color: var(--ink-2);}
+.lp .r3-tile li {display: flex; justify-content: space-between; align-items: center; gap: 8px;}
+.lp .r3-dot {flex: none; width: 10px; height: 10px; border-radius: 50%; background: var(--line);}
+.lp .r3-dot-live {background: var(--ok);}
+.lp .r3-dot-rehearsed {background: var(--amber);}
+@media (max-width: 900px) {.lp .r3-tiles {grid-template-columns: repeat(2, minmax(0, 1fr));}}
+@media (max-width: 480px) {.lp .r3-tiles {grid-template-columns: 1fr;}}
+.lp .r3-log {margin: 0; display: grid; gap: 8px;}
+/* Prices */
+.lp .r3-prices {list-style: none; margin: 22px 0 14px; padding: 0; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px;}
+.lp .r3-prices li {border-top: 2px solid var(--ink); padding-top: 12px; display: grid; gap: 2px;}
+.lp .r3-prices b {font: 600 22px var(--display);}
+.lp .r3-prices span {color: var(--ink-2); font-size: 15px;}
+@media (max-width: 760px) {.lp .r3-prices {grid-template-columns: repeat(2, minmax(0, 1fr));}}
+.lp .r3-secline {margin-top: 28px; padding-top: 14px; border-top: 1px solid var(--line);}
+.lp .r3-plans {display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px;}
+.lp .r3-plan {background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 22px 20px; display: grid; gap: 10px; align-content: start; min-width: 0;}
+.lp .r3-plan-mid {border-color: var(--brand); box-shadow: var(--shadow);}
+.lp .r3-plan > strong {font: 600 20px var(--display);}
+.lp .r3-price {font: 600 34px/1.1 var(--display); font-variant-numeric: tabular-nums;}
+.lp .r3-price span {font: 400 15px var(--sans); color: var(--ink-2);}
+.lp .r3-plan .nx-list {gap: 8px; font-size: 15px; margin-top: 6px;}
+@media (max-width: 1000px) {.lp .r3-plans {grid-template-columns: repeat(2, minmax(0, 1fr));}}
+@media (max-width: 520px) {.lp .r3-plans {grid-template-columns: 1fr;}}
+.lp .r3-notes {display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 24px 36px; margin-top: 20px;}
+.lp .r3-notes div {border-top: 1px solid var(--line); padding-top: 14px; display: grid; gap: 6px;}
+.lp .r3-notes p {color: var(--ink-2);}
+@media (max-width: 760px) {.lp .r3-notes {grid-template-columns: 1fr;}}
+/* Questions */
+.lp .r3-faq {display: grid; max-width: 820px; border-top: 1px solid var(--line);}
+.lp .r3-faq details {border-bottom: 1px solid var(--line); padding: 16px 0;}
+.lp .r3-faq summary {cursor: pointer; font: 600 19px/1.35 var(--display);}
+.lp .r3-faq details p {margin-top: 10px; color: var(--ink-2); max-width: 70ch;}
+.lp .r3-legend {display: flex; gap: 8px 20px; flex-wrap: wrap; margin-top: 14px;}
+.lp .r3-legend > span {display: inline-flex; align-items: center; gap: 6px;}

@@ -24,7 +24,7 @@ export default async function NewFilingPage({ params, searchParams }: { params: 
       <div className="stack">
         <h1>New filing</h1>
         <p className="muted">Which state is the business in?</p>
-        <p className="small muted">Filing types go live one at a time; until then they run as rehearsals. See <Link href="/#coverage">What we file</Link> for where each one stands.</p>
+        <p className="small muted">Filing types go live one at a time; until then they run as rehearsals. See <Link href="/what-we-file">What we file</Link> for where each one stands.</p>
         {ways.address || ways.sms || ways.whatsapp || ways.slackInstallUrl ? (
           <div className="small muted">
             <p style={{ marginBottom: 4 }}>Or send us the details and we fill in the form for you to check:</p>
