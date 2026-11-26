@@ -316,14 +316,15 @@ export function IntakeForm({ kind, nonce, action, submitLabel = "Submit for appr
   const renderItem = (it: Item, k: number) => {
     if (it.kind === "note") return <p key={k} className="notice" hidden={!vis.holds(it.showIf)}>{it.text}</p>;
     if (it.kind === "group") return renderGroup(it);
-    const field = renderField(it, it.path, vis.top.has(it.path));
-    if (it.path.endsWith(".name") && vis.top.has(it.path) && personPrefixes.has(it.path.replace(/\.name$/, ""))) {
-      const copy = samePerson(it.path);
-      if (copy) return <div key={it.path}>{copy}{field}</div>;
-    }
-    if (it.path.endsWith(".street1") && vis.top.has(it.path)) {
-      const copy = sameAs(it.path);
-      if (copy) return <div key={it.path}>{copy}{field}</div>;
+    const shown = vis.top.has(it.path);
+    const field = renderField(it, it.path, shown);
+    const personName = it.path.endsWith(".name") && personPrefixes.has(it.path.replace(/\.name$/, ""));
+    const street = it.path.endsWith(".street1");
+    // Always the same wrapper, with or without the "Same as" buttons: if the wrapper came and went
+    // as names were typed elsewhere, React would remount the input and drop what was typed in it.
+    if (personName || street) {
+      const copy = shown ? (personName ? samePerson(it.path) : sameAs(it.path)) : null;
+      return <div key={it.path} hidden={!shown}>{copy}{field}</div>;
     }
     return field;
   };
