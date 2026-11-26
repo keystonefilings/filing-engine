@@ -1027,8 +1027,8 @@ steps, and your client is in charge of the middle one." G2 below: three columns 
 ink rule running through numerals 1, 2, 3. Columns 1 and 3 sit on the paper; column 2 sits on a
 raised white sheet (elevation 2) 24 px taller than its neighbours, its rule segment thickened to
 4 px, because the lede says the client is in charge of the middle one. (Not green: this is an
-illustration, and the green is kept for real approvals.) The step names ("You start it.", "Your client approves it.", "CoFile files it.") in
-`h3`, bodies in `body`. Phone: three stacked blocks on a vertical rule; the middle block on its sheet.
+illustration, and the green is kept for real approvals.) The step names ("You start it.", "Your
+client approves it.", "CoFile files it.") in `h3`, bodies in `body`. Phone: three stacked blocks on a vertical rule; the middle block on its sheet.
 
 **03 The proof: "Your client sees what the state will see, before the state does."** This is where
 "See what your client sees" lands, so it is the full explainer, G1 at its largest. Wide layout: H2
@@ -1049,9 +1049,8 @@ locked order; only its placement is graphic. Each item carries a key that matche
 
 Placement at `lg` and up: items 1 and 2 on columns 1 to 3, level with the details and the fees;
 items 3 and 5 on columns 10 to 12, level with the state's page and the button; item 4 under items
-1 and 2, its leader running to the space between the fees and the state's page (in a real proof the
-statements live in the terms block above the details, and the leader says so by ending at the top
-edge of the sheet). Item 6 is set as a pull quote under the sheet: `pull` italic serif across
+1 and 2, its leader running up to the top edge of the sheet, because in a real proof the statements
+live in the terms block above the details. Item 6 is set as a pull quote under the sheet: `pull` italic serif across
 columns 2 to 11, a 2 px `ink` rule above, still last in the list. For the CPA reader that one line
 does more than the whole page.
 
@@ -1075,7 +1074,7 @@ bakery counter, the screen showing the proof) and then the list with its markers
 
 **04 Firms: "Your name on the door. Ours in small print."** Spread, reversed (photo left). P1, the
 sign-painted door, columns 1 to 6, with caption "Harbor & Pine CPA · example firm". Right: H2, lede,
-the four ticked items. Under the photo, a small explainer: the firm's branded brand bar at true size
+the four ticked items. Under the photo, a small explainer: the firm's brand bar at true size
 with a blue dimension line comparing the cap height of "Harbor & Pine CPA" with that of "with
 CoFile". The numbers are measurements, not words: "28 px" and "11 px".
 
@@ -1098,11 +1097,13 @@ made-up number. The list items follow in two columns; the standing certificate i
 agate table: "LLC $52, corporation $27", set from the item's own figures.
 
 **07 After: "The papers come back to you."** Spread. G5: three horizontal lanes labeled "New Jersey",
-"New York", "Florida", each starting at a "submitted" node and ending at "documents" node, with the
-shape of what happens between, taken from the lede: New Jersey direct; New York with an email
-receipt node; Florida with an examiner review node. No time axis, no durations: CoFile states no
-turnaround times. P3 (the desk with returned papers) sits under the lanes on wide screens and is
-omitted on phones.
+"New York", "Florida", each starting at a filled node and ending at a document glyph, with the shape
+of what happens between taken from the lede: New Jersey direct; New York with an email receipt
+node; Florida with an examiner review node. No time axis, no durations: CoFile states no turnaround
+times. On wide screens G8 (an example filing record, marked "test details") sits under the lanes
+beside P3 (the desk with returned papers), illustrating "What was approved, what was filed and what
+the state sent back, in one place". Both are omitted on phones, where the lanes and the list carry
+the section.
 
 **08 Rehearsals: "Rehearse on the real stage."** Spread with the log as the graphic. The log
 (`aria-label` "Example rehearsal log") is set as an agate column on a white sheet: header line
@@ -1129,8 +1130,8 @@ The five points as a numbered list with hanging numerals in Record Display 44 px
 skeptical reader decides to trust the page, so it gets the most careful setting on the site.
 
 **11 Security: "Security".** A five-cell "fact box": a ruled grid (3 + 2 at `lg`, 2 + 2 + 1 at `md`,
-stacked on phone) with column rules, each cell an icon (vault, key, single-use link, signature, two
-boxes), the `h3` title and the paragraph. No colors other than ink and blue.
+stacked on phone) with column rules, each cell an icon in the blocks' order (lock for the SSNs, vault for cards and logins,
+single-use link, signature, two boxes for separate accounts), the `h3` title and the paragraph. No colors other than ink and blue.
 
 **12 Enterprise: "Building a filing product? Put CoFile underneath it."** Spread. Left: H2, lede,
 the five ticked items; the `"dryRun": true` item shows the code inline in `mono` and "Read the API
