@@ -1,12 +1,17 @@
 # Brief: photographer and crew
 
+> **On hold (Nov 26).** The owner supplied the photography for every frame in this brief (staged scenes, recorded in `DECISIONS.md`), and photographs of CoFile's own people are deferred. Keep this brief for the day real shoots replace the supplied scenes; don't send it now. If it is revived, How it works's three steps need their crops again (C5 close, C8 three-quarter, and C6 at 4:5 for step 3), since step 3 now uses C6.
+
 **For:** one photographer and their production team (producer, casting director, location scout,
 prop stylist, digital tech, retoucher, and the people the work needs around them).
-**What:** every still photograph for the new cofile.app website, over about seven shoot days.
+**What:** every still photograph for the new cofile.app website, over about six shoot days.
 **Status:** for quotation. **Contact:** [CoFile contact].
 
 A separate brief covers the 12-second film of the engraver at the bench. It shares the first two
 shoot days with this brief, and we would like your production to make it if you shoot motion.
+
+Portraits of CoFile's own team (C10) are not part of this commission for now; they may be added
+later as a separate, short brief.
 
 ---
 
@@ -24,8 +29,8 @@ firm's name on a plate, pulls a proof for the firm to approve before anything ru
 own name off the firm's stationery. So the photographs are of a stationer's real objects and real
 working people: two office doors with hand-engraved name plates, the same plate blank, a printer's
 proof on a make-ready table, a desk where the papers come home, an empty stage under a ghost light,
-a baker texting at dawn, a firm owner reading at her desk, and CoFile's own filing professionals at
-work. The reference is a contemporary fine stationer and a well-made annual report.
+a baker texting at dawn and a firm owner reading at her desk. The reference is a contemporary fine
+stationer and a well-made annual report.
 
 **One light.** Every frame is lit from camera left: low sun or a north window at the left of the
 frame, with practicals where the place has them. Natural light and practicals only, shaped with
@@ -38,8 +43,8 @@ teal and orange, no haze, no vignetting, no added grain, no black and white, no 
 **One metal.** The brass in the photographs is the brand's brass. No other gold, copper or yellow
 appears in any picture.
 
-**People** are mid-task, not posing, and don't look at the lens except in the tight team portraits.
-Hands matter: a thumb on a phone, a hand near a trackpad, a burin.
+**People** are mid-task, not posing, and don't look at the lens. Hands matter: a thumb on a phone,
+a hand near a trackpad, a burin.
 
 **What the pictures are for.** Most photographs are a setting. On the site, live pages of the
 product lie on top of them, so each frame keeps quiet areas where those pages go. The plates are
@@ -88,14 +93,14 @@ or retouched dark). Never red, white and blue together.
 
 ## 3. Shot list
 
-Each commission keeps the spec's number, C1 to C11. Frames inside a commission keep the spec's
-names (wide, medium, macro and so on). The shot list is in three tables, keyed by ID: what each
-photograph is (3a), its crops and where it appears (3b), and the extra passes the site needs (3c).
-Locations are described under the table. Questions where the spec is open or differs are listed at
-the end of this section; each is marked [owner to confirm].
+Each commission keeps the spec's number, C1 to C9 and C11. Frames inside a commission keep the
+spec's names (wide, medium, macro and so on). The shot list is in three tables, keyed by ID: what
+each photograph is (3a), its crops and where it appears (3b), and the extra passes the site needs
+(3c). Locations are described under the table. Questions where the spec is open or differs are
+listed at the end of this section; each is marked [owner to confirm].
 
-Out of scope here: the film part of C11 (the film brief), and C12, the paper scans, which a
-scanning studio makes.
+Out of scope here: C10, the portraits of CoFile's own team (not commissioned for now, as above);
+the film part of C11 (the film brief); and C12, the paper scans, which a scanning studio makes.
 
 **Camera for the whole set:** medium-format digital, about 100 MP, tethered to a calibrated monitor.
 
@@ -114,22 +119,18 @@ scanning studio makes.
 | **C4 wide** | C3 thirty minutes after sunset: warm light from the transom above the door, the blank plate catching the street light. Two passes: transom off and transom on | Door A | None | Plate B | — | The transom lit from inside by a 2,700 K practical. A 3,000 K lamp on a stand off frame left stands in for a street light, so the light still comes from the left | C3's wide frame, same lock-off |
 | **C4 medium** | As C4 wide, closer | Door A | None | Plate B | — | As C4 wide | C3's medium frame, same lock-off |
 | **C5 tight** | Ana at her bakery counter at the start of the day, thumbing a text with one hand, the other floury: a business owner handing a job to someone she trusts, mid-thought, practical, a little rushed. Tight on her hands and the phone, her face at the frame's edge | The bakery (below) | Two real sisters who bake, as Ana and Lucia Ortiz (section 4) | An unbranded phone in a plain case, logo taped; its screen dark with tracking marks. Flour, a tray, a rolling pin | Their own work clothes: Ana in an apron, flour on her wrist | The oven's glow and a work lamp as practicals; the first daylight from a window at camera left | About 50 mm equivalent at f/2 |
-| **C5 loose** | The same moment, wider: Ana's face, and Lucia behind her, soft, pulling a tray | The bakery | As C5 tight | As C5 tight | As C5 tight | As C5 tight | About 50 mm at f/2, loose |
-| **C5 close** | A second, closer frame on her hands and the phone, different enough from C5 tight that the two can sit on different pages | The bakery | As C5 tight | As C5 tight | As C5 tight | As C5 tight | Close on the hands and phone |
-| **C6 clean plate** | A top-down still life of a walnut desk: at the edges a fountain pen, reading glasses and a cup on a coaster; the centre clear, where live pages of the product will lie. No paper of any kind | The north-window room (below) | None | A black lacquer fountain pen (no brand), tortoiseshell reading glasses, a plain white cup on a cork coaster | — | North window light from camera left (top left of the frame), soft; a white bounce at right (question 5) | Medium format on a copy stand directly overhead, a 100 to 120 mm lens from about 2.5 m, so every sheet is a true rectangle |
+| **C5 loose** | The same moment, wider: Ana's face, and Lucia behind her, soft, pulling a tray. A spare for now (3b) | The bakery | As C5 tight | As C5 tight | As C5 tight | As C5 tight | About 50 mm at f/2, loose |
+| **C5 close** | A second, closer frame on her hands and the phone, different enough from C5 tight that the two can sit on different pages. A spare for now (3b) | The bakery | As C5 tight | As C5 tight | As C5 tight | As C5 tight | Close on the hands and phone |
+| **C6 clean plate** | A top-down still life of a walnut desk: at the edges a fountain pen, reading glasses and a cup on a coaster; the centre clear, where live pages of the product will lie. No paper of any kind | The north-window room (below) | None | A black lacquer fountain pen (no brand), tortoiseshell reading glasses, a plain white cup on a cork coaster | — | North window light from camera left (top left of the frame), soft; a white bounce at right (question 4) | Medium format on a copy stand directly overhead, a 100 to 120 mm lens from about 2.5 m, so every sheet is a true rectangle |
 | **C6 clean plate, phone** | The same desk with the props re-laid for the tall phone frame: the pen at the top right, the glasses at the lower left, no cup | The north-window room | None | As above, without the cup | — | As above | As above |
-| **C6 envelope** | The same desk with a heavy white envelope on it, opened, addressed "Harbor & Pine CPA"; papers edge-on or face-down | The north-window room | None | The printed envelope; CoFile's own document cards printed as props (question 7) | — | As above | As above |
-| **C6 flap-up** | The same envelope turned flap-up, so no address shows | The north-window room | None | As C6 envelope | — | As above | As above (question 6) |
-| **C7 wide** | An empty stage under a single ghost light, from the back of the house: "the whole filing, performed on the state's real website with no audience" | The theatre (below) | None. Nobody on stage, nobody in the seats | The ghost light: a bare clear 60 W incandescent bulb (2,700 K) in a wire cage on a stand, centre stage | — | The ghost light only; house lights and work lights off. Brackets to hold the bulb and the dark | About 35 mm equivalent from a raised position (the last row or a balcony rail). Master at 21:9 (question 8) |
+| **C6 envelope** | The same desk with a heavy white envelope on it, opened, addressed "Harbor & Pine CPA"; papers edge-on or face-down | The north-window room | None | The printed envelope; CoFile's own document cards printed as props (question 6) | — | As above | As above |
+| **C6 flap-up** | The same envelope turned flap-up, so no address shows | The north-window room | None | As C6 envelope | — | As above | As above (question 5) |
+| **C7 wide** | An empty stage under a single ghost light, from the back of the house: "the whole filing, performed on the state's real website with no audience" | The theatre (below) | None. Nobody on stage, nobody in the seats | The ghost light: a bare clear 60 W incandescent bulb (2,700 K) in a wire cage on a stand, centre stage | — | The ghost light only; house lights and work lights off. Brackets to hold the bulb and the dark | About 35 mm equivalent from a raised position (the last row or a balcony rail). Master at 21:9 (question 7) |
 | **C7 close** | The ghost light close, with the boards and the curtain's edge | The theatre | None | As C7 wide | — | As C7 wide | About 50 mm |
 | **C8 over the shoulder** | A firm owner at her own desk reading the proof on her screen: someone checking a thing she cares about, calm and in charge, not pressing anything | The CPA's office (below) | A real CPA in her fifties or sixties, cast to appear as the example firm's owner | Her own desk. The screen tracking-marked, then replaced with the proof as she would see it in CoFile. Her hand near the trackpad, the cursor never on the button | Reading glasses on; dressed as she dresses for work | Window light from camera left; her desk lamp as a practical | About 50 mm at f/2.8. The screen large in frame, her concentration in the set of her shoulders |
-| **C8 three-quarter** | Her face in three-quarter as she reads, the reading glasses and the screen in frame | The CPA's office | As above | As above | As above | As above | About 85 mm |
+| **C8 three-quarter** | Her face in three-quarter as she reads, the reading glasses and the screen in frame. A spare for now (3b) | The CPA's office | As above | As above | As above | As above | About 85 mm |
 | **C9 overhead** | The copy's own comparison: "You've approved a proof before: business cards, letterhead, an invitation at the printer." | The letterpress shop (below) | None, or the printer's hand and apron at the frame's edge | Harbor & Pine business cards and letterhead proofs, a loupe, a pencil (section 5). No stamps | The printer's own apron, if their hand is in frame | Raking window light from camera left | Overhead at about 50 mm macro |
 | **C9 angled** | The same table at 30° | The letterpress shop | As above | As above | As above | As above | 120 mm macro at 30° |
-| **C10 portrait** | Head and shoulders of each of CoFile's filing professionals | CoFile's workplace (below): their real office or home office, soft behind them; no backdrop | CoFile's own staff only, with written consent (section 4) | None for effect; no headsets unless they use them every day; nothing branded | What they wear to work | Window light from camera left | About 85 mm at f/2.8, eye level, looking just off lens, a natural expression (not a grin). Every person framed the same way: the same height in frame, the eyes on the same line, so a row of them reads as a team |
-| **C10 at the bench** | Each person from the side, at work: one hand on the keyboard or a pen, not looking at the camera and not smiling for it | CoFile's workplace | As above | Their screen tracking-marked, then replaced with a neutral redraw of a state form or CoFile's filing desk with example data, which we supply. Never a real state website, never a real client's details | As above | Three-quarter light | From the side |
-| **C10 together** (optional) | Two colleagues reading one printed sheet at a window | CoFile's workplace | As above | One printed sheet | As above | Window light | 3:2 |
-| **C10 hands** (optional) | Hands at work, for anyone who would rather not show their face. Used only where the at-the-bench frames go, never as a portrait | CoFile's workplace | As above | As at the bench | As above | As at the bench | As at the bench |
 | **C11 stills** | From the film days: the engraver at the bench (side, three-quarter light); the burin and the curl of brass in macro; the finished plate on the bench | The engraver's own bench | The hand engraver (section 4) | The plates, burin, ball vise, black wax | As they work | Bench light from camera left | Side view; macro |
 
 **The locations** (the scout finds them; no names or numbers may show in frame):
@@ -163,8 +164,6 @@ scanning studio makes.
   Miami: a proscenium, the curtain open, bare boards, rows of empty seats in the foreground falling
   to dark. No colored curtain or seats that would add a hue; no flags or emblems anywhere in the
   house. Exit signs out of frame or retouched dark.
-- **CoFile's workplace (C10).** The team's real workplace, an office or a home office, at a time
-  that suits them (question 12).
 - **The engraver's bench (C11 stills).** The engraver's own workshop, shared with the film crew.
 
 ### 3b. Crops, sizes and where each appears
@@ -180,7 +179,7 @@ layouts we supply will give it.
 | C1 medium | 4:5, tablet | 365 × 456 (doors are capped at 400 × 500) | 730 × 912 (up to 800 × 1000) | Portrait | As desktop | The same, on tablets |
 | C1 medium | 1:1, phone | 310 × 310 | 620 × 620 | Square | Plate centred, 40% down. A client page lies over the lower part from 55% down | The same, as the first card of a two-card swipe on phones |
 | C1 medium | Plate only, for the moving light | about 180 × 90 | about 360 × 180 | Landscape | The plate alone, from the 1.2-second clip in 3c | Home page and For firms: light crosses the plate once |
-| C1 wide | 3:2 | Set when placed | — | Landscape | Door, step, brick and plate | For firms, if placed (question 13); press material. The film's last shot may end on this frame (see the film brief) |
+| C1 wide | 3:2 | Set when placed | — | Landscape | Door, step, brick and plate | For firms, if placed (question 10); press material. The film's last shot may end on this frame (see the film brief) |
 | C1 macro | Open | — | — | — | The letters filling the frame | A detail on For firms, if wanted; press material |
 | C2 medium | Every crop of C1 medium above | As C1 medium | As C1 medium | As C1 medium | As C1 medium, with the steel plate | Home page and For firms, right door; the second swipe card on phones |
 | C2 wide | Open | — | — | — | — | Spare |
@@ -199,45 +198,35 @@ layouts we supply will give it.
 | C5 tight | 4:5, desktop | 264 × 330 | 528 × 660 | Portrait | Ana in the upper two thirds; the lower third quiet counter, where a message bubble lies over the lowest 68 px (question 3) | Home page, "Your client sends a text. Nobody retypes it." |
 | C5 tight | 4:5, tablet | 240 × 300 | 480 × 600 | Portrait | As desktop | The same, on tablets |
 | C5 tight | 4:5, phone | 350 × 438 | 700 × 876 | Portrait | The bubble lies over the lowest 64 px (question 3) | The same, on phones |
-| C5 loose | 3:2 | Set when placed | — | Landscape | Her face; Lucia behind | How it works, "Your client asks." (question 4) |
-| C5 close | 4:5 | 320 × 400 | 640 × 800 | Portrait | Hands and phone; her screen shows the text in CoFile's own message bubble, composited | How it works, step 1, "Your client asks." |
-| C5 close | 4:5, tablet | 240 × 300 | 480 × 600 | Portrait | As above | The same, on tablets |
-| C5 close | 4:3, phone | 350 × 262 | 700 × 524 | Landscape | As above | The same, on phones |
-| C6 clean plate | Desktop | 810 × 640 | 1620 × 1280 | Landscape | Clear wood under a record sheet (x 0 to 480, the full height) and under an envelope and its open flap (x 440 to 760, y 380 to 600): grain only, no knots or marks that read through. Pen lying diagonally at the upper right (about x 500 to 680, y 70 to 170). Folded glasses at the right edge, mostly in the part that runs off the grid (x 660 to 810, y 210 to 330). Cup on its coaster cut by the bottom-right corner (x 640 to 810, y 560 to 640) (question 5) | Home page, "Then it's filed, and the papers come back to you." A setting only: the live record and envelope carry the meaning |
+| C5 loose | Open | — | — | — | — | Spare for now (see under this table) |
+| C5 close | Open | — | — | — | — | Spare for now (see under this table) |
+| C6 clean plate | Desktop | 810 × 640 | 1620 × 1280 | Landscape | Clear wood under a record sheet (x 0 to 480, the full height) and under an envelope and its open flap (x 440 to 760, y 380 to 600): grain only, no knots or marks that read through. Pen lying diagonally at the upper right (about x 500 to 680, y 70 to 170). Folded glasses at the right edge, mostly in the part that runs off the grid (x 660 to 810, y 210 to 330). Cup on its coaster cut by the bottom-right corner (x 640 to 810, y 560 to 640) (question 4) | Home page, "Then it's filed, and the papers come back to you." A setting only: the live record and envelope carry the meaning |
 | C6 clean plate | Tablet | 834 × 600 | 1668 × 1200 | Landscape | As desktop | The same, on tablets |
 | C6 clean plate, phone | Phone | 390 × 640 | 780 × 1280 | Portrait | Pen at the top right, glasses at the lower left, no cup. Clear wood for a record card near the top (about 326 × 434 from x 32, y 24) and an envelope near the foot (about 220 × 96 at x 150, y 520) | The same, on phones |
 | C6 envelope | 4:3, desktop | 708 × 531 (including the part that runs off the grid) | 1416 × 1062 | Landscape | The lower-left corner quiet: a record sheet 420 px wide lies over it, 120 px up from the foot | How it works, "The papers come back to you." |
 | C6 envelope | 4:5, phone | 350 × 438 | 700 × 876 | Portrait | A sheet overlaps the foot by 48 px | The same, on phones |
-| C6 flap-up | Not set | — | — | — | No address showing | The "Completed" email to every firm (question 6) |
-| C7 wide | 3:2, desktop, from the 21:9 master | 810 × 540 | 1620 × 1080 | Landscape | The ghost light at the left fifth: the bulb at about x 120, y 220, its stand meeting the boards at about y 380, its warm pool spreading right across the boards. The fly space and back wall near-black across the top quarter. The backs of the empty seats soft along the bottom (y 440 to 540), most visible at the lower left. Nothing that matters right of x 186 below y 168: a run sheet lies there. On smaller laptops the frame is cropped round the light (question 8) | Home page, "In beta: rehearse a filing, free." The band starts at 70% brightness and the light "comes up" to 100% |
+| C6 flap-up | Not set | — | — | — | No address showing | The "Completed" email to every firm (question 5) |
+| C7 wide | 3:2, desktop, from the 21:9 master | 810 × 540 | 1620 × 1080 | Landscape | The ghost light at the left fifth: the bulb at about x 120, y 220, its stand meeting the boards at about y 380, its warm pool spreading right across the boards. The fly space and back wall near-black across the top quarter. The backs of the empty seats soft along the bottom (y 440 to 540), most visible at the lower left. Nothing that matters right of x 186 below y 168: a run sheet lies there. On smaller laptops the frame is cropped round the light (question 7) | Home page, "In beta: rehearse a filing, free." The band starts at 70% brightness and the light "comes up" to 100% |
 | C7 wide | 3:2, tablet | 834 × 556 | 1668 × 1112 | Landscape | A sheet over the lower 40% | The same, on tablets |
 | C7 close | 4:5, phone | 390 × 488 | 780 × 976 | Portrait | The ghost light close and centred, the bulb in the upper third. A sheet rises 64 px into the bottom edge | Home page, on phones |
 | C7 close | 4:5 | 708 × 885 (including the part that runs off the grid) | 1416 × 1770 | Portrait | A run sheet 420 px wide over the lower half; the light's pool and the bulb never covered | What we file, "How a filing type goes live." |
 | C7 close | 4:5, phone | 350 × 438 | 700 × 876 | Portrait | A sheet overlaps the foot by 64 px | The same, on phones |
-| C8 over the shoulder | 3:2 | Set when placed | — | Landscape | The screen large in frame | How it works, "You approve it." (the art direction's list) |
 | C8 over the shoulder | 4:5 | 486 × 608 | 972 × 1216 | Portrait | The lower-left corner quiet: a detail sheet 400 px wide overlaps it, 64 px above the foot | For firms, "Your registered agent, or ours." |
 | C8 over the shoulder | 4:5, phone | 350 × 438 | 700 × 876 | Portrait | The screen in the upper half; a sheet overlaps the foot by 40 px | The same, on phones |
-| C8 three-quarter | 4:5 | 320 × 400 | 640 × 800 | Portrait | Her face, the reading glasses and the screen | How it works, step 2, "You approve it." |
-| C8 three-quarter | 4:5, tablet | 240 × 300 | 480 × 600 | Portrait | As above | The same, on tablets |
-| C8 three-quarter | 4:3, phone | 350 × 262 | 700 × 524 | Landscape | As above | The same, on phones |
-| C9 overhead | 3:2, desktop | 486 × 324 | 972 × 648 | Landscape | The cards, the letterhead proof and the pencil "OK" in the margin (question 10) | How it works, beside "You see what the state will see, before the state does." |
+| C8 three-quarter | Open | — | — | — | — | Spare for now (see under this table) |
+| C9 overhead | 3:2, desktop | 486 × 324 | 972 × 648 | Landscape | The cards, the letterhead proof and the pencil "OK" in the margin (question 9) | How it works, beside "You see what the state will see, before the state does." |
 | C9 overhead | 3:2, phone | 350 × 233 | 700 × 466 | Landscape | As above | The same, on phones |
 | C9 angled | Open | — | — | — | — | Spare; press material |
-| C10 portrait | 1:1 | 48 × 48 | 96 × 96 | Square | Face; the same height and eye line for every person | Home page first screen: up to three in a row, faces only |
-| C10 portrait | 1:1 | 72 × 72 (question 11) | 144 × 144 | Square | As above | Pricing: up to three in a row, name and role printed under each |
-| C10 portrait | 1:1 | 40 × 40 (question 11) | 80 × 80 | Square | As above | For firms: one portrait beside "CoFile is built and run by filing professionals…" |
-| C10 portrait | 4:5 | 200 × 250 | 400 × 500 | Portrait | As above | Questions, inside the answer to "Is a person involved?", name and role printed |
-| C10 portrait | 4:5, phone | 160 × 200 (question 11) | 320 × 400 | Portrait | As above | The same, on phones |
-| C10 at the bench | 4:5 | 320 × 400 | 640 × 800 | Portrait | From the side, at work | How it works, step 3, "CoFile files it.", name and role printed |
-| C10 at the bench | 4:5, tablet | 240 × 300 | 480 × 600 | Portrait | As above | The same, on tablets |
-| C10 at the bench | 4:3, phone | 350 × 262 | 700 × 524 | Landscape | As above | The same, on phones |
-| C10 at the bench | 3:2 | Set when placed | — | Landscape | As above | How it works, one frame beside step 3, if a triptych isn't used |
-| C10 together | 3:2 | Set when placed | — | Landscape | — | Optional; not yet placed |
-| C10 hands | As C10 at the bench | As at the bench | As at the bench | As at the bench | Hands only | In place of an at-the-bench frame, for anyone who prefers it |
 | C11 stills | Open | — | — | — | — | For firms, if used; press material |
 
-Deliver the tight team portraits at 1:1 and 4:5 for every person, and the at-the-bench frames at
-3:2 and 4:5 (plus the 4:3 phone crop above), so every slot can be filled from the same set.
+**What C10's absence changes on the site.** How it works shows no step photographs for now. By the
+owner's decision its three step photographs (C5, C8 and C10) drop together, and the steps stand on
+their numerals alone. So C5 loose, C5 close and C8 three-quarter have no crops: shoot them on the
+day as spares, and deliver their masters only. C5 tight (the home page) and C8 over the shoulder
+(For firms) keep their crops. The places that were for the team's portraits are not filled by any
+other photograph: the note on the home page's first screen stands alone, Pricing has no row of
+faces, the Questions answer "Is a person involved?" has no picture, and For firms keeps a lozenge (a
+small list mark) in place of a portrait.
 
 ### 3c. Passes and technical captures
 
@@ -249,7 +238,7 @@ Deliver the tight team portraits at 1:1 and 4:5 for every person, and the at-the
 | C4 | A transom-off pass and a transom-on pass. A dusk HDRI from the plate's position | The transom-off pass is a plate for the retoucher. The dusk HDRI lights the engraving in dark mode |
 | C6 | The clean plate; the envelope frames; a light-only pass on a grey card | For matching the shadows of the live pages laid on the desk |
 | C1 to C4 | For every delivered crop of C3 and C4, the four corners of the plate's face in that file's pixel coordinates. For every delivered crop of C1 and C2, the box round the engraved name in that file's pixel coordinates | So the engraving lands in exact register, and the firm's name can lift off its plate on the home page |
-| C5, C8, C10 | Screens shot dark or with tracking marks | So the retoucher can replace them with captures of the real product |
+| C5, C8 | Screens shot dark or with tracking marks | So the retoucher can replace them with captures of the real product |
 
 The HDRIs and the light-pass video are captured with a technical director from CoFile's
 interactive studio, who joins you on the door days (section 9).
@@ -271,36 +260,27 @@ interactive studio, who joins you on the door days (section 9).
    message bubble overlaps it, and asks for a 3:2 phone crop with her hands and phone centred above
    the bubble. The home page layout keeps the lower third quiet counter under the bubble and uses a
    4:5 phone crop. [owner to confirm]
-4. **C5 loose.** The art direction places it on How it works ("Your client asks."); the How it works
-   layout uses the closer C5 frame there instead. Shoot it either way; its use is [owner to confirm].
-5. **The light on the walnut desk (C6).** The art direction asks for north light from the top left
+4. **The light on the walnut desk (C6).** The art direction asks for north light from the top left
    of the frame, with a 4:3 desktop and 4:5 phone crop and the props inside the outer 15%. The home
    page layout asks for light that makes a sheet's shadow fall straight down, and for the frame
    sizes in 3b. [owner to confirm]
-6. **C6 flap-up for the "Completed" email.** The owner has since decided that emails carry no
+5. **C6 flap-up for the "Completed" email.** The owner has since decided that emails carry no
    photographs, only two small engravings. Is this frame still needed? [owner to confirm]
-7. **The printed envelope and document cards (C6).** The art direction sets the envelope's address
+6. **The printed envelope and document cards (C6).** The art direction sets the envelope's address
    in the firm's typeface (Lora) with no CoFile mark. The home page layout, following the owner's
    decision that everything sent to the firm is in CoFile's look, puts CoFile's small logo on the
    envelope and sets the address in CoFile's type. Which does the printed prop follow, and who prints
    CoFile's document cards for the envelope frames? [owner to confirm]
-8. **Where the ghost light sits (C7).** The home page layout puts it at the left fifth of a 3:2
+7. **Where the ghost light sits (C7).** The home page layout puts it at the left fifth of a 3:2
    frame, with the run sheet at the lower right. The art direction puts it about two-thirds across a
    21:9 frame, with the run sheet at the lower left. Please frame the master so both crops can be
    cut. [owner to confirm]
-9. **The grade.** The spec asks for one grade, written as a LUT and given to the photographer, the
+8. **The grade.** The spec asks for one grade, written as a LUT and given to the photographer, the
    film crew and the retoucher. Do we supply it, or do you build it in pre-production for our
    approval? [owner to confirm]
-10. **C9's desktop crop.** The How it works layout asks for 3:2 at 486 × 324; the art direction asks
-    for 4:3 at about 320 × 240. Please frame for both. [owner to confirm]
-11. **Team portrait sizes.** Pricing: three at 72 px (layout) or up to five at 120 px (art
-    direction). For firms: 40 px (layout) or 56 px (art direction). Questions on phones: 160 × 200
-    above the answer (layout) or full width under it (art direction). All are cut from the same
-    1:1 and 4:5 portraits. [owner to confirm]
-12. **The team.** How many team members have agreed in writing to be photographed, and do they work
-    in one place or in several home offices? This sets the length and location of day 7.
-    [owner to confirm]
-13. **C1 wide on For firms.** The art direction lists it for For firms; the For firms layout doesn't
+9. **C9's desktop crop.** The How it works layout asks for 3:2 at 486 × 324; the art direction asks
+   for 4:3 at about 320 × 240. Please frame for both. [owner to confirm]
+10. **C1 wide on For firms.** The art direction lists it for For firms; the For firms layout doesn't
     place it yet. [owner to confirm]
 
 ## 4. Casting and consent
@@ -311,8 +291,6 @@ interactive studio, who joins you on the door days (section 9).
   in their own bakery. Real bakers only: never models in borrowed aprons.
 - **C8:** a real CPA in her fifties or sixties, cast to appear as the example firm's owner.
 - **C9:** optionally the printer's own hand and apron at the frame's edge.
-- **C10:** CoFile's own filing professionals: the people who take over when a filing needs a
-  person. Ideally three to five; one is enough.
 - **C11 stills:** the hand engraver who makes the plates (briefed separately).
 - **Nobody** in C1 to C4, C6 or C7.
 
@@ -344,24 +322,6 @@ releases for every location. They cover web, email, advertising, social and prin
 five years and renewable, and are bilingual (English and Spanish) where needed. Everyone sees their
 selects before use, and a picture of a person is retired on request, with no questions asked.
 
-**CoFile's own team (C10):**
-
-- Only people who agree in writing appear. Nobody stands in for anyone: no models, no stock, no AI,
-  no friend of the founder in a borrowed headset.
-- If nobody can be photographed, every team photograph is dropped and the pages close up. By the
-  owner's decision, How it works then drops all three of its step photographs together (C5 close,
-  C8 three-quarter and C10), and the steps stand on their numerals alone. So we need the team's
-  answer before the shoot.
-- A written release covering the site, emails, social and sales material, worldwide, renewable.
-  Each person sees their selects first and chooses which run. Anyone can withdraw at any time, and
-  their pictures come off the site within five working days. We record each person's consent date.
-- **Names, by the owner's decision:** on the home page's first screen, faces only, with each
-  person's name and role in the image description, not printed. Under the larger portraits on How
-  it works, Pricing and Questions, the person's name and role are printed. Never "example", never a
-  quote. The release must cover both.
-- Anyone who would rather not show their face can appear as hands only, in the at-the-bench slots.
-- Portraits are square-cut, never circles, never animated, never links.
-
 ## 5. Props and dependencies
 
 **Made before the shoot by other vendors** (briefed separately; we deliver them to you):
@@ -384,10 +344,10 @@ selects before use, and a picture of a person is retired on request, with no que
   - For C9: a sheet of Harbor & Pine CPA business cards eight-up with crop and registration marks,
     and a Harbor & Pine letterhead proof, both on cotton stock in Harbor blue. Optionally an
     invitation proof with rules and a blank where the names go.
-  - For C6: the heavy white envelope addressed "Harbor & Pine CPA" (question 7).
+  - For C6: the heavy white envelope addressed "Harbor & Pine CPA" (question 6).
   - The same shop hosts C9.
 - **From CoFile:** CoFile's own document cards as printed props for the C6 envelope frames
-  (question 7); captures of the real product for every screen; the design of CoFile's own message
+  (question 6); captures of the real product for every screen; the design of CoFile's own message
   bubble for Ana's phone.
 
 **What the prop stylist sources** (a stylist who mostly removes things):
@@ -407,7 +367,7 @@ selects before use, and a picture of a person is retired on request, with no que
   brass plates.
 
 **Also needed:** a set painter for door A, if its door has to be repainted (and restored after);
-tracking marks for the screens in C5, C8 and C10; a 20 cm strip reflector for the light passes; a
+tracking marks for the screens in C5 and C8; a 20 cm strip reflector for the light passes; a
 2,700 K practical for the transom and a 3,000 K lamp on a stand for C4.
 
 ## 6. Schedule
@@ -424,7 +384,7 @@ All timing is in weeks from commission (week 1 is the week you are commissioned)
 | To week 10 | Retouching, screen compositing, selects shown to everyone in frame, final delivery |
 
 **The shoot days**, in the order the shots depend on each other (days 1 and 2 must run in this
-order; days 3 to 7 follow it unless a location needs otherwise):
+order; days 3 to 6 follow it unless a location needs otherwise):
 
 | Day | Where | Shots | Notes |
 |---|---|---|---|
@@ -434,7 +394,6 @@ order; days 3 to 7 follow it unless a location needs otherwise):
 | 4 | The bakery, from 5:00 a.m. | C5 (tight, loose, close) | Shooting from 5:30 to 7:00 a.m. |
 | 5 | The CPA's office (morning); the letterpress shop (afternoon) | C8; C9 | |
 | 6 | The theatre, any hour with the house dark | C7 (wide and close) | |
-| 7 | CoFile's workplace, at the team's convenience | C10 | Half a day for three to five people (question 12) |
 
 ## 7. Post-production and delivery
 
@@ -446,14 +405,14 @@ order; days 3 to 7 follow it unless a location needs otherwise):
   color washes, gradients or darkened corners. Tint a photograph with a firm's color. Make anything
   black and white.
 
-**Screens** (a screen compositor, often the retoucher): Ana's phone in C5, the CPA's screen in C8
-and the team's screens in C10 are replaced with captures of the real product at 3x, which we
-supply. Perspective-matched, keeping the glass's real reflections and curve. Ana's message appears
-in CoFile's own message bubble, never in any app's look.
+**Screens** (a screen compositor, often the retoucher): Ana's phone in C5 and the CPA's screen in
+C8 are replaced with captures of the real product at 3x, which we supply. Perspective-matched,
+keeping the glass's real reflections and curve. Ana's message appears in CoFile's own message
+bubble, never in any app's look.
 
 **Color:**
 
-- One grade for every photograph (question 9): whites at Cotton `#FBFAF6`, true blacks, skin as it
+- One grade for every photograph (question 8): whites at Cotton `#FBFAF6`, true blacks, skin as it
   is, the brass reading as Brass `#D9A84A`.
 - On set, the digital tech checks on the calibrated monitor that Harbor `#1D4E63`, Ember `#C2410C`,
   the brass and skin all render true.
@@ -470,9 +429,9 @@ in CoFile's own message bubble, never in any app's look.
 - Web files of each crop as AVIF, WebP and JPEG, at 640, 960, 1,280, 1,920 and 2,560 px wide, up to
   the crop's useful size.
 - Weight targets at a 1440 px screen, as AVIF: C5 tight 90 KB; C6 clean plate 110 KB; C7 wide
-  140 KB; each light-pass master 40 KB; each team portrait at 48 px (2x) 5 KB. The two doors: 60 KB
-  each in the art direction, about 90 KB each in the home page layout. C3 wide: 220 KB in the art
-  direction, about 240 KB in the layout. [owner to confirm] the targets where they differ.
+  140 KB; each light-pass master 40 KB. The two doors: 60 KB each in the art direction, about 90 KB
+  each in the home page layout. C3 wide: 220 KB in the art direction, about 240 KB in the layout.
+  [owner to confirm] the targets where they differ.
 - The 1.2-second light-pass clips for C1 and C2: cropped to the plate (about 360 × 180 px at 2x),
   muted, AV1 with an H.264 fallback, under 150 KB each, the first and last frames identical to the
   still.
@@ -484,8 +443,8 @@ in CoFile's own message bubble, never in any app's look.
 We'll agree the final scheme with you in pre-production.
 
 **Selects and rounds.** [CoFile contact] reviews selects on the tethered monitor on set. Everyone in
-frame sees their selects before use, and each team member chooses which of theirs run. Number of
-retouching rounds: [owner to confirm]. Please quote per round.
+frame sees their selects before use. Number of retouching rounds: [owner to confirm]. Please quote
+per round.
 
 ## 8. Rights
 
@@ -502,10 +461,9 @@ retouching rounds: [owner to confirm]. Please quote per round.
 
 **Releases** (section 4): model releases for everyone in frame; property releases for every
 location (door A's owner, including the repaint and the plate fixing, door B, the north-window room,
-the bakery, the CPA's office, the letterpress shop, the theatre, CoFile's workplace and the
-engraver's bench); web, email, advertising, social and print, worldwide, five years and renewable;
-bilingual where needed; selects shown first; any person's picture retired on request. CoFile's team
-sign their own written consent, as section 4 describes.
+the bakery, the CPA's office, the letterpress shop, the theatre and the engraver's bench); web,
+email, advertising, social and print, worldwide, five years and renewable; bilingual where needed;
+selects shown first; any person's picture retired on request.
 
 **Credit:** whether and where the photographer is credited is [owner to confirm]. The engraver is
 credited by name with the film.
@@ -516,13 +474,12 @@ credited by name with the film.
 - Layouts showing each crop on its page, at desktop and phone sizes (to be supplied).
 - The plates, from the hand engraver, and the engraver on location on days 1 to 3.
 - The printed props, from the letterpress shop, and access to the shop for C9.
-- Artwork for every printed piece, CoFile's document cards (question 7) and its message-bubble
+- Artwork for every printed piece, CoFile's document cards (question 6) and its message-bubble
   design.
 - Captures of the real product, at 3x, for every screen to be composited.
-- The grade, as a LUT, if we are the ones to write it (question 9).
+- The grade, as a LUT, if we are the ones to write it (question 8).
 - A technical director from our interactive studio on the two door days, for the HDRIs and the
   light passes.
-- CoFile's team members for day 7, and their written consent.
 - [CoFile contact] on set every day, to approve frames against the layouts and review selects.
 - Answers to the questions in section 3 before the shoot.
 
@@ -532,7 +489,7 @@ Please break your quote down as follows, and tell us what you would change.
 
 - **By role and by day:** photographer; first assistant; digital tech; producer (also handling
   releases and locations); casting director; location scout; prop stylist; set painter; retoucher
-  and screen compositor. Shoot days 1 to 7, plus prep, scout, recce and wrap days.
+  and screen compositor. Shoot days 1 to 6, plus prep, scout, recce and wrap days.
 - **Equipment:** medium-format digital at about 100 MP with tethering and a calibrated monitor; a
   tilt-shift lens; a 120 mm macro; a 100 to 120 mm lens and a copy stand for overhead work from
   about 2.5 m; tripods for all-day lock-offs; flags, bounce, a polariser and a 20 cm strip reflector;
@@ -557,5 +514,5 @@ Please break your quote down as follows, and tell us what you would change.
 Spec references (for CoFile only): 02 §7.1, 7.2, 7.3.2, 7.4.1–7.4.4, 7.5, 7.6.1, 7.8, 7.9, 7.10,
 7.11, 8.4 (M2, M3, M5, M7, M9), 8.5 (M10, M12); 08 §13.3, 13.4, 13.5; BUILD-PLAN §B, C.4, C.8;
 01 §2.1–2.6, 3.8, 3.9, 4.2, 4.6–4.8, D1, D4; 03 §9.1–9.3; 04 §9.5, 9.7, 9.9; 05 §10A.0.5,
-10A.1.2, 10A.1.3, 10A.1.6, 10A.2.1–10A.2.6, 10A.3.3, 10A.4.1, 10A.6.2, 10A.9.1, 10A.9.3, 10A.18;
-DECISIONS 2, 4, 5, 14, 15, 18, 21, 35.
+10A.1.2, 10A.1.3, 10A.1.6, 10A.2.1–10A.2.6, 10A.3.3, 10A.9.1, 10A.9.3, 10A.18; DECISIONS 2, 4, 5,
+15, 21, 35, and "Decided Nov 26" (C10 deferred).
