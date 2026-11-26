@@ -114,19 +114,18 @@ asset, with no layout work at that point.
    - Founders Grotesk from Klim. Its web license is priced by pageviews, so it must cover the
      high-volume client pages and the widget. Decision 7 has the free alternative if the price is
      too high.
-2. **A lettering artist**: the final CoFile wordmark, the "Co" of the Name Plate, the final mark
-   drawings, a hand-tuned 16 px favicon and a one-page usage sheet.
+2. **A lettering artist**: on hold. The owner supplied the drawn wordmarks, marks, favicons and the
+   usage sheet (Nov 26).
 3. **A hand engraver**: the real brass and steel plates (Harbor & Pine, Northgate, and the blank
    plate), plus test plates for the brass textures.
 4. **A photographer and crew**: on hold. The owner supplied the photography for every frame except
    the team (Nov 26), and photographs of CoFile's people are deferred. The brief stays ready in case
    real shoots replace the supplied scenes later.
 5. **A small film crew**: the 12-second film of the engraver at the bench.
-6. **A steel-engraving illustrator**: about ten one-ink vignettes for empty states, system pages and
-   two emails.
+6. **A steel-engraving illustrator**: on hold. The owner supplied the eleven vignettes (Nov 26).
 7. **A scanning studio**: cotton paper and card scanned into seamless textures.
-8. **A letterpress shop**: the printed props seen in photographs (Harbor & Pine letterhead and
-   business-card proofs, the envelope).
+8. **A letterpress shop**: on hold. The photographs are supplied, and the owner's package has the
+   press-ready proofs if real prints are ever wanted (Nov 26).
 9. **An email-testing service** (subscription): real Outlook, Gmail and Apple Mail rendering. Claude
    can run the tests once there's an account.
 10. **Cross-browser and real-device testing** (subscription, or your own iPhone and Mac): Safari and
