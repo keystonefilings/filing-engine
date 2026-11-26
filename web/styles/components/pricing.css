@@ -1,0 +1,86 @@
+/* Pricing (merged spec 10A.4): "$45" as the biggest number on the page, one heavy price card printed with four ruled
+   columns, a definition ledger with dot leaders, and the errata slip. Nothing here moves: a price that animates looks
+   negotiable. Reads semantic tokens. */
+@layer components {
+
+/* ── Title page: the price as the picture (10A.4.1) ─────────────────────────────────────────────────────── */
+.pr2-head .pg2-head-words { grid-column: 1 / span 10; }
+.pr2-head .pg2-h1 { text-wrap: wrap; }
+.pr2-first { display: block; }
+.pr2-xl { font-family: var(--font-display); font-size: clamp(5.5rem, 3.8286rem + 6.8571vw, 10rem); line-height: clamp(5rem, 3.5143rem + 6.0952vw, 9rem); letter-spacing: -0.015em; font-variant-numeric: lining-nums tabular-nums; }
+/* The "$" at 60%, raised to the figures' cap height and hung into the margin (5.4) */
+.pr2-d { font-size: 0.6em; vertical-align: 0.47em; letter-spacing: 0; }
+.pr2-xl .pr2-d { margin-left: -0.56em; }
+.pr2-head .pg2-lede { max-width: min(34em, calc((100% - 9 * 24px) / 10 * 7 + 6 * 24px)); }
+@media (max-width: 1023px) { .pr2-head .pg2-lede { max-width: 34em; } }
+@media (max-width: 639px) {
+  .pr2-xl .pr2-d { margin-left: 0; }
+  .pr2-head .pg2-line { display: block; }
+}
+
+/* ── The plans: one card, four columns (10A.4.2) ─────────────────────────────────────────────────────────── */
+.pr2-card {
+  display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); grid-auto-rows: auto;
+  padding: 40px; background: var(--surface); color: var(--text); border-radius: var(--r-sheet);
+  box-shadow: var(--e-sheet), 2px 2px 0 var(--line-strong);
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .pr2-card { box-shadow: var(--e-sheet-dark), 2px 2px 0 var(--line-strong); } }
+:root[data-theme="dark"] .pr2-card { box-shadow: var(--e-sheet-dark), 2px 2px 0 var(--line-strong); }
+.pr2-plan { position: relative; grid-row: span 5; display: grid; grid-template-rows: subgrid; row-gap: 0; padding-inline: 32px; min-width: 0; }
+.pr2-plan + .pr2-plan { border-left: 1px solid var(--line); }
+/* Growth is marked by one thing: a 3 px Brass Line rule along the top of its column, inside the card's padding */
+.pr2-plan.is-growth::before { content: ""; position: absolute; left: 0; right: 0; top: -24px; height: 3px; background: var(--brass-line); }
+.pr2-name { color: var(--text); }
+.pr2-price { margin-top: 16px; color: var(--text); }
+.pr2-fig { display: block; font-family: var(--font-display); font-size: clamp(2.75rem, 2.4714rem + 1.1429vw, 3.5rem); line-height: clamp(3rem, 2.7214rem + 1.1429vw, 3.75rem); letter-spacing: -0.005em; font-variant-numeric: lining-nums tabular-nums; }
+.pr2-fig .pr2-d { margin-left: -0.6em; }
+.pr2-per { display: block; font-family: var(--font-serif); font-size: clamp(1.1875rem, 1.1179rem + 0.2857vw, 1.375rem); line-height: clamp(1.875rem, 1.7821rem + 0.381vw, 2.125rem); color: var(--text-2); }
+.pr2-annual { margin-top: 8px; padding-bottom: 24px; border-bottom: 1px solid var(--line); font-variant-numeric: tabular-nums; }
+.pr2-list { align-content: start; gap: 12px; padding-block: 24px; font: 400 clamp(1.0625rem, 1.0393rem + 0.0952vw, 1.125rem)/clamp(1.6875rem, 1.6411rem + 0.1905vw, 1.8125rem) var(--font-sans); font-variant-numeric: tabular-nums lining-nums; }
+/* The takeover line: the same promise on the same line on every plan, under the dot leader's dots */
+.pr2-takeover { align-self: end; padding-top: 20px; font: 500 1.0625rem/1.5rem var(--font-sans); color: var(--text);
+  background: radial-gradient(circle, var(--line-strong) 0.9px, transparent 1.2px) left top / 0.4em 4px repeat-x; }
+.pr2-note { margin-top: 24px; }
+
+@media (max-width: 1023px) {
+  .pr2-card { grid-template-columns: repeat(2, minmax(0, 1fr)); padding: 32px; }
+  .pr2-plan { padding-inline: 24px; }
+  .pr2-plan:nth-child(odd) { border-left: 0; }
+  .pr2-plan:nth-child(n + 3) { margin-top: 32px; padding-top: 32px; border-top: 1px solid var(--line); }
+  .pr2-plan:nth-child(n + 3).is-growth::before { top: 8px; }
+}
+@media (max-width: 639px) {
+  .pr2-card { grid-template-columns: minmax(0, 1fr); padding: 20px; }
+  .pr2-plan { padding-inline: 0; border-left: 0 !important; }
+  .pr2-plan + .pr2-plan { margin-top: 32px; padding-top: 32px; border-top: 1px solid var(--line); }
+  .pr2-plan.is-growth::before, .pr2-plan:nth-child(n + 3).is-growth::before { top: -1px; }
+  .pr2-fig .pr2-d { margin-left: 0; }
+}
+
+/* ── What counts as a filing: a definition ledger with dot leaders (10A.4.3) ────────────────────────────── */
+.pr2-counts { list-style: none; margin: 0; padding: 0; border-top: 1px solid var(--line); }
+.pr2-counts > li { display: grid; grid-template-columns: 200px minmax(0, 1fr); column-gap: 16px; padding-block: 20px; border-bottom: 1px solid var(--line);
+  font: 400 clamp(1.0625rem, 1.0393rem + 0.0952vw, 1.125rem)/clamp(1.6875rem, 1.6411rem + 0.1905vw, 1.8125rem) var(--font-sans); color: var(--text); }
+.pr2-lead { display: grid; align-content: start; gap: 10px; }
+.pr2-lead-line { position: relative; display: block; }
+.pr2-lead-line b { position: relative; z-index: 1; font-weight: 500; background: var(--page); padding-right: 12px; box-decoration-break: clone; -webkit-box-decoration-break: clone; }
+/* The leader: Founders periods every 0.4 em in Rule Strong, on the lead's last baseline */
+.pr2-lead-line::after { content: ""; position: absolute; left: 0; right: 0; bottom: 7px; height: 3px;
+  background: radial-gradient(circle, var(--line-strong) 0.9px, transparent 1.2px) left center / 0.4em 3px repeat-x; }
+.pr2-def { font-variant-numeric: tabular-nums lining-nums; }
+/* The units, drawn: a 72 × 6 bar filled to its share of a filing */
+.pr2-units { display: block; width: 72px; height: 6px; border: 1px solid var(--text); background: linear-gradient(90deg, var(--text) calc(var(--share) * 100%), transparent 0); }
+@media (max-width: 639px) {
+  .pr2-counts > li { grid-template-columns: minmax(0, 1fr); row-gap: 4px; }
+  .pr2-lead-line::after { display: none; }
+  .pr2-lead { gap: 8px; margin-bottom: 4px; }
+}
+
+/* ── What's separate: the errata slip (10A.4.4) ──────────────────────────────────────────────────────────── */
+.pr2-slip { padding: 32px; background: var(--surface); color: var(--text); border-radius: var(--r-sheet); box-shadow: var(--e-sheet); }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .pr2-slip { box-shadow: var(--e-sheet-dark); } }
+:root[data-theme="dark"] .pr2-slip { box-shadow: var(--e-sheet-dark); }
+.pr2-slip .pg2-list { gap: 20px; }
+.pr2-slip b { font-weight: 500; }
+@media (max-width: 639px) { .pr2-slip { padding: 20px; } }
+}
