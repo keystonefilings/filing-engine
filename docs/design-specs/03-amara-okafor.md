@@ -160,7 +160,7 @@ All contrast ratios are WCAG 2.x, computed. "Text" pairs must reach 4.5:1 and no
 | `--rule-strong` | `#8C8797` | `#6C6879` | Input borders, chip outlines | 3.48 on sheet; 3.23 on dark sheet |
 | `--ink` | `#15131C` | `#F2F0EA` | Main text | 16.6 on stock; 16.9 dark |
 | `--ink-2` | `#4A4757` | `#BDB9C9` | Secondary text | 8.1 light; 10.0 dark |
-| `--ink-3` | `#6B6779` | `#9A96A8` | Captions, "with CoFile" | 4.9 on stock; 6.1 on dark sheet |
+| `--ink-3` | `#6B6779` | `#9A96A8` | Captions, "with CoFile" | 4.9 on stock, 5.5 on sheet, 4.5 on sheet-2 (the floor: nothing lighter, ever); 6.1 on dark sheet |
 | `--register` | `#3B2CF5` | `#8F87FF` | Brand, links, primary button on CoFile pages, focus ring | 6.6 on stock; dark 6.5 on stock |
 | `--register-hover` | `#2C1FD1` | `#A9A3FF` | Hover | |
 | `--register-press` | `#2416B0` | `#C2BEFF` | Pressed | |

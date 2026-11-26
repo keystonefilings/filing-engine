@@ -735,7 +735,10 @@ beside them).
 
 ### 9.3 The proof card (component `ProofSheet`)
 
-One component renders the home page's sample and the client's real proof. Structure:
+One component renders the home page's sample and the client's real proof. The sample, as the home
+page shows it with its locked copy, looks like this; the real proof uses the same parts in the same
+order and adds what only a real filing has (the terms block above the details, the decision area
+with the code field and both buttons; see 10.7):
 
 ```
 ╔════════════════════════════════════════════════════════════╗  thick-thin rule (firm's color on firm pages)
@@ -868,13 +871,14 @@ the third column, before the chip, so no new words are needed.
 - **Masthead (CoFile pages):** thick-thin rule at the very top, 72 px bar, wordmark left (18 px
   cap height), the four section links centered-left ("How it works", "For firms", "What we file",
   "For platforms"), then "Log in" (`quiet md`) and "Run a free rehearsal" (`ink md`). The current
-  section's link gets a 2 px `ink` underline as you scroll. Below 860 px: wordmark, "Log in" and a
-  menu button; the four links move into a full-width sheet that drops from the masthead (`t-base`).
+  section's link gets a 2 px `ink` underline as you scroll. Below `lg` (1024 px): wordmark, "Log
+  in" and a menu button; the four links move into a full-width sheet that drops from the masthead (`t-base`).
 - **Filing desk top bar:** the firm's brand bar (section 11) then a 52 px tab row: "Filings",
-  "New filing", "Ready to pay", "Client links", "Signatures", "Setup", "Billing". Ready to pay shows a
-  count badge (`hold` tint) when filings are waiting. On phones, a bottom tab bar holds "Filings",
+  "New filing", "Ready to pay", "Client links", "Signatures", "Setup", "Billing" (the last two for
+  partner firms only, as now). Ready to pay shows a count badge (`hold` tint) when filings are waiting. On phones, a bottom tab bar holds "Filings",
   "New filing" and "Ready to pay", with the rest under a menu.
-- **Dashboard rail:** 240 px left rail on `sheet`, the account name at top in `h4`, links in the
+- **Dashboard rail:** 240 px left rail on `sheet`, the wordmark at the top and the account name
+  under it in `h4`, links in the
   order of the layout ("Overview", "Filings", "Ready to pay", "Firms", "API keys", "Webhooks",
   "Setup", "Team", "Billing", "Sign-ups", "Docs"), 40 px rows, active row with a 3 px `ink` left
   rule. Collapses to a top menu below 1024 px.
