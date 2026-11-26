@@ -71,7 +71,7 @@ export const GUIDES: Guide[] = [
         <h2>Fields by area</h2>
         <ul>
           <li><code>formation</code>: name (<code>baseName</code> + <code>designator</code>), county (NY), management structure (NY), service of process (NY), registered agent or <code>registeredAgentChoice</code>, members and signers (NJ), Florida entity type, shares, incorporator and general partners, effective date, add-on certificates.</li>
-          <li><code>ein</code>: <code>mode</code> (<code>in_run</code>, <code>after_acceptance</code> or <code>none</code>), responsible party, member count, reason, start date, regulated-activity answers, employees, business activity, how the confirmation letter is delivered.</li>
+          <li><code>ein</code>: <code>mode</code> (<code>in_run</code>, <code>after_acceptance</code> or <code>none</code>; a Florida formation is always <code>after_acceptance</code>: once the state accepts it, the EIN application starts as its own <code>ein_only</code> filing under the same approval, with <code>intake.einForFilingId</code> naming the formation, and the EIN is copied back onto the formation), responsible party, member count, reason, start date, regulated-activity answers, employees, business activity, how the confirmation letter is delivered.</li>
           <li><code>payroll</code>: legal name, FEIN, ownership type, business, mailing and books addresses, owners, NAICS, liability dates, work locations, signer, and <code>stateAnswers</code> for each state&apos;s long tail of questions.</li>
           <li><code>contact</code> (required): who the state and the filing company write to about the filing.</li>
         </ul>

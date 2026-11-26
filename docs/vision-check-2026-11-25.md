@@ -233,6 +233,12 @@ Built and tested; each switches on when its accounts and keys are set (steps in 
   engine sends mail). Each takes effect on the next deploy.
 - **Slack:** a Slack app with the `/file` command (V41).
 - **Twilio:** a number with A2P 10DLC registration, and a WhatsApp sender (Meta verification) (V42-V43).
+- **Florida EIN (Yakov, Nov 26):** done. A Florida formation's EIN is applied for only once the
+  state accepts the formation (any `in_run` request becomes `after_acceptance`). When the acceptance
+  is recorded (or a state accepts at once, as NJ does, for a formation asking for that order), the
+  EIN application starts as its own filing under the client's approval of the formation, whose
+  page says so; the EIN is copied back onto the formation. Before this, `after_acceptance` was only
+  a setting, and nothing applied for the EIN after acceptance.
 - **Copy decisions:** all 19 questions from the copy review (docs/copy-review-2026-11-26.md) were
   decided and done on Nov 26: price wording, the filing company, the Terms and Privacy pages, the
   support address (hello@cofile.app), the approval consent (now covering fee payment), the

@@ -79,6 +79,8 @@ export interface ReviewPageModel {
   feeCapUsd?: number;
   expiresAt: string;
   einInRun: boolean;
+  /** The EIN is applied for once the state accepts the formation (always in Florida). */
+  einAfterAcceptance?: boolean;
   postUrl: string;
   requireCode: boolean;
   /** Decision 7: the state's own review page, filled in with this filing (an image URL). */
@@ -125,7 +127,7 @@ export function renderReviewPage(m: ReviewPageModel): string {
 ${m.practice ? `<div class="note"><strong>Practice filing: nothing will be filed or paid, even if you approve.</strong></div>` : ""}<h1>${esc(m.filingTitle)}</h1>
 <p>Filing reference ${esc(m.filingId)}. Please decide by ${esc(plainDeadline(m.expiresAt))}. After that, this link stops working and you'll need a new one.</p>
 <div class="note">${esc(approvalConsent(m.fees, m.feeCapUsd))}
-${m.einInRun ? " While filing, we'll get the EIN from the IRS and enter it on the state form. It's the only detail added after you approve." : ""}
+${m.einInRun ? " While filing, we'll get the EIN from the IRS and enter it on the state form. It's the only detail added after you approve." : ""}${m.einAfterAcceptance ? " Once the state accepts this formation, we'll apply for its EIN with the IRS using the EIN details below; approving now covers that application too, so you won't be asked again." : ""}
 Government sites don't save drafts, so once you approve, the whole filing is sent in one go. Please check everything now.</div>
 ${m.reviewImageUrl ? `<h2>The state's review page</h2><p>This is a picture of the state's own review page, filled in with your details. When we file, we go ahead only if the state shows exactly this page again; if anything is different, we stop before paying.</p><p><img src="${esc(m.reviewImageUrl)}" alt="Picture of the state's review page for this filing. Every value on it is also listed as text under Filing details." style="max-width:100%;border:1px solid #ddd;border-radius:6px"></p>` : ""}
 <h2>Filing details</h2>${JSON.stringify(m.payload ?? null).includes("***-**-") ? "<p>Social Security numbers are masked on this page. We store them encrypted and delete them after 30 days.</p>" : ""}<table>${rows(m.payload)}</table>

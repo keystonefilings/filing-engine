@@ -106,7 +106,7 @@ export class FilingService {
     await this.emit("filing.accepted", accepted, { reference: input.reference, recordedBy: input.by });
     const done = await this.transition(accepted, "completed");
     await this.emit("filing.completed", done, { artifacts: done.artifacts, ein: done.ein, reference: input.reference });
-    return done;
+    return (await this.startEinAfterAcceptance(done)) ?? done;
   }
 
   private async emit(type: EventType, filing: FilingRecord, data: Record<string, unknown> = {}, runId?: string) {
@@ -163,6 +163,7 @@ export class FilingService {
     }
     const req = parsed.data;
     if (req.ein && !req.ein.mode) req.ein.mode = client.einMode; // decision 1
+    einAfterFloridaAcceptance(req);
     // V33: practice filings are always free; a live one needs the subscription (SubscriptionRequired).
     if (!(req.dryRun ?? this.d.dryRunDefault)) await this.d.billing?.assertCanFileLive(tenant, client);
 
@@ -300,6 +301,7 @@ export class FilingService {
     await this.emit("filing.awaiting_approval", f, {
       approvalLink: link, expiresAt: approval.expiresAt, recipients: approval.recipients, fees, feeCapUsd: approval.feeCapUsd,
       einInRun: !!req.ein && req.ein.mode === "in_run",
+      einAfterAcceptance: !!req.ein && req.ein.mode === "after_acceptance",
       dryRun: this.isPractice(req),
       registeredAgent: ra ? { source: ra.source, provider: ra.provider, costUsd: ra.costUsd, pending: ra.pendingProcurement ?? false } : undefined,
       ...(extra.review ? { reviewPage: true, reviewShotArtifactId: extra.review.artifactId } : {}),
@@ -324,6 +326,7 @@ export class FilingService {
     }
     const req = parsed.data;
     if (req.ein && !req.ein.mode) req.ein.mode = client.einMode;
+    einAfterFloridaAcceptance(req);
     const issues = [...applied.issues, ...validateFiling(req), ...await documentIssues(this.d.artifacts, req)];
     const updated = await this.d.store.updateFiling(filing.id, { request: req, payloadHash: this.d.approvals.payloadHash(req), appliedPolicies: applied.provenance });
     if (hasErrors(issues)) {
@@ -339,6 +342,57 @@ export class FilingService {
     }
     const result = await this.finalizeFiling(await this.d.store.updateFiling(updated.id, { missingInformation: [], lastError: undefined }), tenant, client, issues);
     return { ok: true as const, complete: true as const, filing: result.filing, approvalLink: result.approvalLink };
+  }
+
+  /**
+   * A formation whose EIN waits for the state's acceptance (always in Florida): once accepted, the
+   * EIN application starts as its own filing, with the EIN details the client approved with the
+   * formation. The client isn't asked again; the approval is carried from the formation's.
+   */
+  async startEinAfterAcceptance(parent: FilingRecord): Promise<FilingRecord | null> {
+    const req = parent.request;
+    if (req.type !== "formation" || !req.ein || req.ein.mode !== "after_acceptance") return null;
+    if (parent.status !== "accepted" && parent.status !== "completed") return null; // only once the state has accepted it
+    const idempotencyKey = `${req.idempotencyKey.slice(0, 100)}:ein-after-acceptance`;
+    if (await this.d.store.findFilingByIdempotency(parent.tenantId, idempotencyKey)) return null;
+    const tenant = await this.d.store.getTenant(parent.tenantId);
+    const client = await this.d.store.getClientCompany(parent.clientCompanyId);
+    const parentApproval = parent.currentApprovalId ? await this.d.store.getApproval(parent.currentApprovalId) : null;
+    if (!tenant || !client) return null;
+    const today = (this.d.now?.() ?? new Date()).toISOString().slice(0, 10);
+    const parsed = FilingRequest.safeParse({
+      tenantId: parent.tenantId, clientCompanyId: parent.clientCompanyId, idempotencyKey, type: "ein_only", state: req.state,
+      formation: req.formation, contact: req.contact, approvalRecipients: req.approvalRecipients, dryRun: req.dryRun,
+      ein: { ...req.ein, mode: "in_run", formationState: req.ein.formationState ?? req.state, startDate: req.ein.startDate ?? today },
+      intake: { ...(req.intake ?? {}), einForFilingId: parent.id },
+    });
+    const now = new Date().toISOString();
+    const base = { tenantId: parent.tenantId, clientCompanyId: parent.clientCompanyId, idempotencyKey, createdAt: now, updatedAt: now, artifacts: [] };
+    if (!parsed.success) {
+      const message = parsed.error.issues.map((i) => `${i.path.join(".")}: ${i.message}`).join("; ");
+      const bad: FilingRecord = { ...base, id: randomUUID(), status: "invalid", request: req as never, payloadHash: "", lastError: `EIN after acceptance: ${message}` };
+      await this.d.store.createFiling(bad);
+      await this.emit("filing.invalid", bad, { issues: [{ path: "ein", message, severity: "error" }], einForFilingId: parent.id });
+      return bad;
+    }
+    const child = parsed.data;
+    const issues = validateFiling(child);
+    const filing: FilingRecord = { ...base, id: randomUUID(), status: "created", request: child, payloadHash: this.d.approvals.payloadHash(child) };
+    await this.d.store.createFiling(filing);
+    if (hasErrors(issues) || !parentApproval || parentApproval.status !== "approved") {
+      const why = !parentApproval || parentApproval.status !== "approved" ? "the formation's approval isn't on file" : issues.filter((i) => i.severity === "error").map((i) => `${i.path}: ${i.message}`).join("; ");
+      const f = await this.transition(filing, "invalid", { lastError: `EIN after acceptance: ${why}` });
+      await this.emit("filing.invalid", f, { issues, einForFilingId: parent.id });
+      return f;
+    }
+    const fees = this.feesFor(child, tenant, client);
+    const carried = await this.d.approvals.carryForward(filing, parentApproval, parent, tenant, client, fees);
+    // Through awaiting_approval without a link or an email: the approval is already decided.
+    const waiting = await this.transition((await this.d.store.getFiling(filing.id))!, "awaiting_approval", { currentApprovalId: carried.id });
+    const approved = await this.transition(waiting, "approved");
+    await this.emit("filing.approved", approved, { approvalId: approved.currentApprovalId, carriedFrom: { filingId: parent.id, approvalId: parentApproval.id }, reason: "EIN after the state accepted the formation" });
+    await this.enqueueRun(approved.id);
+    return approved;
   }
 
   /** Link decision (decision 2). Approve -> queued for a run; request changes -> back to the caller. */
@@ -539,6 +593,10 @@ export class FilingService {
             await this.emit("filing.accepted", accepted, { site: adapter.site, ein: accepted.ein }, outcome.run.id);
             const done = await this.transition(accepted, "completed");
             await this.emit("filing.completed", done, { artifacts: done.artifacts, ein: done.ein }, outcome.run.id);
+            await this.startEinAfterAcceptance(done);
+            // An EIN applied for after a formation was accepted goes back on that formation too.
+            const parentId = (done.request.intake as { einForFilingId?: string } | undefined)?.einForFilingId;
+            if (done.request.type === "ein_only" && done.ein && parentId) await store.updateFiling(parentId, { ein: done.ein });
           }
           break;
         }
@@ -811,4 +869,14 @@ export function requestFingerprint(raw: Record<string, unknown>): string {
 
 export class OutcomeError extends Error {
   constructor(readonly status: number, message: string) { super(message); }
+}
+
+/**
+ * A formation's EIN: the LLC is formed in the filing's own state, and in Florida the EIN is
+ * applied for only once the state accepts the formation (Yakov, Nov 26), unlike NY and NJ.
+ */
+function einAfterFloridaAcceptance(req: FilingRequestT): void {
+  if (req.type !== "formation" || !req.ein) return;
+  if (!req.ein.formationState) req.ein.formationState = req.state;
+  if (req.state === "FL" && req.ein.mode === "in_run") req.ein.mode = "after_acceptance";
 }

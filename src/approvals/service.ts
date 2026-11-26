@@ -83,6 +83,38 @@ export class ApprovalService {
    * the re-run's verifyForRun passes, with the admin — not the client — as the authority.
    * Fees are unchanged by a name change.
    */
+  /**
+   * An EIN application started after the state accepted its formation: the client approved its
+   * details with the formation (shown on that approval page, with the note that it follows
+   * acceptance). This records an approved approval bound to the EIN filing's own payload, citing
+   * the formation's approval as the authority. The EIN details must be the ones approved.
+   */
+  async carryForward(filing: FilingRecord, from: ApprovalRecord, parent: FilingRecord, tenant: TenantSettings, client: ClientCompanySettings, fees: FeeLine[]): Promise<ApprovalRecord> {
+    if (from.status !== "approved" || from.filingId !== parent.id) throw new Error("the formation's approval isn't an approved approval of that formation");
+    const strip = (e: unknown) => { const { mode: _m, formationState: _f, startDate: _s, ...rest } = (e ?? {}) as Record<string, unknown>; return JSON.stringify(rest); };
+    if (strip(filing.request.ein) !== strip(parent.request.ein)) throw new Error("the EIN details differ from the ones approved with the formation");
+    const id = randomUUID();
+    const now = this.now();
+    const approval: ApprovalRecord = {
+      id, filingId: filing.id, tenantId: filing.tenantId,
+      payloadHash: this.payloadHash(filing.request),
+      settingsSnapshot: takeSettingsSnapshot(tenant, client),
+      shownPayload: maskSensitive(filing.request),
+      fees, feeCapUsd: filing.request.feeCapUsd,
+      recipients: from.recipients,
+      token: mintToken(this.deps.signingSecret, id),
+      status: "approved",
+      createdAt: now.toISOString(),
+      expiresAt: new Date(now.getTime() + (client.approvalTtlHours ?? this.deps.defaultTtlHours) * 3_600_000).toISOString(),
+      decidedAt: now.toISOString(),
+      decidedVia: from.decidedVia,
+      comment: `carried from approval ${from.id} of formation ${parent.id}: the EIN is applied for after the state accepted it`,
+    };
+    await this.deps.store.createApproval(approval);
+    await this.deps.store.updateFiling(filing.id, { currentApprovalId: id });
+    return approval;
+  }
+
   async adminReauthorize(filing: FilingRecord, tenant: TenantSettings, client: ClientCompanySettings, fees: FeeLine[], by: string): Promise<ApprovalRecord> {
     if (filing.currentApprovalId) {
       const prev = await this.deps.store.getApproval(filing.currentApprovalId);

@@ -446,6 +446,7 @@ export function buildServer(deps: ApiDeps): FastifyInstance {
       filingTitle: f ? `${f.request.state} ${f.request.type.replace("_", " ")}${f.request.formation ? `: ${f.request.formation.name.baseName} ${f.request.formation.name.designator}` : ""}` : "Filing",
       payload: a.shownPayload, fees: a.fees, feeCapUsd: a.feeCapUsd, expiresAt: a.expiresAt,
       einInRun: !!f?.request.ein && f.request.ein.mode === "in_run",
+      einAfterAcceptance: !!f?.request.ein && f.request.ein.mode === "after_acceptance",
       practice: !!f && deps.service.isPractice(f.request),
       postUrl: `${deps.publicBaseUrl}/approve/${a.token}`, requireCode: !!a.oneTimeCode,
       reviewImageUrl: a.review?.artifactId ? `${deps.publicBaseUrl}/approve/${a.token}/review.png` : undefined,
