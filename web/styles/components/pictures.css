@@ -816,7 +816,8 @@
 :root[data-theme="dark"] .pstudio-tray :is(input[type="text"], select) { background-color: #1F2230; border-color: #6E7180; color: #ECE8DF; }
 .pstudio-swatches { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
 .pstudio-swatch { position: relative; width: 40px; height: 40px; padding: 0; border: 0; border-radius: 6px; corner-shape: bevel; cursor: pointer; }
-.pstudio-swatch[aria-pressed="true"] { box-shadow: 0 0 0 2px var(--page-2), 0 0 0 4px var(--text); }
+.pstudio-swatch { box-shadow: inset 0 0 0 1px rgba(128, 128, 128, 0.35); }
+.pstudio-swatch[aria-pressed="true"] { box-shadow: inset 0 0 0 1px rgba(128, 128, 128, 0.35), 0 0 0 2px var(--page-2), 0 0 0 4px var(--text); }
 .pstudio-picker { position: relative; width: 40px; height: 40px; border: 1px solid var(--line-strong); border-radius: 6px; corner-shape: bevel; overflow: hidden; background: conic-gradient(from 0deg, #b91c1c, #b45309, #15803d, #0f766e, #1f4fd1, #7e22ce, #be185d, #b91c1c); }
 .pstudio-picker input { position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0; cursor: pointer; }
 .pstudio-hex { font: 400 0.9375rem/1.375rem var(--font-mono); color: var(--text-2); }
