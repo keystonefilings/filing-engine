@@ -226,7 +226,8 @@ Built and tested; each switches on when its accounts and keys are set (steps in 
   the saved-signature consent (limited and revocable), first-person declarations, the EIN owner
   route, the coverage table, practice mode (plus a site-wide beta banner), the registered agent
   (ours, resold from Registered Agents, Inc., $59 a year per business), turnaround times and the
-  sign-up review wording. Still waiting for you: the production hosts, the remaining fee figures,
+  sign-up review wording, and the production addresses (api.cofile.app and cofile.app; DNS records
+  in docs/deploy-fly.md section 9). Still waiting for you: the remaining fee figures,
   the API key prefix, Florida professional entities and the Certificate of Existence upload. Have
   counsel review the Terms and Privacy Policy (governing law, liability cap, legal entity name) and
   the approval consent, saved-signature consent and declaration wording.

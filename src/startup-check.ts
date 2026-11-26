@@ -14,6 +14,9 @@ export interface DeploySettings {
   workerWakeUrl: string | null;
   workerPort: number | null;
   workerWakeToken: string | null;
+  /** The engine's and the site's public addresses (PUBLIC_BASE_URL, WEB_BASE_URL). */
+  publicBaseUrl?: string;
+  webBaseUrl?: string;
 }
 
 /** Production settings that would lose data or stall filings without an error later. */
@@ -25,6 +28,9 @@ export function deployProblems(s: DeploySettings): string[] {
   if (s.onFly && !s.artifactBucket) {
     p.push("no object storage for documents and screenshots (ARTIFACT_BUCKET or BUCKET_NAME): on Fly the API cannot read the worker's disk and every deploy wipes it; run fly storage create");
   }
+  const local = (u?: string) => !!u && /^https?:\/\/(localhost|127\.0\.0\.1)(:|\/|$)/.test(u);
+  if (local(s.publicBaseUrl)) p.push("PUBLIC_BASE_URL is a localhost address: approval links and webhooks would point nowhere (production: https://api.cofile.app)");
+  if (local(s.webBaseUrl)) p.push("WEB_BASE_URL is a localhost address: links in emails would point nowhere (production: https://cofile.app)");
   if (s.role === "api" && s.workerWakeUrl && !s.workerWakeToken) p.push("WORKER_WAKE_URL is set but WORKER_WAKE_TOKEN is not: the worker would refuse every wake");
   if (s.role === "worker" && s.workerPort && !s.workerWakeToken) p.push("WORKER_PORT is set but WORKER_WAKE_TOKEN is not: /wake would stay closed");
   return p;
@@ -51,6 +57,7 @@ export function startupProblems(role: "api" | "worker", env: NodeJS.ProcessEnv =
   p.push(...deployProblems({
     role, production: config.production, databaseUrl: config.databaseUrl, dataEncryptionKey: config.dataEncryptionKey, onFly: !!env.FLY_APP_NAME,
     artifactBucket: config.artifactBucket, workerWakeUrl: config.workerWakeUrl, workerPort: config.workerPort, workerWakeToken: config.workerWakeToken,
+    publicBaseUrl: config.publicBaseUrl, webBaseUrl: config.webBaseUrl,
   }));
   p.push(...billingProblems(config.stripe));
   if (role === "worker" || config.workerEnabled) {

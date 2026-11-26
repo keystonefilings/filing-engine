@@ -140,7 +140,7 @@ up with the form.
 address with what to file; we email back a link to the form filled in from the email (read by
 Claude in the web app, which needs `ANTHROPIC_API_KEY` there). Nothing is filed from an email. In
 Resend: add a receiving domain (for example `in.cofile.app`) and the MX record it shows; add a
-webhook to `https://<your API>/v1/inbound/email/resend` for the event `email.received` and copy
+webhook to `https://api.cofile.app/v1/inbound/email/resend` for the event `email.received` and copy
 its signing secret. The same `RESEND_API_KEY` reads each message's text.
 
 ```bash
@@ -152,8 +152,8 @@ else gets no reply. The email's text is sealed like SSNs and deleted after 30 da
 
 **Requests from Slack.** Not required to start. At api.slack.com/apps create an app (from
 scratch). Under Slash Commands add `/file` with the request URL
-`https://<your API>/v1/slack/command` and the hint "the filing you need, with the details". Under
-OAuth & Permissions add the redirect URL `https://<your API>/v1/slack/oauth/callback` and the bot
+`https://api.cofile.app/v1/slack/command` and the hint "the filing you need, with the details". Under
+OAuth & Permissions add the redirect URL `https://api.cofile.app/v1/slack/oauth/callback` and the bot
 scopes `commands`, `users:read` and `users:read.email`. Under Manage Distribution turn on public
 distribution so firms can add it to their own Slack. Then:
 
@@ -167,7 +167,7 @@ email must match their CoFile account; the answer is private to them.
 **Requests by text and WhatsApp (Twilio).** Not required to start, and both take days to weeks
 of registration. In Twilio: buy a US number and complete A2P 10DLC brand and campaign registration
 for it (texting); add a WhatsApp sender (Twilio walks you through Meta's business verification).
-Set the messaging webhook of both to `https://<your API>/v1/inbound/twilio` (POST). Then:
+Set the messaging webhook of both to `https://api.cofile.app/v1/inbound/twilio` (POST). Then:
 
 ```bash
 read -s TWILIO_AUTH_TOKEN && fly secrets set --stage --app keystone-filing-engine TWILIO_ACCOUNT_SID=ACxxxx TWILIO_AUTH_TOKEN="$TWILIO_AUTH_TOKEN" TWILIO_SMS_FROM=+1xxxxxxxxxx TWILIO_WHATSAPP_FROM=+1xxxxxxxxxx
@@ -195,7 +195,7 @@ as `thirdParty.apiCredentialKey`: the engine then orders through the API and sto
    each price id (`price_...`).
 2. Developers, API keys: create a restricted key with write access to Customers, Checkout
    Sessions and Customer portal, and read access to Prices.
-3. Developers, Webhooks: add the endpoint `https://<your API>/v1/billing/stripe-webhook` with the
+3. Developers, Webhooks: add the endpoint `https://api.cofile.app/v1/billing/stripe-webhook` with the
    events `checkout.session.completed`, `customer.subscription.created`,
    `customer.subscription.updated`, `customer.subscription.deleted`, `customer.subscription.paused`,
    `customer.subscription.resumed`, `invoice.payment_failed` and `invoice.paid`. Copy its signing
@@ -303,19 +303,35 @@ and stops before "Submit EIN Request".
 Use a real client's details, with their consent. The IRS assistant receives each page as the
 interview advances; only the final submission is skipped. Never use made-up identities.
 
-## 9. The engine's web address (api.cofile.app)
+## 9. Web addresses and DNS (decided Nov 26)
+
+The engine (this Fly app) is `https://api.cofile.app`: the API, the client approval pages and every
+webhook (Stripe, Resend, Slack, Twilio). The site (the web app on Vercel) is `https://cofile.app`.
 
 ```bash
 fly certs add api.cofile.app --app keystone-filing-engine
 ```
 
-Add the DNS record that command shows, then:
+`fly.toml` sets `PUBLIC_BASE_URL=https://api.cofile.app` and `WEB_BASE_URL=https://cofile.app`,
+so add the `api` DNS record below before the first deploy, or emailed links won't open.
 
-```bash
-fly secrets set --app keystone-filing-engine PUBLIC_BASE_URL=https://api.cofile.app
-```
+In the web app's environment on Vercel: `ENGINE_PUBLIC_URL=https://api.cofile.app` (shown in the
+partner API docs and the OpenAPI file), `PORTAL_PUBLIC_URL=https://cofile.app`, and
+`ENGINE_API_URL=https://api.cofile.app` (where the site's server calls the engine). The engine
+refuses to start in production while either of its addresses is still a localhost one.
 
-Links sent from then on use the new address.
+DNS records to add at the registrar for `cofile.app`:
+
+| Record | Name | Value | For |
+|---|---|---|---|
+| CNAME | `api` | `keystone-filing-engine.fly.dev` (or the A and AAAA records `fly certs add` prints) | the engine; Fly issues its certificate once this resolves |
+| A (and CNAME `www`) | `@` / `www` | what Vercel shows when you add `cofile.app` to the project | the site |
+| MX | `@` | your mailbox provider's (for example Google Workspace) | the `hello@cofile.app` mailbox; without it, mail to it bounces |
+| TXT and MX | as Resend shows (DKIM `resend._domainkey`, SPF and MX on `send`) | from Resend | sending from `filings@cofile.app` |
+| TXT | `_dmarc` | `v=DMARC1; p=none; rua=mailto:hello@cofile.app` to start | email deliverability (tighten to `quarantine` once reports look clean) |
+| MX | `in` | what Resend shows for a receiving domain | filing requests emailed to `file@in.cofile.app` (V40) |
+
+Links sent from then on use the new addresses. Approval links already sent keep their old address.
 
 ## Running it
 

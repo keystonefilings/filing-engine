@@ -3,9 +3,13 @@ export function platformName(): string {
   return process.env.PLATFORM_NAME?.trim() || "CoFile";
 }
 
-/** The engine's public URL as callers use it, for the docs and the OpenAPI servers entry. Never ENGINE_API_URL: that is the server-side address. */
+/**
+ * The engine's public URL as callers use it, for the docs and the OpenAPI servers entry. Never
+ * ENGINE_API_URL: that is the server-side address. Decision 14 (Nov 26): the engine is its own
+ * deployment at api.cofile.app; the site is https://cofile.app.
+ */
 export function publicApiUrl(): string {
-  return (process.env.ENGINE_PUBLIC_URL?.trim() || "https://cofile.app").replace(/\/+$/, "");
+  return (process.env.ENGINE_PUBLIC_URL?.trim() || "https://api.cofile.app").replace(/\/+$/, "");
 }
 
 /** Only #rgb / #rrggbb colors reach the page's CSS. */

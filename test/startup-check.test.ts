@@ -24,3 +24,14 @@ describe("production deploy checks", () => {
     expect(deployProblems({ ...ok, production: false, databaseUrl: null, artifactBucket: null, workerWakeToken: null })).toEqual([]);
   });
 });
+
+describe("production addresses (decision 14)", () => {
+  it("refuses localhost addresses in production", async () => {
+    const { deployProblems } = await import("../src/startup-check.js");
+    const base = { role: "api" as const, production: true, databaseUrl: "postgres://x", dataEncryptionKey: "e".repeat(64), onFly: false, artifactBucket: null, workerWakeUrl: null, workerPort: null, workerWakeToken: null };
+    expect(deployProblems({ ...base, publicBaseUrl: "https://api.cofile.app", webBaseUrl: "https://cofile.app" })).toEqual([]);
+    const p = deployProblems({ ...base, publicBaseUrl: "http://localhost:8080", webBaseUrl: "http://127.0.0.1:3000" });
+    expect(p.some((x) => x.startsWith("PUBLIC_BASE_URL is a localhost address"))).toBe(true);
+    expect(p.some((x) => x.startsWith("WEB_BASE_URL is a localhost address"))).toBe(true);
+  });
+});

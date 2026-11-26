@@ -14,13 +14,14 @@ const SECRET = "9b1e4c7a2d5f8036e1a4b7c0d3f6e9a2";
 const UNREACHABLE_DB = "postgres://filing:filing@127.0.0.1:1/filing";
 const VALID = {
   API_KEYS: `${API_KEY}:keystone`, STAFF_API_KEYS: `${STAFF_KEY}:ops@keystone.test`, APPROVAL_SIGNING_SECRET: SECRET, DATABASE_URL: UNREACHABLE_DB, DATA_ENCRYPTION_KEY: "c".repeat(64),
+  PUBLIC_BASE_URL: "https://api.cofile.app", WEB_BASE_URL: "https://cofile.app",
 };
 /** What each process prints once it is up: seeing it means the refusal did not happen. */
 const STARTED = /listening on|worker started/;
 /** Settings the test controls; anything set in the test runner's own environment is dropped. */
 const CONTROLLED = [
   "API_KEYS", "STAFF_API_KEYS", "APPROVAL_SIGNING_SECRET", "DATABASE_URL", "DATA_ENCRYPTION_KEY", "WORKER_ENABLED", "PORT", "NODE_ENV",
-  "BROWSER_PROXY", "SITE_PROXIES", "BROWSERS", "FLY_APP_NAME", "ARTIFACT_BUCKET", "BUCKET_NAME", "WORKER_WAKE_URL", "WORKER_WAKE_TOKEN", "WORKER_PORT",
+  "BROWSER_PROXY", "SITE_PROXIES", "BROWSERS", "FLY_APP_NAME", "ARTIFACT_BUCKET", "BUCKET_NAME", "WORKER_WAKE_URL", "WORKER_WAKE_TOKEN", "WORKER_PORT", "PUBLIC_BASE_URL", "WEB_BASE_URL",
 ];
 
 function start(entry: "src/index.ts" | "src/worker.ts", env: Record<string, string | undefined>) {
