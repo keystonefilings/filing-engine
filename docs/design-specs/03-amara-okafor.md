@@ -571,3 +571,296 @@ Captions are burned in on social cuts and supplied as WebVTT for the site. There
 - The 3D scene loads only after the page is interactive, and only when section 7 is within two viewports. If the device can't sustain 50 fps for the first 30 frames, it falls back to the still.
 - Rive files: under 120 KB each. Total motion payload for the home page: under 900 KB, lazy-loaded below the hero. The hero's motion is pure CSS plus a small script, so it costs nothing in Largest Contentful Paint.
 
+---
+
+## 9. The home page, section by section
+
+All copy below is quoted from `web/app/page.tsx` and `web/components/landing/Shell.tsx`. "CoFile" is `{name}`.
+
+### 9.0 The frame: beta notice and header
+
+**Beta notice** (the site-wide slim bar from `BetaBanner.tsx`).
+
+- On CoFile's pages it's 40 px tall on desktop and wraps to two lines on phones. Ground is Ink Night `#100D16`, text is Paper at 16 px, and the email link is underlined.
+- A **"Beta"** chip leads it: Marigold Wash fill, a 1.5 px dashed Ink border and Ink text in Marquee credit caps. The dashed border is the same "pencilled in" language as the Rehearsal chip.
+- Copy: "**Beta** CoFile is in beta. Any filing can run as a free rehearsal on the state's real website. It stops before the last button, so nothing is filed or paid. Filing types go live one at a time. Questions or problems? hello@cofile.app"
+- On firm pages (white-label) the same bar is House Canvas `#F6F6F3` with House Ink 2 text and a neutral dashed chip, reading "This service is in beta. …". There's no CoFile color in it.
+
+**Header.**
+
+- 76 px tall on desktop, Poster Paper with grain and a 1 px Rule line beneath. When the page scrolls past 24 px it compacts to 60 px and the ground becomes Paper at 92% opacity with a 12 px backdrop blur.
+- Left: the *Cº* + CoFile lockup (monogram 26 px tall). Center: the nav "How it works · For firms · What we file · For platforms" in Atkinson Next 600 at 16 px, Ink, with a 2 px Marigold underline growing from the center on hover (200 ms). Right: "Log in" (a quiet button) and the ticket button "Run a free rehearsal".
+- Phones: 56 px tall, with the monogram only, a compact ticket button (44 px tall, 16 px label) and a 48 px menu button (icon; its name is `[copy needed: "Menu" label]`). The menu opens a full-height Paper sheet with the four links in `title` size, then "Log in".
+- Over full-bleed color sections, the header stays Paper. It's the theatre's front of house and it doesn't change color.
+
+### 9.1 Hero
+
+**Copy placed:** kicker "For CPA, payroll, fractional CFO and title firms" · h1 "Your client approves the proof. Then CoFile files it." · sub "CoFile fills in your clients' LLC and corporation formations, EINs and employer registrations on the official New York, New Jersey, Florida and IRS websites, with your firm's name and logo on every page your client sees. First, your client gets one page showing every detail, every fee and, where possible, the state's own review page, filled in." · buttons "Run a free rehearsal" and "See what your client sees" · beta note "In beta. A rehearsal fills in every screen of the state's real website and stops before the last button, so nothing is filed and nothing is paid. You'll set up your firm's filing desk first." · the sample proof (Harbor & Pine CPA · example firm · Two Sisters Bakery LLC · Rehearsal · "New Jersey LLC formation. Please approve by Dec 3, 5:00 PM Eastern." · the details, fees, New Jersey's own review page, "Approve for filing", "Nothing is submitted or paid until you approve.") · caption "Sample proof · test details · not a real business".
+
+**Desktop (1440).**
+
+```
+┌────────────────────────────────────────────────────────────────────────────────────┐
+│ Cº CoFile      How it works  For firms  What we file  For platforms   Log in  ◖Run a free rehearsal◗ │
+├────────────────────────────────────────────────────────────────────────────────────┤
+│                                                           ░░░░░░░░░░░░░░░░░░░░░░    │
+│  FOR CPA, PAYROLL, FRACTIONAL CFO AND TITLE FIRMS     ░░░  ┌──────────────────────┐ ░│
+│                                                      ░░░ ① │▀▀▀▀▀▀ pine rule ▀▀▀▀▀│ ░│
+│  Your client                                         ░░░   │[≡] Harbor & Pine CPA │ ░│
+│  approves the                                        ░░░   │    example firm      │ ░│
+│  proof. Then                                         ░░    │ Two Sisters          │ ░│
+│  CoFile files it.                                    ░░    │ Bakery LLC [Rehearsal]│░│
+│                                                      ░     │ New Jersey LLC …     │  │
+│  CoFile fills in your clients' LLC and corporation      ①  │ Business name  ▓TWO SISTERS BAKERY LLC▓│
+│  formations … filled in.                   (lede, 6 col)   │ Members        Ana Ortiz, Lucia …│
+│                                                            │ Main business  ▓88 Grove St …▓│
+│  ◖ Run a free rehearsal ◗   See what your client sees ↓ ②  │ Formation fee        $100.00│
+│                                                            │ NJ portal fee, by card $3.50│
+│  In beta. A rehearsal fills in every screen …  (small)     │ Total to the state  $103.50 │
+│                                                         ③  │ ┌ New Jersey's own review ┐│
+│                                                            │ └─────────────────────────┘│
+│                                                         ④  │ [  Approve for filing  ]  │
+│                                                            │ Nothing is submitted …    │
+│                                                            └───────────────────────────┘
+│                                                  Sample proof · test details · not a real business │
+└────────────────────────────────────────────────────────────────────────────────────┘
+   cols 1–6: type                                        cols 8–12: the proof (≈ 520 px)
+```
+
+- **Ground.** Poster Paper with grain. Behind the proof, the **light pool**: a soft elliptical radial gradient, Marigold at 55% opacity at its center fading to 0 at a radius of about 520 px, offset up and left of the card as if a lamp above the page is lit on it. This is the only "decoration" in the hero.
+- **Kicker.** Marquee credit caps, 16 px, Ink 2, with a 48 px Ink hairline above it.
+- **h1.** display-xl (100 px, width 100, weight 800), Ink, four lines at 1440. Nothing in it is colored. The type is the poster.
+- **Sub.** lede size (24 px) at a 36 em measure, Ink.
+- **Buttons.** The **ticket** primary "Run a free rehearsal" (§11.1). "See what your client sees" is a secondary button: a 2 px Ink outline with a ↓ arrow, which smooth-scrolls to `#proof`.
+- **Beta note.** small (16 px), Ink 2, max 44 em, with the dashed "Beta" chip in front of it. The chip is design, not added copy: it repeats the word that opens the note, "In beta".
+- **The proof card.** This is the real proof component (§11.5), in Harbor & Pine's house style: a white sheet, 14 px radius, the 6 px Harbor Pine marquee rule, the logo with "Harbor & Pine CPA" in Libre Caslon and *example firm* in Atkinson italic beside it. "Two Sisters Bakery LLC" is set at proof-name size in Libre Caslon bold, with the Rehearsal chip after it. Values are in Atkinson Next 600. Fees use tabular figures with the total in fee-total size. The "New Jersey's own review page, filled in" block is a neutral inset (House Canvas fill, 10 px radius) holding the two rows "Business Name · TWO SISTERS BAKERY" and "Designator · LLC". The button "Approve for filing" is in Harbor Pine with white text.
+- **The callouts** ① to ④ (the copy's 1 to 4) sit *outside* the sheet in the left margin, like a proofreader's marks: 24 px Vermilion discs with Ink numerals. The Marigold Wash highlighter over the business name and address is drawn as an annotation layer over the sheet too. Those two are the marketing site's marks; the sheet itself stays purely the firm's.
+- **Caption.** Atkinson italic, 15 px, Ink 2, right-aligned under the card.
+- **Shadow** on the card: `0 1px 0 rgba(23,20,31,.06), 0 28px 56px -16px rgba(36,21,48,.30)`.
+
+**Phone (375).**
+
+```
+┌─────────────────────────────┐
+│ Cº   ◖Run a free rehearsal◗ ☰│
+├─────────────────────────────┤
+│ For CPA, payroll, fractional│  ← kicker in sentence case on phones
+│ CFO and title firms         │
+│ Your client                 │  ← display-xl 46 px
+│ approves the                │
+│ proof. Then                 │
+│ CoFile files it.            │
+│ CoFile fills in your …      │  ← lede 20 px
+│ ◖  Run a free rehearsal   ◗ │  ← full width, 56 px
+│ [ See what your client sees↓]│  ← full width secondary
+│ ⌐Beta¬ In beta. A rehearsal…│
+│  ░░░░░░░░░░░░░░░░░░░░░░░░░  │
+│ ┌─────────────────────────┐ │  ← proof card, full width minus 20 px,
+│ │▀▀▀▀▀▀▀▀ pine ▀▀▀▀▀▀▀▀▀▀│ │    callouts move inside as small
+│ │ Harbor & Pine CPA       │ │    discs at each block's top left
+│ │ Two Sisters Bakery LLC  │ │
+│ │ …                       │ │
+│ └─────────────────────────┘ │
+│ Sample proof · test details…│
+└─────────────────────────────┘
+```
+
+The kicker is in sentence case on phones because in caps it would run to three lines. Order on phones: words, then button, then proof. Someone who's already convinced never has to scroll.
+
+**Motion:** M1 opening titles, plus M2 tilt on desktop (§8.4).
+
+### 9.2 Process: "You start it. Your client approves it. CoFile files it."
+
+**Copy placed:** h2 "You start it. Your client approves it. CoFile files it." · lede "Three steps, and your client is in charge of the middle one." · three steps: **You start it.** "Fill in a short form yourself, send your client a link, or forward the email or text they sent you. Your saved answers fill in the rest: registered agent, organizer, signer, addresses." · **Your client approves it.** "They get the proof: one page with your firm's name at the top, showing every detail and every fee." · **CoFile files it.** "It fills in the state's own website screen by screen, checks the fee again before paying, and brings back the state's documents. You hear about each stage."
+
+**Treatment.** A full-bleed **Marigold** poster with grain. The h2 is set as a **billing block**, one h2 with three spans at three billing sizes:
+
+```
+┌───────────────────────────── MARIGOLD ─────────────────────────────┐
+│                                                                    │
+│  You start it.                                   ← display-l 72 px │
+│  Your client approves it.                        ← display-xxl 152 px, width 112
+│  ────────                                        ← 1.5 px Ink rule, 96 px
+│  CoFile files it.                                ← title 28 px, credit position
+│                                                                    │
+│  Three steps, and your client is in charge of the middle one.      │
+│                                                                    │
+│   ┌──────────────┐  ┌────────────────────────┐  ┌──────────────┐   │
+│   │   I1 loop    │  │ ┌──────────────────┐   │  │   I3 loop    │   │
+│   │ form·link·   │  │ │   I2 loop: the   │   │  │  screens →   │   │
+│   │ bubble meet  │  │ │   proof, a tap   │   │  │  a sheet back│   │
+│   └──────────────┘  │ └──────────────────┘   │  └──────────────┘   │
+│   You start it.     │ Your client approves it.│  CoFile files it.  │
+│   Fill in a short   │ They get the proof: …   │  It fills in the   │
+│   form yourself …   │       (Paper card,      │  state's own …     │
+│                     │   raised 32 px, 5 cols) │                    │
+│   cols 1–3          └─────────────────────────┘  cols 10–12        │
+└────────────────────────────────────────────────────────────────────┘
+```
+
+- **Steps 1 and 3** are printed straight onto the Marigold in Ink, with illustrations in Ink plus Paper.
+- **Step 2** is a Poster Paper card (16 px radius, no border, a shadow of `0 24px 48px -20px rgba(36,21,48,.35)`) spanning 5 columns and raised 32 px above the others. The middle step is physically the biggest thing, and it's paper, like the proof.
+- Step titles are `title` size and the paragraphs are `body`, Ink on Marigold (10:1).
+- **Phone:** the billing block runs at 38 / 58 / 22 px. The three steps stack, and step 2 is the Paper card, full width. The illustrations are 240 px tall.
+- **Motion:** M3 billing block and M4 step loops.
+
+### 9.3 The proof: "Your client sees what the state will see, before the state does."
+
+**Copy placed:** h2 · lede "You've approved a proof before: business cards, letterhead, an invitation at the printer. Nothing went to press until you said so. The proof does the same for a filing. Your client gets a link to one page with your firm's name and logo at the top. Approving it locks in exactly what's on it. If anything has to change later, it comes back to them to approve again." · the six list items, from "Every name, address and answer, in the order the state asks for them" to "For CPAs: it does for a business filing what the 8879 does for a return."
+
+**Desktop.**
+
+```
+┌──────────────────────────────── PAPER ─────────────────────────────────┐
+│ Your client sees what the state will see,             ┌ P4 printer's ┐ │
+│ before the state does.             (display-l)        │ proof still  │ │
+│                                                       │ life (4:5)   │ │
+│ You've approved a proof before: business cards,       │              │ │
+│ letterhead … (lede, cols 1–7)                         └──────────────┘ │
+│                                                                        │
+│ ─────────── the annotated proof (sticky, ≈ 2.4 viewports of scroll) ── │
+│                                                                        │
+│  ⓵ Every name, address and    ┌─────────────────────┐   ⓸ Each statement│
+│    answer, in the order the ──┤▀▀▀ Harbor Pine ▀▀▀▀▀│     your client is │
+│    state asks for them        │ Harbor & Pine CPA   │──   making, such as│
+│                               │ Two Sisters         │     letting the    │
+│  ⓶ Every fee in dollars and ──┤ Bakery LLC          │     filing company │
+│    cents, from a verified     │ … details …         │     sign or pay    │
+│    fee table                  │ … fees …            │                    │
+│                               │ … state page …      │   ⓹ One button.    │
+│  ⓷ Where the state's website──┤ … statements …      │──   Until it's    │
+│    allows it, a picture of    │ [Approve …]         │     pressed …     │
+│    the state's own review     └─────────────────────┘                    │
+│    page, filled in             cols 4–9 (≈ 630 px)                       │
+│                                                                        │
+│                For CPAs: it does for a business filing                 │
+│                what the 8879 does for a return.       (display-m, centered) │
+└────────────────────────────────────────────────────────────────────────┘
+```
+
+- **Top row.** The h2 is display-l (cols 1–9) and the lede is lede size (cols 1–7). P4, the printer's proof still life, sits at 4:5 in cols 9–12, aligned to the h2's cap height. It's the copy's analogy made visible before the product appears.
+- **The annotated proof.** A sticky stage. The proof sheet (the real component in Harbor & Pine's style) is centered in cols 4–9 and its content scrolls inside a 760 px viewport as the page scrolls. The list items are annotations: items 1 to 3 on the left (cols 1–3), 4 and 5 on the right (cols 10–12). Each has a Vermilion number disc and a leader line that draws to its region of the sheet when active (M5). In the DOM the list stays a single `<ul>` in copy order, so screen readers read it straight.
+- The sheet uses the real proof content (§10.3) filled with the Two Sisters example: details, fees, the "New Jersey's own review page, filled in" picture, the authorizations statement and the single button.
+- **The CPA line.** Item 6, "For CPAs: it does for a business filing what the 8879 does for a return.", is pulled out under the stage as a centered billing block. "For CPAs:" is in credit caps; the rest is display-m Ink, max 22 em. It's the sentence that makes a CPA's head nod, so it gets its own beat.
+- **Bullets.** No ticks anywhere. Items use the Vermilion number discs here, because they map to parts of the proof, and the small **º ring bullet** everywhere else on the site (an 8 px ring with a 2 px stroke, Ink on paper, sitting on the x-height).
+- **Phone.** h2 (38 px), lede, then P4 full width at 4:3, then the proof inside a generic phone frame (a rounded rectangle with a 2 px Ink outline and no hardware details) that is sticky at 62vh. The six items scroll past beneath it as captions, and each one's arrival scrolls the phone's proof to its region. The CPA line comes after.
+- **Motion:** M5.
+
+### 9.4 Firms: "Your name on the door. Ours in small print."
+
+**Copy placed:** h2 "Your name on the door. Ours in small print." · lede "Your client needs an LLC. Who do they call? You. They always have. Until now, saying yes meant someone on staff typing the same agent address into a state website again, or sending the client to an online formation site and getting back a filing you never saw. CoFile lets you say yes and keep your name on it." · four items: "Your filing desk carries your firm's name, logo and color." · "Send one client a link, keep a permanent filing page for each filing you offer, or put the filing button on your own website." · "Your client sees your firm on the form and on the proof. The only sign of us is a small "with CoFile"." · "Name your own registered agent in each state, or use ours, provided through Registered Agents, Inc."
+
+**This is the signature section.** The page hands its stage to the firm.
+
+**Desktop.**
+
+```
+┌──────────────────────── FIRM COLOR (Harbor Pine #1F5A4C) ────────────────────────┐
+│                                                                                  │
+│  Your name on the door.                                   ← display-xxl, white,  │
+│                                                              margin to margin     │
+│                                                    Ours in small print.  ← 18 px │
+│  ──────────────────────────────────────────────────────────────── 1 px white 30% │
+│                                                                                  │
+│  ┌──────────────────────────┐   Your client needs an LLC. Who do they call?      │
+│  │                          │   You. They always have. … (lede, white)           │
+│  │  P1  THE DOOR            │                                                    │
+│  │  gilded "Harbor & Pine   │   º Your filing desk carries your firm's name,     │
+│  │  CPA" on glass           │     logo and color.                                │
+│  │  (4:5, cols 1–5)         │   º Send one client a link, keep a permanent …     │
+│  │                          │   º Your client sees your firm on the form and on  │
+│  │                          │     the proof. The only sign of us is a small      │
+│  │                          │     "with CoFile".                                 │
+│  └──────────────────────────┘   º Name your own registered agent …               │
+│                                                                                  │
+│  ┌─ desk ─────────────────────┐ ┌ form ─┐ ┌ proof ┐ ┌ email ─────────┐           │
+│  │▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀│ │▀▀▀▀▀▀▀│ │▀▀▀▀▀▀▀│ │▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀│           │
+│  │ Harbor & Pine CPA  with CoFile│ │ H&P   │ │ H&P   │ │ Harbor & Pine  │          │
+│  │ Filings  New filing …      │ │ form  │ │ Two   │ │ Your proof is  │           │
+│  │ Two Sisters Bakery LLC  ◐ … │ │ fields│ │Sisters│ │ ready …        │           │
+│  └────────────────────────────┘ └───────┘ └───────┘ └────────────────┘           │
+│                                                                                  │
+│  ● ● ● ● ● ● ● ⊕     ← swatches   [copy needed: label for the swatch row]          │
+└──────────────────────────────────────────────────────────────────────────────────┘
+```
+
+- **The ground** is the firm's main color, Harbor Pine `#1F5A4C` by default, with the same 4% grain as our posters (screen blend). A 6 px marquee rule in the same color, 20% lighter, runs across the top edge, exactly as on a firm's real pages.
+- **The headline** enacts itself. "Your name on the door." is display-xxl in white, running from margin to margin (breaking the 1280 max). "Ours in small print." follows in the same `<h2>`, but set at **18 px** Atkinson Next 400, white at 82% opacity, right-aligned at the end of the headliner's line, like a credit. It's small but fully readable (6:1).
+- **P1, The Door**, sits in cols 1–5 with a 4 px radius and no frame. The gold leaf glows against the green.
+- **Lede and list** are white on the firm color, body 19 px, with º ring bullets in white.
+- **The brand-world spread:** four live mockups of Harbor & Pine's real surfaces, all in their house style, using the product's own labels: (1) the **filing desk** in a generic laptop frame, with its header (logo, name, "with CoFile"), nav ("Filings · New filing · Ready to pay · Client links · Signatures · Setup · Billing") and a Filings table row "Two Sisters Bakery LLC · New Jersey LLC formation · Waiting for approval"; (2) the **client form** on a phone; (3) **the proof** on a phone; (4) **the email** "Your proof is ready to approve" with its "Open your proof" button. They're set 32 px apart on a shared baseline, scale 0.5–0.7, with real shadows.
+- **Harbor & Pine's logo artwork is one color** (House Ink on white sheets, white on color), so the swatches can change the firm color without us ever recoloring a logo. That's the same rule we apply to real firms.
+- **The swatches.** Seven 40 px circles (48 px hit areas) with a 2 px white ring on the active one: Harbor Pine `#1F5A4C`, Navy `#1F3A5F`, Burgundy `#7A2232`, Teal `#0F6E73`, Charcoal `#33363B`, Plum `#5B2A6E` and Rust `#A8431C`. Then a **⊕ custom** swatch that opens the native color picker. Tapping one runs M7: the section and all four mockups re-tint, button shades auto-adjust, and the choice follows the visitor down the page. It needs a short label and accessible names for each swatch: `[copy needed]`.
+- **Phone.** The headline runs at 58 px over three lines, with "Ours in small print." at 16 px on its own line, right-aligned. Then P1 at 4:5 full bleed, then the lede and list, then the spread as a horizontal scroll-snap carousel (one mockup per 80% of the width), with the swatches as a scrollable row pinned beneath it.
+- **Motion:** M6 takeover and M7 try your color.
+
+### 9.5 Requests: "Clients don't fill in forms. They text you."
+
+**Copy placed:** h2 · lede "That's how requests really arrive. Send it on as it is, by email, text, WhatsApp or Slack. CoFile's AI reads the message and drafts the filing, and your saved answers fill in the rest. Someone at your firm checks the draft. Then it goes to your client as a proof, like any other filing. A message alone never reaches the state." · bubble "Need an LLC for the bakery. It's me and my sister, 50/50, in Jersey City." · meta "Ana Ortiz · text message · example" · arrow line "↳ read into a drafted New Jersey LLC formation for your team to check".
+
+**Desktop.**
+
+```
+┌──────────────────────────────────── PAPER ─────────────────────────────────────┐
+│ Clients don't fill in forms.                             ┌ P2 the bakery ┐      │
+│ They text you.                       (display-l)         │ at 5 am (4:5) │      │
+│                                                          │               │      │
+│ That's how requests really arrive. … (lede, cols 1–7)    └───────────────┘      │
+│                                                                                │
+│ ┌────────────────────────────┐                        ┌────────────────────────┐│
+│ │ Need an LLC for the        │   ╭──── LLC ─────────▶ │▀▀▀▀▀▀ firm rule ▀▀▀▀▀▀▀││
+│ │ bakery. It's me and my     │   ╭── bakery ────────▶ │ New Jersey LLC formation│
+│ │ sister, 50/50, in Jersey   │   ╭── 50/50 ─────────▶ │ Business name  bakery ┄┄│
+│ │ City.                      │   ╭── Jersey City ───▶ │ Members  Ana Ortiz 50/50│
+│ └──╮─────────────────────────┘                        │ Main business  Jersey City┄│
+│    Ana Ortiz · text message · example                 │ Registered agent ▒▒▒▒▒  │
+│                                                       │ Organizer        ▒▒▒▒▒  │
+│        ↳ read into a drafted New Jersey LLC formation │ Signer           ▒▒▒▒▒  │
+│          for your team to check                       └────────────────────────┘│
+│   cols 1–4                     cols 5–7 (flight)        cols 8–12               │
+└────────────────────────────────────────────────────────────────────────────────┘
+```
+
+- **The bubble** is our own design, not a messaging app's. It's a Paper-white `#FFFDF8` bubble with a 22 px radius and a 6 px tail at the bottom left, set in Atkinson Next 22 px Ink, on a Vermilion "screen" panel: a 24 px-radius Vermilion `#F2542D` rounded rectangle standing in for the firm's phone, with no hardware detail. The meta line is in credit caps on Vermilion, Ink (5.3:1).
+- **The drafted filing card** is a white sheet in the visitor's chosen firm color (Harbor Pine by default), with the marquee rule and the title "New Jersey LLC formation". The rows are "Business name", "Members" and "Main business address" (the proof's labels), then "Registered agent", "Organizer" and "Signer" (from the Process copy's list of saved answers).
+- **M8, the kinetic sequence** (3.2 s, starting at 50% in view):
+  1. 0–900 ms. Four phrases in the bubble get Vermilion Ink underlines, one after another, 200 ms apart: "LLC", "bakery", "50/50" and "Jersey City". The sender name "Ana Ortiz" in the meta line gets one too.
+  2. 900–2100 ms. A copy of each phrase lifts (scale 1 → 1.08, gaining a soft shadow) and flies along a gentle Bézier arc into its row of the card, 160 ms apart, each flight 700 ms with `--ease-out`. "LLC" lands *inside* the card title. "bakery" lands in Business name. "Ana Ortiz" and "50/50" land in Members. "Jersey City" lands in Main business address.
+  3. Where a value is incomplete, a dashed underline in Vermilion Ink holds the rest of the field open: that's "for your team to check".
+  4. 2100–2800 ms. "Your saved answers fill in the rest": the Registered agent, Organizer and Signer rows fill in one by one, with a 12% firm-tint flash on each. Their sample values are `[copy needed: example saved answers]`.
+  5. 2800–3200 ms. The arrow line "↳ read into a drafted New Jersey LLC formation for your team to check" writes in, character by character, at 14 ms each.
+- **The other channels** mentioned in the lede (email, WhatsApp, Slack) appear as three small channel icons (§7.7) in a row under the bubble at 60% opacity. They're iconographic only; the words are already in the lede.
+- **Phone.** h2 at 38 px and the lede, then the bubble full width, then the card below it. The phrases fly **downward** along a short arc. Then the arrow line, then P2 at 4:5.
+- **Reduced motion:** the bubble shows the underlines and the card shows its filled rows. There are no flights.
+
+### 9.6 Checks: "Checked twice. Filed once." (support)
+
+**Copy placed:** h2 · lede "A state filing can't be taken back, so CoFile would rather stop and ask than guess." · five items, ending "How CoFile handles Social Security numbers, cards and state logins: see Security."
+
+**Treatment.** It's a **Programme page**: quiet, plain and well set.
+
+```
+┌─────────────────────────────── PROGRAMME #ECE3D3 ───────────────────────────────┐
+│                                                                                 │
+│  Checked twice.               º The fee your client approves comes from a       │
+│  Filed once.                    verified fee table. CoFile reads it again …     │
+│  (display-m 48 px)            ─────────────────────────────────────────────     │
+│                               º It reads the fine print. By card, New Jersey's  │
+│  A state filing can't be        standing certificate costs $52 for an LLC …     │
+│  taken back, so CoFile        ─────────────────────────────────────────────     │
+│  would rather stop and ask    º If a state has changed its form since …         │
+│  than guess.                  ─────────────────────────────────────────────     │
+│  (body, Ink 2)                º A filing is never sent twice on its own. …      │
+│                               ─────────────────────────────────────────────     │
+│  cols 1–4                     º How CoFile handles Social Security numbers,     │
+│                                 cards and state logins: see Security.           │
+│                               cols 6–12                                         │
+└─────────────────────────────────────────────────────────────────────────────────┘
+```
+
+- The ground is Programme with grain. The h2 is display-m Ink and the lede is body Ink 2.
+- Items are body 19 px Ink on 1 px Rule hairlines with 20 px padding, using the º ring bullet. Dollar amounts use tabular figures.
+- No icons, illustrations, ticks or shields. The "Security" link is underlined Ink with a 2 px Marigold underline on hover.
+- **Phone:** the same order, in one column.
+- **Motion:** a 360 ms fade-up of the whole block. Nothing else.
+
