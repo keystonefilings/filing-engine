@@ -80,7 +80,7 @@ export async function bootstrap(opts: { withExecutor: boolean; workerId?: string
   if (config.production && !config.email.resendApiKey) {
     console.warn("RESEND_API_KEY is not set: approval links, password resets and notices are recorded, not emailed");
   }
-  const notifier = new Notifier({ store, senders: { email }, defaultSender: new LogChannelSender("email"), publicBaseUrl: config.publicBaseUrl, artifacts, webBaseUrl: config.webBaseUrl, supportEmail: config.supportEmail });
+  const notifier = new Notifier({ store, senders: { email }, defaultSender: new LogChannelSender("email"), publicBaseUrl: config.publicBaseUrl, artifacts, webBaseUrl: config.webBaseUrl, supportEmail: config.supportEmail, platformTenantId: config.platformTenantId });
   const harness = new BrowserHarness({ chromiumPath: config.chromiumPath, proxyServer: config.browserProxy, siteProxies: config.siteProxies, steel: config.steel, profileDir: config.browserProfileDir });
   const { BasisTheoryCardVault } = await import("./payments/card-vault.js");
   const { CardCodes } = await import("./payments/card-codes.js");
