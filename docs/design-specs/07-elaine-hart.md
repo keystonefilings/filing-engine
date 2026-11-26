@@ -163,7 +163,7 @@ It's also exactly what CoFile does. "Then it's filed, and the papers come back t
 
 The imprint is the only sign of CoFile on a firm's pages, and it's the promise of the Firms
 headline made literal: "Ours in small type." It's small, gray and sits after the firm's name. It's
-never decorated. (For firms puts it the same way: "The only sign of us is a small 'with CoFile'.")
+never decorated. (For firms puts it the same way: "The only sign of us is a small “with CoFile”.")
 
 ```
 with CoFile■
