@@ -17,13 +17,26 @@ export function safeColor(c: string | undefined, fallback = "#1f4fd1"): string {
   return c && /^#[0-9a-fA-F]{3}([0-9a-fA-F]{3})?$/.test(c) ? c : fallback;
 }
 
-/** Text color that reads on a brand color: dark on light colors, white on dark ones. */
-export function textOn(hex: string): string {
+/** WCAG relative luminance of a #rgb or #rrggbb color. */
+export function luminance(hex: string): number {
   const h = hex.replace("#", "");
   const full = h.length === 3 ? h.split("").map((c) => c + c).join("") : h;
-  const [r, g, b] = [0, 2, 4].map((i) => parseInt(full.slice(i, i + 2), 16) / 255).map((c) => (c <= 0.03928 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4));
-  const lum = 0.2126 * r! + 0.7152 * g! + 0.0722 * b!;
-  return lum > 0.4 ? "#111111" : "#ffffff";
+  const [r, g, b] = [0, 2, 4].map((i) => parseInt(full.slice(i, i + 2), 16) / 255).map((c) => (c <= 0.04045 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4));
+  return 0.2126 * r! + 0.7152 * g! + 0.0722 * b!;
+}
+
+/** WCAG contrast ratio between two colors (1 to 21). */
+export function contrast(a: string, b: string): number {
+  const [hi, lo] = [luminance(a), luminance(b)].sort((x, y) => y - x);
+  return (hi! + 0.05) / (lo! + 0.05);
+}
+
+/**
+ * Text color that reads on a brand color: dark or white, whichever has the higher WCAG contrast
+ * against it. (The engine's approval page uses the same rule, in src/approvals/contrast.ts.)
+ */
+export function textOn(hex: string): string {
+  return contrast("#111111", hex) >= contrast("#ffffff", hex) ? "#111111" : "#ffffff";
 }
 
 /** Where a firm's logo is shown from: its uploaded picture (served by this site), else its https link. */
