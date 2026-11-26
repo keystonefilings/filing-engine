@@ -15,10 +15,10 @@ export class StripeClient {
   private readonly fetchImpl: typeof fetch;
   constructor(private readonly opts: StripeOptions) { this.fetchImpl = opts.fetchImpl ?? fetch; }
 
-  private async post<T>(path: string, data: Record<string, string | number | undefined>): Promise<T> {
+  private async post<T>(path: string, data: Record<string, string | number | undefined>, idempotencyKey?: string): Promise<T> {
     const res = await this.fetchImpl(`${this.opts.apiUrl ?? "https://api.stripe.com"}${path}`, {
       method: "POST",
-      headers: { authorization: `Bearer ${this.opts.secretKey}`, "content-type": "application/x-www-form-urlencoded" },
+      headers: { authorization: `Bearer ${this.opts.secretKey}`, "content-type": "application/x-www-form-urlencoded", ...(idempotencyKey ? { "idempotency-key": idempotencyKey } : {}) },
       body: form(data), signal: AbortSignal.timeout(20_000),
     });
     const body = (await res.json().catch(() => ({}))) as T & { error?: { message?: string } };
@@ -55,6 +55,12 @@ export class StripeClient {
   }
 
   /** Stripe's own page to change the card, see invoices or cancel. */
+  /** A one-off charge added to the customer's next invoice (decision 9: the yearly agent service). */
+  async invoiceItem(i: { customer: string; amountCents: number; description: string; metadata: Record<string, string>; idempotencyKey?: string }): Promise<{ id: string }> {
+    const meta = Object.fromEntries(Object.entries(i.metadata).map(([k, v]) => [`metadata[${k}]`, v]));
+    return this.post("/v1/invoiceitems", { customer: i.customer, amount: i.amountCents, currency: "usd", description: i.description, ...meta }, i.idempotencyKey);
+  }
+
   async portal(p: { customer: string; returnUrl: string }): Promise<{ url: string }> {
     return this.post("/v1/billing_portal/sessions", { customer: p.customer, return_url: p.returnUrl });
   }

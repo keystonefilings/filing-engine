@@ -13,7 +13,7 @@ import { RateLimiter } from "../users/rate-limit.js";
  * each submission is a new filing for that firm, which then goes through the same preview and
  * approval as any other. The submitter never gets the approval link.
  */
-export function registerPublicPages(app: FastifyInstance, deps: { store: Store; service: FilingService; platformTenantId: string; platformName?: string }): void {
+export function registerPublicPages(app: FastifyInstance, deps: { store: Store; service: FilingService; platformTenantId: string; platformName?: string; agentOffer?: (t: import("../settings/schema.js").TenantSettings, c: import("../settings/schema.js").ClientCompanySettings) => import("../registered-agents/agent-services.js").AgentOffer | null }): void {
   const perFirm = new RateLimiter(30, 3_600_000);
   const overall = new RateLimiter(600, 3_600_000);
 
@@ -39,6 +39,7 @@ export function registerPublicPages(app: FastifyInstance, deps: { store: Store; 
         registeredAgentsByState: c.registeredAgentsByState,
       },
       filerName: filerNameFor(c, await deps.store.getTenant(c.tenantId), deps.platformName ?? "CoFile"),
+      ourAgent: deps.agentOffer ? deps.agentOffer((await deps.store.getTenant(c.tenantId))!, c) : null,
     });
   });
 

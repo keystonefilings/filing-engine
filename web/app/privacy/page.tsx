@@ -38,7 +38,7 @@ export default function PrivacyPage() {
       <ul>
         <li><strong>Government agencies</strong> receive the filings you approve; that is the purpose of the service.</li>
         <li><strong>The firm or filing company you work with</strong> sees the filings it prepares for you.</li>
-        <li><strong>Service providers</strong> that run parts of {name} for us, under contracts that limit their use of the data: hosting, database and file storage, hosted browsers that open government sites, Basis Theory (cards), Stripe (subscriptions), Resend (email), Twilio (texts and WhatsApp), Slack (if your workspace adds {name}), Google (if you log in with Google) and Anthropic (Claude reads requests sent to us by email, Slack, text or WhatsApp to fill in the form).</li>
+        <li><strong>Service providers</strong> that run parts of {name} for us, under contracts that limit their use of the data: hosting, database and file storage, hosted browsers that open government sites, Basis Theory (cards), Stripe (subscriptions), Registered Agents, Inc. (the business&apos;s name, state and filing details, when a firm uses our registered agent service), Resend (email), Twilio (texts and WhatsApp), Slack (if your workspace adds {name}), Google (if you log in with Google) and Anthropic (Claude reads requests sent to us by email, Slack, text or WhatsApp to fill in the form).</li>
         <li><strong>Others when the law requires it</strong>, or to protect people, our service or our rights.</li>
       </ul>
 

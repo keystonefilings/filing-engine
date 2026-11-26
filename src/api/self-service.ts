@@ -72,6 +72,8 @@ export interface SelfServiceDeps {
   now?: () => Date;
   /** The site's name, for "filing through CoFile". */
   platformName?: string;
+  /** Decision 9: our registered agent offer for a firm, if any. */
+  agentOffer?: (tenant: import("../settings/schema.js").TenantSettings, client: import("../settings/schema.js").ClientCompanySettings) => import("../registered-agents/agent-services.js").AgentOffer | null;
 }
 
 export function registerSelfService(app: FastifyInstance, deps: SelfServiceDeps): void {
@@ -200,6 +202,7 @@ export function registerSelfService(app: FastifyInstance, deps: SelfServiceDeps)
     if (!tenantId) return reply;
     const c = await deps.store.getClientCompany((req.params as { id: string }).id);
     if (!c || c.tenantId !== tenantId) return reply.code(404).send({ error: "not found" });
-    return { clientCompany: c, filerName: filerNameFor(c, await deps.store.getTenant(c.tenantId), deps.platformName ?? "CoFile") };
+    const tenant = await deps.store.getTenant(c.tenantId);
+    return { clientCompany: c, filerName: filerNameFor(c, tenant, deps.platformName ?? "CoFile"), ourAgent: tenant && deps.agentOffer ? deps.agentOffer(tenant, c) : null };
   });
 }

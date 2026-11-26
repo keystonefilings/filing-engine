@@ -21,7 +21,7 @@ const app = buildServer({
   staffKeys: parseStaffKeys(process.env.STAFF_API_KEYS, config.production),
   // Dashboard session keys are signed with the approval-link secret (domain-separated).
   sessionSecret: config.approvalSigningSecret,
-  platformTenantId: config.platformTenantId, billing: sys.billing, inbound: sys.inbound, twilio: sys.twilio, slack: sys.slack, supportEmail: config.supportEmail,
+  platformTenantId: config.platformTenantId, billing: sys.billing, inbound: sys.inbound, twilio: sys.twilio, slack: sys.slack, supportEmail: config.supportEmail, agentServices: sys.agentServices,
   google: config.googleClientId ? new GoogleIdTokens({ clientId: config.googleClientId }) : undefined,
   // Partner sign-ups wait for approval unless this is set to "automatic".
   partnerSignupMode: process.env.PARTNER_SIGNUP_MODE === "automatic" ? "automatic" : "approval",
@@ -35,6 +35,8 @@ const purge = () => void purgeSensitive(sys.store, { retentionDays: config.sensi
   .catch((e) => console.warn(`SSN purge failed: ${(e as Error).message.split("\n")[0]}`));
 purge();
 setInterval(purge, 3_600_000).unref();
+// Decision 9: each registered agent service's due year goes on the firm's next Stripe invoice.
+setInterval(() => void sys.agentServices.chargeDue().catch((e: Error) => console.error("agent service charges failed", e.message)), 3_600_000).unref();
 if (config.workerEnabled) {
   // Same lease-aware recovery as the worker tier, on start and then periodically.
   const recover = async () => {

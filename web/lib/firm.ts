@@ -31,8 +31,8 @@ export function offeredKinds(c: Pick<ClientCompany, "portal"> & { partner?: Part
 }
 
 export const loadCompany = cache(async (apiKey: string, clientCompanyId: string): Promise<ClientCompany> => {
-  const r = await engine<{ clientCompany: ClientCompany; filerName?: string }>(apiKey, `/v1/client-companies/${encodeURIComponent(clientCompanyId)}`);
-  return { ...r.clientCompany, filerName: r.filerName };
+  const r = await engine<{ clientCompany: ClientCompany; filerName?: string; ourAgent?: ClientCompany["ourAgent"] }>(apiKey, `/v1/client-companies/${encodeURIComponent(clientCompanyId)}`);
+  return { ...r.clientCompany, filerName: r.filerName, ourAgent: r.ourAgent ?? null };
 });
 
 /** The signed-in firm for a portal page, its settings and brand. Redirects when not signed in to this portal. */

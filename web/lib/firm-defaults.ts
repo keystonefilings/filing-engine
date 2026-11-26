@@ -1,5 +1,6 @@
 import type { ClientCompany } from "./engine";
 import type { FilingKind } from "./intake/forms";
+import { platformName } from "./brand.ts";
 
 /**
  * V22: a firm's saved settings fill or skip questions on its forms (the partner's own filings,
@@ -18,7 +19,33 @@ export function savedAgent(company: Pick<ClientCompany, "registeredAgentsByState
   return all?.[state];
 }
 
-export function withFirmDefaults(kind: FilingKind, company: Pick<ClientCompany, "registeredAgentsByState"> & Partial<Pick<ClientCompany, "name" | "portal">>, opts: { forClient?: boolean } = {}): { kind: FilingKind; prefill: Record<string, string> } {
+/**
+ * Decision 9 (Nov 26): a partner firm's clients use the firm's own agent or ours (Registered Agents,
+ * Inc., resold; charged to the firm per business per year). The "filing company's agent" answer is
+ * ours, named as such: with its price for the firm's own staff, as the firm's service for its
+ * clients, and not offered where our service isn't set up for the state.
+ */
+function ourAgentChoice(kind: FilingKind, company: Partial<Pick<ClientCompany, "name" | "portal" | "partner" | "ourAgent">>, forClient: boolean): FilingKind {
+  if (!company.partner) return kind;
+  const offer = company.ourAgent && company.ourAgent.states.includes(kind.state) ? company.ourAgent : null;
+  const firm = company.portal?.displayName || company.name || "Your firm";
+  return {
+    ...kind,
+    sections: kind.sections.map((s) => ({
+      ...s,
+      items: s.items.map((it) => {
+        if (!(it.kind === "field" && it.path === "formation.registeredAgentChoice" && it.options?.some((o) => o.value === "filing_company"))) return it;
+        const options = offer
+          ? it.options!.map((o) => (o.value !== "filing_company" ? o : { ...o, label: forClient ? `${firm}'s registered agent service (${offer.provider})` : `Ours: ${offer.provider}, through ${platformName()} ($${offer.annualUsd} a year per business, billed to your firm)` }))
+          : it.options!.filter((o) => o.value !== "filing_company");
+        return { ...it, options, ...(it.defaultValue === "filing_company" && !offer ? { defaultValue: "client_provided" } : {}) };
+      }),
+    })),
+  } as FilingKind;
+}
+
+export function withFirmDefaults(kind: FilingKind, company: Pick<ClientCompany, "registeredAgentsByState"> & Partial<Pick<ClientCompany, "name" | "portal" | "partner" | "ourAgent">>, opts: { forClient?: boolean } = {}): { kind: FilingKind; prefill: Record<string, string> } {
+  kind = ourAgentChoice(kind, company, !!opts.forClient);
   // A client filling the firm's form never sees "copy receipts to this email": the state's copy
   // goes to the firm (adapters/copies.ts), not to whoever filled in the form.
   if (opts.forClient) kind = { ...kind, sections: kind.sections.map((s) => ({ ...s, items: s.items.filter((i) => !(i.kind === "field" && i.path === "intake.portal.ccEmail")) })) } as FilingKind;

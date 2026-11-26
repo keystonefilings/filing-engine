@@ -391,3 +391,21 @@ test("V40: answers read from an email are kept only when the form takes them", a
   ]);
   assert.deepEqual(Object.keys(g), [slot.name.replace(".N.", ".1.")]);
 });
+
+test("decision 9: partner forms offer our registered agent where it's set up, priced for the firm, as the firm's service for clients", () => {
+  const nj = filingKind("nj-llc")!, fl = filingKind("fl-llc")!;
+  const firm = { name: "Best Accounting LLC", portal: { displayName: "Best Accounting" }, partner: { companyType: "cpa" }, ourAgent: { provider: "Registered Agents, Inc.", annualUsd: 59, states: ["NJ"] }, registeredAgentsByState: {} } as never;
+  const label = (k: typeof nj, forClient: boolean) => {
+    const { kind } = withFirmDefaults(k, firm, { forClient });
+    const f = kind.sections.flatMap((s) => s.items).find((i) => i.kind === "field" && i.path === "formation.registeredAgentChoice") as { options: { value: string; label: string }[] } | undefined;
+    return f?.options.find((o) => o.value === "filing_company")?.label ?? null;
+  };
+  assert.equal(label(nj, false), "Ours: Registered Agents, Inc., through CoFile ($59 a year per business, billed to your firm)");
+  assert.equal(label(nj, true), "Best Accounting's registered agent service (Registered Agents, Inc.)");
+  assert.equal(label(fl, false), null); // not set up in Florida: not offered
+  // A firm an enterprise set up keeps its own wording.
+  const ent = { name: "Acme CPA", registeredAgentsByState: {} } as never;
+  const { kind } = withFirmDefaults(nj, ent);
+  const f = kind.sections.flatMap((s) => s.items).find((i) => i.kind === "field" && i.path === "formation.registeredAgentChoice") as { options: { value: string }[] };
+  assert.ok(f.options.some((o) => o.value === "filing_company"));
+});

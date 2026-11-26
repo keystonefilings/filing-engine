@@ -46,6 +46,8 @@ export interface PortalBrand { slug: string; publicPages?: boolean; displayName?
 export interface ClientCompany {
   /** Who "the filing company" is in this firm's authorizations (the engine works it out). */
   filerName?: string;
+  /** Decision 9: our registered agent service, where it's offered to this firm (partner firms). */
+  ourAgent?: { provider: string; annualUsd: number; states: string[] } | null;
   clientCompanyId: string;
   tenantId: string;
   name: string;

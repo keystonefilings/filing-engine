@@ -21,6 +21,7 @@ import { registerBrandLogos } from "./brand-logos.js";
 import { registerIntakeLinks } from "./intake-links.js";
 import { registerPublicPages } from "./public-pages.js";
 import { registerCardCodes } from "./card-codes.js";
+import { registerAgentServices } from "../registered-agents/routes.js";
 import { registerBilling } from "../billing/routes.js";
 import { registerInbound } from "../inbound/routes.js";
 import type { InboundEmailService } from "../inbound/email.js";
@@ -69,6 +70,8 @@ export interface ApiDeps {
   /** V41-V43: filing requests from Slack, and by text and WhatsApp through Twilio. */
   slack?: import("../inbound/slack.js").SlackChannel;
   twilio?: import("../inbound/twilio.js").TwilioChannel;
+  /** Decision 9: our registered agent service for partner firms. */
+  agentServices?: import("../registered-agents/agent-services.js").AgentServices;
   /** Where people reach us (SUPPORT_EMAIL). */
   supportEmail?: string;
   /** V37: checks Google ID tokens for "Sign in with Google". */
@@ -379,13 +382,14 @@ export function buildServer(deps: ApiDeps): FastifyInstance {
   });
 
   registerBrandLogos(app, { store: deps.store, artifacts: deps.artifacts, authOf });
-  registerSelfService(app, { store: deps.store, tenantOf, platformName: deps.platformName });
+  registerSelfService(app, { store: deps.store, tenantOf, platformName: deps.platformName, agentOffer: deps.agentServices ? (t, c) => deps.agentServices!.offer(t, c) : undefined });
   registerSignatures(app, { store: deps.store, tenantOf });
   registerIntakeLinks(app, { store: deps.store, authOf });
   registerCardCodes(app, { store: deps.store, service: deps.service, authOf });
+  if (deps.agentServices) registerAgentServices(app, { store: deps.store, agentServices: deps.agentServices, authOf });
   if (deps.billing) registerBilling(app, { store: deps.store, billing: deps.billing, authOf });
   if (deps.inbound || deps.twilio || deps.slack) registerInbound(app, { store: deps.store, inbound: deps.inbound, twilio: deps.twilio, slack: deps.slack, publicBaseUrl: deps.publicBaseUrl, authOf });
-  registerPublicPages(app, { store: deps.store, service: deps.service, platformTenantId: deps.platformTenantId ?? "keystone", platformName: deps.platformName });
+  registerPublicPages(app, { store: deps.store, service: deps.service, platformTenantId: deps.platformTenantId ?? "keystone", platformName: deps.platformName, agentOffer: deps.agentServices ? (t, c) => deps.agentServices!.offer(t, c) : undefined });
   registerUsers(app, {
     store: deps.store, authOf, staffOf, sessionSecret,
     platformTenantId: deps.platformTenantId ?? "keystone", partnerSignupMode: deps.partnerSignupMode ?? "approval",

@@ -87,8 +87,14 @@ export async function bootstrap(opts: { withExecutor: boolean; workerId?: string
   });
   const { BillingService } = await import("./billing/service.js");
   const { StripeClient } = await import("./billing/stripe.js");
+  const stripe = config.stripe.secretKey ? new StripeClient({ secretKey: config.stripe.secretKey, apiUrl: config.stripe.apiUrl }) : undefined;
+  const { AgentServices } = await import("./registered-agents/agent-services.js");
+  const agentServices = new AgentServices({
+    store, platformTenantId: config.platformTenantId, providerName: config.registeredAgent.providerName,
+    annualUsd: config.registeredAgent.annualUsd, stripe, email, opsEmail: config.opsEmail,
+  });
   const billing = new BillingService({
-    store, stripe: config.stripe.secretKey ? new StripeClient({ secretKey: config.stripe.secretKey, apiUrl: config.stripe.apiUrl }) : undefined,
+    store, stripe,
     webhookSecret: config.stripe.webhookSecret, prices: config.stripe.prices, required: config.stripe.required,
     trialDays: config.stripe.trialDays, platformTenantId: config.platformTenantId, webBaseUrl: config.webBaseUrl,
   });
@@ -96,10 +102,10 @@ export async function bootstrap(opts: { withExecutor: boolean; workerId?: string
   const limiter = new ConcurrencyLimiter({
     "site:IRS": config.siteConcurrency.IRS, "site:NY": config.siteConcurrency.NY, "site:NJ": config.siteConcurrency.NJ,
   });
-  const service = new FilingService({ store, approvals, webhooks, queue, vault, drift, nameResolution, reviewGate, registeredAgents, notifier, executor, cardCodes, billing, limiter, dryRunDefault: config.dryRunDefault, workerId: opts.workerId });
+  const service = new FilingService({ store, approvals, webhooks, queue, vault, drift, nameResolution, reviewGate, registeredAgents, notifier, executor, cardCodes, billing, agentServices, limiter, dryRunDefault: config.dryRunDefault, workerId: opts.workerId });
   const { TwilioChannel } = await import("./inbound/twilio.js");
   const { SlackChannel } = await import("./inbound/slack.js");
   const twilio = config.twilio.accountSid ? new TwilioChannel({ store, ...config.twilio, webhookUrl: `${config.publicBaseUrl}/v1/inbound/twilio`, webBaseUrl: config.webBaseUrl }) : undefined;
   const slack = config.slack.clientId ? new SlackChannel({ store, ...config.slack, cipher, publicBaseUrl: config.publicBaseUrl, webBaseUrl: config.webBaseUrl, stateSecret: config.approvalSigningSecret }) : undefined;
-  return { store, artifacts, approvals, webhooks, queue, vault, secrets, drift, nameResolution, reviewGate, registeredAgents, notifier, email, harness, executor, service, billing, inbound, twilio, slack };
+  return { store, artifacts, approvals, webhooks, queue, vault, secrets, drift, nameResolution, reviewGate, registeredAgents, notifier, email, harness, executor, service, billing, inbound, twilio, slack, agentServices };
 }

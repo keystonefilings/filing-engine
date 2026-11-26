@@ -4,7 +4,7 @@ import path from "node:path";
 import { randomUUID } from "node:crypto";
 import {
   ClientCompanyOwnershipError,
-  type ApiKeyRecord, type InquiryRecord, type IntakeLinkRecord, type BillingAccountRecord, type InboundMessageRecord, type UserRecord, type SignatureRecord, type ApprovalRecord, type DriftHaltRecord, type FilingRecord, type MessageRecord, type NameResolutionRecord, type ReviewGateRecord, type RunRecord, type Store, type SubmitIntentRecord, type WebhookDeliveryRecord,
+  type ApiKeyRecord, type InquiryRecord, type IntakeLinkRecord, type BillingAccountRecord, type AgentServiceRecord, type InboundMessageRecord, type UserRecord, type SignatureRecord, type ApprovalRecord, type DriftHaltRecord, type FilingRecord, type MessageRecord, type NameResolutionRecord, type ReviewGateRecord, type RunRecord, type Store, type SubmitIntentRecord, type WebhookDeliveryRecord,
 } from "./types.js";
 import type { ClientCompanySettings, TenantSettings } from "../settings/schema.js";
 import type { PageSnapshot } from "../resolver/types.js";
@@ -278,6 +278,21 @@ export class PostgresStore implements Store {
   async listInboundToPurge(cutoff: string) {
     const rows = await this.docs<InboundMessageRecord & { sealed?: string }>(`select doc from inbound_messages where received_at < $1 and not (doc ? 'purgedAt') limit 500`, [cutoff]);
     return rows.map((d) => this.openInbound(d)!);
+  }
+  async createAgentService(a: AgentServiceRecord) {
+    await this.pool.query(`insert into agent_services (id, tenant_id, client_company_id, filing_id, status, next_charge_at, doc) values ($1,$2,$3,$4,$5,$6,$7)`, [a.id, a.tenantId, a.clientCompanyId, a.filingId, a.status, a.nextChargeAt, a]);
+    return a;
+  }
+  async getAgentService(id: string) { return this.doc<AgentServiceRecord>(`select doc from agent_services where id=$1`, [id]); }
+  async findAgentServiceByFiling(filingId: string) { return this.doc<AgentServiceRecord>(`select doc from agent_services where filing_id=$1`, [filingId]); }
+  async listAgentServices(clientCompanyId: string) { return this.docs<AgentServiceRecord>(`select doc from agent_services where client_company_id=$1 order by doc->>'startedAt' desc`, [clientCompanyId]); }
+  async listDueAgentServices(cutoff: string) { return this.docs<AgentServiceRecord>(`select doc from agent_services where status='active' and next_charge_at <= $1 limit 500`, [cutoff]); }
+  async updateAgentService(id: string, patch: Partial<AgentServiceRecord>) {
+    const cur = await this.getAgentService(id);
+    if (!cur) throw new Error("agent service not found");
+    const next = { ...cur, ...patch, id };
+    await this.pool.query(`update agent_services set status=$2, next_charge_at=$3, doc=$4 where id=$1`, [id, next.status, next.nextChargeAt, next]);
+    return next;
   }
   async getBillingAccount(id: string) { return this.doc<BillingAccountRecord>(`select doc from billing_accounts where id=$1`, [id]); }
   async getBillingAccountByCustomer(customerId: string) { return this.doc<BillingAccountRecord>(`select doc from billing_accounts where customer_id=$1`, [customerId]); }

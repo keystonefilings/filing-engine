@@ -224,11 +224,14 @@ Built and tested; each switches on when its accounts and keys are set (steps in 
   these were decided and done on Nov 26: price wording, the filing company, the Terms and Privacy
   pages, the support address (hello@cofile.app), the approval consent (now covering fee payment),
   the saved-signature consent (limited and revocable), first-person declarations, the EIN owner
-  route, the coverage table and practice mode (plus a site-wide beta banner). Still waiting for you: the agent option,
-  turnaround times, the production hosts, the remaining fee figures, the API key prefix, Florida
-  professional entities and the Certificate of Existence upload. Have counsel review the Terms and
-  Privacy Policy (governing law, liability cap, legal entity name) and the approval consent,
-  saved-signature consent and declaration wording.
+  route, the coverage table, practice mode (plus a site-wide beta banner), the registered agent
+  (ours, resold from Registered Agents, Inc., $59 a year per business), turnaround times and the
+  sign-up review wording. Still waiting for you: the production hosts, the remaining fee figures,
+  the API key prefix, Florida professional entities and the Certificate of Existence upload. Have
+  counsel review the Terms and Privacy Policy (governing law, liability cap, legal entity name) and
+  the approval consent, saved-signature consent and declaration wording.
+- **Registered Agents, Inc.:** their API documentation and key (through your wholesale contact),
+  and their agent name and office address for each state you offer (setup in docs/deploy-fly.md).
 - **Live walks with you:** NY drawdown deposit and post-submit pages, Sunbiz checkout, the IRS
   Assignment screen, the NJ checkout (V9-V12); the checkout walks also let the adapters type saved
   cards (V18). Also the pages V13 and V14 couldn't map: each NY record filing's confirmation, the NJ

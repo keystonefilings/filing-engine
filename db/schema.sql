@@ -181,6 +181,19 @@ create table if not exists inbound_messages (
   doc jsonb not null
 );
 
+-- Decision 9: our registered agent service per business, charged to the partner firm each year.
+create table if not exists agent_services (
+  id uuid primary key,
+  tenant_id text not null,
+  client_company_id text not null,
+  filing_id text not null unique,
+  status text not null,
+  next_charge_at timestamptz not null,
+  doc jsonb not null
+);
+create index if not exists agent_services_due_idx on agent_services (status, next_charge_at);
+create index if not exists agent_services_firm_idx on agent_services (client_company_id);
+
 -- V33: each paying account's Stripe subscription (apart from settings, which approvals are bound to).
 create table if not exists billing_accounts (
   id text primary key,

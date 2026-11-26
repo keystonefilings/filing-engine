@@ -177,6 +177,18 @@ read -s TWILIO_AUTH_TOKEN && fly secrets set --stage --app keystone-filing-engin
 their mobile number under their account and confirm it with a code we text them; messages from
 other numbers get no answer.
 
+**Our registered agent service (Registered Agents, Inc.).** Partner firms can name their own
+agent or use ours, which we resell; the firm is charged `REGISTERED_AGENT_ANNUAL_USD` (default $59)
+per business per year on its Stripe invoices, from the year the filing is submitted until it
+cancels in Billing. Set it up in the platform tenant's settings (`PUT /v1/tenants/<platform>` with
+the staff key): `registeredAgentProvisioning.defaultProvisioning: "third_party"` and
+`thirdParty: { provider: "registered_agents_inc", agents: { NJ: { name, address }, FL: { ... } } }`
+with Registered Agents, Inc.'s agent name and office address in each state you offer. Partner
+forms offer ours only in those states. Until their API is connected, every new business and every
+cancellation emails `OPS_EMAIL` to place it in their portal by hand. When they share their API
+documentation (ask your wholesale contact), add its order endpoint as `thirdParty.http` and the key
+as `thirdParty.apiCredentialKey`: the engine then orders through the API and stops emailing.
+
 **Subscriptions (Stripe).** Not required to start. In Stripe:
 
 1. Products: create a product per plan (Enterprise, Partner), each with a recurring price. Copy

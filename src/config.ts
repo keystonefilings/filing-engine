@@ -85,6 +85,13 @@ export const config = {
   dryRunDefault: env("DRY_RUN_DEFAULT", "true") === "true",
   /** Where people reach us (decided Nov 26): named in our own account emails and staff notices. */
   supportEmail: env("SUPPORT_EMAIL", "hello@cofile.app"),
+  /** Where staff are told to place or cancel registered agent orders by hand (decision 9). */
+  opsEmail: env("OPS_EMAIL", env("SUPPORT_EMAIL", "hello@cofile.app")),
+  /** Decision 9: our registered agent service for partner firms, resold, charged yearly per business. */
+  registeredAgent: {
+    providerName: env("REGISTERED_AGENT_PROVIDER_NAME", "Registered Agents, Inc."),
+    annualUsd: Number(env("REGISTERED_AGENT_ANNUAL_USD", "59")),
+  },
   /** The platform's own tenant: partner firms that sign up on the landing page join it. */
   platformTenantId: env("PLATFORM_TENANT_ID", "keystone"),
   /** The site's name, shown to clients on approval pages (partner firms are "with CoFile"). */

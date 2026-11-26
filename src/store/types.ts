@@ -315,6 +315,35 @@ export interface InboundMessageRecord {
   purgedAt?: string;
 }
 
+/**
+ * Decision 9 (Nov 26): our registered agent service (Registered Agents, Inc., resold), for one business
+ * a partner firm formed with it. Charged to the firm each year (the first year when the filing is
+ * submitted) until the firm cancels; the provider order is placed by API when configured, else by
+ * our staff, who are emailed.
+ */
+export interface AgentServiceRecord {
+  id: string;
+  tenantId: string;
+  clientCompanyId: string;
+  filingId: string;
+  entityName: string;
+  state: string;
+  provider: string;
+  /** The provider's order reference, when ordered through its API. */
+  providerRef?: string;
+  /** api: ordered through the provider's API; staff: our team places the order by hand. */
+  orderedVia: "api" | "staff";
+  annualUsd: number;
+  status: "active" | "cancelled";
+  startedAt: string;
+  /** When the next year is charged. */
+  nextChargeAt: string;
+  yearsCharged: number;
+  lastChargedAt?: string;
+  cancelledAt?: string;
+  cancelledBy?: string;
+}
+
 /** V26: a link a firm sends one client to fill in one filing (the link itself is a sealed token in the web app). */
 export interface IntakeLinkRecord {
   id: string;
@@ -450,6 +479,13 @@ export interface Store {
   updateInbound(id: string, patch: Partial<InboundMessageRecord>): Promise<InboundMessageRecord>;
   /** Messages received before the cutoff that still hold their text. */
   listInboundToPurge(cutoff: string): Promise<InboundMessageRecord[]>;
+  createAgentService(a: AgentServiceRecord): Promise<AgentServiceRecord>;
+  getAgentService(id: string): Promise<AgentServiceRecord | null>;
+  findAgentServiceByFiling(filingId: string): Promise<AgentServiceRecord | null>;
+  listAgentServices(clientCompanyId: string): Promise<AgentServiceRecord[]>;
+  /** Active services whose next year is due by the cutoff. */
+  listDueAgentServices(cutoff: string): Promise<AgentServiceRecord[]>;
+  updateAgentService(id: string, patch: Partial<AgentServiceRecord>): Promise<AgentServiceRecord>;
   getBillingAccount(id: string): Promise<BillingAccountRecord | null>;
   getBillingAccountByCustomer(customerId: string): Promise<BillingAccountRecord | null>;
   putBillingAccount(b: BillingAccountRecord): Promise<BillingAccountRecord>;

@@ -1,7 +1,7 @@
 import { randomUUID } from "node:crypto";
 import {
   ClientCompanyOwnershipError,
-  type ApiKeyRecord, type InquiryRecord, type IntakeLinkRecord, type BillingAccountRecord, type InboundMessageRecord, type UserRecord, type SignatureRecord, type ApprovalRecord, type DriftHaltRecord, type FilingRecord, type MessageRecord, type NameResolutionRecord, type ReviewGateRecord, type RunRecord, type Store, type SubmitIntentRecord, type WebhookDeliveryRecord,
+  type ApiKeyRecord, type InquiryRecord, type IntakeLinkRecord, type BillingAccountRecord, type AgentServiceRecord, type InboundMessageRecord, type UserRecord, type SignatureRecord, type ApprovalRecord, type DriftHaltRecord, type FilingRecord, type MessageRecord, type NameResolutionRecord, type ReviewGateRecord, type RunRecord, type Store, type SubmitIntentRecord, type WebhookDeliveryRecord,
 } from "./types.js";
 import type { ClientCompanySettings, TenantSettings } from "../settings/schema.js";
 import type { PageSnapshot } from "../resolver/types.js";
@@ -144,6 +144,16 @@ export class MemoryStore implements Store {
   }
   async listInboundToPurge(cutoff: string) { return [...this.inbound.values()].filter((m) => m.receivedAt < cutoff && !m.purgedAt); }
   billingAccounts = new Map<string, BillingAccountRecord>();
+  agentServices = new Map<string, AgentServiceRecord>();
+  async createAgentService(a: AgentServiceRecord) { this.agentServices.set(a.id, a); return a; }
+  async getAgentService(id: string) { return this.agentServices.get(id) ?? null; }
+  async findAgentServiceByFiling(filingId: string) { return [...this.agentServices.values()].find((a) => a.filingId === filingId) ?? null; }
+  async listAgentServices(clientCompanyId: string) { return [...this.agentServices.values()].filter((a) => a.clientCompanyId === clientCompanyId).sort((a, b) => b.startedAt.localeCompare(a.startedAt)); }
+  async listDueAgentServices(cutoff: string) { return [...this.agentServices.values()].filter((a) => a.status === "active" && a.nextChargeAt <= cutoff); }
+  async updateAgentService(id: string, patch: Partial<AgentServiceRecord>) {
+    const a = this.agentServices.get(id); if (!a) throw new Error("agent service not found");
+    const next = { ...a, ...patch, id: a.id }; this.agentServices.set(id, next); return next;
+  }
   async getBillingAccount(id: string) { return this.billingAccounts.get(id) ?? null; }
   async getBillingAccountByCustomer(customerId: string) { return [...this.billingAccounts.values()].find((b) => b.customerId === customerId) ?? null; }
   async putBillingAccount(b: BillingAccountRecord) { this.billingAccounts.set(b.id, b); return b; }

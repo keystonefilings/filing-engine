@@ -60,6 +60,8 @@ const RULES: Record<string, Rule> = {
   "DELETE /v1/client-companies/:id/payment-methods/:methodId": ownCompany,
   "GET /v1/client-companies/:id/card-codes": ownCompany,
   "GET /v1/client-companies/:id/billing": ownCompany,
+  "GET /v1/client-companies/:id/agent-services": ownCompany,
+  "POST /v1/client-companies/:id/agent-services/:serviceId/cancel": ownCompany,
   "GET /v1/client-companies/:id/inbound": ownCompany,
   "GET /v1/account/phone": async () => true,
   "POST /v1/account/phone": async () => true,
