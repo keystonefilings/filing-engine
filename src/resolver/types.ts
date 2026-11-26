@@ -72,6 +72,13 @@ export interface ScreenIntents {
    * unmatched-field list; everything else on the screen is still checked.
    */
   dynamicFields?: string[];
+  /**
+   * Label patterns (regex source) for price lines whose amount follows the filing's own answers
+   * (NY's Tax on Shares and the total that includes it; a copy request's per-document fee). They
+   * are left out of the drift snapshot, so the next filing's amount is not drift; the fee check
+   * still compares every line on the page with the approval before the irreversible click.
+   */
+  dynamicPrices?: string[];
 }
 
 export function normalizeLabel(s: string): string {
@@ -91,9 +98,14 @@ export function kindsCompatible(want: FieldKind[] | undefined, have: FieldKind):
   return want.some((w) => TEXT_LIKE.has(w)) && TEXT_LIKE.has(have);
 }
 
-/** The inventory without the screen's per-run fields (see ScreenIntents.dynamicFields). */
-export function structuralInventory(inv: PageInventory, screen: Pick<ScreenIntents, "dynamicFields">): PageInventory {
+/** The inventory without the screen's per-run fields and prices (see ScreenIntents.dynamicFields, dynamicPrices). */
+export function structuralInventory(inv: PageInventory, screen: Pick<ScreenIntents, "dynamicFields" | "dynamicPrices">): PageInventory {
   const dyn = (screen.dynamicFields ?? []).map((r) => new RegExp(r, "i"));
-  if (!dyn.length) return inv;
-  return { ...inv, fields: inv.fields.filter((f) => !dyn.some((r) => r.test(f.label))) };
+  const dynPrices = (screen.dynamicPrices ?? []).map((r) => new RegExp(r, "i"));
+  if (!dyn.length && !dynPrices.length) return inv;
+  return {
+    ...inv,
+    fields: dyn.length ? inv.fields.filter((f) => !dyn.some((r) => r.test(f.label))) : inv.fields,
+    prices: dynPrices.length ? inv.prices.filter((p) => !dynPrices.some((r) => r.test(p.label))) : inv.prices,
+  };
 }

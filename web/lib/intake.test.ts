@@ -182,6 +182,99 @@ test("NY corporation wants whole shares and a first and last name", () => {
   assert.ok(issues.some((i) => i.path === "auth.ny-corp-signature"));
 });
 
+test("NY corporation takes par-value shares only when Par value is picked", () => {
+  const raw: Raw = {
+    "formation.name.baseName": "Hudson Ledger", "formation.name.designator": "Inc.", "formation.county": "Kings",
+    "formation.stockShares": "20000", "intake.portal.nyShareValue": "par", "formation.stockParValueUsd": "0.01", "formation.effectiveDate": "upon_filing",
+    "formation.serviceOfProcess.mode": "service_company", "formation.serviceOfProcess.serviceCompany": "CORPORATION SERVICE COMPANY",
+    "formation.incorporator.name": "Dana J Park", ...addr("formation.incorporator.address"), ...contact, ...auths("ny-corp"),
+  };
+  const par = buildRequest(filingKind("ny-corp")!, raw, ctx);
+  assert.deepEqual(par.issues, []);
+  assert.equal((par.request.formation as any).stockParValueUsd, 0.01);
+  // No par value: the amount is not sent, even if one was typed before switching back.
+  const noPar = buildRequest(filingKind("ny-corp")!, { ...raw, "intake.portal.nyShareValue": "no_par" }, ctx);
+  assert.deepEqual(noPar.issues, []);
+  assert.equal((noPar.request.formation as any).stockParValueUsd, undefined);
+  const missing = buildRequest(filingKind("ny-corp")!, { ...raw, "formation.stockParValueUsd": "" }, ctx);
+  assert.ok(missing.issues.some((i) => i.path === "formation.stockParValueUsd"));
+  const zero = buildRequest(filingKind("ny-corp")!, { ...raw, "formation.stockParValueUsd": "0" }, ctx);
+  assert.match(zero.issues.find((i) => i.path === "formation.stockParValueUsd")?.message ?? "", /at least/);
+});
+
+test("NJ corporation builds a for-profit corporation request with directors and incorporators", () => {
+  const raw: Raw = {
+    "formation.name.baseName": "Garden Ledger", "formation.name.designator": "INC.", "formation.stockShares": "1000", "formation.effectiveDate": "upon_filing",
+    "formation.registeredAgentChoice": "client_provided", "formation.registeredAgent.name": "Acme Agents Inc", ...addr("formation.registeredAgent.address", "NJ"),
+    "formation.directors.0.name": "Avery Stone", ...addr("formation.directors.0.address", "NJ"),
+    "formation.directors.2.name": "Jordan Hale", ...addr("formation.directors.2.address", "NJ"),
+    "formation.incorporators.0.name": "Sam Rivera", ...addr("formation.incorporators.0.address", "NJ"),
+    ...contact, ...auths("nj-corp"),
+  };
+  const { request, issues } = buildRequest(filingKind("nj-corp")!, raw, ctx);
+  assert.deepEqual(issues, []);
+  assert.equal(request.state, "NJ");
+  const f = request.formation as any;
+  assert.equal(f.njEntityType, "for_profit_corporation");
+  assert.equal(f.stockShares, 1000);
+  assert.deepEqual(f.directors.map((d: any) => d.name), ["Avery Stone", "Jordan Hale"]);
+  assert.equal(f.incorporators[0].address.state, "NJ");
+  assert.equal(f.members, undefined);
+  assert.equal(f.signers, undefined, "the incorporators sign; the form doesn't ask again");
+  const empty = buildRequest(filingKind("nj-corp")!, { ...contact }, ctx).issues.map((i) => i.path);
+  for (const p of ["formation.stockShares", "formation.directors", "formation.incorporators", "auth.nj-corp-signature"]) assert.ok(empty.includes(p), p);
+  // Only the corporation's endings are offered.
+  const ending = filingKind("nj-corp")!.sections[0]!.items.find((i: any) => i.path === "formation.name.designator") as any;
+  assert.ok(ending.options.every((o: any) => !/L\.?L\.?C|LIABILITY/.test(o.value)));
+});
+
+test("NY record filings build their own requests", () => {
+  const entity = (base: string): Raw => ({ [`${base}.dosId`]: "1234567", [`${base}.name`]: "Hudson Ledger LLC" });
+  const signer = (base: string): Raw => ({ [`${base}.signer.name`]: "Dana Park", [`${base}.signer.capacity`]: "member" });
+  const build = (id: string, raw: Raw) => buildRequest(filingKind(id)!, { ...raw, ...contact, ...auths(id) }, ctx);
+
+  const d = build("ny-llc-dissolution", { ...entity("dissolution.entity"), "dissolution.reason": "member_vote", ...signer("dissolution") });
+  assert.deepEqual(d.issues, []);
+  assert.equal(d.request.type, "dissolution");
+  assert.deepEqual((d.request as any).dissolution, { entity: { dosId: "1234567", name: "Hudson Ledger LLC" }, reason: "member_vote", signer: { name: "Dana Park", capacity: "member" } });
+
+  const a = build("ny-llc-name-change", { ...entity("amendment.entity"), "amendment.newName.baseName": "Hudson Books", "amendment.newName.designator": "LLC", ...signer("amendment") });
+  assert.deepEqual(a.issues, []);
+  assert.equal(a.request.type, "amendment");
+  assert.equal((a.request as any).amendment.kind, "name_change");
+  assert.equal((a.request as any).amendment.newName.baseName, "Hudson Books");
+
+  // Only the ticked changes are sent.
+  const c = build("ny-llc-change", {
+    ...entity("certificateOfChange.entity"), ...signer("certificateOfChange"),
+    "intake.portal.nyChangeCounty": "on", "certificateOfChange.county": "Queens",
+    "certificateOfChange.serviceOfProcessEmail": "left over from an unticked box",
+    "intake.portal.nyChangeAgentAddress": "on", ...addr("certificateOfChange.registeredAgentAddress"),
+  });
+  assert.deepEqual(c.issues, []);
+  const ch = (c.request as any).certificateOfChange;
+  assert.equal(ch.county, "Queens");
+  assert.equal(ch.serviceOfProcessEmail, undefined);
+  assert.equal(ch.registeredAgentAddress.city, "Albany");
+  assert.ok(build("ny-llc-change", { ...entity("certificateOfChange.entity"), ...signer("certificateOfChange"), "intake.portal.nyChangeCounty": "on" }).issues.some((i) => i.path === "certificateOfChange.county"));
+
+  const k = build("ny-copies", { "copyRequest.entity.dosId": "1234567", "copyRequest.documents.0.filingNumber": "240115000123", "copyRequest.documents.4.description": "Certificate of Publication", "copyRequest.documents.4.filingDate": "2024-05-02" });
+  assert.deepEqual(k.issues, []);
+  assert.equal(k.request.type, "copy_request");
+  assert.deepEqual((k.request as any).copyRequest.documents, [{ filingNumber: "240115000123" }, { description: "Certificate of Publication", filingDate: "2024-05-02" }]);
+  assert.ok(build("ny-copies", { "copyRequest.entity.dosId": "1234567" }).issues.some((i) => i.path === "copyRequest.documents"));
+
+  const s = build("ny-status", { "standing.dosId": "1234567", "standing.entityName": "Hudson Ledger LLC", "standing.form": "long_filing_history" });
+  assert.deepEqual(s.issues, []);
+  assert.equal(s.request.type, "standing_certificate");
+  assert.deepEqual((s.request as any).standing, { dosId: "1234567", entityName: "Hudson Ledger LLC", form: "long_filing_history" });
+
+  // Each asks for the portal's signature and payment authorizations (copies and status: payment only).
+  assert.deepEqual(filingKind("ny-llc-dissolution")!.authorizations.map((x) => x.id), ["ny-dissolution-signature", "ny-dissolution-payment"]);
+  assert.deepEqual(filingKind("ny-copies")!.authorizations.map((x) => x.id), ["ny-copies-payment"]);
+  assert.deepEqual(filingKind("ny-status")!.authorizations.map((x) => x.id), ["ny-status-payment"]);
+});
+
 test("a firm's saved agent is offered first and sent as the firm's own agent (V22)", () => {
   const company = { registeredAgentsByState: { NJ: { name: "Garden State Agents", address: { street1: "9 Agent Way", city: "Newark", state: "NJ", zip: "07102" } } } };
   const { kind, prefill } = withFirmDefaults(filingKind("nj-llc")!, company);

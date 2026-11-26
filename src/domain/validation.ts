@@ -15,6 +15,10 @@ const NY_RESTRICTED_WORDS = [
   "exchange", "board of trade", "chamber of commerce", "state police", "urban development",
 ];
 
+/** NJ Business Formation's designators for a domestic for-profit corporation (Screen 2, portal map 2026-11-24). */
+export const NJ_CORP_DESIGNATORS = ["CORPORATION", "INCORPORATED", "COMPANY", "LTD", "CO", "CO.", "CORP", "CORP.", "INC", "INC."];
+const NJ_CORP_ENDING = /(^|\s)(corporation|incorporated|company|ltd\.?|co\.?|corp\.?|inc\.?)$/i;
+
 /**
  * Pre-run validation, per decision rule 1: all data verified before the run starts.
  * Schema validity is assumed (zod ran first); this layer applies state rules.
@@ -47,11 +51,15 @@ export function validateFiling(req: FilingRequest): ValidationIssue[] {
     if (req.type === "formation" && req.state !== "NY" && f.nyEntityType !== "llc") {
       err("formation.nyEntityType", "nyEntityType applies to New York formations only");
     }
+    if (req.type === "formation" && req.state !== "NJ" && f.njEntityType !== "llc") {
+      err("formation.njEntityType", "njEntityType applies to New Jersey formations only");
+    }
     const nyCorp = req.type === "formation" && req.state === "NY" && f.nyEntityType === "business_corporation";
+    if (f.stockParValueUsd && !nyCorp) err("formation.stockParValueUsd", "a par value applies to a New York business corporation's shares only");
     if (nyCorp) {
       if (!hasCorpIndicator(legal)) err("formation.name", "a NY business corporation name must end with Corporation, Corp., Incorporated, Inc., Limited or Ltd.");
       if (!f.stockShares) err("formation.stockShares", "a NY business corporation needs the number of shares");
-      if (f.stockParValueUsd) err("formation.stockParValueUsd", "par-value shares are not mapped yet: NY's tax on par-value shares has not been read from the live page; use shares without par value");
+      if (f.stockParValueUsd) warn("formation.stockParValueUsd", "New York computes the tax on par-value shares on its own page; the approval quotes it (1/20 of 1% of the shares' total par value) and the filing stops before payment if the page shows a different amount");
       if (!f.incorporator?.address) err("formation.incorporator", "a NY business corporation needs an incorporator with an address (the incorporator's name is the typed signature)");
     }
     if (req.type === "formation" && req.state === "NY") {
@@ -77,7 +85,21 @@ export function validateFiling(req: FilingRequest): ValidationIssue[] {
       }
     }
 
-    if (req.type === "formation" && req.state === "NJ") {
+    if (req.type === "formation" && req.state === "NJ" && f.njEntityType === "for_profit_corporation") {
+      // NJ Business Formation, DP (docs/portal-maps/nj-business-formation.md): shares, at least one
+      // director and one incorporator. The incorporators sign unless signers are named.
+      if (!NJ_CORP_DESIGNATORS.includes(f.name.designator.trim().toUpperCase())) err("formation.name.designator", `a NJ corporation's designator is one of ${NJ_CORP_DESIGNATORS.join(", ")}`);
+      if (NJ_CORP_ENDING.test(f.name.baseName.trim())) err("formation.name.baseName", "baseName must not contain the designator (Corp., Inc. and the like); put it in designator");
+      if (!f.stockShares) err("formation.stockShares", "a NJ corporation needs its total number of shares (at least 1)");
+      if (f.directors.length < 1) err("formation.directors", "a NJ corporation needs at least one director");
+      if (f.incorporators.length < 1) err("formation.incorporators", "a NJ corporation needs at least one incorporator");
+      for (const [i, d] of f.directors.entries()) if (!d.address) err(`formation.directors[${i}].address`, "a NJ director's street address is required");
+      for (const [i, p] of f.incorporators.entries()) if (!p.address) err(`formation.incorporators[${i}].address`, "a NJ incorporator's address is required");
+      if (f.members.length) err("formation.members", "a NJ corporation lists directors and incorporators, not members");
+      if (f.additionalCertificates.certificateOfStanding || f.additionalCertificates.certifiedCopy) {
+        err("formation.additionalCertificates", "the price of a certificate of standing or certified copy at a NJ corporation's formation checkout has not been seen; order them separately");
+      }
+    } else if (req.type === "formation" && req.state === "NJ") {
       if (f.members.length < 1) err("formation.members", "NJ requires at least one member");
       if (f.signers.length < 1) err("formation.signers", "NJ requires at least one signer");
       for (const [i, m] of f.members.entries()) {
@@ -86,6 +108,8 @@ export function validateFiling(req: FilingRequest): ValidationIssue[] {
       for (const [i, s] of f.signers.entries()) {
         if (!s.title) err(`formation.signers[${i}].title`, "NJ signer title is required");
       }
+    }
+    if (req.type === "formation" && req.state === "NJ") {
       if (!raFromTenant && !f.registeredAgent?.address) err("formation.registeredAgent", "NJ requires a registered agent with address");
       else if (f.registeredAgent?.address && f.registeredAgent.address.state !== "NJ") err("formation.registeredAgent.address.state", "NJ registered agent must be in NJ");
       if (f.purpose && f.purpose.length > 300) err("formation.purpose", "NJ business purpose is limited to 300 characters");
@@ -153,10 +177,45 @@ export function validateFiling(req: FilingRequest): ValidationIssue[] {
 
   if (req.type === "standing_certificate") {
     if (req.formation) warn("formation", "standing certificate requests do not use formation details");
-    if (req.state === "NY") err("state", "NY Certificate of Status is a written request, not an online filing; it goes through the paper-upload engine (build order 7)");
-    else if (!req.standing) err("standing", "standing certificate details are required (entityName, form)");
+    if (!req.standing) err("standing", "standing certificate details are required (entityName, form)");
     else if (req.state === "NJ" && !req.standing.entityType) err("standing.entityType", "NJ standing certificates are priced by entity type, so the entity type is required");
+    else if (req.state === "NY") {
+      // NY DOS Certificates of Status (Screen K): found by DOS ID; Short Form or Long Form.
+      if (!req.standing.dosId) err("standing.dosId", "a NY Certificate of Status is ordered by the entity's DOS ID");
+      if (req.standing.form === "long_officers") err("standing.form", "NY offers a Short Form or a Long Form (with the filing history); there is no officers form");
+    }
     if (req.ein && req.ein.mode !== "none") err("ein", "an EIN is not part of a standing certificate request");
+  }
+
+  // NY DOS record filings (docs/portal-maps/ny-dos-corporations.md, Screens G to J): New York only,
+  // on a domestic LLC (the only kind whose flows were walked), with their own details.
+  const RECORD_TYPES = { dissolution: "dissolution", amendment: "amendment", certificate_of_change: "certificateOfChange", copy_request: "copyRequest" } as const;
+  if (req.type in RECORD_TYPES) {
+    const key = RECORD_TYPES[req.type as keyof typeof RECORD_TYPES];
+    if (req.state !== "NY" && req.type !== "amendment") err("state", `${req.type.replace(/_/g, " ")} filings are wired for New York only`);
+    if (req.state === "NY" && !req[key]) err(key, `a NY ${req.type.replace(/_/g, " ")} filing needs ${key}`);
+    if (req.formation) warn("formation", `${req.type.replace(/_/g, " ")} requests do not use formation details`);
+    if (req.ein && req.ein.mode !== "none") err("ein", `an EIN is not part of a ${req.type.replace(/_/g, " ")} request`);
+  }
+  if (req.type === "amendment" && req.state === "NY" && req.amendment) {
+    const a = req.amendment;
+    const newName = fullLegalName(a.newName);
+    if (!hasLlcIndicator(newName)) err("amendment.newName", "the new name of a NY LLC needs an LLC indicator (LLC, L.L.C. or Limited Liability Company)");
+    if (/\b(llc|l\.l\.c\.)\b/i.test(a.newName.baseName)) err("amendment.newName.baseName", "baseName must not contain the designator; put it in designator");
+    if (newName.trim().toUpperCase() === a.entity.name.trim().toUpperCase()) err("amendment.newName", "the new name is the same as the current one");
+    for (const w of NY_RESTRICTED_WORDS) if (newName.toLowerCase().includes(w)) warn("amendment.newName", `name contains restricted word "${w}" (consent or approval may be required)`);
+  }
+  if (req.type === "certificate_of_change" && req.certificateOfChange) {
+    const c = req.certificateOfChange;
+    if (!c.county && !c.serviceOfProcess && !c.serviceOfProcessEmail && !c.registeredAgentName && !c.registeredAgentAddress) {
+      err("certificateOfChange", "a certificate of change needs at least one change (county, service of process address or email, registered agent name or address)");
+    }
+    if (c.registeredAgentAddress && c.registeredAgentAddress.state !== "NY") err("certificateOfChange.registeredAgentAddress.state", "a NY registered agent's address must be in New York");
+  }
+  if (req.type === "copy_request" && req.copyRequest) {
+    for (const [i, d] of req.copyRequest.documents.entries()) {
+      if (!d.filingNumber && !d.description) err(`copyRequest.documents[${i}]`, "name each document by its filing number or its description on the filing history");
+    }
   }
 
   if (req.type === "payroll_registration") {

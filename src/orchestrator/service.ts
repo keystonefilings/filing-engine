@@ -1,5 +1,5 @@
 import { randomUUID } from "node:crypto";
-import { wantsPlainCopy } from "../domain/portal-intake.js";
+import { feeOptionsFor } from "../fees/request-fees.js";
 import { FilingRequest, type FilingRequest as FilingRequestT } from "../domain/filing.js";
 import { hasErrors, validateFiling, type ValidationIssue } from "../domain/validation.js";
 import { checkCompleteness, type CompletenessConfig } from "../domain/completeness.js";
@@ -23,7 +23,6 @@ import type { ResolvedRegisteredAgent } from "../registered-agents/types.js";
 import type { Notifier } from "../comms/notifier.js";
 import { ConcurrencyLimiter } from "./locks.js";
 import { LeaseLost } from "../browser/guard.js";
-import { njAccount, moAccount, flAccount } from "../settings/accounts.js";
 import { applyPolicies } from "../settings/policies.js";
 import type { ClientCompanySettings, TenantSettings } from "../settings/schema.js";
 import type { ArtifactStore } from "../artifacts/store.js";
@@ -121,16 +120,7 @@ export class FilingService {
     if (req.type === "ein_only") return [{ label: "EIN application", amountUsd: 0 }];
     if (req.type === "payroll_registration") return [{ label: `${req.state} payroll / employer registration (no fee)`, amountUsd: 0 }];
     if (req.type === "paper_upload") return paperUploadFees(req);
-    return expectedFees(req.state, req.type, {
-      // The method the NJ adapters will pick on the account the run signs in with.
-      paymentMethod: req.state === "NJ" ? njAccount(tenant, client).feeMethod : req.state === "MO" ? moAccount(tenant, client).feeMethod : req.state === "FL" ? flAccount(tenant, client).feeMethod : undefined,
-      certificateOfStanding: req.formation?.additionalCertificates.certificateOfStanding,
-      certifiedCopy: req.formation?.additionalCertificates.certifiedCopy,
-      plainCopy: wantsPlainCopy(req),
-      entityType: req.standing?.entityType,
-      floridaEntityType: req.formation?.floridaEntityType,
-      nyEntityType: req.formation?.nyEntityType,
-    });
+    return expectedFees(req.state, req.type, feeOptionsFor(req, tenant, client));
   }
 
   /** POST /v1/filings: validate, store, create the approval, emit awaiting_approval. Idempotent per tenant+key. */

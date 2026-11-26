@@ -3,7 +3,7 @@
 <nav><a href="#">Help</a> <a href="#">Retrieve Documents</a> <a href="#">New User</a> <a href="#">Login</a></nav>
 <p>You have chosen to file a <strong>NJ Domestic Limited Liability Company (LLC)</strong> named: <strong id="nm"></strong></p><script>document.getElementById("nm").textContent=NJ.get("name","").toUpperCase()+" "+NJ.get("designator","")</script>
 <h2>Registered Agent Information</h2>
-<form onsubmit="event.preventDefault(); if(!document.getElementById('Attested').checked){alert('attest');return;} NJ.go('members.html')">
+<form onsubmit="event.preventDefault(); if(!document.getElementById('Attested').checked){alert('attest');return;} NJ.go(NJ.get('type','') === 'DP' ? 'directors.html' : 'members.html')">
 <fieldset><h3>Registered Agent Details</h3><ul>
 <li><label for="RegisteredAgentName">Registered Agent Name *</label><input id="RegisteredAgentName" name="RegisteredAgentName" type="text"></li>
 <li><label for="RegisteredAgentEmail">Registered Agent Email</label><input id="RegisteredAgentEmail" name="RegisteredAgentEmail" type="text"></li>

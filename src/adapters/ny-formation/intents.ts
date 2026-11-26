@@ -1,4 +1,5 @@
 import type { ScreenIntents } from "../../resolver/types.js";
+import { NY_REPLENISH } from "../ny-dos/common.js";
 
 /**
  * NY DOS Division of Corporations On-Line Filing System, signed in as the service company
@@ -42,16 +43,8 @@ const filer = [
 const FORM_BUTTONS = ["Service Company Address", "SOP Address", "Organizer Address", "Incorporator Address", "Go Back", "Cancel", "Save for Later", "The LLC", "The Corporation"];
 
 export const NY_SCREENS = {
-  /** Screen M: fund the draw-down account with exactly this filing's approved total. */
-  replenish: {
-    screenKey: "ny.replenish",
-    title: "Replenish DD Account",
-    intents: [
-      { key: "drawdownAccount", labels: ["Drawdown Accounts", "Drawdown Account"], kinds: ["select"], required: true, note: "the account named in the NY settings; with one listed, that one" },
-      { key: "depositAmount", labels: ["Deposit Amount"], kinds: ["text", "number"], required: true },
-      { key: "paymentAuthorization", labels: ["Payment Authorization", "authorize"], kinds: ["checkbox"], required: false, note: "STOP: ticked only on a live run, covered by the client's approval of this filing's fees" },
-    ],
-  },
+  /** Screen M: fund the draw-down account with exactly this filing's approved total (shared by every NY DOS flow). */
+  replenish: NY_REPLENISH,
   /** Screen A: service-company home; the formation entry is a link. */
   home: { screenKey: "ny.home", title: "On-Line Filings for Service Company Filers", intents: [] },
   /** Screen B: which formation document; links. */
@@ -105,7 +98,8 @@ export const NY_SCREENS = {
       { key: "englishTranslation", labels: ["English Translation"], kinds: ["text"], required: false, section: "Corporation Name" },
       { key: "county", labels: ["County"], kinds: ["select"], required: true, section: "County" },
       { key: "shareCount", labels: ["Number of Shares"], kinds: ["text", "number"], required: true, section: "Shares" },
-      { key: "shareValue", labels: ["Share Value"], kinds: ["select"], required: true, section: "Shares", note: "No Par Value, or a par value" },
+      { key: "shareValue", labels: ["Share Value"], kinds: ["select"], required: true, section: "Shares", note: "No Par Value (preselected) or Par Value" },
+      { key: "parValue", labels: ["Par Value Amount", "Par Value per Share", "Par Value", "Par Amount"], kinds: ["text", "number"], required: false, section: "Shares", note: "C: shows when Share Value is Par Value (walk 2026-11-18); its exact label, format and cap were not captured" },
       ...serviceOfProcess,
       { key: "registeredAgentClause", labels: ["Check if applicable"], kinds: ["checkbox"], required: false, section: "Registered Agent" },
       { key: "effectiveDateClause", labels: ["Check if applicable"], kinds: ["checkbox"], required: false, section: "Effective Date" },
@@ -150,10 +144,15 @@ export const NY_SCREENS = {
 
 /**
  * The business corporation's Payment Information: the same fields, its own fee lines ($125 plus
- * the tax on shares the page computes), so its own approved snapshot. Prices are part of the
- * drift check on purpose, so a tax the page computes differently stops for review.
+ * the tax on shares the page computes), so its own approved snapshot. The Tax on Shares and the
+ * total follow each filing's share answers, so they are left out of the drift snapshot; the fee
+ * check compares them with the approval's quote, and a tax the page computes differently stops
+ * the run before File Document.
  */
-export const NY_BCL_PAYMENT: ScreenIntents = { ...NY_SCREENS.payment, screenKey: "ny.bcl_payment", title: "Payment Information (business corporation)" };
+export const NY_BCL_PAYMENT: ScreenIntents = {
+  ...NY_SCREENS.payment, screenKey: "ny.bcl_payment", title: "Payment Information (business corporation)",
+  dynamicPrices: ["^tax on shares", "^total fee"],
+};
 
 /**
  * NY E-Submission upload envelope ("Filing Information"), verified on the Initial

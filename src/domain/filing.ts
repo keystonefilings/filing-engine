@@ -111,6 +111,12 @@ export const FilingType = z.enum([
   "amendment",
   "paper_upload",
   "payroll_registration",
+  /** NY: Articles of Dissolution of a domestic LLC (DOS online, Screen G). */
+  "dissolution",
+  /** NY: Certificate of Change by the entity (DOS online, Screen I). */
+  "certificate_of_change",
+  /** NY: copies of documents on an entity's filing history (DOS online, Screen J). */
+  "copy_request",
 ]);
 export type FilingType = z.infer<typeof FilingType>;
 
@@ -161,8 +167,17 @@ export const FormationDetails = z.object({
   /** NY formation on the DOS On-Line Filing System: LLC Articles of Organization (default) or a
    *  business corporation's Certificate of Incorporation (BCL s.402). */
   nyEntityType: z.enum(["llc", "business_corporation"]).default("llc"),
-  /** NY business corporation: par value per share in USD; omit for shares without par value. */
+  /** NY business corporation: par value per share in USD ("Share Value: Par Value"); omit for shares
+   *  without par value. The page computes the Tax On Shares from it (fees/table.ts nyTaxOnShares). */
   stockParValueUsd: z.number().positive().optional(),
+  /** NJ formation on NJ Business Formation: an LLC's Certificate of Formation (default) or a domestic
+   *  for-profit corporation's (DP) Certificate of Incorporation (docs/portal-maps/nj-business-formation.md). */
+  njEntityType: z.enum(["llc", "for_profit_corporation"]).default("llc"),
+  /** NJ for-profit corporation: the board of directors, 1 to 10, each with a street address. */
+  directors: z.array(Person).max(10).default([]),
+  /** NJ for-profit corporation: the incorporators, 1 to 10, each with an address. They sign the
+   *  certificate (N.J.S.A. 14A:2-7) unless `signers` names others. */
+  incorporators: z.array(Person).max(10).default([]),
   /** FL formation entity type (Sunbiz): LLC (default), profit corporation, or limited partnership. */
   floridaEntityType: z.enum(["llc", "profit_corporation", "limited_partnership"]).default("llc"),
   /** FL profit corporation and NY business corporation: number of authorized shares (required). */
@@ -202,6 +217,8 @@ export const StandingCertificateDetails = z.object({
   form: z.enum(["short", "long_filing_history", "long_officers"]).default("short"),
   /** NJ only: decides the price (LLC/FLC $50, corporations/LP $25); checked against the record's Type column. MO good standing is a flat $10. */
   entityType: NjEntityType.optional(),
+  /** NY only: the entity's DOS ID, which the Certificate of Status search goes by (Screen K). */
+  dosId: z.string().regex(/^\d{1,10}$/, "DOS ID: digits only").optional(),
 });
 
 export const Contact = z.object({
@@ -352,6 +369,82 @@ export const PaperUploadDetails = z.object({
 });
 export type PaperUploadDetails = z.infer<typeof PaperUploadDetails>;
 
+/**
+ * Filings about an entity already on the NY DOS records, on the On-Line Filing System
+ * (docs/portal-maps/ny-dos-corporations.md, Screens G to K). Each flow starts by finding the
+ * entity; dissolution, amendment and change need the DOS ID and the name to match exactly.
+ * Only a domestic LLC's flows were walked.
+ */
+export const NyDosEntity = z.object({
+  dosId: z.string().regex(/^\d{1,10}$/, "DOS ID: digits only"),
+  /** Exactly as on the DOS records. */
+  name: z.string().min(1),
+});
+export type NyDosEntity = z.infer<typeof NyDosEntity>;
+
+/** Who signs (Attestation and Signature: typed name and Capacity of Signer). */
+export const NyRecordSigner = z.object({
+  name: z.string().min(1),
+  capacity: z.enum(["member", "manager", "authorized_person"]),
+});
+
+/** Screen G: Articles of Dissolution of a domestic LLC (Certificate of Dissolution-Cancellation, LLC Law s.705). */
+export const DissolutionDetails = z.object({
+  entity: NyDosEntity,
+  /** Reason for Dissolution, one of the four on the form. */
+  reason: z.enum(["member_vote", "no_members", "dissolution_date", "judicial_decree"]),
+  signer: NyRecordSigner,
+  /** A plain copy ($5); where the flow offers it was not visible in the recording. */
+  plainCopy: z.boolean().default(false),
+});
+export type DissolutionDetails = z.infer<typeof DissolutionDetails>;
+
+/** Screen H: Certificate of Amendment, name change only (LLC Law s.211), for a domestic LLC. */
+export const AmendmentDetails = z.object({
+  kind: z.literal("name_change").default("name_change"),
+  entity: NyDosEntity,
+  /** The new name: base name and LLC ending. */
+  newName: EntityName,
+  signer: NyRecordSigner,
+  plainCopy: z.boolean().default(false),
+});
+export type AmendmentDetails = z.infer<typeof AmendmentDetails>;
+
+/**
+ * Screen I: Certificate of Change by the entity (LLC Law s.211-A), for a domestic LLC. Each field
+ * given is one change ticked on the Change Selection page. Designating a registered agent and
+ * revoking one are on that page too, but their sections were not shown, so they are not offered.
+ */
+export const CertificateOfChangeDetails = z.object({
+  entity: NyDosEntity,
+  /** Entity County Location. */
+  county: NyCounty.optional(),
+  /** Service of Process Recipient and Mailing Address. */
+  serviceOfProcess: z.object({ name: z.string().min(1), address: Address }).optional(),
+  /** Service of Process Email Address. */
+  serviceOfProcessEmail: z.string().email().optional(),
+  /** Name of Registered Agent (an agent already on file). */
+  registeredAgentName: z.string().min(1).optional(),
+  /** Registered Agent Address (New York). */
+  registeredAgentAddress: Address.optional(),
+  signer: NyRecordSigner,
+  plainCopy: z.boolean().default(false),
+});
+export type CertificateOfChangeDetails = z.infer<typeof CertificateOfChangeDetails>;
+
+/** Screen J: plain copies of documents on an entity's Entity Filing History ($5 each). */
+export const CopyRequestDetails = z.object({
+  /** Searched by DOS ID; the name, when given, is checked against the record. */
+  entity: z.object({ dosId: NyDosEntity.shape.dosId, name: z.string().min(1).optional() }),
+  /** Each document by its Filing Number, or by its Description (and Filing Date when several share it). */
+  documents: z.array(z.object({
+    filingNumber: z.string().min(1).optional(),
+    description: z.string().min(1).optional(),
+    filingDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional(),
+  })).min(1).max(25),
+});
+export type CopyRequestDetails = z.infer<typeof CopyRequestDetails>;
+
 export const FilingRequest = z.object({
   tenantId: z.string().min(1),
   clientCompanyId: z.string().min(1),
@@ -362,6 +455,10 @@ export const FilingRequest = z.object({
   standing: StandingCertificateDetails.optional(),
   payroll: PayrollRegistrationDetails.optional(),
   paperUpload: PaperUploadDetails.optional(),
+  dissolution: DissolutionDetails.optional(),
+  amendment: AmendmentDetails.optional(),
+  certificateOfChange: CertificateOfChangeDetails.optional(),
+  copyRequest: CopyRequestDetails.optional(),
   ein: EinRequest.optional(),
   contact: Contact,
   /** The service company's intake answers for this entity (shape: settings/policies.ts FilingIntake). */

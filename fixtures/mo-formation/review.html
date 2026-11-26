@@ -1,0 +1,7 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><script src="_mo.js"></script><title>Review (replica)</title></head><body><script>MO.header()</script>
+<h1>Review</h1>
+<div id="err" role="alert" hidden></div>
+<script>document.write('<p>Entity Name: ' + MO.get("name", "") + ' <button type="button">update</button></p><p>Organizers: ' + MO.get("organizers", []).map(function (o) { return o.name; }).join(", ") + ' <button type="button">update</button></p>');</script>
+<p><label><input type="checkbox" id="ack"> I acknowledge that the information provided above is true and correct.</label></p>
+<p><button type="button" onclick="MO.next(['ack'], 'signer.html')">Next</button></p>
+</body></html>

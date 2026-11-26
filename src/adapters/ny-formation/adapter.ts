@@ -1,11 +1,12 @@
 import { hasCorpIndicator, hasLlcIndicator, renderName } from "../../domain/name.js";
 import type { ScreenStep, SiteAdapter, StepContext } from "../types.js";
 import type { ScreenIntents } from "../../resolver/types.js";
-import { nyDrawdownAccount, tenantVaultKey } from "../../settings/accounts.js";
-import { totalUsd } from "../../fees/table.js";
+import { tenantVaultKey } from "../../settings/accounts.js";
 import { NY_BCL_PAYMENT, NY_SCREENS } from "./intents.js";
 import { portalText, wantsPlainCopy } from "../../domain/portal-intake.js";
 import { copyCc } from "../copies.js";
+import { checkDrawdownCovers, clickLink, money, openReplenish, pickDrawdown, replenish, whenShown } from "../ny-dos/common.js";
+import { nyTaxOnShares } from "../../fees/table.js";
 
 /**
  * NY DOS formation, signed in as the service company: a domestic LLC's Articles of Organization
@@ -21,8 +22,14 @@ import { copyCc } from "../copies.js";
  * authorizing it or touching a card, then files up to Payment Information and stops before
  * "File Document"; neither Payment Authorization box is ever ticked. Not built yet: the live
  * deposit (the card vault for the account's NY state fees is an open decision, and entering a
- * card brings the engine into card-data scope), the page after "File Document" (so no
- * submission can be confirmed), and par-value shares (tax on shares not mapped).
+ * card brings the engine into card-data scope) and the page after "File Document" (so no
+ * submission can be confirmed). The prepay steps and the draw-down checks are shared with the
+ * other NY DOS flows (adapters/ny-dos/common.ts).
+ *
+ * Par-value shares (Screen D1 "Share Value", walk 2026-11-18): Par Value is picked and the par
+ * amount typed into the field that appears. DOS computes the Tax On Shares itself; the approval
+ * quotes it from the share answers (fees/table.ts nyTaxOnShares) and the payment page's fee check
+ * stops the run before File Document when the page shows a different amount.
  */
 
 function formation(ctx: StepContext) {
@@ -31,84 +38,8 @@ function formation(ctx: StepContext) {
   return f;
 }
 const isCorp = (ctx: StepContext) => formation(ctx).nyEntityType === "business_corporation";
-const money = (usd: number) => usd.toFixed(2);
 
-/** Links are not form controls: click one by its text, or say which is missing. */
-async function clickLink(ctx: StepContext, name: RegExp, what: string) {
-  const link = ctx.page.getByRole("link", { name }).first();
-  if (!(await link.count())) throw new Error(`NY DOS: the "${what}" link is not on this page`);
-  await link.click();
-}
-
-/** "Account Balance $1,234.56" on the page, or null when it is not shown. */
-async function readBalance(ctx: StepContext): Promise<number | null> {
-  const text = await ctx.page.locator("body").innerText();
-  const m = /account balance[^$\d]*\$?\s?([\d,]+\.\d{2})/i.exec(text);
-  return m ? Number(m[1]!.replace(/,/g, "")) : null;
-}
-
-/** The deposit amount: the total the client approved, which the payment page is checked against later. */
-function approvedTotal(ctx: StepContext): number {
-  const total = totalUsd(ctx.expectedFees);
-  if (!(total > 0)) throw new Error("NY DOS: no approved fee total to deposit; the filing needs an approval with its fees");
-  return total;
-}
-
-/** The draw-down account in force (the service company's, or the firm's own under answer G1), else the only one listed. */
-async function pickDrawdown(ctx: StepContext, set: StepContext["set"], field: StepContext["field"]) {
-  const ref = nyDrawdownAccount(ctx.tenant, ctx.client);
-  const f = field("drawdownAccount");
-  const options = (f?.options ?? []).filter((o) => o.value && !/select/i.test(o.label));
-  const chosen = ref ? options.find((o) => o.label.includes(ref) || o.value === ref) : options.length === 1 ? options[0] : undefined;
-  if (!chosen) {
-    throw new Error(ref
-      ? `NY DOS: draw-down account "${ref}" is not in the list on this page`
-      : `NY DOS: ${options.length} draw-down accounts are listed; name one in the NY settings (nyDrawdownAccountRef)`);
-  }
-  await set("drawdownAccount", chosen.label);
-  return chosen.label;
-}
-
-/** Waits (bounded) for fields a choice reveals on the same page, then returns the page resolved fresh. */
-async function whenShown(ctx: StepContext, screen: ScreenIntents, keys: string[], after: string, timeoutMs = 15_000) {
-  for (let waited = 0; ; waited += 500) {
-    const r = await ctx.resolve(screen);
-    if (keys.every((k) => r.field(k)?.visible)) return r;
-    if (waited >= timeoutMs) throw new Error(`NY DOS ${screen.title}: ${keys.join(", ")} did not appear after ${after}`);
-    await ctx.page.waitForTimeout(500);
-  }
-}
-
-// ---- Prepay: Screen M (Replenish DD Account) ----
-
-const openReplenish: ScreenStep = {
-  screen: { screenKey: "ny.menu", title: "DOS menu (signed in)", intents: [] },
-  async fill() { /* any signed-in page: the menu is on every page */ },
-  async advance(ctx) { await clickLink(ctx, /^replenish dd account$/i, "Replenish DD Account"); },
-};
-
-const replenish: ScreenStep = {
-  screen: NY_SCREENS.replenish, // no card data here; Elavon's card page will be its own masked step
-  async fill(ctx) {
-    const total = approvedTotal(ctx);
-    const account = await pickDrawdown(ctx, ctx.set, ctx.field);
-    const before = await readBalance(ctx);
-    await ctx.set("depositAmount", money(total));
-    ctx.values.nyDepositUsd = money(total);
-    if (before !== null) ctx.values.nyBalanceBeforeUsd = money(before);
-    if (ctx.dryRun) {
-      await ctx.note(`dry run: draw-down deposit of $${money(total)} into ${account} prepared, not authorized (balance $${before === null ? "not shown" : money(before)})`);
-      return;
-    }
-    // A live deposit: tick Payment Authorization, Continue to Elavon, check the order amount to the
-    // cent, enter the saved card from the payment vault, Submit Payment through the submit guard,
-    // then confirm the balance rose by exactly the total. Not built: the card vault is undecided.
-    throw new Error("NY DOS: live draw-down deposits are not built yet (the card vault for the account's NY state fees is an open decision); no deposit was made");
-  },
-  async advance(ctx) { await clickLink(ctx, /^home$/i, "Home"); },
-};
-
-// ---- Filing: Screens A to F ----
+// ---- Filing: Screens A to F (after the prepay deposit, Screen M) ----
 
 const home: ScreenStep = {
   screen: NY_SCREENS.home,
@@ -241,6 +172,18 @@ const llcForm: ScreenStep = {
   async advance(ctx) { await ctx.clickButton(/^continue/i); },
 };
 
+/**
+ * The form shows "Tax On Shares $..." under Shares. It is recorded beside the approval's quote, as
+ * evidence for the walk; the payment page's fee check is what stops a run on a different amount.
+ */
+async function noteTaxOnShares(ctx: StepContext, shares: number, parUsd: number | undefined) {
+  const text = (await ctx.page.locator("body").innerText()).replace(/\s+/g, " ");
+  const shown = /tax on shares\s*\$?\s*([\d,]+\.\d{2})/i.exec(text)?.[1];
+  let quoted: string;
+  try { quoted = `$${money(nyTaxOnShares(shares, parUsd))}`; } catch { quoted = "none in the fee table"; }
+  await ctx.note(`shares: ${shares} ${parUsd ? `at $${parUsd} par` : "without par value"}; the form shows Tax On Shares ${shown ? `$${shown}` : "(not shown)"}; quoted ${quoted}`);
+}
+
 /** "Mary A Smith" -> first Mary, middle A, last Smith. */
 function splitName(full: string) {
   const parts = full.trim().split(/\s+/);
@@ -256,7 +199,6 @@ const bclForm: ScreenStep = {
     const inc = f.incorporator;
     if (!inc?.address) throw new Error("NY business corporation: incorporator name and address missing");
     if (!f.stockShares) throw new Error("NY business corporation: the number of shares is missing");
-    if (f.stockParValueUsd) throw new Error("NY business corporation: par-value shares are not mapped yet (tax on shares)");
     checkCarriedName(ctx, "corpName");
     if (ctx.client.checkboxDefaults.nyOpeningStatement) await ctx.set("openingStatement", true);
     if (f.name.englishTranslation) await ctx.set("englishTranslation", f.name.englishTranslation);
@@ -264,7 +206,14 @@ const bclForm: ScreenStep = {
     if (!county) throw new Error("NY requires the county");
     await ctx.set("county", county);
     await ctx.set("shareCount", String(f.stockShares));
-    await ctx.set("shareValue", "No Par Value");
+    if (f.stockParValueUsd) {
+      await ctx.set("shareValue", "Par Value");
+      const p = await whenShown(ctx, NY_SCREENS.bclFiling, ["parValue"], "choosing Par Value");
+      await p.set("parValue", String(f.stockParValueUsd));
+    } else {
+      await ctx.set("shareValue", "No Par Value");
+    }
+    await noteTaxOnShares(ctx, f.stockShares, f.stockParValueUsd);
     await fillServiceOfProcess(ctx, NY_SCREENS.bclFiling);
     await fillEffectiveDate(ctx, NY_SCREENS.bclFiling);
     const s = await ctx.resolve(NY_SCREENS.bclFiling);
@@ -314,15 +263,7 @@ const payment: ScreenStep = {
     const s = await whenShown(ctx, NY_SCREENS.payment, ["drawdownAccount"], "choosing the draw-down account");
     await pickDrawdown(ctx, s.set, s.field);
     // The deposit funded exactly this total; the page's total is checked against the approval next.
-    const total = approvedTotal(ctx);
-    if (ctx.values.nyDepositUsd && ctx.values.nyDepositUsd !== money(total)) {
-      throw new Error(`NY DOS: the deposit ($${ctx.values.nyDepositUsd}) differs from the approved total ($${money(total)})`);
-    }
-    const balance = await readBalance(ctx);
-    if (balance !== null && balance < total) {
-      if (!ctx.dryRun) throw new Error(`NY DOS: draw-down balance $${money(balance)} does not cover the total $${money(total)}`);
-      await ctx.note(`dry run: draw-down balance $${money(balance)} (no deposit was made) against the total $${money(total)}`);
-    }
+    await checkDrawdownCovers(ctx);
   },
   async advance(ctx) {
     // Payment Authorization is ticked inside the guard, so a dry run never ticks it.

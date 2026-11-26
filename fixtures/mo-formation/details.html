@@ -1,0 +1,11 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><script src="_mo.js"></script><title>LLC details (replica)</title>
+<script>function go() { MO.set("name", MO.val("nm")); MO.next(["nm", "dur", "mg", "pur"], "agent.html"); }</script></head><body><script>MO.header()</script>
+<h1>LLC details</h1>
+<div id="err" role="alert" hidden></div>
+<p><label for="nm">Entity Name</label> <input id="nm" type="text"></p>
+<p><label for="dur">Duration</label> <input id="dur" type="text"></p>
+<fieldset id="mg"><legend>Managed by</legend><label><input type="radio" name="mg" value="MEM"> Member-managed</label> <label><input type="radio" name="mg" value="MGR"> Manager-managed</label></fieldset>
+<p><label for="pur">Purpose</label> <textarea id="pur"></textarea></p>
+<p><label><input type="checkbox" id="series"> Series LLC</label></p>
+<p><button type="button" onclick="go()">Next</button></p>
+</body></html>

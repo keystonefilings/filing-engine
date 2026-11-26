@@ -8,6 +8,7 @@ import { flFormationAdapter, flProfitCorpAdapter, flLimitedPartnershipAdapter, f
 import { nyPayrollAdapter } from "./ny-payroll/adapter.js";
 import { njPayrollAdapter } from "./nj-payroll/adapter.js";
 import { nyESubmissionAdapter } from "./ny-esubmission/adapter.js";
+import { nyCertificateOfChangeAdapter, nyCopyRequestAdapter, nyDissolutionAdapter, nyNameChangeAdapter, nyStatusCertificateAdapter } from "./ny-records/adapter.js";
 import type { FilingRequest } from "../domain/filing.js";
 
 export const ADAPTERS: Record<string, SiteAdapter> = {
@@ -22,6 +23,11 @@ export const ADAPTERS: Record<string, SiteAdapter> = {
   [nyPayrollAdapter.key]: nyPayrollAdapter,
   [njPayrollAdapter.key]: njPayrollAdapter,
   [nyESubmissionAdapter.key]: nyESubmissionAdapter,
+  [nyDissolutionAdapter.key]: nyDissolutionAdapter,
+  [nyNameChangeAdapter.key]: nyNameChangeAdapter,
+  [nyCertificateOfChangeAdapter.key]: nyCertificateOfChangeAdapter,
+  [nyCopyRequestAdapter.key]: nyCopyRequestAdapter,
+  [nyStatusCertificateAdapter.key]: nyStatusCertificateAdapter,
 };
 
 /** Picks the state adapter for a filing; null when the filing type is not wired yet. */
@@ -34,13 +40,22 @@ export function adapterFor(req: FilingRequest): SiteAdapter | null {
   }
   if (req.type === "ein_only") return irsEinAdapter; // any formation state: the IRS interview is the whole filing
   if (req.type === "standing_certificate" && req.state === "NJ") return njStandingAdapter;
+  // NY DOS filings about an existing entity (portal map 2026-11-24, Screens G to K): dry-run only.
+  if (req.state === "NY") {
+    if (req.type === "standing_certificate") return nyStatusCertificateAdapter;
+    if (req.type === "dissolution") return nyDissolutionAdapter;
+    if (req.type === "amendment") return nyNameChangeAdapter;
+    if (req.type === "certificate_of_change") return nyCertificateOfChangeAdapter;
+    if (req.type === "copy_request") return nyCopyRequestAdapter;
+  }
   if (req.type === "payroll_registration") {
     if (req.state === "NY") return nyPayrollAdapter;
     if (req.state === "NJ") return njPayrollAdapter;
     return null; // MO/FL payroll not mapped
   }
   if (req.type === "paper_upload" && req.state === "NY") return nyESubmissionAdapter; // dry-run only until walked live
-  return null; // alternate_name, amendment: build order 5-6
+  return null; // alternate_name; amendments outside New York: build order 5-6
 }
 
 export { irsEinAdapter, moFormationAdapter, flFormationAdapter, flProfitCorpAdapter, flLimitedPartnershipAdapter, nyPayrollAdapter, njPayrollAdapter };
+export { nyDissolutionAdapter, nyNameChangeAdapter, nyCertificateOfChangeAdapter, nyCopyRequestAdapter, nyStatusCertificateAdapter };

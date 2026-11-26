@@ -1,0 +1,25 @@
+<!doctype html><html><head><meta charset="utf-8"><title>State of NJ - Online Business Entity Filing</title><link rel="stylesheet" href="style.css"><script src="_shell.js"></script></head>
+<body><!-- Test variant: a signer title list with two choices, to check the engine stops when the filing names none. --><h1>Business Formation</h1>
+<nav><a href="#">Help</a> <a href="#">Retrieve Documents</a> <a href="#">New User</a> <a href="#">Login</a></nav>
+<p>You have chosen to file a <strong>NJ Domestic Limited Liability Company (LLC)</strong> named: <strong id="nm"></strong></p><script>document.getElementById("nm").textContent=NJ.get("name","").toUpperCase()+" "+NJ.get("designator","")</script>
+<h2>Signatures</h2><p>Clicking on the Signature Box indicates your acceptance of the certificate and your intent to formally execute the filing.</p>
+<table><thead><tr><th class="sig-header">Signature</th><th>Name</th><th style="display:none">Title</th><th>Actions</th></tr></thead><tbody id="table-body"></tbody></table>
+<div class="form-actions"><a class="btn btn-success" id="add-signer-btn" role="button" href="#">Add New Signer</a></div>
+<form onsubmit="event.preventDefault(); NJ.go('review.html')"><input type="submit" class="btn btn-success" id="scont" value="Continue" disabled></form>
+<div id="signer-modal" class="modal"><div id="signer-body" class="modal-body"><h3>Add New Signer</h3>
+<ul><li><label for="SName">Name *</label><input id="SName" name="Name" type="text"></li>
+<li><label for="Title">Title *</label><select id="Title" name="Title"><option value="">-- Select One --</option><option value="Authorized Representative">Authorized Representative</option><option value="Incorporator">Incorporator</option></select></li></ul>
+<!-- Quirk 2: Save is aria-hidden, so it has no accessible name. -->
+<div class="form-actions"><input id="modal-save-btn" type="button" class="btn btn-primary" aria-hidden="true" value="Save"> <a id="modal-close-btn" href="#" class="btn btn-danger" aria-hidden="true">Close</a></div>
+</div></div>
+<script>
+const signers = NJ.get("signers", []);
+function gate(){ const b=[...document.querySelectorAll("#table-body input[type=checkbox]")]; document.getElementById("scont").disabled = !b.length || !b.every(x=>x.checked); }
+function render(){ const tb=document.getElementById("table-body"); tb.innerHTML = signers.length ? "" : '<tr><td colspan="3">No Signer Listed</td></tr>'; signers.forEach((s,i)=>tb.insertAdjacentHTML("beforeend", `<tr class="new-row"><td><label for="sign-ckbx-${i}" class="checkbox"><input type="checkbox" id="sign-ckbx-${i}"></label></td><td>${s.name}</td><td style="display:none">${s.title}</td><td><a href="#">Edit</a></td></tr>`)); gate(); }
+document.addEventListener("change", gate);
+render();
+document.getElementById("add-signer-btn").onclick = (e) => { e.preventDefault(); document.getElementById("signer-modal").classList.add("open"); };
+document.getElementById("modal-save-btn").onclick = () => { signers.push({name:document.getElementById("SName").value, title:document.getElementById("Title").value}); NJ.set("signers", signers); location.href="signatures.html?ModalAddSigner=1"; };
+</script><div id="timeoutModal" class="modal"><div class="modal-body"><h3>Session Timeout Warning</h3>
+<p>Your session will expire soon.</p><input type="button" class="btn btn-success timeoutPrevent" value="Continue"> <input type="button" class="btn" value="Exit"></div></div>
+</body></html>

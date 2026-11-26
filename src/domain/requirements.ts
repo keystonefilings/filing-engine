@@ -32,8 +32,10 @@ export function fieldRequirements(req: FilingRequest): FieldRequirement[] {
       O("formation.mainBusinessAddress", "principal business address"),
     );
     if (req.state === "NJ") out.push(
-      R("formation.members", "members"),
-      R("formation.signers", "signers"),
+      // An LLC lists members and signers; a for-profit corporation its shares, directors and incorporators (who sign).
+      ...(req.formation?.njEntityType === "for_profit_corporation"
+        ? [R("formation.stockShares", "total number of shares"), R("formation.directors", "directors"), R("formation.incorporators", "incorporators")]
+        : [R("formation.members", "members"), R("formation.signers", "signers")]),
       O("formation.mainBusinessAddress", "principal business address"),
       O("formation.purpose", "business purpose"),
       O("formation.naicsCode", "NAICS code"),
@@ -69,7 +71,14 @@ export function fieldRequirements(req: FilingRequest): FieldRequirement[] {
   if (req.type === "standing_certificate") {
     out.push(R("standing.entityName", "entity name"), O("standing.form", "certificate form"));
     if (req.state === "NJ") out.push(R("standing.entityType", "entity type"));
+    if (req.state === "NY") out.push(R("standing.dosId", "DOS ID"));
   }
+
+  // NY DOS record filings (Screens G to J).
+  if (req.type === "dissolution") out.push(R("dissolution.entity", "the LLC's DOS ID and exact name"), R("dissolution.reason", "reason for dissolution"), R("dissolution.signer", "signer"));
+  if (req.type === "amendment" && req.state === "NY") out.push(R("amendment.entity", "the LLC's DOS ID and exact name"), R("amendment.newName", "new name"), R("amendment.signer", "signer"));
+  if (req.type === "certificate_of_change") out.push(R("certificateOfChange.entity", "the LLC's DOS ID and exact name"), R("certificateOfChange.signer", "signer"));
+  if (req.type === "copy_request") out.push(R("copyRequest.entity.dosId", "DOS ID"), R("copyRequest.documents", "documents to copy"));
 
   return out;
 }
