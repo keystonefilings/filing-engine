@@ -226,7 +226,7 @@ one looks huge; set to the same width, a square logo looks tiny. So we size by a
   12px padding) so it never disappears into the dark.
 
 **No logo? We set the name.** The firm's name is typeset as a nameplate: in the firm's chosen font if
-it has one, otherwise in Publico Headline Semibold, 32px desktop / 26px phone, tracking −0.5%. In our
+it has one, otherwise in Publico Headline Medium, 32px desktop / 26px phone, tracking −0.5%. In our
 face, an ampersand is automatically swapped for Publico Headline's italic ampersand, the oldest trick
 in the masthead book: "Harbor *&* Pine CPA". (We don't do this in a firm's own font, because we don't
 know its italic.)
@@ -234,8 +234,7 @@ know its italic.)
 **The firm's font** is used for the nameplate (when there's no logo) and for the H1 and H2 headings on
 the firm's pages. Never for body text, fields, values, tables or buttons: we can't vouch for a
 font's small sizes, the client has to read the form, and the firm has to read every value on the
-proof. To keep layouts stable, the firm font is
-scaled to match Publico Headline's x-height (`font-size-adjust: from-font`, with a measured fallback
+proof. To keep layouts stable, the firm font is scaled to match Publico Headline's x-height (`font-size-adjust: from-font`, with a measured fallback
 ratio), and if it fails to load, the headings fall back to Publico Headline, never to Times.
 
 ### 3.5 The firm's color
@@ -279,9 +278,9 @@ new bakery has painted on its window. It says "established". It's never the colo
 |---|---|---|---|
 | **Coated White** | `#FBFAF6` | The page. A bright, very slightly warm white, like good coated magazine stock. Not cream, not manila. | — |
 | **Press Black** | `#16181C` | Type, rules, the dark band on For platforms, the footer wordmark. | 17.0:1 on Coated White |
-| **Gold Leaf** | `#CF9F3A` | The spot color: the primary button fill, the end mark, the one highlight in each graphic (leader lines, the selected frame, the current month). | Press Black text on it: 7.3:1. Never used as text on paper (2.3:1). |
+| **Gold Leaf** | `#CF9F3A` | The spot color: the primary button fill, the end mark, the one highlight in each graphic (leader lines, the loupe's ring, the current month). | Press Black text on it: 7.3:1. Never used as text on paper (2.3:1). |
 | **Burnished Gold** | `#7A5714` | Gold you can read: the 1px border on gold buttons (6.3:1 against the page, so the button edge is clear), gold text in chips and captions inside graphics. | 6.3:1 on Coated White, 5.5:1 on Newsprint |
-| **Newsprint** | `#EFEBE2` | Quiet bands (the security line, the How it works checks sidebar), table heads, code blocks, and the "desk" ground that pictures of pages sit on. | Press Black on it: 14.9:1 |
+| **Newsprint** | `#EFEBE2` | Quiet bands (the security line, the How it works checks sidebar), inline code, and the "desk" ground that pictures of pages sit on. | Press Black on it: 14.9:1 |
 | **Caption Gray** | `#555A61` | Captions, secondary text, the imprint, example labels. | 6.7:1 on Coated White, 5.8:1 on Newsprint |
 | Hairline | `#D8D3C8` | Rules and dividers. Decorative only: nothing depends on seeing it. | — |
 | Field Line | `#857F73` | Borders of fields, checkboxes, outline buttons. | 3.8:1 on Coated White |
@@ -595,7 +594,7 @@ House style:
   Bold 16px. On a firm's plate they sit outside the plate, in the margin, so they're clearly our
   annotation, not part of the firm's page.
 - **Highlight:** one thing per graphic in Gold Leaf: a 3px underline under the words that matter, a
-  gold leader line, the selected frame.
+  gold leader line, the loupe's ring.
 - **Labels:** National 2 Narrow Medium 15px, Press Black, set horizontally, never rotated.
 - **Fills:** Newsprint for grounds, Sheet White for paper, nothing else.
 - **No icons** where a word or a picture can do it.

@@ -1913,3 +1913,109 @@ The written label always follows. The meter is a picture of the journey to live,
 
 ---
 
+## 12. Craft notes
+
+**Dark mode.**
+- CoFile's pages become the theatre at night (§4.5): Stage Night ground, Paper text, Marigold unchanged, Marigold posters kept as glowing panels.
+- Photographs get a 6% darkening overlay so they don't glare. The ghost-light section is already dark and barely changes.
+- The firm's pages become neutral dark, with logos on white plates and firm-color text lifted to L ≥ 0.74. **The proof sheet stays white.**
+- The toggle follows the system setting, with a manual override in the footer (`[copy needed: its label]`), and `data-theme="light"` and `"dark"` both respected.
+
+**Phones.**
+- Designed at 375 px first, and checked at 320 px.
+- No horizontal page scroll, ever. Code and wide tables scroll inside their own boxes.
+- The hero's promise and both buttons fit in the first screen at 375 × 667. The headline sizes in §5.2 were chosen for that.
+- Pictures are rebuilt for phones, not shrunk: the division becomes a fan, the run sheet's frames get smaller, the tables become cards.
+- Motion on phones is the same story with shorter flights (about 60% of desktop distances).
+
+**Readable for older eyes.**
+- Body text is never under 18 px on phones or 19 px on the public desktop. Nothing meaningful is under 16 px, except the credit and chips at 14–15 px.
+- Contrast: body text is at least 7:1 almost everywhere (Ink on Paper is 16:1, House Ink on white 17:1), and nothing anywhere is below 4.5:1.
+- Tap targets are at least 48 px. Fields are 56 px tall with labels always above (never placeholder-only). Status is always shape + word, never color alone.
+- Atkinson Hyperlegible Next for every fact. No light weights below 400. Caps only for short kickers and credits, tracked open.
+- The proof's two buttons are stacked, full width, with 12 px between them.
+- Focus rings are 3 px, high-contrast and always visible.
+
+**Spanish text length.**
+- Spanish runs 20–30% longer. The width axis of CoFile Marquee absorbs it: headlines use `font-variation-settings` to tighten from width 100 to as low as 82 before they re-wrap, set per breakpoint by a fitting script that runs once at build per locale. Billing blocks keep their hierarchy in Spanish.
+- Buttons wrap to two lines instead of truncating ("Aprobar y autorizar la presentación y el pago" fits in two lines at 375 px).
+- The ticket strip and plan tickets have no fixed heights.
+- Chip labels wrap.
+- Credit caps never hold more than one line. Where a Spanish kicker would wrap, it switches to sentence case automatically (the same rule as the phone hero).
+- The glyph set covers ñ, accents, ¿ and ¡ (§5.1).
+
+---
+
+## 13. Production
+
+### 13.1 Tools
+
+- **Design:** Figma, for the system, the pages and the tokens (exported as CSS custom properties and a JSON token file).
+- **Type:** Glyphs 3 for the CoFile Marquee commission, plus a fontTools build pipeline for the web subsets.
+- **Motion:** Rive (state-machine interactions: the division, the step loops, the I7 lift), After Effects for the launch film's graphics, and Lottie only where Rive can't go.
+- **3D:** Blender (Cycles) for look development and the stills, exported to glTF with Draco compression. three.js on the site.
+- **Front end:** CSS for the breath, the ticket shapes, the perforations and the house lights (scroll-driven animations, with an IntersectionObserver fallback). A small motion script (under 8 KB) for the kinetic headlines and the text-to-filing flights. Sharp, on the server, for compositing the firm-color folio stills in emails and logo trimming.
+- **Email:** MJML templates with hand-written VML buttons, tested in Litmus (or similar) across Outlook, Gmail and Apple Mail, light and dark.
+- **Checks:** automated contrast tests on every firm color the setup accepts (the adjust-until-4.5:1 rule, §3.4), visual regression on the seven home pictures, and reduced-motion snapshots.
+
+### 13.2 What to commission
+
+| Commission | Kind of studio or artist | Deliverables | Timing |
+|---|---|---|---|
+| CoFile Marquee | An independent type foundry with variable-font experience | Variable font (wdth 60–150, wght 300–900), Box Office figures, Spanish coverage, web subsets | 16–20 weeks (interim face ships first) |
+| Wordmark and monogram | The same foundry, or a lettering artist | Master SVGs, small master, app icon set, usage sheet | 4 weeks |
+| Example firm identities | A small identity studio | Harbor & Pine CPA and Northgate Payroll: one-color logos, colors, fonts | 2 weeks |
+| Photography | An editorial portrait and documentary photographer | P1, P1b, P2–P8 (§7.2) with retouching and the house LUT | 3.5 shoot days + 2 weeks post |
+| Gilding | A traditional signwriter and gilder | "Harbor & Pine CPA" on a real glass door, filmed | 2 days on site |
+| Illustration | A printmaker-illustrator (screenprint style) | I1–I9 as layered vectors for Rive | 5 weeks |
+| 3D | A tactile still-life and product 3D studio | "Papers home" real-time glTF + stills; the optional monogram object | 5 weeks |
+| Motion | A motion studio with Rive experience | M3, M5, M14 and the step loops in Rive; the motion spec QA | 6 weeks |
+| Launch film | A small production company, a craft or food documentary director, a sound designer | 60 / 30 / 15 s cuts, captions, an audio-described version | 8 weeks |
+
+### 13.3 The asset list
+
+- **Identity:** `cofile-monogram.svg`, `cofile-monogram-sm.svg`, `cofile-wordmark.svg`, `cofile-wordmark-display.svg`, `cofile-lockup.svg`, `cofile-credit-14|15|16.svg`, all in Ink, Paper and Marigold-bar variants; favicons 16, 32 and 48; app icons 180, 192 and 512; a maskable icon; and PNG @2× email versions.
+- **Fonts:** `cofile-marquee-var.woff2` (Latin, plus a separate Latin Extended subset) and Atkinson Hyperlegible Next and Mono WOFF2 (400, 600, 700 and italics).
+- **Example firms:** `harbor-pine-logo.svg` (one color), `northgate-logo.svg` (one color), and both firms' brand tokens as JSON so the components can render them.
+- **Photography:** P1 (plus a glint plate and a letter mask), P1b (lights-off and lights-on plates), P2, P3, P4, P5, P6 (plus a clean plate), P7 (×4), P8 (team portraits plus candids). Each in AVIF and WebP at 1×, 2× and the phone crop, with blurred placeholders.
+- **Illustration:** I1–I3 (`.riv`), I4 (`.svg`, with color tokens), I5, I6, I7 (`.riv`), I8 (×5 pictograms), I9 (×12 spots).
+- **3D:** `papers-home.glb`, `papers-home-still.avif` (neutral) and a server template for the firm-color stills.
+- **Texture:** `paper-grain.webp` (512 px tile).
+- **Icons:** 36 SVG icons on the 24 px grid.
+- **Social and OG:** a billing-block OG template (Poster Paper, the page's h1 as billing, the monogram), rendered per page at 1200 × 630.
+- **Film:** masters, social cuts, WebVTT captions, poster frames.
+- **Email:** MJML templates for the firm family and the CoFile family, plus PNG logo plates.
+
+### 13.4 The order to build in
+
+1. **Tokens and type.** Colors, spacing, the interim display face plus Atkinson, the type scale, the billing-block component. (Week 1–2.)
+2. **The house style and the proof.** The Headliner frame (logo sizing, initial tile, plate, color adjustment, font handling), the credit, and the proof page. It's the page where firms say yes to a filing, and every other firm surface is derived from it. (Week 2–4.)
+3. **The home page, structure first.** All nine sections with live components, ground colors and the ticket, using the stand-in pictures rebuilt as live components (desk, division, drafted filing, proof, listings board, run sheet, box-office board) but without photography or motion yet. (Week 3–5.)
+4. **The firm's pages.** Filing desk shell, overview, filing detail with "Your proof is ready", new filing, the client form, filing pages and client link pages, Branding setup with the live preview. (Week 4–7.)
+5. **The pages behind the home page.** How it works, For firms, What we file, Pricing, Security, Questions, For platforms. (Week 5–7.)
+6. **Photography and the gilded door** come in as they're delivered. The hero is a priority shoot. (Week 6–8.)
+7. **Motion:** the breath, M1, M3 (the division), M5 (text to filing), M9 (house lights), M11 (box-office letters), then the rest. (Week 7–10.)
+8. **3D:** papers home, with the still fallback first. (Week 8–10.)
+9. **Emails, dashboard and docs.** (Week 8–11.)
+10. **CoFile Marquee swap**, Spanish fitting, dark mode QA, accessibility audit, performance pass, launch film. (Week 12–20.)
+
+---
+
+## 14. What I'd strip from today's visuals, and why
+
+All of this is visual. The words stay exactly as they are.
+
+- **The manila folder tab with a check cut into it** (the `FolderTab` mark). A folder says "admin", and the check says "verified". It's built around filing and checking, which is exactly what the brief says not to build the brand on. It's replaced by the *Cº*, which says *the company behind your name*.
+- **The green tick on every list item** (the `Tick` component). It turns every benefit into a compliance checklist and makes the page read like an audit. It's replaced by º rings, icon bullets, proofreader's numbers and pictograms, each chosen for what its list is.
+- **The paper-and-ink manila palette** (`#F7F3EA` ground, `#1F6B4F` green buttons, beige borders, visible in the proof's inline styles). It's tasteful but timid, and it's interchangeable with every "trustworthy accounting software" site. The green also competes with firms' own greens. It's replaced by a palette with real nerve on our pages (Marigold, Aubergine, Vermilion) and a nearly colorless house style on the firm's pages.
+- **IBM Plex Sans, IBM Plex Mono and Source Serif 4.** They're good families, but they read as "corporate documentation". Mono uppercase values on the proof make a client's business name look like a terminal readout. They're replaced by a commissioned display face that can perform, and Atkinson Hyperlegible Next for every fact.
+- **Monospace for filing values everywhere** (`mono` cells in the proof, desk and drafted filing). It's hard to read for older eyes and makes a person's business look like code. Values are now Atkinson Next 600.
+- **The 4 px brand bar and the grey "with CoFile" at 0.85em** on the proof. The firm's brand deserved more than a hairline, and our credit deserved to be designed rather than shrunk. They're replaced by the marquee rule, the Headliner frame and the designed credit.
+- **The uniform two-column bands**: the same "text left, box right" layout for every section. With 330 words, the page lives or dies on its pictures, and identical layouts make every picture feel the same size and weight. They're replaced by section-specific arrangements (§6.3), full-bleed posters and a dark stage.
+- **The "Matches the proof" green badge as a picture's hero.** The match is still shown (it's in the stand-in), but as a small slip under the proof, not as a headline element. Checking is reassurance, not the show.
+- **The stand-ins' boxed pictures**: flat bordered boxes labeled as examples. The labels stay; the boxes become designed pictures with photography, 3D and motion.
+- **The text-arrow ↓** between the text and the drafted form. Replaced by the words actually flying.
+
+---
+
+*Amara Okafor · Top Billing · spec 03.*
