@@ -7,7 +7,7 @@ export default function DocsHome() {
   return (
     <>
       <h1>{platformName()} API</h1>
-      <p className="muted">File state business paperwork from your own product: LLC formations in New York, New Jersey and Florida, corporation formations in New York and Florida, Florida limited partnerships, New York foreign qualifications and assumed names (DBAs), IRS EINs, and New York (NYS-100) and New Jersey (NJ-REG) employer registrations. Not every filing type is live yet; see <Link href="/#coverage">Coverage</Link>.</p>
+      <p className="muted">File state business paperwork from your own product: LLC formations in New York, New Jersey and Florida, corporation formations in New York and Florida, Florida limited partnerships, New York foreign qualifications and assumed names (DBAs), IRS EINs, and New York (NYS-100) and New Jersey (NJ-REG) employer registrations. Not every filing type is live yet; see <Link href="/what-we-file">What we file</Link>.</p>
       <h2>Quick start</h2>
       <ol>
         <li>Get an API key from the <Link href="/dashboard/keys">dashboard</Link>.</li>

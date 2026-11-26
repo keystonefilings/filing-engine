@@ -64,7 +64,7 @@ export const GUIDES: Guide[] = [
     summary: "What each state and filing needs, from the state-site walkthroughs.",
     body: () => (
       <>
-        <p>The engine takes one request shape for every state; adapters turn it into each site&apos;s own form. These are the filings the API and the portal take today, with the state fees seen on each site. Not every type can be filed live yet, because some states&apos; checkouts are still being mapped; see <Link href="/#coverage">Coverage</Link> on the home page. Every field the engine accepts, with its type and whether it is required, is in the FilingRequest JSON Schema in <a href="/openapi.json">/openapi.json</a> (also at <code>GET /v1/schema/filing-request</code>). </p>
+        <p>The engine takes one request shape for every state; adapters turn it into each site&apos;s own form. These are the filings the API and the portal take today, with the state fees seen on each site. Not every type can be filed live yet, because some states&apos; checkouts are still being mapped; see <Link href="/what-we-file">What we file</Link>. Every field the engine accepts, with its type and whether it is required, is in the FilingRequest JSON Schema in <a href="/openapi.json">/openapi.json</a> (also at <code>GET /v1/schema/filing-request</code>). </p>
         <div className="table-wrap"><table><thead><tr><th>Filing</th><th>type / state</th><th>Fees</th></tr></thead><tbody>
           {FILING_KINDS.map((k) => <tr key={k.id}><td><strong>{k.title}</strong><div className="muted small">{k.summary}</div></td><td><code>{k.type}</code> / {k.type === "ein_only" ? "the state where the LLC was formed" : <code>{k.state}</code>}</td><td className="small">{k.feeNote}</td></tr>)}
         </tbody></table></div>

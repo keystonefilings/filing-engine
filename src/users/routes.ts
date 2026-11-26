@@ -36,6 +36,8 @@ export const RESERVED_SLUGS = new Set([
   "verify-email", "session-ended", "invite-expired", "openapi.json", "api", "admin", "approve", "static", "_next",
   "favicon.ico", "robots.txt", "sitemap.xml", "pricing", "about", "contact", "help", "support", "terms", "privacy", "security",
   "cofile", "keystone", "keystonefilings", "www", "app", "mail", "status",
+  // Round 3 (Nov 26): the public pages behind the home page.
+  "how-it-works", "for-firms", "what-we-file", "faq", "platforms",
 ]);
 export const SLUG_PATTERN = /^[a-z0-9](?:[a-z0-9-]{0,38}[a-z0-9])?$/;
 

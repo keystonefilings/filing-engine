@@ -296,3 +296,22 @@ Options:
 
 The end client doesn't approve the filing: it hands that job to its CPA, CFO or payroll firm, and the firm approves the proof. A partner firm's filings now send the proof to the firm (its contact from sign-up, unless approvers are set on the firm), never to the end client; the firm can also open the proof and approve from the filing on its filing desk (a partner session may approve its own firm's filings, not another's). The copy says so: "You approve the proof. Then CoFile files it." on the home page; the client's pages say the firm checks every detail and approves before anything is filed; the firm's form button is "Create the proof".
 
+
+## Round 3: benefits first, fewer words (Nov 26)
+
+The owner sent the same 20 reviewers back with two notes: their last edits were amazing; now (1) focus even more on what CoFile sells and the benefits it brings, less on security (still kept), and (2) cut the words, so the site is more visual than copy (the visuals are designed later). No strict word limit.
+
+All 20 led with what the firm can sell and keep instead of the proof, put pricing on the home page, and cut security to one line with a link. They took the home page from about 2,000 words to 240-310 each; the merged page is about 330.
+
+Owner's calls on the merged page:
+
+1. Publish prices: yes. A price strip on the home page and a public Pricing page. The figures live in `web/lib/pricing.ts`; `web/lib/pricing.test.ts` fails if they drift from `config/partner-pricing.json`.
+2. Add the pages the cut text moved to: yes. How it works, For firms, What we file, Pricing, Security, Questions (FAQ) and For platforms. Old `/#…` links point at them, and their slugs are reserved for firms.
+3. Beta banner: keep it on the home page.
+4. The filing desk as the hero picture, "See pricing" as the second button, "ours in small type": yes.
+
+Added by the owner: the site says CoFile is built and run by filing professionals, and that a person takes over when a filing needs one; that line ends every pricing card.
+
+Fixed while moving text: the Security card said a saved signature goes only on a filing "the client has approved"; since the firm approves, it now says "a filing that has been approved".
+
+The home page's pictures are plain HTML stand-ins in `web/components/landing/Visuals.tsx`, each labeled as an example, for the designer to replace.

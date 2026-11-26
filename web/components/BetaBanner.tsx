@@ -8,7 +8,7 @@ import { usePathname } from "next/navigation";
  * so the firm's own brand stays the only one; on our own pages it gives our contact. SITE_BETA_BANNER=false
  * turns it off.
  */
-const OWN = /^\/($|login|signup|docs|dashboard|terms|privacy|forgot-password|reset-password|verify-email|invite-expired|session-ended|auth)/;
+const OWN = /^\/($|login|signup|docs|dashboard|terms|privacy|forgot-password|reset-password|verify-email|invite-expired|session-ended|auth|how-it-works|for-firms|what-we-file|pricing|security|faq|platforms)/;
 
 export function BetaBanner({ name, email }: { name: string; email: string }) {
   const path = usePathname() ?? "/";
