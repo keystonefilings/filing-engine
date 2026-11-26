@@ -583,6 +583,25 @@ Section by section (all copy as in `web/app/page.tsx`):
 13. **Close.** A Tinta band with Papel text (16.17:1). Buttons invert: Papel fill, ink text. The tagline "Approve the proof. Then it's filed." sits with the full-color mark at 40 px.
 
 **Footer:** the lockup, "CoFile · the filing desk behind your firm", "New York · New Jersey · Florida · IRS", the legal line, then Terms · Privacy · Security · hello@cofile.app. Links are 44 px tall on phones.
+**Typesetting the locked headlines.** The words don't change; where they break does. From 768 px, each headline breaks at its sentence or clause boundary using `display: block` spans (not `<br>`, so narrow screens reflow freely with `text-wrap: balance`). The last two words of every headline are joined with a non-breaking space, so nothing ends on a lone word.
+
+| Section | Break (from 768 px) |
+|---|---|
+| Hero H1 | Your client approves the proof. / Then CoFile files&nbsp;it. |
+| Process | You start it. / Your client approves it. / CoFile files&nbsp;it. |
+| The proof | Your client sees what the state will see, / before the state&nbsp;does. |
+| Firms | Your name on the door. / Ours in small&nbsp;print. |
+| Requests | Clients don't fill in forms. / They text&nbsp;you. |
+| Checks | Checked twice. / Filed&nbsp;once. |
+| Coverage | New York, New Jersey, / Florida and the&nbsp;IRS. |
+| The catch | Every filing service has a catch. / Here's&nbsp;ours. |
+| Enterprise | Building a filing product? / Put CoFile underneath&nbsp;it. |
+| Close | Run one rehearsal. / Then&nbsp;decide. |
+
+**In-page links.** "See what your client sees" and the header's section links jump to their section and **move focus to that section's H2** (with `tabindex="-1"`), so keyboard and screen-reader users land where sighted users look. Smooth scrolling is on only when reduced motion is off.
+
+**Enterprise inquiry form states:** default; sending ("Sending…"); success (an approved notice replacing the form, focus moved to it, using the form's existing thank-you text); error (stop notice above the fields with linked issues, as in 9.3).
+
 
 ### 10.2 Account pages
 
@@ -657,6 +676,61 @@ DESKTOP ≥1024
 - **Ready to pay:** H1 "Ready to pay" and the locked explanation. One card per saved card, listing the filings waiting for it, with a single security-code field (Basis Theory element, 4-character width but a 48 px-tall target) and its button. Success is announced with `role="status"`, and the card turns to an approved notice.
 - **Billing:** the plan and its price as Stripe returns it (prices appear only here, after login), and invoices as a table. The "Your plan is changing…" text is an info notice.
 - **Password:** one form (9.3), with the locked hint about signing out other devices.
+**New filing, steps 1 and 2:**
+
+```
+New filing                                   │ New Jersey: what are you filing?
+Which state is the business in?              │ Fill it in yourself, or send your client a link…
+Filing types go live one at a time; until    │ ┌ LLC formation ─────────────┐ ┌ Corporation formation ─┐
+then they run as rehearsals. See What we     │ │ [⏸ Rehearsal]              │ │ [⏸ Rehearsal]          │
+file for where each one stands.              │ │ {summary}                  │ │ {summary}              │
+┌ New York ────┐┌ New Jersey ──┐┌ Florida ──┐│ │ {fee note}                 │ │ {fee note}             │
+│ {n} filing    ││ {n} filing   ││ {n} filing ││ └────────────────────────────┘ └────────────────────────┘
+│ types, plus   ││ types, plus  ││ types, plus││ ┌ Your pages for clients ───────────────────────────────┐
+│ the federal   ││ the federal  ││ the federal││ │ Each service has a permanent page with your branding…│
+│ EIN           ││ EIN          ││ EIN        ││ └───────────────────────────────────────────────────────┘
+└───────────────┘└──────────────┘└────────────┘│
+```
+
+Each picker card is a single link (the whole card is the target, at least 120 px tall), with the chip and summary inside it, so a screen reader hears "LLC formation, Rehearsal, {summary}, link" once, not three times.
+
+**Filing detail:**
+
+```
+← Filings
+Two Sisters Bakery LLC        [◷ Waiting for approval] [⏸ Rehearsal]
+New Jersey LLC formation · started 11/24/2026, 9:02 AM by maria@…
+┌ The approver has a link to check exactly what will be filed and approve it. ┐
+◉ Received ─ ◉ Waiting for approval ─ ○ … (the timeline, 9.6)
+┌ Link to the proof ─────────────────────────────────────────────────────────┐
+│ We emailed this link to ana@… If they can't find it, you can pass it on.   │
+│ It shows exactly what will be filed and the fees.                          │
+│ https://api.cofile.app/approve/…                        [Copy link]        │
+└────────────────────────────────────────────────────────────────────────────┘
+┌ Documents ─────────────────────────────────────────────────────────────────┐
+│ {document label}            {kind}                     PDF                 │
+└────────────────────────────────────────────────────────────────────────────┘
+EIN: 12-3456789 (mono, 24px)
+▸ Progress on the state site (rehearsal, {run status})
+```
+
+(Sample data. The button reuses the existing "Copy link" label from Client links. The "approver" wording is in Appendix B.)
+
+**Desk-wide states:**
+
+| State | Treatment |
+|---|---|
+| Loading a list | Static skeleton rows (48 px), `aria-busy="true"` on the table region, no shimmer |
+| Engine unreachable | The error page ("Something went wrong", "Try again", "Log in again"), in the firm's branding |
+| Session ended | Back to `/login` with its notice "Your session ended. Log in again to carry on." |
+| Subscription needed | Info notice "Real filings need an active subscription; rehearsals are free." with the "Subscribe" link as a button |
+| Something needs action | Rehearsal-tint notices ("… ready to pay…", "… need someone to act.") stacked above the table, most urgent first; each names its count in the sentence, never in a color dot only |
+| Empty desk | 9.11 empty state |
+
+**Setup › Details and Payments, more closely.** Details: "Name, kind of firm and who to contact." as the intro, then the firm's name, kind (the same options as sign-up), contact name, email and phone, and the support email clients will see, with a preview line showing where that email appears. Payments: "Which card pays state fees: one card for everything, or one per filing type, with a backup." as two radio cards. Choosing "one per filing type" opens a table (filing type, card, backup card), with native selects. A saved card row reads "{label} · {brand} ending {last four}". Adding a card opens the Basis Theory element in a card, not a modal, so it reflows at 400%.
+
+**Billing states:** loading (skeleton), loaded (plan, price from Stripe, next charge date, invoices table with links), "Your plan is changing…" (info notice), "Billing couldn't be loaded. Try again shortly." (stop notice with a retry button, copy needed for its label).
+
 
 ### 10.4 The proof (engine page at `api.cofile.app/approve/<token>`)
 
@@ -720,6 +794,59 @@ PHONE 360
 - **The approve button** uses the firm's action color, clamped to **7:1** (section 11), at 56 px. "Request changes" lives in a `<details>` below it, 24 px away, holding the locked label "What should change? (Needed only if you ask for changes)", the textarea and its own "Request changes" button. Nobody can hit the wrong one with a shaky thumb.
 - **After pressing:** the button shows a pending state, the form can't be sent twice, and the decision page loads with the register moment. "Approval recorded" is the H1, and the locked sentence follows (the rehearsal or live version).
 - **Errors and expired links** (today bare `<p>` tags): the same branded shell, an H1 and the locked sentence ("This link to the proof has expired. Ask whoever sent it for a new one.", "That code didn't match…", "A decision was already recorded with this link…"), the firm's support email, and an HTTP 410 or 400 as today. The H1 for each needs copy (Appendix B).
+**Desktop (≥1024 px): the register twin, the signature idea.**
+
+```
+┌ firm bar ─────────────────────────────────────────────────────────────────────┐
+│ ⌐                                                                           ✓ │
+│ NJ formation: TWO SISTERS BAKERY LLC                                          │
+│ Filing reference … (mono)                                                     │
+│ Please decide by December 3, 2026, 5:00 PM Eastern. After that, this link …   │
+│                                                                               │
+│ The state's review page                │ Filing details                       │
+│ ┌ white plate ────────────────────────┐│ Business name                        │
+│ │ Business Name  TWO SISTERS BAKERY ◄─┼┼─► TWO SISTERS BAKERY LLC        ⌟   │
+│ │ Designator     LLC                ◄─┼┼─► …                                  │
+│ │ Registered Agent …                ◄─┼┼─► …                                  │
+│ └──────────────────────────────────────┘│                                     │
+│ This is a picture of the state's own review page, filled in with your …      │
+│                                                                               │
+│ State fees                              │ ┌ By approving, you confirm … ─────┐ │
+│ Formation filing fee         $100.00   │ │ … Please check everything now.   │ │
+│ NJ portal fee, by card         $3.50   │ └──────────────────────────────────┘ │
+│ Total                        $103.50   │ [Approve, and authorize submission    │
+│                                         │  and payment]                        │
+│ ⌊                                       ▸ Request changes                    ⌋ │
+└───────────────────────────────────────────────────────────────────────────────┘
+```
+
+- **How the twin works:** when the engine captures the state's review page, it also records the on-screen box of each value it typed (the browser it drives already knows where each one is). The proof uses those boxes to draw a thin register tick between each detail row and its spot on the picture. Hovering or focusing a detail outlines its spot on the picture in Añil (a 2 px outline, 140 ms fade). Where a box couldn't be recorded, the row simply has no tick. **This needs a small engine change** (box coordinates saved with the review artifact) and nothing else.
+- The ticks and outlines are decoration: `aria-hidden`, with the text list as the accessible truth, exactly as the locked `alt` text says.
+- Under 1024 px, the twin collapses to the phone order above: picture first, then the details, with no ticks.
+
+**The decision page (after approval):**
+
+```
+┌ firm bar ─────────────────────────┐
+│  ⌐───────────────────────────┐    │  the frame closes: corners move in 4px,
+│  │                           ✓    │  the check draws into the fourth corner
+│  Approval recorded  (H1, focus)   │
+│  Thank you. Your approval is      │
+│  recorded. We'll submit the       │  (live version; the rehearsal version
+│  filing exactly as shown. If the  │   reads "…This is a rehearsal, so
+│  state's page has changed by      │   nothing will be filed or paid.")
+│  then, we stop before paying, …   │
+│  Questions: {firm support email}  │
+│  ⌊___________________________⌋    │
+└───────────────────────────────────┘
+```
+
+**Change-request confirmation and error pages** use the same shell without the frame motion. Their locked sentences ("Thank you. Your change request is recorded, and nothing will be filed from this link…", "We couldn't record your decision because this link has expired or was already used…") sit under an H1 (copy needed). The error family's glyph goes beside the H1: the info ring for "already decided" and "expired" (nobody did anything wrong), and the stop octagon only for "That code didn't match…".
+
+**The one-time code field:** the locked label "One-time code sent to you", `inputmode="numeric"`, `autocomplete="one-time-code"` (so iOS and Android offer the code from the message), mono at 24 px with 0.1em tracking, 10 characters wide, 56 px tall, paste allowed.
+
+**Print:** a print stylesheet turns the proof into a clean record on Letter paper: firm bar, title, reference, every detail, the review picture at full width, fees, the consent text, and a footer with the filing reference and page numbers on every page. No buttons. This is what a CPA files in the client folder, so it should look like it belongs there.
+
 
 ### 10.5 Client intake (`/i/<token>`) and permanent service pages (`/<firm>/<service>`)
 
@@ -730,6 +857,34 @@ Both use the firm's brand with CoFile nearly invisible: firm bar, "with CoFile",
 The service page (`/<firm>/<service>`, e.g. `cofile.app/bestaccounting/llc-filing-new-york`) is a permanent public page, so it adds a short page header above the form: the firm's logo at 64 px, its name, the filing type as H1, the fee note, and the firm's support line. It has an Open Graph card generated from the firm's brand (logo on Papel with the filing type), so the link looks right when a firm texts it to a client.
 
 **Expired or closed links** ("This link has expired or isn't valid", "This link can't be used", "This filing is no longer offered"): the firm's branded shell, the H1, the locked sentence, and the firm's contact.
+**Phone steps and the review step:**
+
+```
+STEP SCREEN                         REVIEW STEP (last)
+┌ firm bar ──────────────────┐      ┌ firm bar ──────────────────┐
+│ ⏸ This page is in rehearsal│      │ Step 5 of 5 (copy needed)  │
+│ for now. You can fill it in│      │ {section title}   [Change] │
+│ and see your proof, but …  │      │  Business name             │
+│ {filing type} (H1)          │      │  Two Sisters Bakery        │
+│ Step 2 of 5 (copy needed)   │      │ {section title}   [Change] │
+│ ▰▰▱▱▱                       │      │  …                         │
+│ {section legend} (H2)       │      │ Authorizations (H2)        │
+│ Fields marked * are required│      │ The state form asks for    │
+│ ┌ field ─────────────────┐  │      │ these. Check a box only …  │
+│ └────────────────────────┘  │      │ ☐ {statement}              │
+│ ▸ More options (optional)   │      │ Next, you'll get a proof to│
+│                             │      │ check. Nothing is filed …  │
+│ [Continue]  (56px)          │      │ By sending, you agree to … │
+│                             │      │ [Send to Harbor & Pine CPA]│
+└─────────────────────────────┘      └────────────────────────────┘
+```
+
+- The progress bar is `aria-hidden`; "Step 2 of 5" is the accessible text and is part of the step's H2 region.
+- The rehearsal notice is repeated at the top of the review step, so a client who skimmed past it on step 1 sees it again right before sending.
+- **Authorizations go on the review step**, right above Send, because they're statements the client makes about the answers they've just checked. Each keeps its locked text and its "Please confirm." error.
+- "Change" links return to that step with focus on its H2; Continue from there returns to the review step, not through every step in between.
+- Send pending: "Sending…" on the button. Success: the existing thank-you notice ("Thank you." with its message) replaces the form, with focus moved to it.
+
 
 ### 10.6 Enterprise dashboard (`/dashboard`)
 
@@ -744,6 +899,34 @@ CoFile's brand (Añil), denser type (16 px tables), and the same components.
 - **Ready to pay, Billing, Team, Password:** as in the desk. Team is a table with role chips (neutral, never status colors) and invitations.
 - **Platform tenant only:** "Sign-ups" (Waiting for approval with Approve / Turn down, then Decided) and "Enterprise requests". **Proposed new surface, Drift reviews:** two state screenshots side by side (approved snapshot and today's page) with the differences outlined in rehearsal amber, the affected filings listed, and Accept / Correct / Reject. It uses the engine's existing `/v1/drift-reviews` (copy needed).
 - **`/dashboard/login`** (API key login): the account card, with a mono key field that allows paste.
+**Dashboard overview and setup:**
+
+```
+OVERVIEW                                              SETUP › State portal logins
+┌ Filings ──────┐┌ Webhook deliveries ┐┌ API keys ───┐ Portal      Pays by     Login
+│ 128           ││ 1,204              ││ 3           │ NY DOS      {method}    ◉ sealed  [Disconnect]
+│               ││                    ││ Manage keys │ NYS-100     {method}    Not needed
+└───────────────┘└────────────────────┘└─────────────┘ NJ          {method}    {connect control}
+By status  ▇▇▇▇▇▇▇▇ ▇▇▇ ▇  [View as table]            IRS         {method}    …
+By state   ▇▇▇▇ ▇▇▇▇▇▇ ▇▇                             FL          {method}    Only for a prepaid Sunbiz
+By month   ▁▂▃▅▇                                                                E-file account.
+```
+
+(Numbers are sample data. The label for connecting a login comes from the existing setup forms.)
+
+**Drift reviews (proposed, staff only):**
+
+```
+┌ {state} · {filing type} · {screen} ─────────────────────────────────────────┐
+│ Approved snapshot              │ The state's page today                     │
+│ [screenshot]                   │ [screenshot, changed areas outlined amber] │
+│ Affected filings: {n}, each "Paused: state site changed"                    │
+│ [Accept] [Correct] [Reject]   (decision labels from the engine's API)       │
+└──────────────────────────────────────────────────────────────────────────────┘
+```
+
+The two screenshots sit side by side from 1280 px and stacked below that, each with a text list of the fields that changed (from the engine's drift record), because a picture diff alone is useless to a screen-reader user and slow for everyone else.
+
 
 ### 10.7 White-label surfaces
 
@@ -756,6 +939,29 @@ CoFile's brand (Añil), denser type (16 px tables), and the same components.
 - Syntax colors for code are tested to 4.5:1 on the code background in both modes. Comments are `--ink-2`, not faint gray.
 - The header carries "OpenAPI (JSON)", `llms.txt` and `docs.md` links as quiet buttons. **`/openapi.json`, `/llms.txt`, `/docs.md`** are served as plain files with the right types. No HTML styling, but `docs.md` is written with real headings, so it reads well when an AI agent or a screen reader user opens it.
 - The CPA reading the docs out of curiosity gets a short "what this is" paragraph at the top of `/docs` (existing intro), so the page never opens on code alone.
+```
+≥1280: THREE PANES
+┌ nav (248) ──────────────┬ content (680) ──────────────────────┬ code ─────────────────────┐
+│ Overview                │ [GET] /v1/filings/{id}               │ {request sample}   [Copy] │
+│ Guides                  │ {summary from the reference}         │                           │
+│  Authentication         │ Parameters                           │ {response sample}  [Copy] │
+│  Filings and the        │ ┌ name ─ type ─ required ─ notes ┐   │                           │
+│   lifecycle             │ └────────────────────────────────┘   │                           │
+│  Filing types, fields   │ Errors                               │                           │
+│   and state fees        │ …                                    │                           │
+│  Approvals · Webhooks   │                                      │                           │
+│  Errors · Saved         │ [POST] …                             │                           │
+│   signatures and PDF    │                                      │                           │
+│   uploads · White-label │                                      │                           │
+│   firm portal           │                                      │                           │
+│ Reference               │                                      │                           │
+│  Endpoints              │                                      │                           │
+│  OpenAPI (JSON)         │                                      │                           │
+└─────────────────────────┴──────────────────────────────────────┴───────────────────────────┘
+```
+
+The code pane scrolls with its endpoint (each endpoint's samples sit beside it, not in a pane that drifts out of step). Under 1280 px, samples sit under each endpoint. The current page is marked with `aria-current="page"` in the nav and an Añil-tint background. Every endpoint heading has a stable anchor, and the "#" link is a visible 44 px target (its label: copy needed).
+
 
 ### 10.9 Emails (Resend)
 
@@ -777,15 +983,40 @@ A single column, 600 px wide, all live text (no images of text), 18 px body, 1.6
 └──────────────────────────────┘
 ```
 
-| Email | Audience, brand | Button (locked label) |
-|---|---|---|
-| Approval request: "Your proof is ready to approve: …" | Client, firm brand. A rehearsal line at the top when it's a rehearsal | "Open your proof" |
-| Security code needed: "Card security code needed: …" | Card owner, firm or CoFile | "Enter security code" (goes to Ready to pay) |
-| Missing information: "More information needed: …" | Client, firm brand | None today (Appendix B) |
-| Filing submitted, documents back, EIN issued, "Completed: …" | Client and firm | Link to the filing or documents |
-| Sign-up and verification, password reset, invitations | CoFile brand, Añil | Links to `/verify-email`, `/reset-password` and the invitation's set-password page |
-
 Rejected, changes requested, site changed, bot check and the other staff notices use the same template, with a stop or rehearsal-tint rule at the top matching their family.
+**Every email, as it stands in the code** (subjects and buttons are locked; `{title}` is the filing title the engine builds):
+
+| Email | Event | Subject | Audience · brand | Button | Layout notes |
+|---|---|---|---|---|---|
+| Proof ready | `filing.awaiting_approval` | "Your proof is ready to approve: {title}" | Client · firm | "Open your proof" | On rehearsals, "Rehearsal: nothing will be filed or paid, even if you approve." goes first in a rehearsal-tint band. "Don't forward this email…" is its own paragraph after the button. |
+| Security code | `filing.card_code_needed` | "Card security code needed: {title}" | Card owner · firm on partner desks, CoFile on enterprise | "Enter security code" | Opens Ready to pay. "Never reply to this email with the code." is the last paragraph, in bold. |
+| Missing information | `filing.information_required` | "More information needed: {title}" | Client · firm | None today | The missing items are set as a bulleted list (the sentence leads in), not a run-on line. |
+| Changes requested | `filing.changes_requested` | "Changes requested: {title}" | Client · firm | None | The client's own comment in a quote block with a 4 px `--line-strong` rule. |
+| Completed (documents back) | `filing.completed` | "Completed: {title}" | Client · firm | Default "Open" (Appendix B) | The state reference in mono; attached documents listed by name and size above the footer. |
+| Rejected | `filing.rejected` | "Rejected by the state: {title}" | Client · firm | None | Stop rule at the top; the state's reason in a quote block. |
+| Filing submitted | `filing.submitted` | No email yet (copy needed) | Client and firm | — | Info rule. Template ready. |
+| EIN issued | `filing.ein_filed` | No email yet (copy needed) | Client and firm | — | The EIN in 28 px mono, the IRS letter attached. |
+| Choose a name | `filing.name_options_ready` | "Choose a name: {title}" | Firm staff | "Choose a name" | Hold rule. |
+| Review before submit | `filing.review_gate` | "Review before submit: {title}" | Firm staff | "Review the filing" | The captured screen inline, with the proof's `alt` text. |
+| Site changed | `filing.drift_halted` | "Site changed — review needed: {title}" | Firm staff | None | Hold rule (it matches the chip "Paused: state site changed"). |
+| Bot check, failed, blocked, checking what the state received | as named | "Portal bot check: …", "Failed: …", "Blocked: …", "Checking whether the state received: …" | Firm staff | None | Stop rule for bot check and failed; hold rule for blocked; info rule for checking. |
+| Password reset | account | "Reset your password" | Account holder · CoFile | "Choose a new password" | The time limit sentence in bold. |
+| Email confirmation | account | "Confirm your email for CoFile" | New partner · CoFile | "Confirm my email" | — |
+| Partner account open | account | "Your partner account is open" | Partner · CoFile | "Log in" | (Its body still says "practice filing": Appendix B.) |
+| Enterprise account ready | account | "Your CoFile account is ready" | Enterprise user · CoFile | "Set my password" | — |
+| Invitation | account | "You're invited to {firm}'s filing portal" | Invited staff · firm | "Set my password" | — |
+
+**Template rules:**
+
+- **Preheader** is the first sentence of the body (no new words), hidden visually but read by inbox previews.
+- **Header:** the firm's logo (2x asset, max 40 px tall) and name as text for client and firm emails; the CoFile lockup for account emails.
+- **H1** repeats the subject without the `{title}` part, and the title follows on its own line in mono, so a long business name never squeezes the heading.
+- **Button:** a 52 px bulletproof button, full width under 480 px, in the firm's color clamped to 4.5:1 (11.2). The link URL is also printed below in small mono for clients whose mail app strips buttons.
+- **Footer:** the firm's support line ("Questions? Email …") and "with CoFile" on client emails; CoFile's legal line and hello@cofile.app on account emails.
+- **Language:** each email goes in the language the client chose (12.3), with `lang` on the root element. Never both languages stacked in one email.
+- **No open tracking or tracked links on client emails.** A legal notice shouldn't report back on who read it.
+- **Plain-text part:** the same words, the link on its own line, no ASCII art.
+
 
 ---
 ## 11. The white-label theming system: "the register"

@@ -157,7 +157,7 @@ All contrast ratios are WCAG 2.x, measured against the surface listed.
 | Token | Light | Dark | Use | Contrast |
 |---|---|---|---|---|
 | `--pencil` | #1B64B8 | #7EB6F2 | Callout numerals, links, the kicker, help icons | 5.9 : 1 on sheet, 5.6 : 1 on paper / 8.1 : 1 |
-| `--pencil-line` | #4A8FDB | #5D9BE0 | Leader lines and crop marks (non-text) | 3.4 : 1 |
+| `--pencil-line` | #4A8FDB | #5D9BE0 | Leader lines and crop marks (non-text) | 3.4 : 1 / 6.0 : 1 |
 | `--pencil-wash` | #E6F0FB | #12263D | Tour popovers, highlighted rows on the sample proof | pencil-ink #16539A on it: 6.7 : 1 / #9CC8F6: 8.8 : 1 |
 
 Links are pencil, underlined at 1 px with a 3 px offset, 2 px on hover. Links are never green, so a link never looks like a "go".
@@ -945,6 +945,49 @@ Two families on one 600 px template: client and firm-staff emails in the firm's 
 
 Rules: a plain-text part always, live text (no text in images), dark-mode safe logos (a light-plate variant), 48 px button built as a bulletproof table, the button repeated as a plain link below it.
 
+Per email:
+
+- **Approval request.** The most important email we send, and the one with the most to lose to a spam folder or a skim. Subject as written; the preheader is the first body sentence ("Your proof is ready."). The rehearsal line, when present, is a hold-wash band above the body, so a client never approves a rehearsal thinking it's real. The sentence "Don't forward this email: anyone with the link can open your proof." is set as its own paragraph with the lock glyph, not buried. Sent from the firm's name, with the firm's support address as reply-to.
+- **Security code needed.** Goes to the card's owner, often a firm partner who doesn't use the desk daily. The button ("Enter security code") deep-links to Ready to pay with the card preselected, through login if needed, and returns there after login. "Never reply to this email with the code." is its own paragraph with the stop glyph.
+- **More information needed.** Lists the missing labels as a bulleted list, not a comma run, so a client can check them off.
+- **Changes requested, completed, rejected, filing submitted, documents back, EIN issued.** One layout: subject as heading, the body, and a summary block with the filing title and the state reference in Mono when there is one. Documents-back and EIN emails name the documents as file rows (type icon, file name) that link to the filing; the files themselves are never attached, because attachments get forwarded.
+- **Account emails** (confirm, reset, account open, account ready, invitations): CoFile-branded, the Register mark at 28 px, one button, the link's expiry stated where the product states it. An invitation shows the inviting firm's logo above the heading.
+
+### 10.9 Internal staff surfaces (platform tenant)
+
+CoFile's own staff use the dashboard with three extra queues. They're internal, but they're where "stop and ask rather than guess" actually happens, so they get real design.
+
+| Queue | What staff see | Design |
+|---|---|---|
+| Sign-ups | "Waiting for approval" and "Enterprise requests", with the existing explanations | One row per firm or company: name, kind of firm, states, volume band, sign-up time. Approve (go) and decline (destructive) at the row's end. Enterprise requests show the free-text message folded. |
+| Drift reviews | Filings stopped because a state changed its form ("Site changed — review needed") | A split comparison: the approved form snapshot on the left, the state's current screen on the right, the changed regions outlined in pencil with a numbered list of differences below. Decisions at the bottom as three equal buttons for the engine's three outcomes (accepted, corrected, rejected); there's no staff screen for this today, so its labels are [copy: C15]. The affected filings listed underneath with their firms. |
+| Review gate, name options, reconciliation | "Review before submit", "Choose a name", "Checking whether the state received" | Each opens on the captured screen on a white plate with the filing summary beside it; actions match the email's link label. Reconciliation items show a prominent hold notice, because "Please don't file it again" is the instruction that prevents a double filing. |
+
+### 10.10 The go-live moment
+
+The beta is honest only if switching a type to live is visible everywhere at once. When a filing type is switched live (per deployment, or per account):
+
+| Surface | Before | After |
+|---|---|---|
+| Coverage table and control strip | Hold or neutral chip | Solid green "Live" chip; its square in the strip turns solid |
+| New filing type card | "Rehearsal" hold badge | "Live" chip; the card moves to the top of its state's list |
+| Client form and service page | Rehearsal notice band | No band |
+| The proof | "Rehearsal: nothing will be filed or paid, even if you approve." | No note; the consent note leads |
+| Filing detail | Rehearsal badge | No badge on new filings; old rehearsals keep theirs forever |
+| Approval email | Rehearsal line | No line |
+
+The change is driven by the same live switch the code uses today, so no surface can disagree with another. A filing keeps the mode it was created in: a rehearsal started yesterday stays a rehearsal after the type goes live, and says so.
+
+### 10.11 Cross-cutting states
+
+| Situation | Treatment |
+|---|---|
+| Session ends mid-form | On the next action, the form's values are kept and the login opens in a sheet over the page; after logging in, the action completes. The existing "Your session ended. Log in again to carry on." is the sheet's notice. |
+| Offline | A neutral strip at the top of the desk [copy: C14]; submit buttons disable with the strip as the nearby reason; fields keep working. |
+| Slow state site | The timeline's current node pulses (static under reduced motion) and the run log keeps showing the last row; no spinners without context. |
+| Stale data | Tables refetch on focus; changed rows flash `--pencil-wash` for 600 ms once. |
+| Firm-branded errors | 404 and error pages under `/p/<slug>`, `/i/…`, `/<firm>/<service>` and the proof wear the firm's brand bar, not CoFile's. |
+
 ---
 
 ## 11. The white-label theming system
@@ -1071,6 +1114,43 @@ Guardrails watched on every change: "Request changes" rate and filings corrected
 
 A weekly funnel review by sign-up cohort, segmented by kind of firm, states, device and season. A monthly read of eight to ten recorded, consented usability sessions with CPA and payroll staff, because at this traffic level qualitative research will teach us more than most tests.
 
+### 13.6 The enterprise and developer funnel
+
+Enterprise buyers don't sign up; they ask. Then a developer evaluates. Two funnels, joined at the account:
+
+| Step | Event | Owner |
+|---|---|---|
+| D0 Enterprise interest | `section_viewed` (enterprise), `cta_clicked` (read_api_docs) | Marketing |
+| D1 Inquiry | `enterprise_inquiry_submitted` | Marketing |
+| D2 Account opened | `account_approved` (from Sign-ups) | Staff |
+| D3 First key | `api_key_created` | Developer |
+| D4 First dry run | `first_dry_run_created` (`"dryRun": true`) | Developer |
+| **D5 Dry run held (developer activation)** | `run_held_at_payment` on an API-created dry run | Developer |
+| D6 Webhooks working | `first_webhook_delivered` (2xx) | Developer |
+| D7 First live filing | `filing_submitted`, not a dry run | Account |
+
+**Developer activation:** an API dry run that reaches its planned hold within 14 days of the first key. It's the API's version of "Run one rehearsal". Docs pages are measured by whether their readers reach D4 sooner, not by page views. Requests for `/llms.txt`, `/docs.md` and `/openapi.json` are counted from server logs by user-agent class (browser, AI agent, other), because agent builders often never open a page.
+
+### 13.7 Dashboards to build
+
+| Dashboard | For | Contents |
+|---|---|---|
+| Partner funnel | Growth, weekly | F0 to F13 by sign-up cohort week, conversion between each step, median time between steps, segmented by kind of firm, states and device |
+| Activation | Leadership, weekly | Rehearsed in 7 days (eligible and all firms), time to first own proof, time to rehearsed, the north star |
+| Setup friction | Design, weekly | Step start-to-complete rates and durations, branding contrast fixes and collisions, font fallbacks |
+| Proof health | Product, weekly | Proof open rate within 24 h, decisions by type, "Request changes" rate, approvals later corrected, median time on page by device |
+| Coverage honesty | Product and support, monthly | Support emails tagged "which types are live", coverage filter use, rehearsals started on types that can't reach the hold |
+| Developer | Platform, weekly | D0 to D7, time to first dry run, docs page to D4 conversion, error responses by code in the first week |
+| Experiments | Growth | One page per running test: assignment counts, sample ratio check, primary and guardrail metrics with intervals, the stop rule |
+
+### 13.8 Event governance
+
+- A typed event schema in the repo (one file, reviewed like code). Events not in the schema are dropped at the collector.
+- A CI check that fails if an event property name looks like personal data (`name`, `email`, `ssn`, `ein`, `address`, `phone`, `message`) or if a value matches an email, SSN or card pattern.
+- Each event has an owner, a definition and the question it answers. If no one can name the question, the event isn't added.
+- Retention: raw events 13 months, aggregates indefinitely. Deleting a firm's account deletes its events' link to the account id.
+- Every funnel step is tested end to end in staging with a script that walks a fake firm from visit to held rehearsal and asserts each event fired once.
+
 ---
 
 ## 14. Experiment backlog
@@ -1102,6 +1182,35 @@ A weekly funnel review by sign-up cohort, segmented by kind of firm, states, dev
 | E13 | Approval email | Summary card (firm logo, filing title, total) above the button vs button only | `proof_opened` within 24 h | Complaints | Medium (comprehension, not approval) |
 | E14 | Proof | Moderated study only: the consent once vs twice, sticky jump bar vs none. Measured by comprehension questions, never by approval rate | Correct answers about fees and refunds | none | High, research |
 | E15 | Login | "Continue with Google" above vs below email | F5 time | Login errors | Low |
+| E16 | Coverage | Grouped by stage (as designed) vs grouped by state | `coverage_filtered` use, support emails about live types | none | Medium |
+| E17 | Close | The small sheet beside the closing CTA vs text only | F1 from close | none | Low |
+| E18 | Desk empty state | The first-rehearsal path card (10.3) [copy: C16] vs the plain empty state | F7 within 24 h of first login | none | High |
+
+### 14.3 The first five, in detail
+
+**E11. Unlock the first rehearsal before Payment.**
+- *Hypothesis:* a firm that has to find and enter a card before trying anything stalls at Payment; letting it rehearse first will raise Rehearsed in 7 days without delaying the first live filing for firms that convert.
+- *Variant:* "Start a filing" shown after Branding; Payment stays in the list, marked as needed before filing for real (using the existing "Real filings need an active subscription; rehearsals are free." notice where Payment is incomplete).
+- *Unit:* firm, assigned at sign-up. *Primary:* Rehearsed in 7 days (eligible firms). *Guardrails:* days from first rehearsal to first live filing, card-added rate by day 30.
+- *Decision rule:* ship if the primary improves with a 90% interval above zero and the guardrail doesn't worsen beyond a pre-agreed margin. If traffic can't power it in 8 weeks, ship it to 80% with a 20% holdout and read it over a quarter.
+
+**E8 and E9. Sign-up order and the live preview.**
+- *Hypothesis:* putting the account fields first and showing the firm's name on the sample proof as it's typed makes the form feel like setting up the firm's own desk rather than filling in a vendor's lead form.
+- *Design:* a 2 × 2 factorial (order × preview), so we learn each effect and their interaction from the same traffic.
+- *Unit:* anonymous visitor. *Primary:* F3 sign-up completion from F2. *Guardrails:* field errors per submission; for approval-required deployments, the share of sign-ups staff approve.
+
+**E3. Rehearsals earlier on the home page.**
+- *Hypothesis:* for this buyer, the rehearsal log is the most convincing thing on the page, and it's currently in section 8. Moving Act III to follow "The proof" will raise sign-up starts.
+- *Variant:* order 1, 2, 3, 8, 9, 10, 4, 5, 6, 7, 11, 12, 13. Every section and word is still there.
+- *Unit:* anonymous visitor. *Primary:* F2. *Guardrails:* "which types are live" support emails, section views of Firms and Requests (to check we didn't hide what firms get).
+
+**E1. Interactive callouts.**
+- *Hypothesis:* letting a visitor tap 1 to 4 on the sample proof turns a picture into a demo and raises hero CTA clicks.
+- *Unit:* anonymous visitor. *Primary:* F1 from the hero. *Guardrail:* LCP and bounce, since the interactive sheet adds weight.
+
+**E18. The first-rehearsal path card.**
+- *Hypothesis:* a new desk with an explicit path to one rehearsal (the steps in 10.3) gets more firms to start one on day one than a blank table.
+- *Unit:* firm. *Primary:* F7 within 24 hours of first login. *Guardrail:* rehearsals abandoned before the proof is sent.
 
 ---
 
@@ -1125,6 +1234,24 @@ A weekly funnel review by sign-up cohort, segmented by kind of firm, states, dev
 | Freeze | Feb 16 to Apr 20 | No structural desk changes during tax season; fixes only; low-risk marketing tests |
 | 3 | Apr 21 to Jun 30 | Dashboard, docs, Spanish client pages, commissioned illustration and type finished, the full experiment program |
 
+Phases 0 and 1 overlap on purpose: the proof and the instrumentation are one team's work, the marketing pages another's.
+
+**Performance budgets** (p75, mid-range Android on 4G, measured in the field, not only in the lab):
+
+| Surface | LCP | Interaction delay | JavaScript (compressed) | Fonts |
+|---|---|---|---|---|
+| Home | 2.0 s | 100 ms | 90 KB before interaction; Rive loads after the hero is visible | 110 KB |
+| Sign-up | 1.8 s | 100 ms | 60 KB | shared cache |
+| The proof | 1.5 s | 100 ms | none required: the page works with JavaScript off; the jump bar and image zoom enhance it | 110 KB, or the system stack if fonts haven't loaded in 1 s |
+| Client form | 2.0 s | 100 ms | 120 KB | firm font plus ours |
+| Desk pages | 2.5 s | 150 ms | 200 KB per route | shared cache |
+
+**QA matrix.** iOS Safari (the last two versions), Android Chrome, desktop Chrome, Safari, Edge and Firefox; VoiceOver on iOS and macOS, TalkBack, NVDA with Firefox; 200% zoom; Windows high-contrast mode; reduced motion on and off; light and dark; English and (from phase 3) Spanish; the 24 torture-set brands on every client template.
+
+**Definition of done for a page.** Built from library components only (new components go into the library first); every state in 9.20 present; tokens only, no raw hex in code; copy pulled from the locked strings with no edits; axe clean; keyboard walk recorded; events from the schema firing in the staging walk-through; visual tests passing in both themes; for client pages, the torture set passing; reviewed on a real phone at 360 px by someone other than its builder.
+
+**Handoff.** The Figma library is the source for design, the token package is the source for values, Storybook is the source for behavior. Each page in section 10 gets a Figma frame per breakpoint (360, 768, 1280), a Storybook story per state and a short build note listing its events. Design reviews happen in Storybook against the deployed preview, not in Figma.
+
 ---
 
 ## Appendix A: what I'd push back on
@@ -1134,9 +1261,15 @@ A weekly funnel review by sign-up cohort, segmented by kind of firm, states, dev
 3. **Confirming the email ends in a login.** "Your account is ready. Log in to set it up." Same browser, same person: confirm and continue straight into the desk.
 4. **"See what your client sees" shows text, not the client's view.** The anchor lands on a list. The client's view is a phone-sized proof; show that (E7).
 5. **The best evidence sits in the bottom half.** The rehearsal log, coverage and "the catch" are what win a cautious CPA, and they're sections 8 to 10 of 13. Test moving them up (E3, E4).
-6. **Only two places ask for the rehearsal** on a page of thirteen sections. Reuse the label at the end of each act.
+6. **Outside the nav, only two places ask for the rehearsal** on a page of thirteen sections. Reuse the label at the end of each act.
 7. **"Ready to pay" has no count anywhere.** Filings wait silently for a code. Badge it in the navigation.
 8. **Red brands can produce a red "Approve" button today.** The proof uses the firm's color with no semantic check. Section 11.3 fixes it.
+9. **The proof's error pages are unbranded.** Expired, already decided, invalid, wrong code and the change-request confirmation are a bare paragraph on a blank page, at the exact moment a client is most likely to wonder whether the link was real. Every one of them should wear the firm's brand bar (10.4).
+10. **The partner's own desk leads with CoFile, not the firm.** The desk's top bar shows the CoFile name with the firm's logo tucked in at the right. "Your name on the door" should start on the firm's own desk: firm logo and name at the left, "with CoFile" at the right.
+11. **No measurement exists.** There's no event that tells us how many visitors start a sign-up, how many confirmed firms rehearse, or where they stop. Phase 0 exists because of this.
+12. **The proof was designed for desktop.** A max-width page with a two-column table and a desktop screenshot is hard work at 360 px. The client is on a phone; design the proof for the phone first and let desktop be the variant.
+13. **Nothing is in Spanish.** Spanish-first owners meet the intake form, the proof and the emails in English only, while approving a legal filing. Plan the translation now (C10); the design is ready for it.
+14. **Payment cards are asked for in setup with no context about rehearsals.** Even if Payment stays before the first rehearsal, the step should say plainly, through its placement, that rehearsals never use the card. Today the card form comes before any mention of rehearsals on that page.
 
 ## Appendix B: copy notes
 
@@ -1148,8 +1281,15 @@ These are suggestions for the copy owner. None of them appear in the design abov
 - **C4.** The "More information needed" email has no button or next step. It needs a link label.
 - **C5.** Signed-in visitors on the coverage table could use a short pointer to per-account status in their desk.
 - **C6.** "This link has expired or isn't valid" has no way forward on the invitation page; a "Log in" link may help.
-- **C7.** The mobile menu button needs an accessible name ("Menu" or similar).
+- **C7.** Icon-only buttons need accessible names: the mobile menu, closing the full-screen review image, copy, open and download.
 - **C8.** A new API key needs a "copy" action label and a one-line "shown once" note.
 - **C9.** The co-brand appears as "with CoFile" on client pages and "Filed with CoFile" in the embed. Pick one.
 - **C10.** Spanish versions of client-facing pages, client emails, the proof and its consent texts, by a legal translator with counsel's review.
 - **C11.** The webhooks page says "The engine posts each filing event…" and the dashboard mentions "the platform team" and "tenant"; the copy review asked to keep those words out of customer-facing pages.
+- **C12.** The dashboard overview's status tiles need short labels for the four status families.
+- **C13.** The proof's heading is built from codes (state abbreviation and a lowercased type, as in "NJ llc formation: …") rather than the filing type's name ("New Jersey LLC formation"). The client reads this heading first.
+- **C14.** An offline notice for the desk.
+- **C15.** Labels for the staff drift-review decisions (accepted, corrected, rejected).
+- **C16.** The first-rehearsal path card on an empty desk, if E18 runs: a heading and short step labels.
+- **C17.** After confirming their email, a first-time user lands on a login headed "Welcome back". Fine if A3 is fixed; odd if not.
+- **C18.** The login's "Firms go to their filing desk, platforms to their dashboard." could sit under the sign-up page's enterprise link as well; today a platform buyer who clicks "Run a free rehearsal" learns only at the bottom of the form that it's for firms.

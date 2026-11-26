@@ -1393,13 +1393,64 @@ each filing type's definition in `lib/intake/forms`.)
   consent block.
 - **Ready to pay.** A focused page. The lede ("Approved filings that pay the state with a saved card
   wait here…") then one sheet per card: card label and last four in `mono`, the filings waiting for
-  it as a fee table with a ruled total, the security code field (4 boxes wide, `inputmode=numeric`,
-  `autocomplete=cc-csc`), and the pay button (`go lg`). "Nothing is waiting for a card right now."
+  it as a fee table with a ruled total, the security code field (the card vault's hosted field, labelled "Security code for {card}"),
+  and "Pay and file" (`go lg`). "Nothing is waiting for a card right now."
   as the empty state. A 60-minute keep rule appears as a small clock icon next to the code's sentence.
 - **Billing.** Plan name and its price **from Stripe** (no price is ever hard-coded or shown
   publicly), a ruled invoice table, the registered-agent lines (each business with its renewal date),
   the plan picker as radio cards. Notices as the code gives them.
 - **Password.** One sheet, "Change password".
+
+**Filing detail at `lg`:**
+
+```
+ ← Filings
+ ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ Two Sisters Bakery LLC   ‖ Waiting for approval   ▧ Rehearsal                    (h1 serif 44/50)
+ New Jersey LLC formation · started 11/26/2026, 10:02 AM by m.reyes@… (client link)
+ ┃ The approver has a link to check exactly what will be filed and approve it.    (next step)
+ ─────────────────────────────────────────────────────┬──────────────────────────────────────
+  ○ Received                         10:02 AM          │ LINK TO THE PROOF
+  │                                                    │ We emailed this link to ana@… If they
+  ● Getting the state's review page  10:03 AM          │ can't find it, you can pass it on. It
+  │   (register moment plays here)                     │ shows exactly what will be filed and
+  ◉ Waiting for approval  ◀ now      10:05 AM          │ the fees.
+  ┆                                                    │ ┌──────────────────────────────────┐
+  ◌ Approved                                           │ │ https://api.cofile.app/…         │
+  ◌ Submitted to the state                             │ └──────────────────────────────────┘
+  ◌ Accepted by the state                              │ [Copy link]
+  ◌ Completed                                          │ ───────────────────────────────────
+                                                       │ DOCUMENTS   (none yet: section hidden)
+  ▸ Progress on the state site (rehearsal, …)          │ EIN         (hidden until issued)
+                                                       │ [Save to Google Docs]  A copy of …
+```
+
+Phone: the header, the next-step note, then the right column's blocks (link, documents, EIN) above
+the timeline, because on a phone the thing to act on comes first and the history after it.
+
+**Ready to pay at `lg`:**
+
+```
+ Ready to pay
+ Approved filings that pay the state with a saved card wait here for the card's security code
+ (the 3 or 4 digits on the card). Enter it once and every filing waiting for that card goes ahead.
+ We keep the code for an hour at most, then delete it.                              🕐
+ ┌─────────────────────────────────────────────────────────────────────────────────────────┐
+ │ Firm card  ···· 4242                                                                    │
+ │ Two Sisters Bakery LLC · New Jersey LLC formation                              $103.50 │
+ │ {another approved filing}                                                       $xx.xx │
+ │ ─────────────────────────────────────────────────────────────────────────────────────── │
+ │ Total                                                                          $xxx.xx │
+ │ ═══════════════════════════════════════════════════════════════════════════════════════ │
+ │ Security code for Firm card ···· 4242  [ 123 ]                [ Pay and file ]          │
+ └─────────────────────────────────────────────────────────────────────────────────────────┘
+```
+
+The total row uses the fee table's "Total" label; the figures are the approved filings' own totals.
+The security-code field is the card vault's hosted element (its iframe), so it is styled through the
+vault's style options to match our field spec exactly: 52 px tall, 18 px figures, `field-border`,
+the same focus ring drawn on its wrapper. "Pay and file" is the `go lg` button; while pending it
+reads "Sending…", as in the code. When the code is accepted, the sheet's top rule turns `go`.
 
 ### 10.6 Permanent branded service pages (`/<firm>/<service>`)
 
@@ -1536,6 +1587,98 @@ Rules for the proof:
   so there's nothing more to do here.", "That code didn't match. …"), and the firm's contact line. A
   stop glyph for invalid and wrong code, an open circle for already decided.
 
+**The intake form on a phone:**
+
+```
+┌──────────────────────────────────┐
+│ This service is in beta. …       │  neutral beta notice, 14/20
+│▔▔▔▔▔▔▔▔▔▔ firm color rule ▔▔▔▔▔▔▔│
+│ [logo] Harbor & Pine CPA   with  │
+│                            CoFile│
+├──────────────────────────────────┤
+│▧ This page is in rehearsal for   │  rehearsal band, when it applies
+│  now. You can fill it in and see │
+│  your proof, but nothing will be │
+│  filed with the state … To file  │
+│  for real, contact Harbor & Pine │
+│  CPA.                            │
+├──────────────────────────────────┤
+│ New Jersey LLC formation         │  h1, firm heading font, 30/36
+│ {summary} After you send this,   │  lede 18/28
+│ you'll get a link to check       │
+│ exactly what will be filed, and  │
+│ nothing is filed until it's      │
+│ approved.                        │
+│ ━━ 1 ━━━━━━━━━━━━━━━━━━━━━━━━━━━ │  part rule with numeral
+│ {section title}                  │
+│ Business name                    │  label 17 semibold
+│ [____________________________]   │  52 px input
+│ …                                │
+│ ━━ 2 ━━━━━━━━━━━━━━━━━━━━━━━━━━━ │
+│ …                                │
+│ Next, you'll get a proof to      │
+│ check. Nothing is filed until    │
+│ it's approved.                   │
+│ ┌──────────────────────────────┐ │
+│ │ Send to Harbor & Pine CPA    │ │  brand-action lg, full width
+│ └──────────────────────────────┘ │
+│ By sending, you agree to …       │  caption, links underlined
+│ Questions? Email …               │
+└──────────────────────────────────┘
+```
+
+Behaviour notes: the "the filing company" definition line that the forms carry sits at the top of
+the Authorizations block, set as a definition (term in semibold, then the rest), because a client
+must know who that is before checking anything. Repeated groups (the code's "Add {item}" buttons,
+for example "Add member", with each block titled "{Item} {n}") add a new ruled block that scrolls into view with `t-base` and receives
+focus on its first field. A kept draft (the existing `useKeptForm`) restores silently; nothing
+flashes.
+
+**The decision page (after approving):**
+
+```
+┌──────────────────────────────────┐
+│ [logo] Harbor & Pine CPA   with  │
+│                            CoFile│
+├──────────────────────────────────┤
+│  ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓  │  the frame draws clockwise, t-weight
+│  ┃   Approval recorded        ┃  │  h1 serif 34/40
+│  ┃   Nov 27, 2026 · 9:14 AM   ┃  │  mono 15/22, time of the decision
+│  ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛  │
+│ Thank you. Your approval is      │  the code's paragraph, 18/28
+│ recorded. We'll submit the filing│
+│ exactly as shown. If the state's │
+│ page has changed by then, we stop│
+│ before paying, and you may be    │
+│ asked to approve again. We'll    │
+│ email you when it's complete.    │
+│ Questions: …                     │
+└──────────────────────────────────┘
+```
+
+The time line under the heading is a value (when the approval was recorded), not new words; it is
+the dated signature an editor puts on a press OK. On a rehearsal the frame is drawn with the hatch
+along its left side and the rehearsal paragraph follows.
+
+### 10.7a Print
+
+CPAs print. Title closers print. Every record a client approves will end up in a paper file, so
+the important pages get print stylesheets designed with the same care as the screen.
+
+- **The proof** prints on US Letter (and A4) at 10.5 pt Record Text and 10 pt Record Mono, margins
+  0.75 in, the firm's logo and name at the top, "with CoFile" in 7 pt in the footer, page numbers
+  "1 / 2" in the footer right. The terms block, details, fees and the state's review page print in
+  that order; the buttons and the code field don't print; a 2 in ruled blank sits at the end of the
+  last page for the firm's own initials if they want them (rules only, no words). The state's
+  picture prints at full column width in grayscale-safe contrast.
+- **The filing record** (filing detail) prints as a file copy: header, timeline with dates, the
+  documents list with their names, the EIN, and the proof link's reference, no navigation.
+- **The coverage table** prints on one landscape page with the legend and the footnote.
+- **Terms and Privacy** print as in 10.3.
+- In print, editor's blue becomes 60% black with the markers kept as outlined numerals, and the
+  rehearsal hatch prints as a 0.5 pt diagonal pattern, so a black-and-white office printer keeps
+  every distinction.
+
 ### 10.8 Enterprise dashboard (`/dashboard`)
 
 Working pages for product managers and engineers. The 240 px rail, content on the remaining grid,
@@ -1566,6 +1709,37 @@ sans throughout, the wordmark at the top of the rail (enterprise accounts see Co
 - **Sign-ups** (platform tenant only): "Waiting for approval", "Decided", "Enterprise requests" as
   three ruled sections. Each pending sign-up is a row with the firm name, kind, states and volume,
   and approve/decline buttons; enterprise requests show the inquiry form's answers as a quoted card.
+
+**Dashboard overview at `xl`:**
+
+```
+┌──────────────┬───────────────────────────────────────────────────────────────────────────────┐
+│ CoFile       │ ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ │
+│              │ {account name}                                                     (h1 44/50) │
+│ ▍Overview    │ ▍Real filings need an active subscription; rehearsals are free. Subscribe     │
+│  Filings     │ ───────────────────────────────────────────────────────────────────────────── │
+│  Ready to pay│   1,284        │      3          │     99.6%           │     4               │
+│  Firms       │ FILINGS        │ READY TO PAY    │ WEBHOOK DELIVERIES  │ KEYS                │
+│  API keys    │ ───────────────────────────────────────────────────────────────────────────── │
+│  Webhooks    │ BY STATUS                                                                     │
+│  Setup       │ ███████████████████▓▓▓▓▓▓░░░░░░░▒▒  (stacked bar in status tones, glyph legend)│
+│  Team        │ ● Completed 812  ‖ Waiting for approval 41  ○ Filing now 6  ■ Failed 3  …     │
+│  Billing     │ ───────────────────────────────────────────────────────────────────────────── │
+│  Sign-ups    │ FILING            FIRM            TYPE               STATUS        STARTED    │
+│  Docs ↗      │ …                                                                             │
+│              │                                       [Pay and file]  [Manage keys]           │
+│ m.lee@… ▾    │                                                                               │
+└──────────────┴───────────────────────────────────────────────────────────────────────────────┘
+```
+
+(The figures and the strip's labels other than "By status" and "Webhook deliveries" stand for
+whatever the overview page reports; the strip renders the page's own data and labels. Figures in
+`fee-total` 32 px tabular, labels in small caps 12 px, column rules between, no sparklines unless
+the page has a time series to show.)
+
+The stacked bar follows the house rules for charts: one bar, 16 px tall, segments in status tones
+in the order Go, Wait, In motion, Stop, each segment separated by a 2 px `sheet` gap so adjacent
+tones never touch; the legend uses chips, so the bar is never the only way to read the counts.
 
 ### 10.9 White-label surfaces
 
@@ -1600,6 +1774,42 @@ column at `xl`.
 - **`/openapi.json`, `/llms.txt`, `/docs.md`:** served as files. Links to them carry a file glyph and
   the format in `mono`. When opened in a browser, `/llms.txt` and `/docs.md` render in a plain
   monospaced reader page (sheet, 72-character measure) with a "download" text link **[copy needed]**.
+
+**API reference at `xl`:**
+
+```
+┌──────────────┬──────────────────────────────────────────┬─────────────────────────────────┐
+│ API docs     │ ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ │                                 │
+│ Quick start  │ API reference                            │                                 │
+│ Authentication│ ──────────────────────────────────────── │                                 │
+│ Filings and  │ {group}                                  │                                 │
+│  the lifecycle│ [POST] /v1/filings                       │  REQUEST                         │
+│ …            │ {description}                            │  ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓ │
+│ ──────────── │ BODY                                     │  ┃ curl …/v1/filings \          ┃ │
+│ API reference│ name        type      required  notes    │  ┃  -H "x-api-key: $COFILE_…"  ┃ │
+│  {group}     │ ──────────────────────────────────────── │  ┃  -d '{ "dryRun": true, … }' ┃ │
+│   POST /v1/… │ dryRun      boolean   no        …        │  ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛ │
+│   GET  /v1/… │ …                                        │  RESPONSE 201                     │
+│ ──────────── │                                          │  ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓ │
+│ openapi.json │                                          │  ┃ { "id": "…", "status": … }   ┃ │
+│ llms.txt     │                                          │  ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛ │
+│ docs.md      │                                          │  (sticky while this endpoint      │
+│              │                                          │   is in view)                     │
+└──────────────┴──────────────────────────────────────────┴─────────────────────────────────┘
+```
+
+(Group names, descriptions and schema rows come from the reference page's own data; the column
+heads of the field table follow whatever the reference already prints.)
+
+- **Endpoint anchors:** every endpoint has a permanent anchor and a "copy link" glyph on hover beside
+  its path, for developers pasting links into tickets.
+- **Search:** a `/` keyboard shortcut opens a search sheet over the docs (elevation 3), results
+  grouped by guide and endpoint, paths in `mono` **[copy needed for the placeholder]**.
+- **Two readers:** the guides speak in Record Text for the product manager; the reference speaks in
+  sans and mono for the engineer; the same masthead and the same two inks tell both that it's one
+  publication.
+- **Statuses and webhook events** are cross-linked: each event name in `mono` links to the timeline
+  stage it corresponds to in the lifecycle guide.
 
 ### 10.11 Emails
 
@@ -1723,7 +1933,8 @@ upload, a condensed display upload, and the ten presets. A theme ships only if a
   are `aria-hidden`. Callout markers are `aria-hidden` duplicates of list text that is always present.
 - **Forms:** labels bound to inputs, help bound with `aria-describedby`, an error summary at the
   top with links to fields, correct `autocomplete` tokens (`name`, `email`, `tel`, `street-address`,
-  `postal-code`, `one-time-code`, `cc-csc`), radio groups as `fieldset` with `legend`.
+  `postal-code`, `one-time-code`; the security code is the vault's hosted field, which must expose
+  its label to assistive technology across the iframe), radio groups as `fieldset` with `legend`.
 - **Color independence:** every status has a glyph and a word; the rehearsal hatch backs the amber.
   In forced-colors mode the hatch becomes a dashed border and glyphs stay.
 - **Time:** the proof's deadline and the security code's hour are stated in words; nothing times out

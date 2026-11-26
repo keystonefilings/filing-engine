@@ -53,10 +53,10 @@ Why this fits CoFile: CoFile's promise is "stop and ask rather than guess", and 
 
 "CoFile", one word, capital C, capital F, set in Formular Sans 75 Bold and then redrawn by hand as lettering. Instructions for the letterer:
 
-- **Construction grid.** Cap height = 10 units. x-height = 7.2 units. Stem weight = 1.6 units (vertical), 1.45 units (horizontal; grotesk contrast). Baseline overshoot for round letters 0.15 units.
+- **Construction grid.** Cap height = 10 units. x-height = 6.9 units (lower than the text face's, deliberately, to give the F room; see below). Stem weight = 1.6 units (vertical), 1.45 units (horizontal; grotesk contrast). Baseline overshoot for round letters 0.15 units.
 - **C.** Grotesk construction, terminals cut exactly horizontal, aperture 3.4 units tall at the right side. No spur.
 - **o.** Optically round, width 6.9 units, counter 3.7 units wide.
-- **F.** Top arm 5.8 units long from the stem's left edge. Middle arm 4.9 units long, and **the top edge of the middle arm sits exactly on the x-height line** (7.2 units). This is the one deliberate detail: the F's middle arm continues the top line of "o", "i" and "e", so the word reads as one line of text, the way a field label reads on a form.
+- **F.** Top arm 5.8 units long from the stem's left edge. Middle arm 4.9 units long, and **the top edge of the middle arm sits exactly on the x-height line** (6.9 units), leaving a 1.65-unit counter under the top arm. This is the one deliberate detail: the F's middle arm continues the top line of "o", "i" and "e", so the word reads as one line of text, the way a field label reads on a form.
 - **i.** The dot is a **square**, side = stem width (1.6 units), its top edge on the cap height line. It echoes the mark (3.2).
 - **l.** Ascender rises exactly to cap height, not above. The wordmark sits in a clean rectangle: cap height top, baseline bottom, no ascender poking out.
 - **e.** Horizontal terminal, bar at 3.9 units, same horizontal stem weight.
@@ -66,7 +66,7 @@ The wordmark is supplied as SVG in three optical sizes: **Display** (above 32px 
 
 ### 3.2 The mark: the marked box
 
-A square outline with a solid square inside it. It is the box on a form, marked. On every form I have designed, a box is marked by filling it; the tick is an English-language habit that grew out of hurried clerks. Filling the box is the client's act. The mark says: *the box was marked by the person who had the right to mark it*.
+A square outline with a solid square inside it. It is the box on a form, marked. On the forms I have designed, a box is marked by filling it or crossing it, never by a decorative tick. Filling the box is the client's act. The mark says: *the box was marked by the person who had the right to mark it*.
 
 Drawing instructions, on a 16 × 16 unit grid:
 
@@ -178,17 +178,17 @@ Computed with the WCAG 2.2 relative-luminance formula.
 
 | Pair | Light | Dark | Requirement |
 |---|---|---|---|
-| Ink on paper | 18.4:1 | 15.2:1 | AAA body |
-| Ink-2 on paper | 8.9:1 | 9.4:1 | AAA body |
+| Ink on paper | 18.4:1 | 14.8:1 | AAA body |
+| Ink-2 on paper | 8.9:1 | 8.8:1 | AAA body |
 | Ink-3 on paper | 5.3:1 | 5.3:1 | AA, 14px minimum |
-| Form Blue on paper | 8.5:1 | 8.9:1 | AAA for 14px labels |
-| Go on paper | 6.4:1 | 7.8:1 | AA text, 3:1 symbol |
+| Form Blue on paper | 8.5:1 | 8.7:1 | AAA for 14px labels |
+| Go on paper | 6.3:1 | 7.8:1 | AA text, 3:1 symbol |
 | Hold on paper | 5.7:1 | 9.0:1 | AA text |
-| Stop on paper | 6.9:1 | 7.6:1 | AA text |
-| Go on go-tint | 5.5:1 | 6.9:1 | AA |
-| Hold on hold-tint | 5.1:1 | 7.4:1 | AA |
-| Stop on stop-tint | 5.8:1 | 6.1:1 | AA |
-| Button text on button | 18.4:1 | 15.2:1 | AAA |
+| Stop on paper | 6.8:1 | 7.6:1 | AA text |
+| Go on go-tint | 5.4:1 | 6.9:1 | AA |
+| Hold on hold-tint | 5.1:1 | 7.9:1 | AA |
+| Stop on stop-tint | 5.7:1 | 7.1:1 | AA |
+| Button text on button | 18.4:1 | 15.7:1 | AAA |
 | Field-line on paper | 3.7:1 | 4.0:1 | 3:1 non-text |
 
 The proof is held to **7:1 for all text** (AAA). That rules out ink-3 on the proof except for the "with CoFile" line, which is not content.
@@ -210,9 +210,9 @@ One sans for everything people read, one monospace for everything a machine says
 **Commission brief for the foundry** (a Swiss independent type studio with grotesk and signage experience):
 
 - x-height 0.53 em, cap height 0.72 em. Open apertures on a, c, e, s, 2, 3, 5, 6, 9: at 14px on a cheap phone screen, an older reader must not confuse c with o or 3 with 8.
-- Unambiguous I, l, 1 and O, 0: capital I with no serifs but a slightly shorter height is not acceptable; use a lowercase l with a tail, a 1 with a flag and foot, a capital I plain. In Mono, zero is slashed.
+- Unambiguous I, l, 1 and O, 0: a lowercase l with a tail, a 1 with a flag and a foot, a plain capital I at full cap height, a zero narrower than the O. In Mono, the zero is slashed.
 - Figures: **tabular lining figures by default**, proportional lining as `pnum`. Oldstyle figures are not drawn. All figures share one width in tabular mode, including the dollar sign, comma and period, so that columns of amounts align by construction.
-- Case-sensitive forms for parentheses, hyphens, colons; fractions (`frac`) for "50/50" in the Spanish and English member lines.
+- Case-sensitive forms for parentheses, hyphens and colons. No automatic fractions: "50/50" on a member line is a split, not a fraction, and must stay as typed.
 - Character set: Latin Extended-A and B, Vietnamese, plus ¿ ¡ ñ º ª with their uppercase heights tuned. The Spanish inverted marks sit on the baseline, not the descender.
 - Hinting tuned for Windows at 13 to 16px; tested at 13px on a 1x display.
 - Delivery: WOFF2, variable and static, subsetted Latin core (35 KB target for Sans 400–700 variable) and an extended subset loaded by `unicode-range`.
@@ -231,7 +231,8 @@ Sizes in px at a 16px root, all line heights on a 4px baseline. "Mobile" applies
 | `t-headline` | 40/48 | 28/36 | 75 | −1% | Home section H2s, close |
 | `t-title` | 32/40 | 26/32 | 75 | −0.5% | Page H1 in the desk, dashboard, docs; the proof's H1 |
 | `t-heading` | 24/32 | 22/28 | 75 | 0 | H2 in apps; the catch's five points |
-| `t-sub` | 20/28 | 20/28 | 65 | 0 | H3; home ledes |
+| `t-sub` | 20/28 | 20/28 | 65 | 0 | H3; kickers; step titles |
+| `t-lede` | 20/28 | 18/28 | 55 | 0 | Home section ledes, in `--ink-2`, 60ch maximum |
 | `t-body-l` | 18/28 | 18/28 | 55 | 0 | Home body; all client-facing pages; the proof |
 | `t-body` | 16/24 | 16/24 | 55 | 0 | Desk, dashboard and docs body; tables |
 | `t-small` | 14/20 | 14/20 | 55 | +0.5% | Help text, captions, notes |
@@ -548,7 +549,7 @@ The numbering is a component with its own rules, because if it drifts it is wors
 
 **The callouts on the state's page** are placed by the engine from the field positions it already knows when it fills the page (it typed those values, so it knows where they are). A callout sits 4px to the left of the field's box, or above it when there is no room. If the engine cannot place a callout with confidence, it omits it rather than guess; the text table still has every line.
 
-**Numbers are never interactive by appearance**: they look like print. Their interaction (8.3) is discovered by tapping, and is announced to screen readers as a button only on the proof, where tapping does something.
+**Numbers look like print, not like buttons.** Only on the proof do they do something (8.3): there they get a 1px dotted underline on hover and on focus, a 48px hit area, and are exposed to screen readers as buttons. Everywhere else they are plain text.
 
 ---
 
@@ -1085,3 +1086,124 @@ The client-facing surfaces (intake, the proof, decision and error pages, client 
 - Logos get plates (11.3); firm colors are recomputed for dark paper.
 - The focus ring inverts to `#EDEDE8` with a `#1A1A19` halo.
 - Emails declare `color-scheme: light dark` and provide explicit dark styles.
+
+---
+
+## 13. Production
+
+### 13.1 Tools and stack
+
+- **Design:** Figma, with variables for color (modes: Light, Dark, and four sample firm themes produced by the algorithm), number variables for the spacing scale and type sizes, and layout grids for each breakpoint. Code Connect mappings from each Figma component to its React component.
+- **Tokens:** one `tokens.json` in the W3C Design Tokens format is the source. Style Dictionary builds `tokens.css` (custom properties for light, dark and the structure of firm overrides), a TypeScript module for the app and the engine, and the email constants.
+- **Web:** the existing Next.js app. Today's `globals.css` and `landing.css` (two parallel token sets, `.lp` scoping, manila and serif) are replaced by `tokens.css` plus a small component library (`@cofile/ui`): Button, Field, Choice, Fold, SameAs, SignaturePad, StatusChip, CoverageDisc, Timeline, Table, Notice, Toast, Dialog, Sheet, ProofSheet, LineRef, FirmHeader, WithCoFile. CSS Modules; no utility framework is needed for a system this small.
+- **The engine's proof** (`src/approvals/render.ts`, server-rendered HTML at api.cofile.app) uses the same `tokens.css` and the same theme function, inlined as critical CSS under 14 KB, with fonts from the same origin. The proof must render and submit without JavaScript; a 6 KB script adds the correspondence highlight and the image viewer.
+- **Theme function:** `@cofile/theme`, a pure TypeScript package used by both the web app and the engine, with OKLCH conversion, the seven steps of 11.3, and unit tests on the fixtures of 11.4 and the nightly matrix.
+- **Fonts:** self-hosted WOFF2, preloaded variable Sans (Latin core), `font-display: swap` with metric-matched fallbacks so nothing shifts.
+- **Emails:** React Email components rendered to HTML and text, sent through Resend, checked in an email-client rendering service across Gmail (web, iOS, Android), Apple Mail, Outlook (Windows, web) in light and dark.
+- **Quality:** Storybook showing every component in every state, light and dark, at XS and XL; visual regression on every pull request; axe checks in CI; contrast assertions computed from tokens (not from screenshots); Playwright journeys for the proof on a 360px viewport with VoiceOver and TalkBack scripts run by people each release.
+
+### 13.2 Design-system files
+
+| File | Contents |
+|---|---|
+| `CoFile Foundations.fig` | Color variables and modes, type styles, grids, spacing, rules, symbols |
+| `CoFile Components.fig` | Every component of Section 9 with all states and variants, light and dark |
+| `CoFile Surfaces.fig` | Every page of Section 10 at XS, M and XL, light and dark |
+| `CoFile Firm Theming.fig` | The algorithm's examples, the twelve ready colors, logo plate cases, the matrix sample |
+| `CoFile Pictograms.fig` | 32 pictograms, 12 status symbols, 5 coverage discs, construction grids |
+| `CoFile Email.fig` | The email frame and each template |
+| `tokens.json` | The source of truth |
+| `brand/` | Wordmark and mark masters, usage sheet as a PDF |
+
+### 13.3 Asset list
+
+| Asset | Formats | Notes |
+|---|---|---|
+| Wordmark | SVG in Display, Text, Micro; ink, paper | 3.1 |
+| Mark | SVG mono, two-ink, reversed | 3.2 |
+| Lockups | SVG horizontal, all colors | 3.3 |
+| Favicons | SVG (with dark-mode media query), ICO 16/32, PNG 180, 192, 512 | Mark only |
+| Social images | 1200 × 630 templates for home, docs, and each firm's service page | The firm page image is generated: firm logo plate, firm name, filing type title, band in the firm's color; no CoFile mark |
+| Status symbols | SVG sprite, 12 | 4.3 |
+| Coverage discs | SVG, 5 | 9.10 |
+| Pictograms | SVG sprite, 32 | 7.2 |
+| Email images | PNG 2x of the lockup and the mark | Only images in emails |
+| Fonts | WOFF2 variable and static; OTF for design | 5.1 |
+| Sample data | The Two Sisters Bakery LLC fixture used by the hero, the specimen and Storybook | One fixture, so the specimen never contradicts itself |
+| Annotated specimens | Generated from components at build | 7.3 |
+| Print stylesheets | Proof, filing record, Terms, Privacy | US Letter |
+
+### 13.4 What to commission
+
+| What | From (by kind) | When |
+|---|---|---|
+| Formular Sans and Mono, wordmark lettering | Swiss independent type foundry with grotesk and signage work | Start in phase 0; ships in phase 4 |
+| Pictograms and status symbols | Information-design studio with transit pictogram systems | Phase 1 |
+| Spanish translation of client copy | Legal translators for US Spanish, plus a plain-language editor; counsel review of consents | Phase 2 |
+| Accessibility audit | An audit firm whose testers include blind, low-vision and older users | End of phases 1 and 3 |
+| Usability research | A research studio: sessions with CPA, payroll and title staff aged 45 to 70, and first-time founders approving a proof on their own phones, including Spanish-first founders | Phase 1 (the proof), phase 3 (the desk) |
+
+### 13.5 Phases
+
+The pages people sign go first.
+
+| Phase | Weeks | Scope |
+|---|---|---|
+| 0. Foundations | 3 | Tokens, interim fonts (Univers Next), `@cofile/theme`, the 18 core components, Storybook, CI checks |
+| 1. Client pages | 6 | The proof, decision and error pages, intake form, client links, service pages, embed, client emails. Research and audit |
+| 2. Public site | 5 | Home (13 sections), sign-up, log in and account pages, legal pages, 404 and error. Spanish for client pages |
+| 3. Filing desk and dashboard | 8 | All desk and dashboard pages, Branding with the contrast report, drift review, account emails. Research and audit |
+| 4. Docs and type | 4 | Docs and reference, machine-readable files; the commissioned Formular replaces Univers Next across everything in one release |
+| 5. Records | 3 | Printable filing record, coverage feed, print stylesheets |
+
+---
+
+## 14. Appendix
+
+### A. What I would push back on in the current site
+
+1. **Ticks on marketing bullets.** Every list on the home page starts with a green tick. A tick on a form means *this is done and correct*. Spent on "An embeddable widget for your own pages" it means nothing, and by the time the client reaches the one place where a mark matters, the mark is worn out. Number the lists; keep green for approved and live.
+2. **Paper and manila as decoration.** Cream ground, manila tint, a folder-tab mark and a rotated "stamp" (`.stamp`, `rotate(-4deg)`) imitate an office. The product is not old paper; it is an accurate form. Real paper is white, and white gives older readers the contrast they need.
+3. **Three typefaces.** A serif for headlines, a sans, a mono. The headlines do not need a second voice, and the switch costs a font download and a unity.
+4. **Mono for entered values and amounts.** On the sample proof the client's name, members and address are in mono, as though a machine wrote them. They are the client's words; they belong in the reading face. Amounts need tabular figures and decimal alignment, which a good sans provides, not a typewriter face.
+5. **The declaration at the top of the proof.** The consent paragraph is printed above everything, then the reader scrolls through the picture, the details and the fees, and finds the button at the bottom far from what it commits them to. The declaration belongs directly above the signature.
+6. **The firm's color on the approve button.** `brandedTop()` paints the approve button in the firm's primary color. Across thousands of firms the decisive button would be thousands of colors, some pale with white text, some red. The button that commits a client should look the same everywhere.
+7. **Amber for waiting.** `StatusBadge` gives "Waiting for approval", "Needs information" and "On hold" the same amber as a rehearsal. Amber should mean the planned hold, and nothing else.
+8. **HTTP methods in status colors.** In the docs GET is green and DELETE red. A DELETE is not a stop.
+9. **Coverage chips that look alike.** "Rehearsed to the payment screen" is amber, the other three stages are the same plain gray. The four stages are an order, and the design should show the order.
+10. **Bare error pages on the proof.** Expired and used links return an unstyled `<p>`, without the firm's name, at the moment a client is most likely to be confused.
+11. **No navigation on phones.** The public header hides its section links below 860px with nothing in their place.
+12. **The second color for links.** A firm's pale second color decides whether links can be seen. Links should be ink and underlined.
+13. **Two token systems.** `globals.css` and `landing.css` define the same palette twice under different names, and the engine's proof hard-codes a third copy of the hex values. One source, or the three will drift.
+14. **Rounded corners and shadows on cards.** Small, but they make a legal page look like an app store. Rules separate things better than shadows, and corners do not need softening.
+
+**My biggest pushback:** the site spends its strongest signals (the green tick, the colored button) on marketing bullets and on each firm's brand color, so by the time a client reaches the one button that cannot be undone, those signals no longer mean anything.
+
+### B. Copy notes
+
+The design above uses the copy as it is. These are the words I would raise with the copy owner. None of them is used in the design.
+
+**Inconsistencies with the agreed terms**
+
+1. **"Signing in…"** is the busy label of the log in button (`AuthForms.tsx`). The rule is "log in", so "Logging in…".
+2. **"You're not signed in to this filing desk"** on `/p/<slug>/signed-out`: "logged in".
+3. **"You're invited to {firm}'s filing portal"** (invitation subject): the partner area is now the "filing desk".
+4. **"Test"** badge in the desk's filings list, **"test run"** in "Progress on the state site", and **"never on a preview or test run"** on the Signatures page: these should say "rehearsal".
+5. **"Filed with CoFile"** at the end of the widget, where every other client surface says "with CoFile". On a rehearsal page "Filed" is also not true.
+6. **The proof's H1** is built from engine values ("NJ formation: TWO SISTERS BAKERY LLC"). The filing type's own title ("New Jersey LLC formation") would match the email subject and the intake page.
+7. **"Fields marked * are required."** The forms already mark optional questions with "(optional)". One convention is enough; I would keep "(optional)" and drop the asterisk and its sentence, which also removes an unexplained symbol for screen-reader users.
+8. **"Your filing company"** in `nextStep()` texts shown to firm staff on their own desk ("Your filing company will offer alternatives") reads oddly when the reader is the firm.
+
+**Words the design needs that the copy does not have**
+
+9. **Headings for approval error pages.** The design sets the sentence itself as the heading until there is copy; a short heading per case would be better.
+10. **A skip link** ("Skip to content" or similar).
+11. **The language switch** on client pages: the two language names, and the label for "the English original" under each Spanish authorization.
+12. **The contrast report** on the Branding page: labels for "what you chose", "what clients will see", and a one-line reason when a color is adjusted.
+13. **Line numbers for screen readers.** Whether the number should be read with a word ("line 3") or bare.
+14. **A reference to the state's screen** beside each section of the intake form (for example "Screen 7 of 13"), which the engine already knows from each field's reference; useful for staff who know the state's site.
+15. **Appearance choice** in the desk and dashboard account menu (light, dark, system).
+16. **Logo includes our name:** a setting for firms whose logo already contains their name, so the name is not printed twice.
+17. **A short explanation behind "with CoFile"** for a client who wonders what it means, reached from the phrase.
+18. **Emails the brief lists but the code does not name:** filing submitted, documents back and EIN issued need subjects and bodies; the missing-information email has no link or button, and a client who is asked for details should be told where to give them.
+19. **Coverage legend title**, if one is wanted above the five discs; the design works without one.

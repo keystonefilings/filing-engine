@@ -655,6 +655,26 @@ Header row on `--sheet-2`, 13/16 Atkinson 700 `--ink-2`, sentence case (no all-c
 - **Code blocks:** always on Press Black `#15131C` in both modes, text `#F2F0EA`, keys `#A9A3FF`, strings `#7FE0B0`, numbers `#FFC24F`, comments `#9A96A8`, with a copy button top right. `"dryRun": true` is highlighted in marigold everywhere it appears, so a rehearsal flag in code looks like a rehearsal on screen.
 - **Security code (Basis Theory iframe):** styled through the vault's style API to match our 52 px fields, 4 boxes for 3–4 digits rendered as one input (one field, `autocomplete="cc-csc"`), with the card's label and last four above it.
 
+### 9.12 More components
+
+| Component | Spec |
+|---|---|
+| **Checkbox** | 24 px box, 2 px `--rule-strong` border, 6 px radius. Checked: `--action` fill with a 2 px check in `--on-action` (`t-2`). The whole label is the hit area. Focus ring around the box and label together |
+| **Radio** | 24 px circle, the same rules. For a consequential choice (state, how fees are paid, plan) use **choice sheets**: full-width sheets with a radio inside, 1.5 px border, and when selected a 2 px `--action` border with a `--register-tint` wash |
+| **Select** | A native `<select>` styled as a 52 px field with a chevron, so phones get their own picker. Searchable comboboxes only for lists over 15 items (the 50 states and DC on the EIN form), built to the ARIA combobox pattern |
+| **File upload** (logo, font, PDF documents) | A drop zone sheet, 120 px tall, 1.5 px dashed `--rule-strong` border. Dragging over it turns the border solid `--action` with a tint wash. Uploading shows a linear progress bar. Done shows a thumbnail with "Remove logo". Errors use the locked messages ("Choose a PNG, JPEG or WebP picture.", "That picture couldn't be opened.", "That picture is too large. Try a smaller one.", "The font file must be 600 KB or smaller.") in the Stop style |
+| **Signature pad** | Always white paper, even in dark mode, 520 × 150 at most, with a baseline rule and a small × at its left end. Ink is `#15131C`, 2.5 px, pressure-sensitive where the device allows. It keeps the locked accessible label ("Signature pad: the signer draws their signature here with a mouse, finger or stylus."). The consent statement sits beneath it as a checkbox panel |
+| **Dialog** | Desktop: centered, 560 px maximum, e3, 16 px radius. Phones: a bottom sheet with a grab handle and a 16 px top radius. Focus is trapped, Esc closes it and focus returns to the trigger. Destructive confirmations (Revoke, Disconnect, Turn off, Abort filing) always use a dialog with the destructive button on the right ⟨copy to come: confirmation text⟩ |
+| **Tabs** | 48 px tall, a 2 px `--action` underline on the selected tab, arrow keys move between tabs. Used for code languages in the docs and for By status / By state / By month on the dashboard |
+| **Tooltips** | Avoided. They're used only on icon-only buttons in dense desktop tables and repeat the accessible name. Information is never hidden in one: today's rehearsal-chip tooltip ("Runs on the state's real website and stops before the last button: nothing is filed or paid") becomes visible Small text under the chip on the New filing type sheets |
+| **Skeletons** | `--sheet-2` bars in the shape of the content to come. A slow opacity pulse (0.6 to 1, 1.2 s) only when motion is allowed, and no shimmer sweep |
+| **Secret box** | `--sheet-2`, 1.5 px dashed `--rule-strong`, mono 15/24, `word-break: break-all`, a copy button. For new API keys, webhook secrets and approval links |
+| **Stat tile** | A sheet with an H3 label, the number in Press 760 at 40/44 with tabular figures, a Small sub-line, and an optional split bar (live solid green against rehearsal dashed marigold) |
+| **Method pill** | Mono 12/16 700, 4 px radius: GET Go, POST Register, PUT Stage text, DELETE Stop |
+| **Count badge** | A 20 px minimum pill in Your move colors with the number in mono 12, on nav items like Ready to pay. It's in the item's accessible name too |
+| **Segmented control** | 40 px, for the theme switch (system, light, dark) and the language switch ⟨copy to come⟩ |
+| **Progress bar** | 4 px, `--action` on `--sheet-2`, linear motion only. For uploads, never for a filing (filings use the timeline) |
+
 ---
 
 ## 10. Page by page
@@ -742,6 +762,139 @@ The desk is CoFile's tool with the firm's name on it. The rail carries the firm'
 | **Billing** | The plan panel and the picker as sheets. Prices come only from Stripe once set. The locked line "Real filings need an active subscription. Rehearsals are always free." in Stage style. "Manage billing" secondary |
 | **Password**, **Signed out** | Volume 2 single column. Signed out uses the slip template |
 
+**Filings, desktop**
+
+```
+┌ beta strip (neutral, firm pages) ──────────────────────────────────────────────────────────┐
+├ rail 248 ─────────────┬────────────────────────────────────────────────────────────────────┤
+│ ▀▀▀▀ firm color ▀▀▀▀  │ Filings                                              [New filing]  │
+│ [Harbor & Pine logo]  │ ┌──────────────────────────────────────────────────────────────┐   │
+│                       │ │ ➜ 1 approved filing is ready to pay and need your card's     │   │
+│ ▌Filings              │ │   security code. Pay and file                                │   │
+│  New filing           │ └──────────────────────────────────────────────────────────────┘   │
+│  Ready to pay     (1) │ ┌──────────────────────────────────────────────────────────────┐   │
+│  Client links         │ │ ➜ 1 filing needs someone to act.                             │   │
+│  Signatures           │ └──────────────────────────────────────────────────────────────┘   │
+│  Setup                │  Filing                     Type                    Status   Started│
+│  Billing              │  ───────────────────────────────────────────────────────────────── │
+│                       │  Two Sisters Bakery LLC     New Jersey LLC          ➜ Waiting for  12/1│
+│                       │  ┆Rehearsal┆                formation                 approval         │
+│                       │  ───────────────────────────────────────────────────────────────── │
+│ ───────────────────── │  ⟨another filing⟩           New York employer       ● Completed  11/28│
+│ ⟨staff email⟩         │                             registration (NYS-100)                  │
+│ [Log out]             │                                                                    │
+│ with CoFile           │                                                                    │
+└───────────────────────┴────────────────────────────────────────────────────────────────────┘
+ Questions? Email ⟨firm support email⟩.   ← the locked footer line, under the content column
+```
+
+**Filings, phone:** a 56 px top bar (firm logo left, the account menu right). Banners as full-width cards. Each filing is a card: the title (700), the type (Small), the status chip top right, the Rehearsal chip under the title, and the date (Caption). A fixed bottom tab bar holds Filings, New filing, Ready to pay (with its count) and Client links, plus the overflow.
+
+**New filing, step 2 (phone)**
+
+```
+┌─────────────────────────────────┐
+│ All states                      │  quiet back link (locked)
+│ New Jersey: what are you filing?│  H1
+│ Fill it in yourself, or send    │  the locked paragraph
+│ your client a link ...          │
+│ ┌─────────────────────────────┐ │
+│ │ New Jersey LLC formation    │ │  type sheet, 2 px radius
+│ │ ┆◌ Rehearsal┆               │ │  dashed Stage chip, then the old
+│ │ Runs on the state's real    │ │  tooltip text, now visible
+│ │ website and stops before    │ │
+│ │ the last button: nothing is │ │
+│ │ filed or paid               │ │
+│ │ Certificate of Formation for│ │  summary (Small)
+│ │ a domestic LLC, filed online│ │
+│ │ through NJ Business Formation│ │
+│ │ $103.50 by card: the state  │ │  fee note (Small, ink-2)
+│ │ filing fee of $100 plus ... │ │
+│ └─────────────────────────────┘ │
+│ ┌─────────────────────────────┐ │
+│ │ New Jersey business and     │ │
+│ │ employer registration       │ │
+│ │ (NJ-REG)  ...               │ │
+│ └─────────────────────────────┘ │
+└─────────────────────────────────┘
+```
+
+**New filing form, desktop ≥ 1280 (with the summary rail)**
+
+```
+┌ rail ┬───────────────────────────── 720 ───────────────────────┬──── 320 summary rail ────┐
+│      │ ← Other filings                                         │  ┌ sticky ─────────────┐ │
+│      │ New Jersey LLC formation                     (H1)       │  │ ⟨business name⟩     │ │
+│      │ Certificate of Formation ... Send them a link.          │  │ New Jersey LLC      │ │
+│      │ ┌╌ Rehearsal: New Jersey LLC formation isn't live yet, ╌┐│  │ formation           │ │
+│      │ ╎ so this filing is a rehearsal. ...                    ╎│  │ ─────────────────── │ │
+│      │ └╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┘│  │ Members      2      │ │
+│      │ Start from a client you filed for before [New client ▾] │  │ Agent  ⟨saved⟩      │ │
+│      │ Fields marked * are required.                           │  │ ─────────────────── │ │
+│      │ ┌ ⟨section legend⟩ ─────────────────────────────────┐   │  │ $103.50 by card ... │ │
+│      │ │ Label *                       Label               │   │  │ (the fee note)      │ │
+│      │ │ [ 2fr field            ]      [ 1fr field ]       │   │  └─────────────────────┘ │
+│      │ │ Same as  (Main business address)                  │   │                          │
+│      │ │ ▸ More options (optional)                         │   │                          │
+│      │ └───────────────────────────────────────────────────┘   │                          │
+│      │ ▸ ⟨folded section⟩ (optional)                           │                          │
+│      │ ┌ Authorizations ───────────────────────────────────┐   │                          │
+│      │ │ The state form asks for these. ...                │   │                          │
+│      │ │ ☐ ⟨statement⟩                                     │   │                          │
+│      │ └───────────────────────────────────────────────────┘   │                          │
+│      │ Nothing is filed until your client approves the proof.  │                          │
+│      │ [Send the proof to my client]  $103.50 by card: ...     │                          │
+└──────┴─────────────────────────────────────────────────────────┴──────────────────────────┘
+```
+
+The summary rail is a mini proof. It only restates answers already typed, so it needs no new copy beyond the existing field labels.
+
+**Filing detail, desktop**
+
+```
+ ← Filings
+ Two Sisters Bakery LLC   ➜ Waiting for approval   ┆◌ Rehearsal┆
+ New Jersey LLC formation · started ⟨date⟩ by ⟨staff⟩ (client link)
+ ┌ The approver has a link to check exactly what will be filed and approve it. ┐   ← nextStep, Your move
+ ├──────────── timeline (7 cols, §9.7) ─────────────┬──────── cards (5 cols) ───────────────┤
+ │ ● Received                                      │ ┌ Link to the proof ─────────────────┐ │
+ │ ● Getting the state's review page               │ │ We emailed this link to ⟨address⟩. │ │
+ │ ➜ Waiting for approval  ◀                       │ │ ... It shows exactly what will be  │ │
+ │ ┆                                               │ │ filed and the fees.                │ │
+ │ ○ Approved                                      │ │ ┌╌ secret box: the link ╌╌╌╌╌╌╌╌┐ │ │
+ │ ┆ (dashed marigold below: a rehearsal)          │ │ └╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┘ │ │
+ │ ○ Filing now                                    │ └────────────────────────────────────┘ │
+ │ ┆                                               │ ┌ Documents ─────────────────────────┐ │
+ │ ⏸ held, on purpose                              │ │ (empty until the state sends them) │ │
+ │                                                 │ └────────────────────────────────────┘ │
+ │ ▸ Progress on the state site                    │ [Save to Google Docs] A copy of ...    │
+ └─────────────────────────────────────────────────┴────────────────────────────────────────┘
+```
+
+On phones the cards follow the timeline in one column, with "Link to the proof" first because it's the thing staff need most while a filing waits.
+
+**Setup › Branding, desktop**
+
+```
+ Step 2 of 3
+ Branding
+ Your clients see your name, logo and colors on the pages where they fill in and approve filings.
+ ┌ controls (6 cols) ───────────────────────┐ ┌ Preview of a client's page (6 cols, sticky) ───┐
+ │ Your web address  cofile.app/[harborpine]│ │  [ phone frame, 375 ]   ( Light | Dark )        │
+ │ Name your clients see  [Harbor & Pine CPA]│ │  ▀▀▀▀ firm color ▀▀▀▀                          │
+ │ Logo  ┌╌ drop zone ╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┐   │ │  [logo]                                        │
+ │       └╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┘   │ │  Please fill in your LLC formation details.    │
+ │ Main color  [■ #2E8C83]                   │ │  What you'll need ...                          │
+ │   ■ #2E8C83 → ■ #22837A ⟨copy to come⟩    │ │  [ Send for approval ]  ← uses #22837A         │
+ │ Second color [■ ...]                      │ │                                                │
+ │ Font  (Standard ▾) or upload              │ │                                                │
+ │ Support email shown to clients [ ... ]    │ │                                with CoFile     │
+ │ [Save and continue]                       │ └────────────────────────────────────────────────┘
+ └───────────────────────────────────────────┘
+```
+
+The preview reuses the preview copy already in the code ("Please fill in your LLC formation details.", "What you'll need", "Send for approval"). A third toggle shows the proof instead of the intake ⟨copy to come: toggle labels⟩.
+
 ### 10.4 Permanent service pages `/<firm>/<service>` (Volume 1)
 
 A firm's public page for one filing: the firm's header (logo, name, 4 px top rule), the H1 filing title in the firm font, the summary, the rehearsal notice when not live, then the intake form. The footer carries the Terms and Privacy line, the firm's support email and "with CoFile". The page is designed to be shared and bookmarked, so it gets an Open Graph image generated per firm and service: the firm's logo and the filing title on a sheet with crop marks, in the firm's color.
@@ -752,6 +905,52 @@ A firm's public page for one filing: the firm's header (logo, name, 4 px top rul
 - **The proof:** §9.3.
 - **After deciding:** the same branded page. "Approval recorded" with a filled Go disc that draws in (`t-5`), then the locked paragraph (the rehearsal or the live version). Request changes shows "Thank you. Your change request is recorded, and nothing will be filed from this link. …" with a Your move glyph.
 - **Expired and invalid links** (all four locked messages: "This link to the proof has expired. Ask whoever sent it for a new one.", "isn't valid", "already recorded", "That code didn't match…"): the firm's header (when known), a single sheet, the message in Body 20/32, a neutral glyph (never a Stop octagon: the client did nothing wrong), and the firm's support email. The code-mismatch message gets a "Go back" action ⟨copy to come⟩.
+
+**Intake on a phone (`/i/<token>`)**
+
+```
+┌─────────────────────────────────┐
+│ ▀▀▀▀▀▀▀▀ firm color ▀▀▀▀▀▀▀▀▀▀▀ │
+│ [Harbor & Pine logo]            │  logo only; "with CoFile" moves to the bottom
+├─────────────────────────────────┤
+│ Beta · This service is in beta. ▸│  neutral strip, folded to its first sentence
+├─────────────────────────────────┤
+│ ┌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┐│
+│ ╎ ◌ This page is in rehearsal  ╎│  Stage banner (rehearsal types only)
+│ ╎ for now. You can fill it in  ╎│
+│ ╎ and see your proof, but ...  ╎│
+│ └╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┘│
+│ New Jersey LLC formation        │  H1 in the firm's font
+│ · ⟨link label⟩                  │
+│ Certificate of Formation ...    │  summary + "After you send this ..."
+│ ○ ○ ○ ○ ○                       │  section index: one dot per section,
+│                                 │  names readable on tap
+│ Fields marked * are required.   │
+│ ┌ ⟨section legend⟩ ───────────┐ │
+│ │ Label *                     │ │
+│ │ [                         ] │ │  52 px fields, one per row on phones
+│ │ Same person as (Ana Ortiz)  │ │
+│ └─────────────────────────────┘ │
+│ ...                             │
+│ ┌ Authorizations ─────────────┐ │
+│ │ The state form asks for     │ │  client version of the help text
+│ │ these. Check a box only if  │ │
+│ │ the statement is true ...   │ │
+│ └─────────────────────────────┘ │
+│ Next, you'll get a proof to     │
+│ check. Nothing is filed until   │
+│ it's approved.                  │
+│ ┌─────────────────────────────┐ │
+│ │ Send to Harbor & Pine CPA   │ │  primary L, full width, firm safe color
+│ └─────────────────────────────┘ │
+│ By sending, you agree to        │  Small, links underlined
+│ CoFile's Terms of Service; ...  │
+│ Questions? Email ⟨address⟩.     │
+│           with CoFile           │
+└─────────────────────────────────┘
+```
+
+Every field the firm already knows (saved agent, organizer, defaults) arrives filled and collapsed into a "pre-filled" summary row the client can open, so a first-time founder on a phone sees only what only they can answer. Opening it shows every pre-filled value, editable unless the firm locked it. ⟨copy to come: the row's label⟩
 
 ### 10.6 Enterprise dashboard `/dashboard` (Volume 2)
 
@@ -770,6 +969,41 @@ Built for developers and operations people, so it's denser than the desk: Body s
 
 The rail and header carry the CoFile wordmark. The only brand flourishes are the wordmark and Register Blue on actions and "Your move" chips. Dark mode is fully supported here (many developers live in it).
 
+**Overview, desktop**
+
+```
+┌ rail: CoFile ─┬────────────────────────────────────────────────────────────────────────────┐
+│ ▌Overview     │ ⟨account name⟩                                                             │
+│  Filings      │ ┌ ➜ 2 approved filings are ready to pay and need a card's security code. ─┐│
+│  Ready to pay │ │   Pay and file                                                          ││
+│  Firms        │ └─────────────────────────────────────────────────────────────────────────┘│
+│  API keys     │ ┌ Filings ───────────┐ ┌ Webhook deliveries ┐ ┌ API keys ─────────┐       │
+│  Webhooks     │ │ 128                │ │ 1,940              │ │ 3                 │       │
+│  Setup        │ │ 21 live, 107       │ │ 2 pending, 0 failed│ │ [Manage keys]     │       │
+│  Team         │ │ rehearsals         │ │                    │ │                   │       │
+│  Billing      │ │ ▰▰▰╍╍╍╍╍╍╍╍╍╍╍╍    │ │                    │ │                   │       │
+│  Docs ↗       │ └────────────────────┘ └────────────────────┘ └───────────────────┘       │
+│               │ ( By status | By state | By month )                                        │
+│               │ ● Go      ▰▰▰▰▰▰▰▰▰▰ 64                                                   │
+│               │ ➜ Your move ▰▰▰ 18                                                         │
+│               │ ⋯ Moving  ▰▰ 11                                                            │
+│               │ ◌ Stage   ▰▰▰▰▰▰ 31                                                        │
+│               │ ⬣ Stop    ▰ 4                                                              │
+│               │ As of ⟨time⟩.                                                              │
+└───────────────┴────────────────────────────────────────────────────────────────────────────┘
+```
+
+The numbers are illustrative only. The "By status" view groups raw statuses into the five families, and each bar expands to show its locked status labels with counts.
+
+**Log in with an API key (`/dashboard/login`):** the slip template. "Log in with an API key" / "Log in with one of your API keys to manage keys, webhooks, your firms' portals and usage." A single mono field (paste-friendly, `autocomplete="off"`, show/hide toggle), then "Have an email and password? Log in here instead."
+
+**Staff and filing-company admin surfaces.** These are served by the engine and reached from emails. They use the Desk volume with the tenant's own name (never CoFile's on a subscriber's tenant):
+
+- **Choose an available name** (name resolution): the filing title, then the alternatives as choice sheets with each name in mono 18/26, and [Use the selected name] (primary) beside [Generate more options] (secondary). A "custom name" field with [Check and use this name] follows. [Abort filing] sits alone at the bottom as a destructive button behind a confirmation dialog, separated by a 48 px gap and a rule, so nobody hits it by accident.
+- **Review before submission** (the beta review gate): the captured state screen at full column width on a white plate, with pinch zoom on phones and a 2× zoom lens on desktop. [Approve and submit] is primary L, [Reject / abort] destructive. The screen is the main object; the buttons sit under it, never beside it.
+- **Drift reviews (proposed web view for platform staff, today API only):** a two-pane comparison of the approved form snapshot and the changed screen. Changed fields are drawn as a misregistered overlay in Stop color, the one place in the product where misregistration is shown on purpose, because it is the problem. Decisions use the API's own words (pending, accepted, corrected, rejected) as chips. ⟨copy to come⟩
+- **Sign-ups** (platform tenant): see the table above.
+
 ### 10.7 White-label surfaces (Volume 0)
 
 `/e/<tenant>/<firm>/<service>` and `/embed/...` use the Counter templates with every CoFile signature removed. There's no "with CoFile", the match glyph is swapped for a neutral check, and no CoFile font is loaded except Atkinson for details and fees (an unbranded, widely used typeface). There's no beta strip in the widget. The widget's frame has no chrome: transparent background by default (or `--sheet` if the host page asks), a 16 px inner padding, and it inherits the enterprise's theme through the same token set. Its height follows its content through `embed.js`.
@@ -782,6 +1016,31 @@ Three columns at ≥ 1280: navigation rail (Overview, Guides, Reference, Endpoin
 - **Guides** (Authentication, Filings and the lifecycle, Filing types, fields and state fees, Approvals, Webhooks, Errors, Saved signatures and PDF uploads, White-label firm portal): Press H1, Atkinson 18/30 body, mono 15/24 code. The lifecycle guide uses the §9.7 timeline as its diagram, with raw status names in mono beside the plain labels.
 - **Reference** (the endpoints): one row per endpoint, with a method pill (GET Go green, POST Register, PUT marigold-ink, DELETE Stop), the path in mono and deep links. Request and response examples come with language tabs.
 - **For agents:** `/llms.txt`, `/docs.md` and `/openapi.json` are linked from a "For your tools and AI agents" card with download buttons. Their pages are plain text, so the design shows them as a mono preview with a copy button.
+
+**Docs, desktop ≥ 1280**
+
+```
+┌ CoFile  Docs ───────────────────────────────────────────────── [Log in]  ( ⌘K search ) ┐
+├ rail 240 ───────┬──────────────── prose 760 ─────────────────┬──── code rail 380 ──────┤
+│ Overview        │ Quick start                                 │ ┌ curl | Node | Python ┐│
+│ Guides          │ 1  Get an API key from the dashboard ...    │ │ POST /v1/filings     ││
+│  Authentication │ 2  Set up the client company (the CPA or    │ │ {                    ││
+│  Filings and the│    payroll firm) and its approvers ...      │ │   "dryRun": true,    ││ ← marigold
+│  lifecycle      │ 3  Create a filing with "dryRun": true,     │ │   ...                ││
+│  ...            │    then approve it with its approvalLink.   │ │ }                    ││
+│ Reference       │    The run walks the state site and stops   │ └──────────────────────┘│
+│  Endpoints      │    before the final submit.                 │ (follows the step in    │
+│ OpenAPI (JSON)  │ 4  Add a webhook endpoint so you hear about │  view as you scroll)    │
+│                 │    each step.                               │                         │
+│ ┌ For your tools│ Base URL: https://api.cofile.app            │                         │
+│ │ and AI agents │                                             │                         │
+│ │ docs.md ↓     │                                             │                         │
+│ │ llms.txt ↓    │                                             │                         │
+│ │ openapi.json ↓│                                             │                         │
+└─┴───────────────┴─────────────────────────────────────────────┴─────────────────────────┘
+```
+
+Search (⌘K / Ctrl K) covers guides, endpoints, fields and event names, with results grouped by kind and the endpoint method pill shown. The docs follow the system theme and default to dark when the visitor arrives from the dashboard in dark mode.
 
 ### 10.9 Emails (through Resend)
 
@@ -813,6 +1072,33 @@ Two templates, one system.
 - The security-code email never shows a field: the button "Enter security code" goes to Ready to pay, and "Never reply to this email with the code." is set in 700.
 - Dark mode: `prefers-color-scheme` styles with a dark logo variant if the firm uploaded one, otherwise the logo sits on a white plate.
 - The plain-text version is first-class (the same order, the link on its own line).
+
+**The full catalogue.** Every message, its reader, its volume, the locked subject and button, and the status family that colors its status line. The status line is a 13/16 700 text line above the first paragraph that repeats the subject's first words (for example "Completed"), with the family glyph, so the email's state reads at a glance in a crowded inbox preview. The firm's color stays on the top rule; the family color appears only in the glyph.
+
+| Message | To | Volume | Subject (locked) | Button (locked) | Family |
+|---|---|---|---|---|---|
+| Approval request | Client | 1 | "Your proof is ready to approve: {filing}" | "Open your proof" | Your move |
+| Missing information | Client | 1 | "More information needed: {filing}" | none today (Appendix B) | Your move |
+| Security code needed | Card owner | 1 or 2 | "Card security code needed: {filing}" | "Enter security code" | Your move |
+| Changes requested | Client | 1 | "Changes requested: {filing}" | none | Your move |
+| Completed (documents back) | Client and firm | 1 | "Completed: {filing}" | "Open" (the code's default when no label is set, linking to the filing page; Appendix B) | Go |
+| Rejected | Client | 1 | "Rejected by the state: {filing}" | none | Stop |
+| Filing submitted | Client | 1 | ⟨copy to come⟩ | ⟨copy to come⟩ | Go |
+| EIN issued | Client | 1 | ⟨copy to come⟩ (the EIN in mono, Total style) | ⟨copy to come⟩ | Go |
+| Choose a name | Filing company staff | 2 | "Choose a name: {filing}" | "Choose a name" | Your move |
+| Review before submit | Filing company staff | 2 | "Review before submit: {filing}" | "Review the filing" | Your move, with the screen inline |
+| Site changed | Filing company staff | 2 | "Site changed — review needed: {filing}" | none | Stop |
+| Portal bot check | Filing company staff | 2 | "Portal bot check: {filing}" | none | Stop |
+| Failed | Filing company staff | 2 | "Failed: {filing}" | none | Stop |
+| Blocked | Filing company staff | 2 | "Blocked: {filing}" | none | Your move |
+| Checking whether the state received | Filing company staff | 2 | "Checking whether the state received: {filing}" | none | Moving |
+| Confirm your email | New firm user | 2 | "Confirm your email for CoFile" | "Confirm my email" | Your move |
+| Reset your password | Any user | 2 | "Reset your password" | "Choose a new password" | Your move |
+| Partner account open | Firm owner | 2 | "Your partner account is open" | "Log in" | Go |
+| Enterprise account ready | Enterprise contact | 2 | "Your CoFile account is ready" | "Set my password" | Go |
+| Invitation | Firm staff | 1 (the firm's brand) | "You're invited to {firm}'s filing portal" | "Set my password" | Your move |
+
+Sender and reply-to: client messages come from the firm's name, with the firm's support address as reply-to (as the code allows). CoFile's account emails come from CoFile with hello@cofile.app.
 
 ### 10.10 New surfaces I'd add
 
@@ -864,6 +1150,40 @@ Worked examples (computed):
 The Branding setup shows every fix live in the preview, next to the firm's original color ⟨copy to come: the explanation⟩. A firm can't switch the fixes off.
 
 **Testing:** a theme fuzz suite renders the proof, the intake and an email for 10,000 random color pairs and every font preset, in light and dark, and fails CI on any text pair below 4.5:1 or any action color inside the Stop band.
+
+### 11.4 Logo and font processing
+
+**Logo pipeline (on upload, server side):**
+
+1. Accept PNG, JPEG or WebP, as today. (Later: SVG, sanitized, with scripts and external references stripped.)
+2. Trim transparent margins (alpha below 8/255) and re-pad to a consistent 4% of the logo's height.
+3. Detect a solid background box: if all four corners are opaque and within ΔE 2 of each other, the logo was saved on a colored rectangle. Offer to remove it ⟨copy to come⟩. If the firm declines, keep it and give the box a 2 px radius so it reads as a deliberate plate.
+4. Measure the mean luminance of the opaque pixels. A dark logo (L < 0.3) is placed on a white plate in dark mode; a light logo (L > 0.8) is placed on a `--firm-ink` plate in light mode. The firm can upload a separate dark-mode logo to avoid plates altogether.
+5. Warn when the source is under 64 px tall (it will look soft on high-density screens) ⟨copy to come⟩.
+6. Output WebP and PNG at 1×, 2× and 3× for the web, and a PNG at 2× for email.
+
+**Font guardrails:**
+
+| Check | Passes | Fails |
+|---|---|---|
+| Glyph coverage: Basic Latin, Latin-1, ¿ ¡ ñ and accented vowels | Used for headings, the firm's name and body | Rejected with the locked "That file isn't a font we can use." |
+| x-height ≥ 0.45 em and stroke contrast low enough for 17 px text | Used for body text too, with `size-adjust` | Headings and the firm's name only, at 24 px or larger |
+| Script, display or decorative style (x-height < 0.38 em, or extreme contrast) | | Firm's name only, at 24 px or larger |
+| Any font | | Never used for details, fees, codes, dates, chips or buttons below 17 px |
+
+### 11.5 Enterprise themes (Volume 0)
+
+An enterprise sets its theme on the dashboard or through the API. It gets everything a firm controls, plus:
+
+| Extra control | Range | Notes |
+|---|---|---|
+| Page color | `--stock` lightness from 0.95 to 1.00 in OKLCH, any hue at chroma ≤ 0.02 | Keeps every contrast pair valid |
+| Control radius | 0, 6, 10, 16 or pill | Documents stay at 2 px |
+| Dark mode | on, off, or follow the system | Off forces light on every page, including the proof |
+| The match glyph | check (default) or none | Never the CoFile crosshair |
+| Support line | Its own name and contact on the proof | Already in the engine's branding model |
+
+Status families, the consent panel, the proof's order, field sizes and type sizes are fixed for enterprises too. They are the parts that keep an irreversible act safe, so nobody can theme them away.
 
 ---
 

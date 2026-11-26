@@ -45,18 +45,24 @@ One detail of the tradition does real work. In Japan, a company's seal is square
 The mark is a square seal cut by a stepped seam. Draw it on a 32 × 32 unit grid (1 unit = 1 px at 32 px).
 
 ```
-   2                 16                30
- 2 ┌───────────────┐ ┌───────────────────┐
-   │               │ │                   │
-   │               │ │                   │      body: 28 × 28 units,
-   │   left half   │ │                   │      corner radius 4
-   │               │ │                   │
-15 │               └─┴───┐               │      seam: 2-unit channel
-17 │                     └─┐ ┌───────────┤      centerline (14,2) to (14,16)
-   │                       │ │           │      then (14,16) to (18,16)
-   │                       │ │right half │      then (18,16) to (18,30)
-   │                       │ │           │
-30 └───────────────────────┘ └───────────┘
+Raster at 1 character = 1 unit across, 1 row = 2 units down:
+
+   0         1         2         3
+   01234567890123456789012345678901
+ 2   ███████████  ███████████████
+ 4   ███████████  ███████████████        body: 28 × 28 units,
+ 6   ███████████  ███████████████        corner radius 4
+ 8   ███████████  ███████████████        (corners not shown)
+10   ███████████  ███████████████
+12   ███████████  ███████████████        seam: 2-unit channel,
+14   ███████████      ███████████        centerline (14,2) → (14,16)
+16   ███████████      ███████████        → (18,16) → (18,30)
+18   ███████████████  ███████████
+20   ███████████████  ███████████        the two halves are the
+22   ███████████████  ███████████        same shape turned 180°
+24   ███████████████  ███████████
+26   ███████████████  ███████████
+28   ███████████████  ███████████
 ```
 
 - **Body.** A square from (2, 2) to (30, 30), corner radius 4 units, true circular arcs (not a squircle: this is a carved stone, not an app icon).
@@ -83,7 +89,7 @@ The mark is a square seal cut by a stepped seam. Draw it on a 32 × 32 unit grid
 | Mark alone | Favicon, app icon, avatar, social | 16 px minimum on screen, 6 mm in print. App icon: the carved mark centered on Kami white, at 62% of the tile. |
 | Stacked | Social cards, print only | Mark above, wordmark centered below, gap 0.3 × mark height. |
 
-Clear space is half the mark's height on every side. Never: rotate the mark (the one exception is the 180° "halves rejoin" motion in 8.3), color the two halves differently, add gradients, shadows or outlines, place it inside a firm's color, put it on a firm's page anywhere other than the "with CoFile" note, or pair it with another company's mark in a lockup.
+Clear space is half the mark's height on every side. Never: rotate the mark, pull its halves apart (the 404 page is the one deliberate exception, 10.2), color the two halves differently, add gradients, shadows or outlines, place it inside a firm's color, put it on a firm's page anywhere other than the "with CoFile" note, or pair it with another company's mark in a lockup.
 
 ### 3.4 The approval seal: the Maru
 
@@ -95,6 +101,7 @@ The round seal is not a logo. It is a system component that records a person's d
 - A vertical seam runs through the middle, 2 px wide, exactly like the Kaku's seam but straight. In the approval moment (8.3) the two halves of the Maru sit on two different sheets.
 - Ink: Matsuba green for an approval of a filing that will be filed; Kohaku amber with a dashed outer ring for a rehearsal, with the word "Rehearsal" in the field. These are status colors, fixed in every theme; a firm can't change them.
 - Texture: each impression is masked by one of 30 hand-pulled ink grains (7.2), chosen by a hash of the filing reference, so the same approval always shows the same impression and no two filings look stamped by a machine.
+- The seal is a picture of a decision, not the decision's words: it is `aria-hidden`, and the page's heading ("Approval recorded") carries the meaning. The status word may be split by the seam; that is the point of a tally seal, and nobody needs to read it from the seal alone.
 
 ### 3.5 The "with CoFile" note
 
@@ -366,7 +373,7 @@ Haptics are a second channel for state, never decoration. They play only in resp
 |---|---|---|---|---|
 | `tick` | A light click | Transient, intensity 0.35, sharpness 0.6 | `[8]` | Press-down on the primary button, choosing a radio card, toggling a fold |
 | `settle` | Two soft taps | Two transients 0.3 / 0.5, 50 ms apart | `[10, 50, 10]` | "Same as" filled, a saved answer applied, a link copied |
-| `seal` | A press, then a firm, soft thud | Continuous ramp 0 to 0.5 over 120 ms, transient 1.0 / sharpness 0.3 at impact, continuous tail 0.2 decaying over 80 ms | `[0, 20, 40, 45]` | Approval recorded |
+| `seal` | A press, then a firm, soft thud | Continuous ramp 0 to 0.5 over 120 ms, transient 1.0 / sharpness 0.3 at impact, continuous tail 0.2 decaying over 80 ms | `[14, 40, 36]` at impact | Approval recorded |
 | `held` | One long, soft breath | Continuous 0.2, sharpness 0.1, 300 ms, ease in and out | `[40]` | A rehearsal reached its planned hold |
 | `stop` | Two firm taps, not three | Two transients 0.8 / sharpness 0.7, 110 ms apart | `[18, 110, 18]` | A stop, a code that didn't match, a form with problems |
 
@@ -426,7 +433,7 @@ Rules: one primary per view. Buttons are full width on phones when they end a fo
 - **Select.** Native select on phones (the system picker is the most accessible thing we can offer). Long lists (states) open a full-height sheet with a search field on desktop.
 - **Radio and yes/no.** Radio *cards*: each option a 56 px row with the circle on the left, the whole row tappable. Yes/No as two equal cards side by side. Selected: 2 px action-color border, `tick`.
 - **Checkbox.** 24 px box, 2 px `--line-field` border, check drawn with the Kaku's carved corner. The authorization checkboxes are full-width cards, statement text in `body`, so the person reads the whole sentence they are checking.
-- **Address block.** Street 1, Street 2, City, State, ZIP, paired as the code does (City | State | ZIP on one row from `sm` up). "Same as" appears above as a row of secondary chips, one per earlier address, labelled by that address's own label.
+- **Address block.** Street, suite, city, state and ZIP, with the labels each form already defines, paired as the code does (city, state and ZIP on one row from `sm` up). "Same as" appears above as a row of secondary chips, one per earlier address, labelled by that address's own label.
 - **Person block.** "Same person as" chips, one per person already named.
 - **Repeating group** (members, signers). Each item a sheet with "{item label} {n}" as its heading and "Remove" as a quiet removal button. "Add {item}" as a secondary button with a plus icon at the end of the list.
 - **Signature pad.** Always a Kami-white sheet in both themes, 160 px tall on phones, a baseline drawn at 70% height, the signer's name printed under the line in `caption`. The consent checkbox card directly below.
@@ -515,7 +522,7 @@ One sentence of existing copy, one or two actions, and a lot of space. On the de
 
 ### 9.10 Toasts
 
-Rare. Used only for confirmations of something the reader just did that doesn't change the page ("Copy link" done, a card's security code accepted). A bottom sheet chip, 48 px, centered above the safe area, ink background with paper text, the existing message, 5 s plus 1 s per 10 words, pausable on hover and focus, `role="status"`. Never for errors, never with an action that only exists inside the toast.
+Rare. Used only for confirmations of something the reader just did, where the confirmation already has words (a card's security code accepted). Copy buttons ("Copy link", "Copy") need no toast: the button shows a check glyph in place of its icon for 1.2 s, keeps its label, and plays `settle`. A bottom sheet chip, 48 px, centered above the safe area, ink background with paper text, the existing message, 5 s plus 1 s per 10 words, pausable on hover and focus, `role="status"`. Never for errors, never with an action that only exists inside the toast.
 
 ### 9.11 The coverage table
 
@@ -525,6 +532,38 @@ The most important honesty device on the site. Two parts:
 2. **The table.** Columns "Filing", "Where", "Where it stands". Grouped by "Where" (New Jersey, Florida, IRS, New York), each group with a sticky 40 px header on phones. The status cell is always the chip, never a footnote. "Live" rows come first in each group and are the only rows with a Matsuba chip, so on a page where nothing is live yet, there is simply no green. A row never says more than its label.
 
 On phones each row is a 64 px block: filing name in `body`, chip below it. A segmented filter at the top ("All states", then each state name already in the table) narrows the list.
+
+```
+PHONE: coverage
+┌───────────────────────────────┐
+│ New York, New Jersey, Florida │
+│ and the IRS.                  │
+│ Every filing type carries a   │
+│ plain label, so you always…   │
+│                               │
+│ ● Live                        │  the ladder: a path,
+│ ◌ Rehearsed to the payment    │  top to bottom
+│   screen                      │
+│ ○ Screens recorded, rehearsal │
+│   next                        │
+│ ┄ Offered, not yet rehearsed  │
+│ – Planned                     │
+│                               │
+│ [All states][New Jersey][Flo…]│  segmented filter
+│ ── New Jersey ─────────────── │  sticky group header
+│ LLC formation                 │
+│ ◌ Rehearsed to the payment    │
+│   screen                      │
+│ Standing certificate (through │
+│ the API; not on the filing    │
+│ desk yet)                     │
+│ ◌ Rehearsed to the payment …  │
+│ Employer registration (NJ-REG)│
+│ ○ Screens recorded, rehearsal │
+│   next                        │
+│ …                             │
+└───────────────────────────────┘
+```
 
 ### 9.12 Loading
 
@@ -645,7 +684,7 @@ PHONE: Filings
 
 **Setup guide.** Title "Set up your account" (or "You're set up"), the line under it, then four steps as rows (9.5's rail, vertical): "Your firm", "Branding", "Payment", and "Registered agents (optional)", each with its one-line description and its button ("Set up your firm", "Set up branding", "Set up payment", "Add agents"). Done steps get the ● glyph and their button turns secondary ("Change agents"). When all are done, "Start a filing" becomes the page's primary.
 
-**Branding.** "Step 2 of 3", "Branding", the line, then a split: controls on the left, a **live preview** on the right (on phones, a preview sheet pinned under the controls, collapsible). Controls: display name; logo (drop zone, "Use a link instead", "Remove logo"); primary color and second color (swatch, hex field, the ready colors row); font (the presets as radio cards, each label set in its own face, plus upload); support email. The preview shows the client's phone view of the intake form's top and the proof's decision area, in light and dark side by side, with any automatic correction shown openly (11.3): a small note under the preview names what was adjusted. `[copy needed]` for that note.
+**Branding.** "Step 2 of 3", "Branding", the line, then a split: controls on the left, a **live preview** on the right (on phones, a preview sheet pinned under the controls, collapsible). Controls: "Your web address", "Name your clients see"; logo (drop zone, "Use a link instead", "Remove logo"); "Main color" and "Second color" (swatch, hex field, the ready colors row); "Font" (the presets as radio cards, each label set in its own face, plus "Your own font (uploaded)"); "Support email shown to clients"; "Save and continue". Wireframe and rules in 11.5. The preview shows the client's phone view of the intake form's top and the proof's decision area, in light and dark side by side, with any automatic correction shown openly (11.3): a small note under the preview names what was adjusted. `[copy needed]` for that note.
 
 **Details, Registered agents, Payments.** One form each, same layout as sign-up. Agents: one sheet per state the firm files in, "Ours: Registered Agents, Inc., through CoFile ($59 a year per business, billed to your firm)" as one radio card option, "Your own" as the other. Payments: the saved cards as card-shaped rows (brand mark, last four in the record voice), the Basis Theory field inside a sheet with its own 3:1 border, and the assignment of cards to filing types as a table of selects.
 
@@ -919,10 +958,32 @@ One template, 560 px, sent as the firm (logo, name, color) on client emails and 
 | Filing submitted, documents back, EIN issued | Status labels "Submitted to the state", "Completed", "EIN issued"; `[copy needed]` for bodies | The EIN in the record voice at 24 px. Documents as a list with file names. |
 | Sign-up, verification, password reset, invitations | "Confirm your email for CoFile", "Reset your password", "Your partner account is open", "Your CoFile account is ready", "You're invited to {firm}'s filing portal" | CoFile-branded: Kaku and wordmark, indigo button. |
 
+**Email rules.** Client emails are sent in the firm's name with the firm's support address as reply-to; account emails come from CoFile. The preheader is the body's first sentence, so no new words are needed. Every email has a plain-text part with the link on its own line. The button is a bulletproof HTML button 48 px tall in the firm's corrected color (11.2), never an image. In dark-mode clients the template declares `color-scheme: light dark`, uses a transparent logo with a light plate fallback, and keeps the button's text pair from the dark correction. The "Don't forward this email…" sentence and "Never reply to this email with the code." are set in `small` 600 directly under the button, where people's eyes land after it.
+
 ### 10.11 New surfaces I propose
 
 1. **The client's sealed copy.** After approval, a PDF of exactly what was approved, with the half-seal printed on its right edge and the reference in the record voice, attached to the "Completed" email and kept on the filing. `[copy needed]` for its link.
 2. **A client follow-along page.** The decision page becomes a quiet, read-only timeline (9.5) the client can return to from the same link until the filing completes. `[copy needed]`.
+
+### 10.12 Route checklist
+
+So nothing is missed in the build, every surface in the brief and where it is specified:
+
+| Surface | Route | Section |
+|---|---|---|
+| Home | `/` | 10.1 |
+| Firm sign-up, sent | `/signup`, `/signup/sent` | 10.2 |
+| Log in (with Google), forgot, reset, verify, invite expired, join | `/login`, `/forgot-password`, `/reset-password`, `/verify-email`, `/invite-expired`, `/join/<token>` | 10.2 |
+| Session ended | `/session-ended` (a redirect to `/login?ended=1` or the desk's signed-out page) | 10.2, 10.3 |
+| Terms, Privacy, 404, error | `/terms`, `/privacy`, not-found, error | 10.2 |
+| Desk: Filings, Setup (details, branding, agents, payments), New filing, filing detail, Client links, From email, Signatures, Ready to pay, Billing, Password, signed out | `/p/<slug>/…` | 10.3, 11 |
+| Permanent service pages | `/<firm>/<service>` | 10.4 |
+| Client intake | `/i/<token>` | 10.4 |
+| The proof, decision, approval errors | `api.cofile.app/approve/<token>` | 10.5, 10.6 |
+| Enterprise dashboard: overview, keys, webhooks, filings, firms and firm detail, setup, Ready to pay, billing, team, password, sign-ups and enterprise requests | `/dashboard/…` | 10.7 |
+| Enterprise hosted page, embed | `/e/<tenant>/<firm>/<service>`, `/embed/…`, `embed.js` | 10.8 |
+| Docs, reference, machine-readable | `/docs`, `/docs/<guide>`, `/docs/reference`, `/openapi.json`, `/llms.txt`, `/docs.md` | 10.9 |
+| Emails | Resend templates | 10.10 |
 
 ## 11. The white-label theming system
 
@@ -965,6 +1026,46 @@ Uploaded logos are trimmed of transparent margins and measured. Wide logos (wide
 ### 11.4 Fonts
 
 Presets are shown in the picker set in their own face. An uploaded font is checked for every character English and Spanish need (including á é í ó ú ü ñ ¿ ¡), an x-height of at least 0.42 em, and text-weight stems; a script or display face that fails is used for the firm's name only, with Atkinson for everything else. Every firm font gets `size-adjust`, `ascent-override` and `descent-override` computed so its x-height matches Atkinson's, so a firm's font never changes the layout. The record voice is never replaced.
+
+### 11.5 The branding page, as the firm sees it
+
+The theming system is only as good as the moment the firm meets it. The branding page shows the consequences of every choice before the firm saves.
+
+```
+DESKTOP: Setup › Branding
+┌──────────────────────────────────────────────────────────────────────────┐
+│ Step 2 of 3                                                              │
+│ Branding                                                                 │
+│ Your clients see your name, logo and colors on the pages where they …    │
+│                                    ┆                                     │
+│ Logo                               ┆   LIGHT            DARK             │
+│ ┌ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ┐        ┆  ┌────────────┐  ┌────────────┐   │
+│   drop a PNG, JPEG or WebP         ┆  │[logo] Harb…│  │[logo] Harb…│   │
+│ └ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ┘        ┆  │ Two Sister…│  │ Two Sister…│   │
+│ Use a link instead                 ┆  │ Total      │  │ Total      │   │
+│                                    ┆  │   $103.50  │  │   $103.50  │   │
+│ Main color                         ┆  │[Approve, a…│  │[Approve, a…│   │
+│ [■] #5B9BD5  ● ● ● ● ● ●           ┆  │ with CoFile│  │ with CoFile│   │
+│                                    ┆  └────────────┘  └────────────┘   │
+│ Second color                       ┆   ■ #5B9BD5 → ■ #3979B1           │
+│ [■] #D9A441                        ┆   white text 2.96 → 4.6 : 1        │
+│                                    ┆   [copy needed: adjustment note]   │
+│ Font                               ┆                                     │
+│ (•) Standard (the device's own)    ┆                                     │
+│ ( ) Inter   ( ) Lora (serif) …     ┆                                     │
+│                                    ┆                                     │
+│ [ Save and continue ]              ┆                                     │
+└──────────────────────────────────────────────────────────────────────────┘
+```
+
+- The preview is two real phones, light and dark, rendering the actual proof component with the firm's tokens, not a mock. Changes apply within 140 ms of typing a valid hex.
+- When the rule in 11.2 adjusts a color, the preview shows the chosen swatch, an arrow, the swatch actually used, and both contrast figures. The firm can accept the adjusted color or pick another. It cannot switch the adjustment off.
+- The font radio cards each render their label in their own face; an uploaded font that fails the checks in 11.4 shows the preview with the name in that font and the body in Atkinson.
+- The form's own labels stay: "Your web address", "Name your clients see", "Main color", "Second color", "Font", "Your own font (uploaded)", "Support email shown to clients", "Save and continue" (pending "Saving…"). The existing heading "Preview of a client's page" sits over the two phones. Font upload errors ("That file isn't a font we can use.", "The font file must be 600 KB or smaller.") appear as field errors under the upload.
+
+### 11.6 The theming lab
+
+Before launch, and on every change to the rule, a test suite renders the proof, the intake and an email for a fixed set of hard themes and fails the build if any text pair falls under its minimum: white `#FFFFFF`, pale yellow `#F4D03F`, mint `#7FD1AE`, mid gray `#8A8A8A`, sky `#5B9BD5`, coral `#FF6B6B`, pure red `#FF0000`, near-black `#111111` (for dark mode), navy `#1F3B70`, a status-green `#22654A` (to prove Done chips stay distinct from a green button), a script font, and a logo that is white on transparent.
 
 ## 12. Accessibility, Spanish and dark mode
 

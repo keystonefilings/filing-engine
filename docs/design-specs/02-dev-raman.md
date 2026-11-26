@@ -91,6 +91,15 @@ Bond `#F6F6F3` on dark. Never in Proof Blue or any status color: color belongs t
 Lockups: horizontal (default; gap = half the mark height), stacked (square spaces), mark only. Clear
 space on every side equals the height of one sheet. Minimums: horizontal lockup 72 px wide, mark 16 px.
 
+```
+Horizontal (default)          Stacked (social, square)        Mark only (favicon, app)
+┌────────────────────┐        ┌──────────┐                    ┌────┐
+│ ▭▭▭  CoFile        │        │   ▭▭▭    │                    │▭▭▭ │
+│ ███                │        │   ██▀    │                    │██▀ │
+└────────────────────┘        │  CoFile  │                    └────┘
+  gap = ½ mark height         └──────────┘                  (▀ = register notch)
+```
+
 Don't tint the mark, put it in a container shape (except where an app platform forces one), set
 "CoFile" in caps or write "Cofile", animate it outside the register motion (Section 8), or place it on a
 firm's page anywhere except inside the co-brand mark.
@@ -339,17 +348,32 @@ Content widths: forms 640–720, docs prose 720 with a 400–480 code rail, the 
 `-9` 40, `-10` 48, `-11` 64, `-12` 80, `-13` 96, `-14` 128. Home sections are 96 apart on desktop and 64 on
 phones.
 
-**Density**, per user and remembered per device: *Comfortable* (the desk default) has 52 px rows, 44 px
-inputs (48 on client pages), 40 px buttons and 16 px table text. *Compact* (the dashboard default) has 36 px
-rows, 36 px inputs, 32 px buttons and 14 px table text.
+**Density** is set per user and remembered per device:
+
+| | Comfortable (desk default) | Compact (dashboard default) | Client pages (fixed) |
+|---|---|---|---|
+| Table row | 52 px | 36 px | n/a |
+| Input | 44 px | 36 px | 48 px |
+| Button `md` | 40 px | 32 px | 48 px (`lg`) |
+| Table text | 16/24 | 14/20 | n/a |
+| Card padding | 24 | 16 | 20 on phones, 32 on desktop |
+| Sidebar item | 40 px | 32 px | n/a |
 
 **Radii:** 2 (glyph boxes), 4 (inputs, buttons, chips), 6 (cards, menus), 10 (the proof sheet, modals),
 full (the print). They're kept small, for precision rather than softness. Firms can't change radii, which is
 one of the guardrails that keeps every desk looking professional.
 
-**Elevation:** 0 is a 1 px border. 1 is `0 1px 2px rgb(15 20 25/.06)`. 2 adds `0 8px 24px -8px rgb(15 20 25/.12)`
-(the proof sheet, sticky bars). 3 is `0 4px 8px rgb(15 20 25/.08), 0 24px 48px -12px rgb(15 20 25/.20)` (menus,
-palette, modals). In dark mode, depth comes from lighter surfaces and borders, not shadows.
+**Elevation:**
+
+| Level | Light | Dark | Use |
+|---|---|---|---|
+| 0 | none, 1 px `--cf-border-default` | none, 1 px border | Default cards, tables |
+| 1 | `0 1px 2px rgb(15 20 25 / .06)` | border `#343C47` | Hoverable cards |
+| 2 | `0 2px 4px rgb(15 20 25 / .06), 0 8px 24px -8px rgb(15 20 25 / .12)` | border + `0 8px 24px -8px rgb(0 0 0 / .6)` | The proof sheet, sticky bars, drawers |
+| 3 | `0 4px 8px rgb(15 20 25 / .08), 0 24px 48px -12px rgb(15 20 25 / .20)` | `#1A1F26` + border + the same shadow at .7 | Menus, command palette, modals |
+
+In dark mode, depth comes from lighter surfaces and borders, not shadows. **Z-index scale:** base 0, sticky
+100, drawer 200, overlay 300, modal 400, toast 500, palette 600.
 
 ## 7. Imagery
 
@@ -394,6 +418,12 @@ animates: the commit button never moves, morphs or hides while it can be pressed
   and the dashed rule draws left to right. A replay icon button restarts it.
 - **Approval recorded:** the print draws in, then the heading fades up, all in under 1.2 s.
 - **Live switch-on:** the first time a user sees a type newly Live, its last ladder segment fills (320 ms).
+- **Filing timeline:** on an open filing detail page, when a run check passes, the step's register gutter
+  flips from the progress dot to the go check with a 140 ms scale from 0.8. Status changes arrive by
+  server-sent events and are announced politely.
+- **Live preview:** as staff type in the new-filing form, the matching row of the preview proof gets a
+  `--cf-highlight` underline for 300 ms after the last keystroke, so the eye can find what changed.
+- **Copy:** the icon swaps to a check (`motion-quick`) and back after 1.2 s. No toast for copies.
 
 **Keyboard.** Every app surface has a command palette (`⌘K`/`Ctrl K`) that jumps to any page by its
 existing nav label ("Filings", "New filing", "Ready to pay", "Client links", "Signatures", "Setup",
@@ -453,7 +483,33 @@ in Mono 12. Details show the label (muted sans) above the value (Mono) on phones
 are the intake form's own field labels, in the state's order. A 32 px **register gutter** (`md` and up) shows
 a go check on each row the preview run matched on the state's review page. States: `sample`, `draft` (staff preview:
 unfinished values underlined with dots, commit block replaced by a placeholder), `ready`, `submitting`,
-`expired`. The full layout is in 10.5.
+`expired`. The full phone layout is in 10.5. Anatomy at `md` and up:
+
+```
+┌─ firm header ──────────────────────────────────── 4 px brand rule ┐
+│ [logo] Harbor & Pine CPA                              ▭ with CoFile │
+├────────────────────────────────────────────────────────────────────┤
+│ ▨ Rehearsal tag (rehearsals only)                                  │
+│ {filing title}                                              (print)│
+│ Filing reference f_…  ·  Please decide by …                        │
+├─ 3 ─ the state's own review page ──────────────────────────────────┤
+│ [screenshot on a white plate, tap or click to zoom]                │
+├─ 1 ─ details ──────────────────────────────┬─ register gutter ─┬───┤
+│ Business name   TWO SISTERS BAKERY LLC     │        ✓          │   │
+│ Members         Ana Ortiz, Lucia Ortiz …   │        ✓          │   │
+├─ 2 ─ fees ─────────────────────────────────┴───────────────────┴───┤
+│ Formation filing fee                                      $100.00  │
+│ NJ portal fee, by card                                      $3.50  │
+│ ═══════════════════════════════════════════════════════════════════│
+│ Total                                                     $103.50  │
+├─ 4 ─ commit block ─────────────────────────────────────────────────┤
+│ [code] · [ commit button ] · Request changes                       │
+└────────────────────────────────────────────────────────────────────┘
+```
+
+Props the build needs: `brand` (theme output), `layout` (the per-type proof schema: sections, field order,
+labels from `lib/intake/forms`), `values` (masked), `fees`, `feeCap`, `reviewImage`, `matches` (row IDs
+the preview run matched), `print`, `mode` (`sample` | `draft` | `ready` | `rehearsal`), `locale`.
 
 ### 9.4 Status chip, timeline, tables
 
@@ -487,9 +543,9 @@ unfinished values underlined with dots, commit block replaced by a placeholder),
 - **Empty states:** text, never illustration. The existing copy ("Your desk is clear. Start a filing (it
   can be a free rehearsal), or send a client a link with your logo on it.") sits in a dashed panel with
   its two buttons above a 30% skeleton of the table to come.
-- **Toasts:** bottom-left (top on phones), 360 px, for confirmations only ("Saved to Google Docs."). Go
-  toasts dismiss after 6 s; stop toasts never auto-dismiss. They pause on hover and focus and are announced in a live region.
-  Anything the user has to act on stays an inline notice.
+- **Toasts:** bottom-left (top on phones), 360 px, elevation 3, for confirmations only ("Saved to Google
+  Docs."). They dismiss after 6 s, pause on hover and focus, and are announced in a polite live region.
+  Errors and anything the user has to act on stay inline notices, never toasts.
 
 ### 9.6 The coverage table
 
@@ -504,6 +560,27 @@ directly beneath, not in a footnote.
 Code blocks use `--cf-code-bg` with Mono 14/20, language tabs (curl, Node, Python) and a copy button at top right.
 They scroll sideways inside the block only. The copy button is 28 px. On success its icon becomes a check for 1.2 s and
 a polite live region announces it (`[copy needed]`).
+
+### 9.8 Other primitives
+
+| Component | Spec and states |
+|---|---|
+| **Checkbox, radio** | 20 px box (24 px on client pages and for every consent or authorization), 2 px `--cf-border-control`, radius 4 (radio full). Checked: brand solid fill with on-solid check, except consents and authorizations, which use Carbon fill so a firm color never decorates a legal statement. States: default, hover, focus, checked, indeterminate (checkbox), disabled, error. The whole label is the hit area |
+| **Toggle chips** | Used for "States you file in" and filters. 36 px, radius 4, secondary at rest, brand tint with a brand border and a check glyph when on. `aria-pressed` |
+| **Select, combobox** | 44 px like inputs, chevron right. More than 8 options becomes a searchable combobox (Radix), as with "All firms" on the dashboard and US states in addresses. Type-ahead always works |
+| **Tabs** | 40 px, underline style: 2 px brand bar on the active tab, muted text on the rest. Arrow-key navigation. Used for docs language tabs, response codes, firm detail and the Branding preview |
+| **Disclosure** | Chevron that rotates 90° in `motion-quick`, 44 px row. Used for "More options (optional)", "Not this filing? Choose another", "Your message", and run steps |
+| **Modal** | 480 px (640 wide variant), radius 10, elevation 3, Carbon scrim at 40%. Focus is trapped and returns on close. Used only for the reveal-once API key and secrets, and for destructive confirms ("Revoke", "Remove", "Disconnect") that name the object being destroyed |
+| **Drawer** | 480 px from the right, elevation 2, `motion-slow`. Dashboard row details, webhook payloads. `Esc` closes |
+| **Bottom sheet** (phones) | 16 px top radius, grab handle, snaps to 50% and 90%. The live preview, the menu, More |
+| **Tooltip** | 12/16 on Carbon (dark: `#E9ECEF` with Carbon text), radius 4, 400 ms delay, never the only place information lives |
+| **Count badge** | 20 px, Mono 12, neutral bg; `act` tint when the count is things needing a person ("Ready to pay") |
+| **Skeleton** | `--cf-bg-sunken` blocks with a 1.4 s shimmer (static under reduced motion), shaped like the content to come |
+| **Pagination** | Cursor-based "Load more" at the foot of long tables, with the count shown in Mono; the dashboard filings table also supports `Shift J`/`Shift K` page jumps |
+| **File upload** | Dashed drop zone, 120 px, with the existing help text ("A PNG, JPEG or WebP picture. A wide logo on a clear background looks best. Big pictures are shrunk for you."); after upload a preview on both light and dark plates |
+| **Signature pad** | 3:1 canvas, 1 px baseline at 70% height, pointer and touch, a clear control, and the pad's existing `aria-label` ("Signature pad: … draws their signature here with a mouse, finger or stylus.") |
+| **Security-code input** | The vault's hosted field, styled through its API to match a 48 px Mono input 4 characters wide; masked by default; the card label and last four beside it |
+| **Avatar** | 24/32 px circle with initials on a neutral tint; used in Team and in "Connected … by {who}" |
 
 ## 10. Page by page
 
@@ -613,6 +690,7 @@ because the brief calls this the firm's branded area.
 | **Filings (home)** | A title row with "New filing" (primary). Notices are stacked by urgency: pay (`act`, with "Pay and file"), someone needs to act (`act`), subscription ("Real filings need an active subscription; rehearsals are free." with "Subscribe"). Status filter chips use the status labels themselves. Table columns: Filing (name, plus the rehearsal tag where it applies; the current "Test" badge becomes the rehearsal tag, see Appendix B), Type, Status chip, Started. Rows needing action sort first and carry a 3 px `act` bar. Empty state per 9.5 |
 | **Setup** | A checklist page. "Set up your account" (or "You're set up") and its lede, then the three steps ("Your firm", "Branding", "Payment") as rows with a progress ring, their text and their buttons ("Set up your firm", "Set up branding", "Set up payment", "Change"); the next step's button is primary. "Registered agents (optional)" is a fourth card with "Add agents" / "Change agents". When finished, "Start a filing" |
 | **Setup › Branding** | A split view. On the left (5 cols): `LogoField` (upload, "Use a link instead", "Remove logo"), `ColorField` (picker, hex field, the nine ready swatches) and the font select with its presets ("Standard (the device's own)", "Inter", "IBM Plex Sans", "Roboto", "Open Sans", "Lato", "Montserrat", "Source Serif (serif)", "Merriweather (serif)", "Lora (serif)") or an upload. On the right (7 cols): a live preview with tabs for the intake form, the proof and an email, plus a light/dark toggle. The theming engine's contrast fixes show as annotations on the preview (`[copy needed]`), so the firm sees what the system changed and why |
+| **Setup › Your firm** | "Name, kind of firm and who to contact." as a short paired form (firm name / kind of firm, contact name / email / phone), with the support email that will appear on every client page called out by a small preview of the proof footer beside it |
 | **Setup › Agents** | One card per state (NY, NJ, FL), with "Same as" between states and the option to use CoFile's agent through Registered Agents, Inc. where the firm offers it |
 | **Setup › Payments** | Saved cards (vault), then routing as a table of filing types × card with a backup column |
 | **New filing › state** | "New filing", "Which state is the business in?", and the rehearsal sentence linking to "What we file". Three large cards (New York, New Jersey, Florida), 160 px tall, each with its count line ("{n} filing types, plus the federal EIN"). The "Or send us the details and we fill in the form for you to check:" options (email address, text and WhatsApp numbers, Slack `/file`) sit in a sunken side panel, with copy buttons on the address and numbers |
@@ -956,3 +1034,204 @@ the firm's support email.
 3. **Shared filing timeline**: a signed, read-only link to a filing's timeline that a firm can send its client
    after approval, in the firm's theme. This needs a product decision and copy.
 
+## 11. The white-label theming system
+
+### 11.1 What a firm controls
+
+| Input | Where it goes | Never goes |
+|---|---|---|
+| Firm name | Header, page titles, "Send to {firm}", the email sender name, OG images | Inside values or fees |
+| Logo (light; optional dark) | Header (32 px desk, 40 px proof, 28 px phones), emails, OG images | CoFile's favicons |
+| Main color (`color`) | `--cf-brand-*`: primary buttons, links, selected nav, the 4 px header rule, and the focus ring if it passes 3:1 | Status chips, the commit button, the rehearsal tag, the print, the coverage ladder |
+| Second color (`color2`) | The header rule's gradient end and accents in the Branding preview | Text, buttons |
+| Font (preset or upload) | Firm name and headings; body only if it passes 11.4 | Values, fees, codes, consents, buttons |
+| Support email | Page footers, the proof, emails, error pages | |
+
+Everything else (spacing, radii, type scale, layout, status, motion, iconography) is locked. Limiting what a
+firm can change is the reason thousands of desks will all look professional, and the reason a status chip means the
+same thing on every one of them.
+
+### 11.2 The color pipeline
+
+It runs on the server at save time, and live in the browser for the Branding preview, in OKLCH:
+
+1. **Parse** the hex, convert it to OKLCH and gamut-map it to sRGB.
+2. **Ramp:** generate 11 steps at fixed lightness (L 0.97, 0.93, 0.87, 0.78, 0.68, 0.58, 0.50, 0.43, 0.36,
+   0.29, 0.22). Hue stays fixed, and chroma is scaled down at both ends so tints don't go neon and shades don't go muddy.
+3. **Solid:** `--cf-brand-solid` is the firm's exact color if white or Carbon text on it reaches 4.5:1
+   and APCA Lc 60. The text color is whichever gives more contrast. If neither passes (a mid grey, a dusty
+   orange), L steps down by 0.02 until white passes, and the adjustment is recorded. Examples: light yellow `#F5E663` gets Carbon text
+   (14.44:1) instead of white (1.28:1); pale pink `#FFB3C7` gets Carbon (11.04:1); `#1F4FD1` keeps white
+   (6.78:1); teal `#0F766E` keeps white (5.47:1).
+4. **Text:** `--cf-brand-text` is the ramp step nearest the firm's color that reaches 4.5:1 on the surface, on the
+   light surface in light mode and the dark surface in dark mode. Links never use a failing color.
+5. **Tint:** step 1 (light) or step 10 (dark), for selected nav and rows.
+6. **Focus:** the brand solid if it reaches 3:1 against both page and surface; otherwise `--cf-focus`.
+7. **Collision guard:** measure the hue distance to the status hues (go ≈ 155°, hold ≈ 70°, stop ≈ 27°,
+   act ≈ 290° in OKLCH). If the firm's hue is within 20° of stop or hold and its chroma is above 0.08, primary
+   buttons become Carbon solid with a 3 px underline in the brand color, and the brand color stays on the header rule, logo
+   and selected nav. A red firm never gets red buttons beside red "Failed" chips. A violet firm near `act`
+   keeps its buttons, because act always comes with its glyph and is never a button.
+8. **Dark mode** comes from the same ramp, not from inverting it: the solid moves to the lightest step that keeps
+   Carbon text at 7:1.
+
+The firm sees every adjustment as a note in the Branding preview, side by side with what they picked, so
+nothing changes behind their back. Every adjustment is stored with the theme (`theme.adjustments[]`) and
+shown on the dashboard's firm detail page.
+
+### 11.3 Logos
+
+On upload: transparent padding is trimmed, and the artwork is classified as dark or light from the mean
+luminance of its opaque pixels. If it would sit below 3:1 on the current surface, it goes on a plate (white
+with a 1 px border in dark mode, Carbon for white logos in light mode), with radius 6 and 6 px padding. Wide logos
+(ratio over 4:1) cap at 160 px wide; square logos show the firm name beside them. Uploading an optional dark-mode
+logo removes the plate. Images are re-encoded server side (the engine already keeps up to 512 KB) and
+served at 1×, 2× and 3×.
+
+### 11.4 Fonts
+
+- **Presets** are pre-vetted, and each ships with a metric-matched fallback so nothing shifts while it loads.
+- **Uploads** are checked on the server for the Spanish set (Á É Í Ó Ú Ü Ñ ¿ ¡ and lowercase), digits,
+  `$ % , . - ( ) # @ /`, an x-height of at least 0.45 em, and a regular weight. A font that passes everything is used
+  for headings and body. A font that fails anything is used for headings and the firm name only, with body text
+  falling back to the system stack.
+- Script, display and decorative faces (detected by extreme stroke contrast or joined strokes) are heading-only.
+- On the proof, the firm's font is limited to the firm name and section headings. Values, fees, consents and
+  buttons always use GT Standard and GT Standard Mono.
+
+### 11.5 Testing themes
+
+A theme matrix runs in visual regression: 120 generated firm themes (every ready swatch, extremes such as
+`#FFFFFF`, `#000000` and `#F5E663`, plus random draws), times light and dark, times six key screens (intake, proof, desk
+home, email, embed, service page), with automated WCAG and APCA checks on every text-on-background pair. A
+theme that fails anything blocks the deploy. Real firm themes are added to the matrix as they're created, in
+anonymized form (colors and font only).
+
+## 12. Accessibility, Spanish and dark mode
+
+### 12.1 Accessibility
+
+- The target is WCAG 2.2 AA everywhere, with AAA contrast on the proof and the intake form.
+- **Semantics first:** real `<button>`, `<table>`, `<fieldset>`/`<legend>` and `<label for>`. The proof's details
+  are a `<dl>` on phones and a table on desktop, in the same DOM order. Headings never skip levels.
+- **Focus** is always visible (2 px ring, 2 px offset), follows reading order, and returns to the trigger
+  when a drawer, sheet or modal closes. A skip link heads every page (`[copy needed]` if it isn't already written).
+- **Targets** are at least 44 × 44, or 48 on client pages, with 8 px between neighbors.
+- **Live regions** announce form results, toasts, copy confirmations and status changes on open filing pages.
+- **The screenshot** of the state's review page keeps its existing alt text, which points the reader to
+  the text details. Zoom is a real full-screen image view, not a canvas.
+- **Reflow:** text resizes to 200% with nothing lost, and at 400% (320 CSS px) everything is one column.
+- **Time:** the proof's deadline is written out in words, and nothing on the page times out while it's open.
+  The card security code's one-hour life is stated, never shown as a ticking countdown.
+- **Signatures:** the signature pad has a keyboard alternative where the state's form allows a typed
+  signature. Where a drawn signature is required, the page says so before the pad.
+- **Testing:** VoiceOver (iOS, macOS), TalkBack and NVDA on the proof, the intake form and the desk every
+  release, plus a usability round with readers over 60 using their own phones.
+
+### 12.2 Spanish
+
+Client-facing pages (intake, proof, decision pages, client emails) get a language switch, "English ·
+Español", in the firm header. It defaults to the browser's language, and a firm can set a default per client link.
+
+- The Spanish copy is translated, then approved by the copy owner. Every consent and authorization goes to a
+  certified legal translator, with counsel's sign-off. Each translated consent gets its own `consentVersion`, so the
+  approval record shows which language was agreed.
+- Layouts allow for strings 30% longer: no fixed-width buttons, a two-line commit button allowed, chips that wrap.
+- Values sent to the state stay as entered: labels are translated, values never are. Fees keep the `$103.50`
+  format in both languages, because that's how the state charges them.
+- `lang` is set per page and on English fragments inside Spanish pages (state names, and the review-page alt
+  text where the screenshot is in English).
+- Staff surfaces and the docs stay in English for now.
+
+### 12.3 Dark mode
+
+Every surface has a full dark theme (tokens in Section 4), following `prefers-color-scheme`. The desk, dashboard
+and docs add a manual override in the account menu, remembered per device. Client pages follow the device
+with no toggle. On the proof in dark mode, the screenshot sits on a white plate (state pages are light), and Mono
+values stay at 18 px and weight 400, with no thinning. Emails ship explicit dark styles and are tested in Apple
+Mail, Gmail (web, iOS, Android) and Outlook (Windows, web).
+
+## 13. Production
+
+### 13.1 Stack
+
+| Layer | Choice |
+|---|---|
+| Tokens | One JSON source (W3C design-tokens format), built by Style Dictionary into CSS custom properties, a TypeScript map and Figma variables. Modes: light, dark, high contrast, comfortable, compact |
+| Theming engine | A pure TypeScript package (`@cofile/theme`) using culori for OKLCH and apca-w3 plus WCAG 2 math for contrast. It runs on the server at save time and in the browser for previews, and the same package themes emails and the proof |
+| Components | React 19 in the existing Next.js app; Radix primitives for menus, dialogs, tabs, comboboxes and tooltips; CSS Modules that read tokens; `cmdk` for the command palette |
+| The proof | Rendered by the engine at api.cofile.app from the same component package with server-side React, to static HTML with inline critical CSS: under 60 KB and readable without JavaScript |
+| Motion | CSS transitions for the UI; the register slide and print drawing in CSS and SVG; the hero sequence in Rive with reduced-motion stills |
+| Docs | MDX guides; the reference generated from `api-catalog` and OpenAPI; Shiki with the Carbon theme |
+| Emails | React Email templates rendered by the engine and sent through Resend |
+| Quality | Storybook with every component state; Chromatic visual tests including the theme matrix; axe and Playwright accessibility checks in CI; a Lighthouse budget of 95+ on the proof and intake |
+
+### 13.2 Design-system files
+
+In Figma, one library file ("CoFile System") holds variables that mirror the token JSON, every component with
+its states in both densities, and a "Theme lab" page that runs the theming engine through a plugin, so a
+designer can see any hex as a firm theme. Separate working files for Marketing, Desk, Dashboard, Docs, Client
+pages and Emails are built only from the library. Code Connect maps every Figma component to its React
+component, so handoff is a link, not a redline.
+
+### 13.3 Assets and commissions
+
+| Asset | Source |
+|---|---|
+| Pair mark and wordmark, hinted sizes, favicon set, app icons, OG templates | A brand identity studio with type-drawing skills, working from 3.1–3.2 |
+| Proof print generator (SVG and PNG) | In-house, with the identity studio signing off the tick geometry |
+| GT Standard and GT Standard Mono licenses (web, app, email images), plus the custom cut in 5.1 | The foundry |
+| Icon set, about 60 glyphs | A UI icon designer |
+| State-screen plates, about 30 drawings | A technical illustrator |
+| 4–6 location photographs and 6 document still lifes | An editorial photographer |
+| Hero register sequence and the close-section mark animation | A motion studio, delivered as Rive files |
+| Spanish translation and legal translation | A translation agency and a certified legal translator |
+
+### 13.4 Phases
+
+| Phase | Weeks | Ships |
+|---|---|---|
+| 0. Foundations | 1–3 | Tokens, the theming engine, type, the component core (buttons, fields, chips, notices), the theme matrix in CI |
+| 1. The proof and client pages | 4–7 | The proof (consent where it is today), decision pages, intake, service pages, embed, client emails. Highest risk goes first |
+| 2. Filing desk | 8–11 | Sidebar shell, filings, new filing with the live preview, filing detail timeline, client links, from email, Ready to pay, Setup with the Branding preview |
+| 3. Public site | 12–14 | Home with all 13 sections, auth-frame pages, legal pages, 404 and error, hero motion |
+| 4. Dashboard and docs | 15–18 | Dashboard pages, command palette, docs three-pane, reference, request builder |
+| 5. Signature and polish | 19–20 | The proof print everywhere (once its label is approved), Spanish, a dark-mode pass, motion polish |
+
+## 14. Appendix
+
+### A. What I'd push back on in the current site
+
+1. **The proof is a JSON dump.** `renderReviewPage` walks the request object and prints humanized key
+   paths ("Formation › Members 1 › Name") in a 40/60 table, in object-key order. The copy promises "every
+   name, address and answer, in the order the state asks for them." Keeping that promise takes a proof layout per
+   filing type, using the intake form's own labels and the state's order. This is the biggest gap on the site.
+2. **The firm's color is on the irreversible button.** The proof's approve button takes `primaryColor`
+   with no contrast check. A firm with a light brand gets white text on a pale button, and a red firm gets a
+   red approve button. The commit button has to belong to the system.
+3. **Amber means three things.** A planned hold, waiting for a person and "site changed" share one tone.
+   Splitting out `act` (4.4) makes "who needs to do something" readable at a glance.
+4. **Four names for one mode.** Filings tables show a "Test" badge, the detail page shows "Rehearsal" and
+   "test run", and the code calls it practice. In the UI it should be the rehearsal tag everywhere.
+5. **CoFile shows on enterprise white-label pages.** `PublicIntake` always renders "with CoFile",
+   including under `/e/`. For enterprises that bought white-label, that slot should follow their own setting.
+   That's a product decision for the owner.
+6. **The paper-and-manila look reads as stationery, and the folder-tab mark doesn't survive 16 px.** It's
+   warm, but it doesn't say "checked." The brand should look precise.
+7. **Eleven top-bar links on the dashboard** neither fit a laptop nor group. A grouped sidebar does both.
+8. **Firm desks lead with CoFile.** The partner desk's top bar shows CoFile's name, with the firm's logo
+   off to the right. The brief calls it the firm's branded area, so the firm should lead.
+
+### B. Copy notes (suggestions only; none of this is in the design)
+
+| Where | Note |
+|---|---|
+| The proof's consent | "every detail below" is true only while the consent sits at the top. If counsel agrees to move it into the commit block, it needs "every detail on this page" or similar |
+| The proof print | Needs a short visible label and an accessible name. A suggestion for the copy owner: "Proof print", with help text along the lines of "The same print means the same details." |
+| Login button pending text | "Signing in…" breaks the "log in, not sign in" rule; "Logging in…" would match |
+| Signed-out desk page | "You're not signed in to this filing desk" has the same problem |
+| Google login errors | "Google sign-in…" and "This account can't sign in" could say "log in", except where naming Google's own product |
+| Embed footer | "Filed with CoFile" differs from the "with CoFile" used everywhere else |
+| Rehearsal badge | "Test" in the filings tables and "test run" on the detail page should become "Rehearsal" |
+| "Approval recorded" | "We'll submit the filing exactly as shown" is followed by the stop clause, which helps; worth checking against the rule never to promise "will be submitted" |
+| `[copy needed]` strings | Command palette placeholder and groups; the copy-confirmation announcement; the intake stepper ("1 of 4") and Back/Next; the live-preview sheet handle; the Branding preview's contrast notes; the API-key "saved it" acknowledgment; "Open in request builder" and "Copy as Markdown"; the skip link; the status page; bodies for the "filing submitted", "documents back" and "EIN issued" emails |
