@@ -9,15 +9,17 @@
       "serviceFee": {
         "credit_card": 3.5,
         "echeck": 1.0,
-        "stored_card": null,
-        "stored_echeck": null
+        "stored_card": 3.5,
+        "stored_echeck": 1.0
       },
       "certificate_of_standing": {
         "label": "Certificate of Standing",
         "amountUsd": 50,
         "serviceFee": {
           "credit_card": 2.0,
-          "echeck": 1.0
+          "echeck": 1.0,
+          "stored_card": 2.0,
+          "stored_echeck": 1.0
         }
       },
       "certified_copy": {
@@ -25,7 +27,9 @@
         "amountUsd": 25,
         "serviceFee": {
           "credit_card": 2.0,
-          "echeck": 1.0
+          "echeck": 1.0,
+          "stored_card": 2.0,
+          "stored_echeck": 1.0
         }
       },
       "_source": "Formation Payment screen, 2026-11-17: Formation $100 + $3.50 card / $1 eCheck; at formation time Certificate of Standing $50 (+$2.00/$1), Certified Copy $25 (+$2.00/$1)",
@@ -35,7 +39,8 @@
           "statutory": 100,
           "_source": "Published fee schedule (nj.gov/treasury/revenue/fees.shtml, read 2026-11-24): Certificate of Incorporation, for-profit corporation, $100. The corporation checkout has not been seen (docs/portal-maps/nj-business-formation.md); the portal admin fee is assumed to be the LLC's, and the standing certificate and certified copy prices at a corporation's formation are unpriced (refused) until it is."
         }
-      }
+      },
+      "_storedMethodsNote": "Saved methods in the NJ account (stored_card, stored_echeck) are quoted at the card and eCheck figures until the signed-in checkout is walked (Yakov, Nov 26: pay with the NJ account's saved method per filing type); the payment page's fee check stops a run that shows a different amount."
     },
     "standing_certificate": {
       "byEntityType": {
@@ -67,10 +72,11 @@
       "serviceFee": {
         "credit_card": 2.0,
         "echeck": 1.0,
-        "stored_card": null,
-        "stored_echeck": null
+        "stored_card": 2.0,
+        "stored_echeck": 1.0
       },
-      "_source": "Business Records Service cart, verified per record on 2026-11-18: LLC/FLC $50, DP/FR/NP/LP $25; portal admin fee $2 card / $1 eCheck per certificate, all types. Same price for Short and Long forms (2026-11-17, DP). Types not listed (PA, LLP, LF, FLP, NF, NV) are unpriced and refused until walked."
+      "_source": "Business Records Service cart, verified per record on 2026-11-18: LLC/FLC $50, DP/FR/NP/LP $25; portal admin fee $2 card / $1 eCheck per certificate, all types. Same price for Short and Long forms (2026-11-17, DP). Types not listed (PA, LLP, LF, FLP, NF, NV) are unpriced and refused until walked.",
+      "_storedMethodsNote": "Saved methods in the NJ account (stored_card, stored_echeck) are quoted at the card and eCheck figures until the signed-in checkout is walked (Yakov, Nov 26: pay with the NJ account's saved method per filing type); the payment page's fee check stops a run that shows a different amount."
     },
     "alternate_name": null,
     "amendment": null

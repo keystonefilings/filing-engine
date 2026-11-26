@@ -28,9 +28,12 @@ export async function saveRouting(_prev: Saved, fd: FormData): Promise<Saved> {
   const mode = fd.get("mode") === "per_filing" ? "per_filing" : "single";
   const byFilingKind: Record<string, string> = {};
   if (mode === "per_filing") for (const k of FILING_KINDS) { const v = pick(`kind.${k.id}`, fee); if (v) byFilingKind[k.id] = v; }
+  // Yakov (Nov 26): NJ filing types paid with the NJ account's own saved method.
+  const njKinds = ["nj-llc", "nj-corp", "nj-standing"].filter((k) => fd.get(`njPortal.kind.${k}`) === "on");
   const routing: PaymentRouting = {
     mode, byFilingKind, defaultMethodId: pick("defaultMethodId", fee), fallbackMethodId: pick("fallbackMethodId", fee),
     subscriptionMethodId: pick("subscriptionMethodId", subs),
+    statePortal: { NJ: { method: fd.get("njPortal.method") === "stored_echeck" ? "stored_echeck" : "stored_card", kinds: njKinds } },
   };
   try { await engine(s.apiKey, "/v1/account/payment-routing", { method: "PUT", body: routing }); } catch (e) { return { error: problem(e) }; }
   revalidatePath("/dashboard/setup");

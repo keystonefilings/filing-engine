@@ -1,3 +1,5 @@
+import { njAccount } from "../settings/accounts.js";
+import { filingKindOf } from "../settings/payments.js";
 import type { ClientCompanySettings, TenantSettings } from "../settings/schema.js";
 import { effectivePolicies } from "../settings/policies.js";
 import { stateFeeCards, type PaymentMethodRef } from "../settings/payments.js";
@@ -47,7 +49,8 @@ export class BasisTheoryCardVault implements CardVault {
 /** Whose cards pay a filing's state fees: the firm's own under G1 "own_account", else the subscriber's. */
 export function cardRefsForFiling(filing: FilingRecord, tenant: TenantSettings, client: ClientCompanySettings): PaymentMethodRef[] {
   const own = effectivePolicies(tenant, client).stateFees === "own_account";
-  const kind = (filing.request.intake as { portal?: { kind?: string } } | undefined)?.portal?.kind ?? "";
+  const kind = filingKindOf(filing.request);
+  if (filing.request.state === "NJ" && njAccount(tenant, client, kind).paidByPortalAccount) return []; // the NJ account's saved method pays
   return stateFeeCards(own ? client.payments : tenant.payments, kind);
 }
 

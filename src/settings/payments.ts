@@ -27,6 +27,20 @@ export const PaymentMethodRef = z.object({
 });
 export type PaymentMethodRef = z.infer<typeof PaymentMethodRef>;
 
+/**
+ * Yakov (Nov 26): NJ filing types whose state fees are paid with the payment method saved in the
+ * NJ portal account the run signs in with, instead of a card saved with us. Ids are the filing
+ * kinds (web/lib/intake ids); "nj-standing" is the standing certificate, filed through the API.
+ */
+export const NJ_PORTAL_PAYMENT_KINDS = { "nj-llc": "New Jersey LLC formation", "nj-corp": "New Jersey corporation formation", "nj-standing": "New Jersey standing certificate" } as const;
+export type NjPortalPaymentKind = keyof typeof NJ_PORTAL_PAYMENT_KINDS;
+export const StatePortalPayment = z.object({
+  /** What is saved in the NJ account: a card or an eCheck (bank account). */
+  method: z.enum(["stored_card", "stored_echeck"]).default("stored_card"),
+  kinds: z.array(z.enum(Object.keys(NJ_PORTAL_PAYMENT_KINDS) as [NjPortalPaymentKind, ...NjPortalPaymentKind[]])).max(10).default([]),
+});
+export type StatePortalPayment = z.infer<typeof StatePortalPayment>;
+
 export const PaymentRouting = z.object({
   /** single: one card pays every filing. per_filing: a card per filing kind, the default card for the rest. */
   mode: z.enum(["single", "per_filing"]).default("single"),
@@ -37,6 +51,8 @@ export const PaymentRouting = z.object({
   byFilingKind: z.record(z.string(), z.string()).default({}),
   /** Enterprise only: the card that pays the platform subscription. */
   subscriptionMethodId: z.string().optional(),
+  /** Filing types paid with the state portal account's own saved method (NJ only for now). */
+  statePortal: z.object({ NJ: StatePortalPayment.optional() }).prefault({}),
 });
 export type PaymentRouting = z.infer<typeof PaymentRouting>;
 
@@ -60,6 +76,18 @@ export const PaymentSettings = z.object({
   }
 });
 export type PaymentSettings = z.infer<typeof PaymentSettings>;
+
+/**
+ * A filing's kind for routing: the form it came from, or, for a filing sent through the API, the
+ * kind its state and type stand for (so per-type routing applies to API filings too).
+ */
+export function filingKindOf(req: { state: string; type: string; intake?: unknown; formation?: { njEntityType?: string } }): string {
+  const k = (req.intake as { portal?: { kind?: string } } | undefined)?.portal?.kind;
+  if (k) return k;
+  if (req.state === "NJ" && req.type === "formation") return req.formation?.njEntityType && req.formation.njEntityType !== "llc" ? "nj-corp" : "nj-llc";
+  if (req.state === "NJ" && req.type === "standing_certificate") return "nj-standing";
+  return "";
+}
 
 /** The cards to try for a filing's state fees, in order: its own (or the default), then the fallback. */
 export function stateFeeCards(p: PaymentSettings | undefined, filingKind: string): PaymentMethodRef[] {

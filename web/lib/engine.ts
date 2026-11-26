@@ -126,7 +126,9 @@ export interface SignInResult { user: PublicUser; sessionKey: string; expiresAt:
 export interface Inquiry { id: string; createdAt: string; name: string; company: string; email: string; phone?: string; states?: string; volume?: string; message?: string; status?: string; tenantId?: string; decidedBy?: string }
 
 export interface PaymentMethodRef { id: string; label: string; provider: string; brand?: string; last4?: string; expMonth?: number; expYear?: number; purpose: "state_fees" | "subscription" }
-export interface PaymentRouting { mode: "single" | "per_filing"; defaultMethodId?: string; fallbackMethodId?: string; byFilingKind: Record<string, string>; subscriptionMethodId?: string }
+export interface StatePortalPayment { method: "stored_card" | "stored_echeck"; kinds: string[] }
+export interface PaymentRouting { mode: "single" | "per_filing"; defaultMethodId?: string; fallbackMethodId?: string; byFilingKind: Record<string, string>; subscriptionMethodId?: string; statePortal?: { NJ?: StatePortalPayment } }
+
 export interface PaymentSettings { methods: PaymentMethodRef[]; routing: PaymentRouting }
 
 export interface PortalDefaultField { id: string; label: string; type: "boolean" | "number" | "select"; options?: { value: string; label: string }[]; help?: string }

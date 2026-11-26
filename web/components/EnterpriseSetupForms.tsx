@@ -7,6 +7,13 @@ import type { PaymentMethodRef, PaymentRouting, PortalDefaultField } from "@/lib
 
 type Action = (prev: Saved, fd: FormData) => Promise<Saved>;
 
+/** Yakov (Nov 26): NJ filing types an enterprise can pay with its NJ account's saved payment method (engine: src/settings/payments.ts). */
+export const NJ_PORTAL_PAYMENT_KINDS: { id: string; title: string }[] = [
+  { id: "nj-llc", title: "New Jersey LLC formation" },
+  { id: "nj-corp", title: "New Jersey corporation formation" },
+  { id: "nj-standing", title: "New Jersey standing certificate" },
+];
+
 function Result({ s }: { s: Saved }) {
   if (s?.error) return <p className="notice bad" role="alert">{s.error}</p>;
   if (s?.ok) return <p className="notice ok" role="status">Saved.</p>;
@@ -22,7 +29,7 @@ function CardSelect({ name, value, cards, label }: { name: string; value?: strin
   );
 }
 
-export function RoutingForm({ action, methods, routing, kinds }: { action: Action; methods: PaymentMethodRef[]; routing: PaymentRouting; kinds: { id: string; title: string }[] }) {
+export function RoutingForm({ action, methods, routing, kinds, njLoginConnected }: { action: Action; methods: PaymentMethodRef[]; routing: PaymentRouting; kinds: { id: string; title: string }[]; njLoginConnected?: boolean }) {
   const { state: s, pending, formProps } = useKeptForm(action, null);
   const [mode, setMode] = useState(routing.mode);
   const fee = methods.filter((m) => m.purpose === "state_fees");
@@ -44,6 +51,20 @@ export function RoutingForm({ action, methods, routing, kinds }: { action: Actio
         {mode === "per_filing" ? kinds.map((k) => (
           <div className="field" key={k.id}><label>{k.title}</label><CardSelect name={`kind.${k.id}`} value={routing.byFilingKind[k.id]} cards={fee} label={k.title} /></div>
         )) : null}
+      </fieldset>
+      <fieldset>
+        <legend>New Jersey: pay with your NJ account</legend>
+        <p className="help" style={{ marginTop: 0 }}>For the filing types you tick, New Jersey&apos;s state fees are paid with the payment method saved in your own NJ Division of Revenue account, instead of a card saved here. The run signs in to that account and picks it at checkout; no card saved here is used or asked for.{njLoginConnected ? "" : " Connect your NJ login under State portal logins first: until then, a filing of a ticked type is stopped before approval."}</p>
+        {NJ_PORTAL_PAYMENT_KINDS.map((k) => (
+          <label key={k.id} className="choice" style={{ marginBottom: 6 }}><input type="checkbox" name={`njPortal.kind.${k.id}`} defaultChecked={routing.statePortal?.NJ?.kinds.includes(k.id)} /><span>{k.title}</span></label>
+        ))}
+        <div className="field" style={{ marginTop: 8 }}><label htmlFor="njPortal-method">What&apos;s saved in your NJ account</label>
+          <select id="njPortal-method" name="njPortal.method" defaultValue={routing.statePortal?.NJ?.method ?? "stored_card"}>
+            <option value="stored_card">A card</option>
+            <option value="stored_echeck">A bank account (eCheck)</option>
+          </select>
+          <p className="help">New Jersey adds its own portal fee: $3.50 by card or $1 by eCheck on a formation, $2 or $1 on a standing certificate. The fee is checked again on New Jersey&apos;s payment page, and the filing stops before paying if it differs.</p>
+        </div>
       </fieldset>
       {!methods.length ? <p className="help" style={{ marginBottom: 10 }}>No cards saved yet. Add a card, then choose which card pays for what. You can save these choices now and pick cards later.</p> : null}
       <button className="btn primary" type="submit" disabled={pending}>{pending ? "Saving…" : "Save payment settings"}</button>

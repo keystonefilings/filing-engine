@@ -1,3 +1,4 @@
+import { filingKindOf } from "../../settings/payments.js";
 import { renderName } from "../../domain/name.js";
 import { splitZip, stateName, toUsDate } from "../../domain/usStates.js";
 import type { ScreenStep, SiteAdapter, StepContext } from "../types.js";
@@ -322,7 +323,7 @@ const payment: ScreenStep = {
     await ctx.set("contactEmail", r.contact.email);
     await ctx.set("contactEmailConfirm", r.contact.email);
     // Signed out the dropdown offers Credit Card / E-Check; the signed-in stored-method behaviour is unwalked (decision 3).
-    await ctx.set("paymentType", njAccount(ctx.tenant, ctx.client).paymentTypeLabel);
+    await ctx.set("paymentType", njAccount(ctx.tenant, ctx.client, filingKindOf(ctx.filing.request)).paymentTypeLabel);
     const understand = ctx.page.getByRole("button", { name: /^I Understand$/i });
     if (await understand.isVisible().catch(() => false)) await understand.click(); // e-check disclaimer modal
     const d = ctx.client.checkboxDefaults;

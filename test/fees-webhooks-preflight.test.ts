@@ -17,9 +17,10 @@ describe("fees (decision 5)", () => {
     expect(expectedFees("NJ", "standing_certificate", { paymentMethod: "credit_card", entityType: "DP" }).map((l) => l.amountUsd)).toEqual([25, 2]);
     expect(() => expectedFees("NJ", "standing_certificate", { paymentMethod: "credit_card" })).toThrow(/entity type/);
     expect(() => expectedFees("NJ", "standing_certificate", { paymentMethod: "credit_card", entityType: "LLP" })).toThrow(/not been verified/);
-    expect(() => expectedFees("NJ", "standing_certificate", { paymentMethod: "stored_echeck", entityType: "LLC" })).toThrow(FeeUnknownError);
+    // Yakov (Nov 26): a method saved in the NJ account is quoted at the card or eCheck figure until the signed-in checkout is walked.
+    expect(expectedFees("NJ", "standing_certificate", { paymentMethod: "stored_echeck", entityType: "LLC" }).reduce((s, l) => s + l.amountUsd, 0)).toBe(51);
     expect(() => expectedFees("NJ", "alternate_name")).toThrow(FeeUnknownError);
-    expect(() => expectedFees("NJ", "formation", { paymentMethod: "stored_card" })).toThrow(FeeUnknownError);
+    expect(expectedFees("NJ", "formation", { paymentMethod: "stored_card" }).reduce((s, l) => s + l.amountUsd, 0)).toBe(103.5);
   });
   it("checks the live page against approved lines and cap", () => {
     const exp = expectedFees("NJ", "formation", { paymentMethod: "credit_card" });

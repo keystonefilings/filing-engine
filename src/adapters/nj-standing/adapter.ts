@@ -1,3 +1,4 @@
+import { filingKindOf } from "../../settings/payments.js";
 import type { ScreenStep, SiteAdapter, StepContext } from "../types.js";
 import { njAccount } from "../../settings/accounts.js";
 import { NJ_STANDING_FORM_COLUMN, NJ_STANDING_SCREENS } from "./intents.js";
@@ -81,7 +82,7 @@ const cart: ScreenStep = {
     const text = await ctx.page.locator("body").innerText();
     const m = /Cart \((\d+)\)/.exec(text);
     if (!m || m[1] !== "1") throw new Error(`cart should hold exactly 1 certificate, shows ${m ? m[1] : "none"}`);
-    const method = njAccount(ctx.tenant, ctx.client).paymentTypeLabel;
+    const method = njAccount(ctx.tenant, ctx.client, filingKindOf(ctx.filing.request)).paymentTypeLabel;
     // Choosing a type posts back and adds the portal admin fee lines the fee check needs.
     await ctx.actAndSettle(() => ctx.set("paymentType", method));
     // E-Check opens a notice (bank must allow debits from NJ's Originator ID) that blocks the page.

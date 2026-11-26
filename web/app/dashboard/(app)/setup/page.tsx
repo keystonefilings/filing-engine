@@ -28,7 +28,7 @@ export default async function SetupPage() {
       <p className="muted">Your subscription and state filing fees can be paid by different cards. Saved cards are held by Basis Theory, a card vault, never in our database; a card is used only to pay a state. When filings are ready to pay with a saved card, we ask the card&apos;s owner for its security code on the Ready to pay page and keep it for an hour at most.</p>
       <SavedCards methods={setup.payments.methods} />
       {process.env.BASIS_THEORY_PUBLIC_KEY ? <AddCard publicKey={process.env.BASIS_THEORY_PUBLIC_KEY} save={saveCard} /> : <p className="notice">Saving cards isn&apos;t turned on for your account yet. Email {supportEmail()} to turn it on.</p>}
-      <RoutingForm action={saveRouting} methods={setup.payments.methods} routing={setup.payments.routing} kinds={FILING_KINDS.map((k) => ({ id: k.id, title: k.title }))} />
+      <RoutingForm action={saveRouting} methods={setup.payments.methods} routing={setup.payments.routing} kinds={FILING_KINDS.map((k) => ({ id: k.id, title: k.title }))} njLoginConnected={!!setup.portalLogins["nj-portal"]} />
 
       <h2>State portal logins</h2>
       <p className="muted">Filings run under your own account on each state site. A login you connect is sealed (encrypted) as soon as it arrives, kept apart from every other account, and read only when a filing runs. It&apos;s never shown again.</p>

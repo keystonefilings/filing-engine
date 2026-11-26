@@ -233,6 +233,14 @@ Built and tested; each switches on when its accounts and keys are set (steps in 
   engine sends mail). Each takes effect on the next deploy.
 - **Slack:** a Slack app with the `/file` command (V41).
 - **Twilio:** a number with A2P 10DLC registration, and a WhatsApp sender (Meta verification) (V42-V43).
+- **NJ fees from the NJ account (Yakov, Nov 26):** done in enterprise Setup (Payment methods, "New
+  Jersey: pay with your NJ account"): per NJ filing type (LLC formation, corporation formation,
+  standing certificate), state fees are paid with the card or eCheck saved in the enterprise's own
+  NJ account instead of a card saved with us; no card saved with us is used or asked for on those
+  filings, and API filings are matched by state and type. Without a connected NJ login, a filing of
+  a ticked type is stopped at approval, never paid another way. NJ's portal fee for a saved method
+  is quoted at the card or eCheck figure until the signed-in checkout is walked (the payment page's
+  fee check stops a run that differs); which option the signed-in page shows is part of that walk.
 - **Florida EIN (Yakov, Nov 26):** done. A Florida formation's EIN is applied for only once the
   state accepts the formation (any `in_run` request becomes `after_acceptance`). When the acceptance
   is recorded (or a state accepts at once, as NJ does, for a formation asking for that order), the
