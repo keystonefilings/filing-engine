@@ -36,7 +36,8 @@ export const EMAIL_ASSETS = {
 /** The owner's artwork for mail, in the web app's public folder (web/public/cofile/), on CoFile's letterhead only. */
 export const EMAIL_ART = {
   /** The stacked lockup (3.3), 96 × 56 CSS px. */
-  lockup: "/cofile/identity/cofile-lockup-stacked-email@2x.png",
+  // On white, so a mail app that forces dark mode keeps the ink readable around it (the sheet stays white too).
+  lockup: "/cofile/identity/cofile-lockup-stacked-email-white@2x.png",
   /** Decision 35's two engravings, on white at 2×: the blank Name Plate on the welcome emails (160 × 64, 128 × 52
    *  on phones) and the returned envelope on documents back (120 × 80, 96 × 64 on phones). */
   "blank-plate": "/cofile/vignettes/v01-blank-plate-email@2x.png",
