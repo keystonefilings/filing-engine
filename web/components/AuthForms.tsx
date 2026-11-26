@@ -112,6 +112,11 @@ export function PartnerSignupForm({ action, approvalRequired }: { action: Action
         <select id="su-vol" name="expectedVolume" defaultValue="Under 10">
           <option>Under 10</option><option>10 to 50</option><option>50 to 200</option><option>Over 200</option>
         </select></label>
+      <label className="check-line" htmlFor="su-terms" style={{ display: "flex", gap: 8, alignItems: "flex-start" }}>
+        <input id="su-terms" name="terms" type="checkbox" required style={{ width: "auto", marginTop: 3 }} aria-describedby={s?.issues?.terms ? "terms-err" : undefined} />
+        <span>I agree to the <a href="/terms" target="_blank" rel="noopener">Terms of Service</a> and the <a href="/privacy" target="_blank" rel="noopener">Privacy Policy</a>.</span>
+      </label>
+      <Err s={s} k="terms" />
       <button className="btn btn-primary" type="submit" disabled={pending}>{pending ? "Creating…" : "Create account"}</button>
       <p className="hero-note">{approvalRequired ? "You'll confirm your email. If your account needs a review before it opens, we'll email you when it's ready." : "Your account opens as soon as you confirm your email."} Already have one? <Link href="/login">Log in</Link>.</p>
       <Msg s={s} />

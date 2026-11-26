@@ -42,7 +42,8 @@ export default async function ClientIntakePage({ params }: { params: Promise<{ t
       <main className="wrap narrow stack">
         <h1>{kind.title}{link.label ? <span className="muted" style={{ fontWeight: 400 }}> · {link.label}</span> : null}</h1>
         <p className="muted">{kind.summary} After you send this, you&apos;ll get a link to check exactly what will be filed, and nothing is filed until it&apos;s approved.</p>
-        <IntakeForm kind={kind} nonce={link.nonce} action={submitClientIntake.bind(null, token)} submitLabel="Send for approval" consentText={consentText} prefill={prefill} filerName={company.partner ? `${brand.name}, filing through ${platformName()}` : undefined} />
+        <IntakeForm kind={kind} nonce={link.nonce} action={submitClientIntake.bind(null, token)} submitLabel="Send for approval" consentText={consentText} prefill={prefill} filerName={company.filerName}
+          footnote={<p className="small muted">By sending, you agree to {platformName()}&apos;s <a href="/terms" target="_blank" rel="noopener">Terms of Service</a>; your details are handled under its <a href="/privacy" target="_blank" rel="noopener">Privacy Policy</a>.</p>} />
         {brand.supportEmail ? <p className="small muted">Questions? Email <a href={`mailto:${brand.supportEmail}`}>{brand.supportEmail}</a>.</p> : null}
       </main>
     </div>

@@ -1,3 +1,4 @@
+import { filerNameFor } from "../settings/filer.js";
 import type { FastifyInstance } from "fastify";
 import type { FilingService } from "../orchestrator/service.js";
 import { IdempotencyConflict, ValidationFailed } from "../orchestrator/service.js";
@@ -12,7 +13,7 @@ import { RateLimiter } from "../users/rate-limit.js";
  * each submission is a new filing for that firm, which then goes through the same preview and
  * approval as any other. The submitter never gets the approval link.
  */
-export function registerPublicPages(app: FastifyInstance, deps: { store: Store; service: FilingService; platformTenantId: string }): void {
+export function registerPublicPages(app: FastifyInstance, deps: { store: Store; service: FilingService; platformTenantId: string; platformName?: string }): void {
   const perFirm = new RateLimiter(30, 3_600_000);
   const overall = new RateLimiter(600, 3_600_000);
 
@@ -37,6 +38,7 @@ export function registerPublicPages(app: FastifyInstance, deps: { store: Store; 
         ...(c.partner ? { partner: { states: c.partner.states } } : {}),
         registeredAgentsByState: c.registeredAgentsByState,
       },
+      filerName: filerNameFor(c, await deps.store.getTenant(c.tenantId), deps.platformName ?? "CoFile"),
     });
   });
 

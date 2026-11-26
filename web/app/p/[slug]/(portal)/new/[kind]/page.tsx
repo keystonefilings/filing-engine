@@ -49,7 +49,7 @@ export default async function NewKindPage({ params, searchParams }: { params: Pr
       <h1>{kind.title}</h1>
       <p className="muted">{kind.summary} Would your client rather fill it in? <Link href={`/p/${encodeURIComponent(slug)}/client-links?kind=${encodeURIComponent(kind.id)}`}>Send them a link</Link>.</p>
       {emailed ? <p className="notice">Filled in from your message &ldquo;{emailed.subject || "(no subject)"}&rdquo;. Check every answer and add what&apos;s missing.</p> : null}
-      {!liveFilings() ? <p className="notice warn">Practice mode: this portal isn&apos;t switched to live filing yet, so this filing goes through the government site up to the final step and stops there. Nothing is filed or paid, and practice filings are free.</p> : null}
+      {!liveFilings() ? <p className="notice warn">Practice mode: this portal isn&apos;t switched to live filing yet, so this filing goes through the government site up to the final step and stops there. Nothing is filed or paid.</p> : null}
       {clients.length ? (
         <form method="get" className="row" style={{ gap: 8 }}>
           <label htmlFor="from-client" className="small">Start from a client you filed for before</label>
@@ -66,7 +66,7 @@ export default async function NewKindPage({ params, searchParams }: { params: Pr
         action={createFirmFiling.bind(null, slug, kind.id, emailed?.id ?? null)}
         signatures={sigs?.signatures.filter((s) => s.active) ?? []}
         consentText={sigs?.consentText}
-        filerName={company.partner ? `${brand.name}, filing through ${platformName()}` : undefined}
+        filerName={company.filerName}
         prefill={{ ...(Object.keys(fromEmail).some((k) => k.startsWith("contact.")) ? {} : contactPrefill(company)), ...saved, ...fromClient, ...fromEmail }}
         key={from ?? email ?? "new"}
       />

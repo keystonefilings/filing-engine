@@ -17,6 +17,8 @@ export interface NotifierDeps {
   artifacts?: ArtifactStore;
   /** The web front end: a portal firm's completion email links to the filing page there. */
   webBaseUrl?: string;
+  /** Ours, named in notices to a filing company's staff (never in its clients' emails, which carry the firm's own). */
+  supportEmail?: string;
   now?: () => Date;
 }
 
@@ -44,6 +46,7 @@ export class Notifier {
         ? (Array.isArray(event.data.recipients) ? event.data.recipients as { channel: string; address: string; name?: string }[] : [])
         : await this.clientRecipients(event, filing, tenant, client);
     if (event.type === "filing.card_code_needed" && this.deps.webBaseUrl && typeof event.data.webPath === "string") rendered.link = `${this.deps.webBaseUrl}${event.data.webPath}`;
+    if (rendered.audience === "admin" && this.deps.supportEmail) rendered.body += `\n\nQuestions? Email ${this.deps.supportEmail}.`;
     const screenshotUrl = rendered.screenshotArtifactId ? `${this.deps.publicBaseUrl}/v1/artifacts/${rendered.screenshotArtifactId}` : undefined;
     let attachments: NonNullable<import("./senders.js").OutboundMessage["attachments"]> | undefined;
     if (event.type === "filing.awaiting_approval" && typeof event.data.reviewShotArtifactId === "string" && this.deps.artifacts) {

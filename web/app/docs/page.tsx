@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { platformName, publicApiUrl } from "@/lib/brand";
+import { platformName, publicApiUrl, supportEmail } from "@/lib/brand";
 import { GUIDES } from "./guides";
 
 export default function DocsHome() {
@@ -11,7 +11,7 @@ export default function DocsHome() {
       <h2>Quick start</h2>
       <ol>
         <li>Get an API key from the <Link href="/dashboard/keys">dashboard</Link>.</li>
-        <li>Set up the client company (the CPA or payroll firm) and its approvers with <code>PUT /v1/client-companies/{"{id}"}</code>, or ask us to do it.</li>
+        <li>Set up the client company (the CPA or payroll firm) and its approvers with <code>PUT /v1/client-companies/{"{id}"}</code>, or email {supportEmail()} and we&apos;ll do it.</li>
         <li>Create a filing with <code>&quot;dryRun&quot;: true</code>, then approve it with its <code>approvalLink</code> or <code>POST /v1/filings/{"{id}"}/approval</code>. The run walks the state site and stops before the final submit.</li>
         <li>Add a webhook endpoint so you hear about each step.</li>
       </ol>

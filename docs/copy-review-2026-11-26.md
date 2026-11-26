@@ -48,6 +48,15 @@ Twenty separate reviewers each read every page, form, email and the approval pag
 
 Each lists the options the reviewers gave and my recommendation.
 
+**Decided Nov 26:**
+- **NY corporation tax note:** left as is (it follows the walked page).
+- **Missouri on the EIN form:** stays.
+- **Price (1):** no price or subscription wording on the public site for now; removed from the home and sign-up pages, the API docs example carries no amount.
+- **The filing company (2):** confirmed. Partner pages: "{firm}, filing through CoFile"; a firm an enterprise subscriber set up: the subscriber's own name. The engine works it out and every form with authorizations names it.
+- **Terms, Privacy and notice (10):** written and published at /terms and /privacy; the footer says CoFile is not a law firm or a government agency; sign-up requires agreeing and records the version and time; the public and client-link forms link both beside Send. Before relying on them, have counsel review, in particular governing law (New York, courts in New York County), the liability cap and the legal entity name.
+- **Support channel (11):** hello@cofile.com, in one setting (SUPPORT_EMAIL) for the site footer, legal pages, "contact us" messages, our account emails and staff notices (clients' emails keep their firm's own address).
+- **The rest:** to follow.
+
 ### 1. What should the site say about price, and are the amounts now shown real?
 
 Prices aren't set. The partner Billing page shows "$49.00 a month" and the API docs example shows 49900 ($499 a month), which readers take as quotes. The changes say only "Practice filings are free. Filing for real needs a subscription."

@@ -49,7 +49,7 @@ export const ENDPOINTS: Endpoint[] = [
       { status: 401, description: "Missing or invalid API key." },
       { status: 403, description: "tenantId in the body is not your tenant." },
       { status: 422, description: "Validation failed. `issues` lists each problem with its path.", example: { error: "validation failed", issues: [{ path: "formation.county", message: "county is required in NY", severity: "error" }] } },
-      { status: 402, description: "A live filing needs an active subscription (practice filings are free).", example: { error: "a subscription is needed for live filings (dry runs are free)", billing: { plan: "enterprise", status: "none" } } },
+      { status: 402, description: "A live filing needs an active subscription (practice filings don't need one).", example: { error: "a subscription is needed for live filings (dry runs don't need one)", billing: { plan: "enterprise", status: "none" } } },
     ],
   },
   {
@@ -197,8 +197,8 @@ export const ENDPOINTS: Endpoint[] = [
   {
     id: "billing", method: "GET", path: "/v1/account/billing", group: "Account", auth: "api_key",
     summary: "Your subscription",
-    description: "Plan, price and status of the subscription that pays for live filings. Prices aren't set yet, so the amounts in the example are placeholders. With billing required, creating a live filing without a subscription in good standing (active, trialing or past_due) returns 402; practice filings are always free. Subscribe and manage billing in the dashboard.",
-    responses: [{ status: 200, description: "The subscription.", example: { billed: true, plan: "enterprise", status: "active", canFileLive: true, required: true, configured: true, price: { amount: 49900, currency: "usd", interval: "month" }, currentPeriodEnd: "2026-12-25T00:00:00.000Z", cancelAtPeriodEnd: false } }],
+    description: "Plan, price and status of the subscription that pays for live filings. `price` comes from the plan in Stripe and is null until one is set. With billing required, creating a live filing without a subscription in good standing (active, trialing or past_due) returns 402; practice filings are always free. Subscribe and manage billing in the dashboard.",
+    responses: [{ status: 200, description: "The subscription.", example: { billed: true, plan: "enterprise", status: "active", canFileLive: true, required: true, configured: true, price: null, currentPeriodEnd: "2026-12-25T00:00:00.000Z", cancelAtPeriodEnd: false } }],
   },
   {
     id: "list-keys", method: "GET", path: "/v1/api-keys", group: "API keys", auth: "api_key",

@@ -31,7 +31,7 @@ const GOOD = new Set<BillingAccountRecord["status"]>(["active", "trialing", "pas
 
 export class SubscriptionRequired extends Error {
   constructor(public readonly account: BillingAccountRef, public readonly status: string) {
-    super(status === "none" ? "a subscription is needed for live filings (dry runs are free)" : `the subscription is ${status.replace(/_/g, " ")}; update it in Billing to file for real`);
+    super(status === "none" ? "a subscription is needed for live filings (dry runs don't need one)" : `the subscription is ${status.replace(/_/g, " ")}; update it in Billing to file for real`);
   }
 }
 

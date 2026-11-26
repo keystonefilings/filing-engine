@@ -69,6 +69,8 @@ export interface ApiDeps {
   /** V41-V43: filing requests from Slack, and by text and WhatsApp through Twilio. */
   slack?: import("../inbound/slack.js").SlackChannel;
   twilio?: import("../inbound/twilio.js").TwilioChannel;
+  /** Where people reach us (SUPPORT_EMAIL). */
+  supportEmail?: string;
   /** V37: checks Google ID tokens for "Sign in with Google". */
   google?: import("../users/google.js").GoogleIdTokens;
 }
@@ -377,17 +379,17 @@ export function buildServer(deps: ApiDeps): FastifyInstance {
   });
 
   registerBrandLogos(app, { store: deps.store, artifacts: deps.artifacts, authOf });
-  registerSelfService(app, { store: deps.store, tenantOf });
+  registerSelfService(app, { store: deps.store, tenantOf, platformName: deps.platformName });
   registerSignatures(app, { store: deps.store, tenantOf });
   registerIntakeLinks(app, { store: deps.store, authOf });
   registerCardCodes(app, { store: deps.store, service: deps.service, authOf });
   if (deps.billing) registerBilling(app, { store: deps.store, billing: deps.billing, authOf });
   if (deps.inbound || deps.twilio || deps.slack) registerInbound(app, { store: deps.store, inbound: deps.inbound, twilio: deps.twilio, slack: deps.slack, publicBaseUrl: deps.publicBaseUrl, authOf });
-  registerPublicPages(app, { store: deps.store, service: deps.service, platformTenantId: deps.platformTenantId ?? "keystone" });
+  registerPublicPages(app, { store: deps.store, service: deps.service, platformTenantId: deps.platformTenantId ?? "keystone", platformName: deps.platformName });
   registerUsers(app, {
     store: deps.store, authOf, staffOf, sessionSecret,
     platformTenantId: deps.platformTenantId ?? "keystone", partnerSignupMode: deps.partnerSignupMode ?? "approval",
-    email: deps.email, webBaseUrl: deps.webBaseUrl ?? "http://localhost:3000", secrets: deps.secrets, google: deps.google,
+    email: deps.email, webBaseUrl: deps.webBaseUrl ?? "http://localhost:3000", secrets: deps.secrets, google: deps.google, supportEmail: deps.supportEmail,
   });
 
   // ---- Approval link (client-facing, decision 2) ----

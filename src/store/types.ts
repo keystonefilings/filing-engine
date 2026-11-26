@@ -256,6 +256,8 @@ export interface UserRecord {
   emailVerifiedAt?: string;
   /** Session keys signed out one by one (sign-out on one device); pruned once they expire. */
   revokedSessions?: { jti: string; exp: number }[];
+  /** The Terms of Service and Privacy Policy version this person agreed to at sign-up, and when. */
+  termsAccepted?: { version: string; at: string };
   /** V42-V43: a mobile number (E.164) for filing requests by text or WhatsApp, once confirmed by a code. */
   phone?: string;
   phoneVerifiedAt?: string;

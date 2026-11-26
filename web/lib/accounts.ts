@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import { engine, EngineError, type Account, type ClientCompany, type SignInResult } from "./engine";
 import { readSession, writeSession } from "./session";
 import { finishSignIn } from "./sign-in";
+import { supportEmail, TERMS_VERSION } from "./brand";
 
 export type FormState = { error?: string; issues?: Record<string, string>; ok?: boolean; message?: string; link?: { href: string; label: string } } | null;
 
@@ -33,7 +34,7 @@ export async function signInWithEmail(_prev: FormState, fd: FormData): Promise<F
       if (e.status === 403) {
         const status = (e.body as { status?: string } | null)?.status;
         if (status === "unverified") return { error: "Confirm your email first: open the link we sent when you signed up.", link: { href: "/verify-email", label: "Send the link again" } };
-        return { error: status === "pending" ? "Your account is waiting for approval. We'll email you when it's ready." : "This account can't sign in. Contact us if you think that's wrong." };
+        return { error: status === "pending" ? "Your account is waiting for approval. We'll email you when it's ready." : `This account can't sign in. If you think that's wrong, email ${supportEmail()}.` };
       }
     }
     return { error: "We can't sign you in right now. Try again in a minute." };
@@ -52,8 +53,10 @@ export async function signUpPartner(_prev: FormState, fd: FormData): Promise<For
     phone: text(fd, "phone", 40) || undefined, website: text(fd, "website", 200) || undefined,
     states: fd.getAll("states").map(String).filter((s) => STATES.has(s)),
     expectedVolume: text(fd, "expectedVolume", 40) || undefined,
+    termsVersion: TERMS_VERSION,
   };
   const issues: Record<string, string> = {};
+  if (fd.get("terms") !== "on") issues.terms = "Agree to the Terms of Service and Privacy Policy to create an account.";
   if (body.companyName.length < 2) issues.companyName = "Enter your firm's name.";
   if (!TYPES.has(body.companyType)) issues.companyType = "Pick what kind of firm you are.";
   if (body.name.length < 2) issues.name = "Enter your name.";

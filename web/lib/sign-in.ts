@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import { engine, type Account, type ClientCompany, type SignInResult } from "./engine";
 import { writeSession } from "./session";
+import { supportEmail } from "./brand";
 
 /**
  * After the engine accepted a sign-in (password or Google): keep the session and go to the right
@@ -17,7 +18,7 @@ export async function finishSignIn(r: SignInResult, signedInWith: "password" | "
   if (!user.clientCompanyId) return "Your account is waiting for approval. We'll email you when it's ready.";
   const { clientCompany } = await engine<{ clientCompany: ClientCompany }>(sessionKey, `/v1/client-companies/${encodeURIComponent(user.clientCompanyId)}`);
   const slug = clientCompany.portal?.slug;
-  if (!slug) return "Your dashboard isn't set up yet. Contact us and we'll fix it.";
+  if (!slug) return `Your portal isn't set up yet. Email ${supportEmail()} and we'll fix it.`;
   await writeSession({ kind: "firm", apiKey: sessionKey, tenantId: user.tenantId, clientCompanyId: user.clientCompanyId, slug, email: user.email, signedInWith, expiresAt });
   // Only partner firms (signed up themselves) have the setup guide; a firm an enterprise set up goes straight in.
   const done = clientCompany.partner?.setupDone ?? [];

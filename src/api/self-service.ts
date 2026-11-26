@@ -1,3 +1,4 @@
+import { filerNameFor } from "../settings/filer.js";
 import { createHash, randomBytes, randomUUID } from "node:crypto";
 import { isIP } from "node:net";
 import type { FastifyInstance, FastifyReply, FastifyRequest } from "fastify";
@@ -69,6 +70,8 @@ export interface SelfServiceDeps {
   /** The tenant for a request (environment or stored key), or null. */
   tenantOf: (req: FastifyRequest) => Promise<string | null>;
   now?: () => Date;
+  /** The site's name, for "filing through CoFile". */
+  platformName?: string;
 }
 
 export function registerSelfService(app: FastifyInstance, deps: SelfServiceDeps): void {
@@ -197,6 +200,6 @@ export function registerSelfService(app: FastifyInstance, deps: SelfServiceDeps)
     if (!tenantId) return reply;
     const c = await deps.store.getClientCompany((req.params as { id: string }).id);
     if (!c || c.tenantId !== tenantId) return reply.code(404).send({ error: "not found" });
-    return { clientCompany: c };
+    return { clientCompany: c, filerName: filerNameFor(c, await deps.store.getTenant(c.tenantId), deps.platformName ?? "CoFile") };
   });
 }

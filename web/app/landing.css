@@ -205,6 +205,12 @@
 }
 .lp footer {padding-block: 36px; border-top: 1px solid var(--line); color: var(--ink-3); font-size: .86rem;}
 .lp footer .wrap {display: flex; justify-content: space-between; gap: 16px; flex-wrap: wrap;}
+.lp footer .legal-line {margin-top: 12px; font-size: .8rem;}
+.lp footer a {color: inherit; text-decoration: underline; text-underline-offset: 2px;}
+.lp .legal h1 {margin-bottom: 4px;}
+.lp .legal h2 {font-size: 1.15rem; margin: 28px 0 8px;}
+.lp .legal p, .lp .legal li {line-height: 1.6; color: var(--ink-2);}
+.lp .legal ul {padding-left: 20px; display: grid; gap: 6px;}
 @media (prefers-reduced-motion: reduce) {
 .lp, .lp * {transition: none !important;}
 }

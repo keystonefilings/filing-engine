@@ -1,3 +1,4 @@
+import { supportEmail } from "@/lib/brand";
 import Link from "next/link";
 import { Shell } from "@/components/landing/Shell";
 import { EmailLoginForm } from "@/components/AuthForms";
@@ -12,7 +13,7 @@ export default async function LoginPage({ searchParams }: { searchParams: Promis
   const googleError = ({
     "no-account": "No account uses that Google email. Log in with your email and password, or create a partner account first.",
     pending: "Your account is waiting for approval. We'll email you when it's ready.",
-    blocked: "This account can't sign in. Contact us if you think that's wrong.",
+    blocked: `This account can't sign in. If you think that's wrong, email ${supportEmail()}.`,
     cancelled: "Google sign-in was cancelled.",
     expired: "That Google sign-in took too long. Try again.",
     failed: "Google sign-in didn't work. Try again, or log in with your email and password.",

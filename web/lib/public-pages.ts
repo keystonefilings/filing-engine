@@ -58,7 +58,8 @@ export function publicKind(kind: FilingKind | undefined): kind is FilingKind {
 export const firmBySlug = cache(async (slug: string, tenantId: string = platformTenant()): Promise<ClientCompany | null> => {
   if (!/^[a-z0-9][a-z0-9-]{0,62}$/.test(slug) || !/^[a-z0-9][a-z0-9-]{0,62}$/.test(tenantId)) return null;
   try {
-    return (await engine<{ clientCompany: ClientCompany }>(null, `/v1/public/firms/${encodeURIComponent(tenantId)}/${encodeURIComponent(slug)}`)).clientCompany;
+    const r = await engine<{ clientCompany: ClientCompany; filerName?: string }>(null, `/v1/public/firms/${encodeURIComponent(tenantId)}/${encodeURIComponent(slug)}`);
+    return { ...r.clientCompany, filerName: r.filerName };
   } catch { return null; }
 });
 

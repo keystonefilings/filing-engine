@@ -43,3 +43,11 @@ export function partnerApprovalRequired(): boolean {
 export function isPlatformTenant(tenantId: string): boolean {
   return tenantId === (process.env.PLATFORM_TENANT_ID?.trim() || "keystone");
 }
+
+/** Where people reach us (decided Nov 26). One setting for the site, its emails and the legal pages. */
+export function supportEmail(): string {
+  return process.env.SUPPORT_EMAIL?.trim() || "hello@cofile.com";
+}
+
+/** The version of the Terms and Privacy Policy a sign-up agrees to (the effective date). */
+export const TERMS_VERSION = "2026-11-26";

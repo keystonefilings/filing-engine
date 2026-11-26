@@ -73,7 +73,6 @@ export default function Home() {
                 <Link className="btn btn-primary" href="/signup">Create a partner account</Link>
                 <a className="btn btn-quiet" href="#enterprise">Enterprise and API</a>
               </div>
-              <p className="hero-note">Practice filings are free. Filing for real needs a subscription.</p>
               <p className="hero-note">Starting with New York, New Jersey, Florida and the IRS. Not every filing type is live yet; see <a href="#coverage">Coverage</a>.</p>
             </div>
 
@@ -123,7 +122,6 @@ export default function Home() {
                   <li>Choose how state fees are paid: one card for everything, or one per filing type, with a backup card.</li>
                   <li>Pick a state and a filing, then fill it in yourself, send your client a link or put the form on your own website.</li>
                   <li>Your client checks and approves exactly what will be filed.</li>
-                  <li>Practice filings are free. Filing for real needs a subscription.</li>
                 </ul>
                 <Link className="btn btn-primary" href="/signup">Create a partner account</Link>
               </article>
@@ -133,7 +131,7 @@ export default function Home() {
                 <ul>
                   <li>A filing API with webhooks, full docs and a white-label approval page.</li>
                   <li>Your own state portal logins, connected securely.</li>
-                  <li>Separate payment methods for your subscription and for state fees.</li>
+                  <li>Saved cards for state fees, one per filing type if you like, with a backup.</li>
                   <li>Defaults per portal and per filing type.</li>
                 </ul>
                 <a className="btn btn-quiet" href="#enterprise">Talk to us</a>
@@ -243,7 +241,7 @@ export default function Home() {
                 </tbody>
               </table>
             </div>
-            <p className="table-note">Verified up to payment: {name} completed every screen on the live government site with a test entry and stopped before paying. Screens mapped: the live site&apos;s screens were recorded on a walk-through, but a full test run hasn&apos;t been verified yet. Not yet verified: offered in the portal, but not yet verified on the live site. Planned: not built yet. A filing type is switched to live filing only after its payment step is mapped, so not every type here can be filed for real yet. Until then, it can only be run as a free practice filing.</p>
+            <p className="table-note">Verified up to payment: {name} completed every screen on the live government site with a test entry and stopped before paying. Screens mapped: the live site&apos;s screens were recorded on a walk-through, but a full test run hasn&apos;t been verified yet. Not yet verified: offered in the portal, but not yet verified on the live site. Planned: not built yet. A filing type is switched to live filing only after its payment step is mapped, so not every type here can be filed for real yet. Until then, it can only be run as a practice filing.</p>
           </div>
         </section>
 
@@ -258,7 +256,7 @@ export default function Home() {
               <div><h3>Cards in a vault, logins encrypted</h3><p>Saved cards are held by Basis Theory, a card vault, never in our database. When filings are ready to pay, we ask the card&apos;s owner for its security code and keep it for an hour at most. State logins are encrypted as soon as they arrive, kept apart from every other account and read only when a filing runs.</p></div>
               <div><h3>Single-use approval links</h3><p>Signed, expiring links, bound to the exact data shown. An optional one-time code adds a second check.</p></div>
               <div><h3>Signatures only on approval</h3><p>A saved signature is applied only to a filing the client has approved.</p></div>
-              <div><h3>Free practice filings</h3><p>Any filing can run as a practice filing: every screen of the government site is filled in and the run stops before submitting. New accounts and newly added state sites run this way until they&apos;re switched to live filing.</p></div>
+              <div><h3>Practice filings</h3><p>Any filing can run as a practice filing: every screen of the government site is filled in and the run stops before submitting. New accounts and newly added state sites run this way until they&apos;re switched to live filing.</p></div>
               <div><h3>Separate accounts</h3><p>Logins, jobs, clients and documents are kept per account. One account never sees another&apos;s.</p></div>
             </div>
           </div>

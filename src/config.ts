@@ -83,6 +83,8 @@ export const config = {
   /** "steel-only": this image ships no local browser (Dockerfile target "steel"); every site must route to Steel. */
   browsersSteelOnly: process.env.BROWSERS === "steel-only",
   dryRunDefault: env("DRY_RUN_DEFAULT", "true") === "true",
+  /** Where people reach us (decided Nov 26): named in our own account emails and staff notices. */
+  supportEmail: env("SUPPORT_EMAIL", "hello@cofile.com"),
   /** The platform's own tenant: partner firms that sign up on the landing page join it. */
   platformTenantId: env("PLATFORM_TENANT_ID", "keystone"),
   /** The site's name, shown to clients on approval pages (partner firms are "with CoFile"). */

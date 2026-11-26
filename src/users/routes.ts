@@ -64,6 +64,8 @@ export interface UsersDeps {
   webBaseUrl: string;
   /** V29: where connected portal logins are sealed; absent without DATA_ENCRYPTION_KEY. */
   secrets?: DbVault;
+  /** Ours, named at the end of the account emails. */
+  supportEmail?: string;
   /** V37: checks Google ID tokens for "Sign in with Google". Absent: that route refuses. */
   google?: GoogleIdTokens;
   now?: () => Date;
@@ -99,6 +101,8 @@ const PartnerSignupBody = z.object({
   website: z.string().trim().url().startsWith("https://").max(200).optional(),
   states: z.array(z.enum(["NY", "NJ", "FL", "MO"])).max(4).optional(),
   expectedVolume: z.string().max(40).optional(),
+  /** The Terms and Privacy Policy version the person agreed to (the web form requires it). */
+  termsVersion: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional(),
 });
 const InquiryBody = z.object({
   name: z.string().trim().min(2).max(120),
@@ -373,6 +377,7 @@ export function registerUsers(app: FastifyInstance, deps: UsersDeps): void {
       id: randomUUID(), email: d.email, name: d.name, kind: "partner", tenantId: deps.platformTenantId, status: "pending",
       passwordHash: await hashPassword(d.password), sessionGen: 0, createdAt: at.toISOString(),
       signup: { companyName: d.companyName, companyType: d.companyType, phone: d.phone, website: d.website, states: d.states, expectedVolume: d.expectedVolume },
+      ...(d.termsVersion ? { termsAccepted: { version: d.termsVersion, at: at.toISOString() } } : {}),
       emailVerification: { tokenHash: sha256(secret).toString("hex"), expiresAt: new Date(at.getTime() + VERIFY_TTL_DAYS * 86_400_000).toISOString(), sentAt: at.toISOString() },
     };
     try {
@@ -470,7 +475,7 @@ export function registerUsers(app: FastifyInstance, deps: UsersDeps): void {
     // The sign-up page told them we'd email once the account opens.
     void deps.email?.send({ address: approved.email, name: approved.name }, {
       subject: "Your partner account is open",
-      body: `Your account for ${u.signup!.companyName} is approved. Log in with the email and password you chose. Then set up your portal in three short steps: your firm, your branding and how state fees are paid. Practice filings are free, so you can try one right away.`,
+      body: `Your account for ${u.signup!.companyName} is approved. Log in with the email and password you chose. Then set up your portal in three short steps: your firm, your branding and how state fees are paid. You can try a practice filing right away.${deps.supportEmail ? `\n\nQuestions? Email ${deps.supportEmail}.` : ""}`,
       link: `${deps.webBaseUrl}/login`,
       linkLabel: "Log in",
     }).catch((e) => console.error("approval email failed", (e as Error).message));
@@ -532,7 +537,7 @@ export function registerUsers(app: FastifyInstance, deps: UsersDeps): void {
     await deps.store.updateUser(u.id, { passwordReset: { tokenHash: sha256(secret).toString("hex"), expiresAt: new Date(now().getTime() + 7 * 86_400_000).toISOString(), sessionGen: 0, requestedAt: at } });
     void deps.email?.send({ address: u.email, name: u.name }, {
       subject: "Your CoFile account is ready",
-      body: `Welcome, ${u.name}. The enterprise account for ${q.company} is set up. Open the link below to choose your password; it works for 7 days.\n\nAfter that you can add your team, API keys and webhooks from the dashboard.`,
+      body: `Welcome, ${u.name}. The enterprise account for ${q.company} is set up. Open the link below to choose your password; it works for 7 days.\n\nAfter that you can add your team, API keys and webhooks from the dashboard.${deps.supportEmail ? `\n\nQuestions? Email ${deps.supportEmail}.` : ""}`,
       link: `${deps.webBaseUrl}/reset-password?token=${encodeURIComponent(`${u.id}.${secret}`)}`,
       linkLabel: "Set my password",
     }).catch((e) => console.error("welcome email failed", (e as Error).message));

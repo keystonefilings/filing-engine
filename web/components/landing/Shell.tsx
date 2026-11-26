@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { platformName } from "@/lib/brand";
+import { platformName, supportEmail } from "@/lib/brand";
 import "@/app/landing.css";
 
 const FONTS = "https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&family=Source+Serif+4:opsz,wght@8..60,500;8..60,600&display=swap";
@@ -47,6 +47,10 @@ export function Shell({ children, nav = false }: { children: React.ReactNode; na
         <div className="wrap">
           <span>{name} · state filings for CPA, payroll, CFO and title firms, and filing companies</span>
           <span>New York · New Jersey · Florida · IRS</span>
+        </div>
+        <div className="wrap legal-line">
+          <span>{name} is not a law firm or a government agency and doesn&apos;t give legal or tax advice.</span>
+          <span><a href="/terms">Terms</a> · <a href="/privacy">Privacy</a> · <a href={`mailto:${supportEmail()}`}>{supportEmail()}</a></span>
         </div>
       </footer>
     </div>

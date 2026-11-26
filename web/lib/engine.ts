@@ -44,6 +44,8 @@ export interface Account { tenantId: string; name: string; configured: boolean; 
 export interface PortalBrand { slug: string; publicPages?: boolean; displayName?: string; logoUrl?: string; logoArtifactId?: string; font?: string; fontArtifactId?: string; primaryColor?: string; secondaryColor?: string; supportEmail?: string; filingKinds?: string[] }
 
 export interface ClientCompany {
+  /** Who "the filing company" is in this firm's authorizations (the engine works it out). */
+  filerName?: string;
   clientCompanyId: string;
   tenantId: string;
   name: string;

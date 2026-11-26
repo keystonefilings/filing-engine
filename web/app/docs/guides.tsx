@@ -153,7 +153,7 @@ def verify(secret: str, header: str, raw_body: bytes, tolerance: int = 300) -> b
         <div className="table-wrap"><table><thead><tr><th>Code</th><th>Meaning</th></tr></thead><tbody>
           <tr><td>400</td><td>The request body is not valid JSON.</td></tr>
           <tr><td>401</td><td>No API key, or the key is revoked or unknown.</td></tr>
-          <tr><td>402</td><td>A live filing needs an active subscription; dry runs (practice filings) are free. See <code>GET /v1/account/billing</code>.</td></tr>
+          <tr><td>402</td><td>A live filing needs an active subscription; dry runs (practice filings) never need one. See <code>GET /v1/account/billing</code>.</td></tr>
           <tr><td>403</td><td>The key is valid but not for this tenant or action.</td></tr>
           <tr><td>404</td><td>Not found, or it belongs to another tenant.</td></tr>
           <tr><td>409</td><td>A conflict: the filing isn&apos;t in the state this call needs, an id or slug is taken, or a limit is reached.</td></tr>
