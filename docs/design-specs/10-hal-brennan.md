@@ -336,3 +336,124 @@ Use CSS `clamp()` between the phone and desktop values, interpolated from 400px 
 - **Hinting** for Windows at text sizes, and variable font files (wght and opsz axes) as well as static instances.
 - **Logotype**: the CoFile wordmark and the "Co" for the Name Plate are drawn as part of the commission (3.2, 3.3).
 - **Timeline**: about 6 months. The interim Miller faces carry launch.
+
+---
+
+## 6. Layout
+
+### 6.1 The grid
+
+| Breakpoint | Width | Columns | Outer margin | Gutter | Content max |
+|---|---|---|---|---|---|
+| Phone | up to 599px | 4 | 20px | 16px | 100% |
+| Tablet | 600–1023px | 8 | 40px | 24px | 100% |
+| Laptop | 1024–1279px | 12 | 48px | 24px | 100% |
+| Desktop | 1280px and up | 12 | 64px | 24px | **1152px** (12 × 74 + 11 × 24) |
+
+Over 1600px the content stays at 1152px and the margins grow. Paper doesn't stretch.
+
+**Reading measures:** ledes and body paragraphs max **34em** (about 64 characters). Long reading (Terms, Privacy, docs) max **68ch**. Forms max **640px**. Sheets (proof, intake form) max **760px**, the width of a letter-size sheet with comfortable margins at 96dpi.
+
+### 6.2 Spacing
+
+Built on 8px with one half-step: **4, 8, 12, 16, 24, 32, 48, 64, 96, 128, 160**.
+
+- **Sections breathe like a letterhead: less above, more below.** A good sheet has a smaller head margin than foot margin, and so does a good section. Showpiece sections get **128px above and 160px below** on desktop, **64 / 80** on phone. Support sections (Checks, Catch, Security) get **96 / 112** and **56 / 64**, tighter and plainer on purpose.
+- Headline to lede: 24px. Lede to content: 48px (32 on phone). List items: 20px apart. Between an h2 and an anchored figure: 64px.
+- I don't lock web text to a baseline grid. I lock the spaces between things, and those never vary from the scale.
+
+### 6.3 Surfaces and edges
+
+- **Sheets** are `#FFFFFF`, square-cut with a 2px radius (only enough to anti-alias the corner), and have the **sheet shadow**: `0 1px 1px rgba(29,33,48,.05), 0 10px 28px -10px rgba(29,33,48,.20)`. It's the shadow a sheet of 24lb paper throws on a desk under a window, close and soft.
+- **Lifted sheets** (hover on a clickable card, the hero proof): `0 2px 2px rgba(29,33,48,.06), 0 22px 44px -14px rgba(29,33,48,.24)` with translateY(−2px).
+- **Cards inside sheets** have no shadow, only a 1px Rule border. Paper on paper doesn't throw shadows you can see.
+- **The chamfer.** Buttons, chips, the logo plate in dark mode and the Name Plate share a 45° corner. Build it with `border-radius: 6px; corner-shape: bevel;` and fall back to a 3px round radius where `corner-shape` isn't supported. Only these elements get it. Sheets and cards stay square.
+
+### 6.4 How a page breathes
+
+**Desktop.** A CoFile page is a sequence of horizontal bands across Cotton. Each band has one idea: a headline, its lede, and one picture or sheet. There's a lot of air around the sheets; nobody crowds a letterhead. Sticky things are kept to a minimum: the header (it compacts from 76px to 60px after 120px of scroll) and, in two sections, a pinned picture that the copy scrolls past.
+
+**Phone.** Everything goes to one column in the copy's order. Sheets go **edge to edge**. On a phone the sheet *is* the screen, so the proof and the forms lose their side margins and shadow and keep the letterhead at the top. Sections keep their full spacing. After the hero leaves the screen, a **sticky bottom bar** with "Run a free rehearsal" appears: 64px tall with the button inside, Cotton background, hairline top. It slides away while the close section is on screen, so two copies of the button are never visible at once.
+
+**Firm pages** use a single centred sheet of 760px on desktop. A client opening the proof should feel they've been handed one sheet of paper.
+
+**The filing desk and the dashboard** are working rooms rather than showrooms. They use the full 1152px grid, a 17px base and tighter vertical spacing (32 / 48 between blocks).
+
+---
+
+## 7. Art direction
+
+### 7.1 The look of the pictures
+
+Everything we show should look **made by hand, lit by daylight, and owned by a real firm**. Three kinds of picture, each with a job:
+
+1. **Photographs** for the human moments: the door, the client, the papers coming home.
+2. **Engraved vignettes** for explaining and for empty states: line engravings in the steel-engraving tradition, but of **contemporary** things like phones, laptops, a bakery counter and a text message. An engraving of a smartphone is a little bit funny and very memorable, and it puts the craft of my trade in service of a modern job.
+3. **Live product**: the proof, the desk, the forms, rendered in HTML, not as screenshots. They're the real thing, and the most persuasive picture we have.
+
+**Never:** stock photos of handshakes, people pointing at laptops, smiling headsets, abstract blue networks, isometric illustrations, 3D blobs, emoji, AI-generated people, flags, government buildings or anything in 3.7.
+
+### 7.2 Photography: the commission
+
+**Photographer:** an interiors and still-life photographer who also does honest portraiture. They should work in natural north light, shoot medium-format digital (100MP), and their book should show real small businesses rather than staged offices. One photographer for everything, so the light is consistent. **Retoucher:** a print-trained retoucher. Nothing is "enhanced" beyond what a darkroom could do.
+
+**Casting:** real people over models, with releases. A real CPA in her fifties or sixties for the firm owner. Two real sisters who bake, in their thirties or forties, for Ana and Lucia Ortiz. Captions show "example", as the copy does for Ana's text.
+
+**Shot list:**
+
+| # | Shot | Use | Notes |
+|---|---|---|---|
+| P1 | **The door, engraved.** A painted wooden office door, deep green-black, in a brick rowhouse office on a quiet street (no house numbers, no shop signs). Mounted beside it: a **real brass name plate, hand-engraved "Harbor & Pine CPA"** (from the engraver, 13.3). Late-afternoon raking sun from the left so the engraving reads in light and shadow. Three frames: wide (door and step), medium (plate and doorframe), macro (the engraved letters filling the frame). | Firms section; the name-plate sequence | Tripod lock-off. Shoot the plate straight on, lens axis perpendicular, to make compositing simple. Bracket for HDR. Shoot a 360° HDRI from the plate's position for the WebGL reflections. |
+| P2 | **The door, blank.** The identical lock-off and light, with a **blank** plate of the same size (two screws, slots level, the bevel catching light). | The close; the signup preview; the base plate for rendering any firm name live | Same session, same 20 minutes of sun as P1. |
+| P3 | **The door at dusk.** Same medium frame, 30 minutes after sunset, warm light from the transom above the door, the blank plate catching the street light. | The close on dark mode; social card | |
+| P4 | **The client approves.** Early morning in a small bakery: flour on a steel counter, a tray of something just out of the oven. One sister (Ana) holds a phone at a natural angle, thumb near the bottom of the screen. The other is in soft focus behind, working. They look pleased with themselves, not delighted at a phone. | Process step 2; the Proof section (phone); the proof email | The phone screen is shot dark with tracking dots; the live proof (Harbor & Pine letterhead) is composited in post at true pixel density. The phone is unbranded. |
+| P5 | **The firm owner.** Our CPA at her own desk, in her own office: framed photos, a plant, binders, a window. She's on the phone with a client, smiling, a pen in hand. The laptop beside her shows the filing desk (composited). | Firms section on phone; signup | Shoot in her real office, rearranging nothing but the light. |
+| P6 | **The papers come home.** A top-down still life on a walnut desk: a heavy white envelope (not kraft, not manila) with "Harbor & Pine CPA" set as the address, opened, three sheets fanned out **edge-on or face-down** (no state or IRS letterhead is ever legible), a fountain pen, reading glasses, a coffee cup ring on a coaster. | After section (desktop, behind the live document cards); the documents email | Second frame at 30° oblique for phone. |
+| P7 | **The proof at the printer.** A printer's make-ready table: a business-card proof and a letterhead proof on cotton stock, initialled in pencil in the margin, a loupe beside them. | A small inset in the Proof section, beside the lede's "at the printer" | Optional. Shoot it at a real engraving or letterpress shop. |
+| P8 | **Paper.** Flat reprographic scans at 1200dpi: 100% cotton letter paper (felt side), 600gsm cotton card, black card, and a **real blind-embossed sample** of the Name Plate on cotton card, lit at a low raking angle from four directions. | Textures; the 404; the reference for the CSS blind impression | Scanned by a reprographic studio, not a flatbed. |
+
+**Grading:** neutral, a touch warm in the highlights (Cotton white point), true blacks in the ink. No teal-orange, no haze, no grain filters. Skin as it is.
+
+### 7.3 Engraved vignettes: the commission
+
+**Artist:** a line engraver or illustrator who works in the steel-engraving manner: swelling burin lines, parallel hatching, cross-hatching for shadow and stipple for skin. Ideally they cut the masters on copper by hand. If not, they draw at 4× with a pressure-sensitive line that truly swells, and no "engraving filter" anywhere. Masters are scanned at 2400dpi and vectorized by hand.
+
+**Style rules:** one ink (Plate Ink on light, Cotton on dark). Contemporary objects, real proportions, no caricature. A tight vignette shape that fades out in hatching, never boxed in a frame. No allegory, no eagles, no ornamental borders. Line weight is 0.6 to 2.4px at 1×, and nothing finer than 0.6px or it disappears for older eyes.
+
+**The set:**
+
+| # | Subject | Used in |
+|---|---|---|
+| V1 | Two hands at a laptop keyboard; beside it a phone lying face-up with a text bubble on its screen | Process, step 1 "You start it." |
+| V2 | A hand holding a phone over a bakery counter (rolling pin, a scatter of flour); on the screen, a letterhead and one button | Process, step 2 "Your client approves it." |
+| V3 | A browser window seen slightly from the side, its form fields being filled line by line, with no seal or state header (just fields and a cursor) | Process, step 3 "CoFile files it." |
+| V4 | A phone upright, a speech bubble rising from it, a dotted leader running off to the right | Requests section on phone; the "from email or text" page |
+| V5 | A returned envelope, flap open, papers rising out of it | After section on phone; the documents-back email; a filing's Documents card |
+| V6 | A clear desk: blotter, closed laptop, a pen at rest, a cup | Empty states ("Your desk is clear.") |
+| V7 | The blank Name Plate, engraved at large size, with full bevel and slotted screws | The 404; the signed-out page |
+| V8 | A door with a name plate, seen from the step | Signup and log-in side panels; the invitation email |
+| V9 | A small sheet tipped in at an angle, like an errata slip | The Catch section's corner mark |
+
+Deliver as optimized SVG (each under 80KB), with a Cotton-line dark variant and a 2× PNG fallback for email.
+
+### 7.4 3D and real-time
+
+Only two pieces, both of them physical things rather than abstractions:
+
+1. **The plate under the print** (Enterprise section). A photoreal render: a printed white-label proof sheet floating 40mm above a polished **copper plate**, which carries the same layout engraved in **mirror image**, as a real plate does. Soft studio light and a dark seamless ground. It runs as a 6-second loop: the sheet lowers onto the plate, a soft press, and it lifts. The sheet's brand is a neutral placeholder platform name `[copy needed: sample platform name]`, never a real company. Render at 2400 × 1600, H.264 and AV1 under 1.4MB, with a poster frame. **Studio:** a product-visualization 3D house with strong materials work (metal and paper).
+2. **The brass name in real time** (the Firms section and signup). A WebGL material that engraves *any* text into the blank brass plate from P2. The text is converted to a signed-distance field, then a height map with a V-groove profile (the shape a burin leaves), then a normal map, lit with the HDRI shot at the door. It's composited onto P2 in exact registration, and the raking light can be moved. **Studio:** a creative-technology studio with WebGL and type-rendering experience. Fallback: an SVG filter version (`feSpecularLighting` over the text's alpha), then a static frame from P1.
+
+### 7.5 Product imagery
+
+- The proof, the desk, the forms and the emails are shown as **live HTML components with sample data**, using exactly the sample copy: "Harbor & Pine CPA", "Two Sisters Bakery LLC", "Ana Ortiz". No screenshots, so they stay sharp, translatable and true to the product.
+- **Devices** are drawn, not photographed, except in P4 and P5. A phone is a plain slab (radius 44px, 10px Plate Ink bezel, no notch, no buttons, no brand). A laptop is a thin lid line and a hinge. The device frame is understated so the firm's letterhead inside it carries the picture.
+- **The state's website** is never shown as a screenshot in marketing. It's drawn as neutral blind-embossed field rows with no header. The hero's "New Jersey's own review page, filled in" is two plain rows ("Business Name / TWO SISTERS BAKERY", "Designator / LLC") inside a neutral grey screen frame.
+- **Alt text** for every image is `[copy needed]`, except where the copy already gives a label (the hero figure's "A sample proof for an example business", the log's "Example rehearsal log").
+
+### 7.6 Texture and ornament
+
+- **The blind impression** is the site's signature finish. It's an uninked emboss, drawn in CSS as `box-shadow: inset 0 1px 1.5px var(--blind-shadow), inset 0 -1px 0 var(--blind-light)` on containers, and the letterpress text-shadow on type. It's used for **rehearsal** things (the chip, the rehearsal log, the "Planned" plate glyphs) and for the 404 plate. The text inside a blind element is always inked in Graphite or Ink, so it's always readable. The emboss is decoration around legible text, never the text itself.
+- **Rules.** Hairlines in Rule (1px). The **thick-and-thin** (3px + 2px gap + 1px) is the Firm Rule on firm sheets, and in Plate Ink it's the top of CoFile's footer. Nowhere else.
+- **The lozenge** ◆ (a 7px square turned 45°, in Copper) is the bullet for every list on CoFile's pages. It replaces the green ticks, so a list reads as a list rather than a checklist. On firm pages the lozenge takes the firm's Main color.
+- **Dot leaders** on fees and price-list-style rows.
+- **Nothing else.** No flourishes, no corner ornaments, no borders around pages.
