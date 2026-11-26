@@ -13,12 +13,12 @@ For twelve years I rebuilt government forms: benefit applications, DMV renewals,
 
 So my measure for CoFile is simple. Picture Ana Ortiz, the example client on the home page. She's on a five-year-old Android phone with a cracked screen, on the bus in Jersey City, reading Spanish first. She's about to approve a $103.50 state fee she can't get back. If she can read the proof, understand it, approve it with confidence and know what happens next, then the 60-year-old CPA and the developer will manage too. **Everyone finishes** is the test for every screen in this spec.
 
-That shapes four choices:
+That shapes four choices you'll see all the way through:
 
-1. **Client pages are held to a higher standard than marketing pages:** AAA text contrast (7:1), 48 px targets on phones, strong focus and reading support. That's where a mistake costs money and can't be undone.
-2. **A firm's brand rides on top of an accessible base and never replaces it**, automatically, for thousands of colors I'll never see.
-3. **Words before pictures.** Every picture of a state page has a plain-text twin; every status has a word, a color and a shape.
-4. **Inclusive design is not a beige design.** I want this to be the most beautiful filing site anyone has used.
+1. **Client pages are held to a higher standard than marketing pages.** The proof and the intake form meet WCAG 2.2 AA everywhere, and AAA for text contrast (7:1), target size (44 px minimum, 48 px on phones), focus appearance and reading support. These are the pages where a mistake costs money and can't be undone.
+2. **A firm's brand rides on top of an accessible base and never replaces it.** Thousands of firms will pick colors I'll never see. The system has to make their pages look like theirs and still pass, automatically.
+3. **Words come before pictures, and text before images.** Every picture of a state page has a plain-text twin. Every status has a word as well as a color and a shape.
+4. **Inclusive design is not a beige design.** I draw on two print traditions I love, and I want this to be the most beautiful filing site anyone has used.
 
 ---
 
@@ -38,7 +38,7 @@ Two traditions feed the visual language. I'm drawing on the genres, not copying 
 - **The printer's proof:** corner and crop marks, the sign-off box, the honest grid of a proof sheet, numbers set in a typewriter-like mono.
 - **Mid-century Caribbean community-education print:** the silkscreened posters and booklets made to explain civic processes plainly to readers of every literacy level. Flat color, visible paper, big friendly type, a human hand in the drawing. That tradition is the ancestor of plain-language design, and it belongs to the communities CoFile's clients come from.
 
-Why it fits: CoFile's promise is "stop and ask rather than guess", and in register is that promise as a visual system: warm, crafted, civic, not startup-generic. It also gives "rehearsal" a natural home: in a print shop you pull a proof before the run.
+Why it fits CoFile: the product's whole promise is "stop and ask rather than guess". In register is that promise turned into a visual system. It's warm, it's a craft, it's civic, and it isn't the generic look of tech startups. It also gives "rehearsal" a natural place. In a print shop you pull a proof before the run, so you rehearse before you file.
 
 ### The three rules every screen follows
 
@@ -103,7 +103,7 @@ Calm, exact, warm. Flat color, real paper texture used sparingly (only in illust
 
 ### 4.1 Principles
 
-1. **Action and status are separate color families.** Today green means both "approved" and "press this", mixing what something *is* with what you can *do*. Here, **action color** (Añil, or the firm's clamped color) is only for buttons and links; **status colors** are fixed tokens no firm can change.
+1. **Action and status are separate color families.** Today, green means both "approved" and "the button that moves a filing forward", and a firm's color replaces green on its pages. That mixes up what something *is* with what you can *do*. In this system, **action color** (CoFile's Añil, or the firm's clamped color) is only for buttons and links. **Status colors** (approved/live, rehearsal, stop, information) are fixed system tokens that no firm can ever change.
 2. **No color carries meaning alone.** Each status has a word, an icon shape and a color, so it still reads in grayscale, in Windows contrast themes and for the 1 in 12 men with a color-vision difference.
 3. **Contrast targets:** body text at least **7:1** on client pages and at least 4.5:1 elsewhere (most of ours exceed 7:1 anyway). Large display text at least 4.5:1. Input borders, focus rings and icons that carry meaning at least **3:1** against what's next to them.
 
@@ -194,11 +194,11 @@ Charts in the dashboard (filings by status, by state, by month) use the status f
 
 | Role | Typeface | Why |
 |---|---|---|
-| **Display and headings, legal long-form** | **Literata** (TypeTogether; variable, opsz 7–72, weights 200–900; SIL Open Font License) | A screen-first book serif with open counters, from a foundry with Latin American roots. Full Spanish support; optical sizes tighten headlines and keep Terms text open. |
-| **UI and body text** | **Atkinson Hyperlegible Next** (Braille Institute; variable, weights 200–800; OFL) | Designed for low-vision readers: I, l and 1 differ, 0 is not O, b/d/p/q aren't mirror images. Large x-height, 150+ languages. |
+| **Display and headings, legal long-form** | **Literata** (TypeTogether; variable, opsz 7–72, weights 200–900; SIL Open Font License) | A screen-first book serif with sturdy serifs and open counters, from a foundry with deep Latin American roots. It has full Spanish and Latin Extended support, it's warm without being nostalgic, and its optical sizes let headlines tighten while Terms text stays open. |
+| **UI and body text** | **Atkinson Hyperlegible Next** (Braille Institute; variable, weights 200–800; OFL) | Designed for low-vision readers. Its letters are told apart by shape: I, l and 1 differ, the 0 is not an O, and b, d, p and q aren't mirror images. It has a large x-height and was drawn for over 150 languages. |
 | **Mono for fees, codes, references, state data** | **Atkinson Hyperlegible Mono** (Braille Institute; OFL) | Tabular figures, a slashed zero, and the same letter-shape distinctions as the sans. Used for "$103.50", "TWO SISTERS BAKERY LLC" as the state will see it, filing references, API keys and the EIN. |
 
-All three are open-licensed, so they can be served on thousands of white-label pages, in emails and on the engine's proof with no per-domain licensing. **Self-host them** from `cofile.app` and `api.cofile.app`, subset to Latin Extended-A, and stop loading Google Fonts on the proof: a client's IP address shouldn't go to a third party to render a filing page.
+All three are open-licensed. That matters here: these fonts are served on thousands of white-label pages, inside emails and on the engine-rendered proof, with no per-domain licensing to track. **Self-host every file** from `cofile.app` and `api.cofile.app`, subset to Latin, Latin-1 Supplement and Latin Extended-A, and stop loading Google Fonts on the proof. A client's IP address shouldn't go to a third party just to render a filing page.
 
 **Commission:** a small type studio to draw a **"fee figures" stylistic set** for Atkinson Hyperlegible Mono: a larger, clearer dollar sign, a period that is 15% heavier so "$103.50" can never read as "$10350" at low resolution, and a tuned ¿ and ¡ for the sans. It ships under the OFL's terms as a separately named family.
 
@@ -253,7 +253,7 @@ The root stays at the browser default (16 px), and every size is in rem, so a re
 
 ## 7. Imagery
 
-**Photography: commission, never stock.** A documentary portrait photographer from the communities CoFile serves (northern New Jersey, the five boroughs, South Florida, Puerto Rico's diaspora) shoots real firm owners at their desks and real first-time owners (a bakery, a landscaping crew, a home-care agency), in natural light, with phones showing the real proof. Everyone is paid and signs a release. Photos never carry information, have empty `alt` unless they add something, and never sit behind text.
+**Photography: commission, never stock.** Hire a documentary portrait photographer who works in the communities CoFile serves: northern New Jersey, the five boroughs, South Florida and Puerto Rico's diaspora. Shoot real firm owners and staff (40 to 70, at their own desks), and real first-time owners (a bakery, a landscaping crew, a nail studio, a home-care agency). Use natural light. Hands holding phones that show the real proof. Get a written release from everyone and pay them. Rules: photos never carry information, have empty `alt` unless they show something the text doesn't, and are never placed behind text.
 
 **Illustration: commission a printmaker-illustrator** who works in two- and three-color screenprint. Pull real prints, scan them at 1200 dpi and vectorize them, with the paper grain on a separate layer (under 30 KB per image). The palette is Tinta, Añil 300 and 700, Papel and Flamboyán. A one-pixel misregistration between plates is allowed **in illustrations only**, never on text or UI. Subjects: a sheet passing through three hands (firm, client, state); a stage with the curtain down (rehearsal); a filing desk tray, empty (empty states); a stack of returned papers with a seal (documents back).
 
@@ -322,6 +322,19 @@ A two-tone ring: 2 px `--paper` gap, then a 3 px `--focus` outline (`outline: 3p
 **Sizes:** 48 px (default), 56 px (proof approve, full-width on phones), 44 px (dense tables). Horizontal padding is 24 px, and labels wrap to two lines rather than truncate. **Spanish labels run about 30% longer, so buttons never have a fixed width.**
 
 **States:** default; hover (fill moves to `--action-hover`, 140 ms); pressed (80 ms, no movement); focus (9.1); **loading** (8.4); **disabled is avoided**. A button stays pressable, and pressing it explains what's missing through the error summary. Where disabling is unavoidable (a second press while one is already sending), it uses `aria-disabled`, keeps 4.5:1 text contrast and keeps its focus.
+**Button state matrix (CoFile's own pages; firm pages swap in the clamped action ramp from section 11):**
+
+| State | Primary, light | Primary, dark | Secondary, light | Danger, light |
+|---|---|---|---|---|
+| Default | `#2A3A94` fill, white text (9.85) | `#A9B5FF` fill, `#0F141B` text (9.45) | white fill, 2 px `#77705F` border, ink text (17.29) | white fill, 2 px `#B3261E` border, `#8E1D14` text (8.99) |
+| Hover | `#1F2C78` (12.43) | `#C3CCFF` (11.80) | `#F1ECE3` fill (14.70) | `#FBE5E1` fill (7.45) |
+| Pressed | `#151E52` (15.68) | `#DDE2FF` (14.43) | `#E9E4DA` fill (13.65) | `#FBE5E1` fill, border `#8E1D14` |
+| Focus-visible | Default look plus the 9.1 ring | Ring in `#F2EFE9` | Ring | Ring |
+| Loading | Default fill, pending label, 16 px ring icon, width locked | Same | Same | Same |
+| Unavailable (`aria-disabled`) | `#C9CFF0` fill, ink text (11.25), a 2 px dashed `#77705F` border so the shape survives (the fill alone is 1.44 vs paper) | `#232D3A` fill, `#9AA3B1` text | `#E9E4DA` fill, ink-2 text (7.63) | Same as secondary |
+
+Opacity is never used to show an unavailable button: a faded label fails contrast for exactly the readers who most need to know why they can't go on.
+
 
 ### 9.3 Fields
 
@@ -333,10 +346,39 @@ A two-tone ring: 2 px `--paper` gap, then a 3 px `--focus` outline (`outline: 3p
 - **"Same as" / "Same person as":** a row of pill buttons (44 px) above the address or name. Each shows the source label ("Main business address") or the person's name. After a copy, the pressed chip shows a check for 2 seconds and the live region announces it.
 - **Folded sections and "More options (optional)":** native `<details>` with a 48 px summary row and a rotating chevron (a 90° rotation over 220 ms; reduced motion: a swap). They open by themselves when they hold an answer or a problem, as today.
 - **SSN and FEIN:** `inputmode="numeric"`, `autocomplete="off"`, paste allowed, dashes optional. A Show/Hide toggle (copy needed). On blur, the field shows only the last four.
-- **Dates:** a date of birth is three labeled fields (month, day, year, copy needed); a native Android picker is slow with TalkBack for a year decades back. Other dates keep the native picker.
-- **Signature:** the pad (always light paper, as today) is 160 px tall with clear and redraw. **I'm asking for a typed alternative** (Appendix A), pending counsel.
+- **Dates:** a date of birth is three labeled fields (month, day, year, copy needed), because a native date picker on Android with TalkBack is slow to work through when the year is decades back. Other dates keep the native picker.
+- **Signature:** the pad (always light "paper", as today) is 160 px tall with a clear-and-redraw control. **I'm asking for a typed alternative as well** (Appendix A): a name typed and shown in a signature-style font, for people who can't draw with a finger. Counsel must approve it.
 - **File (PDF):** a large drop zone that's also a 48 px button; the selected file shows name, size and remove. "A PDF of 10 MB or less, without a password." stays as the help text.
 - **Authorizations:** each statement in its own 48 px-minimum card with a checkbox, the full text readable, and "Please confirm." placed inline with the stop styling when missing.
+**Field anatomy and error state (phone, client page):**
+
+```
+Business name *                     ← label, 17px bold, ink
+The name the state will record.     ← help, 16px ink-2 (from the form's own help)
+┌──────────────────────────────────┐
+│ Two Sisters Bakery               │ ← 48px, 18px text, 2px #77705F border
+└──────────────────────────────────┘
+
+Business name *
+┌══════════════════════════════════┐ ← 2px #B3261E border
+│                                  │
+└══════════════════════════════════┘
+⬣ {the engine's issue message}.     ← #8E1D14 on paper (8.41), octagon glyph,
+                                       visually hidden "Error:" prefix
+```
+
+(The help line in the sketch stands for whatever help text the form already has; it isn't new copy.)
+
+| Field state | Border | Background | Other |
+|---|---|---|---|
+| Default | 2 px `#77705F` | white | — |
+| Hover | 2 px Tinta | white | — |
+| Focus | 2 px Tinta + the 9.1 ring | white | Help text stays visible (never replaced by the error) |
+| Prefilled from saved answers | 2 px `#77705F` and a 4 px `#E7EAF8` inner left rule | white | Help line names the source (copy needed) |
+| Error | 2 px `#B3261E` | white | `aria-invalid="true"`; the message joins `aria-describedby` |
+| Read-only | 2 px dashed `#77705F` | `#F1ECE3` | Not focusable unless it holds text someone may need to copy |
+| Hidden by a condition (`showIf`) | — | — | Removed from layout and from the accessibility tree, as today with `hidden` and `disabled` |
+
 
 ### 9.4 The proof sheet (shared by the home sample and the real proof)
 
@@ -354,10 +396,36 @@ A 4 px radius, 28 px tall (32 px on client pages), with a 16 px glyph, the word,
 | Information / in progress | Received, Getting the state's review page, Queued, Filing now, Final check |
 
 "Rehearsal" always uses the hold glyph, so it can never be confused with "Waiting for approval", which uses a clock-ring glyph inside the same family.
+```
+[◉ Approved]  [⏸ Rehearsal]  [◷ Waiting for approval]  [⬣ Rejected by the state]  [◔ Filing now]
+ green tint    amber tint      amber tint                red tint                    blue tint
+```
+
+A filing can carry two chips side by side: its status, and **Rehearsal** whenever it's a rehearsal. The rehearsal chip always comes second, so a sighted scan and a screen reader both get "what's happening" first and "this one won't be filed" second. The pair wraps onto two lines rather than shrinking.
+
 
 ### 9.6 Timeline (filing detail)
 
 A vertical list (`<ol>`) with a 2 px rail. Each step has its glyph, its status label, a timestamp and who did it. The current step has `aria-current="step"`, a 4 px `--action` rail segment and its existing next-step sentence (from `nextStep()`) in a notice beneath. **A rehearsal ends with a terminal step showing the hold glyph**, labeled with its existing status, so the end of a rehearsal reads as a finish, not a failure. Stop steps use the octagon and show `lastError`. Future steps are dashed rings in `--ink-3`.
+```
+LIVE FILING                                REHEARSAL
+◉ Received            Nov 24, 9:02 AM      ◉ Received              Nov 24, 9:02 AM
+│  by maria@harborpine.com                 │
+◉ Waiting for approval  Nov 24, 9:20 AM    ◉ Waiting for approval  Nov 24, 9:20 AM
+│                                          │
+◉ Approved            Nov 24, 6:41 PM      ◉ Approved              Nov 24, 6:41 PM
+┃  ← 4px action rail = current             ┃
+◔ Filing now          Nov 25, 8:00 AM      ⏸ {terminal rehearsal step}  Nov 25, 8:11 AM
+┆  [notice: next-step sentence]               held before the last button
+○ Submitted to the state                   (nothing after this: the rail ends
+┆                                            in a closed register mark)
+○ Accepted by the state
+┆
+○ EIN issued
+```
+
+Each step is one `<li>` with its time in a `<time datetime>` element. The rail and glyphs are `aria-hidden`; the list order and labels carry the meaning. (Times and the email address are sample data.)
+
 
 ### 9.7 Tables
 
@@ -380,6 +448,32 @@ Real `<table>` markup with `<caption>` and `scope` on headers. On phones, rows r
 ### 9.10 The coverage table
 
 The table keeps its locked headers ("Filing", "Where", "Where it stands"). It adds a **ladder meter**: five rungs drawn left to right (Planned, Offered not yet rehearsed, Screens recorded, Rehearsed to the payment screen, Live), shown as a 120 × 12 px stepped bar before each label. The meter is `aria-hidden`. The label is the accessible truth. "Live" is the only rung filled in approved green, and it only fills when `liveFilings()` is true for that type, so **a type can't look live by accident**. Filters: by state (New York, New Jersey, Florida, IRS) and by stage, using the locked labels as filter names. On phones, rows group under state captions, and "Where" becomes the caption rather than a repeated column.
+```
+DESKTOP
+Filing                                        Where        Where it stands
+─────────────────────────────────────────────────────────────────────────────────
+LLC formation                                 New Jersey   ▰▰▰▰▱  ⏸ Rehearsed to the payment screen
+Standing certificate (through the API; not…)  New Jersey   ▰▰▰▰▱  ⏸ Rehearsed to the payment screen
+EIN, with the IRS letter saved                IRS          ▰▰▰▱▱  ◔ Screens recorded, rehearsal next
+Corporation formation (for-profit)            New Jersey   ▰▰▱▱▱  ○ Offered, not yet rehearsed
+Alternate name, charter amendments            New Jersey   ▰▱▱▱▱  ┄ Planned
+(a type switched live)                        …            ▰▰▰▰▰  ◉ Live   ← the only green rung
+
+PHONE (grouped by state; "Where" becomes the caption)
+New Jersey
+┌───────────────────────────────┐
+│ LLC formation                 │
+│ ▰▰▰▰▱ ⏸ Rehearsed to the      │
+│        payment screen         │
+├───────────────────────────────┤
+│ Corporation formation (for-…) │
+│ ▰▰▱▱▱ ○ Offered, not yet      │
+│        rehearsed              │
+└───────────────────────────────┘
+```
+
+The meter's fifth rung is outlined in green but only filled when the type is live, so even an empty rung tells you where "live" is and how far each type has to go. That's how "rehearsal" reads as a strength: it's the fourth step of five on a visible road, not a disclaimer. Long filing names wrap; they're never cut off with an ellipsis in the real table (the sketch abbreviates for width only).
+
 
 ### 9.11 Empty states, toasts, dialogs
 
@@ -387,6 +481,36 @@ The table keeps its locked headers ("Filing", "Where", "Where it stands"). It ad
 - **Toasts:** only for confirmations you could live without missing ("Copy link" → copied). They appear next to the control that triggered them, not at the screen's corner, stay for at least 6 seconds or until dismissed, are announced with `role="status"`, and never cover content at 400% zoom. **Anything that matters is a notice on the page instead** (for example "Saved to Google Docs." stays inline, as today).
 - **Dialogs:** native `<dialog>`, with focus trapped and returned to the trigger, Esc to close, and a 44 px Close button. Used only for confirming destructive actions (Revoke a key, Disconnect a portal login, Turn off a link).
 - **Secrets and links** (an approval link, a new API key): mono text on `--sunk` with a dashed border, wrapping (`overflow-wrap: anywhere`), and a "Copy link" or copy button next to it.
+### 9.12 The firm bar
+
+The header of every client-facing page (intake, service page, proof, decision and error pages, client emails).
+
+```
+▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀  4px rule: firm's second color, else main color
+[LOGO ≤40px]  Harbor & Pine CPA            English | Español     with CoFile
+```
+
+- 72 px tall on desktop and 64 px on phones, on `--surface`, with a 1 px `--line` bottom border.
+- The firm's name is always shown as text in the firm's font at 20 px 700, even when the logo contains it. The logo's `alt` is empty, so the name is read once.
+- On phones: logo and name on the first line; the language toggle and "with CoFile" on a second 32 px line. Nothing is hidden behind a menu, because a client page has no menu.
+- It isn't sticky. On the proof, the client needs every pixel of the screen for the details.
+
+### 9.13 Filters and search (desk and dashboard tables)
+
+A row above each table: a search field (48 px, with a visible label), then filter dropdowns as native `<select>` elements with visible labels (status family, state, rehearsal or live). The result count is announced through the polite live region after each change. Filters live in the URL, so a filtered list can be bookmarked and Back works. There are no auto-filtering chips that reflow the table while someone is reading it. (Labels for search and filters: copy needed.)
+
+### 9.14 Code blocks
+
+Atkinson Hyperlegible Mono at 15 px with a 1.6 line height, on `--sunk` in light mode and Tinta in dark mode, wrapping long lines (no horizontal scroll unless the reader turns wrapping off with a toggle, copy needed). The copy button sits top-right, 44 px, and announces through the live region. Syntax colors are dedicated tokens (they share hues with the status palette but never appear outside code):
+
+| Token | Light on `#F1ECE3` | Dark on `#141B26` |
+|---|---|---|
+| Text | `#141B26` (14.70) | `#F2EFE9` (15.07) |
+| Keys, keywords | `#2A3A94` (8.37) | `#C9CFF0` (11.25) |
+| Strings | `#13543A` (7.57) | `#9FD3B8` (10.28) |
+| Numbers, booleans | `#6B4100` (7.49) | `#F5C36A` (10.62) |
+| Comments | `#3B4556` (8.22), upright | `#9AA3B1` (6.79), upright |
+
 
 ---
 ## 10. Page by page
@@ -445,13 +569,13 @@ PHONE 360
 Section by section (all copy as in `web/app/page.tsx`):
 
 1. **Hero.** The sample proof is live HTML, a `<figure>` with its existing `aria-label`. The `<mark>` highlights on the business name and address are an Añil-tint highlight with a 2 px Añil underline, so they still show in forced colors. The fake "Approve for filing" button is a styled `<span>` (it's not a control, and must never take focus). The numbered callouts 1 to 4 sit in the proof's left margin. On phones they move inline, before each block.
-2. **Process.** Three columns, stacked on phones, each headed by its locked sentence and a 48 px Literata numeral. The middle step ("Your client approves it.") sits on an Añil-tint card, because the lede says the client is in charge of it.
+2. **Process.** "You start it. Your client approves it. CoFile files it." Three columns on desktop, stacked on phones. Each step is headed by its locked `<strong>` sentence, with a numeral in Literata 600 at 48 px. The middle step ("Your client approves it.") sits on an Añil-tint card. The lede says the client is in charge of the middle one, so the layout shows it.
 3. **The proof.** Two columns: the lede on the left; the six checks on the right as a list with the register glyph (not a generic tick). The 8879 line is the last item, set off with a top rule, because it's the line that speaks to CPAs.
 4. **Firms.** A screenprint illustration of a door with a firm's name painted on it and "with CoFile" lettered small on the frame. The list carries the four points.
-5. **Requests.** Ana Ortiz's message as a chat bubble in `--sunk` at 18 px with its caption, then the mono arrow line leading to a mini proof card: the message becomes a proof, never a filing.
+5. **Requests.** The message bubble is a real chat-bubble shape in `--sunk`, 18 px text, with the caption "Ana Ortiz · text message · example". Then the arrow line "read into a drafted New Jersey LLC formation for your team to check" in mono, with a mini proof card: a hint that the message becomes a proof, not a filing.
 6. **Checks.** "Checked twice. Filed once." Two columns, five items with the register glyph. The fine-print line (standing certificate $52 / $27) sets its figures in mono.
 7. **After.** A three-step strip of illustrations: state's documents, EIN letter, one record.
-8. **Rehearsals.** The log is a mono panel on `--sunk` under its header row, animating once (8.3) and ending on "Pay Now: held, on purpose" with the hold glyph. It keeps its `aria-label` and caption, and its rows are a list, read in order.
+8. **Rehearsals.** "Rehearse on the real stage." The log is a mono panel on `--sunk` with a header row "Rehearsal · New Jersey LLC formation" / "test details". It animates once (8.3), with "Pay Now: held, on purpose" in rehearsal text with the hold glyph. The caption under it is kept. Its `aria-label` stays "Example rehearsal log", and its rows are a list, so they're read in order.
 9. **Coverage.** The table with the ladder (9.10). Its locked note goes beneath at body size, not small, because it holds the answer to "which are live". The mailto link is a secondary button-styled link on phones.
 10. **The catch.** Five large numerals in Literata (64 px) in a two-column grid on desktop, one column on phones. No icons. It should read like a signed letter.
 11. **Security.** Five blocks in a 3 + 2 grid, each with an H3 and a small line icon (lock, vault, link, pen, partition).
@@ -500,7 +624,7 @@ DESKTOP ≥1024
 ```
 
 - **Overview / Filings:** notices first (ready to pay, needs action, subscription), then the table. Each row shows its status chip, plus a **Rehearsal** chip whenever `dryRun` is true. On phones, rows become stacked blocks: title (link), type, chips, date.
-- **Setup guide:** a vertical stepper of 4 cards ("Step 2 of 3" kickers): done (approved glyph), current (Añil rail) or not started (dashed ring), each with its existing description and button; Registered agents marked "(optional)".
+- **Setup guide:** "Set up your account", with "Three short steps, plus registered agents if you want them." A vertical stepper of 4 cards ("Step 2 of 3" kickers), each showing done (approved glyph), current (Añil rail) or not started (dashed ring), with the step's existing description and button. Registered agents is marked "(optional)".
 - **Setup › Details:** one fieldset per topic, with a save bar at the end of the form (not sticky on phones).
 - **Setup › Branding** (the theming console, section 11):
 
@@ -527,10 +651,10 @@ DESKTOP ≥1024
 - **New filing, step 2 (type):** H1 "{State}: what are you filing?". Cards in a 2-column grid show title, a **Live or Rehearsal chip** (from `liveFilings()`), summary and fee note. The "Your pages for clients" card follows.
 - **New filing, step 3 (the form):** see 10.5. For staff, it stays one long page with a sticky section index on the right at 1280 px and wider; the submit row "Send the proof to my client" ends the page.
 - **Filing detail:** narrow column. H1 is the filing title with its chips. Then the type line, the timeline (9.6), the ready-to-pay or error notice, the missing-info form when needed, "Link to the proof" (a secret block with a copy button), Documents (a list of files with type and size, each a 48 px row), the EIN (mono, 24 px), and "Progress on the state site" as a disclosure listing each screen with its time.
-- **Client links:** the "Send a client a link" form, the result with "Copy link" and "Email it from your mail app", then "Links you sent" as a table with chips and "Turn off".
+- **Client links:** "Send a client a link" form (Filing, Who it's for, "Make link"), the result with "Copy link" and "Email it from your mail app", then "Links you sent" as a table with status chips and "Turn off" as a danger-quiet button.
 - **From email `/from-email/<id>`:** two columns on desktop. Left: "Your message", the original text in a quoted `--sunk` block (or the 30-day deletion notice). Right: "This looks like a request for: …", the chosen filing and "Open the filled-in form". On phones, the message is first.
 - **Signatures:** a table of Signer, Saved and Last used, with Remove; then "Add a signature". The pad lives in a 640 px card.
-- **Ready to pay:** the locked explanation, then one card per saved card listing its waiting filings, with one security-code field (Basis Theory element, 48 px tall). Success is announced with `role="status"` and the card becomes an approved notice.
+- **Ready to pay:** H1 "Ready to pay" and the locked explanation. One card per saved card, listing the filings waiting for it, with a single security-code field (Basis Theory element, 4-character width but a 48 px-tall target) and its button. Success is announced with `role="status"`, and the card turns to an approved notice.
 - **Billing:** the plan and its price as Stripe returns it (prices appear only here, after login), and invoices as a table. The "Your plan is changing…" text is an info notice.
 - **Password:** one form (9.3), with the locked hint about signing out other devices.
 
@@ -592,7 +716,7 @@ PHONE 360
 - **Filing details** is a `<dl>`: label stacked over value on phones; a two-column grid from 640 px (labels 35%, values 65%), with no 40%-width table header cells squeezing the values. Values the state will record in capitals are shown in mono, as the state will see them. SSNs show masked (spoken label: Appendix B).
 - **The state's review page** sits on a white plate with a 1 px border, even in dark mode (never inverted). Tap opens it full-size in a new view with pinch zoom allowed. Its locked `alt` text points to the text twin. From 1024 px, the image and the details sit side by side, with matching rows marked by small register ticks: the signature idea, in register.
 - **State fees** is a `<table>` with a caption, right-aligned mono figures and the total in 24 px bold. "Maximum you authorize" gets its own row, as now.
-- **The consent block** moves directly above the button, so the last thing read before acting is what acting means, in a 2 px Tinta-bordered box (it's the agreement, not a warning).
+- **The consent block** moves to directly above the button, so the last thing read before acting is what acting means. It sits in a 2 px Tinta-bordered box (not amber, because it's not a warning, it's the agreement).
 - **The approve button** uses the firm's action color, clamped to **7:1** (section 11), at 56 px. "Request changes" lives in a `<details>` below it, 24 px away, holding the locked label "What should change? (Needed only if you ask for changes)", the textarea and its own "Request changes" button. Nobody can hit the wrong one with a shaky thumb.
 - **After pressing:** the button shows a pending state, the form can't be sent twice, and the decision page loads with the register moment. "Approval recorded" is the H1, and the locked sentence follows (the rehearsal or live version).
 - **Errors and expired links** (today bare `<p>` tags): the same branded shell, an H1 and the locked sentence ("This link to the proof has expired. Ask whoever sent it for a new one.", "That code didn't match…", "A decision was already recorded with this link…"), the firm's support email, and an HTTP 410 or 400 as today. The H1 for each needs copy (Appendix B).
@@ -613,7 +737,7 @@ CoFile's brand (Añil), denser type (16 px tables), and the same components.
 
 - **Overview:** three stat tiles (Filings, Webhook deliveries, API keys) with large Atkinson numerals and links. Then "By status", "By state" and "By month" as small bar charts with table toggles. Any account-not-set-up notice comes first.
 - **API keys:** the table (Name, Last used, status) and "Revoke" behind a confirm dialog. A new key appears once in a secret block, `cofile_` prefix visible, with Copy.
-- **Webhooks:** endpoints table and delivery log, HTTP codes in neutral mono; the stop glyph only for deliveries that failed after retries.
+- **Webhooks:** endpoints table, delivery log with HTTP status in mono. **No status colors for HTTP codes.** Failures get the stop glyph only when the delivery actually failed after retries.
 - **Filings:** a filterable table (status family, state, rehearsal or live, firm), with the same chips as the desk.
 - **Firms and firm detail:** a firm list with logo thumbnails, then firm detail with its branding preview (a reduced section 11 console), settings and that firm's filings.
 - **Setup:** "Payment methods" (the locked vault text), "State portal logins" as a table: Portal, Pays by, Login and Disconnect for NY DOS, NYS-100, NJ, IRS and FL, each row with "Not needed" where it applies, then portal defaults and "Who's named on your filings". Connected logins show a sealed glyph and never redisplay the value.
@@ -746,7 +870,7 @@ The English copy is locked. **Spanish is a localization decision**, so this is h
 - **What the state will see:** state systems may strip accents (PANADERÍA → PANADERIA). The proof must show the state's version exactly, in mono, next to what the client typed, whenever they differ (copy needed).
 - **Names:** two surnames, hyphens and accents accepted in every name field; no field is too short for "María de los Ángeles Rodríguez-Santiago".
 - **Format:** es-US conventions: "3 de diciembre de 2026, 5:00 p. m., hora del Este"; dollars stay "$103.50".
-- **Glossary first:** *prueba* means both "proof" and "test", so "the proof" and "rehearsal" could collide in Spanish. Test the glossary with Spanish-first owners in NJ, FL and Puerto Rico before translating. I recommend *usted* throughout, a legal translator and a community review panel.
+- **Words to settle in a glossary first:** "the proof" and "rehearsal". In Spanish, *prueba* means both "proof" and "test", so it could collide with the meaning of a rehearsal. The glossary should be tested with Spanish-first owners in NJ, FL and Puerto Rico before anything is translated. I recommend *usted* throughout (legal and money context), and a legal translator plus a community review panel.
 
 ### 12.4 Dark mode
 

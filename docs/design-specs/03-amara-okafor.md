@@ -11,9 +11,9 @@
 
 I make brand worlds: wordmarks, kinetic type, 3D, sound, launch films. Before I opened a studio I spent school holidays at my aunt's print shop on Lagos Island. I learned to read a press proof there, and I learned that the press operator who stops the run when the plates are a hair out of line is the most valuable person in the building.
 
-My bias: most B2B software looks the same, a pale gradient, a rounded sans, a laptop mock-up, and you forget it in an hour. A brand can be loud and still be careful. Bold color is fine. Vague isn't.
+My bias is simple. Most B2B software looks the same: a pale gradient, a rounded sans, a laptop mock-up, a stock handshake. You forget it in an hour. If a firm is going to put its name on CoFile, CoFile has to look like it knows exactly what it is. A brand can be loud and still be careful. Bold color is fine. Vague isn't.
 
-My second bias matters more here: a brand that won't step back is a bad brand. CoFile's partner firms' clients should see the firm, and learn CoFile is there only from a small "with CoFile". So this spec designs two things that have to agree: a loud CoFile for the people choosing it, and a quiet discipline for the pages it carries for others.
+My second bias matters more here: a brand that won't step back is a bad brand. CoFile sells the right to disappear. Its partner firms' clients should see the firm, and learn CoFile is there only from a small "with CoFile". So this spec designs two things that have to agree: a loud CoFile for the people choosing it, and a quiet discipline for the pages it carries for others.
 
 ## 2. The concept: In Register
 
@@ -26,7 +26,7 @@ That is CoFile's whole product, so it's the idea everything here hangs on:
 - **The product is a set of layers that must line up.** What the client approved, the state's own review page, the fee table, the fee on the state's payment screen. CoFile goes ahead only when they register. When they don't, it "stops before paying". That's the press operator stopping the run.
 - **"Register" is also a tone of voice.** CoFile speaks loudly on its own pages and quietly on its partners' pages. The concept names the volume control too.
 
-The visual world is a modern press, not a nostalgic one: two strong inks overprinting on bright stock, registration targets, crop marks, heavy sheets, acetate overlays sliding into alignment. No sepia, no letterpress texture, no vintage stamps.
+The visual world is a modern press, not a nostalgic one: two strong inks overprinting on bright stock, registration targets, crop marks, heavy sheets, acetate overlays sliding into alignment. No sepia, no letterpress texture, no vintage stamps. Precise, saturated, slightly industrial.
 
 **The signature idea is "the Register".** Two layers slide into exact alignment and a registration target locks with a small tick: in the logo sting, the hero, the proof, the fee check on a filing and the rehearsal log. When the layers don't line up, they stay apart, everything stops moving, and the screen says why. One gesture carries the promise, **it files only when everything lines up**, and it explains the product without a word of new copy.
 
@@ -105,7 +105,37 @@ A system icon, not the logo: a circle (1.5 px stroke) with a short crosshair, us
 
 ### 3.5 Sonic logo
 
-**"Seat and ring", 1.1 seconds.** Two dry wooden clicks 80 ms apart (the plates seating), then a rising major sixth on a felt-mallet wooden xylophone, recorded in a small room, with the second note ringing 600 ms. It's for the launch film, tutorials, webinars and ads. It never autoplays on the website and is never used on a firm's or client's page. An optional dashboard "sounds" switch (off by default) plays one click on "Accepted by the state". Delivered as 48 kHz/24-bit WAV masters, with a calm descending-fourth variant for a stopped filing in video, never an alarm.
+**"Seat and ring", 1.1 seconds.** Two dry wooden clicks 80 ms apart (the plates seating), then a rising major sixth on a felt-mallet wooden xylophone, with the second note ringing 600 ms. It's recorded from a hand-built instrument in a small room, not synthesized, so it has air around it.
+
+- Used in the launch film, tutorials, webinars and ads.
+- Never autoplays on the website. Never used on a firm's or client's page.
+- An optional dashboard "sounds" switch (off by default) plays one click on "Accepted by the state".
+- Delivered as 48 kHz/24-bit WAV masters, with a 3-note variant for a stopped filing in video: a calm descending fourth, never an alarm.
+- Stems: clicks only (for UI), notes only (for music beds), full sting, and a 6-second ambient tail for film end cards.
+
+### 3.6 Icon system
+
+- Drawn on a 24 px grid with a 2 px live area, 1.75 px strokes at 24 px (2 px at 20 px, 1.5 px at 32 px), round joins, round caps, except crosshair elements, which keep square caps like the mark.
+- Two styles: **line** (default, every UI icon) and **solid** (only inside Go and Stop chips and the timeline's done nodes).
+- About 64 icons in the first set:
+  - **Navigation:** filings, new filing, Ready to pay (a card with a clock), client links, signatures, setup, billing, API keys, webhooks, team, docs, overview.
+  - **Actions:** copy, download, upload, external link, more, close, back, expand, filter.
+  - **Status glyphs:** the five families from §4.3.
+  - **Objects:** document, EIN letter, card, vault, envelope, text bubble, Slack-style hash (generic, not Slack's mark), lock, signature line.
+  - **The match glyph.**
+- **Never use government seals, flags, eagles, state capitol buildings or the IRS logo.** CoFile "is not a law firm or a government agency, isn't affiliated with any state or the IRS", and its icons mustn't suggest otherwise. States appear only as plain filled outlines of their borders (New York, New Jersey, Florida) on the New filing state picker. The IRS is shown as a stack of forms.
+- Every icon ships as an SVG symbol with `currentColor` and a matching `aria-label` key. Icon-only buttons always carry an accessible name.
+
+### 3.7 Favicon, app icon, social and share images
+
+| Asset | Spec |
+|---|---|
+| Favicon | SVG micro cut with an embedded `prefers-color-scheme` style: Press Black C and blue dot on light, Stock C and light-blue dot on dark. ICO fallback at 16, 32, 48 |
+| Touch and PWA icon | Mark in Stock on a Register Blue square, 180 and 512 px, with a maskable version (mark inside the central 60% safe zone) |
+| Social avatar | Mark in Stock on a Register Blue circle |
+| Open Graph, CoFile pages | 1200 × 630: Register Blue field, the page's locked title in Mega style in Stock, crop marks at the corners, wordmark bottom left. The home card uses "Your client approves the proof. Then CoFile files it." |
+| Open Graph, firm service pages | Generated per firm and service: the firm's logo and the filing type's title on a white sheet with crop marks, a 12 px top rule in the firm's color, "with CoFile" bottom right in ink-3. No Register Blue |
+| Open Graph, white-label pages | The enterprise's logo and the title only. Nothing from CoFile |
 
 ---
 
@@ -115,7 +145,7 @@ A system icon, not the logo: a circle (1.5 px stroke) with a short crosshair, us
 
 Two inks on bright stock. **Register Blue** is a hot ultramarine, saturated enough to own, and outside the three status meanings (green, amber, red). **Press Black** leans violet, so blue type on it looks deliberate. **Proof Pink** is the second plate, for overprint and marketing only. Where pink and blue overlap they make **Overprint Violet**, the deep field for the hero at night and the film.
 
-Manila, cream and green are retired. Cream says "heritage", which is everyone's safe choice. Retiring green as the brand color also gives it back to the one job that matters most: **approved and live**.
+Manila, cream and green are retired. Cream says "heritage", which is everyone's safe choice. Bright stock and ultramarine say "modern press" in a way nobody else in filings does. Retiring green as the brand color also gives it back to the one job that matters most: **approved and live**.
 
 ### 4.2 Core tokens
 
@@ -156,7 +186,7 @@ Five families. Every status in `web/lib/status.ts` belongs to exactly one, and e
 
 Three rules make this hold:
 
-1. **Our ink marks your move.** In product, Register Blue appears only where a person has to act: the primary button and the "Your move" chips. Blue chips are the to-do list.
+1. **Our ink marks your move.** In product, Register Blue appears only where a person has to act: the primary button and the "Your move" chips. Blue chips are the to-do list, which makes a long filing table scannable at a glance. (Links are blue too, but always underlined, so they never read as chips.)
 2. **Solid means real, dashed means rehearsal.** Live and Go chips are solid. Rehearsal chips are dashed marigold outlines, in the coverage table, the filing list and the proof banner alike, so "is this real?" is answered by shape before anyone reads a word.
 3. **Status colors never come from a firm** (§11).
 
@@ -165,6 +195,46 @@ Today amber covers both "rehearsal" and "needs someone to act". Splitting them l
 ### 4.4 Data colors (dashboard charts)
 
 Series in order: Register `#3B2CF5`, Teal `#0F8B8D`, Pink `#E0337A`, Ink-2 `#4A4757`, Marigold `#C98400`, Sky `#4E8FE0`. Charts "by status" use the five status families only, in the order Go, Your move, Moving, Stage, Stop.
+
+### 4.5 Tokens in code (excerpt)
+
+The build team gets the full set as W3C Design Tokens JSON (§13). This is how it lands in CSS. The status tokens are named by family, and `--stop` used in component specs is an alias of `--stop-text`.
+
+```css
+:root {
+  color-scheme: light dark;
+  --stock:#F5F3EE; --sheet:#FFFFFF; --sheet-2:#ECE9E2; --rule:#DCD8CF; --rule-strong:#8C8797;
+  --ink:#15131C; --ink-2:#4A4757; --ink-3:#6B6779;
+  --register:#3B2CF5; --register-hover:#2C1FD1; --register-press:#2416B0; --on-register:#FFFFFF; --register-tint:#E8E6FF;
+  --pink:#FF3D8B; --overprint:#3B0A86;
+  --go-text:#0B6E44; --go-bg:#DCF2E5; --go-solid:#0B7A4B; --on-go:#FFFFFF;
+  --stage-text:#7A4A00; --stage-bg:#FFEBC2; --stage-line:#C98400; --stage-solid:#F5A623; --on-stage:#15131C;
+  --ask-text:#3B2CF5; --ask-bg:#E8E6FF;
+  --stop-text:#B3261E; --stop-bg:#FDE3DF; --stop-solid:#B3261E; --on-stop:#FFFFFF; --stop:var(--stop-text);
+  --moving-text:#4A4757; --moving-bg:#ECE9E2;
+  /* the action color: ours on CoFile pages, the firm's safe color on Counter pages */
+  --action:var(--register); --on-action:var(--on-register);
+  --action-hover:var(--register-hover); --action-press:var(--register-press);
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --stock:#0F0E14; --sheet:#1A1922; --sheet-2:#23212D; --rule:#2F2C3A; --rule-strong:#6C6879;
+    --ink:#F2F0EA; --ink-2:#BDB9C9; --ink-3:#9A96A8;
+    --register:#8F87FF; --register-hover:#A9A3FF; --register-press:#C2BEFF; --on-register:#0F0E14; --register-tint:#1F1C47;
+    --pink:#FF5C9D;
+    --go-text:#4FD69A; --go-bg:#10291E; --go-solid:#4FD69A; --on-go:#0F0E14;
+    --stage-text:#FFC24F; --stage-bg:#33250A; --stage-line:#FFC24F; --stage-solid:#FFC24F; --on-stage:#0F0E14;
+    --ask-text:#A8A2FF; --ask-bg:#1F1C47;
+    --stop-text:#FF7B6B; --stop-bg:#3A1513; --stop-solid:#FF7B6B; --on-stop:#0F0E14;
+    --moving-text:#BDB9C9; --moving-bg:#23212D;
+  }
+}
+:root[data-theme="dark"] { /* the same dark values, for the manual switch */ }
+.counter { /* written by @cofile/theme per firm (§11) */
+  --action:var(--firm-action); --on-action:var(--firm-on-action);
+  --action-hover:var(--firm-action-hover); --action-press:var(--firm-action-press);
+}
+```
 
 ---
 
@@ -180,7 +250,17 @@ Series in order: Register `#3B2CF5`, Teal `#0F8B8D`, Pink `#E0337A`, Ink-2 `#4A4
 
 The brand is loud in the display face and deliberately plain in the text face. On firm pages (Volume 1) a firm's font replaces CoFile Press for headings and the firm's name; **details, fees and codes always stay in Atkinson Mono**, whatever the firm picks (§11).
 
-Foundry brief for CoFile Press: x-height 0.54 em, squarish curves, flat horizontal terminals, Latin Extended-A (Spanish accents that fit at 0.94 leading), tabular and proportional lining figures, a single-stroke $, and a "CoFile" ligature that drops in the target-o at ≥ 40 px.
+The brief to the foundry for CoFile Press:
+
+- A grotesque with a tall x-height (0.54 em), squarish curves and flat terminals cut horizontally.
+- Two-storey a and g at text sizes, single-storey alternates (`ss01`) for display.
+- Full Latin Extended-A, Spanish ñ á é í ó ú ü ¿ ¡ included, with accents on capitals that fit inside the line at 0.94 leading (shortened cap accents in `case`).
+- Tabular and proportional lining figures, plus oldstyle figures for long-form legal pages only.
+- A custom $ with a single stroke through, and a slashed-zero alternate.
+- A "CoFile" ligature that drops in the wordmark's target-o at sizes ≥ 40 px.
+- The `TRAP` axis: 0 is a clean grotesque, 100 has notches deep enough to read at 120 px as the brand's texture. Above 64 px we run 60–80, below 32 px always 0.
+- **CoFile Press Plates** (COLRv1): two palette entries, plate A and plate B, offset by a variation axis `REGI` (0 = in register, 100 = 6% of the em out). The hero animates `REGI` from 100 to 0. Fallback for browsers without COLRv1: the same effect built with two stacked text layers and `mix-blend-mode: multiply`.
+- Deliverables: variable WOFF2 subset for web (Latin, Latin-1, Latin Extended-A, punctuation), full OTF/TTF for print and film, a hinting pass for Windows at 32–48 px.
 
 ### 5.2 Scale
 
@@ -220,6 +300,14 @@ Root is 16 px. **Product body text is 17 px, never smaller for anything someone 
 - Deadlines keep the copy's format ("Dec 3, 5:00 PM Eastern") in the text face. Codes, references and IDs use mono.
 - Masked SSNs (`***-**-1234`) are in mono with the asterisks at 60% opacity, so the last four stand out.
 
+### 5.4 Loading fonts
+
+- **Self-host every font**, including the firm presets. Today the firm's font and ours load from Google Fonts, which tells a third party about every client who opens a proof. That's wrong for a privacy-sensitive page and impossible on Volume 0. Presets are bundled as subset variable WOFF2 files, and uploaded firm fonts are already served by the engine (`/v1/brand-fonts/…`).
+- **Preload** Atkinson Next 400 and 700 on every page, and the CoFile Press subset on Poster pages only. Desk and Counter pages load Press with `font-display: optional`, so a slow connection never re-flows a form.
+- **No layout shift:** each web font gets a metric-matched fallback (`size-adjust`, `ascent-override`, `descent-override`, `line-gap-override`) over the system UI font, computed at build time.
+- **Firm uploads** are subset on upload to Latin, Latin-1 and Latin Extended-A and converted to WOFF2. We measure their x-height and set `size-adjust` so the firm's text renders at the same optical size as Atkinson (a firm font with a tiny x-height doesn't shrink the proof).
+- **Emails** reference Atkinson as a web font with the system stack behind it (§10.9).
+
 ---
 
 ## 6. Layout
@@ -238,7 +326,7 @@ Container widths: marketing 1280, product 1120, forms and reading 720, **the pro
 
 **Spacing scale (px):** 2, 4, 8, 12, 16, 24, 32, 48, 64, 96, 128, 192 (tokens `s-0`…`s-11`). Marketing sections run on 128 vertical padding at lg (96 md, 64 xs). Product pages use 32 between blocks and 16 inside cards.
 
-**Radii.** Paper has square corners: **documents are 2 px** (the proof, documents, the rehearsal log). **Controls are 10 px.** Chips are pills, marketing panels 16 px. Crisp sheets and soft controls separate "a document" from "something you press".
+**Radii.** Paper has square corners, and that's a brand rule: **documents are 2 px** (the proof, documents, the rehearsal log, filing cards, signature tiles). **Controls are 10 px** (buttons, fields, selects). Chips are pills. Marketing panels are 16 px. Dialogs are 16 px at the top on phones (bottom sheets) and 16 px all round on desktop. Crisp sheets and soft controls separate "a document" from "something you press".
 
 **Elevation**
 
@@ -251,19 +339,51 @@ Container widths: marketing 1280, product 1120, forms and reading 720, **the pro
 
 **Crop marks** frame the key figures on Poster pages: 8 px arms, 1 px `--ink-3`, set 6 px outside the corners. They mark "this is the real artifact": the sample proof, the rehearsal log, the coverage table.
 
+**Page templates**
+
+| Template | Structure | Used by |
+|---|---|---|
+| Poster band | Full-bleed color field, 12-column content at 1280 | Home sections, the close, campaign pages |
+| Slip | 5/7 split: a Register Blue panel and a white form sheet | Sign-up, log in and every account page |
+| Desk | 248 px rail plus 1120 content (phones: top bar and bottom tab bar) | Filing desk, dashboard |
+| Counter | Firm header, one 680–720 column, firm footer | Intake, service pages, the proof, approval outcomes, client-facing errors |
+| Reading | 760 prose plus a 240 sticky table of contents | Terms, Privacy, docs guides |
+| Reference | 240 rail, 760 prose, 380 code rail | API reference |
+
+**Stacking (z-index):** content 0, sticky bars 100, rail 200, banners 300, menus 400, dialogs and sheets 500, toasts 600, skip link 700. Only one sticky element per screen edge. The beta strip scrolls away (it isn't sticky), the marketing top bar is sticky, the proof's total strip is sticky, and the desk's phone tab bar is fixed with `env(safe-area-inset-bottom)` padding.
+
 ---
 
 ## 7. Imagery
 
-**3D (the hero and the proof section).** A real-time WebGL scene: the sample proof as a sheet of heavy uncoated stock with visible fibre and a slight curl, and the state's review page as acetate floating above it. They separate and re-register as you scroll. Commission a 3D studio that specializes in material realism (paper, film, ink), with a 2× AVIF still as the fallback. No laptops, no floating phones, no glowing particles.
+**3D (the hero and the proof section).** A real-time WebGL scene, built in react-three-fiber with custom shaders. The sample proof is a sheet of heavy uncoated stock (think 300 gsm) with visible fibre at 2× zoom, a slight curl at the corners and a soft contact shadow. The state's review page is a sheet of acetate floating above it, with a faint specular sweep as it moves. The two separate and come back into register as you scroll. Every word on the sheets is live HTML text projected onto the mesh (or overlaid exactly on it), never baked into a texture, so it stays selectable, translatable and readable by screen readers. Commission a 3D and motion studio that specializes in material realism (paper, film, ink). Ask for a 2× AVIF still of every key frame, for reduced motion and slow devices. No laptops, no phones floating in space, no glowing particles.
 
-**Press drawings (illustration).** Isometric technical line drawings, 1.5 px strokes, two inks on stock, showing the mechanism: a form becoming a proof, a proof registering over a state page, documents coming back. No characters, mascots or hands holding phones. Commission an illustrator from architectural or engineering drawing, not editorial illustration.
+**Press drawings (illustration).** Technical line drawings, isometric at 30°, 1.5 px strokes at 1× (scaling with the drawing), round caps, two inks: Press Black lines with Register Blue for the one thing that matters in each drawing. They show the mechanism: a form becoming a proof, a proof registering over a state page, documents coming back to a firm, a vault, a single-use ticket. No characters, no mascots, no hands holding phones. Commission a technical illustrator from architectural or engineering drawing, not editorial illustration. Delivered as SVG with named layers, so the motion team can animate individual parts.
 
-**Photography.** Sparingly: Firms, the close, sign-up, social. Documentary portraits on location, flash plus daylight, of **real beta partner firms** who agree to it, each shot against one sheet of Register Blue backdrop paper hung in their own office: their world, our ink. Until partners agree, use still lifes only (a redacted EIN letter, returned state documents, a phone showing a proof on a kitchen counter). Nobody is cast to pose as a customer.
+**Photography.** Used sparingly: on the Firms section, the close, sign-up and social. Documentary portraits on location, flash plus daylight, of **real beta partner firms** who agree to it: a payroll office in Newark, a CPA practice in Queens, a title closing table in Tampa. Each subject is photographed in front of one sheet of Register Blue backdrop paper hung in their own office. That's the recurring device: their world, our ink. Until real partners agree, there's no photography of people. Use still lifes instead: a redacted EIN letter, a stack of returned state documents, a phone showing a proof on a kitchen counter. People are never cast to pose as customers. Grade: neutral whites, true blacks, no teal-and-orange, grain at 3%.
 
 **Data visuals.** The coverage "run bars" (§9.10), the filing timeline (§9.7), dashboard charts in the data palette. Flat, two inks, no 3D charts, no gradients.
 
 **Kinetic type** carries social and campaign work, built only from locked lines: "Checked twice. Filed once." "Rehearse on the real stage." "Your name on the door. Ours in small print." Each line is set in CoFile Press Plates and registers on the beat.
+
+**The first set of press drawings**
+
+| # | Drawing | Where |
+|---|---|---|
+| 1 | An empty press bed with four registration targets | Empty states (desk, dashboard) |
+| 2 | A short form turning into a proof sheet | Process step "You start it." |
+| 3 | A proof with an acetate registering over it | Process step "Your client approves it.", the proof section fallback |
+| 4 | A sheet passing through a browser frame to a state page | Process step "CoFile files it." |
+| 5 | A text bubble becoming a draft sheet | Requests section fallback, From email empty state |
+| 6 | Documents and a letter returning into a folder | "The papers come back to you." |
+| 7 | A vault door | Security: cards in a vault |
+| 8 | A number strip with all but four digits masked | Security: SSNs |
+| 9 | A ticket with a torn stub | Security: single-use links |
+| 10 | A signature line with a lock | Security: signatures; Signatures empty state |
+| 11 | A cabinet of separate drawers | Security: separate accounts |
+| 12 | An envelope whose flap registers shut | `/signup/sent`, verify email |
+
+Plus three filled state outlines (New York, New Jersey, Florida) and the IRS form stack, for the New filing picker.
 
 ---
 
@@ -334,6 +454,33 @@ On phones the sequence runs on tap of "See what your client sees" rather than on
 
 **G. Page transitions (Desk).** A cross-document View Transition: the outgoing page shifts 8 px left and fades (`t-3` exit), the incoming arrives from 8 px right (`t-4` enter). Shared elements (a filing's title and status chip) morph between the list and the detail page.
 
+**H. Launch film (45 s, 16:9 master with 9:16 and 1:1 cuts).** Built only from locked lines, with every example marked as an example. It is mostly the hero sequence, extended.
+
+| Time | Picture | Words on screen (locked) | Sound |
+|---|---|---|---|
+| 0–4 s | Press Black. Two plates of the mark slide together and lock | | Two clicks |
+| 4–10 s | A phone screen. Ana Ortiz's text arrives in a bubble | "Clients don't fill in forms. They text you." · lower third: "Ana Ortiz · text message · example" | Room tone, a message tick |
+| 10–18 s | The words lift out of the bubble and drop into a draft sheet. Fields fill. The sheet becomes the proof, with "Harbor & Pine CPA" at its head | "Your client approves the proof." · lower third: "Sample proof · test details · not a real business" | Paper |
+| 18–26 s | The New Jersey review-page acetate slides in and registers over the proof. The two fee plates, $103.50 and $103.50, register | "Checked twice. Filed once." | Clicks on each lock |
+| 26–34 s | Thirteen screens fly past as thin sheets. "Pay Now · held, on purpose" lands on marigold. Everything stops. One second of silence | "Rehearse on the real stage." | Silence |
+| 34–40 s | Documents and the EIN letter fly back into a folder labeled with the firm's name | "The papers come back to you." | Paper |
+| 40–45 s | End card on Register Blue: mark and wordmark, cofile.app. Under it, in small type: "In beta. A rehearsal fills in every screen of the state's real website and stops before the last button, so nothing is filed and nothing is paid." | "Approve the proof. Then it's filed." | "Seat and ring" |
+
+The film never shows a filing marked Live unless that filing type is live on the day it's published, and it carries the beta line on its end card in every cut.
+
+**I. Product micro-moments**
+
+| Moment | Motion | Timing |
+|---|---|---|
+| "Same as" fill | Fields fill top to bottom, a 600 ms tint flash | 30 ms stagger |
+| "Make link" on Client links | The new link slides out from under the form as a secret box, and "Copy link" takes focus | `t-4` |
+| A setup step done | Its disc fills, the stepper line draws down to the next step, and that step's button turns primary | `t-5` |
+| Security code accepted on Ready to pay | Each waiting filing's chip changes from Your move to Moving, one by one | 80 ms stagger, `t-2` each |
+| A status changes while you're looking | The chip crossfades; on the detail page the timeline node fills and the spine draws to the next node | `t-4` |
+| Logo uploaded in Branding | The logo drops into the preview header, and crop marks close in to show the automatic trim | `t-5` |
+| A contrast fix in Branding | The original swatch and the adjusted one appear side by side; the adjusted one slides into the preview button | `t-5` |
+| Folding sections | Height animates with content fading in at 60% of the way | `t-3` |
+
 ### 8.4 Reduced motion
 
 With `prefers-reduced-motion: reduce`, every sequence jumps to its final state, with only a 120 ms opacity crossfade. There's no parallax, the WebGL scene is replaced by its AVIF still, and the logo sting is skipped. The fee check shows both lines already aligned, or already apart in a stop. A site-wide "Reduce motion" toggle in the footer does the same for people who haven't set the system preference.
@@ -361,14 +508,12 @@ Sizes: **L 56 px** (hero CTAs, the proof's approve button, full width under 480 
 
 ### 9.2 Fields
 
-- 52 px tall, 17 px text, 10 px radius, 1.5 px `--rule-strong` border, `--sheet` fill.
-- Label above (16/22, 700). Help text sits *between* the label and the input (15/22, `--ink-2`), so it's read before typing, and is tied with `aria-describedby`.
-- Focus: border goes to `--action` and the 2 px ring shows. Error: 2 px `--stop` border, a Stop glyph and the message under the field, the field gets `aria-invalid`, and the form's summary ("Please fix these and submit again.") lists every issue as a link to its field.
-- Required: `*` in `--stop`, with the locked line "Fields marked * are required." once at the top of the form.
-- **Paired fields** follow today's `n2` (2fr 1fr) and `n3` (2fr 1fr 1fr) rows and stack under 560 px.
-- **"Same as" / "Same person as":** a row of pill buttons (40 px, secondary) above an address or person block, labeled with the earlier entry ("Same as" · `Main business address`). Pressing one fills the block, and the filled fields flash `--register-tint` for 600 ms. A polite announcement confirms it.
-- **Folded optional questions:** "More options (optional)" is a quiet disclosure with a chevron rotating 90° (`t-3`). Folded sections ("… (optional)") are full-width sheets with a 1 px rule. Either opens by itself when it already holds an answer or an issue (today's behavior, kept).
-- **Authorizations:** each checkbox statement sits on a `--sheet-2` panel with a 24 px checkbox and its text at 17/27. The statement text is never truncated.
+- 52 px tall, 17 px text, 10 px radius, 1.5 px `--rule-strong` border. Label above (16/22, 700). Help text sits *between* label and input, so it's read before typing (`aria-describedby`).
+- Focus: `--action` border plus the ring. Error: 2 px `--stop` border, a Stop glyph and the message under the field, `aria-invalid`, and the summary ("Please fix these and submit again.") lists each issue as a link to its field. Required `*` in `--stop`, explained once by "Fields marked * are required."
+- **Paired fields** keep today's `n2` (2fr 1fr) and `n3` (2fr 1fr 1fr) rows and stack under 560 px.
+- **"Same as" / "Same person as":** 40 px pill buttons above an address or person block, after the locked prefix ("Same as", "Same person as") and labeled with the earlier entry (an address block's label, or a person's name such as `Ana Ortiz`). Pressing one fills the block, the filled fields flash `--register-tint` for 600 ms, and a polite live region confirms it ⟨copy to come⟩. Pressing it again on an already-filled block does nothing, and editing a copied field doesn't change the original.
+- **Folded questions:** "More options (optional)" is a quiet disclosure (chevron rotates 90°, `t-3`), and folded "… (optional)" sections are full-width sheets. Both open by themselves when they hold an answer or an issue, as today.
+- **Authorizations:** each statement on a `--sheet-2` panel with a 24 px checkbox, text at 17/27, never truncated.
 
 ### 9.3 The proof card
 

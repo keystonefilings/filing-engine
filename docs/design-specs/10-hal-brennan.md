@@ -117,18 +117,18 @@ In a pressroom every color is an ink with a job. That is the model here. There a
 | `--sheet-2` | Tint | `#EFECE2` | Table stripes, code inline, quiet fills | — |
 | `--line` | Hairline | `#D9D4C6` | Decorative rules and dividers | 1.4:1 (decorative only) |
 | `--line-strong` | Rule | `#8A8678` | Input and chip borders | 3.6:1 on sheet |
-| `--ink` | Intaglio | `#17171F` | Text, headings | 16.9:1 on bond |
+| `--ink` | Intaglio | `#17171F` | Text, headings | 16.0:1 on bond |
 | `--ink-2` | Graphite | `#4E4C57` | Secondary text, ledes | 7.6:1 on bond |
-| `--ink-3` | Pencil | `#6A6873` | Captions, small print, "with CoFile" | 4.9:1 on bond, 5.1:1 on sheet |
+| `--ink-3` | Pencil | `#6A6873` | Captions, small print, "with CoFile" | 4.9:1 on bond, 5.4:1 on sheet |
 | `--brand` | Indelible | `#3A2F6E` | CoFile mark, kickers, links on CoFile pages, guilloche on CoFile pages | 10.4:1 on bond |
 | `--brand-tint` | Indelible wash | `#E9E6F3` | Underprint pattern ink, selected rows | decorative |
 | `--go` | Countersign green | `#11603F` | Approved, live, forward buttons | 6.8:1 on bond; white on it 7.6:1 |
-| `--go-tint` | | `#E2EFE7` | Go chip fill | go text on it 6.2:1 |
+| `--go-tint` | | `#E2EFE7` | Go chip fill | go text on it 6.4:1 |
 | `--hold` | Ochre | `#8A5300` | Rehearsal and its planned hold | 5.7:1 on bond |
 | `--hold-tint` | | `#F7ECD3` | Rehearsal band, chip fill | hold text on it 5.4:1 |
 | `--stop` | Vermilion | `#A8261B` | A stop | 6.4:1 on bond; white on it 7.1:1 |
 | `--stop-tint` | | `#F7E1DC` | Stop banner fill | stop text on it 5.7:1 |
-| `--focus` | Register | `#3A2F6E` | Focus ring (firm pages: see 11.3) | 10.4:1 |
+| `--focus` | Register | `#3A2F6E` | Focus ring (firm pages: see 11.2) | 10.4:1 |
 
 ### 4.2 Dark tokens ("the plate")
 
@@ -141,8 +141,8 @@ Dark mode is the engraved steel plate before it is inked: blue-black metal with 
 | `--sheet-2` | `#22232E` | — |
 | `--line` | `#2E2F3C` | decorative |
 | `--line-strong` | `#6B6A7A` | 3.3:1 on sheet |
-| `--ink` | `#ECE8DD` | 15.6:1 on paper |
-| `--ink-2` | `#BDB9C7` | 10.1:1 |
+| `--ink` | `#ECE8DD` | 15.3:1 on paper |
+| `--ink-2` | `#BDB9C7` | 9.7:1 |
 | `--ink-3` | `#8F8B9C` | 5.6:1 on paper, 5.2:1 on sheet |
 | `--brand` | `#B7AEF2` | 9.2:1 |
 | `--brand-tint` | `#272440` | decorative |
@@ -176,7 +176,7 @@ Guilloche, microprint and underprint are drawn in tints that are decorative by d
 | Ornament | Light | Dark |
 |---|---|---|
 | Guilloche, CoFile pages | Indelible at 38% on sheet, about `#A9A3C2` | `#4A4570` |
-| Guilloche, firm pages | Firm ink at 38% on sheet (computed, see 11.3) | Firm ink at 30% on the dark sheet |
+| Guilloche, firm pages | Firm ink at 38% on sheet (computed, see 11.2) | Firm ink at 30% on the dark sheet |
 | Guilloche, rehearsal | Ochre at 45%, about `#C7A56B` | `#7A5E2E` |
 | Underprint (anti-alteration) | `#E9E6F3` lines 0.5 px at 3 px pitch | `#262438` |
 | Microprint | `--ink-3` | `--ink-3` |
@@ -379,7 +379,7 @@ Label above (Sans 600 16/24), input (48 px tall, `--r-1`, 1.5 px `--line-strong`
 ```
 ┌─ guilloche frame, 20px ────────────────────────────────────────┐
 │ ░ microprint rule: filing reference · repeated ░               │
-│  [firm logo]  Harbor & Pine CPA                   № KF-…-0412  │ ← serial, top right
+│  [firm logo]  Harbor & Pine CPA                   № …-0412     │ ← serial, top right
 │ ─────────────────────────────────────────────────────────────── │
 │  (rehearsal band, if any)                                      │
 │  H1 filing title                                ┌─rosette─┐    │
@@ -390,7 +390,7 @@ Label above (Sans 600 16/24), input (48 px tall, `--r-1`, 1.5 px `--line-strong`
 │ ═══ signature block ═══════════════════════════════════════════ │
 │  consent text · one-time code · [ Approve, and authorize … ]   │
 │  [ Request changes ]                                           │
-│  № KF-…-0412                                      with CoFile  │ ← serial again, bottom left
+│  № …-0412                                         with CoFile  │ ← serial again, bottom left
 │ ░ microprint rule ░                                            │
 └────────────────────────────────────────────────────────────────┘
 ```
@@ -431,8 +431,8 @@ Header in Sans 600 14/20 Graphite, sentence case, with a 1.5 px Intaglio rule un
 
 ### 9.8 Navigation
 
-- **Public header:** a 72 px bar on Sheet with the lockup at left, then the locked links ("How it works", "For firms", "What we file", "For platforms") and at right "Log in" (secondary) and "Run a free rehearsal" (forward). Under 900 px the links fold into a "Menu" sheet. The two buttons stay visible down to 360 px, and "Log in" becomes a quiet link under 420 px.
-- **Desk and dashboard:** a 240 px left rail on Paper, with the firm's logo (desk) or CoFile lockup (dashboard) at the top, then the locked menu labels, and the user's email and "Log out" at the bottom. The current item gets a 3 px brand-ink bar at its left and Intaglio text. Under 900 px the rail becomes a top bar with a "Menu" drawer.
+- **Public header:** a 72 px bar on Sheet with the lockup at left, then the locked links ("How it works", "For firms", "What we file", "For platforms") and at right "Log in" (secondary) and "Run a free rehearsal" (forward). Under 900 px the links fold into a menu sheet behind a 44 px menu button (three engraved rules; its accessible label is in Copy notes). The two buttons stay visible down to 360 px, and "Log in" becomes a quiet link under 420 px.
+- **Desk and dashboard:** a 240 px left rail on Paper, with the firm's logo (desk) or CoFile lockup (dashboard) at the top, then the locked menu labels, and the user's email and "Log out" at the bottom. The current item gets a 3 px brand-ink bar at its left and Intaglio text. Under 900 px the rail becomes a top bar with a drawer behind the same menu button.
 - **Docs:** a left rail with the locked group heads "Overview", "Guides", "Reference", "Endpoints", "OpenAPI (JSON)".
 
 ### 9.9 Banners
@@ -453,6 +453,24 @@ A ledger of 16 rows with columns "Filing", "Where" and "Where it stands" (locked
 **Empty states** are a single engraved icon (40 px, line master), the locked sentence and the forward button, for example "Your desk is clear. Start a filing (it can be a free rehearsal), or send a client a link with your logo on it." with "New filing" and "Send a client a link". No illustrations of people.
 
 **Toasts** appear at bottom center on mobile and bottom left on desktop: 48 px, Sheet with an e3 shadow, a glyph plus a locked message (for example "Thanks. Filings for this card pay with it for the next hour."). They stay for 6 s, pause on hover or focus, and use `role="status"`. Stops never appear only as a toast. They stay on the page.
+
+### 9.12 State matrix for the remaining controls
+
+Every control below is specified in all of its states. "Focus" is always the 3 px focus ring at a 2 px offset (section 9.1), so it is left out of the table.
+
+| Control | Default | Hover | Selected / on | Disabled | Error |
+|---|---|---|---|---|---|
+| **Checkbox** (24 px, `--r-1`) | 1.5 px Rule border on Sheet | Border goes to Intaglio | Intaglio fill with a white engraved check. This is the one place a check appears before approval, because the person is making a statement themselves. | Hatched fill, label at 4.5:1 | 2 px vermilion border, ■ and message under the label |
+| **Radio card** (kind of firm, state picker, filing type) | Sheet, 1.5 px `--line`, 16 px padding, label in Sans 600 18/28 | Border goes to Rule | 2 px Intaglio border, a filled 10 px disc at top right, Tint fill | Hatched, with the "Rehearsal" or "Live" chip still readable | Vermilion border on the group, message above |
+| **Select** | Like an input, with a 12 px engraved chevron | Border to Intaglio | Native list (no custom dropdowns on client pages) | Hatched | As fields |
+| **Textarea** | As input, 4 rows minimum, resizable vertically | Border to Intaglio | n/a | Hatched | As fields |
+| **Disclosure** (`details`) | Summary in Sans 600 with a 12 px chevron at the left | Summary underlined | Chevron turns 90° (`--t-quick`), body revealed by a downward wipe (`--t-move`) | n/a | n/a |
+| **Link** | Brand ink (firm-text on firm pages), 1 px underline at a 3 px offset | Underline goes to 2 px | Visited links keep the same color (older readers read a color change as an error) | n/a | n/a |
+| **Tooltip** (type cards only) | 12 px info glyph | Shows the locked tooltip in a Sheet panel, e3, 320 px max | Tap toggles it on touch. On phones the text also shows inline under the card, so nothing lives only in a tooltip. | n/a | n/a |
+| **Secret box** (API key, signing secret, proof link) | Dashed 1 px Rule border, Mono 16, Tint fill, the locked "Copy" or "Copy link" at the right | Border goes solid | After copying, the label stays as it is and a ● shows beside it for 2 s | n/a | n/a |
+| **Signature pad** | Always white paper, a 0.5 px baseline at 70% height, an engraved × at the baseline's left | Crosshair cursor | Ink drawn in Intaglio, pressure-sensitive from 1.6 to 3 px | Hatched overlay | Vermilion border |
+| **Method label** (docs) | Outlined, Mono 600 12/16, uppercase, ink | n/a | n/a | n/a | n/a |
+| **Count badge** (rail) | Ink text on Tint, 20 px, Mono 13, tabular | n/a | n/a | n/a | n/a |
 
 ---
 
@@ -507,7 +525,7 @@ The rule for the build team is that **level 4 appears only where a person decide
 |---|---|---|
 | `/signup` | 7/5 split. Form on the left; on the right a **live desk preview**, the brand bar of the firm's future pages that fills with the typed "Firm name" in the default ink. On mobile the preview collapses to a 64 px strip above the button. | Kicker "For firms", H1 "Set up your firm's filing desk", the lede, then fields "Firm name", the kind of firm (radio cards: "CPA or accounting firm", "Payroll company", "Fractional CFO firm", "Title company", "Something else"), "Your name", "Work email", "Password" and "Password again" (help "At least 12 characters. A short sentence works well."), "Phone (optional)", "Website (optional)", "States you file in", the volume radios ("Under 10" … "Over 200"), the terms checkbox, and "Create account". "Building a filing product?" links to `/#enterprise`. |
 | `/signup/sent` | Centered 560 px. The macro photograph of the printed specimen at 5:4 above the text. | "Your filing desk" / "Check your email" and the paragraph, then "send the link again" as a quiet button |
-| `/login` | Centered 440 px card on Bond with a level 2 rule | "Log in" / "Welcome back" / "Firms go to their filing desk, platforms to their dashboard." A secondary full-width "Continue with Google" above an engraved "or" rule, then "Email", "Password", "Forgot your password?" and the forward "Log in". Below: "New here? Set up your firm's filing desk. Enterprise developers can also log in with an API key." Message strings (waiting for approval, Google errors) appear as banners above the card. |
+| `/login` | Centered 440 px card on Bond with a level 2 rule | "Log in" / "Welcome back" / "Firms go to their filing desk, platforms to their dashboard." A secondary full-width "Continue with Google" above a plain engraved rule (no "or": that word isn't in the copy), then "Email", "Password", "Forgot your password?" and the forward "Log in". Below: "New here? Set up your firm's filing desk. Enterprise developers can also log in with an API key." Message strings (waiting for approval, Google errors) appear as banners above the card. |
 | `/forgot-password`, `/reset-password` | Same card | "Reset your password" with "Email me a reset link"; "Choose a new password" with "Set new password"; incomplete-link text as a waiting banner |
 | `/verify-email` | Same card | "Confirm your email", "One click and your email is confirmed.", "Confirm my email"; resend form under an engraved rule |
 | `/invite-expired`, `/join/<token>` (redirects) | Same card, rosette-free. A cancelled perforation line (9 holes) runs across the top of the card. | "This link has expired or isn't valid" plus the paragraph |
@@ -527,7 +545,7 @@ It is served by the engine as server-rendered HTML, so it must work fully **with
 ├─guilloche 12px────────────────────┤
 │ ◐ Rehearsal: nothing will be filed│ (rehearsal only, full width)
 │   or paid, even if you approve.   │
-│ NJ LLC formation: TWO SISTERS…    │ h1 34/40
+│ NJ llc formation: TWO SISTERS…    │ h1 34/40 (title as the engine builds it)
 │ Filing reference ▮▮▮▮-0412.       │ serial figures
 │ Please decide by December 3, 2026,│ bold deadline
 │ 5:00 PM Eastern. After that…      │
@@ -556,14 +574,14 @@ It is served by the engine as server-rendered HTML, so it must work fully **with
 │ [ Request changes ]               │ secondary, full width
 │ ▸ What should change? (Needed     │ <details>, opens textarea
 │   only if you ask for changes)    │
-│ Questions: help@harborpine…       │
+│ Questions: {firm support email}   │
 │ № …-0412             with CoFile  │ imprint line
 └───────────────────────────────────┘
 ```
 
 **Ordering (chunked, not rewritten).** The engine's single note is split into its sentences and placed where each one does its job. The "Government sites don't save drafts…" sentence opens the page as a waiting box, because it tells the reader to check. The consent sentence, the EIN sentence and the fee cap go into the **signature block**, directly above the button, so the client reads the authorization and the total in the same glance as the button. Every word is the engine's, in its own order inside each chunk.
 
-**Details.** Labels sit above values on phones and beside them (40/60) from 600 px. Values are Mono, and masked SSNs show the locked masking note above the table. The state's review page sits in a photo mount with the locked heading and paragraph; tapping opens a full-screen viewer with pinch zoom and a "close" control, and the alt text is the engine's. On IRS filings there is no review image and no mount at all, so nothing claims to be the IRS's page.
+**Details.** Labels sit above values on phones and beside them (40/60) from 600 px. Values are Mono, and masked SSNs show the locked masking note above the table. The state's review page sits in a photo mount with the locked heading and paragraph; tapping opens a full-screen viewer with pinch zoom and a 44 px × close control (accessible label in Copy notes), and the alt text is the engine's. With no JavaScript the picture simply links to the full-size image. On IRS filings there is no review image and no mount at all, so nothing claims to be the IRS's page.
 
 **The signature block.** It sits on Sheet, ruled above by a double Intaglio rule (1.5 px + 0.5 px, 2 px apart), the way a certificate separates the text from the signatures. The approve button runs the full width of the column with a minimum height of 56 px, in forward ink (or Intaglio, see 11.2), with its label on two lines on phones. It has no icon. "Request changes" is secondary and full width, 16 px below. The "What should change?" textarea is inside a `<details>` so the approve path carries no empty field. Submitting "Request changes" with an empty comment is allowed, as today.
 
@@ -578,7 +596,7 @@ Both are firm-branded at level 0 while the form is being filled in; the instrume
 - If the type isn't live: the rehearsal banner with the locked "This page is in rehearsal for now. You can fill it in and see your proof, but nothing will be filed with the state and nothing will be charged, now or later, even after you approve it. To file for real, contact {firm}."
 - H1 is the filing type title (for example "New York LLC formation"), then the summary and the locked "After you send this, we'll email you a link to check and approve exactly what will be filed…" line, and the fee note if any.
 - The form is built from section folds (`details.fold`) with the section titles from the form definitions ("Name", "Registered agent", "Members and managers", …). The first fold is open and the rest are closed with a ✓ count once complete. Paired fields, "Same as" chips and "More options" as in 9.2. The authorization box comes last before the button.
-- The forward button ("Send the proof to my client" for staff, or the client-facing label the form passes), then "Next, we'll email you a proof to check. Nothing is filed until you approve it." and the Terms line, then "Questions about this form? Email {firm} at …".
+- The forward button, "Send to {firm}" on client links and service pages ("Send the proof to my client" when staff fill it in on the desk), then "Next, we'll email you a proof to check. Nothing is filed until you approve it." and the Terms line, then "Questions about this form? Email {firm} at …".
 - Expired or invalid: the firm frame, a cancelled perforation rule, "This link has expired or isn't valid" / "Ask whoever sent it for a new one." Not offered: "This filing is no longer offered".
 
 ### 10.6 Partner filing desk `/p/<slug>` (level 1, the firm's brand)
@@ -588,7 +606,7 @@ Both are firm-branded at level 0 while the form is being filled in; the instrume
 | Page | Layout and locked copy |
 |---|---|
 | **Overview** ("Filings") | H1 "Filings" with "New filing" (forward) at the right. Waiting banners: "{n} approved filings are …" with "Pay and file"; "{n} filings need …"; the subscription line "Real filings need an active subscription; rehearsals are free." with "Subscribe" (quiet). The ledger has columns "Filing", "Type", "Status" and "Started", each row starting with a 24 px rosette thumbnail, then the business name, type, chip and date. Rehearsal rows carry the Rehearsal chip (today's "Test", see Copy notes). Empty: "Your desk is clear. …" with "New filing" and "Send a client a link". |
-| **Setup** | "Set up your account" (then "You're set up") with the lede "Three short steps, plus registered agents if you want them. You can change any of them later." Three **numbered plates** ("Your firm", "Branding", "Payment"), each with its description and button, and the next one shown as a forward button. Done steps get a ● and "Change …". "Registered agents (optional)" sits under an engraved rule. Sub-pages show "Step 1 of 3" etc. as a three-square track. |
+| **Setup** | "Set up your account" (then "You're set up") with the lede "Three short steps, plus registered agents if you want them. You can change any of them later." Three **numbered plates** ("Your firm", "Branding", "Payment"), each with its description and button, and the next one shown as a forward button. Done steps get a ● and their button reads "Change". "Registered agents (optional)" sits under an engraved rule. Sub-pages show "Step 1 of 3" etc. as a three-square track. |
 | **Setup › Branding** | Two columns. On the left: "Logo" (upload with drag-and-drop, the locked help, "Remove logo", "Or a link to your logo", "Use a link instead"), the color fields ("Use a hex code like #1f4fd1."), and the font presets as specimen cards showing each face set in the firm's name (Standard, Inter, IBM Plex Sans, Roboto, Open Sans, Lato, Montserrat, Source Serif, Merriweather, Lora, or upload). On the right is a **live proof preview** at 0.6 scale using the Two Sisters Bakery sample. Any contrast correction the guard makes is shown beside the swatch as a before/after pair of dots, with no new words (see Copy notes for a suggested line). |
 | **Setup › Payment, Registered agents, Your firm** | Level 0 forms on a 720 px column, the locked copy as is, the Basis Theory element styled per 9.2 |
 | **New filing** | "New filing" / "Which state is the business in?" as four large state cards (New York, New Jersey, Florida, All states), with no state outlines and no seals, only the names in Roman Display at 28 px. Then the type list: each type is a card with its name, and either a solid "Live" chip or a "Rehearsal" chip with the locked tooltip "Runs on the state's real website and stops before the last button: nothing is filed or paid". The locked "Filing types go live one at a time…" line sits above the list, and "Or send us the details…" (email, WhatsApp, Slack `/file`) in a quiet panel below. "Your pages for clients" with the widget code in a Mono box and "Copy". |
@@ -644,6 +662,203 @@ A 600 px single column on Sheet inside a Bond background. At the top is the firm
 
 Plain-text versions are generated for every email, with the check group written out.
 
+### 10.11 More wireframes for the build team
+
+**Desk overview, desktop (1280).**
+
+```
+┌──────────────┬──────────────────────────────────────────────────────────────────┐
+│ [firm logo]  │ Filings                                         [New filing]     │ app-h1
+│ Harbor & Pine│ ○ 2 approved filings are … ................. [Pay and file]      │ waiting banner
+│ CPA          │ Real filings need an active subscription; rehearsals are free.   │
+│              │   Subscribe                                                      │ quiet link
+│ Filings    ▌ │ ┌──────────────────────────────────────────────────────────────┐ │
+│ New filing   │ │ Filing                 Type          Status           Started │ │ ledger header
+│ Ready to pay②│ │ ✺ Two Sisters Bakery…  NJ LLC form…  ◐ Rehearsal      Nov 26  │ │ ✺ = 24px rosette
+│ Client links │ │ ✺ {client business}    FL LLC form…  ○ Waiting for …  Nov 25  │ │
+│ Signatures   │ │ ✺ …                    IRS EIN       ● EIN issued     Nov 24  │ │
+│ Setup        │ │ ✺ …                    NY Articles…  ■ Paused: stat…  Nov 22  │ │
+│ Billing      │ └──────────────────────────────────────────────────────────────┘ │
+│              │                                                                  │
+│ {your email} │                                                                  │
+│ [Log out]    │                                                                  │
+│ with CoFile  │                                                                  │
+└──────────────┴──────────────────────────────────────────────────────────────────┘
+  ↑ firm's second color as a 3px rule on the rail's right edge
+```
+
+(Rows other than Two Sisters Bakery stand for real client data. They are placeholders, not copy.)
+
+**Filing detail: the record sheet, desktop.**
+
+```
+┌─ stub ──────────┬┄┄┬─ record ───────────────────────────────────────────────────┐
+│                 │┆ │ ← Filings                                                   │
+│   ( rosette )   │┆ │ NJ llc formation: TWO SISTERS BAKERY LLC      ◐ Rehearsal   │
+│   struck, 160px │┆ │ … started Nov 26, 2026, 10:14 AM                            │
+│   7F3A          │┆ │                                                             │
+│ № …-0412        │┆ │ ● 10:14  Received                                           │
+│ ◐ Rehearsal     │┆ │ ● 10:15  Getting the state's review page                    │ endorsements
+│                 │┆ │ ● 10:21  Waiting for approval                               │
+│ earlier proofs: │┆ │ ▣ 11:02  Approved                       ← current, boxed    │
+│ (✺ cancelled)   │┆ │ ┆  ···   Filing now                       ← ghost entries     │
+│                 │┆ │ ┆  ···   Submitted to the state                               │
+│                 │┆ │                                                             │
+│                 │┆ │ [Link to the proof] [Documents] [EIN:] [Progress on the …]  │ cards below
+└─────────────────┴┄┄┴─────────────────────────────────────────────────────────────┘
+   ┆ = perforation between the stub and the record (8 px dots, 6 px pitch)
+```
+
+The stub is 280 px wide at `lg`. Under 900 px it becomes a 120 px band across the top, with the rosette at 72 px on the left and the serial and chip on the right.
+
+**New filing, phone (375).**
+
+```
+┌───────────────────────────────┐      ┌───────────────────────────────┐
+│ ≡  [firm logo]   with CoFile  │      │ ← New Jersey                  │
+│ New filing                    │      │ Fill it in yourself, or send  │
+│ Which state is the business   │      │ your client a link…           │
+│ in?                           │      │ ┌───────────────────────────┐ │
+│ ┌───────────────────────────┐ │      │ │ LLC formation             │ │
+│ │ New York                  │ │      │ │ ◐ Rehearsal          (i)  │ │
+│ └───────────────────────────┘ │  →   │ └───────────────────────────┘ │
+│ ┌───────────────────────────┐ │      │ ┌───────────────────────────┐ │
+│ │ New Jersey                │ │      │ │ Employer registration …   │ │
+│ └───────────────────────────┘ │      │ │ ◐ Rehearsal          (i)  │ │
+│ ┌───────────────────────────┐ │      │ └───────────────────────────┘ │
+│ │ Florida                   │ │      │ Runs on the state's real      │
+│ └───────────────────────────┘ │      │ website and stops before …    │ tooltip shown inline
+│ ┌───────────────────────────┐ │      │                               │
+│ │ All states                │ │      │ Or send us the details …      │
+│ └───────────────────────────┘ │      └───────────────────────────────┘
+└───────────────────────────────┘
+```
+
+(The type names shown are illustrative; the list comes from the firm's offered filings.)
+
+**Client intake, phone.**
+
+```
+┌───────────────────────────────┐
+│ [firm logo] Harbor & Pine CPA │
+│                   with CoFile │
+├───────────────────────────────┤
+│ Beta  This service is in beta…│ neutral notice
+│ ◐ This page is in rehearsal   │ rehearsal banner (if the type isn't live)
+│   for now. You can fill it in…│
+│ New Jersey LLC formation      │ h1
+│ (summary) After you send this,│
+│ we'll email you a link …      │
+│ Fields marked * are required. │
+│ ▾ Name                   ───  │ first fold open
+│   [ input ................. ] │
+│ ▸ Business data               │ closed folds
+│ ▸ Registered agent       ● 3  │ ● count once complete
+│ ▸ Members and managers        │
+│ ▸ Signers                     │
+│ ┌ Authorizations ───────────┐ │
+│ │ Here, "the filing company"│ │
+│ │ means …                   │ │
+│ │ ☐ I am …                  │ │
+│ └───────────────────────────┘ │
+│ [ Send to Harbor & Pine CPA ] │ forward, 56px: "Send to {firm}"
+│ Next, we'll email you a proof │
+│ to check. Nothing is filed …  │
+│ By sending, you agree to …    │
+└───────────────────────────────┘
+```
+
+**Ready to pay, phone.**
+
+```
+┌───────────────────────────────┐
+│ Ready to pay                  │ app-h1
+│ Approved filings that pay the │
+│ state with a saved card wait  │
+│ here … We keep the code for an│
+│ hour at most, then delete it. │
+│ ┌───────────────────────────┐ │
+│ │ Two Sisters Bakery LLC    │ │ waiting ledger
+│ │ NJ LLC formation $103.50  │ │
+│ └───────────────────────────┘ │
+│  Visa ···· 4242               │ card as the vault names it
+│  ┌──┬──┬──┬──┐                │ one input, drawn as 4 cells
+│  │  │  │  │  │                │ Mono 24, Basis Theory element
+│  └──┴──┴──┴──┘                │
+│ A card's security code can't  │
+│ be stored, so we ask for it … │
+│ [      Pay and file         ] │ forward
+└───────────────────────────────┘
+```
+
+**Dashboard overview, desktop.**
+
+```
+┌──────────────┬───────────────────────────────────────────────────────────────┐
+│ [Open C]     │ Overview                                                      │
+│ CoFile       │ ┌ Filings ─────┐ ┌ Webhook deliveries ┐ ┌ API keys ─────────┐ │ stat plates,
+│ Overview   ▌ │ │   1,284      │ │   9,870  ● 99.6%   │ │  4   Manage keys  │ │ Numbering figures
+│ Filings      │ └──────────────┘ └────────────────────┘ └───────────────────┘ │
+│ Ready to pay │ By status          ▇▇▇▇▇ ▧▧▧ ▦ ◻◻ ···                         │ hatched bars
+│ Firms        │ By state           NY ▇▇▇▇  NJ ▇▇▇  FL ▇▇  IRS ▇▇▇▇            │
+│ API keys     │ By month           ▁▂▃▅▆▇                                     │
+│ Webhooks     │                                                               │
+│ Setup … Docs │                                                               │
+└──────────────┴───────────────────────────────────────────────────────────────┘
+```
+
+(The numbers shown are placeholders for live data.)
+
+**Docs reference, one endpoint, desktop.**
+
+```
+┌ rail ───────┬ prose 720 ────────────────────────────┬ code 440 (plate) ──────────┐
+│ Overview    │ [POST] /v1/filings                    │ curl https://api.cofile.app│
+│ Guides      │ (summary from the reference)          │   /v1/filings \            │
+│ Reference ▌ │ Body                                  │   -H "Authorization: …" \  │
+│  Filings    │ ┌ field ─── type ──── required ─────┐ │   -d '{ "dryRun": true, …' │
+│  Approvals  │ │ dryRun    boolean   no            │ │                            │
+│  …          │ │ …                                 │ │ 201                         │
+│ Endpoints   │ └───────────────────────────────────┘ │ { "id": "…", … }          │
+│ OpenAPI     │ Responses  201 · 400 · 402 · 409      │                    [Copy]  │
+└─────────────┴───────────────────────────────────────┴────────────────────────────┘
+```
+
+(Endpoint content comes from the existing reference; it is shown here only for layout.)
+
+**Email: "Your proof is ready to approve".**
+
+```
+┌────────────────────── 600 ──────────────────────┐
+│ [firm logo]                                     │
+│ ▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁ 3px firm rule ▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁ │
+│ ≋≋≋≋≋≋≋≋≋≋≋≋ 8px guilloche rule (PNG) ≋≋≋≋≋≋≋≋ │
+│ ┌ ◐ Rehearsal: nothing will be filed or paid, ┐ │ (rehearsal only)
+│ └   even if you approve.                      ┘ │
+│ Your proof is ready to approve: …     ( ✺ 96 ) │ H1 + rosette, check group 7F3A
+│                                         7F3A    │
+│ Your proof is ready. Open the link to see every │
+│ detail and every fee …                          │
+│ [          Open your proof           ]          │ 48px bulletproof button
+│ ┌ Don't forward this email: anyone with the   ┐ │ waiting box
+│ └ link can open your proof.                   ┘ │
+│ Harbor & Pine CPA · address · email            │
+│ with CoFile                                     │
+└─────────────────────────────────────────────────┘
+```
+
+### 10.12 Print and PDF
+
+People still print what they sign, and title companies file paper. Every level-4 page has a print stylesheet.
+
+- **Page:** US Letter and A4 both, 18 mm margins. The guilloche frame prints as 0.25 pt lines in the page's guilloche ink (or 40% black on monochrome printers). The microprint prints at 0.3 mm cap height, which reads as a rule to the eye and as text under a loupe. That is a genuine printed security feature, for free.
+- **The proof printed:** buttons and form controls are removed. In their place the signature block prints the consent text in full, the total, the deadline and the proof's URL in Mono 8 pt, so a printed proof says exactly what approving it would authorize, and that it is approved online. The rosette prints at 30 mm. The serials print top right and bottom left.
+- **The filing record PDF** (proposed new surface, from the filing detail page): one document holding the three things the locked copy promises in one place, "What was approved, what was filed and what the state sent back". Page 1 is the proof as approved, with the struck rosette and the approval time. Page 2 is the state's review page as submitted, in its mount, with the countersigned rosette. Then the state's documents, appended as they came. Each page carries the serial and a running microprint footer. Generated server-side (headless Chromium from the same HTML) so the PDF and the page never drift. Social Security numbers and ITINs stay masked, as in the Google Docs copy. Its download button needs a label (Copy notes).
+
+### 10.13 A proposed internal surface: drift review
+
+The brief lists drift reviews among internal staff work. When a state changes its form, staff compare the approved form snapshot with the new screen. That screen gets the counterfoil layout from the home page: the approved snapshot on the left stub, the new screen on the right, a perforation between them, and every changed region outlined in vermilion with a ■ and its number. It is level 1, CoFile brand, platform tenant only. A reviewer approves the change with a forward button, after which the affected filings' clients may be asked to approve again, as the locked drift notice says.
+
 ---
 
 ## 11. The white-label theming system
@@ -668,11 +883,23 @@ Computed in OKLCH at save time (web) and again at render (engine), stored as a p
 1. **`firm-fill`** (button backgrounds). If white text on it is ≥ 4.5:1, use it with white. If the color is light (L ≥ 0.72) and Intaglio text on it is ≥ 4.5:1, keep the color and switch the label to Intaglio. This fixes the "light color behind white button text" case without muddying the brand. Otherwise lower L in 0.01 steps, keeping the hue and clamping chroma to sRGB, until white passes.
 2. **`firm-text`** (links and accents on sheet). Lower L until ≥ 4.5:1 on the sheet. In dark mode raise L until ≥ 4.5:1 on the dark sheet.
 3. **`firm-guilloche`**: firm-text at 38% over the sheet. **`firm-tint`**: L 0.97, chroma ≤ 0.03.
-4. **Meaning guard.** If the color's chroma is ≥ 0.08 and its hue falls in the **stop zone (15° to 40°)** or the **hold zone (55° to 90°)**, the firm keeps it for its brand bar, logo plate, links and guilloche, but **forward buttons, including the approve button, print in Intaglio** with white text. A red firm never gets a red Approve button, and an orange firm never gets one that reads as a rehearsal hold. Greens and every other hue may use their own color for forward buttons.
+4. **Meaning guard.** If the color's chroma is ≥ 0.08 and its OKLCH hue falls in the **stop zone (10° to 45°)** or the **hold zone (50° to 100°, which takes in oranges, golds and yellows)**, the firm keeps it for its brand bar, logo plate, links and guilloche, but **forward buttons, including the approve button, print in Intaglio** with white text. A red firm never gets a red Approve button, and an orange firm never gets one that reads as a rehearsal hold. Greens and every other hue may use their own color for forward buttons.
 5. **Focus.** firm-text if it is ≥ 3:1 against both the sheet and the fill it surrounds; otherwise Intaglio.
 6. **Chips are never themed.** Status inks and glyphs are fixed for every firm.
 
 Setup shows the result live on the sample proof. When the guard changed something, it shows the firm's swatch and the corrected swatch side by side.
+
+**Worked examples** (values are illustrative and come from `@cofile/theme-guard`, which is the source of truth):
+
+| Firm enters | What the guard does | Forward button | Links | Brand rule |
+|---|---|---|---|---|
+| `#1F4FD1` (strong blue) | White passes (about 6.8:1). No change. | `#1F4FD1`, white label | `#1F4FD1` | `#1F4FD1` |
+| `#2A9D8F` (mid teal) | White fails (3.3:1) and the color is mid-light, so L is lowered until white passes | about `#1F7A6F`, white label (about 5.2:1) | about `#1F7A6F` | `#2A9D8F` as entered |
+| `#F4D35E` (pale gold) | Light color, so the label would switch to Intaglio, but the hue sits in the hold zone, so the meaning guard takes over | Intaglio `#17171F`, white label | Darkened gold, about `#7A6200` | `#F4D35E` as entered |
+| `#C62828` (red) | Stop zone | Intaglio, white label | `#C62828` (passes about 5.5:1 on sheet) | `#C62828` |
+| `#FFFFFF` or near-sheet | Can't be seen as a rule, so it is raised to 1.5:1; buttons fall back to Intaglio | Intaglio | Intaglio | about `#C9C6BC` |
+
+**Fonts at scale.** Uploaded fonts are checked once at upload, subset to the characters the firm's pages need (Latin plus Spanish), converted to WOFF2 and served from CoFile's domains. Upload never pulls a stylesheet from a third party onto the proof. The fallback stack is metric-matched to the firm's font, so a slow load doesn't reflow the signature block under someone's thumb.
 
 ### 11.3 Enterprise themes
 
@@ -728,6 +955,40 @@ The same ticket, plus the subscriber's own name on the "filing company" definiti
 
 ---
 
+## 14. Acceptance checklist for the build team
+
+Nothing ships until each item is checked by someone who didn't build it.
+
+**The proof**
+- [ ] Renders and approves with JavaScript off, on a 360 px phone, at 200% text size.
+- [ ] The total and the approve button are visible together in a 667 px-tall viewport once the client reaches the signature block. The button is not sticky.
+- [ ] The consent sentence sits directly above the button, in full, at body size.
+- [ ] The rosette and check group are identical in the email, on the proof and on the record for the same approval. Changing any detail or fee by one character changes the rosette.
+- [ ] The serial prints in two places and both match.
+- [ ] A rehearsal shows the rehearsal band, the ochre microprint and the ochre rosette; a live filing shows none of them.
+- [ ] No request leaves cofile.app or api.cofile.app from the proof (fonts included).
+- [ ] An IRS filing shows no review-page mount at all.
+- [ ] Expired, used and invalid links show the firm's frame with a cancelled rosette, never a bare line of text.
+
+**Meaning and contrast**
+- [ ] Every chip shows its glyph and passes 4.5:1. No chip ever takes a firm's color.
+- [ ] Only Live is solid green in the coverage register, and Live renders only from the per-type live switch.
+- [ ] 500 random firm colors run through the guard, with every derived pair meeting its ratio and no red, orange or gold forward buttons.
+- [ ] The beta notice appears on every public page except the embed, and is neutral on firm and enterprise pages.
+
+**Ethics of the mark**
+- [ ] Nothing on any page uses an eagle, star ring, dome, flag, state outline, seal-like text ring, foil starburst or the words "official" or "certified".
+- [ ] The rosette generator can't produce 13 lobes, sharp star points or a plain circle.
+- [ ] The old name appears nowhere a customer can see, including email headers, alt text, file names of downloaded PDFs, and the serial format.
+- [ ] Enterprise white-label pages show no CoFile mark. Partner pages show only "with CoFile" in small print (or "Filed with CoFile" in the embed).
+
+**Reading**
+- [ ] No text on client pages is under 14 px. No body text is under 7:1 on client pages.
+- [ ] Spanish strings fit every button at 360 px without truncation.
+- [ ] Screen reader pass on the proof (VoiceOver and TalkBack): the reference is read once, the rosette not at all, and the button's description includes the consent and total.
+
+---
+
 ## Appendix A: What I would push back on in the current site
 
 1. **The mark puts a green check on every page before anyone has approved anything.** The folder tab with a check cut into it says "approved" on the log-in page, the 404 and the footer. In my trade you never pre-print the signature. The check belongs to the client, and it should appear only when they approve.
@@ -750,5 +1011,6 @@ The same ticket, plus the subscriber's own name on the "filing company" definiti
 7. Engine jargon on the dashboard: "The engine posts…" (Webhooks) and "Ask the platform team to configure tenant…" (Overview).
 8. The staff subject "Site changed — review needed:" uses an em dash where the rest of the copy uses colons.
 9. The rosette needs one sentence near it, which I have not added. A suggestion: "This pattern is drawn from the details on this page. If any detail changes, so does the pattern." Branding setup could use one too: "We adjusted your color slightly so text on it stays easy to read."
-10. The language switch needs approved labels: "English" and "Español".
+10. Some controls need approved labels that aren't in the copy today: the language switch ("English" and "Español"), the accessible name of the mobile menu button, and the close control on the proof's full-screen picture viewer.
 11. The live "Approval recorded" text, "We'll submit the filing exactly as shown.", is close to the "will be submitted" promise the copy rules avoid. It is saved by the stop-before-paying sentence that follows. Worth a look by counsel.
+12. The proposed filing record PDF (10.12) needs a label for its download button, and the drift review screen (10.13) needs its own copy if it is built.

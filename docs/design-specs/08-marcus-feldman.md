@@ -443,6 +443,90 @@ Above the table, a **control strip**, borrowed from the color bar printed on the
 
 The glyphs form an ordinal progression (dotted ring, empty ring, half ring, bars, solid tick), so the stage order reads without color. Table: "Filing", "Where", "Where it stands", grouped by stage under a quiet group rule, with filter chips for "New York", "New Jersey", "Florida" and "IRS". On xs, each row becomes a card: filing name, state and chip.
 
+### 9.12 Choice controls
+
+| Control | Spec |
+|---|---|
+| Checkbox | 22 px box, 2 px `--field-edge`, 4 radius, inside a 44 px hit row that includes the label. Checked: `--ink` fill with a white tick (not green: checking a box is not "go"). Focus: the 3 px ring around the box. Error: `--stop` edge plus the message below the row. Never pre-checked unless the copy defines a default. |
+| Radio | 22 px circle, 2 px edge; selected is a 10 px ink dot. Groups stack vertically; a row of two is allowed for yes/no questions only. |
+| Yes/no question | Two 48 px segmented buttons in one control, so a yes/no answer is a single tap on a phone. Selected segment: ink fill, white text. |
+| Select | Native `select` on touch devices, always. On desktop, the native control styled to 48 px with a Proof Marks chevron. No custom comboboxes for short lists. |
+| State and type pickers | Cards, not selects (10.3). 2 px `--field-edge` at rest, 2 px `--ink` on hover, the focus ring on focus, selected cards with an ink left rule. |
+| "States you file in" | A row of three checkbox chips (48 px tall), wrapping on xs. |
+
+### 9.13 Code fields
+
+Two codes matter: the card's security code on Ready to pay and the one-time code on the proof.
+
+- One single input, never split into per-digit boxes (they break paste, autofill and screen readers). Mono 24 / 30, letter-spacing 0.2 em, width sized to the code length plus 2 characters.
+- Security code: `inputmode="numeric"`, `autocomplete="cc-csc"`, max 4. One-time code: `autocomplete="one-time-code"` so phones offer the code from the text message.
+- The one-hour rule sits beside the security-code field in `--ink-2`, not under a link.
+- Wrong code: the field gets the stop edge and the existing message, and the field keeps focus with the value selected so retyping replaces it.
+
+### 9.14 Uploads
+
+| Upload | Where | Spec |
+|---|---|---|
+| Logo | Branding | A 160 px tall drop zone with a pencil dashed border; drag, browse or paste. After upload: the trimmed logo on light and dark plates side by side, so the firm sees both before saving. |
+| Font | Branding | A compact drop row under the presets, accepting the formats and size the help text names. After upload: a specimen line rendered in the font, plus the result of the checks in 11.3. |
+| PDF documents | New York Application for Authority | A file row per document with name, size and page count once read; a stop notice if the file isn't a readable PDF or is over the limit. |
+| Signature | Signatures | A sheet with three modes (draw on a 3:1 pad with a baseline, type in a script preset, upload an image); preview on a white plate at the size it will appear on the form. |
+
+All uploads show progress as a thin bar along the bottom of the row (indeterminate under 300 ms, then determinate). Errors stay inline.
+
+### 9.15 Copyable values
+
+Client links, firm page URLs, the widget snippet, API keys and webhook secrets share one component: a Mono value in a `--wash` field (read-only, selectable), a copy button at the right with its existing label where one exists ("Copy link"), and on success a 140 ms swap of the button's glyph to a tick for 2 s, announced through a polite live region. Secrets show once, in full, then only their prefix.
+
+### 9.16 The run log
+
+The home page's rehearsal log and the filing detail's "Progress on the state site" are one component.
+
+```
+┌ Rehearsal · New Jersey LLC formation            test details ┐  header: Mono 15/22, ink-2
+│ Business name                                        filled   │  rows: Mono 16/24
+│ Name check                                           passed   │  result right-aligned
+│ Registered agent                                     filled   │
+│ Members and signatures                               filled   │
+│ Review page                               matched the proof   │  "matched" results in go-ink
+│ Payment: $100.00 + $3.50 NJ portal fee    matches the proof   │
+│ Pay Now                                ▌▌ held, on purpose    │  hold: amber glyph + hold text
+└───────────────────────────────────────────────────────────────┘
+```
+
+On marketing it sits on the ink band with inverted tokens; in the desk it's a `--sheet` card. Rows can expand (desk only) to show the captured screen for that step, on a white plate. A stop row uses the stop glyph and text and ends the log. Rows are a real list (`ol`), so a screen reader hears them in order.
+
+### 9.17 The fee table
+
+Used on the sample proof, the real proof, the type cards' fee note, Ready to pay and Billing. Label column left in body text; amount column right-aligned in Mono with tabular figures; the total row separated by a 2 px ink rule above, bold Mono at the fee-total size. A "Maximum you authorize" row, when present, sits under the total with its parenthetical in `--ink-2`. Never more than one total. No currency symbols in the label column.
+
+### 9.18 Popovers, callout notes and dialogs
+
+- **Callout notes** (the sample proof's 1 to 4, setup tips): a `--pencil-wash` note, 280 to 340 px wide, 12 radius, with a pencil leader line to its numeral. Opened by tap, click or Enter; closed by Escape, a second tap or tapping elsewhere. One open at a time. Never opened on hover alone, because hover doesn't exist on phones and surprises desktop readers.
+- **Tooltips:** only for an existing `title` text (such as the Rehearsal badge's "Runs on the state's real website and stops before the last button: nothing is filed or paid"). Shown on hover after 400 ms and on focus immediately; also reachable by tapping the badge on touch devices, where it opens as a callout note.
+- **Dialogs:** used only for destructive confirmations the product already has (revoking a key, turning off a link if confirmation is added). 480 px max, e4, focus trapped, Escape closes, the destructive action on the right in destructive style. No dialogs on the client's path, and never a dialog on the proof.
+
+### 9.19 Loading
+
+- Under 300 ms: show nothing new. 300 ms to 2 s: skeleton rows in `--wash` with a 1.4 s shimmer (static under reduced motion). Over 2 s: the skeleton stays and a one-line status appears where the product already has one ("Getting the state's review page").
+- Buttons in flight keep their width and show their existing pending label (9.1).
+- A filing that's running ("Filing now") updates its timeline and log every 5 s over a server event stream, without moving the page; new log rows fade in at 140 ms.
+
+### 9.20 State matrix
+
+Every interactive component ships with these states designed and in Storybook, in light and dark and under three torture-set brands:
+
+| State | Buttons | Fields | Chips | Cards (pickers) | Rows (tables) |
+|---|---|---|---|---|---|
+| Rest | ✓ | ✓ | ✓ | ✓ | ✓ |
+| Hover | darken 1 step | edge to ink-2 | none | ink edge | `--wash` |
+| Focus | 3 px ring | 2 px focus edge + ring | ring (when a link) | ring | ring on the first cell |
+| Pressed or selected | 1 px down | n/a | n/a | ink left rule | n/a |
+| Disabled | 40% + nearby reason | `--wash` fill, ink-3 text | n/a | 40% + reason | n/a |
+| Loading | pending label + spinner | n/a | working glyph | skeleton | skeleton |
+| Error | n/a | stop edge + message | stop family | stop edge + message | stop chip in row |
+| Success | toast or inline notice | tick at the right edge on blur (for formats like ZIP and email only) | go family | n/a | go chip in row |
+
 ---
 
 ## 10. Page by page
@@ -578,9 +662,68 @@ My sequencing change: "Start a filing" appears as soon as "Your firm" and "Brand
 
 1. State: three large cards ("New York", "New Jersey", "Florida") with the existing count labels. The email, text and Slack ways sit beneath as a quiet panel.
 2. Type: cards sorted Live first, then rehearsed types, then the rest, each with its chip ("Live" solid green, or the amber "Rehearsal" with the existing tooltip), summary and fee note. Sorting by readiness is presentation, and it steers first rehearsals toward types that run all the way to the payment screen.
-3. Form: one column, max 640, sections with paired fields, "Same as" chips, folded optional sections. On lg, a sticky right rail shows **the proof assembling as they type**: each answered field appears on a mini sheet in ink, unanswered required ones as pencil placeholders. The submit button keeps its label, "Send the proof to my client".
+3. Form: the page opens with the three ways to start, as three equal cards in a row (stacked on xs): "Send them a link", "Start from a client you filed for before" and "New client", with "Fill in" as the action on the last. Under them, "Nothing is filed until your client approves the proof." in `--ink-2`. The form itself is one column, max 640, sections with paired fields, "Same as" chips, folded optional sections. On lg, a sticky right rail shows **the proof assembling as they type**: each answered field appears on a mini sheet in ink, unanswered required ones as pencil placeholders, and the fees fill in from the verified fee table as soon as the type and options are known. The submit button keeps its label, "Send the proof to my client".
+
+```
+ ← Other filings
+ New York LLC formation                                  [▌▌ Rehearsal]
+┌──────────────────┬───────────────────────────┬─────────────────┐
+│ Send them a link │ Start from a client you   │ New client      │
+│                  │ filed for before          │ [Fill in]       │
+└──────────────────┴───────────────────────────┴─────────────────┘
+ Nothing is filed until your client approves the proof.
+┌──────────────────────────────────────────────┬──────────────────┐
+│ Fields marked * are required.                │  mini proof      │ sticky, 320 wide
+│ Filing contact                               │  ┌ your logo ──┐ │
+│ The person the filing company and the state  │  │ Name  ░░░░░ │ │ pencil placeholders
+│ contact about this filing. …                 │  │ Members ░░░ │ │
+│ First name* [_______]  Last name* [_______]  │  │ Fees  $200… │ │ fills as typed
+│ Email* [__________]    Phone* [__________]   │  └─────────────┘ │
+│ ▸ More options (optional)                    │                  │
+│ …                                            │                  │
+│ [ Send the proof to my client ]              │                  │
+└──────────────────────────────────────────────┴──────────────────┘
+```
+
+On a firm's **first** rehearsal, the contact fields are prefilled with the logged-in person's own name and email (the form already supports prefills), so the first proof comes to them and they experience the client side before risking a real client. The firm can overwrite it. Product to confirm that the contact email is where the proof is sent; if not, the same prefill applies to whichever field routes the proof.
+
+**The first rehearsal path (signature idea, step 5).** This is the end of the funnel, so it's designed as one continuous path rather than separate pages:
+
+| Moment | What the firm sees | Design |
+|---|---|---|
+| Empty desk | "Your desk is clear. Start a filing (it can be a free rehearsal)…" | Empty state with "New filing" as the primary action |
+| Choosing | State cards, then type cards sorted by readiness | Types "Rehearsed to the payment screen" carry the hold chip and come first after any live ones |
+| Filling | The form with the mini proof growing in the rail | Their logo is already on it from Branding |
+| Sent | The filing detail, timeline at "Waiting for approval" | A neutral notice pointing to their own inbox; the approval email arrives in their brand |
+| Approving | The real proof on their phone, with "Rehearsal: nothing will be filed or paid, even if you approve." | Exactly the page their client will get |
+| Running | Filing detail, timeline at "Filing now", the log filling row by row | Same log as the home page, live |
+| Held | The log's last row "held, on purpose" with the hold stamp | The rail ends in the amber hold node; this is the activation event |
+
+**Your pages for clients.** On the type step, the existing "Your pages for clients" card lists each service's permanent page URL and its widget code. Each URL row uses the copyable value component (9.15) with an "open" glyph; the widget code sits in a Mono block with its own copy action, folded by default as today.
 
 **Filing detail.** Header: title, status chip, Rehearsal badge. Then the timeline (9.5), the "Approved and ready to pay…" notice when relevant, "Link to the proof" with copy and open actions, "Documents" as file rows (state document, EIN letter) with type icons, and "Progress on the state site" rendered with **the same log component as the home page**: the promise and the product look identical. "Save to Google Docs" sits as a secondary action with its existing explanation.
+
+```
+ Two Sisters Bakery LLC   [◯ Filing now]  [▌▌ Rehearsal]
+ ●───────●───────●───────◉───────○───────○
+ Received  Waiting   Approved  Filing   …          horizontal rail on md+, vertical on xs
+           for                 now
+           approval
+┌ Link to the proof ───────────────────────────┐ ┌ Documents ─────────────────┐
+│ [https://api.cofile.app/approve/…  ] [copy]  │ │ (none yet)                 │
+│ The signer's saved signature is placed on …  │ └────────────────────────────┘
+└──────────────────────────────────────────────┘
+┌ ▸ Progress on the state site (test run, running) ───────────────────────────┐
+│ Business name                                                  filled       │  the run log, 9.16
+│ Name check                                                     passed       │
+│ …                                                                           │
+└─────────────────────────────────────────────────────────────────────────────┘
+ [Save to Google Docs]  A copy of this record in your Google account. …
+```
+
+On xs, the order is header, the action notice if any, the vertical timeline, the run log, the link, documents, Google Docs. What needs the reader's attention always comes before the record.
+
+When a filing stops, the timeline ends in a stop node and the reason from `nextStep()` sits directly under it as a stop notice (for example "Something in the filing doesn't meet the state's rules. Start a corrected filing."), with the existing "New filing" action beside it as the primary button. A filing paused because the state's site changed ("Paused: state site changed") shows the hold family, not stop: nothing went wrong, CoFile stopped on purpose.
 
 **Client links.** "Send a client a link", the form ("Filing", "Who it's for (shown to you and the client)", "Make link"), then the result card with "Copy link" and "Email it from your mail app". The "Links you sent" table uses neutral chips for "Waiting for the client", go for "Used", ink outline for "Turned off" and "Expired".
 
@@ -588,7 +731,23 @@ My sequencing change: "Start a filing" appears as soon as "Your firm" and "Brand
 
 **Signatures.** "Saved signatures" as cards showing the signature image on a white plate, the signer and the consent version; "Add a signature" opens a sheet with draw, type or upload. Empty: "No saved signatures yet."
 
-**Ready to pay.** Grouped by card: a card row ("ending 4242"), the filings waiting under it with totals in Mono, one security-code field (4 digits max, `inputmode="numeric"`, `autocomplete="cc-csc"`) and the go button. The one-hour rule sits next to the field, not in the footer. Empty: "Nothing is waiting for a card right now."
+**Ready to pay.** Grouped by card: a card row ("ending 4242"), the filings waiting under it with totals in Mono, one security-code field (9.13) and the go button. The one-hour rule sits next to the field, not in the footer. Empty: "Nothing is waiting for a card right now."
+
+```
+ Ready to pay
+ Approved filings that pay the state with a saved card wait here for the card's
+ security code (the 3 or 4 digits on the card). Enter it once and every filing …
+┌──────────────────────────────────────────────────────────────┐
+│ ▭ [card label] ending 4242                                   │
+│   Two Sisters Bakery LLC · New Jersey LLC formation  $103.50 │  each row links to the filing
+│   …                                                          │
+│   [ 4 2 · · ]  A card's security code can't be stored, so we │  code field + existing note
+│                ask for it when filings are ready to pay. …   │
+│   [ Pay and file ]                                           │
+└──────────────────────────────────────────────────────────────┘
+```
+
+The page is the destination of the "Card security code needed" email, so it loads with the code field focused when there's exactly one card waiting. After the code is entered, each filing row's chip turns from hold to neutral ("Queued"), in place, so the person sees every filing go ahead without leaving the page. The go button is the existing "Pay and file" (pending label "Sending…").
 
 **Billing.** A plan panel (status chip such as "No subscription yet" or "Waiting for the first payment"), "Real filings need an active subscription. Rehearsals are always free." as the panel's lede, then Stripe actions ("Manage billing"). Registered-agent renewals listed per business. No price appears until Stripe returns a real one.
 
@@ -603,7 +762,7 @@ My sequencing change: "Start a filing" appears as soon as "Your firm" and "Brand
 │ [logo] Best Accounting    with ◉ CoFile│  brand bar
 ├────────────────────────────────────────┤
 │ ▌▌ This page is in rehearsal for now…  │  hold notice, only when not live
-│ LLC formation, New York  (kind.title)  │
+│ New York LLC formation                 │  H1 = the filing type's title
 │ After you send this, we'll email you a │
 │ link to check and approve exactly …    │
 │ Fields marked * are required.          │
@@ -616,6 +775,17 @@ My sequencing change: "Start a filing" appears as soon as "Your firm" and "Brand
 ```
 
 The neutral beta strip sits above the brand bar on these pages. Expired or used links: the brand bar, "This link has expired or isn't valid" / "This link can't be used" / "This filing is no longer offered", the existing sentence, the firm's support email as a link.
+
+**Client form details.** These readers are often first-time founders on a phone, sometimes Spanish-first, sometimes older, so the client template is stricter than the desk's:
+
+- Body 18 / 28, labels 17 / 24, fields 52 tall, one column at every width (paired fields stay paired only on sm and up).
+- The rehearsal notice ("This page is in rehearsal for now. You can fill it in and see your proof, but nothing will be filed with the state and nothing will be charged, now or later, even after you approve it. To file for real, contact {firm}.") is a hold-wash band, full width, above the H1. It's the first thing read, by sight and by screen reader.
+- Sections are numbered in the margin with pencil numerals, so a long legal form reads as a short sequence. Optional sections stay folded.
+- Authorizations and declarations (first person, as decided) sit in their own bordered block with the checkbox at the top left of the text, never at the end of a long paragraph, and the text at 17 / 26 rather than small print. The filer definition ("{firm}, filing through CoFile") appears once above the first authorization, in `--ink-2`.
+- The submit button names the firm ("Send to {firm}"), uses the firm's guarded action color and spans the column on xs.
+- Progress is saved in the browser as they go (per device, encrypted with a key held in the session, cleared on submit), so a client interrupted by a phone call doesn't lose a formation's worth of answers. Social Security numbers, ITINs, signatures and authorization checkboxes are never saved on the device.
+
+**Service pages as landing pages.** `/<firm>/<service>` pages are permanent and get shared, so they're designed as the firm's own small landing page: the firm's brand bar, the filing type's title as H1, the existing intro sentence, then the form. The page's social card is generated from the firm's brand: their logo on their tint, the filing type's title, "with CoFile" in micro at the bottom. Service pages can be indexed by search engines if the firm wants (a product setting); client links (`/i/…`) and the proof are always `noindex` and never cached by shared proxies. Canonical URLs use the firm's slug. Embedded and white-label variants (`/embed/…`, `/e/…`) use the same template minus the parts listed in 10.6.
 
 **The proof (approval page at api.cofile.app).** The page where design matters most. Mobile first, max 680, 18 / 28 body.
 
@@ -662,6 +832,44 @@ Decisions and why:
 - **Filing details** show label above value on xs, two columns on sm and up. Masked SSNs show the existing sentence beside them.
 - **After deciding,** the decision page keeps the brand bar, shows a large go tick or a neutral ring, the heading and paragraphs from `renderDecisionPage`, and nothing else. No upsell, ever.
 
+**The proof's states.** Every one of these wears the firm's brand bar and the same 680 column. Today several of them are a bare paragraph with no branding at all, which is exactly when a nervous client needs to see their firm's name (Appendix A9).
+
+| State | Heading and text (existing) | Design |
+|---|---|---|
+| Ready, rehearsal | The hold note "Rehearsal: nothing will be filed or paid, even if you approve." above the H1 | Full-width hold-wash band with the two-bar glyph, 18 / 28 bold, above everything except the brand bar. Not dismissible. |
+| Ready, live | No rehearsal note | The consent note is the first block after the H1 |
+| EIN in the run | "While filing, we'll get the EIN from the IRS and enter it on the state form. It's the only detail added after you approve." | Inside the consent note, as its own paragraph with a pencil "i" glyph |
+| EIN after acceptance | "Once the state accepts this formation, we'll apply for its EIN with the IRS…" | Same treatment |
+| SSN on the page | "Social Security numbers are masked on this page. We store them encrypted and delete them after 30 days." | Directly under the "Filing details" heading, with the masked-number glyph |
+| Code required | "One-time code sent to you" | The code field (9.13) directly above the approve button |
+| Wrong code | "That code didn't match. Go back, check the latest one-time code we sent you and try again." | Same page re-rendered with the field in error and the message under it, the rest of the page and any typed comment kept. Never a separate page that loses the reader's place. |
+| Approved, rehearsal | "Approval recorded" / "Thank you. Your approval is recorded. This is a rehearsal, so nothing will be filed or paid." | Go tick, 64 px, then the heading and the paragraph |
+| Approved, live | "Approval recorded" / "Thank you. Your approval is recorded. We'll submit the filing exactly as shown. If the state's page has changed by then, we stop before paying, and you may be asked to approve again. We'll email you when it's complete." | Same, with the sentence about stopping before paying kept in full: it's the honest part |
+| Changes requested | "Thank you. Your change request is recorded, and nothing will be filed from this link. If the filing is corrected, you'll get a new link to approve." | Neutral ring, branded page, the comment they typed quoted back beneath in `--ink-2` |
+| Already decided | "A decision was already recorded with this link, so there's nothing more to do here." | Neutral ring |
+| Expired | "This link to the proof has expired. Ask whoever sent it for a new one." | Hold glyph; the firm's support email as a link below, from the brand |
+| Not valid | "This link to the proof isn't valid. Ask whoever sent it for a new one." | Stop glyph; same support link |
+| Decision couldn't be recorded | "We couldn't record your decision because this link has expired or was already used. Ask whoever sent it for a new link." | Stop glyph; same support link |
+
+```
+ Approved, rehearsal (xs)
+┌──────────────────────────────────────┐
+│ [logo] Harbor & Pine CPA  with ◉CoFile│
+├──────────────────────────────────────┤
+│                                      │
+│              ( ✓ )                   │  64 px go tick, drawn on in 320 ms
+│                                      │
+│ Approval recorded                    │  H1 26/32
+│ Thank you. Your approval is          │
+│ recorded. This is a rehearsal, so    │
+│ nothing will be filed or paid.       │
+│                                      │
+│ Questions: …                         │
+└──────────────────────────────────────┘
+```
+
+**The state's review image on a phone.** A screenshot of a desktop state site is unreadable at 328 px. It's shown at full column width with crop marks, and a tap opens it full screen with pinch-zoom and a close button in the top right, 48 px. The page never depends on the image: every value on it is also in the "Filing details" table, which the existing alt text already says.
+
 ### 10.5 Enterprise dashboard (`/dashboard`)
 
 CoFile-branded, denser (44 px rows, 15 / 22 tables), dark mode by default for developers if their system prefers it.
@@ -674,7 +882,30 @@ CoFile-branded, denser (44 px rows, 15 / 22 tables), dark mode by default for de
 | Filings, Firms, firm detail | Filterable tables; firm detail shows its desk branding preview and its filings |
 | Setup | Three panels as on the page today: "Payment methods", "State portal logins" (NY DOS, NYS-100, NJ, IRS, FL, each a row with a sealed state and a connect action), "Who's named on your filings" |
 | Ready to pay, Billing, Team, Password | Same components as the desk |
-| Platform tenant only | "Sign-ups" with "Waiting for approval" and "Enterprise requests" tables, approve and decline per row; drift reviews as a queue with before and after screenshots side by side and the diff highlighted in pencil |
+| Platform tenant only | "Sign-ups" with "Waiting for approval" and "Enterprise requests" tables, approve and decline per row; drift reviews as a queue with before and after screenshots side by side and the diff highlighted in pencil (10.9) |
+
+```
+┌──────────────┬──────────────────────────────────────────────────────────────┐
+│ ◉ CoFile     │ CoFile dashboard                                             │
+│              │ ▌ Real filings need an active subscription; rehearsals are …  │
+│ Overview     │ ┌ Approved ─┐ ┌ Waiting ──┐ ┌ Stopped ──┐ ┌ In progress ┐     │ counts per family,
+│ Filings      │ │ ✓  ··     │ │ ▌▌ ··     │ │ ⬣  ··     │ │ ◯  ··       │     │ each a link to the
+│ Firms        │ └───────────┘ └───────────┘ └───────────┘ └─────────────┘     │ filtered Filings table
+│ API keys     │ Webhook deliveries                                           │ tile labels: [copy: C12]
+│ Webhooks     │ ▁▂▁▃▂▁▁▂▃▂▁▂▁▁  (14 days; failures in stop)                   │
+│ Setup        │                                                              │
+│ Ready to pay │ Filings (latest 10, same table as Filings)                   │
+│ Billing      │                                                              │
+│ Team         │                                                              │
+│ Password     │                                                              │
+│ ──────────── │                                                              │
+│ Sign-ups     │ platform tenant only                                         │
+└──────────────┴──────────────────────────────────────────────────────────────┘
+```
+
+**Setup in detail.** It's the enterprise's activation page, so it's ordered by what blocks a first filing: "State portal logins" first (each portal a row: NY DOS, NYS-100, NJ, IRS, FL, with a sealed or not-connected state, the existing "Not needed" or "Only for a prepaid Sunbiz E-file account." note where it applies, and a connect action that opens a sheet with the login fields), then "Who's named on your filings", then "Payment methods". A connected login shows only "sealed" with the date, never any part of the secret. When the account isn't configured yet, the existing notice ("Your account settings haven't been set up yet, so nothing here can be saved. We'll do that with you first.") sits at the top and every form below is shown read-only rather than hidden, so the buyer can see what's coming.
+
+**API keys and webhooks in detail.** Keys show the readable prefix in Mono and never the secret after creation. Webhook endpoints show the last 50 deliveries with event name, HTTP status as a chip (2xx go, 4xx hold, 5xx and timeouts stop), duration and a resend action. Event names use the docs' names so a developer can search one from the other.
 
 ### 10.6 White-label and embed
 

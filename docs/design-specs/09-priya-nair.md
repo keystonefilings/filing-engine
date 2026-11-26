@@ -64,7 +64,7 @@ This is the blueprint the whole design was built from. The example is the one th
 | 8 | Presses "Approve, and authorize submission and payment" | | "Approval recorded" page | Records consent version, time, IP | | Proof: decision page | |
 | 9 | | Card owner gets the email; opens Ready to pay; types the security code; presses "Pay and file" | Status **Approved**; desk notice "1 approved filing is ready to pay…" | Code goes to Basis Theory, kept an hour at most | | Desk: Ready to pay | "Card security code needed: …" with "Enter security code" |
 | 10 | | | **Queued**, then **Filing now** | Fills NJ's screens; checks the review page matches the proof; reads the fee on NJ's payment screen and compares it with the proof | NJ portal, screen by screen | Desk: detail, live progress on the state site | |
-| 10a | | Told why; may need to re-approve | **Paused: state site changed** (if NJ changed its form) | Stops before paying; drift review by CoFile staff | | Desk: detail with the red-free "paused" tone | "Site changed — review needed: …" |
+| 10a | May be asked to approve again | Sees the pause on the desk | **Paused: state site changed** (if NJ changed its form) | Stops before paying; drift review by CoFile staff | | Desk: detail with the calm `paused` tone, not red | "Site changed — review needed: …" to the account's admin channels (see 2B.2) |
 | 11 | | | **Submitted to the state** → **Accepted by the state** | Saves NJ's documents to the filing | NJ answers at once | Desk: detail, Documents card | |
 | 12 | | | **EIN issued** | Applies with the IRS once the name check passes; saves the IRS letter | IRS EIN assistant | Desk: detail, EIN shown | (no separate email today; see Copy notes) |
 | 13 | Gets the documents | Gets the documents; record in one place | **Completed** | Attaches documents to the email | | Desk: detail; optional "Save to Google Docs" | "Completed: …" with "Documents: …. They're attached." |
@@ -78,6 +78,61 @@ This is the blueprint the whole design was built from. The example is the one th
 - **Row 9 is a hidden second gate.** Today it's only a notice. It gets its own station on the Turn Line ("Ready to pay"), its own count in the desk navigation, and the email lands the card owner straight on it.
 - **Row 10a is the moment trust is won or lost.** A stop has to look calm and competent, not broken. So "Paused: state site changed" uses the slate "paused" tone, not red, and the Turn Line shows the baton stopped at the payment gate with CoFile still holding it.
 - **Rows 12 and 13 need their own touchpoints.** The engine sends "Completed" today. The blueprint wants "Submitted to the state", "EIN issued" and documents-back as separate moments. I've designed the email slots; the words are for the copy owner.
+
+---
+
+## 2B. Roles, permissions and who hears what
+
+A blueprint is only half the picture without the people around it. These are the roles the product already has (or has in settings), and what each one sees. Roles marked *(settings only)* exist in the onboarding questionnaires but aren't built as permissions yet. The design is ready for them, so no layout changes once they arrive.
+
+### 2B.1 Who sees which surface
+
+| Surface | Firm owner (signed up) | Firm staff (invited) | Card owner | Client (approver) | Enterprise admin | Enterprise operator / viewer *(settings only)* | API key (developer) | CoFile staff (platform tenant) |
+|---|---|---|---|---|---|---|---|---|
+| Public site, docs | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
+| Filing desk: Filings, New filing, Client links, Signatures | ✓ | ✓ | if also staff | | | | | |
+| Filing desk: Setup, Billing | ✓ | (proposed: owner only) | | | | | | |
+| Ready to pay | ✓ | ✓ | ✓ (lands here from the email) | | ✓ | operator | | |
+| Intake form, the proof, decision pages | | | | ✓ (by link only) | | | | |
+| Dashboard: Overview, Filings, Firms | | | | | ✓ | ✓ | | ✓ |
+| Dashboard: API keys, Webhooks, Setup, Team, Billing | | | | | ✓ | viewer: read only | | ✓ |
+| Sign-ups and enterprise requests | | | | | | | | ✓ |
+| Drift reviews (proposed surface) | | | | | | | | ✓ |
+| API (`api.cofile.app`) | | | | | | | ✓ | |
+
+**Design consequences**
+- A read-only role sees the same pages with actions removed, not greyed out. A greyed "Pay and file" button invites a click and an error. A viewer instead sees a one-line `paused` note where the action would be **[new label]**.
+- The client never logs in. Everything a client sees is reached by a signed, single-use link, so the client frame has no account menu, no "Log out" and no navigation.
+- A card owner may not be a desk user at all (an owner's spouse, a firm partner who never files). The "Card security code needed" email therefore lands on Ready to pay through log in, and the pay ticket is readable without any other context: card, filings, field, button.
+
+### 2B.2 Who hears about what
+
+Every engine event, who it goes to (from `src/comms/render.ts`), and where its button lands. This is the email half of the blueprint; section 10.8 gives the template.
+
+| Event | Audience | Subject (locked) | Button (locked) | Lands on |
+|---|---|---|---|---|
+| `filing.awaiting_approval` | Client | "Your proof is ready to approve: {title}" | "Open your proof" | The proof |
+| `filing.information_required` | Client | "More information needed: {title}" | (none) | (reply to the firm) |
+| `filing.card_code_needed` | Card owner | "Card security code needed: {title}" | "Enter security code" | Ready to pay |
+| `filing.changes_requested` | Client | "Changes requested: {title}" | (none) | |
+| `filing.completed` | Client | "Completed: {title}" | (link to the filing page where the firm has a desk) | Filing detail |
+| `filing.rejected` | Client | "Rejected by the state: {title}" | (none) | |
+| `filing.name_options_ready` | Admin | "Choose a name: {title}" | "Choose a name" | Name choice page |
+| `filing.review_gate` | Admin | "Review before submit: {title}" | "Review the filing" | Review page |
+| `filing.drift_halted` | Admin | "Site changed — review needed: {title}" | (none) | Filing detail |
+| `filing.failed` (bot check) | Admin | "Portal bot check: {title}" | (none) | Filing detail |
+| `filing.failed` | Admin | "Failed: {title}" | (none) | Filing detail |
+| `filing.blocked` | Admin | "Blocked: {title}" | (none) | Filing detail |
+| `filing.needs_reconciliation` | Admin | "Checking whether the state received: {title}" | (none) | Filing detail |
+| Sign-up | Firm owner | "Confirm your email for CoFile" | | `/verify-email` |
+| Partner approved | Firm owner | "Your partner account is open" | | `/login` |
+| Enterprise approved | Enterprise admin | "Your CoFile account is ready" | | set password |
+| Password reset | Any user | "Reset your password" | | `/reset-password` |
+| Invitation | Firm staff | "You're invited to {firm}'s filing portal" | | `/join/<token>` |
+
+"Admin" means the account's admin channels (`adminChannels` in the account settings). For an enterprise, those are its own staff. For a partner firm, as the code reads today, the account is CoFile's own platform account, so **staff notices about a firm's filing reach CoFile's staff, not the firm**. The firm learns about a stop only by opening its desk. The design routes every admin notice for a partner firm's filing to that firm's own users as well (the desk already knows them), and keeps CoFile staff copied. This is a product change, flagged in the pushback list.
+
+**Gaps the blueprint exposes** (design slots ready; words needed, see Copy notes): no "Submitted to the state", no "EIN issued", and staff emails without a button. Every staff email should land on the filing detail page, where the Turn Line explains the stop. I've designed every admin template with a button slot; it hides when the engine sends no link.
 
 ---
 
@@ -220,6 +275,48 @@ Code blocks (docs, the enterprise section) use an ink ground: background `#111A2
 ### 4.6 Firm colours
 
 Firm colours are never tokens CoFile defines. They're computed per firm by the theming algorithm (section 11) into `--firm-accent`, `--firm-on-accent`, `--firm-accent-hover`, `--firm-tint`, `--firm-link`, and the same set in dark mode. Firm colours are used for: the primary button, the 4 px header rule, the selected nav item's left bar, links, focus halos inside forms, and the turn baton on firm pages. They're never used for status chips, alerts, the rehearsal band, destructive actions or fees.
+
+### 4.7 Token excerpt (as built)
+
+```css
+:root {
+  --paper: #F6F6F2; --surface: #FFFFFF; --surface-sunk: #EEEFEA;
+  --line: #DADCD5; --line-strong: #7F857D;
+  --ink: #111A21; --ink-2: #3F4851; --ink-3: #5A636C; --on-ink: #FFFFFF; --ink-hover: #27313A;
+  --focus-inner: #FFFFFF; --focus-outer: #111A21; --selection: #DCE6F7;
+
+  --done: #17633A;     --done-tint: #E2F2E7;     --done-line: #9DCFAE;
+  --act: #874600;      --act-tint: #FCEFD9;      --act-line: #EBC07D;
+  --progress: #1B52AD; --progress-tint: #E6EEFB; --progress-line: #A8C1EE;
+  --held: #5F33AB;     --held-tint: #EFE8FB;     --held-line: #C4AEEE;
+  --paused: #47525E;   --paused-tint: #ECEFF2;   --paused-line: #C2C8D0;
+  --stop: #AE231C;     --stop-tint: #FBE7E5;     --stop-line: #EFAFA9;
+
+  /* Firm slots: CoFile's own pages fall back to ink. Firm pages get computed values (11.2). */
+  --firm-accent: var(--ink); --firm-on-accent: var(--on-ink); --firm-accent-hover: var(--ink-hover);
+  --firm-tint: #EEF0EC; --firm-link: var(--ink); --firm-deep: var(--ink); --firm-rule: var(--ink);
+
+  --voice: "Newsreader", "Iowan Old Style", "Palatino Linotype", Georgia, serif;
+  --hand: "Atkinson Hyperlegible Next", "Segoe UI", system-ui, -apple-system, Roboto, sans-serif;
+  --record: "Atkinson Hyperlegible Mono", "SF Mono", "Cascadia Mono", Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --paper: #0E1317; --surface: #151B21; --surface-sunk: #1C232A;
+    --line: #2C353E; --line-strong: #6A747E;
+    --ink: #EDEFEA; --ink-2: #BCC2C6; --ink-3: #98A0A7; --on-ink: #0E1317; --ink-hover: #D5D9D4;
+    --focus-inner: #0E1317; --focus-outer: #EDEFEA; --selection: #24344D;
+    --done: #6CCF97; --done-tint: #10281B; --done-line: #2F6B49;
+    --act: #F0B65E; --act-tint: #2D200F; --act-line: #77561F;
+    --progress: #8EB2FF; --progress-tint: #132137; --progress-line: #34507F;
+    --held: #BFA2FF; --held-tint: #231939; --held-line: #54428A;
+    --paused: #ADB6C0; --paused-tint: #1E252D; --paused-line: #46505B;
+    --stop: #FF968C; --stop-tint: #33141A; --stop-line: #7A3A3A;
+    --firm-tint: #1E252D;
+  }
+}
+/* The same dark block repeats under :root[data-theme="dark"] for the manual override. */
+```
 
 ---
 
@@ -381,13 +478,13 @@ A secondary, non-colour signal for anything in rehearsal: 45° lines, 1 px, 8 px
 
 1. **Motion explains a handoff, or it doesn't happen.** The only things that move are the baton (a filing changing hands), gates (opening or holding) and content arriving.
 2. **Nothing moves on the proof except feedback to your own touch.** No entrance animations on the approval page.
-3. **Calm over clever.** No bounce, no parallax, no looping animation anywhere in the product.
+3. **Calm over clever.** No bounce, no parallax and no decorative loops. The only thing that ever repeats is the pending ring on a button you just pressed, and after 10 seconds even that gives way to words (see 9.13).
 
 ### 8.2 Tokens
 
 | Token | Duration | Easing | Use |
 |---|---|---|---|
-| `--t-instant` | 80 ms | linear | Pressed states, checkbox ticks |
+| `--t-instant` | 80 ms | linear | Pressed states, checkbox marks |
 | `--t-quick` | 140 ms | `cubic-bezier(.2, 0, 0, 1)` | Hover, focus ring, chip changes |
 | `--t-standard` | 220 ms | `cubic-bezier(.2, 0, 0, 1)` | Folds opening, menus, toasts in |
 | `--t-exit` | 160 ms | `cubic-bezier(.4, 0, 1, 1)` | Anything leaving |
@@ -453,7 +550,7 @@ A pill 28 px tall (24 px in dense tables): 8 px left padding, a 14 px tone icon,
 
 ### 9.4 The Turn Line
 
-**Compact glyph (lists, 32 × 12 px).** Four 6 px circles on a 1 px line, one for each hand: You · Your client · CoFile · The state. Past stations are small filled `--ink-3` dots; the current one is a 10 px baton in `--firm-accent` (or `--ink` on CoFile pages); future ones are hollow rings. A gate tick sits between "Your client" and "CoFile". Its accessible name is the lane, e.g. "Turn: Your client" **[new label]**.
+**Compact glyph (lists, 32 × 12 px).** Four 6 px circles on a 1 px line, one for each hand: You · Your client · CoFile · The state. Past stations are small filled `--ink-3` dots; the current one is a 10 px baton in `--firm-accent` (or `--ink` on CoFile pages); future ones are hollow rings. A 1 × 8 px gate mark sits between "Your client" and "CoFile". Its accessible name is the lane, e.g. "Turn: Your client" **[new label]**.
 
 **Full blueprint (filing detail).** Four lanes, 56 px tall each, with lane labels in Hand 700 caps at 13 px in a 120 px left gutter. Time runs left to right. Each event is a 12 px station in the lane of whoever acted, labelled underneath with the locked status name and a time in Meta. Handoffs are 1.5 px ink connectors with 8 px rounded corners. Gates are 4 × full-height bars across all four lanes, drawn at "Waiting for approval" (approval gate) and at the payment check (fee gate). A gate that has been passed turns `--done` with a check notch; a held one turns `--held` with the hatch; a stopped one turns `--paused` or `--stop`. Below `md`, the blueprint turns vertical: time runs down, and each event carries a lane tag on the left.
 
@@ -487,7 +584,7 @@ Under the blueprint, the same events appear as an accessible ordered list: time 
 
 | Kind | Look | Copy (locked) |
 |---|---|---|
-| Beta notice, CoFile pages | 36 px slim band above the header, `--surface-sunk`, "Beta" as a small ink tag | "{CoFile} is in beta. Any filing can run as a free rehearsal on the state's real website. It stops before the last button, so nothing is filed or paid. Filing types go live one at a time. Questions or problems? hello@cofile.app" |
+| Beta notice, CoFile pages | 36 px slim band above the header, `--surface-sunk`, "Beta" as a small ink tag | "CoFile is in beta. Any filing can run as a free rehearsal on the state's real website. It stops before the last button, so nothing is filed or paid. Filing types go live one at a time. Questions or problems? hello@cofile.app" |
 | Beta notice, firm pages | Same band, neutral, no CoFile name | "This service is in beta. Any filing can run as a rehearsal on the state's real website. It stops before the last button, so nothing is filed or paid. Filing types go live one at a time." |
 | Rehearsal band (intake, proof, new filing) | Full-width `held` tint, hatch strip, Gate icon, body size | e.g. "Rehearsal: nothing will be filed or paid, even if you approve." |
 | Notice | `--r-md`, 4 px left bar in the tone, tone icon, body text | info (ink), act, done, stop, paused |
@@ -505,6 +602,65 @@ Bottom-left on desktop and bottom full-width on phones, 56 px tall, elevation 2,
 ### 9.11 The proof card and the coverage table
 
 These two are specified in full on their pages (10.4 and 10.1, Coverage), because they carry most of the product's trust. In short: the proof card is a single sheet with numbered regions (details, fees, the state's page, the decision), and the coverage table is a **ladder**: each row shows a five-step track (Planned · Offered, not yet rehearsed · Screens recorded, rehearsal next · Rehearsed to the payment screen · Live), filled up to its stage, with the label in words beside it. "Live" is always the far-right column. If nothing in a row has reached it, the column is visibly empty. You can't misread an empty column.
+
+### 9.12 State matrix
+
+Every interactive component documents these states in Storybook. The Turn Line and status chip have more states than most, so here they are in full.
+
+**Turn Line stations**
+
+| State | Station | Track before it | Label |
+|---|---|---|---|
+| Future | 10 px hollow ring, 1.5 px `--line-strong` | 1 px `--line`, dotted | `--ink-3` |
+| Past | 8 px filled `--ink-3` | 1.5 px `--ink-3` solid | `--ink-2`, with time in Meta |
+| Current | 14 px baton, `--firm-accent` or `--ink`, with a 4 px halo in the tint | 1.5 px `--ink` solid | `--ink`, Label weight, with the status chip under it |
+| Gate, waiting | 4 px bar, full lane height, `--ink` | | the gate's name in Meta **[new label]** |
+| Gate, passed | Bar in `--done` with a 6 px notch | solid continues | |
+| Gate, held (rehearsal) | Bar in `--held` with the hatch on both sides | track after it dashed 4/4 in `--held` | |
+| Gate, paused | Bar in `--paused`, two-bar icon on top | track after it dotted | |
+| Gate, stopped | Bar in `--stop`, square icon on top | track after it absent | |
+
+**Status chip**
+
+| Context | Treatment |
+|---|---|
+| Default | Tint fill, tone text and icon |
+| In a selected or hovered row | Tint fill stays; a 1 px tone line is added so the chip doesn't dissolve into the row tint |
+| On a firm-tinted surface | Chips always sit on `--surface` or `--surface-sunk`, never directly on `--firm-tint` |
+| Dark | Dark tint and text from 4.3 |
+| Forced colors | Chip becomes a 1 px `CanvasText` outline; the icon carries the meaning (12.4) |
+| Updated live | Chip cross-fades at `--t-quick`; the live region announces the new label |
+
+**Fields**: empty, filled, focused, filled from a message (provenance bar), error, disabled (only when hidden by a condition, otherwise never disabled), read-only (viewer role), masked (SSN/FEIN after blur).
+
+**Buttons**: default, hover, focus, pressed, pending, disabled with a reason, and success (the button becomes the next step's link, never a green "Done!" flash).
+
+### 9.13 Loading and long waits
+
+Some statuses last seconds, others days ("in Florida an examiner reviews the filing first"). The design separates three kinds of wait:
+
+| Wait | Example | Treatment |
+|---|---|---|
+| Your own action (under 10 s) | "Sending…", "Saving…" | Pending ring in the button with its label. After 10 s, the ring stops and the button's help line shows the existing pending label as text, so a slow network never shows an endless spinner |
+| CoFile working (minutes) | "Getting the state's review page", "Filing now" | No spinner. The Turn Line baton sits at CoFile, and the newest line of "Progress on the state site" shows under it with its time ("Registered agent · 10:16:42 AM"), updated live. Real progress, not an animation |
+| The state's turn (hours to weeks) | "Submitted to the state" | The baton sits in the state lane. The locked "After" copy explains why ("New York sends a receipt by email, and in Florida an examiner reviews the filing first"), shown on the filing page as a `progress` notice for NY and FL filings, with the submitted date in Record |
+
+Page loads use skeletons that match the final layout (table rows as 48 px bars in `--surface-sunk`, no shimmer), shown only after 300 ms, so fast loads never flash.
+
+### 9.14 Smaller components
+
+| Component | Spec |
+|---|---|
+| Stat tile | 20 px padding, label in Label `--ink-2`, number in Stat (36/40, tabular), a sub-line in Meta; whole tile is a link when it has one |
+| Card tile (payment card) | 64 × 40 card brand mark, "ending 4242" in Record, purpose in Meta; never a fake card graphic with a full number |
+| Copy button | 32 px square, copy icon, `aria-label` names the thing copied; on success the icon becomes a check for 1.5 s and a toast confirms |
+| Code block | Ink ground (4.5), 14/22 Record, a language tab and copy button in the top-right, horizontal scroll with an edge fade |
+| Drawer | 560 px from the right at `lg`, full-screen sheet below `md`; elevation 3; focus trapped; closes with Esc; the URL updates so a drawer can be linked |
+| Confirm dialog | For destructive actions only ("Remove", "Turn off", "Disconnect", revoking a key): 440 px, the action restated in the title, destructive button on the right, Cancel focused by default |
+| Tabs | Underlined, 44 px tall, 2 px `--ink` (or firm accent) indicator; never more than five |
+| Disclosure (`details`) | 44 px summary row with a chevron that rotates 90° at `--t-standard`; summary text in Label |
+| Pager | "Previous" and "Next" with the count line; 44 px targets |
+| Count badge | Ink pill, 20 px tall, tabular white number, 1 to 99 then "99+" |
 
 ---
 
@@ -552,7 +708,7 @@ The home page reads as one long blueprint. A thin Turn Line runs down the left m
 
 **Process.** "You start it. Your client approves it. CoFile files it." is set as an H2 over a three-lane diagram. The three step texts each sit in their lane ("You start it." in lane 1, "Your client approves it." in lane 2, "CoFile files it." in lane 3), with the gate drawn between steps 2 and 3, and the lede "Three steps, and your client is in charge of the middle one." beneath. Phone: the three steps stack vertically along a vertical line with the gate as a horizontal bar.
 
-**The proof.** "Your client sees what the state will see, before the state does." Two columns: the lede on the left; on the right the six checks as a list with Gate-check icons (not generic ticks). At `lg`+, a scaled copy of the sample proof is sticky in the left column below the lede, and each list item highlights its region as it scrolls into view. The sixth item, "For CPAs: it does for a business filing what the 8879 does for a return.", gets a small "8879" Record tag, because CPAs will recognize it at a glance.
+**The proof.** "Your client sees what the state will see, before the state does." Two columns: the lede on the left; on the right the six checks as a list with Gate-check icons (not generic checkmarks). At `lg`+, a scaled copy of the sample proof is sticky in the left column below the lede, and each list item highlights its region as it scrolls into view. The sixth item, "For CPAs: it does for a business filing what the 8879 does for a return.", gets a small "8879" Record tag, because CPAs will recognize it at a glance.
 
 **Firms.** "Your name on the door. Ours in small print." On the right, the firm theme fan: three phone-sized proofs for Harbor & Pine CPA in three palettes (pine, navy `#0B2545`, warm gold `#F2C94C` with ink text), showing the theming engine handling a dark, a very dark and a light brand color. A loupe circle magnifies the "with CoFile" mark on the front sheet. The four list items sit beneath the lede.
 
@@ -713,13 +869,17 @@ New Jersey LLC formation · started Nov 26, 2026, 10:14 AM by ana@harborpine.com
 
 **Password, signed out.** Simple single-card pages inside the desk shell (password) or outside it with the firm's logo plate (signed out).
 
+**Keyboard, for the people who file all day.** Staff who file 40 a month will learn shortcuts, and the desk should reward it. "N" opens New filing; "/" focuses search; "G" then "F" goes to Filings, "G" then "P" to Ready to pay, "G" then "L" to Client links; "J" and "K" move through the queue and "Enter" opens a filing; "?" opens a shortcut sheet **[new labels for the sheet]**. Shortcuts never fire inside a field, and none of them approves, pays or submits anything.
+
+**Multi-firm staff.** A bookkeeper who works for two firms has two desks. The rail's logo plate becomes a switcher when the same email has more than one desk, listing each firm's logo and name. Switching changes the whole theme, so a staff member always knows whose name is on the door.
+
 ### 10.4 Client-facing pages (the firm's brand, CoFile nearly invisible)
 
 **Shared frame.** A firm header 64 px tall: a 4 px top rule in the firm's second colour (or accent), the logo plate (max 160 × 40, optically sized, 11.3), the firm name in the firm's Voice font, and "with CoFile" on the right. Below that, the neutral beta notice, then a single 640 px column. The base size is 17 px and every touch target is 48 px or more. There's no navigation: a client should never get lost.
 
 **Intake form (`/i/<token>`) and permanent service pages (`/<firm>/<service>`).** The order is: the rehearsal band when the type isn't live ("This page is in rehearsal for now. You can fill it in and see your proof, but nothing will be filed with the state and nothing will be charged, now or later, even after you approve it. To file for real, contact {firm}."), the H1 (filing title, with " · {label}" for a labelled link), the summary, the fee note in Record, and then the form. The form is the same `IntakeForm` with client wording: "Send to {firm}", the footnote "Next, you'll get a proof to check. Nothing is filed until it's approved.", and the Terms and Privacy line in Small. On phones:
 
-- Sections become **one section per screen** **(progressive disclosure, not a wizard)**. The legends are sticky section headers, so a long form never feels endless, while all fields stay in one DOM form and one submit, exactly as the engine expects.
+- **Progressive disclosure, not a wizard.** Each section fills the screen in turn, and its legend becomes a sticky section header, so a long form never feels endless. All the fields stay in one DOM form with one submit, exactly as the engine expects.
 - Paired fields stack; "Same as" buttons sit above the address they fill, at 44 px.
 - The submit button is full width and 56 px tall.
 
@@ -728,14 +888,14 @@ Link errors ("This link has expired or isn't valid" / "Ask whoever sent it for a
 **The proof** (served by the engine at `api.cofile.app/approve/<token>`). It's the most important page in the product. On a phone it's one long sheet that has to be read to the end.
 
 ```
-┌──────────────── 390 ────────────────┐
-│▔▔▔▔▔▔▔▔▔ firm colour rule ▔▔▔▔▔▔▔▔▔▔│
+┌──────────────── 390 ─────────────────┐
+│▔▔▔▔▔▔▔▔▔ firm colour rule ▔▔▔▔▔▔▔▔▔▔▔│
 │ [logo] Harbor & Pine CPA  with CoFile│
-├─────────────────────────────────────┤
+├──────────────────────────────────────┤
 │▨ Rehearsal: nothing will be filed or │  held band (rehearsals only)
 │  paid, even if you approve.          │
-├─────────────────────────────────────┤
-│ NJ LLC: TWO SISTERS BAKERY LLC       │  filing title
+├──────────────────────────────────────┤
+│ NJ formation: Two Sisters Bakery LLC │  filing title (as the engine builds it)
 │ Filing reference 7f3c… (Record)      │
 │ Please decide by Wed, Dec 3,         │
 │ 5:00 PM ET. After that, this link    │
@@ -838,6 +998,17 @@ Built with React Email and sent through Resend. Each email is 600 px wide, singl
 
 The approval request ("Your proof is ready to approve: …") puts the rehearsal line in the `held` band when it's a rehearsal and attaches the state review page as today. "Card security code needed: …" leads to Ready to pay, with the warning "Never reply to this email with the code." set as its own paragraph with a `stop` icon. "More information needed", "Changes requested", "Completed" (with "Documents: …"), "Rejected by the state" and the staff notices ("Site changed — review needed", "Portal bot check", "Failed", "Blocked", "Checking whether the state received") all use the same template with the tone icon matching 4.4. Sign-up ("Confirm your email for CoFile"), "Your partner account is open", "Your CoFile account is ready", "Reset your password" and invitations ("You're invited to {firm}'s filing portal") use the CoFile template. "Filing submitted", "Documents back" and "EIN issued" get designed template slots with the matching turn strip; their words are for the copy owner. Every email has a plain-text part, a dark-mode variant (logo plates kept white), and is tested in Litmus across 40 clients.
 
+### 10.9 Proposed new surfaces
+
+The brief allows new surfaces where the design needs them. These four came out of the blueprint. Each reuses existing copy where it can, and needs the copy owner where it can't.
+
+| Surface | Who | Why | What it shows |
+|---|---|---|---|
+| **Drift reviews** (platform staff) | CoFile staff | Row 10a of the blueprint is a human decision with no screen today | Approved snapshot vs today's screen, differences outlined, decision buttons (10.5) |
+| **Client filing status** (`api.cofile.app/approve/<token>/status`, read-only after a decision) | The client | After "Approval recorded", a client hears nothing until "Completed" or "Rejected". For a Florida filing that can be weeks | The client Turn Line through to "Accepted by the state", the locked status labels, and the firm's support line. No details, no fees, nothing sensitive: just where it is |
+| **Coverage history** (`/coverage`) | Firms, procurement | "Rehearsals are also how each filing type earns its way to live." A dated record of each type's steps makes that claim checkable | The ladder from 10.1 with a date at each step reached, filterable by state |
+| **Service status** (`status.cofile.app`) | Everyone | State portals go down and change. A firm whose filing says "Paused: state site changed" wants to know if it's just them | Per-portal availability (NY DOS, NYS-100, NJ, IRS, FL) and open drift reviews by portal, without filing details |
+
 ---
 
 ## 11. The white-label theming system
@@ -912,25 +1083,87 @@ Presets are pre-checked. An upload goes through three checks: it must cover Basi
 
 Each firm's computed theme is snapshot-tested on save against five surfaces (desk header, intake, proof, email, widget). If any text-on-colour pair falls below its threshold (which shouldn't happen, but the check catches bugs), the save is refused with the panel showing the failing pair.
 
+### 11.7 Layering: platform, enterprise, firm
+
+Brand settings stack in three layers. Each layer can only set what the layer above allows.
+
+| Layer | Who sets it | Controls | Locks it can apply |
+|---|---|---|---|
+| Platform | CoFile | Status tones, type roles, the proof's structure, consent text, the beta notice, accessibility floors | Everything below can't change these |
+| Enterprise (tenant) | The enterprise, in its white-label setup | Its name, logo, color, font and support contact on the proof; whether "with CoFile" shows; whether its firms may brand their own pages | "Firms keep our look" (today's behavior: firms an enterprise invited keep the enterprise's white-label look) or "Firms may add their logo" |
+| Firm | The firm, in Setup: Branding | The slots in 11.1, where its layer allows | |
+
+Partner firms that signed up with CoFile directly sit under the platform's own tenant. That tenant allows full firm branding and always shows "with CoFile".
+
+**The computed theme**, stored per firm and per tenant, read by the web app, the engine's proof renderer and the email renderer alike:
+
+```json
+{
+  "version": 3,
+  "computedAt": "2026-11-26T15:04:00Z",
+  "source": { "primary": "#2E9C6A", "secondary": "#C8A951", "font": "lora", "logo": "artifact:7d1e…" },
+  "light": {
+    "accent": "#058656", "onAccent": "#FFFFFF", "accentHover": "#06754B", "tint": "#E3FAEC",
+    "link": "#058656", "deep": "#1E4A37", "rule": "#C8A951",
+    "ratios": { "onAccent": 4.61, "link": 4.61 }, "step": "C", "deltaL": -0.07
+  },
+  "dark": { "accent": "#5BC38F", "onAccent": "#0E1317", "tint": "#10281B", "link": "#5BC38F", "ratios": { "onAccent": 8.58 } },
+  "bands": { "red": false, "violet": false },
+  "logo": { "light": "/logo/7d1e…", "dark": null, "plate": "white", "box": [148, 36] },
+  "font": { "role": "voice", "stack": "'Lora', Georgia, serif", "checks": { "spanish": true, "xHeight": 0.5, "weights": [400, 600] } }
+}
+```
+
+The `deep` value above is illustrative; it's computed by step 8. Version bumps invalidate every cached theme, so a change to the algorithm reaches every firm on the next page load.
+
 ---
 
 ## 12. Accessibility, Spanish and dark mode
 
-**Accessibility (target: WCAG 2.2 AA everywhere, AAA for text contrast on the proof and intake).**
-- Base 17 px on client pages; nothing a reader must act on is below 15 px; zoom to 400% reflows to one column with no horizontal scroll (except data tables, which scroll inside their container with a visible edge fade).
-- Focus is always visible: the double ring works on any firm colour. Skip link "Skip to content" **[new label]**.
-- Every status is a word plus an icon; the Turn Line has a text equivalent; live status changes are announced in a polite live region.
-- Forms: labels always visible, errors tied with `aria-describedby`, the error summary links to fields, and required fields are explained up front.
-- The proof's state review image keeps the locked alt text, and every value it shows is also listed as text.
-- Testing: axe-core in CI, manual audits with NVDA + Firefox, JAWS + Chrome, VoiceOver on iOS and TalkBack on Android, plus moderated sessions with at least four participants over 65 and two low-vision users.
+### 12.1 Accessibility
 
-**Spanish.** Client pages (intake, proof, decision pages, client emails) are designed for Spanish from day one:
-- Layouts allow 35% text expansion; buttons wrap to two lines rather than truncating ("Aprobar, y autorizar la presentación y el pago" needs two lines at 390 px, so the approve button is two-line ready).
-- A language switch in the client header, "English · Español" **[new label]**, is remembered per link and follows `Accept-Language` on first visit.
-- Values going to the state stay as entered and are never translated; legal consent text is shown in Spanish only once counsel approves a translation, with the English original one tap away.
-- Translations come from a legal-financial specialist agency and are approved by the copy owner; the design doesn't invent them.
+Target: WCAG 2.2 AA everywhere, and AAA (7:1) for text contrast on the proof, the intake form and client emails, because those are read by the oldest and least technical readers, often on a phone outdoors.
 
-**Dark mode.** It follows `prefers-color-scheme`, with a manual override (light, dark, system) in the desk and dashboard and stored per user. Every token has a dark value (sections 4 and 11). State review images, logos with opaque backgrounds and signature images always sit on white plates. The proof defaults to light unless the device is set to dark, and even then fees and the approve button keep their computed contrast.
+- **Size and reflow.** Base 17 px on client pages; nothing a reader must act on is below 15 px. Zoom to 400% reflows to one column with no horizontal scroll, except data tables, which scroll inside their container with a visible edge fade and a "scroll" affordance on the first column.
+- **Focus.** Always visible: the double ring (2 px inner `--focus-inner`, 2 px outer `--focus-outer`) works on any firm color, white or black. Skip link "Skip to content" **[new label]** on every page. Focus order follows reading order; drawers and dialogs trap focus and return it.
+- **Status.** Every status is a word plus an icon. The Turn Line has a text equivalent (9.5). Live status changes go to a polite live region; errors that block a submit go to an assertive one.
+- **Forms.** Labels are always visible. Errors are tied with `aria-describedby`; the error summary links to each field; required fields are explained up front ("Fields marked * are required."). Grouped fields use `fieldset` and `legend`, as `IntakeForm` already does. Autocomplete tokens are set on every name, address, email and phone field, so phones can fill them.
+- **Timing.** Approval links expire, so the proof states the deadline in words near the top (the locked "Please decide by…"). Nothing on a client page times out while it's open. The security code's one-hour window applies only after it's entered and is shown as a countdown.
+- **The state's review image** keeps the locked alt text, and every value it shows is also listed as text under "Filing details".
+- **Signature pad.** Signing by keyboard isn't possible for a drawn signature, so the pad's help explains it and the existing alternative stays available: send a client link so the signer signs on their own device.
+- **Testing.** axe-core in CI; manual audits with NVDA + Firefox, JAWS + Chrome, VoiceOver on iOS and macOS, and TalkBack on Android; moderated sessions with at least four participants over 65, two low-vision users (one using 200% zoom, one using a screen magnifier) and two screen-reader users. The proof is tested end to end by each.
+
+### 12.2 Spanish
+
+Client pages (intake, the proof, decision and error pages, client emails) are designed for Spanish from day one. The desk and dashboard follow in a later phase.
+
+- **Room to grow.** Layouts allow 35% text expansion. Buttons wrap to two lines rather than truncating. The approve button is already two-line ready on a 390 px phone, and its Spanish rendering will be longer still.
+- **Switching.** A language switch in the client header, "English · Español" **[new label]**, is remembered per link and follows `Accept-Language` on first visit. The `lang` attribute is set per page, and per element for any string left in English.
+- **What's never translated.** Values going to the state stay exactly as entered. State review images stay as the state shows them. Fees stay in US format ($103.50).
+- **Legal text.** Consent, authorization and no-refund text is shown in Spanish only once counsel approves a translation, with the English original one tap away and the version recorded with the approval.
+- **Who writes it.** Translations come from a legal-financial specialist agency and are approved by the copy owner. The design doesn't invent them.
+- **Typography.** Atkinson Hyperlegible Next and Mono, and Newsreader, all cover the Spanish character set; firm uploads are checked for it (11.5).
+
+### 12.3 Dark mode
+
+It follows `prefers-color-scheme`, with a manual override (light, dark, system) in the desk and dashboard menus, stored per user. CoFile's public pages offer the same toggle in the footer. Every token has a dark value (sections 4 and 11). State review images, logos with opaque backgrounds and signature images always sit on white plates, because they were made for white. The proof follows the device setting; in dark mode, fees and the approve button keep their computed contrast and the consent note keeps its ink rule (in `--ink`, now light).
+
+### 12.4 Forced colors and high contrast
+
+Under `forced-colors: active` (Windows high contrast):
+- Status chips become 1 px `CanvasText` outlines with the tone icon kept. Icons are inline SVG with `fill: currentColor`, so they survive.
+- The Turn Line keeps its geometry. Baton and gates use `Highlight`; the hatch is dropped and the held gate shows its Gate icon instead.
+- Buttons use `ButtonText` and `ButtonFace`, and the firm color is ignored, as the user intends.
+- Focus uses the system `Highlight` 3 px outline.
+
+### 12.5 Print
+
+Firms print. A CPA's file still often has paper in it, and a record of what was approved belongs there.
+- **Filing detail** prints as a one-to-three-page record: the firm's logo and name, the filing title, status and dates, the Turn Line as a static vertical event list, what was approved (the proof's details and fees), documents listed by name, and the EIN. Navigation, buttons and the rail are hidden. Footer: filing reference in Record and the page number.
+- **The proof** prints as it looks, minus the decision area, with "Filing reference" and the deadline in the header.
+- **Terms and Privacy** print with their version and date.
+- Print uses ink on white only (no tints), 11 pt Hand and 10 pt Record, with page breaks avoided inside fee tables.
+
 
 ---
 
@@ -984,6 +1217,44 @@ Each firm's computed theme is snapshot-tested on save against five surfaces (des
 | 4. Enterprise and docs | 17 to 20 | Dashboard, drift reviews, docs and reference, widget theming |
 | 5. Polish | 21 to 22 | Spanish launch, accessibility audit fixes, optional portrait series |
 
+### 13.5 Design files and naming
+
+| Figma file | Pages |
+|---|---|
+| CoFile System | Cover · Tokens (light, dark) · Type · Icons · Gate mark and lockups · Buttons · Fields · Chips · Turn Line · Tables · Navigation · Notices and banners · Empty states · Toasts · Dialogs and drawers · Email blocks |
+| Firm Themes | The 24-firm stress set, each applied to: desk header, intake on phone, proof on phone, email |
+| Public site | Home (desktop, tablet, phone) · Account pages · Legal · 404 and error |
+| Filing desk | Turn board · Setup and brand check · New filing (state, type, form) · Filing detail (every status) · Client links · From email · Signatures · Ready to pay · Billing |
+| Client pages | Intake · The proof (live, rehearsal, with code, with EIN after acceptance) · Decision and error pages · Spanish layouts |
+| Enterprise | Dashboard pages · Drift reviews · Docs and reference · Widget |
+| Emails | All 18 templates, light and dark |
+
+Component names match code names (`TurnLine/Compact`, `StatusChip/held`, `ProofSheet/Fees`). Every status variant of the filing detail page is a separate frame, because a build team needs to see "Name unavailable" as clearly as "Completed".
+
+### 13.6 Acceptance criteria (the build is done when)
+
+1. Every status label in `web/lib/status.ts` renders with its tone, icon and turn from 4.4, in light, dark and forced colors.
+2. All 24 stress-set firms pass the automatic contrast checks on all five themed surfaces, and their logos sit inside their boxes without distortion.
+3. The proof scores 100 in Lighthouse accessibility and 90+ in performance on a mid-range Android profile, and passes a screen-reader walkthrough from the email to "Approval recorded".
+4. A rehearsal is identifiable on every surface it appears on (desk row, detail, intake, proof, email) by color, pattern and word, checked in grayscale.
+5. The coverage ladder's Live column reflects `liveFilings` per type, and an empty Live column renders as visibly empty.
+6. No customer-visible surface contains "Keystone", "sign in" in new strings, or a price outside the desk's Billing page.
+7. Every quoted string in the build matches the repo's copy byte for byte (a test compares rendered text to the source strings).
+
+### 13.7 How we'll know it works
+
+Service measures, tracked per filing type and per firm, reviewed monthly with the product owner:
+
+| Measure | Why it matters |
+|---|---|
+| Time from "Send the proof to my client" to "Approval recorded" | The client's handoff; long times mean the email or the proof isn't working |
+| Proof opened but not decided within the deadline | Abandonment at the gate |
+| "Request changes" rate, and its most common comments | Whether the firm's draft or the AI draft is wrong, and where |
+| Fields edited after an AI draft, per field | Where provenance marks matter most |
+| Time an approved filing waits in Ready to pay | The hidden second gate |
+| Staff minutes per filing (from desk open to send) | The firm's real cost, and the product's real promise |
+| Rehearsals per firm before the first live filing | Whether rehearsal is earning trust, as "Run one rehearsal. Then decide." intends |
+
 ---
 
 ## 14. Appendix
@@ -1006,7 +1277,7 @@ I didn't change any of these in the design; they're for the copy owner.
 1. **"Test" badges.** The desk filings list and the dashboard filings list show "Test" for rehearsals, and filing detail says "test run". The locked term is "rehearsal". I've designed the Rehearsal chip in those places pending your decision.
 2. **Sample vs real approve button.** The home page sample proof says "Approve for filing"; the real proof says "Approve, and authorize submission and payment". A client who has seen the sample may hesitate at the longer button. Consider aligning the sample.
 3. **"1 approved filing is ready to pay and need your card's security code."** The singular form needs "needs".
-4. **"Sign in" wording.** "Continue with Google", "Google sign-in…" (login errors), "You're not signed in to this filing desk" and "People who sign in to this dashboard" use sign-in language against the log-in rule. "Google sign-in" may be fine as Google's product name; the others could become "logged in" and "log in".
+4. **"Sign in" wording.** "Google sign-in…" (login errors), "You're not signed in to this filing desk" and "People who sign in to this dashboard" use sign-in language against the log-in rule. "Google sign-in" may be fine as Google's product name; the others could become "logged in" and "log in".
 5. **Branding help text.** "Button text is white, so choose a dark color." stops being true once contrast is fixed automatically. Suggested direction: tell the firm any color works and that the preview shows any adjustment.
 6. **Brand preview button "Send for approval"** doesn't match the real client button "Send to {firm}".
 7. **New labels the design needs** (proposed, to be written by you): Turn Line lanes ("You", "Your client", "CoFile", "The state"; for clients the firm name, "You", "The state"), "Done" group, ladder column headings, brand check names and messages, "[n] fields filled", "[n] minutes", "Clear" (signature pad), the turn glyph's accessible name, "or" on the proof, "Skip to content", "English · Español", the table pager, and the beta notice's "More".

@@ -296,7 +296,7 @@ The product is the picture. The best image of CoFile is the sample proof, drawn 
 | Commission | From (kind) | What |
 |---|---|---|
 | **The carved seal** | A *tenkoku* seal carver | Carve the Kaku in soft stone, 30 mm square. Scan the stone and its impressions at 2400 dpi. The impression's edge becomes the "carved" mark for print, the 404 page and the close of the home page. |
-| **Ink grains** | The same carver, plus a print studio | Pull 30 impressions of a blank round seal on washi with vermilion-free sumi paste, varied pressure. Scanned as grayscale masks for the Maru (3.4), so on-screen approvals have the irregular density of a real stamp. |
+| **Ink grains** | The same carver, plus a print studio | Pull 30 impressions of a blank round seal on washi with a sumi-based seal paste (no vermilion: red is reserved for stops), varied pressure. Scanned as grayscale masks for the Maru (3.4), so on-screen approvals have the irregular density of a real stamp. |
 | **Paper dioramas** | A paper engineer, photographed by a still-life photographer in north daylight on washi | Three small paper constructions, shot top-down and at 30°: **(a)** a *kamishibai* stage, the wooden paper-theater frame, with 13 paper cards for New Jersey's screens and the last card held half out, for "Rehearse on the real stage"; **(b)** two sheets overlapping with one round seal across their edge, for "Checked twice. Filed once."; **(c)** an opened return envelope with three documents fanned out, for "The papers come back to you." |
 | **Icon set** | An icon designer, working from the Kaku's construction | About 40 icons on a 20 px grid, 1.5 px stroke, the Kaku's 0.75-unit carved inner corners, no fills except status glyphs. |
 | **Motion** | A small motion studio with web and Core Haptics experience | The seal sequence, the halves rejoining, the held breath (8.3), delivered as code-ready specs and reference renders, not video. |
@@ -375,6 +375,33 @@ On iOS Safari, where the web has no vibration API, `tick` and `settle` use the s
 ### 8.5 Sound
 
 None on the web. The future native app may play one sound, the seal's soft paper thud (−24 LUFS, 180 ms), only when the device isn't silenced.
+
+### 8.6 The transition map: one filing's life
+
+"Design every transition" means writing them all down. Each row is a change of status (labels from `web/lib/status.ts`), what the chip becomes, what the timeline does, the email the engine already sends (subject as in `src/comms/render.ts`), and the motion. Remote changes arrive over a server-sent event stream; if the page is open, the change animates once; if the page is opened later, it renders in its current state with no replay. Haptics never fire for remote changes, only for the reader's own gestures.
+
+| Change | Chip becomes | Timeline | Email (existing) | Motion |
+|---|---|---|---|---|
+| Created | ◔ Received | First step appears | none | Step fades in, `t-step` |
+| Preview run starts | ◔ Getting the state's review page | Rail fills to this step | none | Rail fill, `t-step` |
+| Proof goes out | ◐ Waiting for approval | The approved half-seal appears, empty, left of the seam | "Your proof is ready to approve: {title}" | Half-seal slides in from the left, 480 ms |
+| Client asks for changes | ◐ Changes requested | Half-seal outline dims to `--ink-3` | "Changes requested: {title}" | 220 ms fade |
+| Information missing | ◐ Needs information | Step shows "Still needed" form below it | "More information needed: {title}" | Fold opens, `t-fold` |
+| Client approves | ● Approved | The left half-seal fills Matsuba | none | On the client's page: the seal (8.3, 1). On the desk: the half fills from the center, 480 ms |
+| Card code needed | ◐ chip, plus the "Ready to pay" count | Notice under the step | "Card security code needed: {title}" | Badge count changes with a 140 ms crossfade |
+| Run starts | ◔ Queued, then ◔ Filing now | Nested run steps appear one by one as they happen | none | Each line enters in 140 ms, rail extends |
+| Review page matched | ◔ Filing now | Halves rejoin | none | 8.3, 2 |
+| State page changed | ■ Paused: state site changed | Halves stop 4 px apart | "Site changed — review needed: {title}" (staff) | 8.3, 4 |
+| Review gate | ◔ Final check | Captured screen shown as a plate | "Review before submit: {title}" (staff) | Plate fades in |
+| Name taken | ◐ Name unavailable | Step turns Your turn | "Choose a name: {title}" (staff) | 220 ms |
+| Rehearsal reaches its hold | ◌ Rehearsal stays | "Pay Now · held, on purpose" | none | 8.3, 3 |
+| Submitted | ● Submitted to the state | Step fills | `[copy needed]` | `t-step` |
+| Accepted | ● Accepted by the state | Step fills | `[copy needed]` | `t-step` |
+| Rejected | ■ Rejected by the state | Step turns Stop | "Rejected by the state: {title}" | 220 ms, no shake |
+| EIN issued | ● EIN issued | EIN appears in `fee-total` mono | `[copy needed]` | Digits fade in left to right, 30 ms apart |
+| Completed | ● Completed | The rail ends in a full seal | "Completed: {title}" | Final seal fills, 480 ms |
+| Unsure what the state received | ◐ Being checked | Step turns Your turn | "Checking whether the state received: {title}" (staff) | 220 ms |
+| Failed | ■ Failed | Step turns Stop | "Failed: {title}" or "Portal bot check: {title}" (staff) | 220 ms |
 
 ## 9. Components
 
@@ -460,7 +487,7 @@ Done, Held, Your turn and Stop chips have their wash fill; In motion and Not sta
 
 ### 9.5 The timeline
 
-The filing detail's spine, vertical on every width. Each step: a 20 px glyph on a 2 px rail, the step label in `heading`, the time in `caption` `--ink-3` on the right. Steps for a formation: drafted, proof sent, approved, state's review page, payment, submitted, state's answer, documents, EIN. The rail is drawn solid up to the current step and perforated after it. The seam crosses the rail between "approved" and "state's review page": the approved half-seal sits on the left of the seam, the state's half on the right, and they close up when the page matches (8.3). Future steps are listed but dim, so the reader always sees the whole road.
+The filing detail's spine, vertical on every width. Each step: a 20 px glyph on a 2 px rail, the step label in `heading`, the time in `caption` `--ink-3` on the right. Step names are the existing status labels from `web/lib/status.ts`, in lifecycle order; no new words. For a formation: "Received", "Getting the state's review page", "Waiting for approval", "Approved", "Filing now" (with the run's own steps nested under it, as in the rehearsal log: "Review page · matched the proof", "Payment: … · matches the proof"), "Submitted to the state", "Accepted by the state", "EIN issued", "Completed". A step that a filing skips (no review page, no EIN) is simply not drawn. The rail is drawn solid up to the current step and perforated after it. The seam crosses the rail between "Approved" and "Filing now": the approved half-seal sits on the left of the seam, the state's half on the right, and they close up at the nested "Review page · matched the proof" line (8.3). Future steps are listed but dim, so the reader always sees the whole road.
 
 ### 9.6 Tables
 
@@ -498,6 +525,28 @@ The most important honesty device on the site. Two parts:
 2. **The table.** Columns "Filing", "Where", "Where it stands". Grouped by "Where" (New Jersey, Florida, IRS, New York), each group with a sticky 40 px header on phones. The status cell is always the chip, never a footnote. "Live" rows come first in each group and are the only rows with a Matsuba chip, so on a page where nothing is live yet, there is simply no green. A row never says more than its label.
 
 On phones each row is a 64 px block: filing name in `body`, chip below it. A segmented filter at the top ("All states", then each state name already in the table) narrows the list.
+
+### 9.12 Loading
+
+Nothing appears for the first 400 ms: most loads finish inside that, and a flash of skeleton is worse than a pause. After 400 ms, a *paper skeleton*: the sheet's outline and hairline bars where lines of text will be, static. No shimmer, because shimmer is ambient motion. Images reserve their exact aspect ratio (the state's review page is known in advance from the artifact), so nothing jumps when they arrive. Buttons that are waiting show their own pending state (9.1), never a full-page spinner.
+
+### 9.13 The seam (component)
+
+A 1 px line in `--line`, dashed 12 px on, 4 px off, vertical by default and horizontal on phones or inside the timeline. `aria-hidden="true"`, and in forced-colors mode it becomes `CanvasText` at 1 px. It never carries meaning by itself; everything it marks also has words.
+
+### 9.14 Sheets and dialogs
+
+On phones, a bottom sheet: `r4` top corners, a 36 × 4 px grab bar, slides up with `t-slide` over `--scrim`, can be dragged down (dismisses past 30% of its height or at 600 px/s). From `md`, a centered 560 px dialog. Both use the native `<dialog>`, trap focus, close on Escape and return focus to what opened them. Used for: the signature pad on phones, the state's review page full-screen, long pickers. The close control needs an accessible name: `[copy needed]` (one word, in English and Spanish).
+
+### 9.15 Cards and the vault fields
+
+- **Saved card row.** 64 px: a generic card icon (network marks only where the vault returns the network), the card's name ("Name for this card (optional)" when set), the last four in the record voice ("•••• 4242"), "Remove" as a removal button.
+- **Add a card.** "Card number", "Expires" (placeholder "MM/YY"), "Name for this card (optional)", "Save card". The vault's fields are iframes; they are styled through the vault's style options with our tokens (Atkinson 17 px, `--line-field` border, the same 52 px height), and the focus ring is drawn on their wrapper so it matches every other field. The existing vault sentence ("Saved cards are held by Basis Theory, a card vault, never in our database…") sits under the fields with a small lock icon.
+- **Security code field** (Ready to pay). One field, 56 px tall, 140 px wide, centered, mono 28 px, tracking +30%, numeric keypad, 3 or 4 digits. No masking dots while typing (the person is looking at the card), masked after submit.
+
+### 9.16 The enterprise inquiry form
+
+On the home page's Enterprise section: "Name", "Company", "Work email", "Phone (optional)", "States you file in" (radio cards: "New York", "New Jersey", "Florida", "Several of these", "Other states too"), "Filings per month" (radio cards: "Under 50", "50 to 250", "250 to 1,000", "Over 1,000"), "What you'd like to do (optional)" as a textarea, the hidden spam field ("Leave this field empty (it helps us block spam)") moved off-screen but kept labelled, and "Send" (pending: "Sending…"). On success the sheet keeps its size and shows the existing result message in place of the fields.
 
 ## 10. Page by page
 
@@ -540,7 +589,7 @@ PHONE 375                                DESKTOP 1280
 | 1 | **Hero.** "Your client approves the proof. Then CoFile files it." | Kicker with a 24 px hairline before it. H1 in `display`, broken after "proof." on phones. Sub in `lede`. Primary "Run a free rehearsal"; "See what your client sees" as secondary, scrolling to `#proof`. The beta note in `small` `--ink-2` directly under the buttons, never smaller. The sample proof (9.3) lifted at `e2`, rotated 0°: it is a document, not a postcard. Tapping a numbered callout scrolls to the matching line in section 3 and highlights it with Kihada for 1.2 s. |
 | 2 | **Process.** "You start it. Your client approves it. CoFile files it." | Three steps as three sheets in a row on desktop, stacked on phones, joined by the rail from 9.5. The middle step ("Your client approves it.") carries the half-seal glyph and sits 8 px higher: the lede says the client is in charge of the middle one, so the layout does too. |
 | 3 | **The proof.** "Your client sees what the state will see, before the state does." | The lede on the left. On the right, the six checks as a list with the ● glyph in Matsuba instead of ticks. The last item, the 8879 line, is set apart by 24 px and a hairline: it is the one sentence a CPA will repeat to a partner. |
-| 4 | **Firms.** "Your name on the door. Ours in small print." | The exhibit is the same sample proof re-themed live in three firm brands (a navy serif firm, a green sans firm, a warm red firm), crossfading every time the reader taps a swatch, never by itself. Under it, the "with CoFile" note at actual size with a hairline callout: "Ours in small print", quoted from the headline. |
+| 4 | **Firms.** "Your name on the door. Ours in small print." | The exhibit is the same sample proof re-themed live in three brand settings for the same example firm, Harbor & Pine CPA (navy with a serif, green with a sans, warm red with a sans), chosen from three swatches. It crossfades (220 ms) only when the reader taps a swatch, never by itself. Under it, the "with CoFile" note at actual size with a hairline callout: "Ours in small print", quoted from the headline. |
 | 5 | **Requests.** "Clients don't fill in forms. They text you." | Ana Ortiz's text as a real message bubble (sheet, `r3` with one square corner), and to its right (below on phones) a drafted New Jersey LLC formation card. Read-into-a-draft motion (8.3, 6): "LLC", "the bakery", "me and my sister, 50/50", "Jersey City" underlined with index numbers matching fields. The existing "↳ read into a drafted New Jersey LLC formation for your team to check" line sits on the seam between them. |
 | 6 | **Checks.** "Checked twice. Filed once." | Diorama (b): two sheets, one seal across their edge. The five checks as a numbered list in the record voice numbers. |
 | 7 | **After.** "The papers come back to you." | Diorama (c): the return envelope. Three items with the timeline's Done glyph. |
@@ -619,14 +668,16 @@ PHONE: filing detail
 │┃ The approver has a link to   │  nextStep() as a Your-turn note
 │┃ check exactly what will be…  │
 │                               │
-│ ● Drafted              9:12 AM│  timeline (9.5)
-│ ● Proof sent           9:40 AM│
-│ ◐ Approved                    │  ← current: half seal
+│ ● Received             9:12 AM│  timeline (9.5)
+│ ● Getting the state's  9:13 AM│
+│   review page                 │
+│ ◐ Waiting for approval 9:40 AM│  ← current: half seal
+│ ○ Approved                    │  dim future steps
 │ ┆ ─ ─ seam ─ ─ ─ ─ ─ ─ ─ ─ ─  │
-│ ○ State's review page         │  dim future steps
-│ ○ Payment                     │
+│ ○ Filing now                  │
 │ ○ Submitted to the state      │
-│ ○ Documents                   │
+│ ○ Accepted by the state       │
+│ ○ Completed                   │
 │                               │
 │ Link to the proof             │  sheet
 │ We emailed this link to …     │
@@ -649,6 +700,36 @@ Documents as rows with a file icon, label and kind; the EIN as "EIN:" with the n
 **Billing.** The plan from Stripe as one sheet, the registered agent renewals as a table, "Your plan is changing…" as a Your-turn notice. No prices anywhere except the ones Stripe returns for this account.
 
 **Password.** The change-password form on a 480 px sheet. **Signed out** (`/p/<slug>/signed-out`): the firm's logo if known, "You're not signed in to this filing desk" and its text, nothing else.
+
+**Every state of the desk, with its existing words.**
+
+| Where | State | Treatment |
+|---|---|---|
+| Filings | Subscription missing | Your-turn notice: "Real filings need an active subscription; rehearsals are free." with "Subscribe" |
+| Filings | Cards waiting | Your-turn notice: "{n} approved filings are ready to pay…" with "Pay and file" |
+| Filings | People must act | Your-turn notice: "{n} filings need someone to act." |
+| Filing detail | Next step known | `nextStep()` text as a Your-turn note, or In-motion note while "previewing" |
+| Filing detail | Missing information | A "Still needed" sheet under the timeline step with the missing fields, "Send the answers" (pending "Sending…"), and the quiet link "start this filing again" |
+| Filing detail | Waiting for a card code | Your-turn notice: "Approved and ready to pay. It needs the security code of {card} ending {last4}." with "Pay and file" |
+| Filing detail | Error text from the engine | Stop notice with `lastError` |
+| Filing detail | Proof link not emailed | "This link hasn't been emailed (sending failed)…" as a Stop notice when sending failed, Your-turn otherwise |
+| Filing detail | Google Docs | "Saved to Google Docs." with "Open the record" (Done); the five failure lines (cancelled, too long, denied, failed, not available) as Your-turn notices |
+| Ready to pay | Vault not switched on | "Card payments need the card vault switched on for this site." as an In-motion note, no field |
+| Ready to pay | Field couldn't load | Stop: "The field couldn't load. Reload the page and try again." |
+| Ready to pay | Wrong length | Field error: "Type the 3 or 4 digit code from the card." |
+| Ready to pay | Not accepted | Stop: "The code wasn't accepted. Try again.", field cleared, focus kept, `stop` haptic |
+| Ready to pay | Accepted | Done: "Thanks. Filings for this card pay with it for the next hour." plus the one-hour ring |
+| From email | Reading switched off | "Reading emails automatically isn't switched on for this site yet." |
+| From email | Type unknown | "We couldn't tell which filing this is." with the "Choose the filing" picker |
+| From email | Nothing found | "We couldn't find answers in your message for this form." |
+| From email | Already used | "Already sent as a filing." with "Open the filing" |
+| Billing | Subscription status | Chips by tone: "Active" and "Free trial" ● Done; "Waiting for the first payment" ◔; "Paused" ◐; "No subscription yet" ○; "Canceled" –; "The first payment didn't go through", "Payment failed: Stripe is retrying" and "Unpaid" ■ Stop |
+| Billing | Plans | "Your plan", plan sheets with "Choose this plan", "Switch to this plan" or "Not available yet" (disabled), and the counting paragraph ("Only live filings count…") set in `small` under them. Prices only as Stripe returns them for this account. |
+| Billing | After checkout | Done: "Thanks. Stripe is confirming the payment; this page updates in a moment." Buttons pending: "Opening Stripe…" |
+| Billing | Payment failed | Stop: "The last payment failed. Update the card under Manage billing." |
+| Setup › Payments | No cards | "No cards saved yet. Add a card, then choose which card pays for what…" with "Add a card" |
+| Setup › Payments | Routing | Radio cards "One card for every filing" and "A card for each type of filing, with a main card for the rest"; "Main card" and "Backup card" selects; "New Jersey: pay with your NJ account" sheet with "A card" / "A bank account (eCheck)" and the NJ portal-fee paragraph |
+| Setup › Agents | New York | The agent block's label carries "(optional: New York doesn't require one)"; "Save agents" |
 
 ### 10.4 The client's intake: `/i/<token>`, `/<firm>/<service>`, `/e/<tenant>/<firm>/<service>`
 
@@ -685,6 +766,22 @@ PHONE: intake
 - **Asking for as little as possible.** The firm's saved answers prefill silently on the client's page (no Kihada edge for clients; that is a staff cue). Conditional fields appear with a `t-fold` reveal directly under the answer that caused them, so cause and effect are next to each other. Optional sections are folded. "Same as" and "Same person as" chips save retyping.
 - **Errors.** On submit, the Stop notice with "Please fix these and submit again." and its issues as links; each field shows its own message. Focus moves to the notice. Haptic `stop`.
 - **Sent.** The button shows "Sending…"; then the existing thank-you (`result.title`, "Thank you.") replaces the form in place, with the next-step line. No confetti.
+
+**Every state of the intake.**
+
+| State | Treatment |
+|---|---|
+| Link expired | Torn slip, "This link has expired or isn't valid", "Ask whoever sent it for a new one." under the firm's bar |
+| Link can't be used / type withdrawn | Same layout: "This link can't be used" or "This filing is no longer offered" |
+| Rehearsal type | Rehearsal band at the top and in short form above the button |
+| EIN only | The IRS line ("…exactly what will be sent to the IRS…"); the phrase "state's own review page" never appears on IRS pages |
+| Prefilled by the firm | Values present, no marker for the client |
+| Conditional question appears | Revealed under its cause with `t-fold`; disappears the same way, and its answer is kept in case it comes back |
+| Group item added / removed | New sheet unfolds below the last; removal folds it away and moves focus to the next item's heading |
+| Server error | Stop notice at the top, issues linked to fields, answers kept as typed (the existing kept-form behavior; only passwords are cleared) |
+| Without JavaScript | The form still posts; folds are native `details`; "Same as" chips are hidden rather than broken |
+| Sending | Button "Sending…", the form dims to 85% and is inert |
+| Sent | The thank-you replaces the form in place; focus moves to it |
 
 ### 10.5 The proof (api.cofile.app)
 
@@ -732,6 +829,30 @@ PHONE: the proof                         …continued
 - **The decision sheet.** A sheet at `e1` with a 2 px ink top rule. One-time code (when required) as six separate digit boxes, `autocomplete="one-time-code"`, numeric keypad. Then the primary, 56 px, full width, the firm's corrected color, with the label wrapping to two lines if it must (never truncated). Then "Request changes" as secondary; choosing it reveals "What should change? (Needed only if you ask for changes)" with a `t-fold` and moves focus into it. Then "Questions:" and the firm's email.
 - **Pressing approve:** the seal sequence (8.3, 1).
 
+**Every state of the proof.** The engine renders this page as HTML; every state below must work without JavaScript, with JavaScript adding only the motion, the rail, the sticky line and the zoom.
+
+| State | Treatment |
+|---|---|
+| Opening | Firm bar and title paint first; the review picture's plate reserves its aspect ratio |
+| Rehearsal | Kohaku band at the top and again inside the decision sheet; the rehearsal seal variant afterwards |
+| Live filing | No band. The decision sheet's 2 px ink top rule and the firm-color button. Absence of the amber band is never the only signal: the consent text itself names payment and the amount. |
+| With the state's review page | Section ① as specified |
+| Without one (IRS, or where the state's site doesn't allow it) | Section ① is left out; numbering starts at Filing details; the words "state's review page" don't appear |
+| EIN in the run / after acceptance | The existing EIN sentence appended to the consent block, as today |
+| Masked SSNs | The masking sentence once, above the first masked value; values like `***-**-1234` in the record voice |
+| Fee cap | An extra fee row, "Maximum you authorize", with "(if the state asks for more, we stop before paying)" on its own line in `small`; the consent's amount is the cap |
+| One-time code | "One-time code sent to you" above one 56 px field with `autocomplete="one-time-code"` (iOS and Android fill it from the message). Wrong code: the proof stays, Stop notice "That code didn't match…", field cleared, focus back in it, `stop` haptic |
+| Pressing approve | 8.3, 1: the ring traces, label unchanged, second presses ignored |
+| Connection lost while posting | Ring stops, button returns, a Stop notice `[copy needed]`; the code and comment are kept; no seal |
+| Deadline passes while the page is open | The page checks the deadline each minute. Once past, the decision sheet dims, both buttons disable, and "This link to the proof has expired. Ask whoever sent it for a new one." appears inside the sheet |
+| Approved | The seal; "Approval recorded" |
+| Changes requested | The fold; the change-request sentence |
+| Opened again after deciding | A closed paper slip (no seal, because the page doesn't say which decision), with "A decision was already recorded with this link, so there's nothing more to do here." |
+| Expired or invalid | The torn slip with the matching sentence |
+| Printed | A print stylesheet for Letter and A4: no sticky line or rail, the reference and page number in each footer, the review picture at full width, values in the record voice |
+| Text at 200% | Label above value at every width; the sticky line hides above 150% text size to give the content room |
+| Screen reader | Reading order is visual order. The consent text is tied to the approve button with `aria-describedby`, so it is read when the button is reached |
+
 ### 10.6 After the decision, and approval errors
 
 - **Approval recorded:** the seal on the seam between the shrunken proof and the record sheet, then "Approval recorded" and its paragraph (the rehearsal variant uses the Kohaku dashed seal with "Rehearsal").
@@ -745,10 +866,13 @@ CoFile-branded, denser, desktop-leaning but fully usable on phones. Left rail fr
 - **Overview.** Your-turn notices first ("Real filings need an active subscription; rehearsals are free.", ready to pay). Then three figure tiles: Filings, Webhook deliveries, API keys (number in `fee-total` mono, label in `small`), then "By status", "By state", "By month" as bar lists (7.3).
 - **Filings.** The desk's table plus columns for firm and reference (record voice), filters as segmented controls by status tone.
 - **Firms / firm detail.** Table (Firm, Filing desk, Approvers); detail shows the firm's brand as a live mini-preview, its desk link, approvers, and its filings.
-- **API keys.** Keys in the record voice with the `cofile_` prefix visible and the rest masked; a new key is shown once in a dashed `--sunken` well with "Copy" and a clear one-time warning from the existing copy. "Revoke" as removal.
-- **Webhooks.** Endpoints as rows with a delivery strip: the last 30 deliveries as 8 px ticks (● Matsuba delivered, ■ Beni failed), each tick a button opening the delivery.
-- **Setup.** "Payment methods", "State portal logins" (NY DOS, NYS-100, NJ, IRS, FL as rows: "Portal", "Pays by", "Login", with a sealed lock icon once connected and "Disconnect" as removal), "Who's named on your filings", "Your registered agent in each state", portal defaults. Each block a sheet; the existing explanations above each.
-- **Ready to pay, Billing, Team, Password** as in the desk.
+- **API keys.** The existing explanation ("Keys you create here. A key we set up for you isn't listed here…"), then the create form: "Key name" (placeholder "Key name, e.g. Production server") and "Create key". A new key appears once in a dashed `--sunken` well in the record voice with "Copy" beside it (`settle` haptic on copy). The table: "Name", "Key" (the `cofile_` prefix and 8 characters visible), "Last used", and "Revoke" as removal; revoked keys show a – "Revoked" chip. Empty: "No keys created here yet."
+- **Filings.** Filters "All firms" and "Show" as selects on phones and segmented controls from `md`. Columns "Filing", "Firm", "Type", "Status", "Created". "Ready to pay: needs the card's code" as a ◐ chip that links to Ready to pay. Empty: "No filings."
+- **Webhooks.** The existing explanation, then one sheet per endpoint: "URL (https)" in the record voice, "Signing secret ends in" with the last characters in mono and its sentence about changing it, then "Every event" / "Or only these events" as radio cards; the event list appears under the second with each event name in mono. "Remove this endpoint" as removal, "Add another endpoint" as secondary, "Save endpoints" as primary. Under each saved endpoint, a delivery strip: the last 30 deliveries as 8 px ticks (● Matsuba delivered, ■ Beni failed), each tick a button opening that delivery.
+- **Firm detail.** "← Firms", the firm's name in `title`, a Stop notice when it has no approvers ("This firm has no approvers, so its filings can't be approved…"), then sheets for "Filing desk" (a live mini-preview of the firm's brand and its link), "Public pages and website widget" (its line, the page links, the widget code in a copyable well) and "Invite staff".
+- **Team.** "Name", "Email", "Last signed in" table; "Add someone" with "Name", "Email", "First password" ("At least 12 characters."), pending "Adding…", and the existing success line. Empty: "No one yet."
+- **Setup.** "Payment methods" (with "Card for your subscription" and "State fees" as two separate sheets, because the copy insists they are different money), "State portal logins" (NY DOS, NYS-100, NJ, IRS, FL as rows: "Portal", "Pays by", "Login", with a sealed lock icon once connected and "Disconnect" as removal), "Who's named on your filings", "Your registered agent in each state", portal defaults. Each block a sheet; the existing explanations above each.
+- **Ready to pay, Billing, Password** as in the desk; an account that isn't billed shows "This account isn't billed here." on a plain sheet.
 - **Platform tenant: Sign-ups and Enterprise requests.** Two queues as tables with "Approve" (primary, small) and "Turn down" (removal). Drift reviews, when built, use the stop visual: the approved form snapshot and the changed one side by side across the seam, differences in Kihada.
 
 ### 10.8 White-label and embed
@@ -800,3 +924,100 @@ One template, 560 px, sent as the firm (logo, name, color) on client emails and 
 1. **The client's sealed copy.** After approval, a PDF of exactly what was approved, with the half-seal printed on its right edge and the reference in the record voice, attached to the "Completed" email and kept on the filing. `[copy needed]` for its link.
 2. **A client follow-along page.** The decision page becomes a quiet, read-only timeline (9.5) the client can return to from the same link until the filing completes. `[copy needed]`.
 
+## 11. The white-label theming system
+
+Thousands of firms will choose colors I will never see. So I design the rules, not the themes.
+
+### 11.1 What a firm controls, and what it doesn't
+
+| A firm controls | The system keeps |
+|---|---|
+| Display name, logo (plus an optional dark-mode logo), primary color, second color, font (a preset or an upload), support email | Status inks and glyphs, the focus ring, the record voice, sizes and spacing, layout, the Maru seal, the rehearsal band, error and stop styling, button shape and size |
+
+The primary color appears on: the primary button, links (when they pass 4.5:1, otherwise ink with a 2 px underline in the firm color), the selected border of radio cards (when it passes 3:1, otherwise ink), and the intake's progress line. The second color appears only as the brand bar's 4 px top rule. Nowhere else.
+
+### 11.2 Automatic contrast fixes
+
+Computed when the firm saves its branding, stored as derived tokens, shown to the firm in the preview. Nothing is changed silently.
+
+1. Convert the color to OKLCH.
+2. **Button text.** If white text reaches 4.5:1, use white. Else, if ink text reaches 7:1 (the color is genuinely light), keep the fill and use ink text. Else, lower the lightness in 0.005 steps, chroma capped at 0.18 to stay in gamut, hue unchanged, until white reaches 4.5:1.
+3. **Button edge.** If the fill is under 3:1 against the sheet (pale yellows, mints, white), add a 1 px inside edge in the same hue at lightness minus 0.25, so the button still reads as a button.
+4. **Dark mode.** Repeat 2 and 3 against the dark sheet (`#1F1E1B`), lightening instead of darkening for colors that disappear into it (navy, black).
+5. **Status neighbors.** If the color sits within 25° of Beni's hue (red, coral, crimson) with chroma above 0.10, links and selected borders use ink instead, so red never doubles as an interaction cue near a stop. The button keeps the firm's red: its shape and label carry it.
+
+Measured results of the rule on sample firm colors:
+
+| Firm picks | Result | Text | Contrast |
+|---|---|---|---|
+| `#5B9BD5` sky blue | `#3979B1` | White | 4.6:1 |
+| `#FF6B6B` coral | `#D24247` | White | 4.6:1 |
+| `#2E8B57` sea green | `#288653` | White | 4.5:1 |
+| `#8A8A8A` gray | `#757575` | White | 4.6:1 |
+| `#7FD1AE` mint | unchanged, plus edge | Ink | 9.5:1 |
+| `#F4D03F` yellow | unchanged, plus edge | Ink | 11.3:1 |
+| `#1F3B70` navy | unchanged | White | 10.9:1 |
+
+### 11.3 Logos
+
+Uploaded logos are trimmed of transparent margins and measured. Wide logos (wider than 2.5:1) sit 28 px tall on phones, 32 px from `md`, at most 160 / 200 px wide; squarer logos sit at 36 px. If a logo's own contrast against the sheet is under 2:1 (a white logo on a transparent background, say), it sits on a small ink plate (`r2`, 8 px padding) in that theme, and the branding page suggests uploading a version for that mode. No logo: the firm's name in its font at `heading` size.
+
+### 11.4 Fonts
+
+Presets are shown in the picker set in their own face. An uploaded font is checked for every character English and Spanish need (including á é í ó ú ü ñ ¿ ¡), an x-height of at least 0.42 em, and text-weight stems; a script or display face that fails is used for the firm's name only, with Atkinson for everything else. Every firm font gets `size-adjust`, `ascent-override` and `descent-override` computed so its x-height matches Atkinson's, so a firm's font never changes the layout. The record voice is never replaced.
+
+## 12. Accessibility, Spanish and dark mode
+
+**Accessibility.** WCAG 2.2 AA throughout; AAA text contrast on the proof. Reading text is never under 14 px or thinner than weight 400. Everything is set in `rem`, so the device's text size is respected; pages reflow at 320 CSS px and at 200% zoom with no sideways scroll. Every page has landmarks and one `h1`; each proof section is a labelled region; the fees are a real table with a caption and the total announced with its label. Status chips include their column name for screen readers ("Status: Waiting for approval"). Focus moves on purpose: to the Stop notice on errors, to the heading after the seal, into the comment field after "Request changes". Live updates (a run's steps, Ready to pay) use polite live regions, at most one announcement every 5 s. No time limits beyond the real ones, and those are written in words. Touch targets 48 px. Motion and haptics each follow their own system setting.
+
+**Older readers.** Labels always above fields, never inside them as placeholders. Icons always with words. No gray text on gray, no hover-only information, no swipe-only actions. The proof is one scroll, not tabs.
+
+**Spanish.** Client-facing surfaces (intake, proof, decision pages, client emails) are designed to take a Spanish copy deck once it is written and approved: every layout allows 35% longer strings, buttons wrap rather than truncate, and dates and money follow the reader's language (`3 de diciembre, 5:00 p. m., hora del Este`). Values that go to the state are never translated; they keep the record voice and `lang="en"` so screen readers pronounce them correctly. The language choice is remembered per client link. The switcher's wording is a `[copy needed]` slot.
+
+**Dark mode.** Follows the system; `data-theme="light"` or `"dark"` overrides it (per page, per embed). Sumi night is specified in 4.5; firm colors get their own dark-mode correction (11.2).
+
+## 13. Production
+
+**Stack.** Next.js as today. Design tokens authored in Figma variables (modes: light, dark; themes: CoFile and six sample firms), exported through Tokens Studio to Style Dictionary, emitted as CSS custom properties (`--cf-*`) and a TypeScript map. Firm themes are computed server-side in the engine and the web app with `culori` (OKLCH) at save time, so the proof (rendered by the engine) and the desk use the same derived values. Motion in code with the Web Animations API and a small spring helper; no video, no Lottie. Haptics in one `haptics.ts` module with the five patterns and a capability check. Emails built with React Email, rendered to HTML and text for Resend. Fonts self-hosted as WOFF2, subset to Latin, Latin-1 and Latin Extended-A, preloaded on the proof.
+
+**Design-system files.** Figma: Foundations (color, type, space, motion specs), Components (every state in 9), Patterns (forms, the proof, the timeline, empty and error states), Pages (every surface in 10, at 375 and 1280, light and dark), Theming lab (twelve real-looking firm themes, including the hard ones: yellow, white, coral, navy, a script font). Storybook mirrors Components with visual regression across light and dark, six firm themes and three widths.
+
+**Asset list.** Kaku (plain, carved, 16 px, app icon, favicon set, social card), wordmark and lockups (SVG, PDF), Maru component with 30 ink masks (AVIF and WebP, 2x and 3x), torn-slip illustration, three dioramas (transparent, light and dark treatments), 40 icons (SVG sprite), the email template set, the OG image template.
+
+**Commissions.** The seal carver, the paper engineer and still-life photographer, an icon designer, a type designer for the wordmark, a motion studio (7.2).
+
+**Phases.**
+
+| Phase | Weeks | Ships |
+|---|---|---|
+| 1 | 1 to 4 | Tokens, type, the Kaku, core components; the proof, the decision pages and the intake; the theming engine. Client-facing first, because that is where the stakes are. |
+| 2 | 5 to 8 | The filing desk, the home page with real UI exhibits, coverage, emails. |
+| 3 | 9 to 12 | Dashboard, docs, delivered commissions, the seal and haptics polish, the Spanish layouts. |
+
+Before each phase ships: moderated sessions with eight firm staff over 50 on their own computers, and eight clients on their own phones, four of them Spanish-first. The test that matters: can a client say, without help, what they authorized after pressing the button?
+
+## 14. Appendix
+
+### 14.1 What I would push back on in the current site
+
+1. **The proof gets the least design of any surface.** It is an 860 px desktop table with inline styles, two narrow columns on a phone, and the consent sits at the top, far from the button it describes. It is the one page where someone authorizes an irreversible payment.
+2. **Green does three jobs** (approved, live, the forward button). The moment a firm's color replaces the button green, the meaning splits. Action and status must be separate systems.
+3. **Amber also does two jobs.** In the desk, the "warn" tone covers both a rehearsal's planned hold and "someone needs to act". A rehearsal hold is good news; a waiting approval is a to-do. They need different glyphs and tones.
+4. **Coverage labels are right, but they read as a list, not a path.** Without the ladder, "Rehearsed to the payment screen" and "Live" are two chips of similar weight.
+5. **Every value in mono, small.** The mono face is right for exact characters, but at .92em in a narrow column long names and addresses become hard to read for older eyes. Size it up and stack it on phones.
+6. **The folder tab says "storage".** CoFile's promise is not that it keeps files; it is that what was approved is what gets filed. The mark should carry that mechanism.
+7. **The white-label contrast fix is a binary.** Choosing white or black text on the firm's color is not enough for mid-tone colors, where neither passes; the fill has to move.
+
+### 14.2 Copy notes
+
+Suggestions only. None of these are applied in the design above.
+
+1. The desk's filings list labels a rehearsal "Test", and the filing detail says "test run" and "filing run". Elsewhere the word is "Rehearsal".
+2. "1 approved filing is ready to pay and need your card's security code": "need" should be "needs" in the singular.
+3. "Signing in…" on the log-in button, "You're not signed in to this filing desk", "they can sign in at the log-in page" and "Last signed in" use "sign in", which the words table rules out.
+4. The account-approved email says "You can try a practice filing right away"; the current word is "rehearsal".
+5. The proof's title is built from internal ids ("NJ formation: …"). The plain filing type title ("New Jersey LLC formation"), as on the intake and the home sample, would read better.
+6. The home page's sample proof says "Approve for filing"; the real button says "Approve, and authorize submission and payment". The section is called "See what your client sees", so the sample might show the real label.
+7. `nextStep()` lines on the firm's own desk speak of "The approver" and "Your filing company"; partner copy elsewhere says "your client" and speaks to the firm as "you".
+8. The dashboard's "Ask the platform team to configure tenant …" and the webhooks page's "The engine posts…" use words the copy review keeps out of non-developer copy.
+9. Slots that need new words, marked `[copy needed]`: the branding preview's note about automatic adjustments; the bodies of the "Submitted to the state", documents-back and "EIN issued" emails; the client's sealed copy link; the client follow-along page; the Spanish language switcher.

@@ -250,6 +250,46 @@ to tell two things apart.
 - **Dark mode** follows the device unless the person picks a theme. The state's review page picture
   always sits on a white mat (16 px of #FFFFFF around it) so the state's own colors read true.
 
+### 4.6 The tokens as the build team will write them
+
+```css
+:root {
+  /* Two inks */
+  --paper: #F6F5F1;  --sheet: #FFFFFF;  --sheet-2: #EFEDE7;
+  --ink: #15171A;    --ink-2: #474B52;  --ink-3: #62666D;
+  --rule: #D6D3CB;   --rule-strong: #15171A;  --field-border: #7D8187;
+  --blue: #1F45A8;   --blue-tint: #E4EAF8;    --blue-line: #6F87CF;
+  /* Signals */
+  --go: #0E6B3F;   --go-tint: #E2F0E7;   --go-on: #FFFFFF;
+  --hold: #8A5200; --hold-tint: #FBEFD9;
+  --stop: #B02A1E; --stop-tint: #FBE6E3; --stop-on: #FFFFFF;
+  --hatch: repeating-linear-gradient(135deg,
+             color-mix(in srgb, var(--hold) 35%, transparent) 0 1px, transparent 1px 6px);
+  /* Firm theme slots, filled by the theme compiler (section 11); CoFile's defaults shown */
+  --brand-band: var(--ink);
+  --brand-action: var(--go);   --brand-action-on: var(--go-on);
+  --brand-link: var(--blue);
+  --brand-font-head: var(--font-display);
+  color-scheme: light dark;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --paper: #121314;  --sheet: #1B1D20;  --sheet-2: #222428;
+    --ink: #ECEAE4;    --ink-2: #B9B6AE;  --ink-3: #94918A;
+    --rule: #33363A;   --rule-strong: #ECEAE4;  --field-border: #6E7279;
+    --blue: #8FA8F0;   --blue-tint: #18213A;    --blue-line: #5B6FB0;
+    --go: #5DC08A;   --go-tint: #13281C;   --go-on: #0B1A12;
+    --hold: #E9B35A; --hold-tint: #2E2310;
+    --stop: #F08A7E; --stop-tint: #34171A; --stop-on: #1E0B09;
+  }
+}
+:root[data-theme="dark"] { /* the same dark values, for an explicit choice */ }
+```
+
+The dark block is repeated under `:root[data-theme="dark"]` so a person's explicit choice wins over
+the device. The engine's proof renderer imports the same values from the token package rather than
+inlining them.
+
 ---
 
 ## 5. Typography
@@ -473,6 +513,62 @@ Numbered circles that tie a picture to the words beside it.
 election-night and markets graphics), working from this spec in Figma and delivering React SVG
 components with the data bound. One lead designer, one developer, six weeks.
 
+#### Graphic specifications
+
+**G1, the keyed proof.** The `ProofSheet` component itself (9.3), not a picture of it, so it is
+always identical to the client's page. Hero instance 560 px wide with markers only; section 03
+instance 720 px with leaders to the six checks. Data: the sample filing in `page.tsx` (Two Sisters
+Bakery LLC, Harbor & Pine CPA, $100.00 + $3.50 = $103.50, the two lines of New Jersey's review page).
+Leaders: 1 px `blue-line`, horizontal runs only between the list column and the sheet edge, a 3 px
+dot where they touch the sheet, never crossing a value. Accessible name: the figure's existing
+`aria-label`, "A sample proof for an example business"; markers `aria-hidden`.
+
+**G2, the middle step.** Full content width, 200 px tall at `lg`. One 2 px `ink` rule runs at the
+height of the step numerals; numerals 1, 2 and 3 in 32 px Record Display sit on it in 48 px paper
+circles. The middle column's sheet rises 24 px above the others and its rule segment is 4 px. The
+step names and bodies are the real text, set in HTML over the SVG rule, so the graphic is only the
+rule, circles and sheet. Phone: the rule turns vertical on the left at x = 20 px, numerals on it,
+text to its right.
+
+**G3, read into a draft.** Two columns at `md` and up (bubble 5 columns, draft 6 columns, a 1-column
+channel between them for leaders). Bubble: Record Sans 18/26, `sheet-2`, `r1` with a 10 px tail at
+bottom left, max 360 px wide. Three underlined spans in the bubble (2 px `blue` underline, 2 px
+offset): "the bakery", "me and my sister, 50/50", "Jersey City". Draft: three field rows from the
+sample proof (Business name, Members, Main business address) with values in `mono`; the address's
+street portion outlined in a 1 px dotted `ink-3` box with no leader. Leaders route through the
+channel with one bend each, staggered vertically by 24 px so they never cross. Phone: bubble above,
+draft below, leaders replaced by matching markers 1 to 3 on the spans and the fields.
+
+**G4, two readings.** Two "meter" cards side by side, each a white sheet 280 × 160 px: a caption at
+the top in `caption` small caps ("verified fee table" on the left, "the state's payment screen" on the
+right, both phrases from the copy), the figure "$103.50" in `fee-total` 40 px below. Between them, a
+32 px blue circle with "=" in white. Below the pair, the second row at 70% scale: the left card the
+same, the right card's figure replaced by a hatched blank 120 × 32 px, the circle showing "≠" in
+`stop`, and a stop chip beneath reading "stops before paying". Phone: the pairs stack, each pair
+side by side at 50% width.
+
+**G5, the papers come back.** Three horizontal lanes 64 px apart, each a 1 px `rule` line from a
+filled `ink` node at the left to a document glyph at the right. Lane labels in `h4` sans on the left:
+"New Jersey", "New York", "Florida". Between: New Jersey nothing (the line runs straight to the
+document); New York one email glyph node; Florida one examiner node (a generic person-at-desk glyph,
+no face). No time axis, no tick marks, no durations; all three lines are the same length on purpose.
+Captioned by the lede beside it, so it needs no labels beyond the three state names.
+
+**G6, thirteen screens.** A single row of 13 thumbnails (64 × 48 px, 8 px apart; 4 rows of 3 plus
+1 on phones), each a real capture from a New Jersey LLC rehearsal with test details, masked as in
+7.5, on a white mat. Under each, a 6 px marker: filled `ink` square for screens filled in, the hatch
+for the thirteenth. The row sits directly above the log and shares its caption. Thumbnails open a
+lightbox at full size with arrow-key navigation; each has alt text naming the screen **[copy needed]**.
+
+**G7, the ladder.** See 9.7. Legend row above the table: five glyph-plus-label pairs in ladder
+order with the count in tabular figures after each label, 24 px apart, wrapping on phones. Counts
+computed from `COVERAGE` and `liveFilings()` at render time.
+
+**G8, one record.** The `FilingRecord` timeline (9.5) rendered with an example filing for the home
+page's "After" section on wide screens (under G5, beside P3), and with the real filing on the
+filing detail page. On the home page it is marked with the same credit line style as the sample
+proof, using the existing words "test details".
+
 ### 7.5 Real screens
 
 - **Who:** an in-house capture pipeline, not a photographer. Every rehearsal already records its
@@ -535,10 +631,12 @@ appear without a text label, except copy, download and close in tables (which ge
 
 ### 8.3 Signature moments
 
-**The keyed proof draws its keys (hero).** When the sample proof enters the viewport (50%
-visible), markers 1 to 4 scale from 0.6 to 1 with `t-quick`, then each leader line draws from
-marker to target with `t-draw`, staggered 90 ms. The `<mark>` highlight on the business name and
-address wipes left to right behind the text (`t-draw`). Total under 1.1 s. Runs once per visit.
+**The keyed proof draws its keys (hero and section 03).** In the hero, as the sample proof
+enters the viewport (50% visible), markers 1 to 4 scale from 0.6 to 1 with `t-quick`, staggered
+90 ms, and the `<mark>` highlight on the business name and address wipes left to right behind the
+text (`t-draw`). In section 03, the explainer, each leader line then draws from its list item to
+its part of the sheet with `t-draw`, staggered 90 ms, in list order. Each sequence is under 1.1 s
+and runs once per visit.
 
 **The log sets itself (rehearsals).** The rehearsal log's lines appear one by one, 90 ms apart, as
 if typeset: the label appears, the dot leader runs out (`t-draw`), then the result. The last line,
@@ -814,6 +912,50 @@ live region. Used for "Copy link" confirmations and saves; never for errors that
 a "Copy" text button top right. Syntax in two inks: keys and punctuation `ink`, strings `blue`,
 comments `ink-3` italic. No rainbow themes. Inline `code` gets `sheet-2` ground, 2 px padding.
 
+### 9.13 Component state reference
+
+Exact values for the build. "Light / dark" where they differ.
+
+**Buttons**
+
+| Variant | Default | Hover | Active | Focus | Pending | Disabled |
+|---|---|---|---|---|---|---|
+| `ink` | bg #15171A, text #FFFFFF / bg #ECEAE4, text #121314 | bg #2A2D32 / #FFFFFF | bg #000000, 1 px down / #D9D6CF | 2 px #1F45A8 outline, 2 px offset / #8FA8F0 | label from code, 2 px progress rule #FFFFFF at 60% along the bottom | bg #EFEDE7, text #62666D / bg #222428, text #94918A |
+| `go` | bg #0E6B3F, text #FFFFFF / bg #5DC08A, text #0B1A12 | bg #0C5F38 / #74CB9B | bg #0A5230 / #4FAE7B | as above | as above | as above |
+| `quiet` | transparent, 1 px #15171A border / 1 px #ECEAE4 | bg #EFEDE7 / #222428 | bg #E4E1D9 / #2A2D32 | as above | as above | border #D6D3CB, text #62666D |
+| `text` | #1F45A8, 1 px underline / #8FA8F0 | 2 px underline | #15335F / #B3C4F5 | outline as above, 2 px radius | n/a | text #62666D, no underline |
+| `stop` | transparent, 1 px #B02A1E, text #B02A1E / #F08A7E | bg #FBE6E3 / #34171A | bg #F6D2CD / #43201F | as above | as above | as `quiet` disabled |
+| Firm `brand-action` | compiler output | compiler output darkened 8% in OKLCH L | 12% | as above | as above | as above |
+
+**Fields**
+
+| State | Border | Ground | Label | Message |
+|---|---|---|---|---|
+| Default | 1 px `field-border` | `sheet` | `ink` 600 | help in `ink-2` |
+| Hover | 1 px `ink-2` | `sheet` | | |
+| Focus | 1 px `blue` + 2 px `blue` outline + 4 px `blue-tint` halo | `sheet` | | |
+| Filled by "Same as" or saved answers | 1 px `field-border` | `blue-tint` for 1.2 s, then `sheet` | | |
+| Error | 2 px `stop` | `sheet` | `ink` 600 | `stop`, stop square glyph, starts with the label |
+| Read-only (locked by an enterprise default) | 1 px dashed `rule` | `sheet-2` | `ink` 600 | a lock glyph and the reason, if the code gives one |
+| Disabled | 1 px `rule` | `sheet-2` | `ink-3` | |
+
+**Notices**
+
+| Tone | Left rule | Glyph | Text | Use |
+|---|---|---|---|---|
+| plain (`notice`) | 4 px `ink` | none | `ink` | Facts, deleted-message notice |
+| ok | 4 px `go` | filled circle | `ink` | "Saved to Google Docs. …", plan changes |
+| warn | 4 px `hold` | pause bars | `ink` | "Approved and ready to pay. …", "1 filing needs someone to act." |
+| bad | 4 px `stop` | filled square | `ink` | `f.lastError`, "Billing couldn't be loaded. …" |
+| rehearsal | 8 px hatch | hatched square | `ink` 600 | Rehearsal banners |
+
+Notice text is always `ink`, never the tone color, so long sentences stay at full contrast; the tone
+lives in the rule and the glyph. Padding 12 px 16 px, no border other than the left rule, `sheet`
+ground on paper pages and transparent on sheets.
+
+**Chips:** see 9.4. Hover (where a chip is a filter toggle): 1 px `ink-2` border; selected: `ink`
+fill with white text and the glyph kept.
+
 ---
 
 ## 10. Page by page
@@ -873,14 +1015,18 @@ last button, so nothing is filed and nothing is paid. You'll set up your firm's 
 **02 Process: "You start it. Your client approves it. CoFile files it."** Wide layout. Lede: "Three
 steps, and your client is in charge of the middle one." G2 below: three columns joined by one 2 px
 ink rule running through numerals 1, 2, 3. Columns 1 and 3 sit on the paper; column 2 sits on a
-raised white sheet (elevation 2) 24 px taller than its neighbours, its rule segment in `go`
-(it is the step that moves the filing forward), because the lede says the client is in charge of
-the middle one. The step names ("You start it.", "Your client approves it.", "CoFile files it.") in
+raised white sheet (elevation 2) 24 px taller than its neighbours, its rule segment thickened to
+4 px, because the lede says the client is in charge of the middle one. (Not green: this is an
+illustration, and the green is kept for real approvals.) The step names ("You start it.", "Your client approves it.", "CoFile files it.") in
 `h3`, bodies in `body`. Phone: three stacked blocks on a vertical rule; the middle block on its sheet.
 
-**03 The proof: "Your client sees what the state will see, before the state does."** Spread. Left:
-H2 and the long lede ("You've approved a proof before: business cards, letterhead…"). Right: the six
-checks as a ruled list, each item with a key that matches the hero's markers:
+**03 The proof: "Your client sees what the state will see, before the state does."** This is where
+"See what your client sees" lands, so it is the full explainer, G1 at its largest. Wide layout: H2
+and the long lede ("You've approved a proof before: business cards, letterhead…") on columns 1 to 8;
+below them, the sample proof again, now at the real proof's true width (720 px, columns 4 to 9),
+with the six checks arranged around it like the labels of an explainer graphic, each item joined to
+the part of the sheet it describes by a blue leader line. In the DOM it stays one list in its
+locked order; only its placement is graphic. Each item carries a key that matches the markers:
 
 | List item (locked copy) | Key |
 |---|---|
@@ -891,11 +1037,31 @@ checks as a ruled list, each item with a key that matches the hero's markers:
 | One button. Until it's pressed, nothing is submitted and nothing is paid. | 4 |
 | For CPAs: it does for a business filing what the 8879 does for a return. | pull quote |
 
-Hovering or focusing a keyed item lights its marker on the hero proof if it is on screen; on wide
-screens the sample proof becomes **sticky** in the right column (top 96 px) through sections 01 to
-03 so the keys can be read against it. The last item is set as a pull quote: `pull` italic serif
-across columns 7 to 12, a 2 px `ink` rule above, in its list position. For the CPA reader that one
-line does more than the whole page. On phones, P2 (the phone at the bakery counter) follows the list.
+Placement at `lg` and up: items 1 and 2 on columns 1 to 3, level with the details and the fees;
+items 3 and 5 on columns 10 to 12, level with the state's page and the button; item 4 under items
+1 and 2, its leader running to the space between the fees and the state's page (in a real proof the
+statements live in the terms block above the details, and the leader says so by ending at the top
+edge of the sheet). Item 6 is set as a pull quote under the sheet: `pull` italic serif across
+columns 2 to 11, a 2 px `ink` rule above, still last in the list. For the CPA reader that one line
+does more than the whole page.
+
+```
+ [1] Every name, address and      ┌──────────────── proof ────────────────┐   [3] Where the state's
+     answer, in the order the  ───┤ ① details                             │       website allows it, …
+     state asks for them          │                                       ├───
+ [2] Every fee in dollars and  ───┤ ② fees  …  $103.50  ═══               │
+     cents, from a verified       │ ③ New Jersey's own review page        ├─── [4] One button. Until
+     fee table                    │ ④ [ Approve for filing ]              │       it's pressed, …
+ [✓] Each statement your          └───────────────────────────────────────┘
+     client is making, …
+ ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   "For CPAs: it does for a business filing what the 8879 does for a return."
+```
+
+Hovering or focusing an item lights its marker and its part of the sheet (`blue-tint`); hovering a
+marker lights its item. At `md`, the leaders go and the list sits beside the sheet in two columns.
+On phones the hero already showed the proof, so section 03 sets H2, lede, P2 (the phone at the
+bakery counter, the screen showing the proof) and then the list with its markers.
 
 **04 Firms: "Your name on the door. Ours in small print."** Spread, reversed (photo left). P1, the
 sign-painted door, columns 1 to 6, with caption "Harbor & Pine CPA · example firm". Right: H2, lede,
@@ -936,7 +1102,8 @@ G6, the thirteen-screen filmstrip: 13 thumbnails, 64 px wide, of the real New Je
 rehearsal, twelve with a small filled marker, the thirteenth with the hatch. The caption is the
 code's own: "13 screens of New Jersey's own LLC form, some grouped here, filled in with test
 details. Nothing was filed." The second lede paragraph, "Try one on a filing you know by heart, and
-compare it screen by screen.", is set as a pull line in italic serif under the H2.
+compare it screen by screen.", stays where it is, after the first, but is set as a pull line:
+Record Display Italic 26/34 with a 2 px `ink` rule above it.
 
 **09 Coverage: "New York, New Jersey, Florida and the IRS."** Wide. H2, lede ("Every filing type
 carries a plain label, so you always know which ones are live today."), then the ladder legend and
@@ -970,6 +1137,88 @@ the tagline on its own line, Record Display Italic 28/36, followed by the end ma
 **Footer (the colophon).** On `paper`, above it a thick-thin rule. Line one: "CoFile · the filing desk
 behind your firm" left, "New York · New Jersey · Florida · IRS" right. Line two, in `caption`: the
 not-a-law-firm sentence left, "Terms · Privacy · Security · hello@cofile.app" right. Phone: stacked.
+
+**Desktop wireframes for the three graphic-led spreads.**
+
+06 Checks (wide):
+
+```
+━━ 06 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Checked twice. Filed once.                                                     (banner, 80/84)
+A state filing can't be taken back, so CoFile would rather stop and ask than guess.  (lede)
+
+   ┌ VERIFIED FEE TABLE ┐        ┌ THE STATE'S PAYMENT SCREEN ┐
+   │      $103.50       │  (=)   │          $103.50           │
+   └────────────────────┘        └────────────────────────────┘
+   ┌ verified fee table ┐        ┌ the state's payment screen ┐
+   │      $103.50       │  (≠)   │         ▨▨▨▨▨▨▨            │   ■ stops before paying
+   └────────────────────┘        └────────────────────────────┘
+
+ ✓ The fee your client approves comes from    │ ✓ If a state has changed its form since CoFile
+   a verified fee table. CoFile reads it …    │   last verified it, the filing stops …
+ ✓ It reads the fine print. By card, New      │ ✓ A filing is never sent twice on its own. …
+   Jersey's standing certificate costs …      │ ✓ How CoFile handles Social Security numbers,
+     LLC ............ $52                     │   cards and state logins: see Security.
+     corporation .... $27                     │
+```
+
+08 Rehearsals (spread):
+
+```
+━━ 08 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Rehearse on the real stage.              │ ▪▪▪▪▪▪▪▪▪▪▪▪▧   (13 screens, G6)
+                                         │ ┌────────────────────────────────────────────────┐
+CoFile is in beta, and here's what that  │ │ Rehearsal · New Jersey LLC formation  test det. │
+means. Any filing can run as a           │ │ Business name ..................... filled     │
+rehearsal: the whole filing, performed   │ │ Name check ........................ passed     │
+on the state's real website with no      │ │ Registered agent .................. filled     │
+audience. …                              │ │ Members and signatures ............ filled     │
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━   │ │ Review page ........... matched the proof      │
+Try one on a filing you know by heart,   │ │ Payment: $100.00 + $3.50 NJ portal fee         │
+and compare it screen by screen.         │ │   .............................. matches the proof
+  (pull line, italic serif)              │ │▧Pay Now .................. held, on purpose    │
+                                         │ └────────────────────────────────────────────────┘
+                                         │ 13 screens of New Jersey's own LLC form, …
+```
+
+09 Coverage (wide):
+
+```
+━━ 09 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+New York, New Jersey, Florida and the IRS.
+Every filing type carries a plain label, so you always know which ones are live today.
+
+■■■■■ ● Live 0   ■■■■□ ▧ Rehearsed to the payment screen 5   ■■■□□ □ Screens recorded, rehearsal next 7
+■■□□□ □ Offered, not yet rehearsed 3   ■□□□□ □ Planned 1
+┌──────────────────────────────────────────────────────────────────────────────────────┐
+│ FILING ▾                                   WHERE ▾        WHERE IT STANDS ▾           │
+│ ════════════════════════════════════════════════════════════════════════════════════ │
+│ LLC formation                              New Jersey     ■■■■□ ▧ Rehearsed to the …  │
+│ …                                                                                    │
+└──────────────────────────────────────────────────────────────────────────────────────┘
+Rehearsed to the payment screen: CoFile completed every screen on the state's real website …
+```
+
+(The counts shown are computed from today's `COVERAGE` array with nothing switched live; they
+change by themselves when a type goes live.)
+
+**Responsive summary**
+
+| Section | `xs`/`sm` (phone) | `md` (tablet) | `lg`/`xl` (desktop) |
+|---|---|---|---|
+| 01 Hero | Copy, buttons, beta note, then the proof full width | Copy over proof, proof 6 of 8 columns | Copy 1–7, proof 8–12 |
+| 02 Process | Vertical rule, three blocks | Three columns, smaller sheet lift | Three columns, G2 |
+| 03 The proof | H2, lede, P2, keyed list | Proof and list side by side | Explainer with leaders |
+| 04 Firms | Copy, list, P1, ratio strip | Photo over copy | Photo 1–6, copy 7–12 |
+| 05 Requests | Bubble, arrow line, draft with markers | Two columns, markers | G3 with leaders |
+| 06 Checks | Readings stacked, list one column | Readings side by side, list one column | As wireframe |
+| 07 After | Lanes, list (no photo) | Lanes, list, photo | Lanes and G8 beside P3 |
+| 08 Rehearsals | Filmstrip 4 × 3 + 1, log, caption | Copy over log | As wireframe |
+| 09 Coverage | Stacked records, legend wraps | Table, "Where" column narrow | Full table |
+| 10 The catch | One column, numerals hang | Two columns | Two columns |
+| 11 Security | Stacked cells | 2 + 2 + 1 | 3 + 2 |
+| 12 Enterprise | List, then form | List over form | List 1–6, form 7–12 |
+| 13 Close | Centered, buttons full width | Centered | Centered on 3–10 |
 
 ### 10.2 Sign-up, log in and account pages
 
@@ -1062,17 +1311,66 @@ across).
   - **Payment**: the card list as rows (brand, last four in `mono`, label, which filing types it
     pays), the routing choice ("one card for everything, or one per filing type, with a backup") as
     two large radio cards, and the Basis Theory sentence set as an editor's note with a vault icon.
-- **New filing.** Three steps, each a full page with a breadcrumb rule ("All states" link back).
-  1. "Which state is the business in?": four large typographic tiles (New York, New Jersey, Florida,
-     IRS) set in Record Display 32 px on sheets, 2 × 2 on phone. No maps, no seals.
-  2. "{State}: what are you filing?": the filing types as a list of rows, each with its title, the
-     ladder glyph and chip from coverage (so a rehearsal-only type says so where it is chosen), and
-     two actions per row. The lede ("Fill it in yourself, or send your client a link…") above. The
-     service-page and widget block below as a ruled section with the link in `mono` and "Copy link".
+- **New filing.** Three steps, each a full page with a breadcrumb rule ("All states" links back).
+  1. "Which state is the business in?": three large typographic tiles, New York, New Jersey and
+     Florida, set in Record Display 32 px on sheets (a row of three at `md` and up, stacked on
+     phones), each with its count line from the code in `ui-small` ("1 filing type, plus the federal
+     EIN", "None offered yet", or "Federal EIN only. To offer … filings, choose them in Setup."). No
+     maps, no seals. The note "Filing types go live one at a time; until then they run as
+     rehearsals. See What we file for where each one stands." sits above the tiles as an editor's
+     note; the "Or send us the details and we fill in the form for you to check:" list (email, text
+     or WhatsApp, Slack's `/file`) sits below them as a ruled strip of three channels, each with its
+     icon and the address in `mono`.
+  2. "{State}: what are you filing?": the filing types as ruled rows rather than a grid of cards:
+     title in `h4`, the code's chip ("Live" in solid green, or "Rehearsal" with the hatch, whose
+     tooltip text "Runs on the state's real website and stops before the last button: nothing is
+     filed or paid" becomes a visible second line on touch devices, where tooltips don't exist), and
+     the summary in `ink-2`. The whole row is the link, 72 px minimum, chevron at the right. The lede
+     ("Fill it in yourself, or send your client a link…") above. The permanent-page and widget block
+     below as a folded ruled section per filing type, the link in `mono` with "Copy link".
   3. The form (`IntakeForm`): sections as numbered parts with `h3` heads and a hairline, paired
      fields, "Same as", folded "More options (optional)", authorizations in their ruled blocks, and
      the submit "Send the proof to my client" (`go lg`) with the footnote above it. A sticky part
      index on the left at `lg` (section titles from the form), a progress rule on phones.
+
+```
+ ← All states
+ ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ New Jersey: what are you filing?
+ Fill it in yourself, or send your client a link to fill it in. Either way, your client approves …
+ ──────────────────────────────────────────────────────────────────────────────────────────────
+ LLC formation                                           ▧ Rehearsal                        ›
+ {summary from the filing type}
+ ──────────────────────────────────────────────────────────────────────────────────────────────
+ Employer registration (NJ-REG)                          ▧ Rehearsal                        ›
+ {summary}
+ ──────────────────────────────────────────────────────────────────────────────────────────────
+ (a type switched live)                                  ● Live                             ›
+```
+
+The form page at `lg`:
+
+```
+ ┌ PARTS ──────────┐  New Jersey LLC formation
+ │ 1 The business  │  ──────────────────────────────────────────────────────────────
+ │ 2 Members       │  1  {section title}
+ │ 3 Agent         │     Business name                          Ending
+ │ 4 …             │     [______________________________]       [LLC     ▾]
+ │                 │     Main business address
+ │                 │     [__________________________________________________]
+ │                 │     [City_____________________] [State] [ZIP____]
+ │                 │     Same as  [Members' address 1]
+ │                 │     ▸ More options (optional)
+ │                 │  2  {section title}
+ └─────────────────┘  …
+                      ┃ Authorizations
+                      ┃ [ ] {consent text at full size}
+                      {footnote}
+                      [ Send the proof to my client ]
+```
+
+(Part names in this wireframe are placeholders for the form's own section titles, which come from
+each filing type's definition in `lib/intake/forms`.)
 - **Filing detail.** The `FilingRecord` timeline (9.5) is the page. Header: back link "← Filings",
   title in `h1` serif (the business name is the headline of its own record), status chip, rehearsal
   chip, the meta line in `ui-small`. The `nextStep()` sentence as an editor's note. Then, at `lg`, two
@@ -1132,72 +1430,100 @@ centered sheet in the firm's theme with the firm's contact line.
 │                            CoFile│
 ├──────────────────────────────────┤
 │ ① Filing details  ② State fees   │  sticky index strip, scrolls sideways
-│ ③ The state's review page  ④ …   │
+│ ③ The state's review page  ④     │
 ├──────────────────────────────────┤
-│▧ Rehearsal: nothing will be filed│  only on rehearsals; sticky
+│▧ Rehearsal: nothing will be filed│  only on rehearsals; sticky under the strip
 │  or paid, even if you approve.   │
 ├──────────────────────────────────┤
 │ Two Sisters Bakery LLC           │  h1 serif 30/36
-│ Filing reference … Please decide │
+│ Filing reference … Please decide │  ui 17/26 ink-2; the deadline in semibold ink
 │ by December 3, 2026, 5:00 PM     │
-│ Eastern. After that, this link … │
-│ ▍Government sites don't save     │  editor's note
-│ ▍drafts, so once you approve, …  │
-│ ▍Please check everything now.    │
+│ Eastern. After that, this link   │
+│ stops working and you'll need a  │
+│ new one.                         │
+│┃By approving, you confirm every  │  the terms block: the note from render.ts,
+│┃detail below is correct and      │  intact and in its order; sheet-2 ground,
+│┃authorize its submission exactly │  4 px ink left rule, ui 17/26 ink
+│┃as shown, and payment of the fees│
+│┃shown, up to the total shown     │
+│┃($103.50). Government fees       │  this sentence semibold
+│┃generally can't be refunded once │
+│┃paid, even if the filing is      │
+│┃rejected. … Government sites     │
+│┃don't save drafts, so once you   │
+│┃approve, the whole filing is sent│
+│┃in one go. Please check          │
+│┃everything now.                  │
 │                                  │
-│ ① Filing details                 │
-│ Business name                    │
+│ ① Filing details                 │  h2 serif 24/30, marker in the margin
+│ Business name                    │  label ui-small ink-2
 │ TWO SISTERS BAKERY LLC           │  mono-proof on blue-tint
 │ Members                          │
 │ Ana Ortiz, Lucia Ortiz (50/50)   │
 │ …                                │
 │ ② State fees                     │
 │ Nothing is charged on this page. │
-│ Formation filing fee     $100.00 │
+│ These fees are paid to the state │
+│ when the filing is submitted.    │
+│ Formation filing fee     $100.00 │  fee, tabular, decimal-aligned
 │ NJ portal fee, by card     $3.50 │
-│ ──────────────────────────────── │
-│ Total                    $103.50 │
-│ ════════════════════════════════ │
+│ ──────────────────────────────── │  single rule above the total
+│ Total                    $103.50 │  fee-total
+│ ════════════════════════════════ │  double rule below
 │ ③ The state's review page        │
-│ [ white mat: state capture ]     │
-│ ④                                │
-│ By approving, you confirm every  │  consent, ui 17/26, ink
-│ detail below is correct and …    │
-│ Government fees generally can't  │
-│ be refunded once paid, even if   │  semibold
-│ the filing is rejected.          │
-│ [One-time code sent to you    ]  │
+│ This is a picture of the state's │
+│ own review page, filled in …     │
 │ ┌──────────────────────────────┐ │
-│ │ Approve, and authorize       │ │  go lg, 64 px, two lines
+│ │ white mat: state capture     │ │  tap to open full screen, pinch to zoom
+│ └──────────────────────────────┘ │
+│ ④ ─────────────────────────────  │  section rule, the decision
+│ Total                    $103.50 │  recap, same labels and figures as ②
+│ One-time code sent to you        │  only when required
+│ [__________________]             │
+│ ┌──────────────────────────────┐ │
+│ │ Approve, and authorize       │ │  go lg, 64 px, two centered lines
 │ │ submission and payment       │ │
 │ └──────────────────────────────┘ │
-│ [ Request changes ]              │  quiet lg
-│ Questions: help@harborpine…      │
+│ [ Request changes              ] │  quiet lg, full width
+│ Questions: help@harborpine.examp │
 └──────────────────────────────────┘
 ```
 
+Desktop (`lg` and up): the sheet is 720 px wide, centered on the paper, at elevation 2; the index
+strip becomes a sticky column in the left margin (the four markers stacked with the headings beside
+them, 200 px wide); the markers sit 16 px outside the sheet's left edge; the brand bar spans the
+viewport.
+
 Rules for the proof:
 
+- **The terms come first, because the copy says "below".** The approval consent reads "By approving,
+  you confirm every detail below is correct…". The word "below" fixes its position: it must stand
+  above the details. So the whole note from `render.ts` (the consent, the EIN sentence when there is
+  one, and "Government sites don't save drafts…") stays together, intact and in its order, directly
+  under the deadline line, as **the terms block**. It is the first thing read and the thing every
+  later section is checked against. (Appendix B suggests a wording that would let the consent sit
+  beside the button; until then, the copy decides the layout.)
 - **Order matches the sample**: details (1), fees (2), the state's review page (3), the decision (4).
   Today the real page puts the picture first and the sample puts it third; the CPA was shown one
   order and the client gets another. The index strip uses the page's own headings ("Filing
   details", "State fees", "The state's review page"); item 4 is the marker alone and jumps to the
   decision.
-- **Chunking the existing note.** The note in `render.ts` is one block holding three different
-  things. I split it, word for word: the "Government sites don't save drafts…" sentences go to the
-  top as reading instructions; the EIN sentences ("While filing, we'll get the EIN…" or "Once the
-  state accepts this formation…") go with the filing details, beside the EIN-related rows; the
-  consent sentence goes directly above the approve button, where it is being agreed to. Nothing is
-  dropped or reworded.
+- **The decision recap.** Directly above the button, the total is repeated with the fee table's own
+  label and figure ("Total $103.50"), or "Maximum you authorize" and its figure when the filing has
+  a fee cap. No new words: the reader sees the amount she is authorizing at the moment she presses.
 - **The consent is set at reading size**, never in small print. "Government fees generally can't be
   refunded once paid, even if the filing is rejected." is semibold.
-- **"Maximum you authorize"** gets its own ruled row under the total, with its parenthesis in `ink-2`.
+- **"Maximum you authorize"** gets its own ruled row under the total in ②, with its parenthesis
+  ("if the state asks for more, we stop before paying") in `ink-2`.
+- **Rehearsals repeat the banner at the button.** On a rehearsal, "Rehearsal: nothing will be filed
+  or paid, even if you approve." is repeated, word for word, in a hatched band directly above the
+  button, so it is on screen at the moment of the decision as well as at the top.
 - **No sticky approve button.** The button appears once, at the end, after everything it approves.
-  The sticky index strip lets the reader jump, but the button is only reachable after the fees and
-  the consent have passed on screen.
+  The sticky index strip lets the reader jump, but the button is only reached after the details and
+  fees have passed on screen.
 - **"Request changes"** first reveals the comment field ("What should change? (Needed only if you
   ask for changes)") and moves focus to it; pressing it again submits. On approval the field stays
-  hidden.
+  hidden. With JavaScript off, the field is shown above both buttons, as the code renders it today.
 - **The state's review page picture** sits on a white mat with its caption paragraph above it, can
   be opened full screen with pinch zoom, and keeps its long alt text from the code.
 - **SSN masking:** masked values in `mono` with the last four in `ink` and the mask in `ink-3`.
@@ -1355,8 +1681,10 @@ light and dark. One shared package used by the web app and by the engine's proof
    the page's annotations (keys, leaders, highlights) switch to `ink-2` outlines so the reader can
    still tell the firm's voice from the editor's note.
 6. **Dark mode.** The band keeps the original color. The forward button is recomputed for the dark
-   ground: raise lightness until `#121314` text on it reaches 4.5:1, or keep the light-mode button
-   with white text if it reaches 4.5:1 against the dark sheet as a shape (3:1) and as a label (4.5:1).
+   ground. First choice: keep the light-mode button and its white label, if the button reaches 3:1
+   against the dark sheet (so it reads as a shape). Otherwise raise its OKLCH lightness until it
+   reaches 3:1 against the sheet and set the label in `#121314` once that reaches 4.5:1. The signal
+   guard (step 3) runs again on the dark result.
 7. **Logo plate.** The logo is analysed on upload: transparent pixels, mean color, and contrast
    with the sheet in both modes. A logo whose ink is under 3:1 against the ground (a white logo on
    light, a navy logo on dark) is placed on a plate: the band color or white, 8 px padding, `r1`.

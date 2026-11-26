@@ -34,6 +34,17 @@ That idea gives three rules that run through every surface:
 
 Why this fits CoFile: CoFile's promise is "stop and ask rather than guess", and its one irreversible moment is a signature on a page. An austere, form-like design says *this is a serious document and nothing is hidden*. It also solves the co-branding problem structurally instead of cosmetically, and it makes the beta legible, because "Live" is the only thing on the site drawn as a full green disc.
 
+### 2.1 How the concept answers the six hard problems
+
+| Problem | Answer in this design | Where |
+|---|---|---|
+| Co-branding at scale | The firm's color becomes the *print* color of its forms, computed for contrast; ink, the signals and the decisive button never change | 4.2, 9.1, 11 |
+| Trust for an irreversible act | The proof is a numbered form; the declaration sits directly above the one ink button at the end; amounts follow accounting rules; nothing sticky, nothing celebratory | 9.4, 10.4 |
+| Honest beta | "Live" is the only full green disc on the site; rehearsal is the hold symbol in amber; coverage stages are ordinal quarters of a disc | 4.3, 9.10, 10.1 |
+| Two readers on one site | One system, two densities: 18px reading for firms and clients, 16px with mono for developers; the same numbering from intake to API | 5.2, 10.8, 10.10 |
+| Forms that ask little | State order, required first, optional folded, saved answers marked, field widths that say how long an answer is, help before the box | 9.2, 10.5 |
+| Plain reading | 14px minimum, 7:1 on the proof, symbol plus word for every state, Spanish designed in from the start | 5.2, 12 |
+
 ---
 
 ## 3. Brand identity
@@ -513,6 +524,32 @@ Mobile: each row becomes a block: Filing in 65 Medium, Where in ink-2 on the nex
 - **Toasts:** for confirmations that need no action ("Thanks. Filings for this card pay with it for the next hour."). Bottom-left at L+, bottom full-width on mobile above the safe area, paper with 1px ink border, `t-body`, 6 seconds, pause on hover and focus, `role="status"`. Errors never appear as toasts; they stay on the page where the problem is.
 - **Dialogs:** used only to confirm destructive actions where inline confirmation is not enough (disconnecting a state portal login). Paper, 1px ink border, 480px maximum, focus trapped, Escape closes.
 
+### 9.12 The line numbering (the signature system)
+
+The numbering is a component with its own rules, because if it drifts it is worse than useless.
+
+**Assignment.**
+
+- Each filing type has a **schedule**: the ordered list of every detail the state asks for, in the state's screen order. Line numbers are assigned 1, 2, 3 … down that schedule. Repeated groups take one number with sub-lines: members are line 9, and Member 1's name and address are 9.1 and 9.2, Member 2's are 9.3 and 9.4. Authorizations are numbered last, continuing the sequence.
+- Optional details keep their number whether or not they are answered. On the proof, an unanswered optional line is shown as its number and label with an en dash for the value, so the numbers never renumber between a client's proof and the next client's. A gap is honest; a renumbered line is a trap.
+- The schedule is versioned with the filing type (the engine already versions the state's form snapshots). If a state adds a field, the new version appends or inserts and the version changes; a proof always shows the numbers of the version it was made with.
+
+**Display.**
+
+| Surface | Where the number sits | Style |
+|---|---|---|
+| Intake form | Reference column, baseline of the label | `t-ref`, print color |
+| The proof, Filing details | Reference column (row header text on phones) | `t-ref`, print color |
+| The proof, the state's page | Callout squares drawn on the capture by the engine | 24px print-color square, paper numeral, 13px |
+| Rehearsal log, run log | First column of the log | Mono, ink-2 |
+| Filing detail (desk, dashboard) | In the request fold and in the record | `t-ref` |
+| API | `line` property on each field in `/v1/schema/filing-request` and on each row of the shown payload | String, e.g. `"9.2"` |
+| Printed record | Left margin | 9pt, print color |
+
+**The callouts on the state's page** are placed by the engine from the field positions it already knows when it fills the page (it typed those values, so it knows where they are). A callout sits 4px to the left of the field's box, or above it when there is no room. If the engine cannot place a callout with confidence, it omits it rather than guess; the text table still has every line.
+
+**Numbers are never interactive by appearance**: they look like print. Their interaction (8.3) is discovered by tapping, and is announced to screen readers as a button only on the proof, where tapping does something.
+
 ---
 
 ## 10. Page by page
@@ -720,3 +757,331 @@ Rules for the build:
 **Approval errors and expired links.** Today these are bare `<p>` elements without the firm's header. They get the full branded page: firm header, an H1 (see Appendix B; until there is copy, the sentence itself is set as `t-title`), and the support line. The three texts ("A decision was already recorded with this link…", "This link to the proof has expired…", "This link to the proof isn't valid…") and the two POST errors ("That code didn't match…", "We couldn't record your decision…") unchanged. "That code didn't match" returns to the proof with the code field in its error state, not to a separate page.
 
 **Print.** The proof prints on US Letter: 0.75in margins, 10.5pt, the reference column in the left margin, the picture of the state's page at full text width, the decision block replaced by a line recording the approval time if approved. The firm's band prints as a 2pt rule.
+
+### 10.5 The intake form `/i/<token>` and the form in the desk
+
+One form component serves the client link, the firm's permanent pages, the hosted enterprise page, the widget and the desk's New filing. It is designed to ask for as little as possible and to look exactly like the proof it will become.
+
+```
+┌ band ─────────────────────────────────────────────┐
+│ [logo] Harbor & Pine CPA                with CoFile│
+├───────────────────────────────────────────────────┤
+│ ‖ This page is in rehearsal for now. You can fill  │  only when the type isn't live
+│   it in and see your proof, but nothing will be …  │
+│ New Jersey LLC formation · {link label}            │
+│ Certificate of Formation for a domestic LLC, …     │
+│ After you send this, you'll get a link to check …  │
+│                                                    │
+│ Fields marked * are required.                      │
+│ ──────────────────────────────────────── 1/7 ───── │
+│    Name                                            │  section legend, t-heading
+│ 1  LLC name, without the ending *                  │
+│    Don't type LLC or Ltd. here; pick the ending …  │  help before the box
+│    [                                            ]  │
+│ 2  Ending *                                        │
+│    [ LLC                ▾]                         │
+│ ──────────────────────────────────────── 2/7 ───── │
+│    Business data                                   │
+│ 3  EIN, if one is already assigned (usually blank) │
+│    [            ]                                  │
+│    ＋ More options (optional)                      │
+│ ...                                                │
+│ ──────────────────────────────────────── 5/7 ───── │
+│    Members and managers                            │
+│    Member 1                              Remove    │
+│ 9  Name *                                          │
+│ 10 Address *                                       │
+│    Same as  [Main business address]                │
+│ ...                                                │
+│    Other provisions (optional)            ＋       │  folded section
+│ ────────────────────────────────────────────────── │
+│    Authorizations                                  │
+│    The state form asks for these. Check a box …    │
+│   ┌──────────────────────────────────────────────┐ │
+│   │ □  I attest that the registered agent …      │ │
+│   └──────────────────────────────────────────────┘ │
+│    Next, you'll get a proof to check. Nothing is … │
+│    By sending, you agree to CoFile's Terms …       │
+│    [ Send to Harbor & Pine CPA ]                   │  firm primary
+│    Questions? Email {firm support email}.          │
+└───────────────────────────────────────────────────┘
+```
+
+- **Order** follows the state's screens, which is the order the proof will show. Line numbers are assigned per filing type from that order and fixed for the type's version; the proof uses the same numbers.
+- **Section progress** as a numeral pair (`1/7`) at the right end of each section's rule, `t-ref`. No progress bar, no steps across the top; the form is one page and scrolls.
+- **Required first, optional folded:** sections with nothing required are folded with "(optional)" in their title, as `planSections()` already decides; inside a section, optional questions go under "More options (optional)". A folded section opens by itself when it holds an answer or a problem.
+- **Repeated groups** (members, signers, provisions): each item is a sub-sheet with a hairline frame, titled "Member 1", with "Remove" at the right; "Add" below the last item as a small secondary button.
+- **Saved answers** from the firm's setup (registered agent, organizer, signer, addresses) are shown filled, with the 3px print bar (9.2), so staff see at a glance what came from Setup.
+- **Desk version:** same component in `t-body` instead of `t-body-l`, with an aside in cols 10–12 holding the filing type's fee note (`feeNote`) and the rehearsal or live chip, sticky at L+. Button: "Send the proof to my client".
+- **Widths:** the client sheet is 720px; on a phone, every field is full width except the short ones (ZIP, state, dates), which keep their widths so their brevity is visible.
+
+### 10.6 The filing desk `/p/<slug>`
+
+Firm's theme throughout (Section 11). Header: the firm's logo plate and name at left, the nav ("Filings", "New filing", "Ready to pay", "Client links", "Signatures", "Setup", "Billing"), and at right the user's email (link to password), "Log out", and "with CoFile". The 4px band in the firm's color sits above the header. The beta band (neutral wording) above that.
+
+**Filings (home).** "Filings" H1 with "New filing" (firm primary) at the right edge. Notices directly under the title, in this order: approved filings ready to pay, with "Pay and file" (a neutral notice in print color, not amber: paying is the next step, not a hold); filings that need someone to act; the subscription notice "Real filings need an active subscription; rehearsals are free." with "Subscribe". Then the table:
+
+| Filing | Type | Status | Started |
+|---|---|---|---|
+| Two Sisters Bakery LLC  ‖ Rehearsal | New Jersey LLC formation | ○ Waiting for approval | Nov 26 |
+
+Rows that need action sort first and are set in 65 Medium. The Rehearsal chip replaces today's "Test" badge. Empty state: "Your desk is clear. Start a filing (it can be a free rehearsal), or send a client a link with your logo on it." with "New filing" and "Send a client a link".
+
+**New filing.** Step one: "New filing", "Which state is the business in?", the rehearsal sentence with its "What we file" link, the request channels (email address, text, WhatsApp, Slack `/file`) as a small definition list. The three states are **three full-width rows**, not cards: state name in `t-heading`, the count ("2 filing types, plus the federal EIN") in ink-2, a chevron at the right, 80px tall, hairlines between. Step two: "All states" back link, "{State}: what are you filing?", the paragraph, then the filing types as rows: title in `t-sub` 75, the Live or Rehearsal chip directly after the title, summary in ink-2, fee note in `t-small`. "Your pages for clients" below as a sheet listing each permanent page URL in mono with a "Copy link" button and the widget snippet in a code block. Step three is the form (10.5).
+
+**Filing detail.** Cols 2–8 for the record, cols 10–12 for the aside.
+
+```
+ ← Filings
+ Two Sisters Bakery LLC                       [○ Waiting for approval] [‖ Rehearsal]
+ New Jersey LLC formation · started Nov 26, 2026, 10:42 AM by ana@… (client link)
+ ┌ notice ────────────────────────────────────────────────────────────┐
+ │ The approver has a link to check exactly what will be filed …      │
+ └────────────────────────────────────────────────────────────────────┘
+ 10:42  ●──  Received                                    aside:
+ 10:44  ●──  Getting the state's review page             Link to the proof
+ 10:51  ○══  Waiting for approval                        We emailed this link to …
+        ○    Approved                                    https://api.cofile.app/…  [Copy]
+        ○    Filing now                                  Documents
+        ○    Submitted to the state                      – (none yet)
+        ○    Accepted by the state                       Save to Google Docs
+        ○    Completed
+ ▸ Progress on the state site (rehearsal, running)
+```
+
+The timeline (9.6) is the spine of the page, from draft to proof to filed. Documents list with pictograms and the document kind in ink-2; the EIN in mono 75 Bold when issued ("EIN: 12-3456789"). "Progress on the state site" is a fold containing the run's steps as a numbered mono log with times, the same visual language as the home page's rehearsal log. Stop notices (`lastError`) in stop tint directly under the header. "Approved and ready to pay…" as a neutral notice with "Pay and file". Missing information: the "Still needed" form inline, with "Send the answers".
+
+**Setup.** "Set up your account" / "You're set up". The steps as a numbered list of rows (1 Your firm, 2 Branding, 3 Payment), each with its description and its button; a done step shows the go disc in place of its number and its button reads "Change". Registered agents (optional) as a fourth row set apart by a hairline. Each step page is a reading layout (cols 2–8) with "Step 2 of 3" in `t-ref`.
+
+**Branding** is the most important setup page, because it is where the theming system meets the firm. Left (cols 2–6): "Your web address", "Name your clients see", Logo, "Main color", "Second color", Font, "Support email shown to clients", "Save and continue". Right (cols 8–12, sticky): **"Preview of a client's page"**, showing three live miniatures one above the other, at true size: the intake header, the proof's top with its decisive button, and the email header, each in light and dark (a two-up). Under each color field, the computed result: the swatch the firm chose, an arrow, and the swatch the system will use for print and for buttons, with their contrast ratios as numbers (for example `4.9 : 1`). When the system changes a color, the firm sees both and the reason is numeric. (The labels for this report are in Appendix B.)
+
+**Registered agents, Payments.** Reading layouts; per-state rows for agents ("Ours: Registered Agents, Inc., through CoFile ($59 a year per business, billed to your firm)" appears here in the desk only, never publicly); the payment routing form with the two radios ("One card for every filing", "A card for each type of filing") and the card selects, Basis Theory card fields styled to match 9.2 through their style API.
+
+**Client links.** Two parts: "Send a client a link" (Filing select, "Who it's for (shown to you and the client)", "Make link", then the link in mono with "Copy link" and "Email it from your mail app"), and "Links you sent" as a table (Filing, label, Status with chips "Waiting for the client" ○ or "Turned off", and "Used: open the filing" or "Turn off").
+
+**From email `/from-email/<id>`.** "Filing request". Two columns at L+: left (cols 2–6) "Your message" set as a quotation (as on the home page, 10.1 section 05), the phrases that were read underlined and numbered; right (cols 8–12) "This looks like a request for: {type}", the draft's filled lines with the same numbers, and "Open the filled-in form". The failure messages ("We couldn't find answers in your message for this form.", "We couldn't tell which filing this is.") as neutral notices with the "Choose the filing" select. Deleted messages: the 30-day sentence in place of the quotation.
+
+**Signatures.** "Saved signatures", the paragraph, the table (Signer, Last used, Remove), "No saved signatures yet." and "Add a signature" with the signature pad (9.3) and the consent as an authorization row.
+
+**Ready to pay.** "Ready to pay" and its paragraph. Then one block per card: the card's label and "ending 4242" in 65, the filings waiting for it as a short list with amounts right-aligned and a total line (accounting rules), then the security code field (mono 24px, 6ch wide, `inputmode="numeric"`, `autocomplete="cc-csc"`) and "Pay and file" (ink: paying is irreversible, so it is ink on firm pages too). Confirmation as the toast "Thanks. Filings for this card pay with it for the next hour."
+
+**Billing.** "Billing": the plan and its price (shown here only), the Stripe portal link, and the table of businesses with our registered agent and their renewal dates. Notices ("Your plan is changing…", "Billing couldn't be loaded. Try again shortly.") as neutral and stop notices.
+
+**Password, signed out.** The 480px sheet pattern (10.3), in the firm's theme. The signed-out page keeps the firm's look so the firm's staff know where they are.
+
+### 10.7 Permanent branded service pages `/<firm>/<service>`
+
+The firm's public page for one filing type, for example `cofile.app/bestaccounting/llc-filing-new-york`. It is the intake form (10.5) with three differences: no link label in the H1; the summary followed by the firm-page sentence ("After you send this, we'll email you a link to check and approve exactly what will be filed, with a picture of the state's own review page where possible. Nothing is filed or paid until it's approved.", or the IRS version for EIN filings); and a page head suitable for search and sharing: `<title>` from `publicTitle()`, an Open Graph image generated per firm (Section 13.3). These pages are permanent addresses a firm prints on its letterhead, so they never move and never change layout between releases.
+
+### 10.8 The enterprise dashboard `/dashboard`
+
+CoFile's own theme, denser (`t-body`, 40 to 48px rows), because its readers are operators and developers. Header nav: "Overview", "Filings", "Ready to pay", "Firms", "API keys", "Webhooks", "Setup", "Team", "Billing" (or "Sign-ups" for the platform tenant), "Docs".
+
+- **Overview.** Three figures across cols 1–12 ("Filings", "Webhook deliveries", "API keys") in `t-title` tabular with their label above in `t-small`; "Manage keys" link. Then "By status", "By state", "By month" as **bar tables** (7.3) side by side at L, stacked on mobile. The setup notice ("Your account settings haven't been set up by the platform yet…") as a stop notice at the top when it applies.
+- **Filings.** The filings table with filters as a single row of selects (status, state, firm) above it; no chart. Filing detail as in the desk (10.6) plus the request JSON in a fold and the webhook deliveries for that filing.
+- **Firms and firm detail.** Table of firms (name, filings, last filing, theme swatch). Firm detail shows the firm's branding preview (the same three miniatures as the desk's branding page), its settings, its filings.
+- **API keys.** Table (name, prefix in mono `cofile_1a2b3c4d`, created, "Last used", "Revoke"). A new key appears once in a secret box: Ground background, 1px dashed print border, the key in mono 16px with a "Copy" button, and the note that it is shown once. Older `kfe_` keys are listed in the same table without distinction.
+- **Webhooks.** Endpoints table; the deliveries log as a mono ledger with HTTP status codes; failed deliveries carry the stop symbol, successful ones nothing (absence of a symbol is the normal case).
+- **Setup.** "Payment methods" (the Basis Theory paragraph), "State portal logins" as a table with one row per portal (NY DOS, NYS-100, NJ, IRS, FL), columns "Portal", "Pays by", and "Disconnect" (destructive, dialog confirm), "Not needed" rows in ink-3; "Who's named on your filings", "Your registered agent in each state", "Defaults per portal", each a numbered reading-layout form.
+- **Ready to pay, Billing, Team, Password.** As in the desk, in CoFile's theme; Team is a table with roles and an invite form.
+- **Platform tenant only: Sign-ups and Enterprise requests.** Two queue tables ("Waiting for approval", "Decided"; "Enterprise requests"), each row with "Approve" (ink, small) and "Turn down" / "Decline" (destructive). The explanatory sentences above each table unchanged.
+- **Drift reviews (platform staff).** A comparison layout: the approved snapshot of the state's screen at left, the new screen at right, both at the same scale on the grid (cols 1–6 and 7–12), with differences outlined in stop color and listed beneath as numbered lines. Decisions as three buttons. This is where "stop and ask" is answered, so it gets the same care as the proof.
+
+### 10.9 White-label surfaces
+
+**`/e/<tenant>/<firm>/<service>`** is the service page (10.7) in the subscriber's theme, with no "with CoFile" and the subscriber named as the filing company. The beta band appears in its neutral wording.
+
+**`/embed/...` and `embed.js`.** The form without header, band, beta notice or footer: the host page supplies the brand. The frame grows with the form (the existing `cofile:height` message). Layout responds to the **frame's** width with container queries: under 480px one column; 480 to 720px paired fields; never wider than 720px, centered if the frame is wider. Padding 16px. Firm print color and font apply. The rehearsal notice still appears when the type is not live: a widget on a firm's site must not hide that nothing will be filed. The closing line "Filed with CoFile" in `t-small` ink-3 at the end (see Appendix B).
+
+### 10.10 Developer docs `/docs`, `/docs/reference`, and the machine-readable files
+
+The docs are read by a different person, but they are set in the same system. Engineers like typography that respects them as much as CPAs do.
+
+```
+ XL
+ cols 1–2 nav        cols 3–8 prose (66ch)                      cols 9–12 examples
+ Overview            POST /v1/filings                           curl / JSON, mono
+ Guides              Create a filing. …                         ┌───────────────────────┐
+  Authentication     Body                                       │ {                     │
+  Filings and the …  ┌──────────────┬────────┬───────────────┐  │   "dryRun": true,     │
+  Filing types, …    │ dryRun       │ bool   │ …             │  │   …                   │
+  Approvals          └──────────────┴────────┴───────────────┘  │ }                     │
+  Webhooks           Responses                                  └───────────────────────┘
+  Errors             201 · 402 · 422
+  Saved signatures …
+  White-label firm …
+ Reference
+  Endpoints
+  OpenAPI (JSON)
+```
+
+- **Nav** (cols 1–2, sticky): the existing structure ("Overview", "Guides" with the eight guides, "Reference", "Endpoints", "OpenAPI (JSON)"), section heads in `t-small` 65 ink-2 (not uppercase). Current page with a 2px ink bar at its left. Mobile: the nav becomes a select-style button at the top of the page opening the full list in a sheet.
+- **Prose** cols 3–8 in `t-body` (16/24), headings `t-heading`, inline code `t-mono-s` on Ground.
+- **Examples** cols 9–12 at XL, sticky per endpoint; below L they follow the prose.
+- **Reference:** the 25 endpoints each opened by a 1px ink rule. The method and path as one line in Formular Mono 65 Medium 16px: `POST /v1/filings`. **Methods are not color-coded.** Today GET is green and DELETE red, which spends the status colors on HTTP verbs; a DELETE is not a stop. Method in ink, path in ink, path parameters (`:id`) in print color. Parameter tables: name (mono), type (mono, ink-2), required, description. Response codes as a row of mono codes.
+- **`/openapi.json`, `/llms.txt`, `/docs.md`:** not pages, but still designed: `docs.md` follows one heading hierarchy (one `#`, then `##` per guide, `###` per endpoint), wraps at 100 characters, uses only tables and fenced code, and opens with a contents list. A "Download" link for `docs.md` and links to the other two sit at the top of `/docs` as a three-item list in mono. Served with correct types (`text/markdown`, `text/plain`, `application/json`).
+
+### 10.11 Emails
+
+Sent through Resend; written as components (React Email) so the HTML and plain-text versions are generated from one source.
+
+- **Frame:** 600px maximum, single column, Ground outside, paper sheet inside with 32px padding (20px on phones). Client emails carry the firm's header (logo plate, firm name, 4px band as a table cell of the firm color) and "with CoFile" in the footer line for partner firms; account emails carry the CoFile lockup.
+- **Type:** Formular Sans static where clients support web fonts, falling back to Helvetica and Arial; body 17/26, headings 24/32 Bold. The subject line is repeated as the email's H1.
+- **One button per email**, ink, 48px, bulletproof (table-based), with the link also written out underneath in mono for clients that strip buttons. On client emails the button is ink, never the firm color, because the action (opening the proof) leads to an irreversible decision.
+- **Dark mode:** `color-scheme: light dark` with explicit dark styles; logos on a white plate when they have no dark version.
+
+| Email | Subject (locked) | Button |
+|---|---|---|
+| Approval request | Your proof is ready to approve: {title} | Open your proof |
+| Security code needed | Card security code needed: {title} | Enter security code (to Ready to pay) |
+| Missing information | More information needed: {title} | none today (Appendix B) |
+| Changes requested | Changes requested: {title} | none |
+| Completed | Completed: {title} | none |
+| Rejected | Rejected by the state: {title} | none |
+| Staff notices | Choose a name, Review before submit, Site changed — review needed, Portal bot check, Failed, Blocked, Checking whether the state received | as each provides |
+| Sign-up verification | Confirm your email for CoFile | Confirm my email |
+| Password reset | Reset your password | the reset link |
+| Account ready | Your CoFile account is ready / Your partner account is open | Log in |
+| Invitation | You're invited to {firm}'s filing portal | the join link |
+
+The rehearsal line ("Rehearsal: nothing will be filed or paid, even if you approve.") opens the approval email in a hold-tint block with the hold symbol, above everything else. "Don't forward this email: anyone with the link can open your proof." sits directly above the button, in 65 Medium. The brief also lists filing submitted, documents back and EIN issued emails; they use the same status template with the filing's timeline drawn as a list of stages, and need their copy confirmed (Appendix B).
+
+### 10.12 New surfaces I propose
+
+1. **The filing record, printable.** One page per filing that holds "What was approved, what was filed and what the state sent back, in one place": the proof as approved (with its line numbers and approval time), the run log, and the documents list. A print stylesheet for US Letter. It is what a CPA puts in the client file.
+2. **A permanent `/#coverage` anchor and a coverage feed** (`/coverage.json`) so firms and agents can check which types are live without reading the page. The page and the feed are rendered from the same source as the table.
+
+---
+
+## 11. The white-label theming system
+
+### 11.1 The principle
+
+A firm changes the print of the form, never the ink. Its logo, name, color and font say *whose form this is*. Everything that says *what the client is agreeing to* and *what state the filing is in* is fixed by the system and identical on every firm's pages, so that a client who has approved one proof has learned to read all of them.
+
+### 11.2 What a firm controls, and where it goes
+
+| Firm setting (Setup, Branding) | Token(s) | Applied to | Never applied to |
+|---|---|---|---|
+| Logo | logo plate | Header of the desk, intake, service pages, the proof, client emails | Inside the form, near buttons, as a watermark |
+| "Name your clients see" | firm name | Header (beside or instead of the logo), "Send to {firm}", the definition of "the filing company", emails | The proof's H1 |
+| "Main color" | `--band`, `--print`, `--print-tint`, `--firm-button`, `--firm-button-text`, `--firm-button-hover` | The 4px band; labels, section rules, field boxes, line and section numbers (as print); forward buttons ("Send to {firm}", "Send the proof to my client", "Make link", "Save and continue") | Status symbols and chips; the decisive button on the proof; "Pay and file"; notices; links; body text |
+| "Second color" | `--firm-mark` | The highlight underlay of values on the proof and the correspondence highlight | Text, links, buttons, rules |
+| Font | `--firm-font` | The firm's name; H1 and H2 of the intake and service pages; the desk's page titles | Field labels, values, help, tables, amounts, the proof's details and declaration, buttons, notices |
+| Support email | text | "Questions? Email…", the proof's "Questions:" line, client emails' reply-to | Nothing else |
+| Web address (slug) | URL | `/<firm>/<service>`, `/p/<slug>` | Nothing else |
+
+Today "Second color" drives links. In this system links are always ink, underlined. A link's job is to be recognized as a link by every reader on every firm's page; a firm's pale teal underline cannot be relied on to do that.
+
+### 11.3 The algorithm
+
+One function, `firmTheme(primary, secondary, font, logo)`, shared by the web app and the engine (today `brandStyle()` in `web/lib/firm.ts` and `brandedTop()` in `src/approvals/render.ts` each do part of this, differently). It works in OKLCH so that darkening keeps the firm's hue.
+
+**Step 1: classify the main color.** Convert to OKLCH (L, C, h).
+
+- **Protected zone** if C ≥ 0.09 and h is between 10° and 105° (reds, oranges, ambers, yellows, saturated browns). These hues collide with stop and hold. A page printed in red reads as an error page; a page printed in amber reads as a rehearsal.
+- **Neutral** if C < 0.03 (grays, near-black). Treated as normal.
+- **Normal** otherwise (greens, teals, blues, purples, pinks).
+
+Green is deliberately not protected: many accounting firms are green, a green-printed form does not read as "approved" without the disc and the word, and green forward buttons agree with the existing meaning of green.
+
+**Step 2: print color.**
+
+- Normal: hold h and C (C capped at 0.20), lower L in steps of 0.01 until contrast against `--paper` is at least **4.5:1** (labels are 14 to 16px Medium). If the chosen color already passes, use it unchanged. `--print-tint` = the print color at L 0.96, C × 0.25.
+- Protected: `--print` = neutral print `#3E4451` (9.8:1), `--print-tint` = `#EEEFF2`. The firm's color is still used for the band and the logo plate's surroundings, so the brand remains on the page.
+- Dark mode: raise L from the light print value until contrast against dark paper `#1A1A19` is at least 4.5:1, capping L at 0.86 so the color does not become white. Protected colors use `#AEB4C2`.
+
+**Step 3: band.** `--band` = the main color exactly as chosen, if its contrast against paper is at least 1.5:1 (it must be visible as a band); otherwise the print color from step 2. The band is never adjusted for hue; it is the firm's own color.
+
+**Step 4: forward button.**
+
+1. Fill = the main color as chosen (protected colors: fill = ink, and stop here).
+2. Text: white `#FFFFFF` if white on the fill is at least 4.5:1; otherwise ink `#141414` if ink on the fill is at least 4.5:1; otherwise darken the fill (as in step 2) until white passes.
+3. If the fill's contrast against paper is below 3:1 (a pale button would disappear), add a 1px ink border.
+4. Hover: fill L − 0.06 (light mode), L + 0.06 (dark mode); text recomputed.
+5. Dark mode: repeat against dark paper.
+
+**Step 5: highlight.** `--firm-mark` = the second color mixed with paper (in OKLab) starting at 16% and decreasing until ink on it is at least 12:1, so that the highlighted value stays as readable as any other. If the second color is in the protected zone, or missing, `--firm-mark` = `--print-tint`.
+
+**Step 6: font.** Presets load as today. An uploaded font (WOFF2, OTF or TTF, 600 KB or smaller, as now) is checked on upload:
+
+- Glyph coverage: Basic Latin and Latin-1 Supplement are required, plus ñ á é í ó ú ü ¿ ¡ for Spanish pages. Missing glyphs fall back to Formular per glyph through `unicode-range`; a font missing basic letters is refused.
+- x-height ratio: if below 0.42 of the em, the font is used only for the firm's name and H1 (28px and up).
+- Weights: if only one weight is supplied, headings use it as it is (`font-synthesis: none`); no faux bold.
+- Metric-matched fallback: the system generates `size-adjust` and ascent overrides so the page does not jump when the font arrives.
+
+**Step 7: logo.** On upload:
+
+- Transparent margins are trimmed; the logo is stored at 2x of its display height.
+- Display: height 40px (desktop), 32px (mobile), maximum width 200px (160px mobile). Very wide logos scale down to fit the width, but never below 24px tall; below that the typed name is used instead.
+- A logo whose visible pixels have contrast below 1.6:1 against paper (white or very pale logos on transparency) is set on an ink plate `#141414` with 8px padding. In dark mode the reverse: dark logos are set on a paper plate `#FFFFFF`. A firm may upload a separate dark-mode logo, which then needs no plate.
+- JPEG logos with opaque white backgrounds keep their rectangle and get a 1px hairline in dark mode, on a paper plate.
+
+### 11.4 Examples
+
+| Firm's main color | Class | Print (light) | Forward button | Notes |
+|---|---|---|---|---|
+| `#1F4FD1` cobalt | Normal | `#1F4FD1` (6.8:1, unchanged) | Fill `#1F4FD1`, white text | Passes as chosen |
+| `#8EC5FF` pale sky | Normal | about `#2F6DB5` (5.3:1) | Fill `#8EC5FF`, ink text, 1px ink border | The band stays pale sky |
+| `#0F766E` teal | Normal | `#0F766E` (5.5:1) | Fill `#0F766E`, white text | |
+| `#E0201B` signal red | Protected | `#3E4451` | Ink | Band and logo plate keep the red |
+| `#F4C430` saffron | Protected | `#3E4451` | Ink | Saffron is a hold hue; band keeps it |
+| `#334155` slate | Neutral | `#334155` (10.4:1) | Fill `#334155`, white text | |
+
+### 11.5 The ready colors
+
+Today's nine swatches include an amber and a red. They are replaced by twelve colors that pass every step unchanged, so a firm that picks from the row never sees a correction: Form Blue `#2F4C80`, Navy `#1E3A6E`, Cobalt `#1F4FD1`, Indigo `#3B3C9E`, Teal `#0F6670`, Pine `#1E5E46`, Moss `#3F5F2A`, Plum `#6B2E6B`, Aubergine `#4A2350`, Mulberry `#7A2257`, Slate `#3E4451`, Graphite `#2B2B2B`. Any other color can still be typed or picked.
+
+### 11.6 What a firm can never change
+
+Type sizes; the grid; radii; the order and structure of the proof; the decisive button; status colors and symbols; the rehearsal notice and the beta notice; legal and consent text; "with CoFile" on partner pages; the line numbering. These are the parts every client must be able to rely on.
+
+### 11.7 Verification
+
+- On every save, the Branding page shows the result (10.6) with numeric contrast, so the firm sees what the system did.
+- The build runs a **theme matrix** nightly: 200 colors sampled around the hue wheel at five lightnesses, 20 awkward logos (white on transparent, square, 8:1 wide, JPEG on white, tiny), and the ten font presets plus three uploaded fonts with missing glyphs, through the intake, the proof and the email, in light and dark. Each render is checked for contrast by computation (not by eye) and compared visually with the last run.
+
+---
+
+## 12. Accessibility, Spanish and dark mode
+
+### 12.1 Accessibility
+
+**Standard:** WCAG 2.2 AA on every surface; AAA contrast (7:1) for all text on the proof and client pages. Tested with VoiceOver on iOS Safari, TalkBack on Android Chrome, NVDA with Firefox and Chrome, and JAWS with Chrome (many CPA offices run Windows with JAWS or ZoomText), at 200% and 400% zoom, and with Windows high-contrast themes.
+
+**Structure.** One H1 per page; landmarks for header, navigation (named "Sections" on the home page, "Docs" in the docs), main and footer; a skip link (Appendix B). Every page has its own title (the copy review found identical titles; the design keeps them distinct).
+
+**The proof.** Each part is a `<section>` labelled by its heading. Filing details is a real `<table>` with row headers (`<th scope="row">`) whose text begins with the line number, so a screen-reader user hears "3, Main business address, 88 Grove St…" and can be told "line 3" on the telephone like anyone else. The fee table has a caption ("State fees") and the total row is marked up as a `<tfoot>`. The picture of the state's page carries the existing alt text, which correctly says every value is also listed as text; nothing appears only in the picture. The decisive button's accessible name is its visible label, with nothing added. The page works fully without JavaScript; the correspondence highlight and the image viewer are enhancements.
+
+**Forms.** Labels bound to fields; help text and error text linked with `aria-describedby`; `aria-invalid` on errors; the error summary takes focus and is `role="alert"`; groups (`fieldset` with `legend`) for sections, repeated items and radio sets; authorizations are real checkboxes with their full sentences as labels; `autocomplete` tokens on every name, address, email, phone and one-time code field.
+
+**Status.** Symbols are `aria-hidden`; the word carries the meaning. Status changes in the desk are announced through a polite live region. Color is never the only carrier, anywhere.
+
+**Motion and time.** Reduced motion honored (8.4). No time limits on pages; deadlines (the proof link, the security code's hour) are stated as clock times with the time zone.
+
+**Target size and spacing.** 48px targets, 8px minimum between adjacent targets; layouts survive WCAG 1.4.12 text-spacing overrides and reflow at 320 CSS px without horizontal scrolling (except docs code blocks).
+
+**Forced colors.** Every button has a transparent 1px border so it remains outlined in Windows high contrast; symbols use `currentColor` where forced colors are active; the band is dropped and the firm's name remains.
+
+**Older readers.** 18px body on every client page; no light weights; no gray text below 5:1; no text on images; no icon-only controls except the menu button, which has a visible focus state and a name.
+
+### 12.2 Spanish
+
+The client-facing surfaces (intake, the proof, decision and error pages, client emails) are designed for Spanish from the start; the desk, the dashboard and the docs follow later, if firms ask.
+
+- **Switching:** a language switch in the client header beside "with CoFile", showing the two language names in their own language (Appendix B). A firm can also choose the language when making a client link, so the email and form arrive in Spanish.
+- **Translation:** the locked English copy is translated by legal translators into US Spanish, then reviewed by counsel for every consent, authorization and declaration. The state receives English; values on the proof stay exactly as they will be filed (often the state's capitals), with `lang="en"` on them so screen readers pronounce "TWO SISTERS BAKERY LLC" correctly inside a Spanish page.
+- **Statements under oath:** each authorization shows the Spanish text with the English original directly beneath it in `t-small` ink-2, because the English is what is filed. (Wording of the label for the English original in Appendix B.)
+- **Length:** Spanish runs 20 to 30% longer. Nothing truncates; buttons wrap. The decisive button is tested at 360px with the Spanish label at three lines (88px tall).
+- **Formats:** dates written out as Spanish does ("3 de diciembre de 2026, 5:00 p. m., hora del Este"); amounts keep US notation (`$103.50`), which is also the convention of Spanish in the United States; tabular figures unchanged.
+- **Typography:** Formular's ¿ and ¡ are drawn to sit on the baseline; hyphenation on for Spanish body text, off for labels and values; `lang="es"` on the document.
+
+### 12.3 Dark mode
+
+- All tokens have dark values (4.2); dark mode follows the system on public and client pages. In the desk and dashboard, the account menu offers a choice (Appendix B).
+- **The proof follows dark mode**, with the same 7:1 rule; the print stylesheet is always light.
+- **Evidence is never altered.** Screenshots of the state's pages are shown exactly as captured, never inverted or dimmed, framed in a 1px hairline. They will be bright in dark mode, and that is correct: it is a picture of what the state shows.
+- The signature pad stays paper white.
+- Logos get plates (11.3); firm colors are recomputed for dark paper.
+- The focus ring inverts to `#EDEDE8` with a `#1A1A19` halo.
+- Emails declare `color-scheme: light dark` and provide explicit dark styles.
