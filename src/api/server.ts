@@ -429,6 +429,7 @@ export function buildServer(deps: ApiDeps): FastifyInstance {
     if (client?.partner || ownTenant) {
       return {
         look: "cofile",
+        fontBase: deps.webBaseUrl,
         firmName: portal?.displayName ?? client?.name,
         clientName: f ? businessName(f.request) : undefined,
         supportEmail: portal?.supportEmail ?? tenant?.branding.supportEmail,
