@@ -1733,7 +1733,7 @@ These are the only pages a firm's **client** ever sees, and on them the firm's b
 
 ### 10.13 Emails
 
-Two families: **the firm's** (anything about a filing, sent to the firm's people) and **CoFile's** (sign-up and account).
+Two families: **the firm's** (anything about a filing, in the firm's brand, whoever receives it: the firm's own people or its client, since "Your client sees your firm on the form and in every email") and **CoFile's** (sign-up and account).
 
 **Shared build:** 600 px max width, table-based, with VML buttons for Outlook. The type stack is `"Atkinson Hyperlegible Next", Verdana, Arial, sans-serif`: Verdana is the closest widely available fallback for legibility. Body is 17 px with line height 1.55, headlines 26 px bold, and buttons 52 px tall with a 10 px radius, full width under 480 px. Logos and the wordmark are PNG at 2×. All text is live text, never images of text. A `color-scheme: light dark` meta is included, logos sit on white plates so they survive dark-mode inversion, and there's a plain-text part for every email.
 
