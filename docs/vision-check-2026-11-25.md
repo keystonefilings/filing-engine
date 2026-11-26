@@ -230,8 +230,12 @@ Built and tested; each switches on when its accounts and keys are set (steps in 
   needs Google's verification.
 - **Vercel production settings (Nov 26):** I set `PLATFORM_NAME=CoFile` (it was "Keystone
   Filings") and added `PORTAL_PUBLIC_URL=https://cofile.app`, with your OK; both apply on the next
-  deploy. Still yours: `PLATFORM_API_KEY` isn't set, so a client link a partner firm sends fails when the
-  client opens it: set it to the platform tenant's engine key. `RESEND_API_KEY` there is unused (the
+  deploy. Still yours: `PLATFORM_API_KEY` isn't set. Without it a client link a partner firm sends
+  carries the firm's session key and ends with that session (7 days at most); with it, the link
+  carries no key and lasts 30 days. Its value is the platform tenant's engine caller key: the key
+  in the engine's `API_KEYS` secret before `:keystone` (made at deploy step 3 into ~/fe-api-key),
+  or a key created in the dashboard's Keys page as a `keystone` staff user. Add it in Vercel as a
+  Sensitive, Production variable. `RESEND_API_KEY` there is unused (the
   engine sends mail). Each takes effect on the next deploy.
 - **Slack:** a Slack app with the `/file` command (V41).
 - **Twilio:** a number with A2P 10DLC registration, and a WhatsApp sender (Meta verification) (V42-V43).
