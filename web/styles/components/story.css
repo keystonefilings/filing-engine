@@ -19,8 +19,8 @@
   .st .pg2-two.st-two > .pg2-words { max-width: 792px; }
 }
 @media (max-width: 599px) { .st .pg2-two.st-two { row-gap: 40px; } }
-.st-list { margin-top: 48px; }
-@media (max-width: 599px) { .st-list { margin-top: 32px; } }
+.st .st-list { margin-top: 48px; }
+@media (max-width: 599px) { .st .st-list { margin-top: 32px; } }
 
 /* 10A.1.2 The steps: numeral, photograph, lead and paragraph on one row grid; the firm's step on a white sheet */
 .st-steps-list { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 24px; align-items: start; margin: 0; padding: 0; list-style: none; }
@@ -52,12 +52,12 @@
 /* 10A.1.3 The proof band: the printer's proof under the lede, the points, the closing remark */
 .st-printer { margin-top: 32px; max-width: 486px; }
 .st-printer img { aspect-ratio: 3 / 2; object-fit: cover; object-position: 50% 45%; }
-.st-points { margin-top: 48px; }
+.st .st-points { margin-top: 48px; }
 .st-points .st-remark { margin-top: 32px; padding: 24px 0 0; font: italic 400 clamp(1.1875rem, 1.1179rem + 0.2857vw, 1.375rem)/clamp(1.875rem, 1.7821rem + 0.381vw, 2.125rem) var(--font-serif); }
 .st-points .st-remark::before { left: 0; top: 0; width: 40px; height: 1px; background: var(--line); transform: none; }
 .st-proof-pic { display: flex; justify-content: flex-start; }
 @media (max-width: 1279px) { .st-proof-pic { justify-content: center; } }
-@media (max-width: 599px) { .st-points { margin-top: 32px; } }
+@media (max-width: 599px) { .st .st-points { margin-top: 32px; } }
 
 /* 10A.1.5 Checks */
 @media (min-width: 1280px) {

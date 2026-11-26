@@ -54,7 +54,7 @@ export default function ForFirms() {
         <section className="pg2-band is-show" id="brand" aria-labelledby="ff-brand">
           <div className="site2-in pg2-two st-two ff-doors">
             <div className="pg2-words">
-              <h2 id="ff-brand" className="ff-door"><span className="t-display-m">Your name on the door.</span> <span className="ff-small t-small-type">Ours in small type.</span></h2>
+              <h2 id="ff-brand" className="ff-door pg2-h2"><span className="t-display-m">Your name on the door.</span> <span className="ff-small t-small-type">Ours in small type.</span></h2>
               <p className="t-lede pg2-band-lede">The same page carries each firm&apos;s own name, logo and color. Your clients never see another firm&apos;s, or a big {name} logo.</p>
             </div>
             <div className="pg2-pic ff-doors-pic"><TwoDoors parked /></div>

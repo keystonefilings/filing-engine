@@ -71,6 +71,7 @@
   .pdh .lockup2 .lockup2-s { display: block; }
   .pdh-acct { gap: 6px; font-size: 0.9375rem; line-height: 1.25rem; }
   .pdh-acct img { width: 20px; height: 20px; }
+  .pdesk .pdh, .pdraft .pdh { padding-inline: 16px; gap: 8px; }
 }
 /* Inside a white sheet the lockup is the light export, at night too: the sheet is paper (4.6) */
 @media (prefers-color-scheme: dark) {
