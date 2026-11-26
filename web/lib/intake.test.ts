@@ -52,6 +52,18 @@ test("missing required fields and authorizations are reported", () => {
   assert.ok(paths.includes("auth.ny-signature"));
 });
 
+test("an optional agent nobody started isn't sent, even with its preset state", () => {
+  const kind = filingKind("ny-llc")!;
+  const untouched = buildRequest(kind, { "formation.registeredAgent.address.state": "NY" }, ctx);
+  assert.equal((untouched.request.formation as any)?.registeredAgent, undefined);
+  assert.ok(!untouched.issues.some((i) => i.path.startsWith("formation.registeredAgent")));
+  const started = buildRequest(kind, { "formation.registeredAgent.address.state": "NY", "formation.registeredAgent.name": "Harbor Agent Services LLC" }, ctx);
+  // A named agent with no address goes without one: an address of a preset state alone is refused by the engine.
+  assert.deepEqual((started.request.formation as any).registeredAgent, { name: "Harbor Agent Services LLC" });
+  const addressed = buildRequest(kind, { "formation.registeredAgent.address.state": "NY", "formation.registeredAgent.name": "A", "formation.registeredAgent.address.city": "Albany" }, ctx);
+  assert.equal((addressed.request.formation as any).registeredAgent?.address?.state, "NY", "a started address keeps its state");
+});
+
 test("NJ groups are re-indexed and empty rows skipped", () => {
   const raw: Raw = {
     "formation.name.baseName": "Shore", "formation.name.designator": "LLC", "formation.effectiveDate": "upon_filing",
