@@ -30,6 +30,22 @@ may change them:
 - The five steps under each status: **"Details", "Proof", "Filing", "With the state", "Done"**,
   shown as "Proof, step 2 of 5" (read aloud as "Step 2 of 5: Proof").
 
+## Stand-in words in the build (Nov 26), to replace or confirm
+
+The build needed words where the spec says `[copy needed]`. These stand in until the copy owner writes them; each is
+one string in the code.
+
+| Where | Stand-in | Spec |
+|---|---|---|
+| Desk and dashboard: the skip link | "Skip to content" | 10B.3.1 |
+| Desk on phones: the menu button and the sheet's close button | "Menu", "Close" | 10B.3.2 |
+| Empty desk: the accessible name of the client page preview | "Preview: the page {firm}'s clients see" | 10B.4.2 |
+| Branding: the two thumbnail captions | "Your page for a filing", "An email to a client" | 10B.7.5 |
+| Branding: a thumbnail's accessible name | "Show larger: {caption}" | 10B.7.5 |
+| Branding: the logo bay's two captions | "as uploaded", "on your pages" (the spec's own suggestion) | 10B.7.3 |
+| Branding on phones: the preview sheet's title | "Previews" | 10B.7.6 |
+| Branding: the ink match line's spoken text | "Buttons print as {hex}", "Buttons print as {hex}, from {hex}" (no visible explanation line yet) | 10B.7.4 |
+
 ## Part 1: the foundation
 
 From [`01-foundation.md`](01-foundation.md).
