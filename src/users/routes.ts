@@ -475,7 +475,7 @@ export function registerUsers(app: FastifyInstance, deps: UsersDeps): void {
     // The sign-up page told them we'd email once the account opens.
     void deps.email?.send({ address: approved.email, name: approved.name }, {
       subject: "Your partner account is open",
-      body: `Your account for ${u.signup!.companyName} is approved. Log in with the email and password you chose. Then set up your portal in three short steps: your firm, your branding and how state fees are paid. You can try a practice filing right away.${deps.supportEmail ? `\n\nQuestions? Email ${deps.supportEmail}.` : ""}`,
+      body: `Your account for ${u.signup!.companyName} is approved. Log in with the email and password you chose. Then set up your filing desk in three short steps: your firm, your branding and how state fees are paid. You can try a practice filing right away.${deps.supportEmail ? `\n\nQuestions? Email ${deps.supportEmail}.` : ""}`,
       link: `${deps.webBaseUrl}/login`,
       linkLabel: "Log in",
     }).catch((e) => console.error("approval email failed", (e as Error).message));

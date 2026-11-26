@@ -10,7 +10,7 @@ export default async function VerifyEmailPage({ searchParams }: { searchParams: 
     <Shell>
       <main className="auth-main band">
         <div className="auth-card">
-          <span className="field-label">Partner account</span>
+          <span className="field-label">Your filing desk</span>
           <h2>Confirm your email</h2>
           {token ? (
             <>

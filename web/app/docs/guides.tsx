@@ -76,7 +76,7 @@ export const GUIDES: Guide[] = [
           <li><code>contact</code> (required): who the state and the filing company write to about the filing.</li>
         </ul>
         <h2>Sensitive fields</h2>
-        <p><code>ein.responsibleParty.ssn</code> and <code>payroll.owners[].ssn</code> are encrypted, masked on approval pages, in API responses, in logs and in recorded screens, and deleted after 30 days.</p>
+        <p><code>ein.responsibleParty.ssn</code> and <code>payroll.owners[].ssn</code> are encrypted, masked on proofs (approval pages), in API responses, in logs and in recorded screens, and deleted after 30 days.</p>
       </>
     ),
   },
@@ -87,7 +87,7 @@ export const GUIDES: Guide[] = [
     body: () => (
       <>
         <p>Nothing is submitted or paid until the client approves it. Where the client approves the state&apos;s own review page, a preview run first fills in the state site up to that page, without submitting. When a filing is ready, the engine creates an approval and sends its link to the approvers on the client company (or those in <code>approvalRecipients</code>). The link is also returned as <code>approvalLink</code> when you create the filing, and from <code>GET /v1/filings/{"{id}"}</code> while it is open.</p>
-        <p>The approval page shows the full request as it will be filed, with sensitive numbers masked, the state fees and your fee cap. Approving authorizes submitting the filing exactly as shown and paying the fees shown, up to the fee cap (or the total when there is none), with a warning that government fees generally can&apos;t be refunded; the approval records which consent was agreed (<code>consentVersion</code>). Where possible, it also shows a screenshot of the state&apos;s own review page, filled in with this filing; a preview run (status <code>previewing</code>) captures it before the link is sent. The live run goes ahead only if the state shows exactly that page again; if it has changed, the run stops before paying. If you collect approval in your own app, show the same screenshot: <code>filing.awaiting_approval</code> carries <code>data.reviewShotArtifactId</code>, which you download with <code>GET /v1/artifacts/{"{id}"}</code>. The client approves or asks for changes, and can add a comment. Approval links expire; the page says so and a new filing gets a new link.</p>
+        <p>The proof (the approval page) shows the full request as it will be filed, with sensitive numbers masked, the state fees and your fee cap. Approving authorizes submitting the filing exactly as shown and paying the fees shown, up to the fee cap (or the total when there is none), with a warning that government fees generally can&apos;t be refunded; the approval records which consent was agreed (<code>consentVersion</code>). Where possible, it also shows a screenshot of the state&apos;s own review page, filled in with this filing; a preview run (status <code>previewing</code>) captures it before the link is sent. The live run goes ahead only if the state shows exactly that page again; if it has changed, the run stops before paying. If you collect approval in your own app, show the same screenshot: <code>filing.awaiting_approval</code> carries <code>data.reviewShotArtifactId</code>, which you download with <code>GET /v1/artifacts/{"{id}"}</code>. The client approves or asks for changes, and can add a comment. Approval links expire; the page says so and a new filing gets a new link.</p>
         <h2>Changes requested</h2>
         <p>The filing moves to <code>changes_requested</code> and <code>filing.changes_requested</code> carries the comment. Correct the request and create a new filing with a new idempotency key.</p>
         <h2>Signatures and attestations</h2>
@@ -153,7 +153,7 @@ def verify(secret: str, header: str, raw_body: bytes, tolerance: int = 300) -> b
         <div className="table-wrap"><table><thead><tr><th>Code</th><th>Meaning</th></tr></thead><tbody>
           <tr><td>400</td><td>The request body is not valid JSON.</td></tr>
           <tr><td>401</td><td>No API key, or the key is revoked or unknown.</td></tr>
-          <tr><td>402</td><td>A live filing needs an active subscription; dry runs (practice filings) never need one. See <code>GET /v1/account/billing</code>.</td></tr>
+          <tr><td>402</td><td>A live filing needs an active subscription; dry runs (rehearsals) never need one. See <code>GET /v1/account/billing</code>.</td></tr>
           <tr><td>403</td><td>The key is valid but not for this tenant or action.</td></tr>
           <tr><td>404</td><td>Not found, or it belongs to another tenant.</td></tr>
           <tr><td>409</td><td>A conflict: the filing isn&apos;t in the state this call needs, an id or slug is taken, or a limit is reached.</td></tr>

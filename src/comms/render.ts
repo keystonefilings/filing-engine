@@ -32,7 +32,7 @@ export function renderMessage(event: WebhookEvent, filing: FilingRecord): Render
   const link = str("approvalLink") ?? str("adminLink");
   switch (event.type) {
     case "filing.awaiting_approval":
-      return { audience: "client", subject: `Please review and approve: ${t}`, body: `${d.dryRun === true ? "Practice filing: nothing will be filed or paid, even if you approve.\n\n" : ""}Your filing is ready for you to check. Open the link to see every detail and the fees, then approve it or ask for changes. Nothing is filed or paid until you approve. The link expires, so please look soon. Don't forward this email: anyone with the link can open your approval page.`, link, linkLabel: "Review and approve" };
+      return { audience: "client", subject: `Your proof is ready to approve: ${t}`, body: `${d.dryRun === true ? "Rehearsal: nothing will be filed or paid, even if you approve.\n\n" : ""}Your proof is ready. Open the link to see every detail and every fee, exactly as they'll go to the state, then approve it or ask for changes. Nothing is filed or paid until you approve. The link expires, so please look soon. Don't forward this email: anyone with the link can open your proof.`, link, linkLabel: "Open your proof" };
     case "filing.information_required": {
       const missing = Array.isArray(d.missing) ? (d.missing as { label: string }[]).map((m) => m.label).join(", ") : "";
       return { audience: "client", subject: `More information needed: ${t}`, body: `Before we can file, we still need: ${missing}. Please send these details to whoever is preparing this filing for you. Nothing is filed or paid until then.` };

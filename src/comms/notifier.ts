@@ -53,7 +53,7 @@ export class Notifier {
       const shot = await this.deps.artifacts.get(event.data.reviewShotArtifactId).catch(() => null);
       if (shot && shot.meta.filingId === filing.id) {
         attachments = [{ filename: "State review page.png", contentType: shot.meta.contentType, content: shot.body }];
-        rendered.body += "\n\nAttached is a picture of the state's own review page, filled in with your details; every value on it is also listed as text on the approval page. When we file, we go ahead only if the state shows exactly this page again; if anything is different, we stop before paying.";
+        rendered.body += "\n\nAttached is a picture of the state's own review page, filled in with your details; every value on it is also listed as text on the proof. When we file, we go ahead only if the state shows exactly this page again; if anything is different, we stop before paying.";
       }
     }
     if (event.type === "filing.completed") {

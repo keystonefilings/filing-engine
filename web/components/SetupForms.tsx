@@ -52,7 +52,7 @@ export function DetailsForm({ action, v }: { action: Action; v: DetailsValues })
         <fieldset className="field">
           <legend>Services you offer your clients</legend>
           <input type="hidden" name="servicesShown" value="1" />
-          <p className="help">Only these show in your portal and on your pages for clients. You can change them any time.</p>
+          <p className="help">Only these show on your filing desk and your filing pages for clients. You can change them any time.</p>
           {Array.from(new Set(v.services.map((k) => k.state))).map((st) => (
             <div key={st} style={{ marginTop: 8 }}>
               <strong className="small">{st === "US" ? "Federal" : STATE_NAMES[st] ?? st}</strong>

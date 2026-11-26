@@ -20,14 +20,15 @@ export async function PublicIntake({ tenantId, firm, service, embed = false }: {
   const nonce = randomUUID();
   const body = (
     <>
-      {!liveFilings(kind.id) ? <p className="notice warn">Practice mode: this page runs practice filings only. Nothing you send from it will be filed with the state or paid, now or later, even after you approve it. To file for real, contact {brand.name}.</p> : null}
+      {!liveFilings(kind.id) ? <p className="notice warn">This page is in rehearsal for now. You can fill it in and see your proof, but nothing will be filed with the state and nothing will be charged, now or later, even after you approve it. To file for real, contact {brand.name}.</p> : null}
       <h1>{kind.title}</h1>
       <p className="muted">{kind.summary} {kind.type === "ein_only"
         ? <>After you send this, we&apos;ll email a link to check and approve exactly what will be sent to the IRS. Nothing is filed until it&apos;s approved.</>
         : <>After you send this, we&apos;ll email you a link to check and approve exactly what will be filed, with a picture of the state&apos;s own review page where possible. Nothing is filed or paid until it&apos;s approved.</>}</p>
       {kind.feeNote ? <p className="small">{kind.feeNote}</p> : null}
-      <IntakeForm kind={form} prefill={prefill} nonce={nonce} action={submitPublic.bind(null, tenantId, firm, service, nonce)} submitLabel="Send for approval" filerName={company.filerName} forClient={brand.name}
+      <IntakeForm kind={form} prefill={prefill} nonce={nonce} action={submitPublic.bind(null, tenantId, firm, service, nonce)} submitLabel={`Send to ${brand.name}`} filerName={company.filerName} forClient={brand.name}
         footnote={<>
+          <p className="small">Next, we&apos;ll email you a proof to check. Nothing is filed until you approve it.</p>
           <p className="small muted">By sending, you agree to {platformName()}&apos;s <a href="/terms" target="_blank" rel="noopener">Terms of Service</a>; your details are handled under its <a href="/privacy" target="_blank" rel="noopener">Privacy Policy</a>.</p>
           {brand.supportEmail ? <p className="small muted">Questions about this form? Email {brand.name} at <a href={`mailto:${brand.supportEmail}`}>{brand.supportEmail}</a>.</p> : null}
         </>} />

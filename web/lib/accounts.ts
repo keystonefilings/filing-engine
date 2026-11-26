@@ -163,7 +163,7 @@ export async function confirmEmail(_prev: FormState, fd: FormData): Promise<Form
   try {
     const r = await engine<{ ok: boolean; status: string }>(null, "/v1/auth/verify-email", { method: "POST", body: { token } });
     if (r.status === "active") return { ok: true, message: "Your email is confirmed. You can log in now.", link: { href: "/login", label: "Log in" } };
-    return { ok: true, message: "Your email is confirmed. We review new partner accounts and will email you as soon as yours is open." };
+    return { ok: true, message: "Your email is confirmed. We review new filing desks and will email you as soon as yours is open." };
   } catch (e) {
     if (e instanceof EngineError && e.status === 410) return { error: "This link has expired or isn't valid. Ask for a new one below.", link: { href: "/verify-email", label: "Send a new link" } };
     return { error: "We can't confirm your email right now. Try again in a minute." };

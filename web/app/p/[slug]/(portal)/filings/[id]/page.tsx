@@ -44,7 +44,7 @@ export default async function FilingPage({ params, searchParams }: { params: Pro
   return (
     <div className="narrow stack">
       <p className="small"><Link href={base}>← Filings</Link></p>
-      <div className="row"><h1 style={{ margin: 0 }}>{filingTitle(f)}</h1><StatusBadge status={f.status} />{f.request.dryRun ? <span className="badge">Practice filing</span> : null}</div>
+      <div className="row"><h1 style={{ margin: 0 }}>{filingTitle(f)}</h1><StatusBadge status={f.status} />{f.request.dryRun ? <span className="badge">Rehearsal</span> : null}</div>
       <p className="muted" style={{ marginTop: 0 }}>{kind?.title ?? `${f.request.state} ${f.request.type.replace(/_/g, " ")}`} · started {new Date(f.createdAt).toLocaleString()}{portal?.submittedBy ? ` by ${portal.submittedBy}` : ""}{portal?.source === "client_link" ? " (client link)" : ""}</p>
       {step ? <p className="notice">{step}</p> : null}
       {doc && /^[A-Za-z0-9_-]{20,}$/.test(doc)
@@ -63,7 +63,7 @@ export default async function FilingPage({ params, searchParams }: { params: Pro
       ) : null}
       {approvalLink ? (
         <div className="card">
-          <strong>Approval link</strong>
+          <strong>Link to the proof</strong>
           <p className="small muted">
             {emailedTo.length
               ? <>We emailed this link to {Array.from(new Set(emailedTo)).join(", ")}. If they can&apos;t find it, you can pass it on.</>

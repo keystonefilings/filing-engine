@@ -73,7 +73,7 @@ Fees: State filing fee $200, paid only after the filing is approved. Optional: p
 Authorizations the client grants (and confirms again on the approval page):
 
 - **ny-signature** (Screen D2, Signature (STOP)): I authorize the filing company to type the organizer's name as the organizer's signature on these Articles of Organization and to certify that the statements in them are true and correct.
-- **ny-payment** (Screen F, Payment Authorization (STOP)): I authorize the filing company to pay the state fee shown on the approval page. The Department of State does not refund fees.
+- **ny-payment** (Screen F, Payment Authorization (STOP)): I authorize the filing company to pay the state fee shown on the proof. The Department of State does not refund fees.
 
 Not covered yet:
 
@@ -135,7 +135,7 @@ Fees: State filing fee $125, plus New York's tax on shares: 5 cents for each sha
 Authorizations the client grants (and confirms again on the approval page):
 
 - **ny-corp-signature** (Screen D1, Signature of Incorporator (STOP)): I am the incorporator named above. I authorize the filing company to type my name as the incorporator's signature on this Certificate of Incorporation, and I certify that the statements in it are true and correct.
-- **ny-payment** (Screen F, Payment Authorization (STOP)): I authorize the filing company to pay the state fee shown on the approval page. The Department of State does not refund fees.
+- **ny-payment** (Screen F, Payment Authorization (STOP)): I authorize the filing company to pay the state fee shown on the proof. The Department of State does not refund fees.
 
 Not covered yet:
 
@@ -147,7 +147,7 @@ Not covered yet:
 
 Certificate of Formation for a domestic LLC, filed online through NJ Business Formation. Walkthrough: [nj-business-formation.md](./nj-business-formation.md). Engine type `formation`, state `NJ`.
 
-Fees: $103.50 by card: the state filing fee of $100 plus New Jersey's $3.50 portal fee ($1 by eCheck). Optional: certificate of standing $52, certified copy $27 by card ($50 and $25 plus a $2 portal fee each). The approval page shows the exact total, and it's checked again at payment.
+Fees: $103.50 by card: the state filing fee of $100 plus New Jersey's $3.50 portal fee ($1 by eCheck). Optional: certificate of standing $52, certified copy $27 by card ($50 and $25 plus a $2 portal fee each). The proof shows the exact total, and it's checked again at payment.
 
 | Section | Field | Request path | Required | Walkthrough |
 |---|---|---|---|---|
@@ -194,7 +194,7 @@ Authorizations the client grants (and confirms again on the approval page):
 
 - **nj-ra-attestation** (Screen 7, Attestation checkbox (STOP)): I attest that the registered agent information is correct for this business and that the agent named is aware of and has accepted the responsibility of acting as its registered agent, and I authorize the filing company to check that box for me.
 - **nj-signature** (Screen 10, Signatures (STOP)): I authorize the filing company to enter the signers' names as their signatures on the Certificate of Formation.
-- **nj-payment** (Screen 13, Payment): I authorize the filing company to pay the state fee shown on the approval page.
+- **nj-payment** (Screen 13, Payment): I authorize the filing company to pay the state fee shown on the proof.
 
 Not covered yet:
 
@@ -204,7 +204,7 @@ Not covered yet:
 
 Certificate of Incorporation for a domestic for-profit corporation (DP), filed online through NJ Business Formation. Walkthrough: [nj-business-formation.md](./nj-business-formation.md). Engine type `formation`, state `NJ`.
 
-Fees: State filing fee $100, plus New Jersey's portal fee ($3.50 by card for an LLC; the corporation checkout's own figure hasn't been seen yet). The approval page shows the exact total, and it's checked again at payment.
+Fees: State filing fee $100, plus New Jersey's portal fee ($3.50 by card for an LLC; the corporation checkout's own figure hasn't been seen yet). The proof shows the exact total, and it's checked again at payment.
 
 | Section | Field | Request path | Required | Walkthrough |
 |---|---|---|---|---|
@@ -250,7 +250,7 @@ Authorizations the client grants (and confirms again on the approval page):
 
 - **nj-ra-attestation** (Screen 7, Attestation checkbox (STOP)): I attest that the registered agent information is correct for this business and that the agent named is aware of and has accepted the responsibility of acting as its registered agent, and I authorize the filing company to check that box for me.
 - **nj-corp-signature** (Screen 10, Signatures (STOP)): I am an incorporator named above, and each other incorporator named above has authorized me to give this authorization for them. I authorize the filing company to enter each incorporator's name as a signer and check their Signature Box on the Certificate of Incorporation, which the portal says indicates acceptance of the certificate and the intent to formally execute the filing.
-- **nj-payment** (Screen 13, Payment): I authorize the filing company to pay the state fee shown on the approval page.
+- **nj-payment** (Screen 13, Payment): I authorize the filing company to pay the state fee shown on the proof.
 
 Not covered yet:
 
@@ -316,7 +316,7 @@ Authorizations the client grants (and confirms again on the approval page):
 - **fl-disclaimer** (Entry screen, disclaimer checkbox (STOP)): I authorize the filing company to accept the Sunbiz filing disclaimer for this filing.
 - **fl-ra-signature** (Registered Agent Signature (STOP)): I am the person named above to accept for the registered agent. I authorize the filing company to type my name as the agent's signature accepting the appointment. (Typing another person's name without authority is forgery under s.831.06 F.S.)
 - **fl-llc-signature** (Electronic Signature (STOP)): I am the authorized representative named above. I authorize the filing company to type my name as the electronic signature, I affirm the facts are true (false information is a third-degree felony under s.817.155 F.S.), and I acknowledge the annual report duty.
-- **fl-payment** (Tyler Payment Services hand-off): I understand a submitted Florida filing can't be changed, cancelled or refunded, everything in it becomes public record, and I authorize payment of the fee shown on the approval page.
+- **fl-payment** (Tyler Payment Services hand-off): I understand a submitted Florida filing can't be changed, cancelled or refunded, everything in it becomes public record, and I authorize payment of the fee shown on the proof.
 
 Not covered yet:
 
@@ -387,7 +387,7 @@ Authorizations the client grants (and confirms again on the approval page):
 - **fl-disclaimer** (Entry screen, disclaimer checkbox (STOP)): I authorize the filing company to accept the Sunbiz filing disclaimer for this filing.
 - **fl-ra-signature** (Registered Agent Signature (STOP)): I am the person named above to accept for the registered agent. I authorize the filing company to type my name as the agent's signature accepting the appointment. (Typing another person's name without authority is forgery under s.831.06 F.S.)
 - **fl-corp-signature** (Electronic Signature of Incorporator (STOP)): I am the incorporator named above. I authorize the filing company to type my name as the incorporator's electronic signature, and I affirm the facts are true (s.817.155 F.S.).
-- **fl-payment** (Tyler Payment Services hand-off): I understand a submitted Florida filing can't be changed, cancelled or refunded, everything in it becomes public record, and I authorize payment of the fee shown on the approval page.
+- **fl-payment** (Tyler Payment Services hand-off): I understand a submitted Florida filing can't be changed, cancelled or refunded, everything in it becomes public record, and I authorize payment of the fee shown on the proof.
 
 Not covered yet:
 
@@ -452,7 +452,7 @@ Authorizations the client grants (and confirms again on the approval page):
 - **fl-disclaimer** (Entry screen, disclaimer checkbox (STOP)): I authorize the filing company to accept the Sunbiz filing disclaimer for this filing.
 - **fl-ra-signature** (Registered Agent Signature (STOP)): I am the person named above to accept for the registered agent. I authorize the filing company to type my name as the agent's signature accepting the appointment. (Typing another person's name without authority is forgery under s.831.06 F.S.)
 - **fl-gp-signatures** (GP Signature per block (STOP)): I am a general partner named above, and each other general partner named above has authorized me to give this authorization for them. I authorize the filing company to type each general partner's name as their signature, and I affirm the facts are true (s.817.155 F.S.).
-- **fl-payment** (Tyler Payment Services hand-off): I understand a submitted Florida filing can't be changed, cancelled or refunded, everything in it becomes public record, and I authorize payment of the fee shown on the approval page.
+- **fl-payment** (Tyler Payment Services hand-off): I understand a submitted Florida filing can't be changed, cancelled or refunded, everything in it becomes public record, and I authorize payment of the fee shown on the proof.
 
 Not covered yet:
 
@@ -811,7 +811,7 @@ Fees: State filing fee $225. Faster handling and copies cost extra.
 Authorizations the client grants (and confirms again on the approval page):
 
 - **ny-esub-signature** (Form signature line (STOP)): I am the signer named above. I authorize the filing company to place my saved signature on this New York form, only once this filing is approved, and I confirm what the form states is true.
-- **ny-esub-payment** (Screen L4: Payment Authorization (STOP)): I authorize the filing company to submit this form to the NY Department of State and pay the fees shown on the approval page.
+- **ny-esub-payment** (Screen L4: Payment Authorization (STOP)): I authorize the filing company to submit this form to the NY Department of State and pay the fees shown on the proof.
 
 Not covered yet:
 
@@ -867,7 +867,7 @@ Fees: $25 for an LLC or LP. A corporation pays $25 plus $100 for each New York C
 Authorizations the client grants (and confirms again on the approval page):
 
 - **ny-esub-signature** (Form signature line (STOP)): I am the signer named above. I authorize the filing company to place my saved signature on this New York form, only once this filing is approved, and I confirm what the form states is true.
-- **ny-esub-payment** (Screen L4: Payment Authorization (STOP)): I authorize the filing company to submit this form to the NY Department of State and pay the fees shown on the approval page.
+- **ny-esub-payment** (Screen L4: Payment Authorization (STOP)): I authorize the filing company to submit this form to the NY Department of State and pay the fees shown on the proof.
 
 Not covered yet:
 
@@ -895,7 +895,7 @@ Fees: State filing fee $60.
 Authorizations the client grants (and confirms again on the approval page):
 
 - **ny-dissolution-signature** (Screen G2, Attestation and Signature (STOP)): The signer named above authorizes the filing company to check the certification box and type their name as their signature on these articles of dissolution: that they have read the statements, are authorized to sign, and that the statements are true and correct to the best of their knowledge and belief.
-- **ny-dissolution-payment** (Screen G4, Payment Authorization (STOP)): I authorize the filing company to authorize the total fee shown on the approval page to be charged to the Department of State draw-down account this filing is paid from. The Department of State does not refund fees.
+- **ny-dissolution-payment** (Screen G4, Payment Authorization (STOP)): I authorize the filing company to authorize the total fee shown on the proof to be charged to the Department of State draw-down account this filing is paid from. The Department of State does not refund fees.
 
 Not covered yet:
 
@@ -924,7 +924,7 @@ Fees: State filing fee $60.
 Authorizations the client grants (and confirms again on the approval page):
 
 - **ny-amendment-signature** (Screen H3, Attestation and Signature (STOP)): The signer named above authorizes the filing company to check the certification box and type their name as their signature on this certificate of amendment: that they have read the statements, are authorized to sign, and that the statements are true and correct to the best of their knowledge and belief.
-- **ny-amendment-payment** (Screen H5, Payment Authorization (STOP)): I authorize the filing company to authorize the total fee shown on the approval page to be charged to the Department of State draw-down account this filing is paid from.
+- **ny-amendment-payment** (Screen H5, Payment Authorization (STOP)): I authorize the filing company to authorize the total fee shown on the proof to be charged to the Department of State draw-down account this filing is paid from.
 
 Not covered yet:
 
@@ -971,7 +971,7 @@ Fees: State filing fee $30.
 Authorizations the client grants (and confirms again on the approval page):
 
 - **ny-change-signature** (Screen I3, Attestation and Signature (STOP)): The signer named above authorizes the filing company to check the certification box and type their name as their signature on this certificate of change: that they have read the statements, are authorized to sign, and that the statements are true and correct to the best of their knowledge and belief.
-- **ny-change-payment** (Screen I5, Payment Authorization (STOP)): I authorize the filing company to authorize the total fee shown on the approval page to be charged to the Department of State draw-down account this filing is paid from.
+- **ny-change-payment** (Screen I5, Payment Authorization (STOP)): I authorize the filing company to authorize the total fee shown on the proof to be charged to the Department of State draw-down account this filing is paid from.
 
 Not covered yet:
 
@@ -999,7 +999,7 @@ Fees: $5 per document (plain copy).
 
 Authorizations the client grants (and confirms again on the approval page):
 
-- **ny-copies-payment** (Screen J4, Payment Authorization (STOP)): I authorize the filing company to authorize the copy fees shown on the approval page to be charged to the Department of State draw-down account this filing is paid from.
+- **ny-copies-payment** (Screen J4, Payment Authorization (STOP)): I authorize the filing company to authorize the copy fees shown on the proof to be charged to the Department of State draw-down account this filing is paid from.
 
 Not covered yet:
 
@@ -1025,7 +1025,7 @@ Fees: $25 for either form.
 
 Authorizations the client grants (and confirms again on the approval page):
 
-- **ny-status-payment** (Screen K, Payment Authorization (STOP)): I authorize the filing company to authorize the fee shown on the approval page to be charged to the Department of State draw-down account this filing is paid from.
+- **ny-status-payment** (Screen K, Payment Authorization (STOP)): I authorize the filing company to authorize the fee shown on the proof to be charged to the Department of State draw-down account this filing is paid from.
 
 Not covered yet:
 

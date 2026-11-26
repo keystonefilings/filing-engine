@@ -28,7 +28,7 @@ export default function PrivacyPage() {
 
       <h2>Sensitive information</h2>
       <ul>
-        <li>Social Security numbers are encrypted, masked on approval pages, in API responses, in logs and in recorded screens, used only for the filing they belong to, and deleted 30 days after that filing finishes.</li>
+        <li>Social Security numbers are encrypted, masked on proofs, in API responses, in logs and in recorded screens, used only for the filing they belong to, and deleted 30 days after that filing finishes.</li>
         <li>The text of requests sent to us by email, Slack, text or WhatsApp, and what was read from it, is encrypted and deleted after 30 days.</li>
         <li>State logins are encrypted as soon as they arrive, kept apart from every other account and read only when a filing runs.</li>
         <li>A card&apos;s security code is never saved with the card; it is asked of the card&apos;s owner when filings are ready to pay and kept for an hour at most.</li>
@@ -49,7 +49,7 @@ export default function PrivacyPage() {
       <p>Data is encrypted in transit and sensitive fields are encrypted at rest. Access is limited to what each person and service needs. No system is perfectly secure; if a breach affects your information, we&apos;ll tell you as the law requires.</p>
 
       <h2>Your choices</h2>
-      <p>You can see and correct most account details in your portal or dashboard. To ask for a copy of your information or for its deletion or correction, email {mail}. If a firm filed for you, we may pass your request to it, because it decides what is filed.</p>
+      <p>You can see and correct most account details on your filing desk or dashboard. To ask for a copy of your information or for its deletion or correction, email {mail}. If a firm filed for you, we may pass your request to it, because it decides what is filed.</p>
 
       <h2>Children</h2>
       <p>{name} is for businesses and isn&apos;t meant for anyone under 18.</p>

@@ -33,7 +33,7 @@ export function BillingPanel({ summary, subscribe, manage, justSubscribed, plans
       {justSubscribed && status === "none" ? <p className="notice">Thanks. Stripe is confirming the payment; this page updates in a moment.</p> : null}
       {summary.currentPeriodEnd && subscribed ? <p className="small muted" style={{ margin: 0 }}>{summary.cancelAtPeriodEnd ? "Ends" : "Renews"} {new Date(summary.currentPeriodEnd).toLocaleDateString()}.</p> : null}
       {summary.lastPaymentFailedAt ? <p className="notice warn">The last payment failed. Update the card under Manage billing.</p> : null}
-      {summary.required && !summary.canFileLive ? <p className="notice warn">Real filings need an active subscription. Practice filings are always free.</p> : null}
+      {summary.required && !summary.canFileLive ? <p className="notice warn">Real filings need an active subscription. Rehearsals are always free.</p> : null}
       {!summary.configured ? <p className="notice">You can&apos;t subscribe from this page yet. To ask about filing for real, email <a href="mailto:hello@cofile.app">hello@cofile.app</a>.</p> : (
         <div className="row">
           {!subscribed && !plans ? <form action={doSubscribe}><button className="btn primary" type="submit" disabled={subPending}>{subPending ? "Opening Stripe…" : "Subscribe"}</button></form> : null}
@@ -41,7 +41,7 @@ export function BillingPanel({ summary, subscribe, manage, justSubscribed, plans
         </div>
       )}
       {subState.error || manState.error ? <p className="notice bad" role="alert">{subState.error ?? manState.error}</p> : null}
-      <p className="help">Your subscription lets you file for real; practice filings are always free. State fees aren&apos;t included: they&apos;re shown on each approval page and paid with the cards you chose in Setup. Stripe handles subscription payments{summary.hasCustomer ? "; card changes, receipts and canceling are under Manage billing" : ""}.</p>
+      <p className="help">Your plan pays for live filings; rehearsals are always free. State fees aren&apos;t included: they&apos;re shown on each proof and paid with the cards you chose in Setup. Stripe handles subscription payments{summary.hasCustomer ? "; card changes, receipts and canceling are under Manage billing" : ""}.</p>
     </div>
   );
 }

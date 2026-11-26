@@ -125,6 +125,6 @@ describe("fee figures confirmed on the live checkouts (decision 16)", () => {
     expect(filingKind("nj-llc")!.feeNote).toContain("certificate of standing $52");
     const { readFileSync } = await import("node:fs");
     const home = readFileSync("web/app/page.tsx", "utf8");
-    expect(home).toContain("New Jersey&apos;s standing certificate costs $52 for an LLC and $27 for a corporation, each including NJ&apos;s $2 portal fee");
+    expect(home).toContain("By card, New Jersey&apos;s standing certificate costs $52 for an LLC and $27 for a corporation");
   });
 });

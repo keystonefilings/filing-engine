@@ -69,7 +69,7 @@ export async function submitIntake(kind: FilingKind, fd: FormData, ctx: SubmitCo
     const file = fd.get(pf.path);
     if (!(file instanceof File) || file.size === 0) { if (pf.required) issues.push({ path: pf.path, message: `${pf.label}: choose the PDF` }); continue; }
     if (file.size > MAX_DOCUMENT_BYTES) { issues.push({ path: pf.path, message: `${pf.label}: the PDF must be 10 MB or smaller` }); continue; }
-    if (ctx.publicPath) { issues.push({ path: pf.path, message: `${pf.label}: this form takes uploads only from the firm's own portal` }); continue; }
+    if (ctx.publicPath) { issues.push({ path: pf.path, message: `${pf.label}: this form takes uploads only from the firm's own filing desk` }); continue; }
     files.push({ path: pf.path, label: pf.label, kind: pf.documentKind, file });
   }
 
@@ -116,7 +116,7 @@ export async function submitIntake(kind: FilingKind, fd: FormData, ctx: SubmitCo
       return { ok: false, error: "The filing engine found problems with these answers.", issues: list.map((i) => ({ path: i.path, message: i.message })) };
     }
     if (e instanceof EngineError && e.status === 402) {
-      return { ok: false, error: ctx.publicPath ? "This firm can't take filings online right now. Please contact them directly." : "Your subscription isn't active, so this can't be filed for real. Subscribe under Billing, or send it as a practice filing.", issues: [] };
+      return { ok: false, error: ctx.publicPath ? "This firm can't take filings online right now. Please contact them directly." : "Your subscription isn't active, so this can't be filed for real. Choose a plan under Billing, or send it as a rehearsal.", issues: [] };
     }
     return { ok: false, error: e instanceof EngineError ? e.message : "The filing could not be created. Please try again.", issues: [] };
   }

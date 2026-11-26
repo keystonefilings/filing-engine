@@ -96,10 +96,12 @@ export type PageBrand = Pick<ReviewPageModel, "brandName" | "supportEmail" | "lo
 function brandedTop(m: PageBrand, title: string): string {
   return `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>${esc(title)}</title>
-<style>body{font-family:system-ui,sans-serif;max-width:860px;margin:2rem auto;padding:0 1rem;color:#1b1b1b}
-table{border-collapse:collapse;width:100%}th,td{text-align:left;padding:.4rem .6rem;border-bottom:1px solid #ddd;vertical-align:top}th{width:40%;font-weight:600;color:#444}
-.note{background:#fff8e1;border:1px solid #f0d47a;padding:.8rem 1rem;border-radius:6px;margin:1rem 0}
-button{font:inherit;padding:.6rem 1.2rem;border-radius:6px;border:1px solid #333;background:#fff;cursor:pointer}button.primary{background:#1a5fb4;color:#fff;border-color:#1a5fb4}
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400&family=IBM+Plex+Sans:wght@400;600&family=Source+Serif+4:opsz,wght@8..60,600&display=swap">
+<style>body{font-family:"IBM Plex Sans",system-ui,sans-serif;font-size:17px;line-height:1.55;max-width:860px;margin:2rem auto;padding:0 1rem;color:#1C2430;background:#F7F3EA}
+h1,h2{font-family:"Source Serif 4",Georgia,serif;font-weight:600;line-height:1.2}
+table{border-collapse:collapse;width:100%;background:#FFFDF8}th,td{text-align:left;padding:.45rem .6rem;border-bottom:1px solid #D8D0BF;vertical-align:top}th{width:40%;font-weight:600;color:#4A5361}td{font-family:"IBM Plex Mono",ui-monospace,monospace;font-size:.92em}
+.note{background:#FBEFD5;border:1px solid #EBDDB8;padding:.8rem 1rem;border-radius:6px;margin:1rem 0}
+button{font:inherit;padding:.65rem 1.2rem;border-radius:6px;border:1px solid #1C2430;background:#FFFDF8;color:#1C2430;cursor:pointer}button.primary{background:#1F6B4F;color:#fff;border-color:#1F6B4F}
 textarea,input{font:inherit;width:100%;padding:.5rem;border:1px solid #bbb;border-radius:6px}</style></head><body>
 ${m.font?.href ? `<link rel="stylesheet" href="${esc(m.font.href)}">` : ""}${m.font?.fileUrl ? `<style>@font-face{font-family:"FirmFont";src:url("${esc(m.font.fileUrl)}");font-display:swap}</style>` : ""}${m.font ? `<style>body{font-family:${m.font.fileUrl ? `"FirmFont",` : ""}${m.font.stack.replace(/[<>]/g, "")}}</style>` : ""}
 ${m.primaryColor && /^#[0-9a-fA-F]{6}$/.test(m.primaryColor) ? `<style>button.primary{background:${m.primaryColor};border-color:${m.primaryColor}}.brandbar{border-top:4px solid ${m.primaryColor}}</style>` : ""}
@@ -124,7 +126,7 @@ export function approvalConsent(fees: { amountUsd: number }[], feeCapUsd?: numbe
 export function renderReviewPage(m: ReviewPageModel): string {
   const total = m.fees.reduce((s, f) => s + f.amountUsd, 0);
   return `${brandedTop(m, m.brandName ? `${m.brandName}: approve filing` : "Approve filing")}
-${m.practice ? `<div class="note"><strong>Practice filing: nothing will be filed or paid, even if you approve.</strong></div>` : ""}<h1>${esc(m.filingTitle)}</h1>
+${m.practice ? `<div class="note"><strong>Rehearsal: nothing will be filed or paid, even if you approve.</strong></div>` : ""}<h1>${esc(m.filingTitle)}</h1>
 <p>Filing reference ${esc(m.filingId)}. Please decide by ${esc(plainDeadline(m.expiresAt))}. After that, this link stops working and you'll need a new one.</p>
 <div class="note">${esc(approvalConsent(m.fees, m.feeCapUsd))}
 ${m.einInRun ? " While filing, we'll get the EIN from the IRS and enter it on the state form. It's the only detail added after you approve." : ""}${m.einAfterAcceptance ? " Once the state accepts this formation, we'll apply for its EIN with the IRS using the EIN details below; approving now covers that application too, so you won't be asked again." : ""}

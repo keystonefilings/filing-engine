@@ -243,7 +243,7 @@ const nyLlc: FilingKind = {
   ],
   authorizations: [
     { id: "ny-signature", ref: "Screen D2, Signature (STOP)", text: "I authorize the filing company to type the organizer's name as the organizer's signature on these Articles of Organization and to certify that the statements in them are true and correct." },
-    { id: "ny-payment", ref: "Screen F, Payment Authorization (STOP)", text: "I authorize the filing company to pay the state fee shown on the approval page. The Department of State does not refund fees." },
+    { id: "ny-payment", ref: "Screen F, Payment Authorization (STOP)", text: "I authorize the filing company to pay the state fee shown on the proof. The Department of State does not refund fees." },
   ],
   gaps: [
     "The page after File Document (the filing receipt) is not mapped, so the filing runs as a dry run.",
@@ -332,7 +332,7 @@ const nyCorp: FilingKind = {
   ],
   authorizations: [
     { id: "ny-corp-signature", ref: "Screen D1, Signature of Incorporator (STOP)", text: "I am the incorporator named above. I authorize the filing company to type my name as the incorporator's signature on this Certificate of Incorporation, and I certify that the statements in it are true and correct." },
-    { id: "ny-payment", ref: "Screen F, Payment Authorization (STOP)", text: "I authorize the filing company to pay the state fee shown on the approval page. The Department of State does not refund fees." },
+    { id: "ny-payment", ref: "Screen F, Payment Authorization (STOP)", text: "I authorize the filing company to pay the state fee shown on the proof. The Department of State does not refund fees." },
   ],
   gaps: [
     "The tax on shares is quoted from the statute (Tax Law s.180: 5 cents a share without par value, 1/20 of 1% of total par value, at least $10), which the live checkout charges. A different amount on the page stops the filing before payment.",
@@ -353,7 +353,7 @@ const njLlc: FilingKind = {
   state: "NJ",
   constants: { formation: { entityType: "LLC" } },
   map: NJ_BF,
-  feeNote: "$103.50 by card: the state filing fee of $100 plus New Jersey's $3.50 portal fee ($1 by eCheck). Optional: certificate of standing $52, certified copy $27 by card ($50 and $25 plus a $2 portal fee each). The approval page shows the exact total, and it's checked again at payment.",
+  feeNote: "$103.50 by card: the state filing fee of $100 plus New Jersey's $3.50 portal fee ($1 by eCheck). Optional: certificate of standing $52, certified copy $27 by card ($50 and $25 plus a $2 portal fee each). The proof shows the exact total, and it's checked again at payment.",
   sections: [
     {
       title: "Name",
@@ -426,7 +426,7 @@ const njLlc: FilingKind = {
   authorizations: [
     { id: "nj-ra-attestation", ref: "Screen 7, Attestation checkbox (STOP)", text: "I attest that the registered agent information is correct for this business and that the agent named is aware of and has accepted the responsibility of acting as its registered agent, and I authorize the filing company to check that box for me." },
     { id: "nj-signature", ref: "Screen 10, Signatures (STOP)", text: "I authorize the filing company to enter the signers' names as their signatures on the Certificate of Formation." },
-    { id: "nj-payment", ref: "Screen 13, Payment", text: "I authorize the filing company to pay the state fee shown on the approval page." },
+    { id: "nj-payment", ref: "Screen 13, Payment", text: "I authorize the filing company to pay the state fee shown on the proof." },
   ],
   gaps: [
     "The Signatures, Contact Information, Review and Payment screens were not reached in the walkthrough; their exact fields are unconfirmed.",
@@ -445,7 +445,7 @@ const njCorp: FilingKind = {
   state: "NJ",
   constants: { formation: { entityType: "LLC", njEntityType: "for_profit_corporation" } },
   map: NJ_BF,
-  feeNote: "State filing fee $100, plus New Jersey's portal fee ($3.50 by card for an LLC; the corporation checkout's own figure hasn't been seen yet). The approval page shows the exact total, and it's checked again at payment.",
+  feeNote: "State filing fee $100, plus New Jersey's portal fee ($3.50 by card for an LLC; the corporation checkout's own figure hasn't been seen yet). The proof shows the exact total, and it's checked again at payment.",
   sections: [
     {
       title: "Name",
@@ -507,7 +507,7 @@ const njCorp: FilingKind = {
   authorizations: [
     { id: "nj-ra-attestation", ref: "Screen 7, Attestation checkbox (STOP)", text: "I attest that the registered agent information is correct for this business and that the agent named is aware of and has accepted the responsibility of acting as its registered agent, and I authorize the filing company to check that box for me." },
     { id: "nj-corp-signature", ref: "Screen 10, Signatures (STOP)", text: "I am an incorporator named above, and each other incorporator named above has authorized me to give this authorization for them. I authorize the filing company to enter each incorporator's name as a signer and check their Signature Box on the Certificate of Incorporation, which the portal says indicates acceptance of the certificate and the intent to formally execute the filing." },
-    { id: "nj-payment", ref: "Screen 13, Payment", text: "I authorize the filing company to pay the state fee shown on the approval page." },
+    { id: "nj-payment", ref: "Screen 13, Payment", text: "I authorize the filing company to pay the state fee shown on the proof." },
   ],
   gaps: [
     "Signatures, Review and Payment were reached for an LLC only; a corporation's signer title list wasn't seen. Each incorporator signs, with the only title the list offers; the filing stops if it offers several.",
@@ -569,7 +569,7 @@ function flCopies(statusFee: string, copyFee: string): Section {
 
 const flRaAuth: Authorization = { id: "fl-ra-signature", ref: "Registered Agent Signature (STOP)", text: "I am the person named above to accept for the registered agent. I authorize the filing company to type my name as the agent's signature accepting the appointment. (Typing another person's name without authority is forgery under s.831.06 F.S.)" };
 const flTerms: Authorization = { id: "fl-disclaimer", ref: "Entry screen, disclaimer checkbox (STOP)", text: "I authorize the filing company to accept the Sunbiz filing disclaimer for this filing." };
-const flPay: Authorization = { id: "fl-payment", ref: "Tyler Payment Services hand-off", text: "I understand a submitted Florida filing can't be changed, cancelled or refunded, everything in it becomes public record, and I authorize payment of the fee shown on the approval page." };
+const flPay: Authorization = { id: "fl-payment", ref: "Tyler Payment Services hand-off", text: "I understand a submitted Florida filing can't be changed, cancelled or refunded, everything in it becomes public record, and I authorize payment of the fee shown on the proof." };
 
 const flLlc: FilingKind = {
   id: "fl-llc",
@@ -1112,7 +1112,7 @@ const esubSign: Authorization = {
 const esubPay: Authorization = {
   id: "ny-esub-payment",
   ref: "Screen L4: Payment Authorization (STOP)",
-  text: "I authorize the filing company to submit this form to the NY Department of State and pay the fees shown on the approval page.",
+  text: "I authorize the filing company to submit this form to the NY Department of State and pay the fees shown on the proof.",
 };
 
 const AU = "paperUpload.applicationForAuthority";
@@ -1296,7 +1296,7 @@ const nyRecordSignature = (id: string, ref: string, doc: string): Authorization 
 });
 const nyRecordPayment = (id: string, ref: string, what: string, refund = false): Authorization => ({
   id, ref,
-  text: `I authorize the filing company to authorize the ${what} shown on the approval page to be charged to the Department of State draw-down account this filing is paid from.${refund ? " The Department of State does not refund fees." : ""}`,
+  text: `I authorize the filing company to authorize the ${what} shown on the proof to be charged to the Department of State draw-down account this filing is paid from.${refund ? " The Department of State does not refund fees." : ""}`,
 });
 const NY_RECORD_GAPS = [
   "The page after Submit (the filing receipt) is not mapped, so the filing runs as a dry run.",

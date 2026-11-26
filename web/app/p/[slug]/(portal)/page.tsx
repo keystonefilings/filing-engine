@@ -24,11 +24,11 @@ export default async function FilingsPage({ params }: { params: Promise<{ slug: 
         <span className="spacer" />
         <Link className="btn primary" href={`${base}/new`}>New filing</Link>
       </div>
-      {billing?.billed && !billing.canFileLive ? <p className="notice warn">Real filings need an active subscription; practice filings are free. <Link href={`${base}/billing`}>Subscribe</Link></p> : null}
+      {billing?.billed && !billing.canFileLive ? <p className="notice warn">Real filings need an active subscription; rehearsals are free. <Link href={`${base}/billing`}>Subscribe</Link></p> : null}
       {toPay ? <p className="notice warn">{toPay === 1 ? "1 approved filing is" : `${toPay} approved filings are`} ready to pay and need your card&apos;s security code. <Link href={`${base}/pay`}>Pay and file</Link></p> : null}
       {waiting ? <p className="notice warn">{waiting === 1 ? "1 filing needs" : `${waiting} filings need`} someone to act.</p> : null}
       {filings.length === 0 ? (
-        <div className="card"><p>No filings yet. Start one yourself, or send your client a link to fill in.</p>
+        <div className="card"><p>Your desk is clear. Start a filing (it can be a free rehearsal), or send a client a link with your logo on it.</p>
           <div className="row"><Link className="btn primary" href={`${base}/new`}>New filing</Link><Link className="btn" href={`${base}/client-links`}>Send a client a link</Link></div></div>
       ) : (
         <div className="table-wrap card" style={{ padding: 0 }}>

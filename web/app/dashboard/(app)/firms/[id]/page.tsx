@@ -28,7 +28,7 @@ export default async function FirmPage({ params }: { params: Promise<{ id: strin
       <p className="small"><Link href="/dashboard/firms">← Firms</Link></p>
       <h1>{c.name}</h1>
       {!c.approvers?.length ? <p className="notice warn">This firm has no approvers, so its filings can&apos;t be approved. Add them with <code>PUT /v1/client-companies/{c.clientCompanyId}</code>.</p> : null}
-      <h2>Portal</h2>
+      <h2>Filing desk</h2>
       <PortalForm action={savePortal.bind(null, c.clientCompanyId)} portal={c.portal} firmName={c.name} logoSrc={logoSrc(c.portal)} kinds={FILING_KINDS.map((k) => ({ id: k.id, title: k.title }))} />
       {c.portal?.publicPages && c.portal.slug ? (
         <div className="card">

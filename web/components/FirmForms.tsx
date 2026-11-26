@@ -25,7 +25,7 @@ export function PortalForm({ action, portal, kinds, firmName, logoSrc }: { actio
         <p className="help">{portal?.slug ? <>Its address is <code>/p/{portal.slug}</code>.</> : "Its address is made from the firm's name when you save."} Unchecking turns the portal off.</p>
         {on ? (
           <>
-            <div className="field"><label htmlFor="dn">Name shown on the portal</label><input id="dn" name="displayName" type="text" maxLength={80} value={name} onChange={(e) => setName(e.target.value)} placeholder={firmName} /></div>
+            <div className="field"><label htmlFor="dn">Name shown on the filing desk</label><input id="dn" name="displayName" type="text" maxLength={80} value={name} onChange={(e) => setName(e.target.value)} placeholder={firmName} /></div>
             <LogoField current={logoSrc} currentLink={portal?.logoArtifactId ? undefined : portal?.logoUrl} onPreview={setLogo} />
             <div className="field-row n2">
               <ColorField id="color" name="primaryColor" label="Main color" value={color} onChange={setColor} help="Buttons and the top of the page. Button text is white, so choose a dark color." />
@@ -38,7 +38,7 @@ export function PortalForm({ action, portal, kinds, firmName, logoSrc }: { actio
             </fieldset>
           </>
         ) : null}
-        <button className="btn primary" type="submit" disabled={pending}>{pending ? "Saving…" : "Save portal"}</button>
+        <button className="btn primary" type="submit" disabled={pending}>{pending ? "Saving…" : "Save filing desk"}</button>
       </form>
       {on ? <BrandPreview name={name || firmName} logo={logo} color={color} color2={color2} /> : null}
     </div>

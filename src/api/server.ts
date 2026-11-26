@@ -434,8 +434,8 @@ export function buildServer(deps: ApiDeps): FastifyInstance {
     const found = await deps.approvals.lookup((req.params as { token: string }).token);
     if (!found.ok) {
       const text = found.reason === "already_decided" ? "A decision was already recorded with this link, so there's nothing more to do here."
-        : found.reason === "expired" ? "This approval link has expired. Ask whoever sent it for a new one."
-        : "This approval link isn't valid. Ask whoever sent it for a new one.";
+        : found.reason === "expired" ? "This link to the proof has expired. Ask whoever sent it for a new one."
+        : "This link to the proof isn't valid. Ask whoever sent it for a new one.";
       return reply.code(410).type("text/html").send(`<p>${text}</p>`);
     }
     const a = found.approval;
@@ -470,7 +470,7 @@ export function buildServer(deps: ApiDeps): FastifyInstance {
       ...(await approvalBrand(r.approval.tenantId, f)),
       heading: "Approval recorded",
       paragraphs: [f && deps.service.isPractice(f.request)
-        ? "Thank you. Your approval is recorded. This is a practice filing, so nothing will be filed or paid."
+        ? "Thank you. Your approval is recorded. This is a rehearsal, so nothing will be filed or paid."
         : "Thank you. Your approval is recorded. We'll submit the filing exactly as shown. If the state's page has changed by then, we stop before paying, and you may be asked to approve again. We'll email you when it's complete."],
     }));
   });

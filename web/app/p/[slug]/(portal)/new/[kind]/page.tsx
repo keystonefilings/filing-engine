@@ -49,7 +49,7 @@ export default async function NewKindPage({ params, searchParams }: { params: Pr
       <h1>{kind.title}</h1>
       <p className="muted">{kind.summary} Would your client rather fill it in? <Link href={`/p/${encodeURIComponent(slug)}/client-links?kind=${encodeURIComponent(kind.id)}`}>Send them a link</Link>.</p>
       {emailed ? <p className="notice">Filled in from your message &ldquo;{emailed.subject || "(no subject)"}&rdquo;. Check every answer and add what&apos;s missing.</p> : null}
-      {!liveFilings(kind.id) ? <p className="notice warn">Practice mode: this filing type isn&apos;t switched to live filing yet, so this filing goes through the government site up to the final step and stops there. Nothing is filed or paid. Each filing type is switched to live filing once it&apos;s verified on the government site. To ask when this one will be switched, email <a href={`mailto:${supportEmail()}`}>{supportEmail()}</a>.</p> : null}
+      {!liveFilings(kind.id) ? <p className="notice warn">Rehearsal: {kind.title} isn&apos;t live yet, so this filing is a rehearsal. {platformName()} fills in every screen of the state&apos;s real website and stops before the last button. Nothing is filed or paid. Each filing type goes live once it&apos;s verified on the state&apos;s website. To ask when this one will, email <a href={`mailto:${supportEmail()}`}>{supportEmail()}</a>.</p> : null}
       {clients.length ? (
         <form method="get" className="row" style={{ gap: 8 }}>
           <label htmlFor="from-client" className="small">Start from a client you filed for before</label>
@@ -67,6 +67,7 @@ export default async function NewKindPage({ params, searchParams }: { params: Pr
         signatures={sigs?.signatures.filter((s) => s.active) ?? []}
         consentText={sigs?.consentText}
         filerName={company.filerName}
+        footnote={<p className="small muted">Nothing is filed until your client approves the proof.</p>}
         prefill={{ ...(Object.keys(fromEmail).some((k) => k.startsWith("contact.")) ? {} : contactPrefill(company)), ...saved, ...fromClient, ...fromEmail }}
         key={from ?? email ?? "new"}
       />

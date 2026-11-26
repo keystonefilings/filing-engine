@@ -46,14 +46,14 @@ export async function savePortal(id: string, _prev: PortalResult, fd: FormData):
       const issues = Array.isArray(e.body && (e.body as { error?: unknown }).error) ? ((e.body as { error: { path: (string | number)[]; message: string }[] }).error).map((i) => `${i.path.join(".")}: ${i.message}`).join("; ") : e.message;
       return { ok: false, message: issues };
     }
-    return { ok: false, message: "The portal couldn't be saved." };
+    return { ok: false, message: "The filing desk couldn't be saved." };
   }
   if (on && uploading) {
     const problem = await applyLogo(s.apiKey, id, fd);
     if (problem) { revalidatePath(`/dashboard/firms/${id}`); return { ok: false, message: `The rest was saved. ${problem}` }; }
   }
   revalidatePath(`/dashboard/firms/${id}`);
-  return { ok: true, message: portal ? `Saved. The portal is at /p/${slug ?? old?.slug}.` : "Saved. This firm has no portal now." };
+  return { ok: true, message: portal ? `Saved. The filing desk is at /p/${slug ?? old?.slug}.` : "Saved. This firm has no filing deskal now." };
 }
 
 /**

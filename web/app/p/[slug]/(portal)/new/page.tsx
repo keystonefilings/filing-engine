@@ -24,7 +24,7 @@ export default async function NewFilingPage({ params, searchParams }: { params: 
       <div className="stack">
         <h1>New filing</h1>
         <p className="muted">Which state is the business in?</p>
-        <p className="small muted">Not every filing type can be filed for real yet. See <Link href="/#coverage">Coverage</Link> on the home page for where each one stands.</p>
+        <p className="small muted">Filing types go live one at a time; until then they run as rehearsals. See <Link href="/#coverage">What we file</Link> for where each one stands.</p>
         {ways.address || ways.sms || ways.whatsapp || ways.slackInstallUrl ? (
           <div className="small muted">
             <p style={{ marginBottom: 4 }}>Or send us the details and we fill in the form for you to check:</p>
@@ -59,13 +59,13 @@ export default async function NewFilingPage({ params, searchParams }: { params: 
     <div className="stack">
       <p className="small"><Link href={`${base}/new`}>All states</Link></p>
       <h1>{st.name}: what are you filing?</h1>
-      <p className="muted">Fill it in yourself, or send your client a link to fill it in. Either way, your client approves exactly what will be filed before anything is filed or paid. Not every filing type can be filed for real yet.</p>
+      <p className="muted">Fill it in yourself, or send your client a link to fill it in. Either way, your client approves the proof before anything is filed or paid. Filing types go live one at a time; until then they run as rehearsals.</p>
       {kinds.length === 0 ? <p className="notice">No {st.name} filings are offered here yet.</p> : (
         <div className="pick">
           {kinds.map((k) => (
             <Link key={k.id} href={`${base}/new/${k.id}`}>
               <strong>{k.title}</strong>
-              <span className="small" style={{ display: "block", marginBottom: 4 }}>{liveFilings(k.id) ? <span className="badge ok">Files for real</span> : <span className="badge">Practice filing: stops before the final step</span>}</span>
+              <span className="small" style={{ display: "block", marginBottom: 4 }}>{liveFilings(k.id) ? <span className="badge ok">Live</span> : <span className="badge warn" title="Runs on the state's real website and stops before the last button: nothing is filed or paid">Rehearsal</span>}</span>
               <span className="small muted">{k.summary}</span>
               {k.feeNote ? <span className="small" style={{ display: "block", marginTop: 6 }}>{k.feeNote}</span> : null}
             </Link>

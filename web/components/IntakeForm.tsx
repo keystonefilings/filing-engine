@@ -65,7 +65,7 @@ function initialState(kind: FilingKind, prefill: Record<string, string> = {}): {
   return { values, groups, next, prefill: mapped };
 }
 
-export function IntakeForm({ kind, nonce, action, submitLabel = "Send for approval", footnote, signatures = [], consentText, prefill, filerName, forClient }: Props) {
+export function IntakeForm({ kind, nonce, action, submitLabel = "Send the proof to my client", footnote, signatures = [], consentText, prefill, filerName, forClient }: Props) {
   const router = useRouter();
   const init = useMemo(() => initialState(kind, prefill), [kind, prefill]);
   const startValues = init.prefill;
@@ -390,7 +390,7 @@ export function IntakeForm({ kind, nonce, action, submitLabel = "Send for approv
         <legend>Authorizations</legend>
         <p className="help" style={{ marginTop: 0 }}>{forClient
           ? <>The state form asks for these. Check a box only if the statement is true for you; if a statement names someone else, ask {forClient} before you send this.</>
-          : <>The state form asks for these. Each statement is made by the person who checks its box, so a statement that begins &quot;I am&quot; should be checked by the person named; if that&apos;s your client, send them a client link instead.</>}{filerName ? <> Here, &quot;the filing company&quot; means {filerName}.</> : null} Each one is shown again on the approval page before anything is filed.</p>
+          : <>The state form asks for these. Each statement is made by the person who checks its box, so a statement that begins &quot;I am&quot; should be checked by the person named; if that&apos;s your client, send them a client link instead.</>}{filerName ? <> Here, &quot;the filing company&quot; means {filerName}.</> : null} Each one is shown again on the proof before anything is filed.</p>
         {kind.authorizations.map((a) => (
           <label key={a.id} className="auth">
             <input type="checkbox" name={`${AUTH_PREFIX}${a.id}`} />

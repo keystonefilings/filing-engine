@@ -251,9 +251,10 @@ Built and tested; each switches on when its accounts and keys are set (steps in 
   page plan choice, usage counted at each live submission, extras and pay-as-you-go charges on the
   firm's Stripe invoice). Yours: create the Stripe prices and set `STRIPE_PARTNER_PRICES`
   (docs/deploy-fly.md). Prices stay off the public site.
-- **Copy and branding, round 2 (Yakov, Nov 26):** the 20 personas wrote the site as for their own
-  client; the merged direction waits on five choices (docs/copy-review-2026-11-26.md, Persona
-  review): rehearsal or practice filing, "the proof", "your filing desk", "free", and the new look.
+- **Copy and branding, round 2 (Yakov, Nov 26):** done. The 20 personas wrote the site as for
+  their own client; Yakov approved all five choices (rehearsal, the proof, filing desk, free
+  rehearsals, the new look), and the home page, sign-up, filing desk, client pages, proof page and
+  approval email now follow the merged direction (docs/copy-review-2026-11-26.md).
 - **Florida EIN (Yakov, Nov 26):** done. A Florida formation's EIN is applied for only once the
   state accepts the formation (any `in_run` request becomes `after_acceptance`). When the acceptance
   is recorded (or a state accepts at once, as NJ does, for a formation asking for that order), the

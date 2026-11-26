@@ -52,7 +52,7 @@ export function filingDocContent(f: Filing, o: { title: string; statusLabel: str
 
   heading(o.title, 1);
   para(`${o.kindTitle ?? `${f.request.state} ${f.request.type.replace(/_/g, " ")}`}, for ${o.firmName}.`);
-  para(`Status: ${o.statusLabel}${f.request.dryRun ? " (practice filing: nothing was filed or paid)" : ""}.`);
+  para(`Status: ${o.statusLabel}${f.request.dryRun ? " (a rehearsal: nothing was filed or paid)" : ""}.`);
   para(`Started ${new Date(f.createdAt).toUTCString()}; this record was saved ${o.now.toUTCString()}.`);
   if (f.ein) para(`EIN: ${f.ein}`);
   para(`Filing reference: ${f.id}`);
@@ -73,7 +73,7 @@ export function filingDocContent(f: Filing, o: { title: string; statusLabel: str
     for (const a of auths) para(`${a.text}${a.grantedBy ? ` (by ${a.grantedBy}${a.grantedAt ? `, ${new Date(a.grantedAt).toUTCString()}` : ""})` : ""}`);
   }
   if (f.artifacts.length) {
-    heading("Documents kept in the portal", 2);
+    heading("Documents kept on the filing desk", 2);
     for (const a of f.artifacts) para(a.label);
   }
   para("People's Social Security numbers and ITINs are left out of this record.");
