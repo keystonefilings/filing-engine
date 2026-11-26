@@ -220,7 +220,17 @@ Built and tested; each switches on when its accounts and keys are set (steps in 
   text and WhatsApp (V40-V43).
 - **Basis Theory:** a public key (web) and a private key (engine) for saved cards (V18).
 - **Stripe:** the two prices, a restricted key, the webhook secret, then `BILLING_REQUIRED=true` (V33).
-- **Google:** an OAuth client for "Continue with Google" (V37).
+- **Google:** done Nov 26 (project cofile-515904, client "CoFile Web"; redirect URIs
+  `https://cofile.app/api/auth/callback/google` and the localhost one, which the code now uses).
+  The engine's client ID is in fly.toml. While the consent screen is in Testing only its test users
+  can sign in with Google. The Docs scope is enabled for a portal-only Docs integration that isn't
+  built yet (what it should do is your call).
+- **Vercel production settings (read Nov 26):** `PLATFORM_NAME` is "Keystone Filings", which shows
+  on the docs and dashboard: set it to CoFile or delete it (the default is CoFile).
+  `PORTAL_PUBLIC_URL` isn't set (the code now falls back to https://cofile.app in production, but
+  set it). `PLATFORM_API_KEY` isn't set, so a client link a partner firm sends fails when the
+  client opens it: set it to the platform tenant's engine key. `RESEND_API_KEY` there is unused (the
+  engine sends mail). Each takes effect on the next deploy.
 - **Slack:** a Slack app with the `/file` command (V41).
 - **Twilio:** a number with A2P 10DLC registration, and a WhatsApp sender (Meta verification) (V42-V43).
 - **Copy decisions:** all 19 questions from the copy review (docs/copy-review-2026-11-26.md) were

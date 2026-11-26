@@ -123,18 +123,18 @@ fly secrets set --stage --app keystone-filing-engine EMAIL_FROM="CoFile <filings
 `EMAIL_FROM` must be an address on the verified domain, and `WEB_BASE_URL` is where the web
 front end runs: password-reset and log-in links in emails point there.
 
-**Sign in with Google.** Not required to start. In Google Cloud, APIs & Services, Credentials:
-create an OAuth client of type Web application, with the authorized redirect URI
-`https://cofile.app/auth/google/callback` (your `PORTAL_PUBLIC_URL` plus `/auth/google/callback`).
-The consent screen needs only the `openid` and `email` scopes. Set `GOOGLE_CLIENT_ID` and
-`GOOGLE_CLIENT_SECRET` in the web app and the same `GOOGLE_CLIENT_ID` on the engine:
+**Sign in with Google.** Set up on Nov 26 in Google Cloud project `cofile-515904` (the cofile
+workspace): OAuth client "CoFile Web" (Web application), client ID
+`259652348504-111v1dcj7b0fmri3ur4agippdtacokql.apps.googleusercontent.com`. Registered redirect URIs:
+`https://cofile.app/api/auth/callback/google` and `http://localhost:3000/api/auth/callback/google`
+(the site's `PORTAL_PUBLIC_URL` plus `/api/auth/callback/google`); authorized origins
+`https://cofile.app` and `http://localhost:3000`. Sign-in asks only for `openid` and `email`.
+`GOOGLE_CLIENT_ID` and `GOOGLE_CLIENT_SECRET` are set in the Vercel project (Production); the engine
+gets the same client ID from `fly.toml`, to check that Google's ID token was issued to it.
 
-```bash
-fly secrets set --stage --app keystone-filing-engine GOOGLE_CLIENT_ID=xxxx.apps.googleusercontent.com
-```
-
-It signs in existing accounts only (a Google-verified email that matches one); new firms still sign
-up with the form.
+While the consent screen is in Testing, only its test users can sign in with Google; add people
+under Google Auth Platform, Audience, or publish the app. It signs in existing accounts only (a
+Google-verified email that matches one); new firms still sign up with the form.
 
 **Filing by email (Resend receiving).** Not required to start. A firm's user writes to one
 address with what to file; we email back a link to the form filled in from the email (read by

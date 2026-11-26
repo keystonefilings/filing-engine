@@ -7,7 +7,12 @@ export function googleConfigured(): boolean {
 }
 
 export const GOOGLE_COOKIE = "g_oauth";
-export const googleRedirectUri = () => `${publicUrl()}/auth/google/callback`;
+/**
+ * Where Google sends the person back: this exact address is registered on the OAuth client
+ * ("CoFile Web", https://cofile.app and http://localhost:3000). The state cookie is scoped to it.
+ */
+export const GOOGLE_CALLBACK_PATH = "/api/auth/callback/google";
+export const googleRedirectUri = () => `${publicUrl()}${GOOGLE_CALLBACK_PATH}`;
 
 export function newGoogleRequest(): { state: string; nonce: string; verifier: string; url: string } {
   const state = randomBytes(18).toString("base64url"), nonce = randomBytes(18).toString("base64url"), verifier = randomBytes(48).toString("base64url");

@@ -44,6 +44,9 @@ kill_timeout = 300               # seconds: the worker finishes the filing in pr
   # Decision 14 (Nov 26): the engine's own address (approval links, webhooks) and the site's.
   # Add the api.cofile.app DNS record first (docs/deploy-fly.md, step 9), or emailed links won't open.
   PUBLIC_BASE_URL = "https://api.cofile.app"
+  # V37: the Google OAuth client ("CoFile Web", project cofile-515904). Not a secret: the engine checks
+  # that a Google ID token was issued to it. The client secret lives only in the web app (Vercel).
+  GOOGLE_CLIENT_ID = "259652348504-111v1dcj7b0fmri3ur4agippdtacokql.apps.googleusercontent.com"
   WEB_BASE_URL = "https://cofile.app"
 
 [processes]

@@ -1,6 +1,6 @@
 import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
-import { GOOGLE_COOKIE, googleIdToken } from "@/lib/google";
+import { GOOGLE_CALLBACK_PATH, GOOGLE_COOKIE, googleIdToken } from "@/lib/google";
 import { unseal } from "@/lib/seal";
 import { engine, EngineError, type SignInResult } from "@/lib/engine";
 import { finishSignIn } from "@/lib/sign-in";
@@ -10,7 +10,7 @@ export async function GET(req: Request) {
   const url = new URL(req.url);
   const jar = await cookies();
   const saved = unseal<{ state: string; nonce: string; verifier: string }>("google-oauth", jar.get(GOOGLE_COOKIE)?.value);
-  jar.delete({ name: GOOGLE_COOKIE, path: "/auth/google" });
+  jar.delete({ name: GOOGLE_COOKIE, path: GOOGLE_CALLBACK_PATH });
   const back = (why: string) => NextResponse.redirect(new URL(`/login?google=${why}`, req.url), 303);
   if (url.searchParams.get("error")) return back("cancelled");
   const code = url.searchParams.get("code");

@@ -69,8 +69,15 @@ export function intakeKey(i: ClientIntake): string {
 
 export const INVITE_TTL = { staff: 7 * 24 * 3600, client: 30 * 24 * 3600 } as const;
 
+/**
+ * This site's own address, for links it sends (client intake, staff invites) and the Google
+ * redirect. PORTAL_PUBLIC_URL sets it; without it a production deployment uses https://cofile.app
+ * (decision 14), never localhost, which would send people nowhere.
+ */
 export function publicUrl(): string {
-  return (process.env.PORTAL_PUBLIC_URL ?? "http://localhost:3000").replace(/\/+$/, "");
+  const set = process.env.PORTAL_PUBLIC_URL?.trim();
+  const fallback = process.env.VERCEL_ENV === "production" || process.env.NODE_ENV === "production" ? "https://cofile.app" : "http://localhost:3000";
+  return (set || fallback).replace(/\/+$/, "");
 }
 
 export function staffInviteLink(i: StaffInvite): string {
