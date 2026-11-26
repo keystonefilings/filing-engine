@@ -26,10 +26,16 @@ The merged design spec (`docs/design-specs/merged/`) as code. Phase 0 of the bui
 - **Cascade layers:** `legacy, tokens, base, components, pictures, utilities`. Today's stylesheets
   (`app/globals.css`, `app/landing.css`) sit in `legacy`, the lowest layer, so a rebuilt page always wins
   and a page not yet rebuilt looks exactly as before (checked: 20 screenshots identical, Nov 26).
-- **Fonts:** the licensed Miller and Founders Grotesk come first in each stack; until the licenses are
-  bought, the stand-ins are Georgia (drawn by Miller's own designer) and the system sans. When the files
-  arrive, add them under `public/fonts` with `@font-face` rules and metric-matched fallbacks measured from
-  the files.
+- **Fonts**: Miller Text and Founders Grotesk, from the owner's desktop files (Nov 26), subset to Latin and compressed
+  to WOFF2. **The files are never committed: this repository is public.** They live in `public/fonts` on the machine
+  that builds or serves the site (`public/fonts/README.md` lists them and the subset command), and
+  `lib/licensed-fonts.ts` declares each face only when its file is there. Without them the site uses the metric-matched
+  fallbacks in `styles/fonts.css` (`size-adjust` from the average lowercase width), so nothing moves. Miller Text
+  stands in for Miller Display, and Founders Grotesk for Founders Grotesk Text; Founders Grotesk Mono is still
+  missing, so mono uses the system's. Founders Grotesk's 2010 files put the ascent at the cap height, so
+  `ascent-override` / `descent-override` centre its capitals in the line (Miller's the same way). Before the live site
+  serves them, confirm the web licenses (`docs/design-specs/merged/briefs/01-font-licenses.md`): desktop files don't
+  license web embedding.
 - **The ink match** follows the spec's 3.6 with two changes its own reference values call for: a second
   color counts as distinct at ΔE OK > 0.05 (not 0.08), and "neon" means chroma over 0.20 *and* lightness
   over 0.70. Tests: `lib/design/ink.test.ts`, including 1,000 random colors.

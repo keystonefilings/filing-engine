@@ -1,0 +1,14 @@
+/* The metric-matched fallbacks for CoFile's faces (merged spec 5.1). The licensed faces themselves are declared by
+   web/lib/fonts.ts, only when their files are in public/fonts (they are never committed: the repository is public).
+   CoFile's faces are self-hosted WOFF2, subset to Latin (Spanish included).
+   Development stand-ins from the owner's desktop files (Nov 26): Miller Text stands in for Miller Display, and
+   Founders Grotesk (2010) for Founders Grotesk Text; Founders Grotesk Mono isn't here yet, so mono falls to the
+   system's. Not to be served on the live site until the web licenses are confirmed (briefs/01-font-licenses.md).
+
+   The vertical metrics are overridden. Founders Grotesk's 2010 files put the ascent at the cap height (0.63 em,
+   descent 0.37), which sets every line of text high in its box: buttons, chips and fields would look off-centre.
+   81.5 / 18.5 centres the capitals in the line. Miller's 1.13 / 0.31 is evened to 0.95 / 0.25 the same way.
+   The fallbacks are metric-matched (size-adjust from the average lowercase width against Arial and Times), so the
+   swap moves nothing (5.1). */
+@font-face { font-family: "Founders Grotesk Fallback"; src: local("Arial"), local("Helvetica Neue"), local("Helvetica"), local("Liberation Sans"); size-adjust: 91.2%; ascent-override: 89.4%; descent-override: 20.3%; line-gap-override: 0%; }
+@font-face { font-family: "Miller Text Fallback"; src: local("Times New Roman"), local("Times"), local("Liberation Serif"); size-adjust: 107.2%; ascent-override: 88.6%; descent-override: 23.3%; line-gap-override: 0%; }

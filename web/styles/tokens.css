@@ -46,10 +46,10 @@
   --firm-tint: #DDEEF7;
   --firm-ink-dark: #6394AB;
   /* Faces (5.1): licensed families first, then the stand-ins until the licenses are bought */
-  --font-display: "Miller Display", "Miller Text", Georgia, "Times New Roman", serif;
-  --font-serif: "Miller Text", Georgia, "Times New Roman", serif;
-  --font-sans: "Founders Grotesk Text", "Founders Grotesk", "Helvetica Neue", Arial, system-ui, sans-serif;
-  --font-sans-display: "Founders Grotesk", "Founders Grotesk Text", "Helvetica Neue", Arial, system-ui, sans-serif;
+  --font-display: "Miller Display", "Miller Text", "Miller Text Fallback", Georgia, "Times New Roman", serif;
+  --font-serif: "Miller Text", "Miller Text Fallback", Georgia, "Times New Roman", serif;
+  --font-sans: "Founders Grotesk Text", "Founders Grotesk", "Founders Grotesk Fallback", "Helvetica Neue", Arial, system-ui, sans-serif;
+  --font-sans-display: "Founders Grotesk", "Founders Grotesk Text", "Founders Grotesk Fallback", "Helvetica Neue", Arial, system-ui, sans-serif;
   --font-mono: "Founders Grotesk Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
   --font-email-head: Georgia, "Times New Roman", serif;
   --font-email-body: -apple-system, "Segoe UI", Helvetica, Arial, sans-serif;

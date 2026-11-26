@@ -1,4 +1,6 @@
 import type { Metadata } from "next";
+import "@/styles/fonts.css";
+import { licensedFonts } from "@/lib/licensed-fonts";
 import "@/styles/tokens.css";
 import "./globals.css";
 import "@/styles/type.css";
@@ -16,9 +18,12 @@ export function generateMetadata(): Metadata {
 }
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
+  const fonts = licensedFonts();
   return (
     <html lang="en">
       <head>
+        {fonts.preload ? <link rel="preload" href={fonts.preload} as="font" type="font/woff2" crossOrigin="" /> : null}
+        {fonts.css ? <style>{fonts.css}</style> : null}
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="" />
         <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&family=Source+Serif+4:opsz,wght@8..60,500;8..60,600&display=swap" />
