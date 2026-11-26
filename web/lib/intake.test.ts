@@ -102,6 +102,41 @@ test("NYS-100 member extras go to stateAnswers and SSN follows residency", () =>
   assert.equal(p.stateAnswers.owners[0].principalType, "person");
 });
 
+test("NYS-100 sends what the walked member and location screens ask, in the engine's shape", () => {
+  const r = buildRequest(filingKind("ny-nys100")!, {
+    // A US resident in New York: the US address and its county.
+    "payroll.owners.0.stateAnswers_principalType": "person", "payroll.owners.0.title": "Member", "payroll.owners.0.name": "Avery Rivera",
+    "payroll.owners.0.usResident": "yes", "payroll.owners.0.ssn": "123456789", ...addr("payroll.owners.0.address"), "payroll.owners.0.county": "Albany",
+    // Not a US resident: the address outside the US; a US address typed before the answer changed is dropped.
+    "payroll.owners.1.stateAnswers_principalType": "person", "payroll.owners.1.title": "Member", "payroll.owners.1.name": "Lee Chen",
+    "payroll.owners.1.usResident": "no", ...addr("payroll.owners.1.address"), "payroll.owners.1.county": "Albany",
+    "payroll.owners.1.foreignAddress.street1": "200 King St W", "payroll.owners.1.foreignAddress.city": "Toronto",
+    "payroll.owners.1.foreignAddress.postalCode": "M5V 0A1", "payroll.owners.1.foreignAddress.country": "Canada",
+    // A12: Manufacturing asks its own three questions; a service answer left over is not sent.
+    "payroll.workLocations.0.activity": "Manufacturing", "payroll.workLocations.0.activityDetails.productsProduced": "Ship fittings",
+    "payroll.workLocations.0.activityDetails.rawMaterials": "Bronze", "payroll.workLocations.0.activityDetails.percentOfSalesValue": "80",
+    "payroll.workLocations.0.activityDetails.establishmentType": "Office",
+    // A4: the acquired employer's New York address asks its county.
+    "payroll.stateAnswers.acquiredBusiness": "yes", ...addr("payroll.stateAnswers.acquiredAddress"),
+  }, ctx);
+  const p = r.request.payroll as any;
+  assert.equal(p.owners[0].ssn, "123-45-6789");
+  assert.equal(p.owners[0].county, "Albany");
+  assert.equal(p.owners[0].foreignAddress, undefined);
+  assert.equal(p.owners[1].address, undefined);
+  assert.equal(p.owners[1].county, undefined);
+  assert.deepEqual(p.owners[1].foreignAddress, { street1: "200 King St W", city: "Toronto", postalCode: "M5V 0A1", country: "Canada" });
+  assert.deepEqual(p.workLocations[0].activityDetails, { productsProduced: "Ship fittings", rawMaterials: "Bronze", percentOfSalesValue: 80 });
+  const paths = r.issues.map((i) => i.path);
+  assert.ok(paths.includes("payroll.stateAnswers.acquiredCounty"), "the county of a New York acquired employer is asked");
+  assert.ok(!paths.includes("payroll.owners.1.foreignAddress.region"), "a state or province is optional");
+});
+
+test("NJ-REG sends the fiscal month as the number the engine takes", () => {
+  const r = buildRequest(filingKind("nj-reg")!, { "payroll.entity.fiscalMonth": "6" }, ctx);
+  assert.equal((r.request.payroll as any).entity.fiscalMonth, 6);
+});
+
 test("sealed tokens round-trip, are purpose-bound and expire", () => {
   const s = "x".repeat(40);
   const t = seal("client-intake", { a: 1 }, 60, s);

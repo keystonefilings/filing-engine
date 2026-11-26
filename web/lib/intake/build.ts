@@ -149,6 +149,7 @@ function coerce(f: Field, value: string, path: string, issues: BuildIssue[]): un
   if (f.options && v && !f.options.some((o) => o.value === v)) return bad("pick one of the listed choices");
   if (f.minWords && v && v.split(/\s+/).length < f.minWords) return bad("enter a first and last name");
   switch (f.type) {
+    case "select": return v ? (f.integer ? Number(v) : v) : undefined; // a list of numbers (NJ-REG fiscal month) sends a number
     case "checkbox": return v === "on" || v === "true" ? true : undefined;
     case "yesno": return v === "yes" ? true : v === "no" ? false : undefined;
     case "number": {
@@ -317,6 +318,8 @@ function postProcess(kind: FilingKind, r: Record<string, unknown>, raw: Raw): vo
 
   const payroll = r.payroll as Record<string, unknown> | undefined;
   if (payroll && raw["intake.portal.booksSameAsBusiness"] === "on" && payroll.businessAddress) payroll.booksRecordsAddress = payroll.businessAddress;
+  // NYS-100 P11: a member who is not a US resident has no US address, so no New York county either.
+  for (const o of (payroll?.owners as Record<string, unknown>[] | undefined) ?? []) if (o && o.usResident === false) delete o.county;
 
   const assumed = (r.paperUpload as { assumedName?: Record<string, unknown> } | undefined)?.assumedName;
   if (assumed && raw["intake.portal.nyAllCounties"] === "all") assumed.counties = "all";

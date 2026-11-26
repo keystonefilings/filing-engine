@@ -231,9 +231,21 @@ export const Contact = z.object({
 /**
  * Payroll / employer registration (NY NYS-100, NJ NJ-REG). One registration covers
  * Unemployment Insurance + withholding + wage reporting. No filing fee in either state.
- * Field maps: docs/walks/nys-100-payroll-2026-11-19.md, docs/walks/nj-reg-payroll-2026-11-19.md.
+ * Screen maps from the walks: docs/portal-maps/ny-nys100-unemployment.md, docs/portal-maps/nj-reg.md.
+ * The long state-specific tail the intake forms collect lives in stateAnswers (web/lib/intake/forms.ts).
  * SSNs on the owners/officers are sensitive (masked, never stored as reusable defaults).
  */
+/** A residential address outside the US (NYS-100: a member who is not a US resident must give one). */
+export const ForeignAddress = z.object({
+  street1: z.string().min(1),
+  street2: z.string().optional(),
+  city: z.string().min(1),
+  /** State, province or region, as the country uses them. */
+  region: z.string().optional(),
+  postalCode: z.string().min(1),
+  country: z.string().min(2),
+});
+
 export const PayrollOwner = z.object({
   name: z.string().min(1),
   ssn: z.string().regex(/^\d{3}-?\d{2}-?\d{4}$/, "SSN must be 9 digits").describe("sensitive").optional(),
@@ -246,6 +258,24 @@ export const PayrollOwner = z.object({
   phone: z.string().min(7).optional(),
   email: z.string().email().optional(),
   profitDistributionPercent: z.number().min(0).max(100).optional(),
+  /** NYS-100 member screen: County* of a New York residential address (the portal lists the 62 NY counties). */
+  county: z.string().optional(),
+  /** NYS-100 member screen: the residential address of a member who is not a US resident (a US address is refused). */
+  foreignAddress: ForeignAddress.optional(),
+});
+
+/**
+ * NYS-100 A12 Physical Locations Details: what the portal reveals after the principal activity.
+ * Service activities ask the first three, Manufacturing the next three, Other the last.
+ */
+export const LocationActivityDetails = z.object({
+  establishmentType: z.string().optional(),
+  productOrService: z.string().optional(),
+  percentOfRevenue: z.number().min(0).max(100).optional(),
+  productsProduced: z.string().optional(),
+  rawMaterials: z.string().optional(),
+  percentOfSalesValue: z.number().min(0).max(100).optional(),
+  otherDetails: z.string().optional(),
 });
 
 export const PayrollRegistrationDetails = z.object({
@@ -290,6 +320,7 @@ export const PayrollRegistrationDetails = z.object({
     address: Address,
     employees: z.number().int().nonnegative().optional(),
     activity: z.string().optional(),
+    activityDetails: LocationActivityDetails.optional(),
   })).max(20).default([]),
   /** Falls back to the request-level contact when absent. */
   contact: Contact.optional(),

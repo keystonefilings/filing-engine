@@ -1,0 +1,21 @@
+<!doctype html><html><head><meta charset="utf-8"><title>NJ Online Business and Employer Registration</title>
+<style>.modal{position:fixed;inset:10%;background:#fff;border:1px solid #444;padding:1em;z-index:10}</style>
+<script src="_reg.js"></script></head>
+<body>
+<h1>Welcome to New Jersey's Online Business and Employer Registration Service</h1>
+<p>Use this service for a business already formed in New Jersey, or a sole proprietorship or partnership.</p>
+<h2>What you will need</h2>
+<ul><li>Business Entity ID or Corporate ID</li><li>Federal EIN</li><li>NJ Business Code</li><li>NAICS code</li></ul>
+<button type="button" id="get-started">Get Started</button>
+<div id="notice" class="modal" role="dialog" style="display:none">
+  <h3>IMPORTANT NOTICE!</h3><p>Did you file your Business Formation Application Online?</p>
+  <button type="button" id="notice-continue">Continue</button> <button type="button" id="notice-close">Close</button>
+</div>
+<div id="timeoutModal" class="modal" style="display:none"><h3>Session Timeout Warning</h3><button type="button">Continue</button></div>
+<script>
+  NJREG.reset();
+  document.getElementById("get-started").addEventListener("click", () => { setTimeout(() => { document.getElementById("notice").style.display = ""; }, 200); });
+  document.getElementById("notice-close").addEventListener("click", () => { document.getElementById("notice").style.display = "none"; });
+  document.getElementById("notice-continue").addEventListener("click", () => { location.href = "step.html?s=first"; });
+</script>
+</body></html>

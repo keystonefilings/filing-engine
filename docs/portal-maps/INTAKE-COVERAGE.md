@@ -559,11 +559,18 @@ Fees: No state fee. Average processing time shown: 15 days.
 | Members and owners | Email | `payroll.owners[].email` |  | P11, Add A Member |
 | Members and owners | Ownership % | `payroll.owners[].percentOwnership` | yes | P11, Add A Member |
 | Members and owners | Profit distribution %, if different | `payroll.owners[].profitDistributionPercent` |  | P11, Add A Member |
-| Members and owners | Residential address: street address | `payroll.owners[].address.street1` | yes | P11, Add A Member |
+| Members and owners | Residential address: street address | `payroll.owners[].address.street1` | when shown | P11, Add A Member |
 | Members and owners | Residential address: suite, unit or floor | `payroll.owners[].address.street2` |  | P11, Add A Member |
-| Members and owners | Residential address: city | `payroll.owners[].address.city` | yes | P11, Add A Member |
-| Members and owners | Residential address: state | `payroll.owners[].address.state` | yes | P11, Add A Member |
-| Members and owners | Residential address: ZIP code | `payroll.owners[].address.zip` | yes | P11, Add A Member |
+| Members and owners | Residential address: city | `payroll.owners[].address.city` | when shown | P11, Add A Member |
+| Members and owners | Residential address: state | `payroll.owners[].address.state` | when shown | P11, Add A Member |
+| Members and owners | Residential address: ZIP code | `payroll.owners[].address.zip` | when shown | P11, Add A Member |
+| Members and owners | County of the residential address | `payroll.owners[].county` | when shown | P11, County (New York addresses) |
+| Members and owners | Residential address outside the US: street address | `payroll.owners[].foreignAddress.street1` | when shown | P11, non-US address |
+| Members and owners | Residential address outside the US: suite, unit or floor | `payroll.owners[].foreignAddress.street2` |  | P11, non-US address |
+| Members and owners | Residential address outside the US: city | `payroll.owners[].foreignAddress.city` | when shown | P11, non-US address |
+| Members and owners | Residential address outside the US: state or province | `payroll.owners[].foreignAddress.region` |  | P11, State/Province |
+| Members and owners | Residential address outside the US: postal code | `payroll.owners[].foreignAddress.postalCode` | when shown | P11, Postal Code |
+| Members and owners | Residential address outside the US: country | `payroll.owners[].foreignAddress.country` | when shown | P11, Country |
 | Liability | Existing NY employer registration number (7 digits; leave blank if new) | `payroll.stateAnswers.employerRegistrationNumber` |  | A2, Employer Registration Number |
 | Liability | Paid, or expect to pay, $300 or more in a calendar quarter? | `payroll.payingWages` | yes | A3 |
 | Liability | Date the business began in New York | `payroll.dateFirstOperations` | yes | A3, date you began business in NYS |
@@ -583,6 +590,7 @@ Fees: No state fee. Average processing time shown: 15 days.
 | Liability | Acquired employer's address: city | `payroll.stateAnswers.acquiredAddress.city` | when shown | A4 |
 | Liability | Acquired employer's address: state | `payroll.stateAnswers.acquiredAddress.state` | when shown | A4 |
 | Liability | Acquired employer's address: ZIP code | `payroll.stateAnswers.acquiredAddress.zip` | when shown | A4 |
+| Liability | Acquired employer's county | `payroll.stateAnswers.acquiredCounty` | when shown | A4, County |
 | Liability | Acquired employer's registration number | `payroll.stateAnswers.acquiredRegistrationNumber` |  | A4 |
 | Liability | Acquired employer's FEIN | `payroll.stateAnswers.acquiredFein` |  | A4 |
 | Liability | Has your legal entity changed? | `payroll.stateAnswers.legalEntityChanged` | yes | A5, Change of Legal Entity |
@@ -617,7 +625,13 @@ Fees: No state fee. Average processing time shown: 15 days.
 | Physical locations in New York | Address: ZIP code | `payroll.workLocations[].address.zip` | yes | A12, Physical Locations Details |
 | Physical locations in New York | Employees at this location | `payroll.workLocations[].employees` | yes | A12, Physical Locations Details |
 | Physical locations in New York | Principal activity | `payroll.workLocations[].activity` | yes | A12, Physical Locations Details |
-| Physical locations in New York | Details: type of establishment, main product or service, and its % of revenue (or products, raw materials and % of sales for manufacturing) | `payroll.stateAnswers.workLocations[].activityDetail` | yes | A12, Physical Locations Details |
+| Physical locations in New York | Type of establishment | `payroll.workLocations[].activityDetails.establishmentType` | when shown | A12, Type of Establishment |
+| Physical locations in New York | Principal product sold or service rendered | `payroll.workLocations[].activityDetails.productOrService` | when shown | A12, Principal Product Sold or Service Rendered |
+| Physical locations in New York | Percent of total revenue | `payroll.workLocations[].activityDetails.percentOfRevenue` | when shown | A12, Percent of Total Revenue |
+| Physical locations in New York | Principal products produced | `payroll.workLocations[].activityDetails.productsProduced` | when shown | A12, Principal Products Produced |
+| Physical locations in New York | Principal raw material used | `payroll.workLocations[].activityDetails.rawMaterials` | when shown | A12, Principal Raw Material Used |
+| Physical locations in New York | Percent of total sales value | `payroll.workLocations[].activityDetails.percentOfSalesValue` | when shown | A12, Percent of Total Sales Value |
+| Physical locations in New York | Details of the activity | `payroll.workLocations[].activityDetails.otherDetails` | when shown | A12, If other, furnish details |
 | Submitter | Submitter full name | `payroll.signer.name` | yes | A13, First / M.I. / Last Name |
 | Submitter | Official position | `payroll.signer.title` | yes | A13, Official Position |
 | Submitter | Submitter email | `payroll.signer.email` | yes | A13, Email |
@@ -634,9 +648,9 @@ Authorizations the client grants (and confirms again on the approval page):
 
 Not covered yet:
 
-- Ready to Submit (the final screen) is not mapped yet.
+- Ready to Submit (the final screen) is not mapped yet, so the engine fills up to Submitter Information and stops there.
 - Corporation, sole-proprietor and partnership owner screens were not walked; only the LLC member path is confirmed.
-- The engine's NY payroll adapter does not yet enter the answers kept in payroll.stateAnswers.
+- Not walked, so the engine stops before typing anything: a business member, a mailing address apart from the physical address, more than one physical location, a secondary NAICS code.
 
 ## New Jersey business and employer registration (NJ-REG) (`nj-reg`)
 
@@ -753,7 +767,7 @@ Not covered yet:
 
 - Only the business-entity registration option is covered; sole proprietorships and partnerships (option 2) and options 3 to 7 are not.
 - The confirmation screen after Complete Registration is not mapped.
-- The engine's NJ payroll adapter does not yet enter the answers kept in payroll.stateAnswers.
+- Not walked, so the engine stops before typing anything: a seasonal business, an acquired predecessor, an S corporation or QSSS election, cigarette and tobacco sales.
 
 ## New York Application for Authority (foreign corporation) (`ny-authority`)
 

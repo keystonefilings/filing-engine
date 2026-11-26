@@ -35,7 +35,7 @@ export interface Field {
   maxLength?: number;
   min?: number;
   max?: number;
-  /** A number field that takes whole numbers only. */
+  /** A number field that takes whole numbers only; on a select of numbers, the value is sent as a number. */
   integer?: boolean;
   /** A text field that needs at least this many words (a first and last name). */
   minWords?: number;
@@ -765,6 +765,14 @@ const irsEin: FilingKind = {
 // ---------------------------------------------------------------- NY NYS-100
 
 const NYS100 = "ny-nys100-unemployment.md";
+/** A12 Select Principal Activity, as the walk listed it. */
+const NYS100_ACTIVITIES = [
+  "Arts, Entertainment & Recreation", "Computer/Information Services", "Construction", "Corporate, Subsidiary Managing Office", "Educational Services",
+  "Finance and Insurance", "Food Service, Drinking & Accommodations", "Health & Social Assistance", "Manufacturing", "Non store retailer", "Real Estate",
+  "Rental ; Leasing Services", "Retail Trade", "Scientific/Professional & Technical Services", "Transportation", "Utilities", "Warehousing", "Wholesale trade", "Other",
+];
+/** The activities that ask type of establishment, product or service and % of revenue (Manufacturing and Other ask their own). */
+const NYS100_SERVICE_ACTIVITIES = NYS100_ACTIVITIES.filter((a) => a !== "Manufacturing" && a !== "Other");
 
 const nyNys100: FilingKind = {
   id: "ny-nys100",
@@ -813,8 +821,15 @@ const nyNys100: FilingKind = {
           f("email", "Email", "email"),
           f("percentOwnership", "Ownership %", "number", { required: true, min: 0, max: 100 }),
           f("profitDistributionPercent", "Profit distribution %, if different", "number", { min: 0, max: 100 }),
-          ...address("address", "Residential address", { required: true }),
-          { kind: "note", text: "A non-resident member needs an address outside the US." },
+          ...address("address", "Residential address", { required: true, showIf: { path: ".usResident", equals: "yes" } }),
+          f("county", "County of the residential address", "select", { required: true, options: opts(...NY_COUNTIES), showIf: { path: ".address.state", equals: "NY" }, ref: "P11, County (New York addresses)" }),
+          { kind: "note", text: "New York refuses a US address for a member who is not a US resident: give the address outside the US.", showIf: { path: ".usResident", equals: "no" } },
+          f("foreignAddress.street1", "Residential address outside the US: street address", "text", { required: true, showIf: { path: ".usResident", equals: "no" }, ref: "P11, non-US address" }),
+          f("foreignAddress.street2", "Residential address outside the US: suite, unit or floor", "text", { showIf: { path: ".usResident", equals: "no" }, ref: "P11, non-US address" }),
+          f("foreignAddress.city", "Residential address outside the US: city", "text", { required: true, showIf: { path: ".usResident", equals: "no" }, ref: "P11, non-US address" }),
+          f("foreignAddress.region", "Residential address outside the US: state or province", "text", { showIf: { path: ".usResident", equals: "no" }, ref: "P11, State/Province" }),
+          f("foreignAddress.postalCode", "Residential address outside the US: postal code", "text", { required: true, showIf: { path: ".usResident", equals: "no" }, ref: "P11, Postal Code" }),
+          f("foreignAddress.country", "Residential address outside the US: country", "text", { required: true, showIf: { path: ".usResident", equals: "no" }, ref: "P11, Country" }),
         ],
       }],
     },
@@ -837,6 +852,7 @@ const nyNys100: FilingKind = {
         f("payroll.stateAnswers.acquiredDate", "Date acquired", "date", { required: true, showIf: { path: "payroll.stateAnswers.acquiredBusiness", equals: "yes" }, ref: "A4" }),
         f("payroll.stateAnswers.acquiredLegalName", "Acquired employer's legal name", "text", { required: true, showIf: { path: "payroll.stateAnswers.acquiredBusiness", equals: "yes" }, ref: "A4" }),
         ...address("payroll.stateAnswers.acquiredAddress", "Acquired employer's address", { required: true, showIf: { path: "payroll.stateAnswers.acquiredBusiness", equals: "yes" }, ref: "A4" }),
+        f("payroll.stateAnswers.acquiredCounty", "Acquired employer's county", "select", { required: true, options: opts(...NY_COUNTIES), showIf: { path: "payroll.stateAnswers.acquiredAddress.state", equals: "NY" }, ref: "A4, County" }),
         f("payroll.stateAnswers.acquiredRegistrationNumber", "Acquired employer's registration number", "text", { showIf: { path: "payroll.stateAnswers.acquiredBusiness", equals: "yes" }, ref: "A4" }),
         f("payroll.stateAnswers.acquiredFein", "Acquired employer's FEIN", "fein", { showIf: { path: "payroll.stateAnswers.acquiredBusiness", equals: "yes" }, ref: "A4" }),
         yes("payroll.stateAnswers.legalEntityChanged", "Has your legal entity changed?", "A5, Change of Legal Entity"),
@@ -868,8 +884,15 @@ const nyNys100: FilingKind = {
         fields: [
           ...address("address", "Address", { required: true, state: "NY" }),
           f("employees", "Employees at this location", "number", { required: true, min: 0 }),
-          f("activity", "Principal activity", "select", { required: true, options: opts("Arts, Entertainment & Recreation", "Computer/Information Services", "Construction", "Corporate, Subsidiary Managing Office", "Educational Services", "Finance and Insurance", "Food Service, Drinking & Accommodations", "Health & Social Assistance", "Manufacturing", "Non store retailer", "Real Estate", "Rental ; Leasing Services", "Retail Trade", "Scientific/Professional & Technical Services", "Transportation", "Utilities", "Warehousing", "Wholesale trade", "Other") }),
-          f("stateAnswers_activityDetail", "Details: type of establishment, main product or service, and its % of revenue (or products, raw materials and % of sales for manufacturing)", "textarea", { required: true }),
+          f("activity", "Principal activity", "select", { required: true, options: opts(...NYS100_ACTIVITIES) }),
+          { kind: "note", text: "New York asks these for the activity chosen; only what its screen shows is entered.", showIf: { path: ".activity", equals: NYS100_SERVICE_ACTIVITIES } },
+          f("activityDetails.establishmentType", "Type of establishment", "text", { required: true, showIf: { path: ".activity", equals: NYS100_SERVICE_ACTIVITIES }, ref: "A12, Type of Establishment" }),
+          f("activityDetails.productOrService", "Principal product sold or service rendered", "text", { required: true, showIf: { path: ".activity", equals: NYS100_SERVICE_ACTIVITIES }, ref: "A12, Principal Product Sold or Service Rendered" }),
+          f("activityDetails.percentOfRevenue", "Percent of total revenue", "number", { required: true, min: 0, max: 100, showIf: { path: ".activity", equals: NYS100_SERVICE_ACTIVITIES }, ref: "A12, Percent of Total Revenue" }),
+          f("activityDetails.productsProduced", "Principal products produced", "text", { required: true, showIf: { path: ".activity", equals: "Manufacturing" }, ref: "A12, Principal Products Produced" }),
+          f("activityDetails.rawMaterials", "Principal raw material used", "text", { required: true, showIf: { path: ".activity", equals: "Manufacturing" }, ref: "A12, Principal Raw Material Used" }),
+          f("activityDetails.percentOfSalesValue", "Percent of total sales value", "number", { required: true, min: 0, max: 100, showIf: { path: ".activity", equals: "Manufacturing" }, ref: "A12, Percent of Total Sales Value" }),
+          f("activityDetails.otherDetails", "Details of the activity", "textarea", { required: true, showIf: { path: ".activity", equals: "Other" }, ref: "A12, If other, furnish details" }),
         ],
       }],
     },
@@ -890,9 +913,9 @@ const nyNys100: FilingKind = {
     { id: "nys100-attest", ref: "A13, I attest to the above (STOP)", text: "The submitter named above affirms that the answers are true to the best of their knowledge and belief, and authorizes the filing company to tick \"I attest to the above\" and submit the registration for them." },
   ],
   gaps: [
-    "Ready to Submit (the final screen) is not mapped yet.",
+    "Ready to Submit (the final screen) is not mapped yet, so the engine fills up to Submitter Information and stops there.",
     "Corporation, sole-proprietor and partnership owner screens were not walked; only the LLC member path is confirmed.",
-    "The engine's NY payroll adapter does not yet enter the answers kept in payroll.stateAnswers.",
+    "Not walked, so the engine stops before typing anything: a business member, a mailing address apart from the physical address, more than one physical location, a secondary NAICS code.",
   ],
 };
 
@@ -956,7 +979,7 @@ const njReg: FilingKind = {
       ref: "Screens 5 and 6",
       items: [
         f("payroll.ownershipType", "Ownership type", "select", { required: true, options: opts("Ltd. Liability Co. (1065 Filer)", "Ltd. Liability Co. (1120 Filer)", "Ltd. Liability Co. - Single Member", "Corporation", "Limited Partnership", "Limited Liability Partnership"), help: "The list on the site follows the entity type; only the LLC options were seen.", ref: "Screen 5, Ownership Type" }),
-        f("payroll.entity.fiscalMonth", "Last month of the fiscal year", "select", { options: lv([["1", "January"], ["2", "February"], ["3", "March"], ["4", "April"], ["5", "May"], ["6", "June"], ["7", "July"], ["8", "August"], ["9", "September"], ["10", "October"], ["11", "November"], ["12", "December"]]), defaultValue: "12", ref: "Screen 5" }),
+        f("payroll.entity.fiscalMonth", "Last month of the fiscal year", "select", { options: lv([["1", "January"], ["2", "February"], ["3", "March"], ["4", "April"], ["5", "May"], ["6", "June"], ["7", "July"], ["8", "August"], ["9", "September"], ["10", "October"], ["11", "November"], ["12", "December"]]), defaultValue: "12", integer: true, ref: "Screen 5" }),
         yes("payroll.stateAnswers.subsidiary", "Is this business a subsidiary of another corporation?", "Screen 5"),
         f("payroll.stateAnswers.sCorpStatus", "Federal S corporation status", "radio", { required: true, defaultValue: "neither", options: lv([["s_corp", "Federal S Corporation"], ["qsss", "QSSS"], ["neither", "Neither"]]), help: "Pick Neither if you don't have the IRS acceptance letter.", ref: "Screen 5, S Corporation or QSSS" }),
         f("payroll.stateAnswers.sCorpApprovalDate", "Federal S corp / QSSS approval date", "date", { required: true, showIf: { path: "payroll.stateAnswers.sCorpStatus", equals: ["s_corp", "qsss"] }, ref: "Screen 5, election block (not walked)" }),
@@ -1044,7 +1067,7 @@ const njReg: FilingKind = {
   gaps: [
     "Only the business-entity registration option is covered; sole proprietorships and partnerships (option 2) and options 3 to 7 are not.",
     "The confirmation screen after Complete Registration is not mapped.",
-    "The engine's NJ payroll adapter does not yet enter the answers kept in payroll.stateAnswers.",
+    "Not walked, so the engine stops before typing anything: a seasonal business, an acquired predecessor, an S corporation or QSSS election, cigarette and tobacco sales.",
   ],
 };
 
