@@ -1,4 +1,5 @@
 import { SENSITIVE_PATHS } from "../domain/filing.js";
+import { DEFAULT_BUTTON, primaryButton } from "./contrast.js";
 
 const maskSsn = (v: string): string => `***-**-${v.replace(/\D/g, "").slice(-4)}`;
 
@@ -94,6 +95,10 @@ export type PageBrand = Pick<ReviewPageModel, "brandName" | "supportEmail" | "lo
 
 /** The page's head, styles and brand bar, up to the first heading. */
 function brandedTop(m: PageBrand, title: string): string {
+  // The brand bar always takes the firm's color; the approve button takes it only when its label
+  // (ink or white) reads at 4.5:1 or better on it, else it stays the default green.
+  const color = m.primaryColor && /^#[0-9a-fA-F]{6}$/.test(m.primaryColor) ? m.primaryColor : undefined;
+  const button = primaryButton(color);
   return `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>${esc(title)}</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400&family=IBM+Plex+Sans:wght@400;600&family=Source+Serif+4:opsz,wght@8..60,600&display=swap">
@@ -101,10 +106,10 @@ function brandedTop(m: PageBrand, title: string): string {
 h1,h2{font-family:"Source Serif 4",Georgia,serif;font-weight:600;line-height:1.2}
 table{border-collapse:collapse;width:100%;background:#FFFDF8}th,td{text-align:left;padding:.45rem .6rem;border-bottom:1px solid #D8D0BF;vertical-align:top}th{width:40%;font-weight:600;color:#4A5361}td{font-family:"IBM Plex Mono",ui-monospace,monospace;font-size:.92em}
 .note{background:#FBEFD5;border:1px solid #EBDDB8;padding:.8rem 1rem;border-radius:6px;margin:1rem 0}
-button{font:inherit;padding:.65rem 1.2rem;border-radius:6px;border:1px solid #1C2430;background:#FFFDF8;color:#1C2430;cursor:pointer}button.primary{background:#1F6B4F;color:#fff;border-color:#1F6B4F}
+button{font:inherit;padding:.65rem 1.2rem;border-radius:6px;border:1px solid #1C2430;background:#FFFDF8;color:#1C2430;cursor:pointer}button.primary{background:${DEFAULT_BUTTON.background};color:${DEFAULT_BUTTON.text};border-color:${DEFAULT_BUTTON.background}}
 textarea,input{font:inherit;width:100%;padding:.5rem;border:1px solid #bbb;border-radius:6px}</style></head><body>
 ${m.font?.href ? `<link rel="stylesheet" href="${esc(m.font.href)}">` : ""}${m.font?.fileUrl ? `<style>@font-face{font-family:"FirmFont";src:url("${esc(m.font.fileUrl)}");font-display:swap}</style>` : ""}${m.font ? `<style>body{font-family:${m.font.fileUrl ? `"FirmFont",` : ""}${m.font.stack.replace(/[<>]/g, "")}}</style>` : ""}
-${m.primaryColor && /^#[0-9a-fA-F]{6}$/.test(m.primaryColor) ? `<style>button.primary{background:${m.primaryColor};border-color:${m.primaryColor}}.brandbar{border-top:4px solid ${m.primaryColor}}</style>` : ""}
+${color ? `<style>${button.firm ? `button.primary{background:${button.background};color:${button.text};border-color:${button.background}}` : ""}.brandbar{border-top:4px solid ${color}}</style>` : ""}
 <div class="brandbar" style="display:flex;align-items:center;gap:.6rem;padding-top:.6rem">${m.logoUrl ? `<img src="${esc(m.logoUrl)}" alt="" style="max-height:40px;max-width:160px">` : ""}${m.brandName ? `<strong style="color:#333">${esc(m.brandName)}</strong>` : ""}${m.poweredBy ? `<span style="color:#777;font-size:.85em;margin-left:auto">with ${esc(m.poweredBy)}</span>` : ""}</div>`;
 }
 
