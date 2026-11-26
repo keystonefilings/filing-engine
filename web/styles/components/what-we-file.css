@@ -1,0 +1,168 @@
+/* What we file (merged spec 10A.3): the four places as the title, the coverage ledger, the stage with the run sheet
+   and the road to live, the four places' notes on sample cards. Reads semantic tokens; the stage sets its own inks. */
+@layer components {
+
+/* ── Title page: four places, one to a line, the lede beside the last two (10A.3.1) ──────────────────────── */
+.wwf2-head .pg2-head-words { grid-column: 1 / span 7; }
+.wwf2-head .pg2-line { display: block; }
+.wwf2-lede { grid-column: 9 / span 4; max-width: 34em; color: var(--text); }
+@media (min-width: 1024px) {
+  /* The lede's first baseline on the h1's third line: kicker, its gap, two h1 lines, then the two baselines. */
+  .wwf2-lede {
+    --h1-lh: clamp(2.625rem, 2.1143rem + 2.0952vw, 4rem); --h1-fs: clamp(2.375rem, 1.8643rem + 2.0952vw, 3.75rem);
+    --le-lh: clamp(1.875rem, 1.7821rem + 0.381vw, 2.125rem); --le-fs: clamp(1.1875rem, 1.1179rem + 0.2857vw, 1.375rem);
+    margin-top: calc(1.375rem + 16px + 2.5 * var(--h1-lh) + 0.35 * var(--h1-fs) - 0.5 * var(--le-lh) - 0.35 * var(--le-fs));
+  }
+}
+@media (max-width: 1023px) { .wwf2-lede { grid-column: 1 / -1; margin-top: 24px; } }
+@media (max-width: 639px) { .wwf2-lede { margin-top: 16px; } }
+
+/* ── The ledger (10A.3.2) ──────────────────────────────────────────────────────────────────────────────────── */
+.cov2 { display: block; width: 100%; border-collapse: collapse; color: var(--text); }
+.cov2 > thead, .cov2 > tbody { display: block; }
+.cov2-row { display: grid; grid-template-columns: [what] calc((100% - 264px) / 12 * 6 + 120px) [where] calc((100% - 264px) / 12 * 2 + 24px) [stands] minmax(0, 1fr); column-gap: 24px; align-items: start; }
+.cov2-row > * { padding: 0; border: 0; text-align: left; min-width: 0; background: none; }
+.cov2-row.is-head { padding-bottom: 12px; border-bottom: 1px solid var(--text); }
+.cov2-row.is-head > th { font: 500 0.875rem/1.125rem var(--font-sans); color: var(--text-2); }
+.cov2 tbody .cov2-row { min-height: 64px; padding-block: 16px; border-bottom: 1px solid var(--line); }
+.cov2-what { font: 400 1.0625rem/1.5rem var(--font-sans); }
+.cov2-aside { color: var(--text-2); }
+.cov2-where { font: 400 1.0625rem/1.5rem var(--font-sans); color: var(--text-2); }
+.cov2-what, .cov2-where { padding-top: 3px; }
+.cov2-note { margin-top: 24px; max-width: calc((100% - 264px) / 12 * 8 + 168px); }
+@media (max-width: 1023px) {
+  .cov2-row { grid-template-columns: [what] calc((100% - 168px) / 8 * 4 + 72px) [where] calc((100% - 168px) / 8 * 2 + 24px) [stands] minmax(0, 1fr); }
+  .cov2-note { max-width: 34em; }
+}
+@media (max-width: 639px) {
+  /* Each row a block on the page: where, then the filing, then the chip; no horizontal scrolling. */
+  .cov2-row.is-head { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; padding: 0; border: 0; }
+  .cov2 tbody { border-top: 1px solid var(--text); }
+  .cov2 tbody .cov2-row { display: flex; flex-direction: column; align-items: flex-start; min-height: 0; padding-block: 16px; }
+  .cov2-where { order: 1; padding: 0; font: 500 0.9375rem/1.375rem var(--font-sans-display); letter-spacing: 0.005em; }
+  .cov2-what { order: 2; padding: 0; font-weight: 500; }
+  .cov2-aside { font-weight: 400; }
+  .cov2-stands { order: 3; margin-top: 8px; max-width: 100%; }
+}
+
+/* The chip: 30 px, 12 px side padding, the plate glyph 8 px before the label; long labels wrap inside it */
+.cov2-chip { position: relative; display: inline-flex; align-items: flex-start; gap: 8px; min-height: 30px; max-width: 100%; padding: 6px 12px; font: 500 0.875rem/1.125rem var(--font-sans); border: 1px solid transparent; border-radius: 4px; corner-shape: bevel; }
+@supports not (corner-shape: bevel) { .cov2-chip { border-radius: 2px; } }
+.cov2-chip > .plate2-glyph { flex: none; margin-top: 4px; }
+.cov2-chip.is-live { background: var(--done-tint); color: var(--done); }
+.cov2-chip.is-rehearsed { background: var(--surface); color: var(--text); }
+.cov2-chip.is-recorded, .cov2-chip.is-offered { background: var(--surface); color: var(--text); border-color: var(--text-2); }
+.cov2-chip.is-planned { background: none; color: var(--text-2); border: 1px dotted var(--line-strong); }
+.cov2-chip > .dash { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; pointer-events: none; }
+.cov2-chip > .dash rect { fill: none; stroke: currentColor; stroke-width: 1.5; stroke-dasharray: 4 3; vector-effect: non-scaling-stroke; }
+
+/* The plate glyphs (4.5): cut, marked out, inked */
+.plate2-glyph { display: block; overflow: visible; }
+.plate2-glyph .plate2-fill { fill: currentColor; }
+.plate2-glyph .plate2-line { stroke: var(--cotton); stroke-width: 1; fill: none; }
+.plate2-glyph .plate2-edge { fill: none; stroke: currentColor; stroke-linejoin: miter; }
+.plate2-glyph.is-rehearsed .plate2-edge { stroke-dasharray: 4 3; }
+.plate2-glyph.is-recorded, .plate2-glyph.is-offered { color: var(--text-2); }
+.plate2-glyph.is-planned { color: var(--line-strong); }
+.plate2-glyph.is-planned .plate2-edge { stroke-dasharray: 1 2; }
+.plate2-glyph .plate2-rule { stroke: currentColor; stroke-width: 1; }
+.cov2-chip.is-live .plate2-glyph { color: var(--done); }
+
+/* ── The stage (10A.3.3) ───────────────────────────────────────────────────────────────────────────────────── */
+.stage2-grid {
+  --bleed: min(120px, var(--site-pad));
+  display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); grid-template-rows: auto 1fr; column-gap: 24px;
+}
+.stage2-grid::before { content: ""; grid-column: 7 / span 6; grid-row: 1; margin-right: calc(-1 * var(--bleed)); aspect-ratio: 1.6; }
+.stage2-words { grid-column: 1 / span 5; grid-row: 2; align-self: center; min-width: 0; padding-bottom: 32px; }
+.stage2 { grid-column: 7 / span 6; grid-row: 1 / 3; position: relative; margin: 0 calc(-1 * var(--bleed)) 0 0; min-width: 0; }
+.stage2-photo { position: relative; aspect-ratio: 4 / 5; background: #0E1016; overflow: hidden; }
+.stage2-photo img { width: 100%; height: 100%; object-fit: cover; }
+.stage2-shade { position: absolute; inset: 0; background: #0E1016; opacity: 0; pointer-events: none; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .stage2-photo img { filter: brightness(0.96); } }
+:root[data-theme="dark"] .stage2-photo img { filter: brightness(0.96); }
+.stage2 > .rs2 { position: relative; width: 440px; max-width: calc(100% - 48px); margin: -50% 0 0 40px; }
+.stage2 .play2-caption { width: 440px; max-width: calc(100% - 48px); margin-left: 40px; }
+@media (max-width: 1023px) {
+  .stage2-grid { grid-template-columns: minmax(0, 1fr); grid-template-rows: auto; row-gap: 48px; }
+  .stage2-grid::before { display: none; }
+  .stage2-words { grid-column: 1; grid-row: auto; padding: 0; max-width: 34em; }
+  .stage2 { grid-column: 1; grid-row: auto; margin: 0; max-width: 588px; }
+}
+@media (max-width: 639px) {
+  .stage2-grid { row-gap: 40px; }
+  .stage2 { max-width: none; }
+  .stage2 > .rs2 { --rs-pad: 20px; width: auto; max-width: none; margin: -64px 0 0; }
+  .rs2-account { white-space: nowrap; }
+  .stage2 .play2-caption { width: auto; max-width: none; margin-left: 0; }
+}
+
+/* The caption row and its replay control */
+.play2-caption { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; margin-top: 12px; font: 400 0.875rem/1.25rem var(--font-sans); letter-spacing: 0.005em; color: var(--text-2); }
+.play2-replay { flex: none; display: inline-grid; place-content: center; width: 32px; height: 32px; margin: -6px -4px 0 0; padding: 0; color: var(--text-2); background: none; border: 0; border-radius: 2px; cursor: pointer; }
+@media (hover: hover) { .play2-replay:hover { color: var(--text); } }
+
+/* The run sheet: a white page of CoFile's desk on the stage (Home 7, L7) */
+.rs2 { --rs-pad: 32px; position: relative; overflow: hidden; padding: var(--rs-pad) var(--rs-pad) 32px; box-shadow: var(--e-sheet-dark); color: #1D2130; }
+.rs2-top { display: flex; align-items: center; justify-content: space-between; gap: 12px; min-height: 44px; }
+.rs2-account { display: inline-flex; align-items: center; gap: 8px; font: 500 0.9375rem/1.25rem var(--font-sans); color: #1D2130; }
+.rs2-account img { flex: none; width: 24px; height: 24px; }
+.rs2-rule { height: 1px; background: #1D2130; margin-top: 20px; }
+.rs2-head { display: flex; align-items: flex-start; gap: 8px; margin-top: 30px; font: 500 1.125rem/1.5rem var(--font-sans); }
+.rs2-head > svg { flex: none; width: 14px; height: 14px; margin-top: 4px; }
+.rs2-test { margin: 4px 0 0 22px; font: 400 0.875rem/1.25rem var(--font-sans); letter-spacing: 0.005em; color: #555867; }
+.rs2-dash { height: 0; margin-top: 16px; border-top: 1.5px dashed #1D2130; }
+.rs2-cues { --row: 52px; list-style: none; margin: 10px 0 0; padding: 0; }
+.rs2-cue { display: flex; flex-wrap: wrap; align-items: baseline; column-gap: 12px; min-height: var(--row); padding-block: 14px; }
+.rs2-step { font: 400 1.0625rem/1.5rem var(--font-sans); font-variant-numeric: tabular-nums lining-nums; }
+.rs2-leader { flex: 1 1 40px; min-width: 40px; align-self: stretch; background: radial-gradient(circle, #8A8578 0.9px, transparent 1.2px) left calc(100% - 6px) / 0.4em 4px repeat-x; }
+.rs2-result { margin-left: auto; font: 400 1rem/1.5rem var(--font-mono); text-align: right; }
+/* The ghost light's pool, the one gradient: at rest it covers the sheet, centred on the cues */
+.rs2-pool { position: absolute; left: 50%; top: 0; width: 560px; height: 260px; margin-left: -280px; background: radial-gradient(closest-side, rgba(255,196,107,.16), transparent 70%); pointer-events: none;
+  transform: translateY(calc(var(--pool-rest, 300px) - 130px)) scale(1.9, 2.4); transform-origin: 50% 50%; }
+.stage2 .rs2 { --pool-rest: 380px; }
+
+/* The house-lights choreography (D3, Home 7): about 2.4 s, once */
+.stage2[data-motion="ready"] .stage2-shade { opacity: .3; }
+.stage2[data-motion="ready"] .rs2-cue { opacity: 0; transform: translateY(2px); }
+.stage2[data-motion="ready"] .rs2-pool { opacity: 0; }
+.stage2[data-motion="play"] .stage2-shade { animation: stage2-light var(--t-light) var(--ease-sweep) both; }
+.stage2[data-motion="play"] .rs2-cue { animation: rs2-set var(--t-set) var(--ease-settle) both; animation-delay: calc(700ms + var(--i) * 120ms); }
+.stage2[data-motion="play"] .rs2-cue .rs2-leader { animation: rs2-lead var(--t-set) var(--ease-settle) both; animation-delay: calc(700ms + var(--i) * 120ms); transform-origin: left; }
+.stage2[data-motion="play"] .rs2-pool { animation: rs2-pool 2340ms linear both; }
+@keyframes stage2-light { from { opacity: .3; } to { opacity: 0; } }
+@keyframes rs2-set { from { opacity: 0; transform: translateY(2px); } to { opacity: 1; transform: none; } }
+@keyframes rs2-lead { from { transform: scaleX(0); } to { transform: none; } }
+@keyframes rs2-pool {
+  0% { opacity: 0; transform: translateY(calc(var(--cue0, 220px) - 130px)) scale(1); }
+  26% { opacity: 0; transform: translateY(calc(var(--cue0, 220px) - 130px)) scale(1); }
+  37% { opacity: 1; transform: translateY(calc(var(--cue0, 220px) - 130px)) scale(1); }
+  61% { opacity: 1; transform: translateY(calc(var(--cue0, 220px) + 6 * 52px - 130px)) scale(1); }
+  74% { opacity: 1; transform: translateY(calc(var(--cue0, 220px) + 6 * 52px - 130px)) scale(1); }
+  100% { opacity: 1; transform: translateY(calc(var(--pool-rest, 300px) - 130px)) scale(1.9, 2.4); }
+}
+
+/* The road to live: five plates joined by a hairline, labelled in the copy's words (10A.3.3) */
+.road2 { --g: 24px; position: relative; list-style: none; display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); column-gap: var(--g); margin: 64px 0 0; padding: 0; }
+.road2::before { content: ""; position: absolute; top: 12px; left: 20px; right: calc((100% - 4 * var(--g)) / 5 - 20px); height: 1px; background: #6E7180; }
+.road2 li { position: relative; display: grid; gap: 12px; justify-items: start; font: 400 0.9375rem/1.4375rem var(--font-sans); color: var(--night-ink); }
+.road2 .plate2-glyph { background: var(--stage); color: var(--night-ink); }
+.road2 .plate2-glyph.is-recorded, .road2 .plate2-glyph.is-offered { color: var(--night-ink); }
+.road2 .plate2-glyph.is-planned { color: #6E7180; }
+.road2 .plate2-glyph.is-live { color: #2E6B57; }
+.road2 .plate2-glyph.is-live .plate2-line { stroke: var(--night-ink); }
+@media (max-width: 639px) {
+  .road2 { grid-template-columns: minmax(0, 1fr); row-gap: 24px; margin-top: 48px; }
+  .road2::before { top: 12px; bottom: 12px; left: 20px; right: auto; width: 1px; height: auto; }
+  .road2 li { grid-template-columns: 40px 1fr; align-items: center; gap: 16px; }
+}
+
+/* ── State by state: the home page's sample cards (10A.3.4) ─────────────────────────────────────────────── */
+.states2 { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 24px; margin-top: 48px; }
+.states2-card { padding: 32px; background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-sheet); color: var(--text); }
+.states2-card h3 { color: var(--text); }
+.states2-card h3::after { content: ""; display: block; width: 24px; height: 1.5px; margin-top: 16px; background: var(--brass-line); }
+.states2-card p { margin-top: 16px; }
+@media (max-width: 1023px) { .states2 { grid-template-columns: repeat(2, minmax(0, 1fr)); margin-top: 40px; } }
+@media (max-width: 639px) { .states2 { grid-template-columns: minmax(0, 1fr); gap: 16px; margin-top: 32px; } .states2-card { padding: 20px; } }
+}

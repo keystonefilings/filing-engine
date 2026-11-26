@@ -69,12 +69,18 @@ export async function bootstrap(opts: { withExecutor: boolean; workerId?: string
   // Outbound communication. Email goes through Resend when RESEND_API_KEY is set; Slack, WhatsApp
   // and SMS senders are not built yet, so those messages (and email without a key) are recorded only.
   const email: ChannelSender = config.email.resendApiKey
-    ? new ResendEmailSender({ apiKey: config.email.resendApiKey, from: config.email.from, replyTo: config.email.replyTo, apiUrl: `${config.email.resendApiBase}/emails` })
+    // CoFile's letterhead replies to the support address (merged spec 10D.1); an email to a firm's client
+    // replies to the firm instead (src/comms/notifier.ts). CoFile's lockup and the two engravings load from the web
+    // app's public folder; the ghost light and the document card from this engine (/email-assets).
+    ? new ResendEmailSender({
+      apiKey: config.email.resendApiKey, from: config.email.from, replyTo: config.email.replyTo ?? config.supportEmail, apiUrl: `${config.email.resendApiBase}/emails`,
+      webBaseUrl: config.webBaseUrl, assetBaseUrl: `${config.publicBaseUrl.replace(/\/+$/, "")}/email-assets`,
+    })
     : new LogChannelSender("email", { print: !config.production });
   if (config.production && !config.email.resendApiKey) {
     console.warn("RESEND_API_KEY is not set: approval links, password resets and notices are recorded, not emailed");
   }
-  const notifier = new Notifier({ store, senders: { email }, defaultSender: new LogChannelSender("email"), publicBaseUrl: config.publicBaseUrl, artifacts, webBaseUrl: config.webBaseUrl, supportEmail: config.supportEmail });
+  const notifier = new Notifier({ store, senders: { email }, defaultSender: new LogChannelSender("email"), publicBaseUrl: config.publicBaseUrl, artifacts, webBaseUrl: config.webBaseUrl, supportEmail: config.supportEmail, platformTenantId: config.platformTenantId });
   const harness = new BrowserHarness({ chromiumPath: config.chromiumPath, proxyServer: config.browserProxy, siteProxies: config.siteProxies, steel: config.steel, profileDir: config.browserProfileDir });
   const { BasisTheoryCardVault } = await import("./payments/card-vault.js");
   const { CardCodes } = await import("./payments/card-codes.js");

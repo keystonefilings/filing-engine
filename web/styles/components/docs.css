@@ -1,0 +1,222 @@
+/* The API docs (merged spec 10C.16, 10C.17), set like a technical book from CoFile's shop: Miller Text to read,
+   mono for everything typed, examples on Plate Ink plates with typographic highlighting only (decision 36), and
+   the rehearsal's dashed mark wherever "dryRun": true or /dry-run appears. */
+@layer components {
+.docs2 {
+  --docs-pad: 32px; --rail-gap: 32px;
+  --plate: #1D2130; --plate-ink: #ECE8DF; --plate-dim: #A9ABB5; --plate-edge: transparent; --plate-line: #6E7180;
+  min-height: 100vh; background: var(--page); color: var(--text);
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .docs2 { --plate: #0E1016; --plate-edge: #323646; } }
+:root[data-theme="dark"] .docs2 { --plate: #0E1016; --plate-edge: #323646; }
+@media (max-width: 1439px) { .docs2 { --docs-pad: 24px; --rail-gap: 24px; } }
+@media (max-width: 599px) { .docs2 { --docs-pad: 20px; } }
+@media (max-width: 360px) { .docs2 { --docs-pad: 16px; } }
+
+/* ---- The beta slip, as on the site's own pages; the old banner above the page goes ---- */
+body:has(.docs2) > .beta-banner { display: none; }
+.docs2-beta { background: var(--page-2); border-bottom: 1px solid var(--line); }
+.docs2-beta .docs2-head-in { display: grid; grid-template-columns: auto 1fr; gap: 12px; align-items: baseline; min-height: 0; padding-block: 12px; font: 400 0.9375rem/1.4375rem var(--font-sans); color: var(--text-2); text-wrap: pretty; }
+.docs2-beta .chip2 { position: relative; top: -1px; }
+.docs2-beta a { color: var(--link); text-decoration: underline; text-decoration-color: var(--link-line); text-underline-offset: 3px; }
+@media (max-width: 599px) { .docs2-beta .docs2-head-in { grid-template-columns: minmax(0, 1fr); gap: 6px; justify-items: start; } }
+
+/* ---- The header: 64 px, Cotton, sticky; the lockup, then "API docs" and "Dashboard"; CoFile's 1 px rule ---- */
+.docs2-head { position: sticky; top: 0; z-index: 30; background: var(--page); border-bottom: 1px solid var(--text); }
+.docs2-head-in { box-sizing: border-box; display: flex; align-items: center; gap: 16px; max-width: 1488px; min-height: 64px; margin-inline: auto; padding-inline: var(--docs-pad); }
+.docs2-home { flex: none; display: inline-flex; align-items: center; color: var(--text); text-decoration: none; border-radius: 2px; }
+.docs2-home:focus-visible { outline: 2px solid var(--focus); outline-offset: 4px; }
+.docs2-top { display: flex; gap: 28px; margin-left: auto; }
+.docs2-top a { position: relative; font: 400 1.0625rem/1.5rem var(--font-sans); color: var(--text); text-decoration: none; white-space: nowrap; }
+.docs2-top a::after { content: ""; position: absolute; left: 0; right: 0; bottom: -6px; height: 1px; background: transparent; transition: background-color var(--t-quick) var(--ease-settle); }
+@media (hover: hover) { .docs2-top a:hover::after { background: var(--line-strong); } }
+.docs2-top a[aria-current="page"]::after { height: 2px; background: var(--brass-line); }
+.docs2-top a:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; border-radius: 2px; }
+@media (max-width: 599px) { .docs2-top { gap: 16px; } .docs2-head-in .lockup2 { --lockup-h: 22px; } }
+@media (max-width: 360px) { .docs2-top a { font-size: 0.9375rem; line-height: 1.375rem; } .docs2-top { gap: 12px; } }
+
+/* ---- The frame: a 240 px contents column, the article, and on reference pages a 400 px rail; paper doesn't stretch ---- */
+.docs2-frame { box-sizing: border-box; max-width: 1488px; margin-inline: auto; padding-inline: var(--docs-pad); }
+@media (min-width: 1024px) { .docs2-frame { display: grid; grid-template-columns: 240px minmax(0, 1fr); column-gap: var(--rail-gap); align-items: start; } }
+.docs2-main { min-width: 0; padding: 48px 0 96px; outline: none; }
+.docs2-article { max-width: 720px; }
+@media (max-width: 1023px) { .docs2-article { margin-inline: auto; } .docs2-main { padding-top: 32px; } }
+@media (min-width: 1280px) { .docs2-article { max-width: min(720px, calc(100% - 400px - var(--rail-gap))); } .docs2-article.is-ref { max-width: none; } }
+
+/* ---- The contents ---- */
+.docs2-menu { display: none; }
+.docs2-nav ul { margin: 0; padding: 0; list-style: none; }
+.docs2-nav a { position: relative; display: flex; align-items: center; min-height: 36px; padding: 6px 0 6px 14px; font: 400 1rem/1.5rem var(--font-sans); color: var(--text); text-decoration: none; }
+@media (pointer: coarse) { .docs2-nav a { min-height: 44px; } }
+@media (hover: hover) { .docs2-nav a:hover { text-decoration: underline; text-decoration-color: var(--link-line); text-underline-offset: 3px; } }
+.docs2-nav a:focus-visible { outline: 2px solid var(--focus); outline-offset: -2px; border-radius: 2px; }
+.docs2-nav a[aria-current="page"] { font-weight: 500; }
+.docs2-nav a[aria-current="page"]::before { content: ""; position: absolute; left: 0; top: 8px; bottom: 8px; width: 2px; background: var(--brass-line); }
+.docs2-navhead { margin: 24px 0 4px; padding-left: 14px; font: 500 0.875rem/1.125rem var(--font-sans); color: var(--text-2); }
+.docs2-toc { padding: 0 0 6px 12px !important; }
+.docs2-toc a { min-height: 30px; padding-block: 4px; font-size: 0.9375rem; line-height: 1.375rem; color: var(--text-2); }
+.docs2-toc a.is-here { color: var(--text); }
+@media (min-width: 1024px) {
+  .docs2-side { position: sticky; top: 89px; max-height: calc(100vh - 113px); overflow-y: auto; padding: 48px 0 24px; margin-top: 0; }
+}
+/* Below 1024 px: one row whose button is the current page's title; the full list opens under it */
+@media (max-width: 1023px) {
+  .docs2-side { position: sticky; top: 65px; z-index: 20; margin-inline: calc(-1 * var(--docs-pad)); background: var(--page); border-bottom: 1px solid var(--line); }
+  .docs2-menu { box-sizing: border-box; display: flex; align-items: center; justify-content: space-between; gap: 12px; width: 100%; min-height: 52px; padding: 0 var(--docs-pad); font: 500 1.0625rem/1.5rem var(--font-sans); color: var(--text); text-align: left; background: none; border: 0; cursor: pointer; }
+  .docs2-menu:focus-visible { outline: 2px solid var(--focus); outline-offset: -2px; }
+  .docs2-chevron { flex: none; width: 12px; height: 8px; background: currentColor; mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1.5l5 5 5-5' fill='none' stroke='black' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center / contain no-repeat; transition: transform var(--t-quick) var(--ease-settle); }
+  .docs2-side.is-open .docs2-chevron { transform: rotate(180deg); }
+  .docs2-nav { display: none; position: absolute; left: 0; right: 0; top: 100%; max-height: calc(100dvh - 130px); overflow-y: auto; padding: 8px var(--docs-pad) 24px; background: var(--page); border-bottom: 1px solid var(--line); box-shadow: var(--e-menu); }
+  .docs2-side.is-open .docs2-nav { display: block; animation: docs2-in 200ms var(--ease-settle) both; }
+  .docs2-nav a { min-height: 44px; }
+}
+@keyframes docs2-in { from { opacity: 0; transform: translateY(-6px); } }
+@media (prefers-reduced-motion: reduce) { .docs2-side.is-open .docs2-nav { animation: none; } }
+
+/* ---- Type in the docs (10C.16's table) ---- */
+.docs2-article h1 { margin: 0 0 24px; font: 400 2.25rem/2.625rem var(--font-display); color: var(--text); text-wrap: balance; }
+.docs2-article h2 { position: relative; margin: 48px 0 16px; font: 400 1.625rem/2rem var(--font-serif); color: var(--text); scroll-margin-top: 89px; }
+.docs2-article h3 { scroll-margin-top: 89px; }
+.docs2-anchor { position: absolute; left: -24px; top: 0; width: 20px; color: var(--text-2); text-decoration: none; opacity: 0; transition: opacity var(--t-quick) var(--ease-settle); }
+.docs2-article h2:is(:hover, :focus-within, :target) .docs2-anchor { opacity: 1; }
+.docs2-lede { max-width: 34em; margin: 0 0 8px; font: 400 1.375rem/2.125rem var(--font-serif); color: var(--text-2); }
+.docs2-article :is(p, li) { font: 400 1.0625rem/1.75rem var(--font-serif); font-variant-numeric: oldstyle-nums; overflow-wrap: break-word; }
+.docs2-article p { max-width: 68ch; margin: 0 0 16px; }
+.docs2-article .docs2-lede { font-size: 1.375rem; line-height: 2.125rem; }
+.docs2-article > p.muted { color: var(--text-2); }
+/* Run-in heads (the product's strong) in Miller Text Italic */
+.docs2-article :is(p, li) > strong:first-child { font-style: italic; font-weight: 400; }
+.docs2-article a { color: var(--link); text-decoration: underline; text-decoration-color: var(--link-line); text-decoration-thickness: 1px; text-underline-offset: 3px; }
+@media (hover: hover) { .docs2-article a:hover { text-decoration-thickness: 2px; text-decoration-color: var(--link); } }
+.docs2-article a:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; border-radius: 2px; }
+/* Inline code: mono on a Cotton 2 chip, the one place Miller and mono share a line */
+.docs2-article :not(pre) > code { padding: 1px 5px; font: 400 0.88em/1 var(--font-mono); color: var(--text); background: var(--page-2); border: 0; border-radius: 2px; overflow-wrap: anywhere; font-variant-numeric: normal; }
+.docs2-article :not(pre) > code.is-rehearsal { background: var(--surface); outline: 1.5px dashed var(--text); outline-offset: -1.5px; }
+.docs2-article .small { font: 400 0.9375rem/1.4375rem var(--font-sans); color: var(--text-2); font-variant-numeric: lining-nums; }
+.docs2-article .muted { color: var(--text-2); }
+/* Ordered lists: numerals with a period hung into the margin */
+.docs2-article ol { margin: 0 0 16px; padding: 0; list-style: none; counter-reset: docs2-step; max-width: 68ch; }
+.docs2-article ol > li { position: relative; margin: 0 0 12px; counter-increment: docs2-step; }
+.docs2-article ol > li::before { content: counter(docs2-step) "."; position: absolute; left: -32px; width: 24px; text-align: right; font-variant-numeric: lining-nums; color: var(--text); }
+/* The Quick start's four steps: Miller Display numerals in a 48 px hanging column */
+.docs2-article ol.docs2-steps > li { padding-left: 48px; margin-bottom: 16px; }
+.docs2-article ol.docs2-steps > li::before { content: counter(docs2-step); left: 0; top: -2px; width: 32px; text-align: left; font: 400 1.75rem/2.125rem var(--font-display); }
+/* Unordered lists: a 6 px Graphite en rule hung in the margin */
+.docs2-article ul:not(.docs2-params, .docs2-responses) { margin: 0 0 16px; padding: 0; list-style: none; max-width: 68ch; }
+.docs2-article ul:not(.docs2-params, .docs2-responses) > li { position: relative; margin-bottom: 8px; }
+.docs2-article ul:not(.docs2-params, .docs2-responses) > li::before { content: ""; position: absolute; left: -16px; top: 0.9em; width: 6px; height: 1px; background: var(--text-2); }
+@media (max-width: 1023px) {
+  .docs2-article ol:not(.docs2-steps) { padding-left: 32px; }
+  .docs2-article ul:not(.docs2-params, .docs2-responses) { padding-left: 16px; }
+}
+/* Tables: Founders in a sheet with a Rule border, the head on Cotton 2 */
+.docs2-article .table-wrap { margin: 16px 0 24px; overflow-x: auto; background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-sheet); }
+.docs2-article table { width: 100%; border-collapse: collapse; font: 400 1rem/1.375rem var(--font-sans); font-variant-numeric: lining-nums tabular-nums; }
+.docs2-article th { height: 44px; padding: 0 16px; font: 500 0.875rem/1.125rem var(--font-sans); color: var(--text-2); text-align: left; vertical-align: middle; background: var(--page-2); border-bottom: 1px solid var(--line); white-space: nowrap; }
+.docs2-article td { padding: 14px 16px; vertical-align: top; border-bottom: 1px solid var(--line); }
+.docs2-article tr:last-child > td { border-bottom: 0; }
+.docs2-article td > strong { font-weight: 500; }
+.docs2-article td :not(pre) > code, .docs2-article td > code { font-size: 0.9375rem; line-height: 1.375rem; background: none; padding: 0; }
+.docs2-chip { display: block; margin-top: 8px; }
+@media (max-width: 599px) {
+  .docs2-article .table-wrap { background: none; border: 0; overflow: visible; }
+  .docs2-article .table-wrap :is(table, tbody, tr, td) { display: block; }
+  .docs2-article .table-wrap thead { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
+  .docs2-article .table-wrap tr { padding: 14px 0; border-top: 1px solid var(--line); }
+  .docs2-article .table-wrap tr:last-child { border-bottom: 1px solid var(--line); }
+  .docs2-article .table-wrap td { padding: 0; border: 0; }
+  .docs2-article .table-wrap td + td { margin-top: 6px; }
+}
+
+/* ---- Code samples on Plate Ink: weight for structure, grey for comments, nothing else (decision 36) ---- */
+.docs2-article .code2, .docs2 .code2 { position: relative; margin: 16px 0 24px; color: var(--plate-ink); background: var(--plate); border: 1px solid var(--plate-edge); border-radius: var(--r-sheet); color-scheme: dark; }
+.code2 + .code2 { margin-top: -8px; }
+.code2 pre { margin: 0; padding: 20px 24px; overflow-x: auto; background: none; border: 0; border-radius: 0; scrollbar-width: thin; scrollbar-color: transparent transparent; outline: none; }
+.code2 pre:is(:hover, :focus-visible) { scrollbar-color: var(--plate-line) transparent; }
+.code2 pre:focus-visible { box-shadow: 0 0 0 2px var(--page), 0 0 0 4px var(--focus); border-radius: var(--r-sheet); }
+.code2 code { display: block; width: max-content; min-width: 100%; padding: 0; font: 400 0.9375rem/1.5rem var(--font-mono); color: inherit; background: none; white-space: pre; }
+.code2-line { position: relative; display: block; padding-right: 72px; }
+.code2-line:first-child { padding-right: 88px; }
+/* Founders Grotesk Mono Medium when its files arrive; with the system's mono, 600 is the weight that shows */
+.c2.is-key, .c2.is-kw, .c2.is-lit { font-weight: 600; }
+.c2.is-com { color: var(--plate-dim); }
+/* The rehearsal: a 1.5 px dashed underline (dash 4, gap 3) and the ghost light in the block's left padding */
+.c2.is-rehearsal { background-image: linear-gradient(to right, currentColor 4px, transparent 4px); background-size: 7px 1.5px; background-repeat: repeat-x; background-position: 0 calc(100% - 1px); }
+.code2.has-rehearsal pre { padding-left: 36px; }
+.code2-line.is-rehearsal::before { content: ""; position: absolute; left: -26px; top: 5px; width: 14px; height: 14px; background: currentColor; mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 14 14' fill='none' stroke='black' stroke-width='1.25' stroke-linecap='round'%3E%3Ccircle cx='7' cy='4.5' r='3' stroke-width='1.5'/%3E%3Cpath d='M3.6 4.5a3.4 3.4 0 0 1 6.8 0M3.9 6.3a3.4 3.4 0 0 0 6.2 0'/%3E%3Cpath d='M7 7.6V12.6M4.6 12.8h4.8M7 12.6 5 13.2M7 12.6l2 .6'/%3E%3C/svg%3E") center / contain no-repeat; }
+.code2-copy { position: absolute; top: 10px; right: 10px; min-height: 32px; padding: 4px 12px; font: 500 0.875rem/1.25rem var(--font-sans); color: var(--plate-ink); background: var(--plate); border: 1px solid var(--plate-line); border-radius: 4px; corner-shape: bevel; cursor: pointer; }
+.code2-copy::after { content: ""; position: absolute; inset: -8px; }
+@media (hover: hover) { .code2-copy:hover { border-color: var(--plate-ink); } }
+.code2-copy:focus-visible { outline: 2px solid var(--plate-ink); outline-offset: 2px; }
+/* On guide pages a block is as wide as its longest line needs, up to the article plus the rail */
+@media (min-width: 1280px) { .docs2-article:not(.is-ref) .code2 { width: max-content; min-width: 100%; max-width: calc(100% + 400px + var(--rail-gap)); box-sizing: border-box; } }
+/* Phones: blocks run to the screen's edges */
+@media (max-width: 599px) {
+  .docs2-article .code2, .docs2-article .docs2-inline-ex .code2 { margin-inline: calc(-1 * var(--docs-pad)); border-inline: 0; border-radius: 0; }
+  /* "Copy" keeps a band of its own at the top, so long lines scroll under nothing */
+  .code2 pre { padding: 52px var(--docs-pad) 16px; }
+  .code2.has-rehearsal pre { padding-left: 36px; }
+  .code2-line:first-child { padding-right: 0; }
+}
+
+/* ---- The docs home: the file shelf, and the guides as cards ---- */
+.docs2-article p.docs2-shelf { max-width: none; margin: 24px 0 16px; padding: 20px; font: 400 0.9375rem/1.4375rem var(--font-sans); font-variant-numeric: lining-nums; color: var(--text); background: var(--page-2); box-shadow: inset 2px 0 0 var(--line-strong); border-radius: var(--r-sheet); }
+.docs2-file { display: inline-block; width: 16px; height: 16px; margin-right: 4px; vertical-align: -3px; color: var(--text); }
+.docs2-article p.small code { font-size: 0.9375rem; }
+.docs2-cards { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 24px; margin-top: 24px; }
+.docs2-article a.docs2-card { display: grid; align-content: start; gap: 8px; min-height: 120px; padding: 24px; color: var(--text); text-decoration: none; background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-sheet); transition: transform var(--t-quick) var(--ease-settle), box-shadow var(--t-quick) var(--ease-settle); }
+.docs2-card strong { font: 400 1.375rem/1.75rem var(--font-serif); }
+.docs2-card .small { display: block; }
+@media (hover: hover) { .docs2-article a.docs2-card:hover { transform: translateY(-2px); box-shadow: var(--e-lift); } }
+.docs2-article a.docs2-card:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+@media (prefers-reduced-motion: reduce) { .docs2-article a.docs2-card:hover { transform: none; } }
+@media (max-width: 599px) { .docs2-cards { grid-template-columns: minmax(0, 1fr); gap: 16px; } }
+
+/* ---- The reference: the index, each group and its endpoints ---- */
+.docs2-article.is-ref > :is(h1, p, nav) { max-width: 720px; }
+@media (min-width: 1280px) { .docs2-article.is-ref > :is(h1, p, nav), .docs2-group > h2 { max-width: min(720px, calc(100% - 400px - var(--rail-gap))); } }
+.docs2-index { margin: 24px 0 8px; padding: 24px; font: 400 0.9375rem/1.4375rem var(--font-sans); background: var(--page-2); border-radius: var(--r-sheet); }
+.docs2-index > div + div { margin-top: 8px; }
+.docs2-index strong { font-weight: 500; }
+.docs2-sep { color: var(--line-strong); }
+.docs2-article .docs2-index a { text-decoration-thickness: 1px; }
+.docs2-endpoint { padding-top: 48px; margin-top: 48px; border-top: 1px solid var(--line); scroll-margin-top: 89px; }
+.docs2-group > h2 + .docs2-endpoint { margin-top: 24px; }
+.docs2-ep-text { min-width: 0; }
+.docs2-ep-head { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; margin: 0 0 16px; }
+.docs2-method { display: inline-grid; place-items: center; min-width: 64px; height: 28px; padding: 0 8px; box-sizing: border-box; font: 500 0.875rem/1.125rem var(--font-mono); color: var(--text); border: 1px solid var(--text); border-radius: 3px; corner-shape: bevel; }
+.docs2-article .docs2-ep-head code.docs2-path { padding: 0; font: 500 1.125rem/1.625rem var(--font-mono); background: none; overflow-wrap: anywhere; }
+.docs2-rehearsal { background-image: linear-gradient(to right, currentColor 4px, transparent 4px); background-size: 7px 1.5px; background-repeat: repeat-x; background-position: 0 100%; }
+.docs2-article .label { display: block; margin: 24px 0 8px; font: 500 0.875rem/1.125rem var(--font-sans); color: var(--text-2); }
+.docs2-article .label .muted { font-weight: 400; color: var(--text); font-family: var(--font-mono); }
+.docs2-article ul:is(.docs2-params, .docs2-responses) { margin: 0; padding: 0; list-style: none; }
+.docs2-article ul:is(.docs2-params, .docs2-responses) > li { margin: 0 0 8px; font: 400 1rem/1.375rem var(--font-sans); font-variant-numeric: lining-nums; }
+.docs2-article .docs2-params code { font-size: 0.9375rem; }
+.docs2-article code.docs2-status, .docs2 figcaption code.docs2-status { display: inline-grid; place-items: center; min-width: 44px; height: 24px; margin-right: 8px; padding: 0 6px; box-sizing: border-box; font: 400 0.875rem/1.125rem var(--font-mono); color: var(--text); background: none; border: 1px solid var(--line-strong); border-radius: 3px; corner-shape: bevel; }
+.docs2-inline-ex .code2 { margin: 12px 0 16px; }
+.docs2-ep-rail { display: none; }
+.docs2-ep-rail figure { min-width: 0; margin: 0; }
+.docs2-ep-rail figcaption { margin: 0 0 8px; }
+.docs2-ep-rail figcaption.label { margin-top: 0; }
+.docs2-ep-rail .code2 { margin: 0; }
+.docs2-ep-rail .code2 pre { max-height: 640px; overflow: auto; }
+@media (min-width: 1280px) {
+  .docs2-endpoint.has-rail { display: grid; grid-template-columns: minmax(0, 1fr) 400px; column-gap: var(--rail-gap); align-items: start; }
+  .docs2-endpoint:not(.has-rail) > .docs2-ep-text, .docs2-endpoint.has-rail > .docs2-ep-text { max-width: 720px; }
+  .docs2-endpoint:not(.has-rail) > .docs2-ep-text { max-width: min(720px, calc(100% - 400px - var(--rail-gap))); }
+  .docs2-endpoint.has-rail .docs2-inline-ex { display: none; }
+  .docs2-ep-rail { display: block; min-width: 0; height: 100%; }
+  .docs2-ep-rail-in { position: sticky; top: 89px; display: grid; gap: 16px; }
+}
+
+/* ---- Print: code on Cotton 2 in Plate Ink, no nav or header, link targets after links ---- */
+@media print {
+  .docs2-head, .docs2-side, .shell2-skip, .code2-copy { display: none !important; }
+  .docs2-frame { display: block; padding: 0; }
+  .docs2-article { max-width: none; }
+  .docs2 .code2 { color: #1D2130; background: #F3F0E8; border: 1px solid #DDD7CB; }
+  .code2 code { white-space: pre-wrap; width: auto; }
+  .c2.is-com { color: #555867; }
+  .docs2-article p a[href^="/"]::after, .docs2-article p a[href^="http"]::after { content: " (" attr(href) ")"; font-size: 0.875em; color: #555867; }
+}
+}

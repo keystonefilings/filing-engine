@@ -1,0 +1,18 @@
+/* The website widget's frame (merged spec 10C.19): the firm's form inside the firm's own website. Pure white, square,
+   no border and no shadow, light in every theme (the host page's theme can't be known, and the firm's colors were
+   chosen for white). Inside an iframe the viewport is the frame, so these sizes follow the frame, not the screen. */
+@layer components {
+html:has(.client2.is-embed), html:has(.embed2-gone) { color-scheme: light; background: #fff; }
+html:has(.client2.is-embed) body, html:has(.embed2-gone) body { background: #fff; }
+.reg-firm:has(> .client2.is-embed) { background: #fff; }
+.client2.is-embed { padding: 20px; background: #fff; }
+@media (max-width: 359px) { .client2.is-embed { padding: 16px; } }
+/* The form column caps at 640 px and sits at the frame's left edge, aligned with the host page's own text */
+.client2.is-embed > .client2-sheet { max-width: 640px; margin-left: 0; }
+.client2.is-embed .client2-title { font-size: 1.5rem; line-height: 1.875rem; }
+@media (min-width: 480px) { .client2.is-embed .client2-title { font-size: 1.75rem; line-height: 2.125rem; } }
+@media (min-width: 720px) { .client2.is-embed .client2-title { font-size: 2rem; line-height: 2.375rem; } }
+/* A page that doesn't exist: the product's one line on the white sheet */
+.embed2-gone { padding: 20px; background: #fff; color: #1D2130; }
+.embed2-gone p { margin: 0; font: 400 1.125rem/1.75rem var(--font-sans); }
+}

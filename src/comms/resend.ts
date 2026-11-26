@@ -1,4 +1,7 @@
 import type { ChannelSender, OutboundMessage } from "./senders.js";
+import { renderEmail } from "./email.js";
+
+export { renderEmail };
 
 export interface ResendOptions {
   apiKey: string;
@@ -6,30 +9,31 @@ export interface ResendOptions {
   from: string;
   replyTo?: string;
   apiUrl?: string;
+  /** The web app's public address: CoFile's lockup and the two engravings (src/comms/email.ts, EMAIL_ART). */
+  webBaseUrl?: string;
+  /** The engine's public address + /email-assets: the ghost light and the document card (EMAIL_ASSETS). */
+  assetBaseUrl?: string;
   fetchImpl?: typeof fetch;
   timeoutMs?: number;
 }
 
-const escapeHtml = (s: string) => s.replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]!);
+/** The address inside "Name <a@b.c>", or the value itself. */
+const addressOf = (from: string) => /<([^>]+)>/.exec(from)?.[1]?.trim() ?? from.trim();
 
-/** Plain text and a simple HTML version of the same message; every value is escaped. */
-export function renderEmail(msg: OutboundMessage): { text: string; html: string } {
-  const paragraphs = msg.body.split(/\n{2,}/).map((p) => p.trim()).filter(Boolean);
-  const text = [...paragraphs, ...(msg.link ? [msg.link] : [])].join("\n\n");
-  const button = msg.link
-    ? `<p style="margin:24px 0"><a href="${escapeHtml(msg.link)}" style="background:#1f4fd1;color:#ffffff;padding:10px 18px;border-radius:6px;text-decoration:none;display:inline-block">${escapeHtml(msg.linkLabel ?? "Open")}</a></p>`
-      + `<p style="color:#555;font-size:13px">Or paste this link into your browser:<br>${escapeHtml(msg.link)}</p>`
-    : "";
-  const html = `<div style="font-family:-apple-system,Segoe UI,Helvetica,Arial,sans-serif;font-size:15px;line-height:1.5;color:#111;max-width:560px">`
-    + paragraphs.map((p) => `<p>${escapeHtml(p).replace(/\n/g, "<br>")}</p>`).join("")
-    + button + `</div>`;
-  return { text, html };
+/** A display name, quoted, on one line: "Harbor & Pine CPA" <filings@cofile.app>. */
+export function mailbox(name: string, address: string): string {
+  const clean = name.replace(/[\r\n<>]+/g, " ").replace(/\s+/g, " ").trim().replace(/[\\"]/g, (c) => `\\${c}`);
+  return clean ? `"${clean}" <${address}>` : address;
 }
 
 /**
  * Email through Resend (https://resend.com/docs/api-reference/emails/send-email). A send that
  * Resend does not accept comes back as ok: false with its reason, so the Notifier records the
  * message as failed instead of losing it; nothing here throws on a provider error.
+ *
+ * Sender (decision 37): CoFile's configured From and Reply-To, unless the message is an email to a firm's
+ * client, which goes out under the firm's name (from the firm's own address once its domain is verified,
+ * else from the configured address) with replies to the firm.
  */
 export class ResendEmailSender implements ChannelSender {
   readonly channel = "email" as const;
@@ -39,17 +43,19 @@ export class ResendEmailSender implements ChannelSender {
   }
 
   async send(to: { address: string; name?: string }, msg: OutboundMessage): Promise<{ ok: boolean; detail?: string }> {
-    const { text, html } = renderEmail(msg);
+    const { text, html } = renderEmail(msg, { webBaseUrl: this.opts.webBaseUrl, assetBaseUrl: this.opts.assetBaseUrl });
     const recipient = to.name ? `${to.name.replace(/[<>"\r\n]/g, "")} <${to.address}>` : to.address;
+    const from = msg.from ? mailbox(msg.from.name, msg.from.address ?? addressOf(this.opts.from)) : this.opts.from;
+    const replyTo = msg.replyTo ?? (this.opts.replyTo ? [this.opts.replyTo] : []);
     let res: Response;
     try {
       res = await this.fetchImpl(this.opts.apiUrl ?? "https://api.resend.com/emails", {
         method: "POST",
         headers: { authorization: `Bearer ${this.opts.apiKey}`, "content-type": "application/json" },
         body: JSON.stringify({
-          from: this.opts.from, to: [recipient], subject: msg.subject.replace(/[\r\n]+/g, " "), text, html,
-          ...(this.opts.replyTo ? { reply_to: this.opts.replyTo } : {}),
-          ...(msg.attachments?.length ? { attachments: msg.attachments.map((a) => ({ filename: a.filename, content: a.content.toString("base64"), content_type: a.contentType })) } : {}),
+          from, to: [recipient], subject: msg.subject.replace(/[\r\n]+/g, " "), text, html,
+          ...(replyTo.length ? { reply_to: replyTo.length === 1 ? replyTo[0] : replyTo } : {}),
+          ...(msg.attachments?.length ? { attachments: msg.attachments.map((a) => ({ filename: a.filename, content: a.content.toString("base64"), content_type: a.contentType, ...(a.contentId ? { content_id: a.contentId } : {}) })) } : {}),
         }),
         signal: AbortSignal.timeout(this.opts.timeoutMs ?? 15_000),
       });

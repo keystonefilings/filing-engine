@@ -1,0 +1,85 @@
+/* Terms of Service and Privacy Policy (merged spec 10A.15, decision 25): a well-printed booklet. At 1280 px and wider
+   the contents are a sticky rail in c1–c3 beside the text in c4–c11, the current section marked by a 2 px Brass Line
+   rule; narrower, the contents sit at the top between two rules, numbers hung. Miller Text carries the reading.
+   No pictures, no motion. Reads semantic tokens. */
+@layer components {
+.legal2 { padding-block: 96px 112px; background: var(--page); color: var(--text); }
+.legal2-grid { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); column-gap: 24px; align-items: start; }
+.legal2-head, .legal2-contents, .legal2-text { grid-column: 3 / span 8; min-width: 0; }
+.legal2-h1 { color: var(--text); text-wrap: balance; }
+.legal2-effective { margin-top: 16px; }
+
+/* The contents: the headings as links, the number in tabular Graphite, a wrapped title hanging under the title */
+.legal2-contents { margin-top: 48px; padding-block: 48px; border-block: 1px solid var(--line); }
+.legal2-contents ol { list-style: none; margin: 0; padding: 0; columns: 2; column-gap: 48px; }
+.legal2-contents li { break-inside: avoid; padding-bottom: 8px; }
+.legal2-contents a { display: grid; grid-template-columns: minmax(0, 1fr); font: 400 1.0625rem/1.5rem var(--font-sans); color: var(--text); }
+.legal2-contents.is-numbered a { grid-template-columns: 2.2em minmax(0, 1fr); column-gap: 8px; }
+.legal2-contents .legal2-n { color: var(--text-2); font-variant-numeric: tabular-nums; text-align: right; text-decoration: none; display: inline-block; }
+.legal2-contents a .legal2-t { text-decoration: underline; text-decoration-thickness: 1px; text-decoration-color: var(--link-line); text-underline-offset: 3px; }
+.legal2-contents a { text-decoration: none; }
+@media (hover: hover) { .legal2-contents a:hover .legal2-t { text-decoration-thickness: 2px; text-decoration-color: var(--text); } }
+
+/* The text: Miller Text 19/30, 68 ch, paragraphs 16 px apart; strong in the bold cut, for these two pages only */
+.legal2-text { margin-top: 48px; max-width: min(68ch, 650px); font: 400 1.1875rem/1.875rem var(--font-serif); color: var(--text); }
+.legal2-text p + p, .legal2-text p + ul, .legal2-text ul + p { margin-top: 16px; }
+.legal2-text strong { font-weight: 700; }
+.legal2-text ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 12px; }
+.legal2-text li { position: relative; }
+.legal2-text li::before { content: ""; position: absolute; left: -22px; top: calc(0.5lh - 0.75px); width: 6px; height: 1.5px; background: var(--text-2); }
+.legal2-sec { scroll-margin-top: 96px; }
+.legal2-h2 { position: relative; margin: 64px 0 16px; color: var(--text); scroll-margin-top: 96px; outline: none; }
+.legal2-h2:focus-visible { outline: 2px solid var(--focus); outline-offset: 4px; }
+.legal2-h2 .legal2-n { position: absolute; right: calc(100% + 24px); top: 0; color: var(--text-2); font-variant-numeric: tabular-nums; white-space: nowrap; }
+
+/* Below 1280 px the contents' numbers hang to the left of the titles, so the titles line up with the text */
+@media (min-width: 640px) and (max-width: 1279px) {
+  .legal2-contents.is-numbered ol { margin-left: calc(-2.2em - 8px); }
+}
+
+/* At 1280 px and wider: the sticky rail, the numbers inline */
+@media (min-width: 1280px) {
+  .legal2-head { grid-column: 4 / span 8; grid-row: 1; }
+  .legal2-text { grid-column: 4 / span 8; grid-row: 2; }
+  .legal2-contents { grid-column: 1 / span 3; grid-row: 1 / span 2; align-self: start; position: sticky; top: 96px; max-width: 240px; margin-top: 14px; padding: 0; border: 0; }
+  .legal2-contents.is-static { position: static; }
+  .legal2-contents ol { columns: 1; }
+  .legal2-contents a { position: relative; padding-left: 14px; }
+  .legal2-contents a[aria-current="location"] { font-weight: 500; }
+  .legal2-contents a[aria-current="location"]::before { content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 2px; background: var(--brass-line); }
+  .legal2-h2 .legal2-n { position: static; }
+}
+@media (max-width: 1023px) {
+  .legal2 { padding-block: 72px 88px; }
+  .legal2-grid { grid-template-columns: 96px minmax(0, 1fr); column-gap: 0; }
+  .legal2-head, .legal2-contents, .legal2-text { grid-column: 2; }
+}
+@media (max-width: 639px) {
+  .legal2 { padding-block: 56px 64px; }
+  .legal2-grid { grid-template-columns: minmax(0, 1fr); }
+  .legal2-head, .legal2-contents, .legal2-text { grid-column: 1; }
+  .legal2-contents { margin-top: 32px; padding-block: 32px; }
+  .legal2-contents ol { columns: 1; }
+  .legal2-text { margin-top: 32px; font-size: 1.125rem; line-height: 1.8125rem; }
+  .legal2-text ul { padding-left: 20px; }
+  .legal2-text li::before { left: -20px; }
+  .legal2-h2 { margin-top: 48px; }
+  .legal2-h2 .legal2-n { position: static; }
+}
+
+/* Print: US Letter, 1 in margins, the contents first as a list, no rail, no header, notice or footer (10A.15) */
+@media print {
+  body:has(.legal2) :is(.site2-foot, .site2-beta, .site2-head, .site2-bar, .shell2-skip, .beta-banner) { display: none !important; }
+  .legal2 { padding: 0; }
+  .legal2-grid { display: block; padding: 0; }
+  .legal2-contents { position: static; max-width: none; margin: 18pt 0; padding: 12pt 0; border-block: 0.5pt solid #8A8578; }
+  .legal2-contents ol { columns: 2; }
+  .legal2-contents a::before { display: none; }
+  .legal2-contents a { font-size: 10pt; line-height: 14pt; }
+  .legal2-text { max-width: none; margin: 0; font-size: 11pt; line-height: 15pt; color: #000; }
+  .legal2-h2 { margin: 18pt 0 6pt; font-size: 13pt; line-height: 17pt; break-after: avoid; }
+  .legal2-h2 .legal2-n { position: static; }
+  .legal2-text p, .legal2-text li { orphans: 3; widows: 3; }
+  .legal2-text a[href]:not([href^="mailto:"])::after, .legal2-effective a::after { content: " (" attr(href) ")"; }
+}
+}

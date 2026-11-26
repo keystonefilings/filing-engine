@@ -1,6 +1,7 @@
 "use client";
 
 import { useKeptForm } from "./useKeptForm";
+import { Notice } from "./ui/Sheet";
 
 export type DefaultsState = { ok?: boolean; message?: string; error?: string } | null;
 type P = { name: string; title?: string; address?: { street1: string; street2?: string; city: string; state: string; zip: string } } | undefined;
@@ -9,7 +10,7 @@ type P = { name: string; title?: string; address?: { street1: string; street2?: 
 export function FilingDefaultsForm({ action, v }: { action: (prev: DefaultsState, fd: FormData) => Promise<DefaultsState>; v: { organizer?: P; filer?: P; signer?: P; copyEmail?: string } }) {
   const { state: s, pending, formProps } = useKeptForm(action, null);
   const person = (key: "organizer" | "filer" | "signer", label: string, help: string) => (
-    <fieldset className="card" key={key}>
+    <fieldset className="card dash2-person" key={key}>
       <legend><strong>{label}</strong></legend>
       <p className="help">{help}</p>
       <div className="field-row n2">
@@ -25,7 +26,7 @@ export function FilingDefaultsForm({ action, v }: { action: (prev: DefaultsState
     </fieldset>
   );
   return (
-    <form {...formProps} className="stack">
+    <form {...formProps} className="stack dash2-people">
       {person("organizer", "Organizer", "Named as organizer (New York) when a client's firm leaves it to you.")}
       {person("filer", "Filer", "Named as filer on New York filings.")}
       {person("signer", "Signer", "Signs where a client's firm hasn't named its own signer.")}
@@ -35,7 +36,7 @@ export function FilingDefaultsForm({ action, v }: { action: (prev: DefaultsState
         <p className="help">Where a state site has a CC for its emailed copies (New York does), this address goes there when a client&apos;s firm has none of its own.</p>
       </div>
       <button className="btn primary" type="submit" disabled={pending}>{pending ? "Saving…" : "Save"}</button>
-      {s?.error ? <p className="notice bad" role="alert">{s.error}</p> : s?.message ? <p className="notice ok" role="status">{s.message}</p> : null}
+      {s?.error ? <Notice tone="problem" role="alert">{s.error}</Notice> : s?.message ? <Notice tone="done" role="status">{s.message}</Notice> : null}
     </form>
   );
 }

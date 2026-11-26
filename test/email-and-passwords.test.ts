@@ -1,4 +1,4 @@
-import { afterAll, beforeAll, describe, expect, it } from "vitest";
+import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
 import type { FastifyInstance } from "fastify";
 import { buildServer } from "../src/api/server.js";
 import { FsArtifactStore } from "../src/artifacts/store.js";
@@ -31,7 +31,8 @@ describe("Resend email sender (V1)", () => {
       from: "Keystone Filings <filings@keystonefilings.com>", to: ["Pat Rivera <pat@rivera-cpa.test>"],
       subject: "Approve: NJ formation", reply_to: "help@cofile.app",
     });
-    expect(f.calls[0]!.body.text).toBe("Please review.\n\nhttps://api.test/approve/tok");
+    // The plain-text part (merged spec 10D.17): the letterhead's name, the headline, the words, the button's label and link, CoFile's foot.
+    expect(f.calls[0]!.body.text).toBe("CoFile\n\nApprove: NJ formation\n\nPlease review.\n\nOpen\nhttps://api.test/approve/tok\n\nCoFile · the filing desk behind your firm");
     expect(f.calls[0]!.body.html).toContain('href="https://api.test/approve/tok"');
   });
 
@@ -179,6 +180,27 @@ describe("account emails that the pages promise (V1, V6)", () => {
       expect(d.statusCode).toBe(200);
       expect(box.sent[1]).toMatchObject({ address: "pat@rivera.test", msg: { subject: "Your partner account is open", link: "http://web.test/login" } });
     } finally { await srv.close(); }
+  });
+
+  it("an approval email the provider refuses is logged, not lost silently", async () => {
+    const store = await seededStore();
+    const w = wire(store);
+    const email = new ResendEmailSender({ apiKey: "k", from: "a@b.test", fetchImpl: fakeFetch(() => Response.json({ message: "The domain is not verified" }, { status: 403 })).impl });
+    const srv = buildServer({
+      service: w.service, approvals: w.approvals, store, artifacts: new FsArtifactStore("var/test-artifacts"), publicBaseUrl: "http://api.test",
+      apiKeys: { k1: "keystone" }, staffKeys: {}, sessionSecret: "session-secret-for-tests-0123456789",
+      platformTenantId: "keystone", partnerSignupMode: "approval", email, webBaseUrl: "http://web.test",
+    });
+    await srv.ready();
+    const logged = vi.spyOn(console, "error").mockImplementation(() => {});
+    try {
+      await srv.inject({ method: "POST", url: "/v1/signups/partner", payload: { companyName: "Rivera CPA", companyType: "cpa", name: "Pat Rivera", email: "pat@rivera.test", password: PW } });
+      const id = (await srv.inject({ method: "GET", url: "/v1/partner-signups", headers: { "x-api-key": "k1" } })).json().signups[0].id as string;
+      const d = await srv.inject({ method: "POST", url: `/v1/partner-signups/${id}/decision`, payload: { action: "approve" }, headers: { "x-api-key": "k1" } });
+      expect(d.statusCode).toBe(200);
+      await vi.waitFor(() => expect(logged).toHaveBeenCalledWith("approval email not sent: resend 403: The domain is not verified"));
+      expect(logged).toHaveBeenCalledWith("confirmation email not sent: resend 403: The domain is not verified");
+    } finally { logged.mockRestore(); await srv.close(); }
   });
 });
 

@@ -81,6 +81,9 @@ describe("emailing a filing request in", () => {
     // Acme isn't a partner firm, so its approvers may be other people: the proof "is approved".
     expect(mail.msg.body).toMatch(/until you send it and the proof is approved\./);
     expect(mail.msg.body).not.toMatch(/your client approves/);
+    // On CoFile's letterhead, the firm named above the headline (merged spec 10D.12).
+    expect(mail.msg.letter).toMatchObject({ side: "cofile", headline: { phrase: "Ready to check: New LLC for Sam" } });
+    expect(mail.msg.letter?.context).toBeTruthy();
     // Resend retries a delivery: the same message is stored once.
     await deliver({ email_id: "em_1", from: "pat@acme.test", to: ["file@in.cofile.app"], subject: "New LLC for Sam" });
     expect([...store.inbound.values()].filter((m) => m.providerId === "em_1")).toHaveLength(1);

@@ -1,0 +1,117 @@
+/* The pages behind the home page (merged spec 10A.0): the title page, the four kinds of band and how they meet, words
+   beside a picture, lists, and the page close. Reads semantic tokens; the pages sit in SiteShell's .reg-cofile.
+   Breakpoints follow the shell: phone to 639 px, tablet to 1023 px, then the 12-column desktop grid. */
+@layer components {
+
+/* A span of n desktop columns (78 px at 1440, 24 px gutters) in whatever box the element sits in. */
+.pg2-head, .pg2-band { --gut: 24px; }
+
+/* ── The title page (10A.0.2) ─────────────────────────────────────────────────────────────────────────────── */
+.pg2-head { position: relative; background: var(--page); padding-block: 96px 128px; }
+.pg2-head-in { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); column-gap: var(--gut); align-items: start; }
+.pg2-head-words { grid-column: 1 / span 8; min-width: 0; }
+.pg2-kicker { display: flex; align-items: baseline; gap: 12px; margin: 0 0 16px; }
+.pg2-kicker::before { content: ""; flex: none; width: 24px; height: 1.5px; background: var(--brass-line); transform: translateY(-0.3em); }
+.pg2-h1 { color: var(--text); text-wrap: balance; }
+.pg2-lede { margin-top: 24px; max-width: 34em; color: var(--text); }
+.pg2-line { display: block; }
+.pg2-barmark { display: none; }
+@media (max-width: 1023px) {
+  .pg2-head { padding-block: 72px 96px; }
+  .pg2-head-in { grid-template-columns: repeat(8, minmax(0, 1fr)); }
+  .pg2-head-words { grid-column: 1 / -1; }
+}
+@media (max-width: 639px) {
+  .pg2-head { padding-block: 48px 64px; }
+  .pg2-head-in { grid-template-columns: minmax(0, 1fr); }
+  .pg2-kicker { margin-bottom: 12px; }
+  .pg2-lede { margin-top: 16px; }
+  .pg2-line { display: inline; }
+  .pg2-barmark { display: block; position: absolute; inset: 0; visibility: hidden; pointer-events: none; }
+}
+
+/* ── Bands (10A.0.3) ──────────────────────────────────────────────────────────────────────────────────────── */
+.pg2-band { background: var(--page); padding-block: var(--above, 128px) var(--below, 160px); }
+.pg2-band.is-show { --above: 128px; --below: 160px; }
+.pg2-band.is-support { --above: 96px; --below: 112px; }
+.pg2-band.is-alt { background: var(--page-2); }
+@media (max-width: 1023px) {
+  .pg2-band.is-show { --above: 96px; --below: 128px; }
+  .pg2-band.is-support { --above: 72px; --below: 88px; }
+}
+@media (max-width: 639px) {
+  .pg2-band.is-show { --above: 64px; --below: 80px; }
+  .pg2-band.is-support { --above: 56px; --below: 64px; }
+}
+/* Bands on the same ground don't add up: the gap is the first band's space below. */
+.pg2-head + .pg2-band:is(.is-show, .is-support):not(.is-alt),
+.pg2-band:is(.is-show, .is-support):not(.is-alt) + .pg2-band:is(.is-show, .is-support):not(.is-alt) { padding-top: 0; }
+
+/* The stage (What we file's "How a filing type goes live."): Night in either mode, Night Ink type. The theatre is
+   always dark, so its inks are set here rather than read from the page's light or dark register. */
+.pg2-band.is-stage {
+  --above: 128px; --below: 160px;
+  background: var(--stage); color: var(--night-ink);
+  --text: var(--night-ink); --text-2: #A9ABB5; --line: #323646; --line-strong: #6E7180;
+  --link: var(--night-ink); --link-line: var(--brass); --focus: var(--night-ink); --focus-gap: var(--stage);
+  color-scheme: dark;
+}
+@media (max-width: 1023px) { .pg2-band.is-stage { --above: 96px; --below: 128px; } }
+@media (max-width: 639px) { .pg2-band.is-stage { --above: 64px; --below: 80px; } }
+
+/* Headings and ledes in bands */
+.pg2-h2 { color: var(--text); text-wrap: balance; }
+.pg2-h2 + .pg2-band-lede { margin-top: 24px; }
+.pg2-band-lede { max-width: 34em; color: var(--text); }
+@media (max-width: 639px) { .pg2-h2 + .pg2-band-lede { margin-top: 16px; } }
+
+/* Words beside a picture: five columns of words, one empty, six of picture (10A.0.3) */
+.pg2-two { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); column-gap: var(--gut); align-items: center; }
+.pg2-two > .pg2-words { grid-column: 1 / span 5; min-width: 0; }
+.pg2-two > .pg2-pic { grid-column: 7 / span 6; min-width: 0; }
+.pg2-two.is-top { align-items: start; }
+@media (max-width: 1023px) {
+  .pg2-two { grid-template-columns: repeat(8, minmax(0, 1fr)); row-gap: 40px; }
+  .pg2-two > .pg2-words { grid-column: 1 / span 6; }
+  .pg2-two > .pg2-pic { grid-column: 1 / -1; }
+}
+@media (max-width: 639px) {
+  .pg2-two { grid-template-columns: minmax(0, 1fr); }
+  .pg2-two > .pg2-words, .pg2-two > .pg2-pic { grid-column: 1 / -1; }
+}
+
+/* Lists: the 7 px Brass Line lozenge hung in the margin; support bands use the 6 px Graphite en rule (5.4) */
+.pg2-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 16px; }
+.pg2-list > li { position: relative; padding-left: 24px; color: var(--text); }
+.pg2-list > li::before { content: ""; position: absolute; left: 1px; top: calc(0.5lh - 3.5px); width: 7px; height: 7px; background: var(--brass-line); transform: rotate(45deg); }
+.pg2-list.is-rule > li::before { width: 6px; height: 1.5px; left: 2px; top: calc(0.5lh - 0.75px); background: var(--text-2); transform: none; }
+@media (max-width: 639px) { .pg2-list { gap: 14px; } }
+
+/* ── The page close (10A.0.4) ─────────────────────────────────────────────────────────────────────────────── */
+.pg2-close { background: var(--page-2); --above: 96px; --below: 128px; }
+.pg2-close-h2 { max-width: calc((100% - 11 * 24px) / 12 * 8 + 7 * 24px); color: var(--text); text-wrap: balance; }
+.pg2-close-lede { margin-top: 24px; max-width: min(34em, calc((100% - 11 * 24px) / 12 * 7 + 6 * 24px)); color: var(--text); }
+.pg2-close-ctas { display: flex; flex-wrap: wrap; gap: 16px; margin-top: 48px; }
+.pg2-close-second { border-color: var(--text); }
+@media (hover: hover) { .pg2-close .btn2.is-outline:hover { background: var(--surface); border-color: var(--text); } }
+@media (max-width: 1023px) {
+  .pg2-close { --above: 72px; --below: 96px; }
+  .pg2-close-h2, .pg2-close-lede { max-width: 34em; }
+}
+@media (max-width: 639px) {
+  .pg2-close { --above: 56px; --below: 64px; }
+  .pg2-close-lede { margin-top: 16px; }
+  .pg2-close-ctas { flex-direction: column; gap: 12px; margin-top: 32px; }
+  .pg2-close-ctas .btn2 { width: 100%; }
+}
+
+/* Anchors land below the compact header plus 36 px (10A.0.1) */
+.site2-main :is([id]) { scroll-margin-top: 96px; }
+
+/* Captions under pictures and example labels */
+.pg2-caption { margin-top: 12px; font: 400 0.875rem/1.25rem var(--font-sans); letter-spacing: 0.005em; color: var(--text-2); }
+
+@media print {
+  .pg2-band, .pg2-head, .pg2-close { padding-block: 24px; background: none; }
+}
+}
