@@ -1967,7 +1967,7 @@ field is visually hidden. On phones the form follows the list, full width.
   account" · "Building a filing product? See CoFile for platforms."
 - **Desktop**: the form on cols 1–6 on a Sunlit panel; on cols 7–12, full height and sticky, **the
   door** (§7.2) in morning light, its glass blank except for the chalk guidelines. As the reader
-  types in "Firm name", the name is gilded onto the glass (M12), in roman capitals with a Pine-free
+  types in "Firm name", the name is gilded onto the glass (M12), in roman capitals with a
   neutral Ink shade (we don't know their color yet). When they pause, the burnish sweeps it. If they
   clear the field, the leaf lifts off letter by letter. "with CoFile" is already tiny in the corner.
   The picture's accessible name `[copy needed]`; it announces nothing as it changes.

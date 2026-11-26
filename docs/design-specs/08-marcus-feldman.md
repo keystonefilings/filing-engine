@@ -625,7 +625,7 @@ tracking-marked screen, so the real UI can be composited in post.
 | P3 | Over the shoulder of a firm owner, 50s, at her desk with a laptop; a client folder and a mug beside it; late-afternoon light. Screen tracking-marked. | You approve it | How it works (step 2); For firms; the log-in page |
 | P4 | A bakery counter at 6 a.m., flour on the counter, aprons on hooks; a hand holding a phone at chest height, thumb near the screen. Screen tracking-marked. No face. | The client fills in the firm's page | For firms (the client's side); How it works (step 1) |
 | P5 | A contractor in a pickup cab, phone on the steering wheel, thumb typing. Screen tracking-marked. | Your client sends a text | Home, The Run on phones (state A); How it works (requests) |
-| P6 | A first-time founder at a kitchen table at night, laptop open, a notebook of sketches beside it. | The client on their own time | The "Check your email" page |
+| P6 | A first-time founder at a kitchen table at night, laptop open, a notebook of sketches beside it. Screen tracking-marked. | The client asks, on their own time | How it works on phones (card 1, the client's page composited on the laptop); For firms on phones, in place of P4 when the layout is portrait |
 | P7 | A firm's front desk mid-morning: a staffer on the phone, another walking past with papers, motion blur on the walker. | A busy practice that says yes | The sign-up page side panel |
 | P8 | Hands at a print-shop counter turning over a letterhead proof with crop marks, business cards beside it. | You've approved a proof before | How it works (the proof section) |
 | P9 | A tidy desk corner: a printed formation document and an envelope being slid into a client's binder. Documents shot blank and composited with neutral layouts. | The papers come back to you | How it works (after); the documents-back email header (firm-facing) |
@@ -2038,7 +2038,7 @@ support line "Questions? Email …" at the foot in Small.
 ```
  ┌──────────────────────────────────────────────────────────────────────────────────────────┐
  │▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀ firm color ▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀│
- │ [LOGO] Harbor & Pine CPA                       ana@… [Log out]          (◯•) with CoFile │
+ │ [LOGO] Harbor & Pine CPA                       [email] [Log out]       (◯•) with CoFile │
  │ Filings  New filing  Ready to pay  Client links  Signatures  Setup  Billing              │
  ├──────────────────────────────────────────────────────────────────────────────────────────┤
  │ Filings                                                              [ New filing ]      │
@@ -2123,8 +2123,7 @@ soft yellow, matching The Run.
 **Signatures.** "Saved signatures" with its explanation; the table ("Signer", "Saved", "Last used",
 "Remove"), each signature shown as a 160 × 48 px thumbnail on a white strip with a baseline rule; "Add a
 signature" opens the signature pad: a full-width 220 px canvas, a 1 px Field Edge baseline 48 px from the
-bottom, Ink strokes at 2.5 px, with "Clear" as a text button `[copy needed]` if the pad doesn't already have
-one.
+bottom, Ink strokes at 2.5 px, with the pad's own "Clear signature" as a text button under its right corner.
 
 **Ready to pay.** "Ready to pay" with its explanation. One card per payment card: a generic card glyph with
 the card's label and last four, the filings waiting for it as rows, a four-box code input (56 px boxes,
