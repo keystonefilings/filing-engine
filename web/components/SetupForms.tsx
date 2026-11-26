@@ -4,7 +4,6 @@ import { useKeptForm } from "./useKeptForm";
 import { useState } from "react";
 import type { SetupState } from "@/app/p/[slug]/(portal)/setup/actions";
 import type { PaymentMethodRef, PaymentRouting } from "@/lib/engine";
-import { firmVars, inkMatch } from "@/lib/design/ink";
 
 type Action = (prev: SetupState, fd: FormData) => Promise<SetupState>;
 
@@ -64,33 +63,6 @@ export function DetailsForm({ action, v }: { action: Action; v: DetailsValues })
       ) : null}
       <button className="btn primary" type="submit" disabled={pending}>{pending ? "Saving…" : "Save and continue"}</button>
     </form>
-  );
-}
-
-/** The preview's colors, from the same ink match the firm's real pages use (it re-runs as the firm picks colors). */
-function previewStyle(color: string, color2: string): Record<string, string> {
-  try {
-    const ink = inkMatch(color, color2);
-    return { ...firmVars(ink), "--accent": ink.fill, "--accent-text": ink.on, "--accent-2": ink.ink, borderTop: `4px solid ${ink.firm2}` };
-  } catch {
-    return {}; // a half-typed color: keep the last good look
-  }
-}
-
-/** How a client's page will look with these choices. */
-export function BrandPreview({ name, logo, color, color2 }: { name: string; logo?: string; color: string; color2: string }) {
-  return (
-    <div className="card" style={previewStyle(color, color2)}>
-      <p className="small muted" style={{ marginTop: 0 }}>Preview of a client&apos;s page</p>
-      <div className="row">
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        {logo ? <img src={logo} alt="" style={{ height: 28, width: "auto" }} /> : null}
-        <strong>{name || "Your firm"}</strong>
-        <span className="spacer" />
-      </div>
-      <p className="small" style={{ marginBottom: 8 }}>Please fill in your LLC formation details. <a href="#" onClick={(e) => e.preventDefault()}>What you&apos;ll need</a></p>
-      <button type="button" className="btn primary small">Send for approval</button>
-    </div>
   );
 }
 
