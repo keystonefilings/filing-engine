@@ -25,7 +25,7 @@ export const GUIDES: Guide[] = [
           <li>Revoke the old key. Revoking takes effect at once and can&apos;t be undone.</li>
         </ol>
         <h2>Keep keys on your server</h2>
-        <p>A key can create filings that, once your client approves them, are submitted to a state and paid for. Never put it in a browser, a mobile app or a public repository. The CPA and payroll portal on this site calls the API from the server for the same reason.</p>
+        <p>A key can create filings that, once your client approves them, are submitted to a state and paid for. Never build it into a web page, a mobile app or a public repository. The CPA and payroll portal on this site calls the API from the server for the same reason.</p>
       </>
     ),
   },
@@ -45,7 +45,7 @@ export const GUIDES: Guide[] = [
           <li><strong>Firm defaults.</strong> Blanks are filled from the client company&apos;s onboarding answers (registered agent, organizer, approver and so on). A value you send always wins.</li>
           <li><strong>Completeness.</strong> If something is still missing the filing waits in <code>awaiting_information</code>. Send it with <code>POST /v1/filings/{"{id}"}/information</code>.</li>
           <li><strong>Approval.</strong> The client gets a link to a page showing exactly what will be filed and the fees. See <Link href="/docs/approvals">Approvals</Link>.</li>
-          <li><strong>Run.</strong> After approval a worker fills the state site, submits it and collects the documents into <code>artifacts</code>.</li>
+          <li><strong>Run.</strong> After approval a worker fills the state site, checks the fee and the review page against what was approved, pays, submits it and collects the documents into <code>artifacts</code>. If the state&apos;s page changed, the run stops before paying.</li>
         </ol>
         <h2>Idempotency</h2>
         <p><code>idempotencyKey</code> (8 characters or more) makes retries safe: sending the same key again returns the original filing with status <code>200</code> and creates nothing. Use one key per filing you mean to make, such as your own order id.</p>
@@ -60,13 +60,13 @@ export const GUIDES: Guide[] = [
   },
   {
     slug: "filing-types",
-    title: "Filing types and fields",
+    title: "Filing types, fields and state fees",
     summary: "What each state and filing needs, from the state-site walkthroughs.",
     body: () => (
       <>
-        <p>The engine takes one request shape for every state; adapters turn it into each site&apos;s own form. These are the filings the portal collects today, with the state fees seen on each site. Every field the engine accepts, with its type and whether it is required, is in the FilingRequest JSON Schema in <a href="/openapi.json">/openapi.json</a> (also at <code>GET /v1/schema/filing-request</code>). </p>
+        <p>The engine takes one request shape for every state; adapters turn it into each site&apos;s own form. These are the filings the API and the portal take today, with the state fees seen on each site. Not every type can be filed live yet, because some states&apos; checkouts are still being mapped; see <Link href="/#coverage">Coverage</Link> on the home page. Every field the engine accepts, with its type and whether it is required, is in the FilingRequest JSON Schema in <a href="/openapi.json">/openapi.json</a> (also at <code>GET /v1/schema/filing-request</code>). </p>
         <div className="table-wrap"><table><thead><tr><th>Filing</th><th>type / state</th><th>Fees</th></tr></thead><tbody>
-          {FILING_KINDS.map((k) => <tr key={k.id}><td><strong>{k.title}</strong><div className="muted small">{k.summary}</div></td><td><code>{k.type}</code> / <code>{k.state}</code>{k.type === "ein_only" ? <div className="muted small">any formation state</div> : null}</td><td className="small">{k.feeNote}</td></tr>)}
+          {FILING_KINDS.map((k) => <tr key={k.id}><td><strong>{k.title}</strong><div className="muted small">{k.summary}</div></td><td><code>{k.type}</code> / {k.type === "ein_only" ? "the state where the LLC was formed" : <code>{k.state}</code>}</td><td className="small">{k.feeNote}</td></tr>)}
         </tbody></table></div>
         <h2>Fields by area</h2>
         <ul>
@@ -76,7 +76,7 @@ export const GUIDES: Guide[] = [
           <li><code>contact</code> (required): who the state and the filing company write to about the filing.</li>
         </ul>
         <h2>Sensitive fields</h2>
-        <p><code>ein.responsibleParty.ssn</code> and <code>payroll.owners[].ssn</code> are masked on every page and in every log, held only for the run and purged after it completes.</p>
+        <p><code>ein.responsibleParty.ssn</code> and <code>payroll.owners[].ssn</code> are encrypted, masked on approval pages, in API responses, in logs and in recorded screens, and deleted after 30 days.</p>
       </>
     ),
   },
@@ -86,12 +86,12 @@ export const GUIDES: Guide[] = [
     summary: "How the client approves, and what you can show them.",
     body: () => (
       <>
-        <p>Nothing reaches a state site until the client approves it. When a filing is ready, the engine creates an approval and sends its link to the approvers on the client company (or those in <code>approvalRecipients</code>). The link is also returned as <code>approvalLink</code> when you create the filing, and from <code>GET /v1/filings/{"{id}"}</code> while it is open.</p>
-        <p>The approval page shows the full request as it will be filed, with sensitive numbers masked, the state fees and your fee cap. The client approves or asks for changes, and can add a comment. Approval links expire; the page says so and a new filing gets a new link.</p>
+        <p>Nothing is submitted or paid until the client approves it. Where the client approves the state&apos;s own review page, a preview run first fills in the state site up to that page, without submitting. When a filing is ready, the engine creates an approval and sends its link to the approvers on the client company (or those in <code>approvalRecipients</code>). The link is also returned as <code>approvalLink</code> when you create the filing, and from <code>GET /v1/filings/{"{id}"}</code> while it is open.</p>
+        <p>The approval page shows the full request as it will be filed, with sensitive numbers masked, the state fees and your fee cap. Where possible, it also shows a screenshot of the state&apos;s own review page, filled in with this filing; a preview run (status <code>previewing</code>) captures it before the link is sent. The live run goes ahead only if the state shows exactly that page again; if it has changed, the run stops before paying. If you collect approval in your own app, show the same screenshot: <code>filing.awaiting_approval</code> carries <code>data.reviewShotArtifactId</code>, which you download with <code>GET /v1/artifacts/{"{id}"}</code>. The client approves or asks for changes, and can add a comment. Approval links expire; the page says so and a new filing gets a new link.</p>
         <h2>Changes requested</h2>
         <p>The filing moves to <code>changes_requested</code> and <code>filing.changes_requested</code> carries the comment. Correct the request and create a new filing with a new idempotency key.</p>
         <h2>Signatures and attestations</h2>
-        <p>Some state forms ask for a typed signature, an attestation tick or a payment authorization. The client grants each one on the approval page; the portal intake also records them with who granted them and when, under <code>intake.portal.authorizations</code>.</p>
+        <p>Some state forms ask for a typed signature, an attestation checkbox or a payment authorization. The client grants each one on the approval page; the portal intake also records them with who granted them and when, under <code>intake.portal.authorizations</code>.</p>
       </>
     ),
   },
@@ -148,11 +148,12 @@ def verify(secret: str, header: str, raw_body: bytes, tolerance: int = 300) -> b
     summary: "Status codes and the error body.",
     body: () => (
       <>
-        <p>Errors are JSON with an <code>error</code> message, and <code>issues</code> when there is more than one problem.</p>
+        <p>Errors are JSON with an <code>error</code> message. Validation errors (422) also carry <code>issues</code>, one entry per problem, each with a <code>path</code>, <code>message</code> and <code>severity</code>.</p>
         <Code>{`{ "error": "validation failed", "issues": [ { "path": "formation.county", "message": "county is required in NY", "severity": "error" } ] }`}</Code>
         <div className="table-wrap"><table><thead><tr><th>Code</th><th>Meaning</th></tr></thead><tbody>
           <tr><td>400</td><td>The request body is not valid JSON.</td></tr>
           <tr><td>401</td><td>No API key, or the key is revoked or unknown.</td></tr>
+          <tr><td>402</td><td>A live filing needs an active subscription; dry runs (practice filings) are free. See <code>GET /v1/account/billing</code>.</td></tr>
           <tr><td>403</td><td>The key is valid but not for this tenant or action.</td></tr>
           <tr><td>404</td><td>Not found, or it belongs to another tenant.</td></tr>
           <tr><td>409</td><td>A conflict: the filing isn&apos;t in the state this call needs, an id or slug is taken, or a limit is reached.</td></tr>
@@ -176,7 +177,7 @@ def verify(secret: str, header: str, raw_body: bytes, tolerance: int = 300) -> b
           <li>Save it with <code>POST /v1/signatures</code>. The image is encrypted and never returned; you get its <code>id</code>.</li>
           <li>Put that id in <code>paperUpload.signatureId</code>. The signer named on the form must be the person who saved it.</li>
         </ol>
-        <p>The engine places the signature on the form only during a live run of a filing the client approved, and only if the filing is unchanged since that approval. A dry run uploads an unsigned copy marked as not for filing. A live run that can&apos;t sign stops before uploading. Revoke a signature with <code>DELETE /v1/signatures/{"{id}"}</code>.</p>
+        <p>The engine places the signature on the form only during a live run of a filing the client approved, and only if the filing is unchanged since that approval. A dry run uses an unsigned copy marked as not for filing and stops before the final submit. A live run that can&apos;t sign stops before uploading. Revoke a signature with <code>DELETE /v1/signatures/{"{id}"}</code>.</p>
         <h2>Fees</h2>
         <p>Application for Authority is $225. A Certificate of Assumed Name is $25, plus, for a corporation, $100 for each New York City county and $25 for each other county. Expedited handling and copies are added.</p>
       </>
@@ -191,7 +192,7 @@ def verify(secret: str, header: str, raw_body: bytes, tolerance: int = 300) -> b
         <p>Each client company can have a portal on this site at <code>/p/&lt;slug&gt;</code>, in the firm&apos;s own name, logo and color. Firm staff start filings, follow their status and send their own clients intake links. Clients fill in a branded form and never see your API key.</p>
         <ol>
           <li>On the dashboard, open <Link href="/dashboard/firms">Firms</Link> and set the firm&apos;s portal slug, name, logo, color and which filings it offers.</li>
-          <li>Create a staff invite link for each person at the firm. The link signs them in to that firm&apos;s portal only.</li>
+          <li>Invite each person at the firm by email. The invitation lets them choose a password within 7 days, then log in to that firm&apos;s portal only.</li>
           <li>From the portal, staff fill in a filing themselves or send a client an intake link for one filing.</li>
         </ol>
         <p>Every portal filing goes through the same approval as an API filing.</p>

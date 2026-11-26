@@ -27,7 +27,7 @@ afterAll(async () => { await app.close(); });
 
 async function partner(companyName: string, address: string) {
   await app.inject({ method: "POST", url: "/v1/signups/partner", payload: { companyName, companyType: "cpa", name: "Pat Rivera", email: address, password: PW } });
-  const token = new URL([...mail].reverse().find((m) => m.subject === "Confirm your email")!.link!).searchParams.get("token");
+  const token = new URL([...mail].reverse().find((m) => m.subject === "Confirm your email for CoFile")!.link!).searchParams.get("token");
   await app.inject({ method: "POST", url: "/v1/auth/verify-email", payload: { token } });
   const s = (await app.inject({ method: "POST", url: "/v1/auth/sign-in", payload: { email: address, password: PW } })).json();
   return { key: s.sessionKey as string, firm: s.user.clientCompanyId as string };

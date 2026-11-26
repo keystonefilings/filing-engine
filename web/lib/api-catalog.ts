@@ -41,7 +41,7 @@ export const ENDPOINTS: Endpoint[] = [
   {
     id: "create-filing", method: "POST", path: "/v1/filings", group: "Filings", auth: "api_key",
     summary: "Create a filing",
-    description: "Validates the request, fills blanks from the firm's onboarding answers, checks completeness and fees, and sends the client an approval link. Nothing reaches a state site until the client approves. Sending the same idempotencyKey again returns the original filing with status 200.",
+    description: "Validates the request, fills blanks from the firm's onboarding answers, checks completeness and fees, and sends the client an approval link. Nothing is submitted or paid until the client approves; a preview run may first fill in the state site to capture its review page. Sending the same idempotencyKey again returns the original filing with status 200.",
     body: "FilingRequest", bodyExample: EXAMPLE_FILING,
     responses: [
       { status: 201, description: "Created. `approvalLink` is set when the filing is waiting for the client's approval.", example: { filing: FILING_OUT, approvalLink: "https://api.example.com/approve/…", issues: [] } },
@@ -49,7 +49,7 @@ export const ENDPOINTS: Endpoint[] = [
       { status: 401, description: "Missing or invalid API key." },
       { status: 403, description: "tenantId in the body is not your tenant." },
       { status: 422, description: "Validation failed. `issues` lists each problem with its path.", example: { error: "validation failed", issues: [{ path: "formation.county", message: "county is required in NY", severity: "error" }] } },
-      { status: 402, description: "A live filing needs an active subscription (practice filings are free).", example: { error: "a subscription is needed to file for real (practice filings are free)", billing: { plan: "enterprise", status: "none" } } },
+      { status: 402, description: "A live filing needs an active subscription (practice filings are free).", example: { error: "a subscription is needed for live filings (dry runs are free)", billing: { plan: "enterprise", status: "none" } } },
     ],
   },
   {
@@ -197,7 +197,7 @@ export const ENDPOINTS: Endpoint[] = [
   {
     id: "billing", method: "GET", path: "/v1/account/billing", group: "Account", auth: "api_key",
     summary: "Your subscription",
-    description: "Plan, price and status of the subscription that pays for live filings. With billing required, creating a live filing without a subscription in good standing (active, trialing or past_due) returns 402; practice filings are always free. Subscribe and manage billing in the dashboard.",
+    description: "Plan, price and status of the subscription that pays for live filings. Prices aren't set yet, so the amounts in the example are placeholders. With billing required, creating a live filing without a subscription in good standing (active, trialing or past_due) returns 402; practice filings are always free. Subscribe and manage billing in the dashboard.",
     responses: [{ status: 200, description: "The subscription.", example: { billed: true, plan: "enterprise", status: "active", canFileLive: true, required: true, configured: true, price: { amount: 49900, currency: "usd", interval: "month" }, currentPeriodEnd: "2026-12-25T00:00:00.000Z", cancelAtPeriodEnd: false } }],
   },
   {
@@ -228,7 +228,7 @@ export const ENDPOINTS: Endpoint[] = [
     summary: "Replace your webhook endpoints",
     description: "Sends the whole list (up to 10). An endpoint that keeps its URL keeps its secret. A new endpoint without a `secret` gets one generated, returned once in `generatedSecrets`. URLs must be public https.",
     body: "{ endpoints: [{ url, secret?, events? }] }", bodyExample: { endpoints: [{ url: "https://hooks.example.com/cofile", events: ["filing.awaiting_approval", "filing.completed", "filing.failed"] }] },
-    responses: [{ status: 200, description: "Saved.", example: { endpoints: [{ url: "https://hooks.example.com/cofile", secretHint: "…9f2a" }], generatedSecrets: [{ url: "https://hooks.example.com/cofile", secret: "whsec_…" }] } }, { status: 409, description: "Your tenant isn't set up yet; ask the platform team." }, { status: 422, description: "A URL is not public https, or is listed twice." }],
+    responses: [{ status: 200, description: "Saved.", example: { endpoints: [{ url: "https://hooks.example.com/cofile", secretHint: "…9f2a" }], generatedSecrets: [{ url: "https://hooks.example.com/cofile", secret: "whsec_…" }] } }, { status: 409, description: "Your tenant isn't set up yet; ask us." }, { status: 422, description: "A URL is not public https, or is listed twice." }],
   },
   {
     id: "list-events", method: "GET", path: "/v1/events", group: "Webhooks", auth: "none",
@@ -273,13 +273,14 @@ export const FILING_STATUSES: { status: string; meaning: string }[] = [
   { status: "created", meaning: "Received." },
   { status: "invalid", meaning: "Validation failed; see lastError and the filing.invalid event." },
   { status: "awaiting_information", meaning: "Something is missing; supply it with POST /v1/filings/{id}/information." },
+  { status: "previewing", meaning: "A preview run is capturing the state's review page for the client to approve; the approval link follows." },
   { status: "awaiting_approval", meaning: "Waiting for the client to approve on the approval page." },
   { status: "changes_requested", meaning: "The client asked for changes. Create a corrected filing with a new idempotency key." },
   { status: "approved", meaning: "Approved; a run is queued." },
   { status: "blocked", meaning: "Held by a policy, fee cap or site problem, or approved and waiting for a saved card's security code (awaitingCardCode is set)." },
   { status: "queued", meaning: "Waiting for a worker." },
   { status: "running", meaning: "The state site is being filled in." },
-  { status: "awaiting_drift_review", meaning: "The state site changed; the platform team is checking the map." },
+  { status: "awaiting_drift_review", meaning: "The state site changed; CoFile is checking the change before the run continues." },
   { status: "awaiting_name_resolution", meaning: "The name was taken; alternatives are being offered." },
   { status: "awaiting_review_gate", meaning: "Stopped before submit for a staff check." },
   { status: "ein_filed", meaning: "The EIN was issued (EIN filings, or formation with EIN in the run)." },
@@ -288,7 +289,7 @@ export const FILING_STATUSES: { status: string; meaning: string }[] = [
   { status: "rejected", meaning: "The state rejected it." },
   { status: "completed", meaning: "Done; documents are in artifacts." },
   { status: "failed", meaning: "The run failed; see lastError." },
-  { status: "aborted", meaning: "Stopped by staff." },
+  { status: "aborted", meaning: "Cancelled with POST /v1/filings/{id}/cancel, or stopped by staff." },
   { status: "needs_reconciliation", meaning: "Unclear whether the state received it; staff are checking before anything is retried." },
 ];
 

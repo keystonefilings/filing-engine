@@ -45,7 +45,7 @@ export function RoutingForm({ action, methods, routing, kinds }: { action: Actio
           <div className="field" key={k.id}><label>{k.title}</label><CardSelect name={`kind.${k.id}`} value={routing.byFilingKind[k.id]} cards={fee} label={k.title} /></div>
         )) : null}
       </fieldset>
-      {!methods.length ? <p className="help" style={{ marginBottom: 10 }}>No card saved yet: add one above. Your choices here are saved now.</p> : null}
+      {!methods.length ? <p className="help" style={{ marginBottom: 10 }}>No cards saved yet. Add a card, then choose which card pays for what. You can save these choices now and pick cards later.</p> : null}
       <button className="btn primary" type="submit" disabled={pending}>{pending ? "Saving…" : "Save payment settings"}</button>
     </form>
   );

@@ -37,7 +37,7 @@ export function missingAuthorizations(req: Pick<FilingRequest, "intake">, ids: r
 export function requireAuthorizations(req: Pick<FilingRequest, "intake">, ids: readonly string[], where: string): GrantedAuthorization[] {
   const missing = missingAuthorizations(req, ids);
   if (missing.length) {
-    throw new Error(`${where} needs the client's own attestation (${missing.join(", ")}); it is not on file for this filing, so nothing was ticked`);
+    throw new Error(`${where} needs the client's own attestation (${missing.join(", ")}); it is not on file for this filing, so nothing was checked`);
   }
   return ids.map((id) => grantedAuthorization(req, id)!);
 }

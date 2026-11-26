@@ -123,6 +123,11 @@ export class FilingService {
     return expectedFees(req.state, req.type, feeOptionsFor(req, tenant, client));
   }
 
+  /** A practice filing (dry run): it goes through the government site and stops before submitting. */
+  isPractice(req: Pick<FilingRequestT, "dryRun">): boolean {
+    return req.dryRun ?? this.d.dryRunDefault;
+  }
+
   /** POST /v1/filings: validate, store, create the approval, emit awaiting_approval. Idempotent per tenant+key. */
   async createFiling(raw: unknown): Promise<{ filing: FilingRecord; approvalLink?: string; issues: ValidationIssue[]; existing: boolean }> {
     const r0 = (raw ?? {}) as Record<string, unknown>;
@@ -290,6 +295,7 @@ export class FilingService {
     await this.emit("filing.awaiting_approval", f, {
       approvalLink: link, expiresAt: approval.expiresAt, recipients: approval.recipients, fees, feeCapUsd: approval.feeCapUsd,
       einInRun: !!req.ein && req.ein.mode === "in_run",
+      dryRun: this.isPractice(req),
       registeredAgent: ra ? { source: ra.source, provider: ra.provider, costUsd: ra.costUsd, pending: ra.pendingProcurement ?? false } : undefined,
       ...(extra.review ? { reviewPage: true, reviewShotArtifactId: extra.review.artifactId } : {}),
       ...(extra.reason ? { reason: extra.reason } : {}),

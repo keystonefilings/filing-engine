@@ -41,7 +41,7 @@ export async function submitIntake(kind: FilingKind, fd: FormData, ctx: SubmitCo
     if (choice === NEW_SIGNATURE.choice) {
       const image = raw[NEW_SIGNATURE.image] ?? "";
       if (!image) issues.push({ path: sig.path, message: "Signature: please sign in the box" });
-      if (raw[NEW_SIGNATURE.consent] !== "on") issues.push({ path: sig.path, message: "Signature: please tick the box to adopt it" });
+      if (raw[NEW_SIGNATURE.consent] !== "on") issues.push({ path: sig.path, message: "Signature: please check the box to adopt it" });
       if (!signer) issues.push({ path: sig.signerPath, message: "Signer's name: required before signing" });
     } else if (choice && !ctx.allowSavedSignature) {
       issues.push({ path: sig.path, message: "Signature: please sign in the box" });

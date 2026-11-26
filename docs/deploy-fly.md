@@ -252,7 +252,7 @@ curl -fsS -X PUT https://keystone-filing-engine.fly.dev/v1/tenants/keystone -H "
 ```
 
 ```bash
-curl -fsS -X PUT https://keystone-filing-engine.fly.dev/v1/client-companies/keystone-direct -H "x-api-key: $(cat ~/fe-api-key)" -H "content-type: application/json" -d '{"name":"Keystone direct clients","einMode":"in_run"}'
+curl -fsS -X PUT https://keystone-filing-engine.fly.dev/v1/client-companies/keystone-direct -H "x-api-key: $(cat ~/fe-api-key)" -H "content-type: application/json" -d '{"name":"CoFile direct clients","einMode":"in_run"}'
 ```
 
 The full settings (organizer, filer, registered agents, webhook endpoints, admin channels) go

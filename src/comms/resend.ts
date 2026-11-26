@@ -17,7 +17,7 @@ export function renderEmail(msg: OutboundMessage): { text: string; html: string 
   const paragraphs = msg.body.split(/\n{2,}/).map((p) => p.trim()).filter(Boolean);
   const text = [...paragraphs, ...(msg.link ? [msg.link] : [])].join("\n\n");
   const button = msg.link
-    ? `<p style="margin:24px 0"><a href="${escapeHtml(msg.link)}" style="background:#1f4fd1;color:#ffffff;padding:10px 18px;border-radius:6px;text-decoration:none;display:inline-block">Open</a></p>`
+    ? `<p style="margin:24px 0"><a href="${escapeHtml(msg.link)}" style="background:#1f4fd1;color:#ffffff;padding:10px 18px;border-radius:6px;text-decoration:none;display:inline-block">${escapeHtml(msg.linkLabel ?? "Open")}</a></p>`
       + `<p style="color:#555;font-size:13px">Or paste this link into your browser:<br>${escapeHtml(msg.link)}</p>`
     : "";
   const html = `<div style="font-family:-apple-system,Segoe UI,Helvetica,Arial,sans-serif;font-size:15px;line-height:1.5;color:#111;max-width:560px">`

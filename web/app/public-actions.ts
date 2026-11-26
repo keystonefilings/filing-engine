@@ -19,5 +19,5 @@ export async function submitPublic(tenantId: string, firmSlug: string, serviceSl
     allowSavedSignature: false, idempotencySeed: nonce,
   });
   if (!r.ok) return r.error?.includes("429") ? { ok: false, error: "This page has had a lot of submissions in the last hour. Try again later, or contact the firm.", issues: [] } : r;
-  return { ok: true, message: "We have your answers. You'll get an email with the state's own page to check and approve before anything is sent to the state." };
+  return { ok: true, title: "Thank you, we have your details.", message: "Next, we'll email a link to check and approve everything. Nothing is filed or paid until it's approved. You can close this page." };
 }

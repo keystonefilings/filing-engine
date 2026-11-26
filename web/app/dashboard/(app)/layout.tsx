@@ -13,14 +13,14 @@ export default async function DashboardLayout({ children }: { children: React.Re
     <>
       <TopBar brand={platformName()} href="/dashboard"
         links={[
-          { href: "/dashboard", label: "Overview" }, { href: "/dashboard/filings", label: "Filings" }, { href: "/dashboard/firms", label: "Firms" },
+          { href: "/dashboard", label: "Overview" }, { href: "/dashboard/filings", label: "Filings" }, { href: "/dashboard/pay", label: "Ready to pay" }, { href: "/dashboard/firms", label: "Firms" },
           { href: "/dashboard/keys", label: "API keys" }, { href: "/dashboard/webhooks", label: "Webhooks" },
           { href: "/dashboard/setup", label: "Setup" }, { href: "/dashboard/team", label: "Team" },
           ...(isPlatformTenant(s.tenantId) ? [] : [{ href: "/dashboard/billing", label: "Billing" }]),
           ...(isPlatformTenant(s.tenantId) ? [{ href: "/dashboard/partners", label: "Sign-ups" }] : []),
           { href: "/docs", label: "Docs" },
         ]}
-        right={<form action="/logout" method="post" className="row">{personalSession(s) ? <Link className="small muted" href="/dashboard/password" title="Change password">{s.email ?? s.name}</Link> : <span className="small muted">{s.email ?? s.name}</span>}<button className="btn small" type="submit">Sign out</button></form>} />
+        right={<form action="/logout" method="post" className="row">{personalSession(s) ? <Link className="small muted" href="/dashboard/password" title="Change password">{s.email ?? s.name}</Link> : <span className="small muted">{s.email ?? s.name}</span>}<button className="btn small" type="submit">Log out</button></form>} />
       <main className="wrap">{children}</main>
     </>
   );

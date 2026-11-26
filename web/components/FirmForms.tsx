@@ -22,14 +22,14 @@ export function PortalForm({ action, portal, kinds, firmName, logoSrc }: { actio
       <form {...formProps} className="card">
         {state ? <p className={`notice ${state.ok ? "ok" : "bad"}`} role="status">{state.message}</p> : null}
         <label className="choice"><input type="checkbox" name="portalOn" checked={on} onChange={(e) => setOn(e.target.checked)} /><span><b>This firm has a portal</b></span></label>
-        <p className="help">{portal?.slug ? <>Its address is <code>/p/{portal.slug}</code>.</> : "Its address is made from the firm's name when you save."} Unticking turns the portal off.</p>
+        <p className="help">{portal?.slug ? <>Its address is <code>/p/{portal.slug}</code>.</> : "Its address is made from the firm's name when you save."} Unchecking turns the portal off.</p>
         {on ? (
           <>
             <div className="field"><label htmlFor="dn">Name shown on the portal</label><input id="dn" name="displayName" type="text" maxLength={80} value={name} onChange={(e) => setName(e.target.value)} placeholder={firmName} /></div>
             <LogoField current={logoSrc} currentLink={portal?.logoArtifactId ? undefined : portal?.logoUrl} onPreview={setLogo} />
             <div className="field-row n2">
-              <ColorField id="color" name="primaryColor" label="Main color" value={color} onChange={setColor} help="Buttons and the top of the page." />
-              <ColorField id="color2" name="secondaryColor" label="Second color" value={color2} onChange={setColor2} help="Links and highlights." />
+              <ColorField id="color" name="primaryColor" label="Main color" value={color} onChange={setColor} help="Buttons and the top of the page. Button text is white, so choose a dark color." />
+              <ColorField id="color2" name="secondaryColor" label="Second color" value={color2} onChange={setColor2} help="Links and highlights. Choose a color that's easy to read on white." />
             </div>
             <div className="field"><label htmlFor="support">Support email shown to clients</label><input id="support" name="supportEmail" type="email" defaultValue={portal?.supportEmail} /></div>
             <label className="choice"><input type="checkbox" name="publicPages" defaultChecked={portal?.publicPages} /><span><b>Public pages and website widget</b><br /><span className="small muted">A page per service anyone can fill in, and code to put the form on the firm&apos;s own website. Each submission becomes a filing for this firm and goes through approval as usual.</span></span></label>

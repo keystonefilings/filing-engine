@@ -250,7 +250,7 @@ export function buildRequest(kind: FilingKind, raw: Raw, ctx: BuildContext): Bui
     const value = raw[v.name];
     const required = v.field.required === true || (v.field.required === "withSiblings" && siblingFilled(v, vis, raw));
     if (required && isEmpty(v.field, value)) {
-      issues.push({ path: v.name, message: v.field.type === "checkbox" ? `${v.field.label}: please tick this` : `${v.field.label}: required` });
+      issues.push({ path: v.name, message: v.field.type === "checkbox" ? `${v.field.label}: please check this box` : `${v.field.label}: required` });
       continue;
     }
     if (value === undefined) continue;

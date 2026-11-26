@@ -1,6 +1,6 @@
 import { randomUUID } from "node:crypto";
 import { notFound } from "next/navigation";
-import { brandOf, brandStyle, offeredKinds } from "@/lib/firm";
+import { brandOf, brandStyle, liveFilings, offeredKinds } from "@/lib/firm";
 import { platformName } from "@/lib/brand";
 import { firmBySlug, kindForServiceSlug, publicKind } from "@/lib/public-pages";
 import { withFirmDefaults } from "@/lib/firm-defaults";
@@ -20,11 +20,14 @@ export async function PublicIntake({ tenantId, firm, service, embed = false }: {
   const nonce = randomUUID();
   const body = (
     <>
+      {!liveFilings() ? <p className="notice warn">Practice mode: nothing sent from this page will be filed or paid yet.</p> : null}
       <h1>{kind.title}</h1>
-      <p className="muted">{kind.summary} After you send this, you&apos;ll get the state&apos;s own page to check, and nothing is filed until it&apos;s approved.</p>
+      <p className="muted">{kind.summary} {kind.type === "ein_only"
+        ? <>After you send this, we&apos;ll email a link to check and approve exactly what will be sent to the IRS. Nothing is filed until it&apos;s approved.</>
+        : <>After you send this, we&apos;ll email a link to check and approve exactly what will be filed, on the state&apos;s own review page where possible. Nothing is filed or paid until it&apos;s approved.</>}</p>
       {kind.feeNote ? <p className="small">{kind.feeNote}</p> : null}
-      <IntakeForm kind={form} prefill={prefill} nonce={nonce} action={submitPublic.bind(null, tenantId, firm, service, nonce)} submitLabel="Send" />
-      {brand.supportEmail ? <p className="small muted">Questions? Email <a href={`mailto:${brand.supportEmail}`}>{brand.supportEmail}</a>.</p> : null}
+      <IntakeForm kind={form} prefill={prefill} nonce={nonce} action={submitPublic.bind(null, tenantId, firm, service, nonce)} submitLabel="Send for approval" filerName={company.partner ? `${brand.name}, filing through ${platformName()}` : undefined}
+        footnote={brand.supportEmail ? <p className="small muted">Questions about this form? Email {brand.name} at <a href={`mailto:${brand.supportEmail}`}>{brand.supportEmail}</a>.</p> : undefined} />
     </>
   );
   return (

@@ -22,14 +22,14 @@ function fakeFetch(respond: (url: string, init: RequestInit) => Response | Promi
 describe("Resend email sender (V1)", () => {
   it("posts the message to Resend with the key, sender and both text and HTML", async () => {
     const f = fakeFetch(() => Response.json({ id: "msg_1" }));
-    const s = new ResendEmailSender({ apiKey: "re_test", from: "Keystone Filings <filings@keystonefilings.com>", replyTo: "help@keystonefilings.com", fetchImpl: f.impl });
+    const s = new ResendEmailSender({ apiKey: "re_test", from: "Keystone Filings <filings@keystonefilings.com>", replyTo: "help@cofile.app", fetchImpl: f.impl });
     const res = await s.send({ address: "pat@rivera-cpa.test", name: "Pat Rivera" }, { subject: "Approve: NJ formation", body: "Please review.", link: "https://api.test/approve/tok" });
     expect(res).toEqual({ ok: true, detail: "resend msg_1" });
     expect(f.calls[0]!.url).toBe("https://api.resend.com/emails");
     expect((f.calls[0]!.init.headers as Record<string, string>).authorization).toBe("Bearer re_test");
     expect(f.calls[0]!.body).toMatchObject({
       from: "Keystone Filings <filings@keystonefilings.com>", to: ["Pat Rivera <pat@rivera-cpa.test>"],
-      subject: "Approve: NJ formation", reply_to: "help@keystonefilings.com",
+      subject: "Approve: NJ formation", reply_to: "help@cofile.app",
     });
     expect(f.calls[0]!.body.text).toBe("Please review.\n\nhttps://api.test/approve/tok");
     expect(f.calls[0]!.body.html).toContain('href="https://api.test/approve/tok"');
@@ -173,7 +173,7 @@ describe("account emails that the pages promise (V1, V6)", () => {
     try {
       const s = await srv.inject({ method: "POST", url: "/v1/signups/partner", payload: { companyName: "Rivera CPA", companyType: "cpa", name: "Pat Rivera", email: "pat@rivera.test", password: PW } });
       expect(s.statusCode).toBe(202);
-      expect(box.sent.map((m) => m.msg.subject)).toEqual(["Confirm your email"]);
+      expect(box.sent.map((m) => m.msg.subject)).toEqual(["Confirm your email for CoFile"]);
       const id = (await srv.inject({ method: "GET", url: "/v1/partner-signups", headers: { "x-api-key": "k1" } })).json().signups[0].id as string;
       const d = await srv.inject({ method: "POST", url: `/v1/partner-signups/${id}/decision`, payload: { action: "approve" }, headers: { "x-api-key": "k1" } });
       expect(d.statusCode).toBe(200);
@@ -229,7 +229,7 @@ describe("enterprise requests: approve creates the account (V32)", () => {
     expect(d.statusCode).toBe(201);
     expect(d.json().tenantId).toBe("hale-filing-services");
     const mail = outbox.sent.find((m) => m.address === "morgan@hale-filings.test")!;
-    expect(mail.msg.subject).toBe("Your account is ready");
+    expect(mail.msg.subject).toBe("Your CoFile account is ready");
     // Nobody knows the password until Morgan sets it.
     const token = new URL(mail.msg.link!).searchParams.get("token")!;
     expect((await post("/v1/auth/password-reset/confirm", { token, password: NEW_PW })).statusCode).toBe(200);

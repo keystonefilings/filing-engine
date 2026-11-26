@@ -220,6 +220,9 @@ Built and tested; each switches on when its accounts and keys are set (steps in 
 - **Google:** an OAuth client for "Continue with Google" (V37).
 - **Slack:** a Slack app with the `/file` command (V41).
 - **Twilio:** a number with A2P 10DLC registration, and a WhatsApp sender (Meta verification) (V42-V43).
+- **Copy decisions:** 19 questions only you (and counsel, for the legal texts) can answer, from
+  the copy review: docs/copy-review-2026-11-26.md (price wording, who "the filing company" is,
+  consent scope, terms and privacy pages, support channel, and more), each with a recommendation.
 - **Live walks with you:** NY drawdown deposit and post-submit pages, Sunbiz checkout, the IRS
   Assignment screen, the NJ checkout (V9-V12); the checkout walks also let the adapters type saved
   cards (V18). Also the pages V13 and V14 couldn't map: each NY record filing's confirmation, the NJ
@@ -282,7 +285,7 @@ Built and tested; each switches on when its accounts and keys are set (steps in 
 - [x] V43. SMS through Twilio with 10DLC registration (row 6). **Done**: people add their mobile number under their account and confirm it with a texted code; a text from that number becomes a request and Twilio's reply carries the link. Twilio's signature is checked; unknown numbers get no answer; a number belongs to one account. Checked end to end with stand-ins for Twilio, Slack and the Claude API. *Needs from you: a Twilio number with A2P 10DLC registration.*
 
 ### Step 7: copy and release hygiene
-- [ ] V44. 20-persona copy review of the full site, best recommendations applied (row 29). *Nov 25: run as 20 separate reviewers, then merge the best changes.*
+- [x] V44. 20-persona copy review of the full site, best recommendations applied (row 29). *Nov 25: run as 20 separate reviewers, then merge the best changes.* **Done**: 20 separate reviewers, 599 findings, 150 changes kept and 148 applied (263 edits), checked by the tests and in the browser; the coverage table brought up to date. Results, the shared glossary and 19 decisions for you (with recommendations): docs/copy-review-2026-11-26.md.
 - [x] V45. CI on push to `main`, and a test gate before the Fly deploy (risk 7). **Done**: `test.yml` runs on pull requests, pushes to `main` and before each deploy; `fly-deploy.yml` deploys only after it passes.
 
 ### Found while building

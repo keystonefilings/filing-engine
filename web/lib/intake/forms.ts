@@ -85,6 +85,8 @@ export interface FilingKind {
   map: string;
   /** State fees from the walkthrough, for the client's information (the engine's fee check is what counts). */
   feeNote?: string;
+  /** A required step or cost outside this filing, shown below the fee line. */
+  feeAside?: string;
   sections: Section[];
   authorizations: Authorization[];
   /** What the engine or the walkthrough does not cover yet. */
@@ -157,7 +159,8 @@ const nyLlc: FilingKind = {
   state: "NY",
   constants: { formation: { entityType: "LLC" } },
   map: NY_DOS,
-  feeNote: "State filing fee $200. Optional: plain copy $5, certified copy $10, certificate of existence $25.",
+  feeNote: "State filing fee $200, paid only after the filing is approved. Optional: plain copy $5, certified copy $10, certificate of existence (proof the LLC exists and is in good standing) $25.",
+  feeAside: "New York also requires a new LLC to publish a notice of its formation within 120 days. That's a separate step with its own costs and isn't part of this filing.",
   sections: [
     {
       title: "Name",
@@ -172,24 +175,24 @@ const nyLlc: FilingKind = {
       title: "Articles",
       ref: "Screen D2: LLC main form",
       items: [
-        f("formation.county", "County where the LLC's office will be", "select", { required: true, options: opts(...NY_COUNTIES), ref: "Screen D2, County" }),
+        f("formation.county", "County where the LLC's office will be", "select", { required: true, options: opts(...NY_COUNTIES), help: "Where the LLC will be based; if you work from home, use your home county. In New York City, Manhattan is New York County, Brooklyn is Kings and Staten Island is Richmond.", ref: "Screen D2, County" }),
         f("intake.portal.nyIncludePurposes", "Include the standard \"any lawful act or activity\" purpose clause", "checkbox", { defaultValue: "on", ref: "Screen D2, Purposes (optional)" }),
         f("formation.purpose", "Specific purpose (optional)", "textarea", { maxLength: 300, ref: "Screen D2, Purposes" }),
-        f("formation.managementStructure", "Managed by", "radio", { required: true, options: lv([["member_managed", "Its members"], ["manager_managed", "One or more managers"]]), ref: "Screen D2, Management Structure" }),
+        f("formation.managementStructure", "Managed by", "radio", { required: true, options: lv([["member_managed", "Its members"], ["manager_managed", "One or more managers"]]), help: "Members are the LLC's owners. Choose \"Its members\" if the owners will run the business; choose managers if people you appoint (owners or not) will run it.", ref: "Screen D2, Management Structure" }),
         f("intake.portal.nyManagementByClass", "Members or managers are organized in classes", "checkbox", { help: "Picks \"a class or classes of\" members or managers on the form.", ref: "Screen D2, Management Structure" }),
         f("formation.effectiveDate", "Effective date", "radio", { required: true, defaultValue: "upon_filing", options: lv([["upon_filing", "When filed"], ["specific", "On a later date"]]), ref: "Screen D2, Effective Date" }),
         f("formation.effectiveDateValue", "Effective on", "date", { required: true, showIf: { path: "formation.effectiveDate", equals: "specific" }, ref: "Screen D2, Effective Date" }),
         f("formation.dissolutionDate", "Latest date to dissolve (leave blank for perpetual existence)", "date", { ref: "Screen D2, Dissolution Date" }),
         f("intake.portal.nyLiabilityStatement", "Include the indemnification (liability) statement", "checkbox", { ref: "Screen D2, Liability Statement" }),
-        f("intake.portal.nyOpeningStatement", "Include the opening statement (organizer is a person 18 or older)", "checkbox", { help: "Leave unticked when the organizer is a company.", ref: "Screen D2, Opening Statement" }),
+        f("intake.portal.nyOpeningStatement", "Include the opening statement (organizer is a person 18 or older)", "checkbox", { help: "Leave unchecked when the organizer is a company.", ref: "Screen D2, Opening Statement" }),
       ],
     },
     {
       title: "Service of process",
       ref: "Screen D2: Service of Process",
-      help: "Where the Secretary of State forwards legal papers served on the LLC.",
+      help: "New York's Secretary of State accepts legal papers (service of process) for the LLC, for example if it is sued, and mails a copy to this name and address. Use an address where mail is read promptly.",
       items: [
-        f("formation.serviceOfProcess.mode", "Send legal papers to", "radio", { required: true, defaultValue: "manual", options: lv([["manual", "A name and address I enter (often \"The LLC\" at its address)"], ["service_company", "A registered service company"]]), ref: "Screen D2, SOP Select One" }),
+        f("formation.serviceOfProcess.mode", "Send legal papers to", "radio", { required: true, defaultValue: "manual", options: lv([["manual", "A name and address I enter (often \"The LLC\" at its address)"], ["service_company", "A service company that receives legal papers for businesses (if you've hired one)"]]), ref: "Screen D2, SOP Select One" }),
         f("formation.serviceOfProcess.person.name", "Name", "text", { required: true, defaultValue: "THE LLC", showIf: { path: "formation.serviceOfProcess.mode", equals: "manual" }, ref: "Screen D2, SOP Name" }),
         ...address("formation.serviceOfProcess.person.address", "Mailing address", { required: true, state: "NY", ref: "Screen D2, SOP address", showIf: { path: "formation.serviceOfProcess.mode", equals: "manual" } }),
         f("formation.serviceOfProcess.serviceCompany", "Service company name, as registered with DOS", "text", { required: true, showIf: { path: "formation.serviceOfProcess.mode", equals: "service_company" }, ref: "Screen D2, Select Service Company" }),
@@ -200,7 +203,7 @@ const nyLlc: FilingKind = {
     {
       title: "Registered agent (optional)",
       ref: "Screen D2: Registered Agent",
-      help: "New York doesn't require one. Leave blank unless the LLC has a registered agent in New York.",
+      help: "Optional in New York: the Secretary of State already accepts legal papers for the LLC (see Service of process). Fill this in only if you've hired a registered agent.",
       items: [
         f("formation.registeredAgent.name", "Agent name", "text", { required: "withSiblings", ref: "Screen D2, RA Name" }),
         ...address("formation.registeredAgent.address", "Agent address", { state: "NY", ref: "Screen D2, RA address" }),
@@ -209,7 +212,7 @@ const nyLlc: FilingKind = {
     {
       title: "Organizer and filer",
       ref: "Screen D2: Organizer, Signature, Filer",
-      help: "Leave blank to use the filing company's details (its organizer and filer on record).",
+      help: "The organizer signs the Articles that create the LLC. It can be the owner or the person filing for them, and being the organizer doesn't make someone an owner. The filer is who the state sends the filing receipt to. Leave blank to use the filing company's details (its organizer and filer on record).",
       items: [
         f("formation.organizer.name", "Organizer name", "text", { required: "withSiblings", help: "This name is typed as the organizer's signature.", ref: "Screen D2, Organizer / Signature" }),
         ...address("formation.organizer.address", "Organizer address", { ref: "Screen D2, Organizer" }),
@@ -236,7 +239,7 @@ const nyLlc: FilingKind = {
   ],
   authorizations: [
     { id: "ny-signature", ref: "Screen D2, Signature (STOP)", text: "I authorize the filing company to type the organizer's name as the organizer's signature on these Articles of Organization and to certify that the statements in them are true and correct." },
-    { id: "ny-payment", ref: "Screen F, Payment Authorization (STOP)", text: "I authorize the filing company to authorize payment of the state fee shown on the approval page. The Department of State does not refund fees." },
+    { id: "ny-payment", ref: "Screen F, Payment Authorization (STOP)", text: "I authorize the filing company to pay the state fee shown on the approval page. The Department of State does not refund fees." },
   ],
   gaps: [
     "The page after File Document (the filing receipt) is not mapped, so the filing runs as a dry run.",
@@ -279,9 +282,9 @@ const nyCorp: FilingKind = {
     {
       title: "Service of process",
       ref: "Screen D1: Service of Process",
-      help: "Where the Secretary of State forwards legal papers served on the corporation.",
+      help: "New York's Secretary of State accepts legal papers (service of process) for the corporation, for example if it is sued, and mails a copy to this name and address. Use an address where mail is read promptly.",
       items: [
-        f("formation.serviceOfProcess.mode", "Send legal papers to", "radio", { required: true, defaultValue: "manual", options: lv([["manual", "A name and address I enter (often \"The Corporation\" at its address)"], ["service_company", "A registered service company"]]), ref: "Screen D1, SOP Select One" }),
+        f("formation.serviceOfProcess.mode", "Send legal papers to", "radio", { required: true, defaultValue: "manual", options: lv([["manual", "A name and address I enter (often \"The Corporation\" at its address)"], ["service_company", "A service company that receives legal papers for businesses (if you've hired one)"]]), ref: "Screen D1, SOP Select One" }),
         f("formation.serviceOfProcess.person.name", "Name", "text", { required: true, defaultValue: "THE CORPORATION", showIf: { path: "formation.serviceOfProcess.mode", equals: "manual" }, ref: "Screen D1, SOP Name" }),
         ...address("formation.serviceOfProcess.person.address", "Mailing address", { required: true, state: "NY", ref: "Screen D1, SOP address", showIf: { path: "formation.serviceOfProcess.mode", equals: "manual" } }),
         f("formation.serviceOfProcess.serviceCompany", "Service company name, as registered with DOS", "text", { required: true, showIf: { path: "formation.serviceOfProcess.mode", equals: "service_company" }, ref: "Screen D1, Select Service Company" }),
@@ -325,7 +328,7 @@ const nyCorp: FilingKind = {
   ],
   authorizations: [
     { id: "ny-corp-signature", ref: "Screen D1, Signature of Incorporator (STOP)", text: "The incorporator named above authorizes the filing company to type their name as the incorporator's signature on this Certificate of Incorporation and to certify that the statements in it are true and correct." },
-    { id: "ny-payment", ref: "Screen F, Payment Authorization (STOP)", text: "I authorize the filing company to authorize payment of the state fee shown on the approval page. The Department of State does not refund fees." },
+    { id: "ny-payment", ref: "Screen F, Payment Authorization (STOP)", text: "I authorize the filing company to pay the state fee shown on the approval page. The Department of State does not refund fees." },
   ],
   gaps: [
     "The tax on par-value shares is quoted from the statute (Tax Law s.180); the state's page has only been seen computing it for shares without par value. A different amount on the page stops the filing before payment.",
@@ -346,7 +349,7 @@ const njLlc: FilingKind = {
   state: "NJ",
   constants: { formation: { entityType: "LLC" } },
   map: NJ_BF,
-  feeNote: "State filing fee $100 (published schedule). The online checkout amount is checked at payment.",
+  feeNote: "State filing fee $100, plus any charge New Jersey's checkout adds. The approval page shows the exact total, and it's checked again at payment.",
   sections: [
     {
       title: "Name",
@@ -374,7 +377,7 @@ const njLlc: FilingKind = {
       ref: "Screens 6 and 7: Registered Agent",
       help: "Every New Jersey business needs a registered agent with a New Jersey street address.",
       items: [
-        f("formation.registeredAgentChoice", "Registered agent", "radio", { required: true, defaultValue: "client_provided", options: lv([["client_provided", "I'll name the agent"], ["filing_company", "The filing company provides the agent"]]), ref: "Screen 6" }),
+        f("formation.registeredAgentChoice", "Registered agent", "radio", { required: true, defaultValue: "client_provided", options: lv([["client_provided", "I'll name the agent"], ["filing_company", "The filing company's registered agent (named on the approval page)"]]), ref: "Screen 6" }),
         f("intake.portal.njRegisteredAgentNumber", "Registered agent number, if the agent has one on file (optional)", "text", { showIf: { path: "formation.registeredAgentChoice", equals: "client_provided" }, ref: "Screen 6, Option A" }),
         f("formation.registeredAgent.name", "Agent name", "text", { required: true, showIf: { path: "formation.registeredAgentChoice", equals: "client_provided" }, ref: "Screen 7, RA Name" }),
         f("formation.registeredAgent.email", "Agent email (optional)", "email", { showIf: { path: "formation.registeredAgentChoice", equals: "client_provided" }, ref: "Screen 7, RA Email" }),
@@ -417,7 +420,7 @@ const njLlc: FilingKind = {
     contactSection("Screen 11: Contact Information (not reached)"),
   ],
   authorizations: [
-    { id: "nj-ra-attestation", ref: "Screen 7, Attestation checkbox (STOP)", text: "I attest that the registered agent information is correct for this business and that the agent named is aware of and has accepted the responsibility of acting as its registered agent, and I authorize the filing company to tick that attestation for me." },
+    { id: "nj-ra-attestation", ref: "Screen 7, Attestation checkbox (STOP)", text: "I attest that the registered agent information is correct for this business and that the agent named is aware of and has accepted the responsibility of acting as its registered agent, and I authorize the filing company to check that box for me." },
     { id: "nj-signature", ref: "Screen 10, Signatures (STOP)", text: "I authorize the filing company to enter the signers' names as their signatures on the Certificate of Formation." },
     { id: "nj-payment", ref: "Screen 13, Payment", text: "I authorize the filing company to pay the state fee shown on the approval page." },
   ],
@@ -438,7 +441,7 @@ const njCorp: FilingKind = {
   state: "NJ",
   constants: { formation: { entityType: "LLC", njEntityType: "for_profit_corporation" } },
   map: NJ_BF,
-  feeNote: "State filing fee $100 (published schedule). The online checkout amount is checked at payment.",
+  feeNote: "State filing fee $100, plus any charge New Jersey's checkout adds. The approval page shows the exact total, and it's checked again at payment.",
   sections: [
     {
       title: "Name",
@@ -466,7 +469,7 @@ const njCorp: FilingKind = {
       ref: "Screens 6 and 7: Registered Agent",
       help: "Every New Jersey business needs a registered agent with a New Jersey street address.",
       items: [
-        f("formation.registeredAgentChoice", "Registered agent", "radio", { required: true, defaultValue: "client_provided", options: lv([["client_provided", "I'll name the agent"], ["filing_company", "The filing company provides the agent"]]), ref: "Screen 6" }),
+        f("formation.registeredAgentChoice", "Registered agent", "radio", { required: true, defaultValue: "client_provided", options: lv([["client_provided", "I'll name the agent"], ["filing_company", "The filing company's registered agent (named on the approval page)"]]), ref: "Screen 6" }),
         f("formation.registeredAgent.name", "Agent name", "text", { required: true, showIf: { path: "formation.registeredAgentChoice", equals: "client_provided" }, ref: "Screen 7, RA Name" }),
         f("formation.registeredAgent.email", "Agent email (optional)", "email", { showIf: { path: "formation.registeredAgentChoice", equals: "client_provided" }, ref: "Screen 7, RA Email" }),
         ...address("formation.registeredAgent.address", "Agent office", { required: true, state: "NJ", noPoBox: true, ref: "Screen 7, Office Address", showIf: { path: "formation.registeredAgentChoice", equals: "client_provided" } }),
@@ -498,8 +501,8 @@ const njCorp: FilingKind = {
     contactSection("Screen 13: Payment, Contact Information (LLC walk 2026-11-17)"),
   ],
   authorizations: [
-    { id: "nj-ra-attestation", ref: "Screen 7, Attestation checkbox (STOP)", text: "I attest that the registered agent information is correct for this business and that the agent named is aware of and has accepted the responsibility of acting as its registered agent, and I authorize the filing company to tick that attestation for me." },
-    { id: "nj-corp-signature", ref: "Screen 10, Signatures (STOP)", text: "Each incorporator named above authorizes the filing company to enter their name as a signer and tick their Signature Box on the Certificate of Incorporation, which the portal says indicates acceptance of the certificate and the intent to formally execute the filing." },
+    { id: "nj-ra-attestation", ref: "Screen 7, Attestation checkbox (STOP)", text: "I attest that the registered agent information is correct for this business and that the agent named is aware of and has accepted the responsibility of acting as its registered agent, and I authorize the filing company to check that box for me." },
+    { id: "nj-corp-signature", ref: "Screen 10, Signatures (STOP)", text: "Each incorporator named above authorizes the filing company to enter their name as a signer and check their Signature Box on the Certificate of Incorporation, which the portal says indicates acceptance of the certificate and the intent to formally execute the filing." },
     { id: "nj-payment", ref: "Screen 13, Payment", text: "I authorize the filing company to pay the state fee shown on the approval page." },
   ],
   gaps: [
@@ -536,7 +539,7 @@ function flCommon(nameRef: string, designators: string[], nameHelp: string): Sec
       title: "Registered agent",
       help: "A Florida street address is required; the entity can't be its own agent.",
       items: [
-        f("formation.registeredAgentChoice", "Registered agent", "radio", { required: true, defaultValue: "client_provided", options: lv([["client_provided", "I'll name the agent"], ["filing_company", "The filing company provides the agent"]]) }),
+        f("formation.registeredAgentChoice", "Registered agent", "radio", { required: true, defaultValue: "client_provided", options: lv([["client_provided", "I'll name the agent"], ["filing_company", "The filing company's registered agent (named on the approval page)"]]) }),
         f("intake.portal.flAgentKind", "The agent is", "radio", { required: true, defaultValue: "individual", options: lv([["individual", "A person"], ["business", "A business"]]), showIf: { path: "formation.registeredAgentChoice", equals: "client_provided" }, ref: "Registered agent, individual or business" }),
         f("intake.portal.flAgentFirstName", "First name", "text", { required: true, showIf: { path: "intake.portal.flAgentKind", equals: "individual" }, ref: "RA First Name" }),
         f("intake.portal.flAgentInitial", "Middle initial", "text", { maxLength: 1, showIf: { path: "intake.portal.flAgentKind", equals: "individual" }, ref: "RA Initial" }),
@@ -572,7 +575,7 @@ const flLlc: FilingKind = {
   state: "FL",
   constants: { formation: { entityType: "LLC", floridaEntityType: "llc" } },
   map: FL,
-  feeNote: "State fees $125 (filing $100 + registered agent $25). Optional: certificate of status $5, certified copy $30.",
+  feeNote: "State fees $125 (filing $100 + registered agent designation $25). Optional: certificate of status $5, certified copy $30.",
   sections: [
     ...flCommon("LLC Name", ["LLC", "L.L.C.", "Limited Liability Company"], "A professional LLC uses PLLC or P.L.L.C. and must give a professional purpose."),
     {
@@ -611,14 +614,14 @@ const flCorp: FilingKind = {
   state: "FL",
   constants: { formation: { entityType: "LLC", floridaEntityType: "profit_corporation" } },
   map: FL,
-  feeNote: "State fees $70 (filing $35 + registered agent $35). Optional: certificate of status $8.75, certified copy $8.75.",
+  feeNote: "State fees $70 (filing $35 + registered agent designation $35). Optional: certificate of status $8.75, certified copy $8.75.",
   sections: [
     ...flCommon("Corporate Name", ["Inc.", "Corp.", "Corporation", "Incorporated", "Company", "Co."], "A professional association uses P.A., Chartered or Professional Association."),
     {
       title: "Shares, purpose and incorporator",
       items: [
         f("formation.stockShares", "Number of authorized shares", "number", { required: true, min: 1, ref: "Corporate Stock Shares" }),
-        f("intake.portal.flAnyLawfulBusiness", "Purpose is \"any and all lawful business\"", "checkbox", { defaultValue: "on", help: "Untick for a professional association, which must state a specific purpose.", ref: "Any and all lawful business checkbox" }),
+        f("intake.portal.flAnyLawfulBusiness", "Purpose is \"any and all lawful business\"", "checkbox", { defaultValue: "on", help: "Uncheck for a professional association, which must state a specific purpose.", ref: "Any and all lawful business checkbox" }),
         f("formation.purpose", "Specific purpose", "textarea", { required: true, maxLength: 240, showIf: { path: "intake.portal.flAnyLawfulBusiness", equals: "" }, ref: "Purpose" }),
         f("formation.incorporator.name", "Incorporator name", "text", { required: true, help: "Typed as the incorporator's electronic signature.", ref: "Incorporator Name" }),
         ...address("formation.incorporator.address", "Incorporator address", { required: true, ref: "Incorporator Address" }),
@@ -647,7 +650,7 @@ const flLp: FilingKind = {
   state: "FL",
   constants: { formation: { entityType: "LLC", floridaEntityType: "limited_partnership" } },
   map: FL,
-  feeNote: "State fees $1,000 (filing $965 + registered agent $35). Optional: certificate of status $8.75, certified copy $52.50.",
+  feeNote: "State fees $1,000 (filing $965 + registered agent designation $35). Optional: certificate of status $8.75, certified copy $52.50.",
   sections: [
     ...flCommon("Limited Partnership Name", ["LP", "L.P.", "Limited Partnership", "Limited", "Ltd.", "LLLP", "L.L.L.P.", "Limited Liability Limited Partnership"], "The ending must match the LLLP choice below."),
     {
@@ -681,18 +684,18 @@ const IRS = "irs-ein-online.md";
 const irsEin: FilingKind = {
   id: "irs-ein",
   title: "EIN for an existing LLC",
-  summary: "Federal Employer Identification Number from the IRS EIN Assistant. Free.",
+  summary: "Employer Identification Number (EIN) from the IRS, applied for online. The IRS charges no fee.",
   type: "ein_only",
   state: "NY",
   constants: { ein: { mode: "in_run" }, formation: { entityType: "LLC", effectiveDate: "upon_filing" } },
   map: IRS,
-  feeNote: "No fee. The IRS issues one EIN per responsible party per day, and the online service has set hours.",
+  feeNote: "No IRS fee. The IRS issues one EIN per responsible party per day, and the online service has set hours.",
   sections: [
     {
       title: "The LLC",
       ref: "Screens 2 and 5: Legal Structure, Additional Details",
       items: [
-        f("state", "State where the articles were filed", "select", { required: true, options: lv([["NY", "New York"], ["NJ", "New Jersey"], ["FL", "Florida"], ["MO", "Missouri"]]), help: "Form the LLC with the state first; the IRS says skipping that may delay the EIN.", ref: "Screen 5, State where articles are filed" }),
+        f("state", "State where the LLC was formed", "select", { required: true, options: lv([["NY", "New York"], ["NJ", "New Jersey"], ["FL", "Florida"], ["MO", "Missouri"]]), help: "Form the LLC with the state first; the IRS says skipping that may delay the EIN.", ref: "Screen 5, State where articles are filed" }),
         f("formation.name.baseName", "Legal name, without the ending", "text", { required: true, help: "Must match the articles. Only - and & are allowed as special characters.", ref: "Screen 5, Legal name" }),
         f("formation.name.designator", "Ending", "select", { required: true, defaultValue: "LLC", options: opts("LLC", "L.L.C.", "Limited Liability Company"), ref: "Screen 5, Legal name" }),
         f("ein.tradeName", "Trade name / DBA, if different (optional)", "text", { ref: "Screen 5, Trade name" }),
@@ -706,14 +709,14 @@ const irsEin: FilingKind = {
     {
       title: "Responsible party",
       ref: "Screen 3: Identity",
-      help: "The person who controls the LLC. Their details must match IRS records. The SSN is used for this filing only and is purged after it completes.",
+      help: "The person who controls the LLC. Their details must match IRS records. The SSN is encrypted, used only for this filing and deleted after 30 days.",
       items: [
         f("ein.responsibleParty.name", "Full name", "text", { required: true, help: "Only - and & are allowed as special characters.", ref: "Screen 3, First / Middle / Last name, Suffix" }),
         f("ein.responsibleParty.ssn", "SSN or ITIN", "ssn", { required: true, ref: "Screen 3, SSN/ITIN" }),
         f("ein.responsibleParty.title", "Role in the LLC", "text", { required: true, defaultValue: "Member", ref: "Screen 3, role" }),
         f("ein.responsibleParty.phone", "Phone (digits only)", "tel", { required: true, ref: "Screen 4, Phone number" }),
         ...address("ein.responsibleParty.address", "Physical location of the LLC", { required: true, noPoBox: true, ref: "Screen 4, Addresses", help: "Must be a U.S. address; no P.O. box." }),
-        f("ein.applicantRole", "Who submits the application", "radio", { required: true, defaultValue: "third_party_designee", options: lv([["third_party_designee", "The filing company, as third-party designee"], ["owner", "An owner or managing member"]]), ref: "Screen 3, Your role" }),
+        f("ein.applicantRole", "Who submits the application", "radio", { required: true, defaultValue: "third_party_designee", options: lv([["third_party_designee", "The filing company, as third-party designee"], ["owner", "The responsible party named below"]]), ref: "Screen 3, Your role" }),
         { kind: "note", text: "As a third-party designee the filing company needs a signed authorization (Form SS-4 designee section) from the responsible party before it applies.", showIf: { path: "ein.applicantRole", equals: "third_party_designee" } },
         f("intake.portal.ss4AuthorizationSigned", "I have signed, or will sign, the third-party designee authorization", "checkbox", { required: true, showIf: { path: "ein.applicantRole", equals: "third_party_designee" }, ref: "Rules: third-party designee" }),
         f("intake.portal.mailElsewhere", "Mail should go to a different address", "checkbox", { ref: "Screen 4, different mailing address" }),
@@ -751,7 +754,7 @@ const irsEin: FilingKind = {
         f("ein.noticeDelivery", "How to receive the EIN confirmation letter (CP 575)", "radio", { required: true, defaultValue: "digital", options: lv([["digital", "Digitally, right away"], ["mail", "By mail (up to 4 weeks)"]]), ref: "Screen 7, confirmation letter" }),
       ],
     },
-    contactSection("engine contact"),
+    { ...contactSection("engine contact"), help: "Who the filing company contacts about this application. Updates about it go to this email." },
   ],
   authorizations: [
     { id: "irs-designee", ref: "Rules: third-party designee", text: "As the responsible party, I authorize the filing company to apply for this EIN on the LLC's behalf with the details above." },
@@ -782,13 +785,13 @@ const nyNys100: FilingKind = {
   state: "NY",
   constants: { payroll: { employerType: "business" } },
   map: NYS100,
-  feeNote: "No state fee. Average processing time shown: 15 days.",
+  feeNote: "No state fee. NY Business Express lists an average processing time of 15 days.",
   sections: [
     {
       title: "Business profile",
       ref: "P2 to P9: Entity Type, Business Identification, Addresses, Contact, Industry",
       items: [
-        f("payroll.ownershipType", "Type of entity", "select", { required: true, options: lv([["llc_member_managed", "LLC, member managed"], ["llc_manager_managed", "LLC, manager managed"], ["corporation_s", "Corporation, S corp"], ["corporation_c", "Corporation, C corp"], ["llp", "Limited liability partnership"], ["lp", "Limited partnership"], ["partnership", "Partnership"], ["sole_proprietor", "Individual (sole proprietor)"]]), help: "Only the LLC path was walked; other types may ask for different owner details.", ref: "P2, Type of entity + sub type" }),
+        f("payroll.ownershipType", "Type of entity", "select", { required: true, options: lv([["llc_member_managed", "LLC, member managed"], ["llc_manager_managed", "LLC, manager managed"], ["corporation_s", "Corporation, S corp"], ["corporation_c", "Corporation, C corp"], ["llp", "Limited liability partnership"], ["lp", "Limited partnership"], ["partnership", "Partnership"], ["sole_proprietor", "Individual (sole proprietor)"]]), help: "So far this form has been tested only with LLCs. For other entity types, the state may ask for owner details this form doesn't collect.", ref: "P2, Type of entity + sub type" }),
         f("payroll.legalName", "Legal name", "text", { required: true, ref: "P3, Legal Name" }),
         f("payroll.tradeName", "DBA or trade name (optional)", "text", { ref: "P3, DBA" }),
         f("payroll.fein", "Federal EIN", "fein", { required: true, help: "Required to register online. Get the EIN first.", ref: "P3, FEIN" }),
@@ -809,7 +812,7 @@ const nyNys100: FilingKind = {
       ref: "P11: Member Information",
       items: [{
         kind: "group", path: "payroll.owners", label: "Members", itemLabel: "Member", min: 1, max: 10, ref: "P11, Add A Member",
-        help: "The SSN is required for a US-resident member. It is used for this filing only.",
+        help: "The SSN is required for a US-resident member. It's encrypted, used only for this filing and deleted after 30 days.",
         fields: [
           f("stateAnswers_principalType", "Type", "select", { required: true, defaultValue: "person", options: lv([["person", "Person"], ["business", "Business"]]) }),
           f("title", "Title", "select", { required: true, options: opts("Member", "Managing Member") }),
@@ -838,7 +841,7 @@ const nyNys100: FilingKind = {
       ref: "A2 to A5: Business Identification, Liability, Transfers, Change of Legal Entity",
       items: [
         f("payroll.stateAnswers.employerRegistrationNumber", "Existing NY employer registration number (7 digits; leave blank if new)", "text", { help: "Not the FEIN.", ref: "A2, Employer Registration Number" }),
-        yes("payroll.payingWages", "Paid, or expect to pay, $300 or more in a calendar quarter?", "A3"),
+        yes("payroll.payingWages", "Paid, or expect to pay, $300 or more in wages in a calendar quarter?", "A3"),
         f("payroll.dateFirstOperations", "Date the business began in New York", "date", { required: true, ref: "A3, date you began business in NYS" }),
         f("payroll.uiLiabilityQuarter", "First quarter with $300 or more in wages", "select", { required: true, options: lv([["Q1", "January to March"], ["Q2", "April to June"], ["Q3", "July to September"], ["Q4", "October to December"]]), ref: "A3, first calendar quarter" }),
         f("payroll.uiLiabilityYear", "Year of that quarter", "number", { required: true, min: 1990, max: 2100, ref: "A3, Year" }),
@@ -910,7 +913,7 @@ const nyNys100: FilingKind = {
     contactSection("P8, Contact Information"),
   ],
   authorizations: [
-    { id: "nys100-attest", ref: "A13, I attest to the above (STOP)", text: "The submitter named above affirms that the answers are true to the best of their knowledge and belief, and authorizes the filing company to tick \"I attest to the above\" and submit the registration for them." },
+    { id: "nys100-attest", ref: "A13, I attest to the above (STOP)", text: "The submitter named above affirms that the answers are true to the best of their knowledge and belief, and authorizes the filing company to check \"I attest to the above\" and submit the registration for them." },
   ],
   gaps: [
     "Ready to Submit (the final screen) is not mapped yet, so the engine fills up to Submitter Information and stops there.",
@@ -978,14 +981,14 @@ const njReg: FilingKind = {
       title: "Ownership",
       ref: "Screens 5 and 6",
       items: [
-        f("payroll.ownershipType", "Ownership type", "select", { required: true, options: opts("Ltd. Liability Co. (1065 Filer)", "Ltd. Liability Co. (1120 Filer)", "Ltd. Liability Co. - Single Member", "Corporation", "Limited Partnership", "Limited Liability Partnership"), help: "The list on the site follows the entity type; only the LLC options were seen.", ref: "Screen 5, Ownership Type" }),
+        f("payroll.ownershipType", "Ownership type", "select", { required: true, options: opts("Ltd. Liability Co. (1065 Filer)", "Ltd. Liability Co. (1120 Filer)", "Ltd. Liability Co. - Single Member", "Corporation", "Limited Partnership", "Limited Liability Partnership"), help: "The state's list depends on the entity type. These are the LLC options; other entity types may see different choices on the state's site, and only LLCs have been tested so far.", ref: "Screen 5, Ownership Type" }),
         f("payroll.entity.fiscalMonth", "Last month of the fiscal year", "select", { options: lv([["1", "January"], ["2", "February"], ["3", "March"], ["4", "April"], ["5", "May"], ["6", "June"], ["7", "July"], ["8", "August"], ["9", "September"], ["10", "October"], ["11", "November"], ["12", "December"]]), defaultValue: "12", integer: true, ref: "Screen 5" }),
         yes("payroll.stateAnswers.subsidiary", "Is this business a subsidiary of another corporation?", "Screen 5"),
         f("payroll.stateAnswers.sCorpStatus", "Federal S corporation status", "radio", { required: true, defaultValue: "neither", options: lv([["s_corp", "Federal S Corporation"], ["qsss", "QSSS"], ["neither", "Neither"]]), help: "Pick Neither if you don't have the IRS acceptance letter.", ref: "Screen 5, S Corporation or QSSS" }),
         f("payroll.stateAnswers.sCorpApprovalDate", "Federal S corp / QSSS approval date", "date", { required: true, showIf: { path: "payroll.stateAnswers.sCorpStatus", equals: ["s_corp", "qsss"] }, ref: "Screen 5, election block (not walked)" }),
         {
           kind: "group", path: "payroll.owners", label: "Owners, partners or responsible officers", itemLabel: "Owner", min: 1, max: 10, ref: "Screen 6, Add Individual Owner",
-          help: "At least one. A single-member LLC lists exactly one. The SSN is used for this filing only.",
+          help: "At least one. A single-member LLC lists exactly one. Each SSN is encrypted, used only for this filing and deleted after 30 days.",
           fields: [
             f("name", "Full name", "text", { required: true }),
             f("title", "Title", "select", { required: true, options: NJ_TITLES }),
@@ -1054,7 +1057,7 @@ const njReg: FilingKind = {
         f("payroll.stateAnswers.eveningPhone", "Evening phone (optional)", "tel", { ref: "Screen 10, Evening Phone" }),
         f("payroll.signer.name", "Authorized representative (typed as the signature)", "text", { required: true, ref: "Screen 11, Name of Authorized Representative" }),
         f("payroll.signer.title", "Their title", "select", { required: true, options: NJ_TITLES, ref: "Screen 11" }),
-        f("payroll.stateAnswers.gov2goNotifications", "Sign up for free Gov2Go text/email reminders for NJ tax returns", "checkbox", { help: "The site ticks this by default; the filing company unticks it unless you choose it here.", ref: "Screen 11, Gov2Go checkbox" }),
+        f("payroll.stateAnswers.gov2goNotifications", "Sign up for free Gov2Go text/email reminders for NJ tax returns", "checkbox", { help: "The site checks this by default; the filing company unchecks it unless you choose it here.", ref: "Screen 11, Gov2Go checkbox" }),
       ],
     },
     contactSection("Screen 10: Contact Information"),
@@ -1062,7 +1065,7 @@ const njReg: FilingKind = {
   authorizations: [
     { id: "njreg-employment", ref: "Screen 11, employment attestation (STOP)", text: "I confirm the Yes/No employment answers above accurately reflect the business's employment activities, and I understand NJ payroll tax filings are required for any \"Yes\"." },
     { id: "njreg-tax", ref: "Screen 11, taxable activities attestation (STOP)", text: "I confirm the Yes/No answers above accurately reflect the business activities subject to New Jersey taxes." },
-    { id: "njreg-perjury", ref: "Screen 11, perjury declaration and typed name (STOP)", text: "The authorized representative named above declares under penalty of perjury that the information is true, correct and complete, and authorizes the filing company to tick the declaration and type their name as the signature." },
+    { id: "njreg-perjury", ref: "Screen 11, perjury declaration and typed name (STOP)", text: "The authorized representative named above declares under penalty of perjury that the information is true, correct and complete, and authorizes the filing company to check the declaration box and type their name as the signature." },
   ],
   gaps: [
     "Only the business-entity registration option is covered; sole proprietorships and partnerships (option 2) and options 3 to 7 are not.",
@@ -1280,7 +1283,7 @@ function nySignerSection(base: string, ref: string): Section {
 
 const nyRecordSignature = (id: string, ref: string, doc: string): Authorization => ({
   id, ref,
-  text: `The signer named above authorizes the filing company to tick the certification and type their name as their signature on ${doc}: that they have read the statements, are authorized to sign, and that the statements are true and correct to the best of their knowledge and belief.`,
+  text: `The signer named above authorizes the filing company to check the certification box and type their name as their signature on ${doc}: that they have read the statements, are authorized to sign, and that the statements are true and correct to the best of their knowledge and belief.`,
 });
 const nyRecordPayment = (id: string, ref: string, what: string, refund = false): Authorization => ({
   id, ref,
@@ -1370,7 +1373,7 @@ const nyChange: FilingKind = {
     {
       title: "What changes",
       ref: "Screen I2: Change Selection",
-      help: "Tick each change. The state greys out the registered agent changes when no agent is on file.",
+      help: "Check each change. The state greys out the registered agent changes when no agent is on file.",
       items: [
         f("intake.portal.nyChangeCounty", "The county where the LLC's office is", "checkbox", { ref: "Screen I2, Entity County Location (Edit)" }),
         f(`${CH}.county`, "New county", "select", { required: true, options: opts(...NY_COUNTIES), showIf: changeShown("nyChangeCounty"), ref: "Screen I3, County Change" }),

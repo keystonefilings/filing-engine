@@ -4,6 +4,8 @@ export interface OutboundMessage {
   subject: string;
   body: string;
   link?: string;
+  /** The email button's text; "Open" when not set. */
+  linkLabel?: string;
   screenshotUrl?: string;
   /** Files sent with the message (email only): the filing's documents. */
   attachments?: { filename: string; contentType: string; content: Buffer }[];

@@ -39,7 +39,7 @@ export function BillingPanel({ summary, subscribe, manage, justSubscribed }: {
         </div>
       )}
       {subState.error || manState.error ? <p className="notice bad" role="alert">{subState.error ?? manState.error}</p> : null}
-      <p className="help">Payments are handled by Stripe. Card changes, receipts and cancelling are on Stripe&apos;s page under Manage billing.</p>
+      <p className="help">Your subscription lets you file for real; practice filings are always free. State fees aren&apos;t included: they&apos;re shown on each approval page and paid with the cards you chose in Setup. Stripe handles subscription payments; card changes, receipts and canceling are under Manage billing.</p>
     </div>
   );
 }

@@ -9,7 +9,7 @@ import { ADDRESS_PARTS, addressBlocks, planSections, type Block } from "@/lib/in
 import { SignaturePad } from "./SignaturePad";
 
 export type IntakeResult =
-  | { ok: true; redirectTo?: string; message?: string }
+  | { ok: true; redirectTo?: string; message?: string; title?: string }
   | { ok: false; error?: string; issues: { path: string; message: string }[] };
 
 interface Props {
@@ -25,6 +25,8 @@ interface Props {
   consentText?: string;
   /** Answers filled in from the start (form path -> value), e.g. the firm's own contact details. */
   prefill?: Record<string, string>;
+  /** Who "the filing company" in the authorizations is, e.g. "Best Accounting, filing through CoFile". */
+  filerName?: string;
 }
 
 /**
@@ -61,7 +63,7 @@ function initialState(kind: FilingKind, prefill: Record<string, string> = {}): {
   return { values, groups, next, prefill: mapped };
 }
 
-export function IntakeForm({ kind, nonce, action, submitLabel = "Submit for approval", footnote, signatures = [], consentText, prefill }: Props) {
+export function IntakeForm({ kind, nonce, action, submitLabel = "Submit for approval", footnote, signatures = [], consentText, prefill, filerName }: Props) {
   const router = useRouter();
   const init = useMemo(() => initialState(kind, prefill), [kind, prefill]);
   const startValues = init.prefill;
@@ -173,14 +175,14 @@ export function IntakeForm({ kind, nonce, action, submitLabel = "Submit for appr
   const removeItem = (g: Group, id: number) => setGroups((p) => ({ ...p, [g.path]: (p[g.path] ?? []).filter((x) => x !== id) }));
 
   if (result?.ok && !result.redirectTo) {
-    return <div className="notice ok"><strong>Thank you.</strong> {result.message}</div>;
+    return <div className="notice ok"><strong>{result.title ?? "Thank you."}</strong> {result.message}</div>;
   }
 
   const renderField = (f: Field, name: string, shown: boolean) => {
     const id = `f-${name.replace(/[^a-zA-Z0-9]/g, "-")}`;
     const value = values[name] ?? "";
     const issue = fieldIssues.get(name);
-    const common = { id, name, disabled: !shown, "aria-invalid": issue ? true : undefined, "aria-describedby": f.help || issue ? `${id}-help` : undefined };
+    const common = { id, name, disabled: !shown, "aria-required": f.required === true ? true : undefined, "aria-invalid": issue ? true : undefined, "aria-describedby": f.help || issue ? `${id}-help` : undefined };
     const label = <>{f.label}{f.required === true ? <span className="req" aria-hidden>*</span> : null}</>;
     let control: React.ReactNode;
     switch (f.type) {
@@ -202,7 +204,7 @@ export function IntakeForm({ kind, nonce, action, submitLabel = "Submit for appr
       case "yesno": {
         const options = f.type === "yesno" ? [{ value: "yes", label: "Yes" }, { value: "no", label: "No" }] : f.options ?? [];
         return (
-          <div className="field" key={name} hidden={!shown} role="radiogroup" aria-labelledby={`${id}-label`}>
+          <div className="field" key={name} hidden={!shown} role="radiogroup" aria-required={f.required === true ? true : undefined} aria-labelledby={`${id}-label`}>
             <span className="label" id={`${id}-label`}>{label}</span>
             <div className={`choices${f.type === "yesno" ? " inline" : ""}`}>
               {options.map((o) => (
@@ -233,7 +235,7 @@ export function IntakeForm({ kind, nonce, action, submitLabel = "Submit for appr
             </p>
             {choice === NEW_SIGNATURE.choice && shown ? (
               <div style={{ marginTop: 10 }}>
-                <SignaturePad name={NEW_SIGNATURE.image} label={signer ? `${signer}, sign here` : "Signer, sign here"} />
+                <SignaturePad name={NEW_SIGNATURE.image} label={signer ? `Signature pad: ${signer} draws their signature here with a mouse, finger or stylus.` : "Signature pad: the signer draws their signature here with a mouse, finger or stylus."} />
                 <label className="choice consent" style={{ marginTop: 10 }}>
                   <input type="checkbox" name={NEW_SIGNATURE.consent} />
                   <span>{consentText ?? "I adopt this image as my signature for this company's New York filings, used only on approved filings."}</span>
@@ -337,6 +339,7 @@ export function IntakeForm({ kind, nonce, action, submitLabel = "Submit for appr
           {result.issues.length ? <ul className="issues">{result.issues.slice(0, 20).map((i, n) => <li key={n}>{i.message}</li>)}</ul> : null}
         </div>
       ) : null}
+      <p className="help" style={{ marginTop: 0 }}>Fields marked * are required.</p>
       {plan.map(({ section: s, folded, main, more }) => {
         // A folded section opens by itself when it already holds an answer or a problem.
         const touched = s.items.some((it) => Object.keys(values).some((k) => "path" in it && it.path && k.startsWith(it.path) && values[k] && values[k] !== (it.kind === "field" ? it.defaultValue : undefined)))
@@ -371,7 +374,7 @@ export function IntakeForm({ kind, nonce, action, submitLabel = "Submit for appr
       })}
       <fieldset>
         <legend>Authorizations</legend>
-        <p className="help" style={{ marginTop: 0 }}>The state form asks for these. Each one is shown again on the approval page before anything is filed.</p>
+        <p className="help" style={{ marginTop: 0 }}>The state form asks for these.{filerName ? <> Here, &quot;the filing company&quot; means {filerName}, the company that enters this filing on the government site.</> : null} Each one is shown again on the approval page before anything is filed.</p>
         {kind.authorizations.map((a) => (
           <label key={a.id} className="auth">
             <input type="checkbox" name={`${AUTH_PREFIX}${a.id}`} />
@@ -384,6 +387,7 @@ export function IntakeForm({ kind, nonce, action, submitLabel = "Submit for appr
         <button className="btn primary" type="submit" disabled={pending}>{pending ? "Sending…" : submitLabel}</button>
         {kind.feeNote ? <span className="small muted">{kind.feeNote}</span> : null}
       </div>
+      {kind.feeAside ? <p className="small muted">{kind.feeAside}</p> : null}
     </form>
   );
 }

@@ -26,11 +26,12 @@ export default async function PortalLayout({ children, params }: { children: Rea
         links={[
           { href: base, label: "Filings" },
           { href: `${base}/new`, label: "New filing" },
+          { href: `${base}/pay`, label: "Ready to pay" },
           { href: `${base}/client-links`, label: "Client links" },
           { href: `${base}/signatures`, label: "Signatures" },
           ...(partner ? [{ href: `${base}/setup`, label: "Setup" }, { href: `${base}/billing`, label: "Billing" }] : []),
         ]}
-        right={<form action="/logout" method="post" className="row">{cobrand}{personalSession(session) ? <Link className="small muted" href={`${base}/password`} title="Change password">{session.email}</Link> : <span className="small muted">{session.email}</span>}<button className="btn small" type="submit">Sign out</button></form>}
+        right={<form action="/logout" method="post" className="row">{cobrand}{personalSession(session) ? <Link className="small muted" href={`${base}/password`} title="Change password">{session.email}</Link> : <span className="small muted">{session.email}</span>}<button className="btn small" type="submit">Log out</button></form>}
       />
       <main className="wrap">{children}</main>
       {brand.supportEmail ? <footer className="wrap small muted" style={{ paddingTop: 0 }}>Questions? Email <a href={`mailto:${brand.supportEmail}`}>{brand.supportEmail}</a>.</footer> : null}

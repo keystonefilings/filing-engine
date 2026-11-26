@@ -13,7 +13,7 @@ import type { ChannelSender, OutboundMessage } from "../src/comms/senders.js";
 const outbox: { address: string; msg: OutboundMessage }[] = [];
 const email: ChannelSender = { channel: "email", async send(to, msg) { outbox.push({ address: to.address, msg }); return { ok: true }; } };
 async function confirmEmail(srv: FastifyInstance, address: string) {
-  const link = [...outbox].reverse().find((m) => m.address === address && m.msg.subject === "Confirm your email")?.msg.link;
+  const link = [...outbox].reverse().find((m) => m.address === address && m.msg.subject === "Confirm your email for CoFile")?.msg.link;
   if (!link) throw new Error(`no confirmation email for ${address}`);
   return srv.inject({ method: "POST", url: "/v1/auth/verify-email", payload: { token: new URL(link).searchParams.get("token") } });
 }

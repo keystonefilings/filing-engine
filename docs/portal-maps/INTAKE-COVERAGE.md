@@ -73,7 +73,7 @@ Fees: State filing fee $200. Optional: plain copy $5, certified copy $10, certif
 Authorizations the client grants (and confirms again on the approval page):
 
 - **ny-signature** (Screen D2, Signature (STOP)): I authorize the filing company to type the organizer's name as the organizer's signature on these Articles of Organization and to certify that the statements in them are true and correct.
-- **ny-payment** (Screen F, Payment Authorization (STOP)): I authorize the filing company to authorize payment of the state fee shown on the approval page. The Department of State does not refund fees.
+- **ny-payment** (Screen F, Payment Authorization (STOP)): I authorize the filing company to pay the state fee shown on the approval page. The Department of State does not refund fees.
 
 Not covered yet:
 
@@ -135,7 +135,7 @@ Fees: State filing fee $125 (no tax on shares without par value). Shares with a 
 Authorizations the client grants (and confirms again on the approval page):
 
 - **ny-corp-signature** (Screen D1, Signature of Incorporator (STOP)): The incorporator named above authorizes the filing company to type their name as the incorporator's signature on this Certificate of Incorporation and to certify that the statements in it are true and correct.
-- **ny-payment** (Screen F, Payment Authorization (STOP)): I authorize the filing company to authorize payment of the state fee shown on the approval page. The Department of State does not refund fees.
+- **ny-payment** (Screen F, Payment Authorization (STOP)): I authorize the filing company to pay the state fee shown on the approval page. The Department of State does not refund fees.
 
 Not covered yet:
 

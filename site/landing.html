@@ -431,11 +431,11 @@ footer .wrap { display: flex; justify-content: space-between; gap: 16px; flex-wr
         <table>
           <thead><tr><th scope="col">Filing</th><th scope="col">Where</th><th scope="col">Status</th></tr></thead>
           <tbody>
-            <tr><td>LLC formation</td><td>New Jersey</td><td><span class="status live">Verified on the live site</span></td></tr>
-            <tr><td>Standing certificate</td><td>New Jersey</td><td><span class="status live">Verified on the live site</span></td></tr>
-            <tr><td>LLC formation</td><td>Florida</td><td><span class="status live">Verified on the live site</span></td></tr>
-            <tr><td>Profit corporation formation</td><td>Florida</td><td><span class="status live">Verified on the live site</span></td></tr>
-            <tr><td>Limited partnership formation</td><td>Florida</td><td><span class="status live">Verified on the live site</span></td></tr>
+            <tr><td>LLC formation</td><td>New Jersey</td><td><span class="status live">Verified up to payment</span></td></tr>
+            <tr><td>Standing certificate</td><td>New Jersey</td><td><span class="status live">Verified up to payment</span></td></tr>
+            <tr><td>LLC formation</td><td>Florida</td><td><span class="status live">Verified up to payment</span></td></tr>
+            <tr><td>Profit corporation formation</td><td>Florida</td><td><span class="status live">Verified up to payment</span></td></tr>
+            <tr><td>Limited partnership formation</td><td>Florida</td><td><span class="status live">Verified up to payment</span></td></tr>
             <tr><td>LLC formation</td><td>Missouri</td><td><span class="status map">Mapped from the state guide</span></td></tr>
             <tr><td>Certificate of good standing</td><td>Missouri</td><td><span class="status map">Mapped from the state guide</span></td></tr>
             <tr><td>EIN application, with confirmation letter</td><td>IRS</td><td><span class="status map">Mapped from a live walk</span></td></tr>
@@ -457,7 +457,7 @@ footer .wrap { display: flex; justify-content: space-between; gap: 16px; flex-wr
         <h2>Sensitive data stays where it belongs.</h2>
       </div>
       <div class="sec">
-        <div><h3>Masked SSNs</h3><p>Social Security numbers are masked on approval pages, in API responses and in recorded screens.</p></div>
+        <div><h3>Masked SSNs</h3><p>Social Security numbers are encrypted, masked on approval pages, in API responses and in recorded screens, and deleted after 30 days.</p></div>
         <div><h3>Secrets in a vault</h3><p>State logins live in a vault under your account, never in settings, chat or email, and are read only when a run starts.</p></div>
         <div><h3>Single-use approval links</h3><p>Signed, expiring links, bound to the exact data shown. An optional one-time code adds a second check.</p></div>
         <div><h3>Signed webhooks</h3><p>Every event carries a timestamped signature, with retries and a dead-letter record.</p></div>

@@ -86,7 +86,7 @@ describe("uploaded logos", () => {
   it("lets a partner change only its own firm's logo", async () => {
     const r = await app.inject({ method: "POST", url: "/v1/signups/partner", payload: { companyName: "Logo Test CPA", companyType: "cpa", name: "Lee Park", email: "lee@logo-test.test", password: PW, states: ["NY"] } });
     expect(r.statusCode).toBeLessThan(300);
-    const token = new URL(mail.find((m) => m.subject === "Confirm your email")!.link!).searchParams.get("token");
+    const token = new URL(mail.find((m) => m.subject === "Confirm your email for CoFile")!.link!).searchParams.get("token");
     expect((await app.inject({ method: "POST", url: "/v1/auth/verify-email", payload: { token } })).statusCode).toBe(200);
     const key = (await app.inject({ method: "POST", url: "/v1/auth/sign-in", payload: { email: "lee@logo-test.test", password: PW } })).json().sessionKey as string;
     const firm = "firm-logo-test-cpa";

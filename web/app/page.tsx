@@ -7,6 +7,15 @@ import { platformName } from "@/lib/brand";
 
 // Adapted from the designed page in site/landing.html.
 
+export function generateMetadata() {
+  const name = platformName();
+  return {
+    // absolute: the layout's "%s · name" template doesn't apply to a page in the layout's own segment.
+    title: { absolute: `LLC, EIN and employer registration filing for firms · ${name}` },
+    description: `${name} fills in and submits LLC and corporation formations, EINs and employer registrations on state and IRS sites for CPA, payroll and title firms. Clients approve first.`,
+  };
+}
+
 function Tick() {
   return (
     <svg className="tick" viewBox="0 0 22 22" aria-hidden="true">
@@ -30,18 +39,22 @@ const TRACE: [string, string, string | undefined, string, string?][] = [
 ];
 
 const COVERAGE: [string, string, "live" | "map" | "", string][] = [
-  ["LLC formation", "New Jersey", "live", "Verified on the live site"],
-  ["Standing certificate", "New Jersey", "live", "Verified on the live site"],
-  ["LLC formation", "Florida", "live", "Verified on the live site"],
-  ["Profit corporation formation", "Florida", "live", "Verified on the live site"],
-  ["Limited partnership formation", "Florida", "live", "Verified on the live site"],
-  ["EIN application, with confirmation letter", "IRS", "map", "Mapped from a live walk"],
-  ["Articles of Organization (LLC)", "New York", "map", "Mapped from a live walk"],
-  ["Certificate of Incorporation (business corporation)", "New York", "map", "Mapped from a live walk"],
-  ["Payroll registration (NYS-100)", "New York", "map", "Mapped from a live walk"],
-  ["Name-change amendment", "New York", "", "Planned"],
+  ["LLC formation", "New Jersey", "live", "Verified up to payment"],
+  ["Standing certificate", "New Jersey", "live", "Verified up to payment"],
+  ["LLC formation", "Florida", "live", "Verified up to payment"],
+  ["Profit corporation formation", "Florida", "live", "Verified up to payment"],
+  ["Limited partnership formation", "Florida", "live", "Verified up to payment"],
+  ["EIN application, with confirmation letter", "IRS", "map", "Screens mapped"],
+  ["Articles of Organization (LLC)", "New York", "map", "Screens mapped"],
+  ["Certificate of Incorporation (business corporation)", "New York", "map", "Screens mapped"],
+  ["Employer registration (NYS-100)", "New York", "map", "Screens mapped"],
+  ["Employer registration (NJ-REG)", "New Jersey", "map", "Screens mapped"],
+  ["LLC name change, certificate of change and dissolution", "New York", "map", "Screens mapped"],
+  ["Copies and certificate of status", "New York", "map", "Screens mapped"],
+  ["Corporation formation (for-profit)", "New Jersey", "", "Not yet verified"],
+  ["Application for Authority (foreign corporation), by PDF upload", "New York", "", "Not yet verified"],
+  ["Certificate of Assumed Name (DBA), by PDF upload", "New York", "", "Not yet verified"],
   ["Alternate name, charter amendments", "New Jersey", "", "Planned"],
-  ["Paper filings by upload: certificate of status, assumed name, foreign qualification, dissolution", "New York", "", "Planned"],
 ];
 
 export default function Home() {
@@ -53,32 +66,33 @@ export default function Home() {
         <section className="hero band">
           <div className="wrap">
             <div className="hero-copy">
-              <span className="field-label">For CPA, payroll, CFO and title firms</span>
-              <h1>State filings, done on the government sites. Approved before they leave.</h1>
-              <p className="lede">{name} fills formation, EIN and payroll registration filings on the live state and IRS websites, under your brand. It reads every form fresh, checks every fee, and submits nothing until your client approves the exact data.</p>
+              <span className="field-label">For CPA, payroll, fractional CFO and title firms</span>
+              <h1>LLC formations, EINs and employer registrations, filed on the government sites. Nothing is filed until your client approves.</h1>
+              <p className="lede">{name} fills in and submits LLC and corporation formations, EINs and employer registrations on the live state and IRS websites, with your name and logo on the pages your clients see. It reads every form fresh, checks every fee, and submits nothing until your client approves the exact data.</p>
               <div className="hero-actions">
                 <Link className="btn btn-primary" href="/signup">Create a partner account</Link>
                 <a className="btn btn-quiet" href="#enterprise">Enterprise and API</a>
               </div>
-              <p className="hero-note">Starting with New York, New Jersey, Florida and the IRS.</p>
+              <p className="hero-note">Practice filings are free. Filing for real needs a subscription.</p>
+              <p className="hero-note">Starting with New York, New Jersey, Florida and the IRS. Not every filing type is live yet; see <a href="#coverage">Coverage</a>.</p>
             </div>
 
-            <figure className="trace" aria-label="Run trace from a dry run on the New Jersey portal" style={{ margin: 0 }}>
+            <figure className="trace" aria-labelledby="trace-label" style={{ margin: 0 }}>
               <div className="trace-head">
                 <span><strong>NJ · Domestic LLC formation</strong> · njportal.com</span>
-                <span className="pill pill-dry">Dry run</span>
+                <span className="pill pill-dry">Practice run</span>
               </div>
               <ol>
                 {TRACE.map(([t, s, small, out, tone], i) => (
                   <li key={t} className={i === 0 ? "scan" : undefined}>
-                    <span className="t">{t}</span>
+                    <span className="t" aria-hidden="true">{t}</span>
                     <span className="s">{s}{small ? <small>{small}</small> : null}</span>
                     <span className={tone === "halt" ? "halt" : "ok"}>{out}</span>
                   </li>
                 ))}
               </ol>
               <div className="trace-foot">
-                <span>13 live screens, test entry, nothing filed.</span>
+                <span id="trace-label">Example practice run: 13 live screens of New Jersey&apos;s LLC formation, filled in with test details and stopped before Pay Now. Nothing was filed.</span>
                 <span className="stamp">Stopped before Pay Now</span>
               </div>
             </figure>
@@ -87,10 +101,10 @@ export default function Home() {
 
         <div className="principles band">
           <div className="wrap">
-            <div className="principle"><b>Approval first</b><span>Your client approves the exact data through a signed link before any run starts.</span></div>
+            <div className="principle"><b>Approval first</b><span>Your client approves the exact details and fees through a secure link, on a picture of the state&apos;s own review page where possible, before anything is filed or paid.</span></div>
             <div className="principle"><b>Live forms, every run</b><span>Fields are matched by their labels on the page as it is today.</span></div>
             <div className="principle"><b>Stops on change</b><span>A changed form halts the run before submission and proposes the fix.</span></div>
-            <div className="principle"><b>Your brand</b><span>Your logo and colors on the pages your clients see.</span></div>
+            <div className="principle"><b>Your brand</b><span>Your name, logo and colors on the pages your clients see. Partner pages also show a small &quot;with {name}&quot;.</span></div>
           </div>
         </div>
 
@@ -103,12 +117,13 @@ export default function Home() {
             <div className="paths">
               <article className="path">
                 <span className="field-label">Partner firms</span>
-                <h3>For CPA, payroll, CFO and title firms</h3>
+                <h3>For CPA, payroll, fractional CFO and title firms</h3>
                 <ul>
                   <li>Create an account, then add your logo and colors.</li>
                   <li>Choose how state fees are paid: one card for everything, or one per filing type, with a backup card.</li>
-                  <li>Pick a state and a filing, then fill it in yourself or send your client a link.</li>
+                  <li>Pick a state and a filing, then fill it in yourself, send your client a link or put the form on your own website.</li>
                   <li>Your client checks and approves exactly what will be filed.</li>
+                  <li>Practice filings are free. Filing for real needs a subscription.</li>
                 </ul>
                 <Link className="btn btn-primary" href="/signup">Create a partner account</Link>
               </article>
@@ -116,7 +131,7 @@ export default function Home() {
                 <span className="field-label">Enterprise</span>
                 <h3>For filing companies and platforms</h3>
                 <ul>
-                  <li>API keys, endpoints, webhooks and full docs.</li>
+                  <li>A filing API with webhooks, full docs and a white-label approval page.</li>
                   <li>Your own state portal logins, connected securely.</li>
                   <li>Separate payment methods for your subscription and for state fees.</li>
                   <li>Defaults per portal and per filing type.</li>
@@ -136,11 +151,11 @@ export default function Home() {
             </div>
             <div className="steps">
               <div className="step"><h3>Intake</h3><p>You or your client fill in a short form. Your saved answers fill the rest: agent, organizer, signer, addresses.</p></div>
-              <div className="step"><h3>Approval</h3><p>The client receives a link with every value and the fees. Approving binds those exact values to the run.</p></div>
+              <div className="step"><h3>Approval</h3><p>The client gets a link showing every detail and the fees and, where possible, a picture of the state&apos;s own review page, filled in. Approving locks in exactly those details.</p></div>
               <div className="step"><h3>Pre-flight</h3><p>Site hours, logins, account balance and fee table are checked before a browser opens.</p></div>
-              <div className="step"><h3>Run</h3><p>The engine reads each screen live, fills it by label and keeps a screenshot and page copy of every step.</p></div>
-              <div className="step"><h3>EIN in the same pass</h3><p>After the name check passes, the EIN is filed and its letter saved, then entered into the state form.</p></div>
-              <div className="step"><h3>Filed</h3><p>Documents are stored, and each stage is reported back to you.</p></div>
+              <div className="step"><h3>Run</h3><p>{name} reads each screen live, fills it in by label and keeps a screenshot and a copy of every page.</p></div>
+              <div className="step"><h3>EIN in the same pass</h3><p>If the state form needs an EIN, {name} can apply for it once the name check passes, save the IRS letter and enter the EIN on the form. It can also apply after the state accepts the formation, as the IRS advises.</p></div>
+              <div className="step"><h3>Filed</h3><p>{name} submits once your client approves (and, when a saved card pays, once its security code is entered), during the state site&apos;s hours. Some states answer at once; others answer later, such as New York&apos;s receipt email or a Florida examiner&apos;s review. The state&apos;s documents are saved and sent to you when they arrive, and each stage is reported back to you.</p></div>
             </div>
           </div>
         </section>
@@ -168,7 +183,7 @@ export default function Home() {
               </article>
               <article className="control">
                 <h3>Checks the price before paying</h3>
-                <p>Fees are quoted at approval from a verified fee table and read again on the payment screen. NJ charges $50 for an LLC standing certificate and $25 for a corporation&apos;s, so the engine also confirms the entity type on the state record.</p>
+                <p>Fees are quoted at approval from a verified fee table and read again on the payment screen. NJ charges more for an LLC&apos;s standing certificate than for a corporation&apos;s, so {name} also confirms the entity type on the state record.</p>
                 <div className="exhibit" role="img" aria-label="Example fee checks">
                   <div className="exhibit-head"><span>NJ standing certificate · by card</span><span>Fee check</span></div>
                   <div className="exhibit-body">
@@ -179,8 +194,8 @@ export default function Home() {
                 </div>
               </article>
               <article className="control">
-                <h3>Never submits twice</h3>
-                <p>A record is written before the final click. If a machine stops mid-run, that filing is flagged for reconciliation and never re-run on its own.</p>
+                <h3>Built not to submit twice</h3>
+                <p>A record is written before the final click. If our system stops in the middle of a filing, it&apos;s never re-run on its own: our team checks what the state received first.</p>
               </article>
               <article className="control">
                 <h3>Shows where every value came from</h3>
@@ -216,7 +231,7 @@ export default function Home() {
           <div className="wrap">
             <div className="section-head">
               <span className="field-label">Coverage</span>
-              <h2>Where the engine files today, and what is next.</h2>
+              <h2>Where each filing type stands today, and what is next.</h2>
             </div>
             <div className="table-wrap">
               <table>
@@ -228,7 +243,7 @@ export default function Home() {
                 </tbody>
               </table>
             </div>
-            <p className="table-note">Verified means the engine completed every screen on the live government site with a test entry and stopped before payment. Each filing type is switched to live submission only after its payment step has been mapped.</p>
+            <p className="table-note">Verified up to payment: {name} completed every screen on the live government site with a test entry and stopped before paying. Screens mapped: the live site&apos;s screens were recorded on a walk-through, but a full test run hasn&apos;t been verified yet. Not yet verified: offered in the portal, but not yet verified on the live site. Planned: not built yet. A filing type is switched to live filing only after its payment step is mapped, so not every type here can be filed for real yet. Until then, it can only be run as a free practice filing.</p>
           </div>
         </section>
 
@@ -239,11 +254,11 @@ export default function Home() {
               <h2>Sensitive data stays where it belongs.</h2>
             </div>
             <div className="sec">
-              <div><h3>Masked SSNs</h3><p>Social Security numbers are masked on approval pages, in API responses and in recorded screens.</p></div>
-              <div><h3>Cards and logins in a vault</h3><p>Card numbers and state logins are held by a vault, never in our database, and are read only when a run needs them.</p></div>
+              <div><h3>Encrypted, masked SSNs</h3><p>Social Security numbers are encrypted, masked on approval pages, in API responses and in recorded screens, and deleted after 30 days.</p></div>
+              <div><h3>Cards in a vault, logins encrypted</h3><p>Saved cards are held by Basis Theory, a card vault, never in our database. When filings are ready to pay, we ask the card&apos;s owner for its security code and keep it for an hour at most. State logins are encrypted as soon as they arrive, kept apart from every other account and read only when a filing runs.</p></div>
               <div><h3>Single-use approval links</h3><p>Signed, expiring links, bound to the exact data shown. An optional one-time code adds a second check.</p></div>
               <div><h3>Signatures only on approval</h3><p>A saved signature is applied only to a filing the client has approved.</p></div>
-              <div><h3>Dry-run mode</h3><p>New sites and new accounts can run every screen and stop before submission until they are switched live.</p></div>
+              <div><h3>Free practice filings</h3><p>Any filing can run as a practice filing: every screen of the government site is filled in and the run stops before submitting. New accounts and newly added state sites run this way until they&apos;re switched to live filing.</p></div>
               <div><h3>Separate accounts</h3><p>Logins, jobs, clients and documents are kept per account. One account never sees another&apos;s.</p></div>
             </div>
           </div>

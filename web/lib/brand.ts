@@ -3,9 +3,9 @@ export function platformName(): string {
   return process.env.PLATFORM_NAME?.trim() || "CoFile";
 }
 
-/** The engine's public URL as callers use it, for the docs and the OpenAPI servers entry. */
+/** The engine's public URL as callers use it, for the docs and the OpenAPI servers entry. Never ENGINE_API_URL: that is the server-side address. */
 export function publicApiUrl(): string {
-  return (process.env.ENGINE_PUBLIC_URL ?? process.env.ENGINE_API_URL ?? "https://api.example.com").replace(/\/+$/, "");
+  return (process.env.ENGINE_PUBLIC_URL?.trim() || "https://cofile.app").replace(/\/+$/, "");
 }
 
 /** Only #rgb / #rrggbb colors reach the page's CSS. */

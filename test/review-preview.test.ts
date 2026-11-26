@@ -96,7 +96,7 @@ describe("approval on the state's review page (decision 7)", () => {
     // The email carries the screenshot; the event says the approval is on the review page.
     const ev = (await events(id)).find((e) => e.type === "filing.awaiting_approval")!;
     expect(ev.data).toMatchObject({ reviewPage: true, reviewShotArtifactId: approval.review!.artifactId });
-    const mail = outbox.sent.find((m) => m.msg.subject.startsWith("Approve"))!;
+    const mail = outbox.sent.find((m) => m.msg.subject.startsWith("Please review and approve"))!;
     expect(mail.msg.attachments?.[0]).toMatchObject({ filename: "State review page.png", contentType: "image/png" });
 
     await service.onApprovalDecision(approval.token, "approve", {});

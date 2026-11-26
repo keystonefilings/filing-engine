@@ -113,7 +113,7 @@ export function PartnerSignupForm({ action, approvalRequired }: { action: Action
           <option>Under 10</option><option>10 to 50</option><option>50 to 200</option><option>Over 200</option>
         </select></label>
       <button className="btn btn-primary" type="submit" disabled={pending}>{pending ? "Creating…" : "Create account"}</button>
-      <p className="hero-note">{approvalRequired ? "You'll confirm your email, then we review new accounts before they open and email you when yours is ready." : "Your account opens as soon as you confirm your email."} Already have one? <Link href="/login">Log in</Link>.</p>
+      <p className="hero-note">{approvalRequired ? "You'll confirm your email. If your account needs a review before it opens, we'll email you when it's ready." : "Your account opens as soon as you confirm your email."} Already have one? <Link href="/login">Log in</Link>.</p>
       <Msg s={s} />
     </form>
   );
@@ -137,7 +137,7 @@ export function InquiryForm({ action }: { action: Action }) {
         <label htmlFor="bf-volume">Filings per month<select id="bf-volume" name="volume"><option>Under 50</option><option>50 to 250</option><option>250 to 1,000</option><option>Over 1,000</option></select></label>
       </div>
       <label htmlFor="bf-msg">What you&apos;d like to do (optional)<textarea id="bf-msg" name="message" maxLength={2000} /></label>
-      <div className="hp" aria-hidden="true"><label htmlFor="bf-website">Leave this empty<input id="bf-website" name="website" tabIndex={-1} autoComplete="off" /></label></div>
+      <div className="hp" aria-hidden="true"><label htmlFor="bf-website">Leave this field empty (it helps us block spam)<input id="bf-website" name="website" tabIndex={-1} autoComplete="off" /></label></div>
       <button className="btn btn-primary" type="submit" disabled={pending}>{pending ? "Sending…" : "Send"}</button>
       <Msg s={s} />
     </form>

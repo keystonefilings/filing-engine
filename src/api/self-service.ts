@@ -86,7 +86,7 @@ export function registerSelfService(app: FastifyInstance, deps: SelfServiceDeps)
     const t = await deps.store.getTenant(tenantId);
     return {
       tenantId,
-      name: t?.name ?? tenantId,
+      name: t?.branding?.displayName ?? t?.name ?? tenantId,
       configured: !!t,
       branding: t?.branding ?? {},
       webhookEndpointCount: t?.webhookEndpoints.length ?? 0,

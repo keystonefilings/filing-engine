@@ -15,7 +15,7 @@ export default async function SignupSentPage({ searchParams }: { searchParams: P
             We sent a link to confirm your email address. Open it to finish.
             {open
               ? <> Once it&apos;s confirmed you can <Link href="/login">log in</Link> with the email and password you chose.</>
-              : <> We also review new partner accounts before they open, and we&apos;ll email you as soon as yours is approved.</>}
+              : <> If your account needs a review before it opens, we&apos;ll email you as soon as it&apos;s approved.</>}
           </p>
           <p className="hero-note">No email after a few minutes? Check spam, or <Link href="/verify-email">send the link again</Link>.</p>
         </div>

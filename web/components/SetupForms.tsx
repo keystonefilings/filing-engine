@@ -45,7 +45,7 @@ export function DetailsForm({ action, v }: { action: Action; v: DetailsValues })
       <div className="field">
         <label htmlFor="d-copy">Email for the state&apos;s copies (optional)</label>
         <input id="d-copy" name="copyEmail" type="email" defaultValue={v.copyEmail} />
-        <p className="help">When we file on our state accounts, New York sends its copies to us and copies you in. Leave empty to use your contact email.</p>
+        <p className="help">When we file using our own New York account, the state emails the filed documents to us and sends a copy to this address. Leave it empty to use your contact email.</p>
         <Issue s={s} k="copyEmail" />
       </div>
       {v.services?.length ? (
@@ -114,8 +114,8 @@ export function BrandingForm({ action, v, platform }: { action: Action; v: Brand
         <LogoField current={v.logoSrc} currentLink={v.logoUrl} onPreview={setLogo} />
         <Issue s={s} k="logoUrl" /><Issue s={s} k="data" />
         <div className="field-row n2">
-          <ColorField id="b-color" name="primaryColor" label="Main color" value={color} onChange={setColor} help="Buttons and the top of the page." />
-          <ColorField id="b-color2" name="secondaryColor" label="Second color" value={color2} onChange={setColor2} help="Links and highlights." />
+          <ColorField id="b-color" name="primaryColor" label="Main color" value={color} onChange={setColor} help="Buttons and the top of the page. Button text is white, so choose a dark color." />
+          <ColorField id="b-color2" name="secondaryColor" label="Second color" value={color2} onChange={setColor2} help="Links and highlights. Choose a color that's easy to read on white." />
         </div>
         <div className="field">
           <label htmlFor="b-font">Font</label>
@@ -151,7 +151,7 @@ export function BrandPreview({ name, logo, color, color2, platform }: { name: st
         {platform ? <span className="small muted">with {platform}</span> : null}
       </div>
       <p className="small" style={{ marginBottom: 8 }}>Please fill in your LLC formation details. <a href="#" onClick={(e) => e.preventDefault()}>What you&apos;ll need</a></p>
-      <button type="button" className="btn primary small">Send</button>
+      <button type="button" className="btn primary small">Send for approval</button>
     </div>
   );
 }
@@ -189,7 +189,7 @@ export function PaymentsForm({ action, methods, routing, kinds }: { action: Acti
           ))}
         </fieldset>
       ) : null}
-      {none ? <p className="notice">No card saved yet. Add one above, then pick which pays what here. Your choice is saved now.</p> : null}
+      {none ? <p className="notice">No cards saved yet. Add a card, then choose which card pays for what. You can save how fees are paid now and pick cards later.</p> : null}
       <button className="btn primary" type="submit" disabled={pending}>{pending ? "Saving…" : "Save"}</button>
     </form>
   );

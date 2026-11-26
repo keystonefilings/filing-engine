@@ -54,7 +54,6 @@ export const PORTALS: PortalInfo[] = [
       { id: "certificateOfStatus", label: "Order a certificate of status", type: "boolean" },
     ],
   },
-  { id: "mo-sos", state: "MO", name: "Missouri SOS online filing", needsLogin: true, pays: "Card or eCheck at checkout", defaults: [] },
   { id: "irs-ein", state: "US", name: "IRS EIN online application", needsLogin: false, pays: "No fee", defaults: [] },
 ];
 

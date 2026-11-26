@@ -304,8 +304,9 @@ export function registerUsers(app: FastifyInstance, deps: UsersDeps): void {
     // Not awaited: how long a send takes must not tell the caller whether the account exists.
     void deps.email?.send({ address: u.email, name: u.name }, {
       subject: "Reset your password",
-      body: `Someone asked to reset the password for the account ${u.email}. Open the link below within ${RESET_TTL_MINUTES} minutes to choose a new one. It works once.\n\nIf this wasn't you, ignore this email: your password stays the same.`,
+      body: `Someone asked to reset the password for the CoFile account ${u.email}. Open the link below within ${RESET_TTL_MINUTES} minutes to choose a new one. It works once.\n\nIf this wasn't you, ignore this email: your password stays the same.`,
       link,
+      linkLabel: "Choose a new password",
     }).catch((e) => console.error("password reset email failed", (e as Error).message));
     return reply.code(202).send(answer);
   });
@@ -385,9 +386,10 @@ export function registerUsers(app: FastifyInstance, deps: UsersDeps): void {
 
   const sendVerification = (u: UserRecord, secret: string) => {
     void deps.email?.send({ address: u.email, name: u.name }, {
-      subject: "Confirm your email",
+      subject: "Confirm your email for CoFile",
       body: `Confirm that ${u.email} is your email to finish setting up the partner account for ${u.signup?.companyName ?? "your firm"}. The link works for ${VERIFY_TTL_DAYS} days.\n\nIf you didn't sign up, ignore this email.`,
       link: `${deps.webBaseUrl}/verify-email?token=${encodeURIComponent(`${u.id}.${secret}`)}`,
+      linkLabel: "Confirm my email",
     }).catch((e) => console.error("confirmation email failed", (e as Error).message));
   };
 
@@ -468,8 +470,9 @@ export function registerUsers(app: FastifyInstance, deps: UsersDeps): void {
     // The sign-up page told them we'd email once the account opens.
     void deps.email?.send({ address: approved.email, name: approved.name }, {
       subject: "Your partner account is open",
-      body: `Your account for ${u.signup!.companyName} is approved. Log in with the email and password you chose to set up your dashboard.`,
+      body: `Your account for ${u.signup!.companyName} is approved. Log in with the email and password you chose. Then set up your portal in three short steps: your firm, your branding and how state fees are paid. Practice filings are free, so you can try one right away.`,
       link: `${deps.webBaseUrl}/login`,
+      linkLabel: "Log in",
     }).catch((e) => console.error("approval email failed", (e as Error).message));
     return { user: publicUser(approved) };
   });
@@ -528,9 +531,10 @@ export function registerUsers(app: FastifyInstance, deps: UsersDeps): void {
     const secret = randomBytes(32).toString("base64url");
     await deps.store.updateUser(u.id, { passwordReset: { tokenHash: sha256(secret).toString("hex"), expiresAt: new Date(now().getTime() + 7 * 86_400_000).toISOString(), sessionGen: 0, requestedAt: at } });
     void deps.email?.send({ address: u.email, name: u.name }, {
-      subject: "Your account is ready",
+      subject: "Your CoFile account is ready",
       body: `Welcome, ${u.name}. The enterprise account for ${q.company} is set up. Open the link below to choose your password; it works for 7 days.\n\nAfter that you can add your team, API keys and webhooks from the dashboard.`,
       link: `${deps.webBaseUrl}/reset-password?token=${encodeURIComponent(`${u.id}.${secret}`)}`,
+      linkLabel: "Set my password",
     }).catch((e) => console.error("welcome email failed", (e as Error).message));
     const inquiry = await deps.store.updateInquiry(q.id, { status: "approved", decidedAt: at, decidedBy: by, tenantId });
     return reply.code(201).send({ inquiry, tenantId, user: publicUser(u) });
@@ -561,8 +565,9 @@ export function registerUsers(app: FastifyInstance, deps: UsersDeps): void {
     const firmName = c.portal.displayName ?? c.name;
     void deps.email?.send({ address: u.email, name: u.name }, {
       subject: `You're invited to ${firmName}'s filing portal`,
-      body: `${by === "api key" ? "You've" : `${by} has`} given you access to ${firmName}'s filing portal. Open the link below to choose your password; it works for 7 days. Then log in with this email.`,
+      body: `${by === "api key" ? "You've been given" : `${by} has given you`} access to ${firmName}'s filing portal. Open the link below to choose your password; it works for 7 days. Then log in with this email.`,
       link,
+      linkLabel: "Set my password",
     }).catch((e) => console.error("invite email failed", (e as Error).message));
     return reply.code(201).send({ user: publicUser(u), link, expiresAt: new Date(at.getTime() + 7 * 86_400_000).toISOString() });
   });

@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { firmContext, liveFilings, offeredKinds } from "@/lib/firm";
 import { IntakeForm } from "@/components/IntakeForm";
+import { platformName } from "@/lib/brand";
 import { newNonce } from "@/lib/intake/submit";
 import { listSignatures } from "@/lib/signatures";
 import { createFirmFiling } from "./actions";
@@ -10,6 +11,13 @@ import { withFirmDefaults } from "@/lib/firm-defaults";
 import { answersFrom, pastClients } from "@/lib/past-clients";
 import { engine, type Filing } from "@/lib/engine";
 import { answersFor, inboundMessage } from "@/lib/inbound";
+import { filingKind } from "@/lib/intake/forms";
+
+/** The tab names the form: "New York LLC formation · New filing · CoFile" (the root layout adds the brand). */
+export async function generateMetadata({ params }: { params: Promise<{ slug: string; kind: string }> }) {
+  const k = filingKind((await params).kind);
+  return { title: k ? `${k.title} · New filing` : "New filing" };
+}
 
 /** V28: the firm files this one itself, so its own contact details start in the contact block. */
 function contactPrefill(c: ClientCompany): Record<string, string> {
@@ -22,7 +30,7 @@ function contactPrefill(c: ClientCompany): Record<string, string> {
 export default async function NewKindPage({ params, searchParams }: { params: Promise<{ slug: string; kind: string }>; searchParams: Promise<{ from?: string; email?: string }> }) {
   const { slug, kind: kindId } = await params;
   const { from, email } = await searchParams;
-  const { session, company } = await firmContext(slug);
+  const { session, company, brand } = await firmContext(slug);
   const offered = offeredKinds(company).find((k) => k.id === kindId);
   if (!offered) notFound();
   const { kind, prefill: saved } = withFirmDefaults(offered, company);
@@ -41,7 +49,7 @@ export default async function NewKindPage({ params, searchParams }: { params: Pr
       <h1>{kind.title}</h1>
       <p className="muted">{kind.summary} Would your client rather fill it in? <Link href={`/p/${encodeURIComponent(slug)}/client-links?kind=${encodeURIComponent(kind.id)}`}>Send them a link</Link>.</p>
       {emailed ? <p className="notice">Filled in from your message &ldquo;{emailed.subject || "(no subject)"}&rdquo;. Check every answer and add what&apos;s missing.</p> : null}
-      {!liveFilings() ? <p className="notice warn">Test mode: filings from this portal are walked through the state site up to the final step and stopped there. Nothing is filed or paid.</p> : null}
+      {!liveFilings() ? <p className="notice warn">Practice mode: this portal isn&apos;t switched to live filing yet, so this filing goes through the government site up to the final step and stops there. Nothing is filed or paid, and practice filings are free.</p> : null}
       {clients.length ? (
         <form method="get" className="row" style={{ gap: 8 }}>
           <label htmlFor="from-client" className="small">Start from a client you filed for before</label>
@@ -58,6 +66,7 @@ export default async function NewKindPage({ params, searchParams }: { params: Pr
         action={createFirmFiling.bind(null, slug, kind.id, emailed?.id ?? null)}
         signatures={sigs?.signatures.filter((s) => s.active) ?? []}
         consentText={sigs?.consentText}
+        filerName={company.partner ? `${brand.name}, filing through ${platformName()}` : undefined}
         prefill={{ ...(Object.keys(fromEmail).some((k) => k.startsWith("contact.")) ? {} : contactPrefill(company)), ...saved, ...fromClient, ...fromEmail }}
         key={from ?? email ?? "new"}
       />

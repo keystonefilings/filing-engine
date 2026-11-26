@@ -38,7 +38,8 @@ describe("field cipher", () => {
   it("refuses a tampered value and a wrong key", () => {
     const sealed = FieldCipher.fromSpec(KEY)!.seal("123-45-6789");
     const [iv, body, tag] = sealed.slice(7).split(".");
-    const flipped = `enc:v1:${iv}.${body!.slice(0, -1)}${body!.endsWith("A") ? "B" : "A"}.${tag}`;
+    // The first character always carries data (the last can be only padding bits, which decode the same).
+    const flipped = `enc:v1:${iv}.${body!.startsWith("A") ? "B" : "A"}${body!.slice(1)}.${tag}`;
     expect(() => FieldCipher.fromSpec(KEY)!.open(flipped)).toThrow();
     expect(() => FieldCipher.fromSpec("b".repeat(64))!.open(sealed)).toThrow();
     expect(() => FieldCipher.fromSpec("short")).toThrow(/64 hex/);

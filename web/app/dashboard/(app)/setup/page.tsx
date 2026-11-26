@@ -24,9 +24,9 @@ export default async function SetupPage() {
       {!setup.configured ? <p className="notice warn">Your account settings haven&apos;t been set up yet, so nothing here can be saved. We&apos;ll do that with you first.</p> : null}
 
       <h2>Payment methods</h2>
-      <p className="muted">Your subscription and state filing fees can be paid by different cards. Cards are held by Basis Theory, a card vault, never by us; the engine reads a card only when it pays a state.</p>
+      <p className="muted">Your subscription and state filing fees can be paid by different cards. Cards are held by Basis Theory, a card vault, never by us; a card is read only when it pays a state. When filings are ready to pay with a saved card, we ask the card&apos;s owner for its security code on the Ready to pay page and keep it for an hour at most.</p>
       <SavedCards methods={setup.payments.methods} />
-      {process.env.BASIS_THEORY_PUBLIC_KEY ? <AddCard publicKey={process.env.BASIS_THEORY_PUBLIC_KEY} save={saveCard} /> : <p className="notice">Adding cards needs the card vault switched on for this site.</p>}
+      {process.env.BASIS_THEORY_PUBLIC_KEY ? <AddCard publicKey={process.env.BASIS_THEORY_PUBLIC_KEY} save={saveCard} /> : <p className="notice">Saving cards isn&apos;t turned on for your account yet. Ask us to turn it on.</p>}
       <RoutingForm action={saveRouting} methods={setup.payments.methods} routing={setup.payments.routing} kinds={FILING_KINDS.map((k) => ({ id: k.id, title: k.title }))} />
 
       <h2>State portal logins</h2>

@@ -9,7 +9,7 @@ export function PortalLoginForm({ action, portalName }: { action: (prev: LoginSt
   const { state: s, pending, formProps } = useKeptForm(action, null, { clearOnSuccess: true });
   return (
     <details className="small">
-      <summary className="btn small">Connect</summary>
+      <summary className="btn small" aria-label={`Connect ${portalName} login`}>Connect</summary>
       <form {...formProps} className="stack" style={{ marginTop: 8, minWidth: 260 }}>
         <label>Username for {portalName}<input name="username" autoComplete="off" required /></label>
         <label>Password<input name="password" type="password" autoComplete="new-password" required /></label>

@@ -1,0 +1,254 @@
+# Copy review, Nov 26 (V44)
+
+Twenty separate reviewers each read every page, form, email and the approval page as a different reader (CPA firm owner, payroll operations, fractional CFO, title closer, API developer, AI agent builder, a client approving on a phone, first-time founder, paralegal, in-house counsel, security officer, accessibility specialist, Spanish-first owner, older owner, conversion copywriter, brand editor, forms UX writer, SEO, a skeptical switcher, enterprise procurement). They returned 599 findings; one merge kept the best 150 changes and listed 19 decisions only the owner can make.
+
+**Applied:** 148 of the 150 changes (263 edits in 40 files), checked by the full test suites and in the browser. Two were held for a decision: the NY corporation tax note (the walk showed $0 where the statute has a $10 minimum) and removing Missouri from the EIN form. The coverage table was also brought up to date with the filings built since the review (V13, V14), and the approval page now shows plain labels instead of field paths.
+
+## What the reviewers found most
+
+- Coverage is overstated and unclear: no page says plainly which filing types file for real today. "Verified on the live site" reads as live, and "mapped from a live walk" is undefined. Filings the portal sells are listed as planned or missing (NJ-REG, Authority, Assumed Name), and Missouri and standing certificates appear without support.
+- Cost is never stated publicly. Practice filings are free and filing for real needs a subscription, but no price is set, and the $49 and $499 figures shown read as quotes.
+- Security and privacy claims are wrong or incomplete. SSNs are encrypted and deleted after 30 days, not "purged after it completes". Only cards are held by Basis Theory, while logins are encrypted. The one-hour security-code rule is missing where it matters.
+- Approval and submission are overpromised: "the state's own page" every time, "will be submitted exactly as shown", "filed right away", "before any run starts" and "nothing reaches a state site", when preview runs exist and live runs stop before paying if the state's page changed.
+- Practice mode is confusing. It has five names, a banner with no reason or way out, and practice filings that clients approve without knowing nothing will be filed.
+- Flows dead-end: the security-code and missing-information emails have no link or next step, Ready to pay isn't in any menu, approval errors show raw codes, "add one above" points at nothing, and buttons just say "Open".
+- Legal authorizations name an undefined "the filing company", the agent option implies an agent service CoFile doesn't offer, and the consent texts (approval, saved signature, third-person perjury declarations, EIN designee) need counsel's decision.
+- Development leftovers undermine trust: "Keystone", localhost and 127.0.0.1 addresses, SITE_PROXIES and PARTNER_SIGNUP_MODE, "(decision 7)", "the LLC path was walked", and engine or platform jargon.
+- Plain language and accessibility: legal and engine terms go unexplained for first-time and non-native readers, the * marker is unexplained, page titles are identical, buttons are unlabeled, and white button text sits on a brand color the firm chooses.
+- The developer docs have gaps that break unattended integrations: the previewing status and 402 error are missing, aborted is described wrongly, firm cards get the wrong card-code path, and review-page approval isn't documented.
+
+## Words to use everywhere
+
+| Term | Use |
+|---|---|
+| CoFile | The only product name in anything a customer or client can see. Never "Keystone". Outside the developer docs, also avoid "the engine" and "the platform (team/contact)"; say "CoFile", "we" or "our team". |
+| practice filing / practice mode | A filing that goes through the live government site up to the final step and stops: nothing is filed or paid, and it's free. This replaces "test mode", "test run", "dry-run mode" and "DRY RUN" in customer copy. The developer docs keep "dry run" for the dryRun flag and gloss it once as "dry run (practice filing)". |
+| live filing / file for real | A filing that is actually submitted to the government site and paid. It needs a subscription. Use "file for real" as the verb in customer copy. |
+| preview run | Developer docs only. A run that fills in the state site up to its review page so the page can be captured for approval. It submits nothing and pays nothing. |
+| approval page / approval link | The page the client opens from the approval email to check every detail and the fees, then approve or ask for changes. In partner copy, the person who approves is "your client", not "the approver". |
+| the state's own review page | The screenshot the client approves. Always add "where possible". Never say it on IRS (EIN) pages. Say "government site" when the sentence covers both state sites and the IRS. |
+| stops before paying | The standard way to describe what happens when the state's page has changed: "we stop before paying, and you may be asked to approve again". Never promise that a filing "will be submitted" or "is filed right away". |
+| the filing company | Kept in the authorization texts, but on every form and client page it is defined once by name: 'Here, "the filing company" means {filer name}'. Counsel confirms who that is (see decisions). |
+| filing type / filing | "Filing type" means a kind of filing, such as New York LLC formation. "Filing" means one filing. Write "6 filing types", not "6 filings". |
+| Coverage statuses | VERIFIED UP TO PAYMENT, SCREENS MAPPED, NOT YET VERIFIED, PLANNED. Use "live" only for a type that files for real today. Say plainly that not every type is live yet. |
+| security code | The 3 or 4 digits on a card. Don't use CVV or CVC in customer copy. Standard wording: "we ask the card's owner for it when approved filings are ready to pay and keep it for an hour at most". |
+| Ready to pay | The name of the page (portal and dashboard) where the security code is entered. Name it exactly this way in emails, setup text and the top bars. |
+| Basis Theory, a card vault | Always this phrase for where saved cards are held: "Saved cards are held by Basis Theory, a card vault, never in our database". Don't describe state logins as being in the vault. |
+| state logins | "Encrypted as soon as they arrive, kept apart from every other account and read only when a filing runs", as on the dashboard. |
+| SSN sentence | "The SSN is encrypted, used only for this filing and deleted after 30 days." Use "deleted", not "purged", everywhere, including the docs. |
+| portal / dashboard | Partner firms have a portal at /p/<slug>. Enterprise accounts have a dashboard. Don't call the partner area a dashboard. |
+| log in / log out | Use these everywhere, not "sign in" or "sign out". |
+| employer registration | The name for NYS-100 and NJ-REG, matching the portal's filing names. "Payroll" is only a descriptor, as in "employer (payroll) registration". |
+| assumed name (DBA) / foreign qualification (Application for Authority) | Use these pairs on first mention, so the coverage table, docs and portal use the same names. |
+| state fee vs subscription | State fees are paid to the state with the cards chosen in Setup, after the client approves the exact amount. The subscription is what allows filing for real. Never blur the two. |
+| details (client copy) | On the approval page and in client emails, say "details" rather than "values" or "data". |
+| check (a box) | American usage: "check" and "uncheck", not "tick" and "untick". |
+
+## Decisions for you
+
+Each lists the options the reviewers gave and my recommendation.
+
+### 1. What should the site say about price, and are the amounts now shown real?
+
+Prices aren't set. The partner Billing page shows "$49.00 a month" and the API docs example shows 49900 ($499 a month), which readers take as quotes. The changes say only "Practice filings are free. Filing for real needs a subscription."
+
+Options:
+- Say only that practice filings are free and filing for real needs a subscription
+- Also say "pricing isn't set yet; talk to us"
+- Publish real prices once set, and hide Billing amounts until then
+
+**Recommendation:** Say only that practice filings are free and filing for real needs a subscription, until prices are set in Stripe. The Billing page then shows Stripe's real price; the $49 seen in testing came from a test stand-in, and the docs example is marked as a placeholder.
+
+### 2. Who is "the filing company" in the authorizations on partner portals and firm public pages, and on white-label enterprise pages?
+
+Every authorization (typed signatures, attestations, fee payment, IRS third-party designee) grants power to an unnamed party. The changes add a definition with {filer name}, but counsel must confirm which legal party that is.
+
+Options:
+- CoFile only
+- The partner firm only
+- The partner firm, filing through CoFile
+- On white-label pages, the enterprise filing company's own name
+
+**Recommendation:** On partner portals and firm pages: "{firm}, filing through CoFile" (what the forms now show). On white-label enterprise pages: the enterprise filing company's own name. Counsel to confirm.
+
+### 3. Should the approval consent also cover fee payment, the approver's authority to act for the business, and the signatures and attestations listed?
+
+Today the consent authorizes only "submission exactly as shown", though the page shows a "Maximum you authorize" fee cap and the forms say each authorization is shown again on the approval page. Several reviewers asked for these additions, but they change the consent's meaning.
+
+Options:
+- Keep the current scope (wording clarified only)
+- Add payment of the fees shown, with a non-refundable warning
+- Add payment, a confirmation of authority and the listed authorizations
+
+**Recommendation:** Add payment of the fees shown, up to the maximum, with a no-refund warning. Counsel to confirm the wording.
+
+### 4. Should the saved-signature consent be narrowed and say it can be revoked?
+
+The consent covers any approved filing for the company and says each one is "signed and filed in my name". The engine signs only forms that name that signer, and DELETE /v1/signatures exists. The text must match consentText from GET /v1/signatures on all three forms.
+
+Options:
+- Keep as is
+- Limit it to forms that name the signer, and drop "filed in my name"
+- Also add "I can revoke this signature at any time"
+
+**Recommendation:** Limit it to forms that name that signer, drop "filed in my name", and say it can be revoked (the engine already works this way).
+
+### 5. Should declarations made for another person become first-person, and who certifies the facts in NY Articles?
+
+NJ-REG has the person checking the box declare under penalty of perjury on behalf of "the authorized representative named above". The NYS-100 submitter, NY incorporator and Florida agent and partner authorizations use the same third-person pattern. In the NY LLC, the filing company "certifies" that the statements are true.
+
+Options:
+- Keep the third-person wording
+- Rewrite as first person ("I am the authorized representative… I declare…")
+- Have the person giving the authorization confirm the facts, and the filing company only type the name
+
+**Recommendation:** Counsel's call. Suggested: first person where the person checking the box is the declarant; otherwise the declarant confirms the facts and the filing company only types the name.
+
+### 6. Should the EIN third-party designee box still accept "or will sign"?
+
+The help text says the designee needs the signed authorization before it applies, but the checkbox lets an application go ahead without it, and "I" is wrong when firm staff fill in the form.
+
+Options:
+- Keep as is
+- "…or will sign it before the filing company applies"
+- Require "The responsible party has signed…" before submission
+
+**Recommendation:** "…or will sign it before the filing company applies".
+
+### 7. What is each filing type's real status, and which file for real today?
+
+Coverage omits NJ-REG and calls NY Application for Authority and Assumed Name planned while the portal sells them. The changes use NOT YET VERIFIED until engineering confirms. A standing certificate is listed as verified but isn't in the product's list of offered filings.
+
+Options:
+- Confirm each row's label (Verified up to payment / Screens mapped / Not yet verified)
+- Mark live types as LIVE in the table
+- Remove or keep the NJ standing certificate row and fee example
+- Add "Ask us which types are live for your account"
+
+**Recommendation:** The coverage table is now updated to what's built (verified up to payment, screens mapped, not yet verified). Add "Ask us which types are live for your account" until types switch live one by one.
+
+### 8. How does a partner portal leave practice mode, and what should the banner say?
+
+Billing shows an active plan, yet every form says practice/test mode with no reason or next step.
+
+Options:
+- Explain it in the banner, with a contact
+- Switch portals live automatically once subscribed and the type is live
+- Tag each filing card "Practice only for now" until that type is live
+
+**Recommendation:** Explain it in the banner now, with a contact; later, switch each filing type live for subscribed portals once it is verified live.
+
+### 9. Should partner portals offer "the filing company's registered agent"?
+
+CoFile has no registered agent service. Partners save their own agents in Setup. On partner pages the option may name an agent nobody provides.
+
+Options:
+- Remove it from partner portals
+- Point it at the firm's saved agent
+- Keep it only on enterprise white-label pages
+
+**Recommendation:** Point it at the firm's own saved agent (Setup already saves one per state).
+
+### 10. Publish Terms of Service, a Privacy Policy and a "not a law firm / not a government agency" notice?
+
+The site collects SSNs, dates of birth, signatures and cards, and files final government documents, but links to no terms, privacy page or disclaimer. Sign-up records no agreement to any terms.
+
+Options:
+- Publish all three, link them in the footer and next to Send, and add a consent line above Create account
+- Publish Terms and Privacy only
+- Wait for counsel
+
+**Recommendation:** Publish all three, link them in the footer and next to Send, and record agreement at sign-up. Needs counsel to write them.
+
+### 11. Which support channel should the site, emails and dashboard name?
+
+Bot-check, reconciliation, card-vault and key-revocation messages need someone to contact, and procurement asks for a support contact. The changes use "ask us" without naming a channel.
+
+Options:
+- A support email address
+- The existing Talk to us form
+- Support hours plus email
+
+**Recommendation:** A support email address (for example support@cofile.app) named in emails, the dashboard and the site.
+
+### 12. Should the site state any turnaround or processing times?
+
+Firms and closers ask how long filings take. The only figure is the state's NYS-100 average; the changes promise no times.
+
+Options:
+- State none and point to each state's own estimate
+- Publish typical times per filing type once measured
+
+**Recommendation:** State none for now and point to each state's own estimate.
+
+### 13. Are partner sign-ups reviewed before accounts open?
+
+/signup and /signup/sent promise a review, while the Sign-ups page shows automatic opening. The changes use wording that's true either way.
+
+Options:
+- Automatic (drop the review mention)
+- Always reviewed
+- Depends on the setting (keep the neutral wording)
+
+**Recommendation:** Keep the neutral wording: it depends on the sign-up setting.
+
+### 14. What are the production API host and web base URL?
+
+The docs use 127.0.0.1:8090 and the portal links use localhost:3100. The changes assume https://cofile.app for both.
+
+Options:
+- https://cofile.app for both
+- https://api.cofile.app for the API, https://cofile.app for pages
+
+**Recommendation:** Your deployment decides. The docs take the API address from ENGINE_PUBLIC_URL; set it in production.
+
+### 15. Should EIN-only filings accept LLCs formed outside NY, NJ and FL?
+
+The EIN forms list Missouri, while the docs say "any formation state". The changes remove Missouri.
+
+Options:
+- NY, NJ and FL only
+- List all states on purpose
+
+**Recommendation:** List all states on purpose: the IRS doesn't depend on the formation state.
+
+### 16. Confirm three fee figures before the copy ships.
+
+NY corporations: NY Tax Law §180 adds a 5-cent-per-no-par-share organization tax ($10 minimum), but the site says there's no tax, and the fee table must match. NJ LLC: the demo shows $100 + $3.50. NJ standing certificate: the example shows $52/$27 against the stated $50/$25.
+
+Options:
+- Confirm each with the live checkout and fee table
+- Correct the fee table where it differs
+
+**Recommendation:** Confirm each during the checkout walks (V9-V12); the run already stops before paying if the state's amount differs.
+
+### 17. Change the API key prefix kfe_?
+
+If it stands for the old name, it's a visible trace of Keystone in the docs and dashboard. Changing it affects only new keys.
+
+Options:
+- Keep kfe_
+- Use a CoFile prefix for new keys
+
+**Recommendation:** Use a CoFile prefix for new keys and keep accepting old ones. Low priority.
+
+### 18. Do the Florida forms support professional entities (PLLC, P.A., Chartered)?
+
+The help text tells users to use endings that the Ending lists don't offer.
+
+Options:
+- Add the endings
+- Say "This form doesn't file professional entities yet"
+
+**Recommendation:** Say "This form doesn't file professional entities yet" until the endings are added.
+
+### 19. How does the home-state Certificate of Existence reach CoFile for a NY Application for Authority?
+
+The form says "Send it to the filing company; it is uploaded with the form" but gives no upload field or address. The Tax Commission consent option has the same gap.
+
+Options:
+- Add required PDF upload fields
+- Name a support email until uploads exist
+
+**Recommendation:** Add required PDF upload fields to the form.
+

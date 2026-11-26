@@ -115,6 +115,8 @@ export class ApprovalService {
     if (!v) return { ok: false, reason: "invalid_token" };
     const approval = await this.deps.store.getApproval(v.approvalId);
     if (!approval || approval.token !== token) return { ok: false, reason: "not_found" };
+    // A link marked expired on an earlier visit still reads as expired, not as decided.
+    if (approval.status === "expired") return { ok: false, reason: "expired" };
     if (approval.status !== "pending") return { ok: false, reason: "already_decided" };
     if (approval.expiresAt <= this.now().toISOString()) {
       await this.deps.store.updateApproval(approval.id, { status: "expired" });

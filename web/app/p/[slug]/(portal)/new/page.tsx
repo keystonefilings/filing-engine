@@ -24,6 +24,7 @@ export default async function NewFilingPage({ params, searchParams }: { params: 
       <div className="stack">
         <h1>New filing</h1>
         <p className="muted">Which state is the business in?</p>
+        <p className="small muted">Not every filing type can be filed for real yet. See <Link href="/#coverage">Coverage</Link> on the home page for where each one stands.</p>
         {ways.address || ways.sms || ways.whatsapp || ways.slackInstallUrl ? (
           <div className="small muted">
             <p style={{ marginBottom: 4 }}>Or send us the details and we fill in the form for you to check:</p>
@@ -40,7 +41,7 @@ export default async function NewFilingPage({ params, searchParams }: { params: 
             return (
               <Link key={s.id} href={`${base}/new?state=${s.id}`}>
                 <strong>{s.name}</strong>
-                <span className="small muted">{n === 1 ? "1 filing" : `${n} filings`}</span>
+                <span className="small muted">{n === 1 ? "1 filing type" : `${n} filing types`}</span>
               </Link>
             );
           })}
@@ -53,7 +54,7 @@ export default async function NewFilingPage({ params, searchParams }: { params: 
     <div className="stack">
       <p className="small"><Link href={`${base}/new`}>All states</Link></p>
       <h1>{st.name}: what are you filing?</h1>
-      <p className="muted">Fill it in yourself, or send your client a link to fill it in. Either way the approver checks exactly what will be filed before anything is sent to the state.</p>
+      <p className="muted">Fill it in yourself, or send your client a link to fill it in. Either way, your client approves exactly what will be filed before anything is filed or paid. Not every filing type can be filed for real yet.</p>
       {kinds.length === 0 ? <p className="notice">No {st.name} filings are offered here yet.</p> : (
         <div className="pick">
           {kinds.map((k) => (

@@ -18,10 +18,13 @@ export function savedAgent(company: Pick<ClientCompany, "registeredAgentsByState
   return all?.[state];
 }
 
-export function withFirmDefaults(kind: FilingKind, company: Pick<ClientCompany, "registeredAgentsByState">, opts: { forClient?: boolean } = {}): { kind: FilingKind; prefill: Record<string, string> } {
+export function withFirmDefaults(kind: FilingKind, company: Pick<ClientCompany, "registeredAgentsByState"> & Partial<Pick<ClientCompany, "name" | "portal">>, opts: { forClient?: boolean } = {}): { kind: FilingKind; prefill: Record<string, string> } {
   // A client filling the firm's form never sees "copy receipts to this email": the state's copy
   // goes to the firm (adapters/copies.ts), not to whoever filled in the form.
   if (opts.forClient) kind = { ...kind, sections: kind.sections.map((s) => ({ ...s, items: s.items.filter((i) => !(i.kind === "field" && i.path === "intake.portal.ccEmail")) })) } as FilingKind;
+  // The contact block names the firm the client works with, not "the filing company".
+  const filer = company.portal?.displayName || company.name;
+  if (filer) kind = { ...kind, sections: kind.sections.map((s) => (s.title === "Filing contact" && s.help ? { ...s, help: s.help.replace("the filing company", () => filer) } : s)) } as FilingKind;
   const agent = savedAgent(company, kind.state);
   if (!agent) return { kind, prefill: {} };
   const prefill: Record<string, string> = {};

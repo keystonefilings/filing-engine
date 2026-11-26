@@ -7,7 +7,7 @@ import { z } from "zod";
 import type { FilingService } from "../orchestrator/service.js";
 import { IdempotencyConflict, OutcomeError, ValidationFailed } from "../orchestrator/service.js";
 import type { ApprovalService } from "../approvals/service.js";
-import { renderReviewPage, maskSensitive } from "../approvals/render.js";
+import { renderReviewPage, renderDecisionPage, maskSensitive, type PageBrand } from "../approvals/render.js";
 import { ClientCompanyOwnershipError, type Store, type FilingRecord } from "../store/types.js";
 import type { ArtifactStore } from "../artifacts/store.js";
 import { TenantSettings, ClientCompanySettings } from "../settings/schema.js";
@@ -400,20 +400,17 @@ export function buildServer(deps: ApiDeps): FastifyInstance {
     return reply.header("cache-control", "private, no-store").type(got.meta.contentType).send(got.body);
   });
 
-  app.get("/approve/:token", async (req, reply) => {
-    const found = await deps.approvals.lookup((req.params as { token: string }).token);
-    if (!found.ok) return reply.code(410).type("text/html").send(`<p>This approval link is ${found.reason.replace("_", " ")}.</p>`);
-    const a = found.approval;
-    const f = await deps.store.getFiling(a.filingId);
-    const tenant = await deps.store.getTenant(a.tenantId);
-    // V20: the client sees the firm they work with. A firm with portal branding (a partner, or a
-    // firm a subscriber set up) brands the page; partners are co-branded with the platform.
+  // V20: the client sees the firm they work with. A firm with portal branding (a partner, or a
+  // firm a subscriber set up) brands the page; partners are co-branded with the platform. The
+  // page shown after the client decides carries the same look.
+  async function approvalBrand(tenantId: string, f: FilingRecord | null): Promise<PageBrand> {
+    const tenant = await deps.store.getTenant(tenantId);
     const client = f ? await deps.store.getClientCompany(f.clientCompanyId) : null;
     const portal = client?.portal;
     const firmBrand = portal && (portal.displayName || portal.logoUrl || portal.logoArtifactId || client?.partner);
     const firmLogo = portal?.logoArtifactId ? `${deps.publicBaseUrl}/v1/brand-logos/${portal.logoArtifactId}` : portal?.logoUrl?.startsWith("https://") ? portal.logoUrl : undefined;
-    const html = renderReviewPage({
-      brandName: firmBrand ? (portal!.displayName ?? client!.name) : (a.tenantId === (deps.platformTenantId ?? "keystone") ? (deps.platformName ?? "CoFile") : (tenant?.branding.displayName ?? tenant?.name)),
+    return {
+      brandName: firmBrand ? (portal!.displayName ?? client!.name) : (tenantId === (deps.platformTenantId ?? "keystone") ? (deps.platformName ?? "CoFile") : (tenant?.branding.displayName ?? tenant?.name)),
       supportEmail: (firmBrand ? portal!.supportEmail : undefined) ?? tenant?.branding.supportEmail,
       logoUrl: firmBrand ? firmLogo : undefined, primaryColor: firmBrand ? portal!.primaryColor : undefined,
       font: firmBrand && portal!.font && portal!.font !== "system"
@@ -422,10 +419,26 @@ export function buildServer(deps: ApiDeps): FastifyInstance {
           : { stack: FONT_PRESETS[portal!.font as FontPreset]?.stack ?? FONT_PRESETS.system.stack, href: googleFontHref(portal!.font) ?? undefined }
         : undefined,
       poweredBy: client?.partner ? (deps.platformName ?? "CoFile") : undefined,
+    };
+  }
+
+  app.get("/approve/:token", async (req, reply) => {
+    const found = await deps.approvals.lookup((req.params as { token: string }).token);
+    if (!found.ok) {
+      const text = found.reason === "already_decided" ? "A decision was already recorded with this link, so there's nothing more to do here."
+        : found.reason === "expired" ? "This approval link has expired. Ask whoever sent it for a new one."
+        : "This approval link isn't valid. Ask whoever sent it for a new one.";
+      return reply.code(410).type("text/html").send(`<p>${text}</p>`);
+    }
+    const a = found.approval;
+    const f = await deps.store.getFiling(a.filingId);
+    const html = renderReviewPage({
+      ...(await approvalBrand(a.tenantId, f)),
       filingId: a.filingId,
       filingTitle: f ? `${f.request.state} ${f.request.type.replace("_", " ")}${f.request.formation ? `: ${f.request.formation.name.baseName} ${f.request.formation.name.designator}` : ""}` : "Filing",
       payload: a.shownPayload, fees: a.fees, feeCapUsd: a.feeCapUsd, expiresAt: a.expiresAt,
       einInRun: !!f?.request.ein && f.request.ein.mode === "in_run",
+      practice: !!f && deps.service.isPractice(f.request),
       postUrl: `${deps.publicBaseUrl}/approve/${a.token}`, requireCode: !!a.oneTimeCode,
       reviewImageUrl: a.review?.artifactId ? `${deps.publicBaseUrl}/approve/${a.token}/review.png` : undefined,
     });
@@ -438,10 +451,19 @@ export function buildServer(deps: ApiDeps): FastifyInstance {
     const r = await deps.service.onApprovalDecision((req.params as { token: string }).token, decision, {
       ip: req.ip, userAgent: String(req.headers["user-agent"] ?? ""), comment: body.comment, code: body.code,
     });
-    if (!r.ok) return reply.code(r.reason === "bad_code" ? 400 : 410).type("text/html").send(`<p>Could not record your decision: ${r.reason.replace("_", " ")}.</p>`);
-    return reply.type("text/html").send(decision === "approve"
-      ? "<p>Thank you. Your approval is recorded and the filing will be submitted exactly as shown.</p>"
-      : "<p>Thank you. Your change request is recorded; you will receive a new link once the filing is updated.</p>");
+    if (!r.ok) return reply.code(r.reason === "bad_code" ? 400 : 410).type("text/html").send(r.reason === "bad_code"
+      ? "<p>That code didn't match. Go back, check the latest one-time code we sent you and try again.</p>"
+      : "<p>We couldn't record your decision because this link has expired or was already used. Ask whoever sent it for a new link.</p>");
+    if (decision !== "approve") return reply.type("text/html").send("<p>Thank you. Your change request is recorded, and nothing will be filed from this link. If the filing is corrected, you'll get a new link to approve.</p>");
+    // A practice filing is never filed or paid; a live one still stops before paying if the state's page changed.
+    const f = await deps.store.getFiling(r.approval.filingId);
+    return reply.type("text/html").send(renderDecisionPage({
+      ...(await approvalBrand(r.approval.tenantId, f)),
+      heading: "Approval recorded",
+      paragraphs: [f && deps.service.isPractice(f.request)
+        ? "Thank you. Your approval is recorded. This is a practice filing, so nothing will be filed or paid."
+        : "Thank you. Your approval is recorded. We'll submit the filing exactly as shown. If the state's page has changed by then, we stop before paying, and you may be asked to approve again. We'll email you when it's complete."],
+    }));
   });
 
   // ---- Drift reviews (platform staff, decision 6): the platform maintains the site adapters for all tenants ----

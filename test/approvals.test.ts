@@ -22,7 +22,7 @@ describe("hash and token", () => {
     const html = renderReviewPage({ filingId: "f", filingTitle: "t", payload: m, fees: [{ label: "fee", amountUsd: 100 }], expiresAt: "x", einInRun: true, postUrl: "/p", requireCode: false });
     expect(html).toContain("***-**-6789");
     expect(html).not.toContain("123-45");
-    expect(html).toContain("EIN issued during this run");
+    expect(html).toContain("we'll get the EIN from the IRS");
   });
 });
 

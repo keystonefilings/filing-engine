@@ -9,6 +9,13 @@ import { inviteStaff, savePortal } from "./actions";
 import { firmPageUrl, publicKind, SERVICE_SLUGS, widgetSnippet } from "@/lib/public-pages";
 import { offeredKinds } from "@/lib/firm";
 
+export async function generateMetadata({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
+  const s = await requireTenant();
+  const c = await engine<{ clientCompany: ClientCompany }>(s.apiKey, `/v1/client-companies/${encodeURIComponent(id)}`).then((r) => r.clientCompany).catch(() => null);
+  return { title: c ? `${c.name} · Firms` : "Firms" };
+}
+
 export default async function FirmPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const s = await requireTenant();
