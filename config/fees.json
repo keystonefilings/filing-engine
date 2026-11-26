@@ -101,9 +101,9 @@
           "statutory": 125,
           "taxOnShares": {
             "parValueRate": 0.0005,
-            "noParPerShareUsd": 0,
-            "minimumUsd": 0,
-            "_source": "Computed by the DOS page from the share answers; the engine quotes it at approval and the payment page's fee check stops a run when the page differs (portal map 2026-11-24, Cost rules). No par value: $0, as the page showed for 200 no-par shares (same map). Par value: 1/20 of 1% of the shares' total par value (NY Tax Law s.180), not yet seen on the page. No minimum: the page charged $0 where s.180's $10 minimum would apply, so the page's own rule governs and is what a live walk confirms."
+            "noParPerShareUsd": 0.05,
+            "minimumUsd": 10,
+            "_source": "NY Tax Law s.180, confirmed by the owner on the live checkout (decision 16, 2026-11-26): New York charges the tax. Shares without par value: 5 cents each; shares with a par value: 1/20 of 1% of their total par value; at least $10 either way (200 no-par shares: $10). The engine quotes it at approval; the payment page's fee check stops a run when the page shows a different amount. The form showed Tax On Shares $0.00 for 200 no-par shares on the 2026-11-24 walk; that is not the amount charged."
           }
         }
       }

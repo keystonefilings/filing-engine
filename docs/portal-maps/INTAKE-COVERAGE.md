@@ -83,7 +83,7 @@ Not covered yet:
 
 Certificate of Incorporation for a domestic business corporation, filed online with the NY Department of State. Walkthrough: [ny-dos-corporations.md](./ny-dos-corporations.md). Engine type `formation`, state `NY`.
 
-Fees: State filing fee $125 (no tax on shares without par value). Shares with a par value add New York's tax on shares, 1/20 of 1% of their total par value; the state's page works it out, and the filing stops before payment if it differs. Optional: plain copy $5, certified copy $10, certificate of existence $25.
+Fees: State filing fee $125, plus New York's tax on shares: 5 cents for each share without par value, or 1/20 of 1% of the shares' total par value, and at least $10 (200 shares without par value: $10, so $135 in all). The state's page works it out, and the filing stops before payment if it differs. Optional: plain copy $5, certified copy $10, certificate of existence $25.
 
 | Section | Field | Request path | Required | Walkthrough |
 |---|---|---|---|---|
@@ -139,7 +139,7 @@ Authorizations the client grants (and confirms again on the approval page):
 
 Not covered yet:
 
-- The tax on par-value shares is quoted from the statute (Tax Law s.180); the state's page has only been seen computing it for shares without par value. A different amount on the page stops the filing before payment.
+- The tax on shares is quoted from the statute (Tax Law s.180: 5 cents a share without par value, 1/20 of 1% of total par value, at least $10), which the live checkout charges. A different amount on the page stops the filing before payment.
 - The par amount field's exact label, format and limit were not captured on the walk.
 - The optional registered agent, duration date, director-liability and preemptive-rights statements on the form aren't entered by the engine yet, so the form doesn't ask for them.
 
@@ -147,7 +147,7 @@ Not covered yet:
 
 Certificate of Formation for a domestic LLC, filed online through NJ Business Formation. Walkthrough: [nj-business-formation.md](./nj-business-formation.md). Engine type `formation`, state `NJ`.
 
-Fees: State filing fee $100, plus any charge New Jersey's checkout adds. The approval page shows the exact total, and it's checked again at payment.
+Fees: $103.50 by card: the state filing fee of $100 plus New Jersey's $3.50 portal fee ($1 by eCheck). Optional: certificate of standing $52, certified copy $27 by card ($50 and $25 plus a $2 portal fee each). The approval page shows the exact total, and it's checked again at payment.
 
 | Section | Field | Request path | Required | Walkthrough |
 |---|---|---|---|---|
@@ -204,7 +204,7 @@ Not covered yet:
 
 Certificate of Incorporation for a domestic for-profit corporation (DP), filed online through NJ Business Formation. Walkthrough: [nj-business-formation.md](./nj-business-formation.md). Engine type `formation`, state `NJ`.
 
-Fees: State filing fee $100, plus any charge New Jersey's checkout adds. The approval page shows the exact total, and it's checked again at payment.
+Fees: State filing fee $100, plus New Jersey's portal fee ($3.50 by card for an LLC; the corporation checkout's own figure hasn't been seen yet). The approval page shows the exact total, and it's checked again at payment.
 
 | Section | Field | Request path | Required | Walkthrough |
 |---|---|---|---|---|

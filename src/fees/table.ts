@@ -34,9 +34,10 @@ export interface FeeOptions {
 
 /**
  * NY business corporation's Tax on Shares, quoted from the share answers by the rule in the fee
- * table (NY.formation.entityFees.business_corporation.taxOnShares). The DOS page computes its own
- * figure (portal map 2026-11-24); the approval carries this quote and the payment page's fee check
- * stops the run when the page shows a different amount.
+ * table (NY.formation.entityFees.business_corporation.taxOnShares): Tax Law s.180, 5 cents a share
+ * without par value or 1/20 of 1% of total par value, at least $10 (decision 16). The DOS page
+ * computes its own figure; the approval carries this quote and the payment page's fee check stops
+ * the run when the page shows a different amount.
  */
 export function nyTaxOnShares(shares: number, parUsd: number | undefined, table: FeeTable = loadFeeTable()): number {
   const rule = ((table.NY?.formation as Record<string, any> | undefined)?.entityFees?.business_corporation?.taxOnShares) as
@@ -46,7 +47,8 @@ export function nyTaxOnShares(shares: number, parUsd: number | undefined, table:
   }
   const raw = parUsd ? shares * parUsd * rule.parValueRate : shares * rule.noParPerShareUsd;
   const tax = Math.round(raw * 100) / 100;
-  return tax > 0 ? Math.max(tax, rule.minimumUsd ?? 0) : 0;
+  // The minimum applies to any shares at all, however small their par value.
+  return raw > 0 ? Math.max(tax, rule.minimumUsd ?? 0) : 0;
 }
 
 /** Expected charges for a filing, or FeeUnknownError when the table has no entry yet. */

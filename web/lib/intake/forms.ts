@@ -256,7 +256,7 @@ const nyCorp: FilingKind = {
   state: "NY",
   constants: { formation: { entityType: "LLC", nyEntityType: "business_corporation" } },
   map: NY_DOS,
-  feeNote: "State filing fee $125 (no tax on shares without par value). Shares with a par value add New York's tax on shares, 1/20 of 1% of their total par value; the state's page works it out, and the filing stops before payment if it differs. Optional: plain copy $5, certified copy $10, certificate of existence $25.",
+  feeNote: "State filing fee $125, plus New York's tax on shares: 5 cents for each share without par value, or 1/20 of 1% of the shares' total par value, and at least $10 (200 shares without par value: $10, so $135 in all). The state's page works it out, and the filing stops before payment if it differs. Optional: plain copy $5, certified copy $10, certificate of existence $25.",
   sections: [
     {
       title: "Name",
@@ -272,9 +272,9 @@ const nyCorp: FilingKind = {
       ref: "Screen D1: BCL main form",
       items: [
         f("formation.county", "County where the corporation's office will be", "select", { required: true, options: opts(...NY_COUNTIES), ref: "Screen D1, County" }),
-        f("formation.stockShares", "Number of shares the corporation may issue", "number", { required: true, min: 1, integer: true, help: "Many new corporations authorize 200 shares without par value.", ref: "Screen D1, Shares" }),
+        f("formation.stockShares", "Number of shares the corporation may issue", "number", { required: true, min: 1, integer: true, help: "Many new corporations authorize 200 shares without par value, which New York taxes at $10 (5 cents a share, $10 at least).", ref: "Screen D1, Shares" }),
         f("intake.portal.nyShareValue", "Share value", "radio", { defaultValue: "no_par", options: lv([["no_par", "No par value"], ["par", "Par value"]]), help: "No par value unless you pick Par value.", ref: "Screen D1, Share Value" }),
-        f("formation.stockParValueUsd", "Par value of each share (US dollars)", "number", { required: true, min: 0.000001, help: "For example 0.01. The tax on shares is 1/20 of 1% of the shares' total par value.", showIf: { path: "intake.portal.nyShareValue", equals: "par" }, ref: "Screen D1, Share Value (par amount)" }),
+        f("formation.stockParValueUsd", "Par value of each share (US dollars)", "number", { required: true, min: 0.000001, help: "For example 0.01. The tax on shares is 1/20 of 1% of the shares' total par value, and at least $10.", showIf: { path: "intake.portal.nyShareValue", equals: "par" }, ref: "Screen D1, Share Value (par amount)" }),
         f("formation.effectiveDate", "Effective date", "radio", { required: true, defaultValue: "upon_filing", options: lv([["upon_filing", "When filed"], ["specific", "On a later date"]]), ref: "Screen D1, Effective Date" }),
         f("formation.effectiveDateValue", "Effective on", "date", { required: true, showIf: { path: "formation.effectiveDate", equals: "specific" }, ref: "Screen D1, Effective Date" }),
       ],
@@ -331,7 +331,7 @@ const nyCorp: FilingKind = {
     { id: "ny-payment", ref: "Screen F, Payment Authorization (STOP)", text: "I authorize the filing company to pay the state fee shown on the approval page. The Department of State does not refund fees." },
   ],
   gaps: [
-    "The tax on par-value shares is quoted from the statute (Tax Law s.180); the state's page has only been seen computing it for shares without par value. A different amount on the page stops the filing before payment.",
+    "The tax on shares is quoted from the statute (Tax Law s.180: 5 cents a share without par value, 1/20 of 1% of total par value, at least $10), which the live checkout charges. A different amount on the page stops the filing before payment.",
     "The par amount field's exact label, format and limit were not captured on the walk.",
     "The optional registered agent, duration date, director-liability and preemptive-rights statements on the form aren't entered by the engine yet, so the form doesn't ask for them.",
   ],
@@ -349,7 +349,7 @@ const njLlc: FilingKind = {
   state: "NJ",
   constants: { formation: { entityType: "LLC" } },
   map: NJ_BF,
-  feeNote: "State filing fee $100, plus any charge New Jersey's checkout adds. The approval page shows the exact total, and it's checked again at payment.",
+  feeNote: "$103.50 by card: the state filing fee of $100 plus New Jersey's $3.50 portal fee ($1 by eCheck). Optional: certificate of standing $52, certified copy $27 by card ($50 and $25 plus a $2 portal fee each). The approval page shows the exact total, and it's checked again at payment.",
   sections: [
     {
       title: "Name",
@@ -441,7 +441,7 @@ const njCorp: FilingKind = {
   state: "NJ",
   constants: { formation: { entityType: "LLC", njEntityType: "for_profit_corporation" } },
   map: NJ_BF,
-  feeNote: "State filing fee $100, plus any charge New Jersey's checkout adds. The approval page shows the exact total, and it's checked again at payment.",
+  feeNote: "State filing fee $100, plus New Jersey's portal fee ($3.50 by card for an LLC; the corporation checkout's own figure hasn't been seen yet). The approval page shows the exact total, and it's checked again at payment.",
   sections: [
     {
       title: "Name",

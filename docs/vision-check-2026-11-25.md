@@ -227,8 +227,9 @@ Built and tested; each switches on when its accounts and keys are set (steps in 
   route, the coverage table, practice mode (plus a site-wide beta banner), the registered agent
   (ours, resold from Registered Agents, Inc., $59 a year per business), turnaround times and the
   sign-up review wording, and the production addresses (api.cofile.app and cofile.app; DNS records
-  in docs/deploy-fly.md section 9), and EIN-only filings for an LLC formed in any state. Still
-  waiting for you: the remaining fee figures,
+  in docs/deploy-fly.md section 9), EIN-only filings for an LLC formed in any state, and the fee figures (NY's tax on shares,
+  NJ's $103.50 LLC and $52/$27 standing certificate). Still
+  waiting for you:
   the API key prefix, Florida professional entities and the Certificate of Existence upload. Have
   counsel review the Terms and Privacy Policy (governing law, liability cap, legal entity name) and
   the approval consent, saved-signature consent and declaration wording.

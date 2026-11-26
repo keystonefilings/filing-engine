@@ -67,6 +67,7 @@ Each lists the options the reviewers gave and my recommendation.
 - **Partner sign-up review (13):** the neutral wording stays; it depends on the sign-up setting.
 - **Production addresses (14), delegated to me:** the engine is its own deployment at `https://api.cofile.app` (API, approval pages, webhooks); the site is `https://cofile.app`. The docs' API address defaults to api.cofile.app (ENGINE_PUBLIC_URL); the deploy guide lists every webhook there and the DNS records to add; a production engine refuses to start with localhost addresses.
 - **EIN-only formation states (15):** every state is listed on purpose; the IRS doesn't depend on where the LLC was formed. The EIN form asks for the formation state from all 50 states and DC, the filing records it as its state, and state filings still take only NY, NJ, MO and FL.
+- **Fee figures (16), confirmed by the owner on the live checkouts:** New York charges the tax on shares (Tax Law s.180): 5 cents a share without par value, 1/20 of 1% of total par value, at least $10; the fee table quotes it (200 no-par shares: $125 + $10 = $135) and the NY corporation form's "no tax" line is gone. The NJ LLC is $103.50 by card ($100 + the $3.50 portal fee) and the NJ standing certificate $52 (LLC) / $27 (corporation) by card; the fee table already listed those as the state fee plus NJ's portal fee, each a separate line on the NJ cart, so its totals stand, and the site's copy now gives the totals instead of $50/$25.
 - **Support address:** hello@cofile.app (corrected from .com).
 - **The rest:** to follow.
 

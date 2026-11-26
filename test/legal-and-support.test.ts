@@ -99,3 +99,32 @@ describe("EIN-only filings take any formation state (decision 15)", () => {
     expect(formation.error!.issues.some((i) => i.path.join(".") === "state")).toBe(true);
   });
 });
+
+describe("fee figures confirmed on the live checkouts (decision 16)", () => {
+  it("the production fee table quotes NY's tax on shares, NJ's $103.50 LLC and its $52/$27 standing certificate", async () => {
+    const { expectedFees, totalUsd, nyTaxOnShares } = await import("../src/fees/table.js");
+    const { readFileSync } = await import("node:fs");
+    const prod = JSON.parse(readFileSync("config/fees.json", "utf8")); // the tests' own table is test/fees.test.json
+    // NY: 200 shares without par value pay 5 cents each, $10; any shares pay at least $10.
+    expect(nyTaxOnShares(200, undefined, prod)).toBe(10);
+    expect(nyTaxOnShares(20, undefined, prod)).toBe(10);
+    expect(totalUsd(expectedFees("NY", "formation", { nyEntityType: "business_corporation", stockShares: 200 }, prod))).toBe(135);
+    // NJ: $100 + the $3.50 card portal fee; standing certificates $50/$25 + $2 by card.
+    expect(totalUsd(expectedFees("NJ", "formation", { paymentMethod: "credit_card" }, prod))).toBe(103.5);
+    expect(totalUsd(expectedFees("NJ", "standing_certificate", { paymentMethod: "credit_card", entityType: "LLC" }, prod))).toBe(52);
+    expect(totalUsd(expectedFees("NJ", "standing_certificate", { paymentMethod: "credit_card", entityType: "DP" }, prod))).toBe(27);
+  });
+
+  it("the site's copy says so: no 'no tax' line for NY corporations, and NJ's totals", async () => {
+    const { filingKind } = await import("../web/lib/intake/forms.js");
+    const corp = filingKind("ny-corp")!.feeNote;
+    expect(corp).not.toMatch(/no tax/i);
+    expect(corp).toContain("5 cents");
+    expect(corp).toContain("at least $10");
+    expect(filingKind("nj-llc")!.feeNote).toContain("$103.50");
+    expect(filingKind("nj-llc")!.feeNote).toContain("certificate of standing $52");
+    const { readFileSync } = await import("node:fs");
+    const home = readFileSync("web/app/page.tsx", "utf8");
+    expect(home).toContain("NJ charges $52 by card for an LLC&apos;s standing certificate and $27 for a corporation&apos;s");
+  });
+});

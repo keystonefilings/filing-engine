@@ -181,7 +181,7 @@ export default function Home() {
               </article>
               <article className="control">
                 <h3>Checks the price before paying</h3>
-                <p>Fees are quoted at approval from a verified fee table and read again on the payment screen. NJ charges more for an LLC&apos;s standing certificate than for a corporation&apos;s, so {name} also confirms the entity type on the state record.</p>
+                <p>Fees are quoted at approval from a verified fee table and read again on the payment screen. NJ charges $52 by card for an LLC&apos;s standing certificate and $27 for a corporation&apos;s ($50 and $25, plus its $2 portal fee), so {name} also confirms the entity type on the state record.</p>
                 <div className="exhibit" role="img" aria-label="Example fee checks">
                   <div className="exhibit-head"><span>NJ standing certificate · by card</span><span>Fee check</span></div>
                   <div className="exhibit-body">

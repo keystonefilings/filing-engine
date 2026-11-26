@@ -59,7 +59,7 @@ export function validateFiling(req: FilingRequest): ValidationIssue[] {
     if (nyCorp) {
       if (!hasCorpIndicator(legal)) err("formation.name", "a NY business corporation name must end with Corporation, Corp., Incorporated, Inc., Limited or Ltd.");
       if (!f.stockShares) err("formation.stockShares", "a NY business corporation needs the number of shares");
-      if (f.stockParValueUsd) warn("formation.stockParValueUsd", "New York computes the tax on par-value shares on its own page; the approval quotes it (1/20 of 1% of the shares' total par value) and the filing stops before payment if the page shows a different amount");
+      if (f.stockParValueUsd) warn("formation.stockParValueUsd", "New York computes the tax on par-value shares on its own page; the approval quotes it (1/20 of 1% of the shares' total par value, at least $10) and the filing stops before payment if the page shows a different amount");
       if (!f.incorporator?.address) err("formation.incorporator", "a NY business corporation needs an incorporator with an address (the incorporator's name is the typed signature)");
     }
     if (req.type === "formation" && req.state === "NY") {

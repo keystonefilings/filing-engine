@@ -99,8 +99,8 @@
           "statutory": 125,
           "taxOnShares": {
             "parValueRate": 0.0005,
-            "noParPerShareUsd": 0,
-            "minimumUsd": 0
+            "noParPerShareUsd": 0.05,
+            "minimumUsd": 10
           }
         }
       }

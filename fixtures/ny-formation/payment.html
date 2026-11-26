@@ -2,9 +2,11 @@
 <script>
 function corp() { return /(^|\s)(CORPORATION|CORP\.?|INCORPORATED|INC\.?|LIMITED|LTD\.?)$/.test(sessionStorage.getItem('ny-name') || ''); }
 function taxOnShares() {
-  // The replica charges what the engine quotes (1/20 of 1% of total par value; $0 without par).
+  // The replica charges Tax Law s.180: 5 cents a share without par value, 1/20 of 1% of total par value, at least $10.
   var s = JSON.parse(sessionStorage.getItem('ny-shares') || '{"shares":0,"par":0}');
-  return corp() && s.par ? Math.round(s.shares * s.par * 0.0005 * 100) / 100 : 0;
+  if (!corp() || !(s.shares > 0)) return 0;
+  var raw = s.par ? s.shares * s.par * 0.0005 : s.shares * 0.05;
+  return Math.max(Math.round(raw * 100) / 100, 10);
 }
 function fees() {
   var rows = [[corp() ? 'Certificate Filing Fee' : 'Certificate Filing Fee', corp() ? 125 : 200], ['Tax on Shares', taxOnShares()]];

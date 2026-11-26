@@ -148,7 +148,8 @@ describe("NY DOS formation (dry run)", () => {
     expect(screens).toContain("ny.bcl_filing");
     expect(screens).not.toContain("ny.filing");
 
-    expect(valueOf(await domOf(run, "ny.replenish"), "deposit")).toBe("125.00");
+    // $125 + Tax on Shares: 200 shares without par value at 5 cents = $10 (Tax Law s.180, decision 16).
+    expect(valueOf(await domOf(run, "ny.replenish"), "deposit")).toBe("135.00");
     const d = await domOf(run, "ny.bcl_filing");
     expect(valueOf(d, "corp-name")).toBe("HUDSON LEDGER INC.");
     expect(valueOf(d, "shares")).toBe("200");
@@ -207,11 +208,14 @@ describe("NY business corporation requests", () => {
 
   it("quote the tax on par-value shares from the share answers, and a page that computes another amount stops the run", () => {
     const corp = (stockShares: number, stockParValueUsd?: number) => expectedFees("NY", "formation", { nyEntityType: "business_corporation", stockShares, stockParValueUsd });
-    expect(nyTaxOnShares(200, undefined)).toBe(0); // no par value: $0, as the page showed for 200 shares
-    expect(corp(200).map((l) => l.amountUsd)).toEqual([125]);
+    expect(nyTaxOnShares(200, undefined)).toBe(10); // no par value: 5 cents a share (decision 16)
+    expect(nyTaxOnShares(1000, undefined)).toBe(50);
+    expect(nyTaxOnShares(20, undefined)).toBe(10); // $1, raised to the $10 minimum
+    expect(corp(200).map((l) => l.amountUsd)).toEqual([125, 10]);
     expect(nyTaxOnShares(20000, 1)).toBe(10); // 1/20 of 1% of $20,000
     expect(corp(20000, 1).map((l) => l.amountUsd)).toEqual([125, 10]);
-    expect(corp(200, 0.001).map((l) => l.amountUsd)).toEqual([125]); // rounds to $0.00
+    expect(corp(200, 0.001).map((l) => l.amountUsd)).toEqual([125, 10]); // a fraction of a cent, raised to the $10 minimum
+    expect(nyTaxOnShares(1_000_000, 1)).toBe(500); // 1/20 of 1% of $1,000,000
     const page = (tax: number) => [{ label: "Certificate Filing Fee", amountUsd: 125 }, { label: "Tax on Shares", amountUsd: tax }, { label: "TOTAL FEE", amountUsd: 125 + tax }];
     expect(checkLiveFees(corp(20000, 1), page(10)).ok).toBe(true);
     const other = checkLiveFees(corp(20000, 1), page(12.5));
