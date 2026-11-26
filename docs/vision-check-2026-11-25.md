@@ -224,7 +224,7 @@ Built and tested; each switches on when its accounts and keys are set (steps in 
   these were decided and done on Nov 26: price wording, the filing company, the Terms and Privacy
   pages, the support address (hello@cofile.app), the approval consent (now covering fee payment),
   the saved-signature consent (limited and revocable), first-person declarations, the EIN owner
-  route and the coverage table. Still waiting for you: leaving practice mode, the agent option,
+  route, the coverage table and practice mode (plus a site-wide beta banner). Still waiting for you: the agent option,
   turnaround times, the production hosts, the remaining fee figures, the API key prefix, Florida
   professional entities and the Certificate of Existence upload. Have counsel review the Terms and
   Privacy Policy (governing law, liability cap, legal entity name) and the approval consent,

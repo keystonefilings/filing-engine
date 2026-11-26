@@ -2,7 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { firmContext, liveFilings, offeredKinds } from "@/lib/firm";
 import { IntakeForm } from "@/components/IntakeForm";
-import { platformName } from "@/lib/brand";
+import { platformName, supportEmail } from "@/lib/brand";
 import { newNonce } from "@/lib/intake/submit";
 import { listSignatures } from "@/lib/signatures";
 import { createFirmFiling } from "./actions";
@@ -49,7 +49,7 @@ export default async function NewKindPage({ params, searchParams }: { params: Pr
       <h1>{kind.title}</h1>
       <p className="muted">{kind.summary} Would your client rather fill it in? <Link href={`/p/${encodeURIComponent(slug)}/client-links?kind=${encodeURIComponent(kind.id)}`}>Send them a link</Link>.</p>
       {emailed ? <p className="notice">Filled in from your message &ldquo;{emailed.subject || "(no subject)"}&rdquo;. Check every answer and add what&apos;s missing.</p> : null}
-      {!liveFilings() ? <p className="notice warn">Practice mode: this portal isn&apos;t switched to live filing yet, so this filing goes through the government site up to the final step and stops there. Nothing is filed or paid.</p> : null}
+      {!liveFilings(kind.id) ? <p className="notice warn">Practice mode: this filing type isn&apos;t switched to live filing yet, so this filing goes through the government site up to the final step and stops there. Nothing is filed or paid. Each filing type is switched to live filing once it&apos;s verified on the government site. To ask when this one will be, email <a href={`mailto:${supportEmail()}`}>{supportEmail()}</a>.</p> : null}
       {clients.length ? (
         <form method="get" className="row" style={{ gap: 8 }}>
           <label htmlFor="from-client" className="small">Start from a client you filed for before</label>

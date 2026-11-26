@@ -20,7 +20,7 @@ export async function PublicIntake({ tenantId, firm, service, embed = false }: {
   const nonce = randomUUID();
   const body = (
     <>
-      {!liveFilings() ? <p className="notice warn">Practice mode: nothing sent from this page will be filed or paid yet.</p> : null}
+      {!liveFilings(kind.id) ? <p className="notice warn">Practice mode: nothing sent from this page will be filed or paid yet.</p> : null}
       <h1>{kind.title}</h1>
       <p className="muted">{kind.summary} {kind.type === "ein_only"
         ? <>After you send this, we&apos;ll email a link to check and approve exactly what will be sent to the IRS. Nothing is filed until it&apos;s approved.</>

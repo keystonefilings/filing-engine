@@ -15,7 +15,7 @@ export async function submitPublic(tenantId: string, firmSlug: string, serviceSl
   const email = String(fd.get("contact.email") ?? "").trim();
   const r = await submitIntake(withFirmDefaults(kind, company, { forClient: true }).kind, fd, {
     apiKey: "", publicPath: publicSubmitPath(tenantId, firmSlug), tenantId, clientCompanyId: company.clientCompanyId,
-    submittedBy: email ? `client:${email}` : "client", source: "client_link", dryRun: !liveFilings(),
+    submittedBy: email ? `client:${email}` : "client", source: "client_link", dryRun: !liveFilings(kind.id),
     allowSavedSignature: false, idempotencySeed: nonce,
   });
   if (!r.ok) return r.error?.includes("429") ? { ok: false, error: "This page has had a lot of submissions in the last hour. Try again later, or contact the firm.", issues: [] } : r;

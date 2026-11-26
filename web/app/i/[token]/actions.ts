@@ -21,7 +21,7 @@ export async function submitClientIntake(token: string, fd: FormData): Promise<I
   const email = String(fd.get("contact.email") ?? "").trim();
   const r = await submitIntake(kind, fd, {
     apiKey: key, tenantId: link.tenantId, clientCompanyId: link.clientCompanyId,
-    submittedBy: email ? `client:${email}` : "client", source: "client_link", dryRun: !liveFilings(),
+    submittedBy: email ? `client:${email}` : "client", source: "client_link", dryRun: !liveFilings(kind.id),
     // One link, one filing: sending the form again returns the same filing.
     allowSavedSignature: false, idempotencySeed: `${link.clientCompanyId}-${link.nonce}`,
   });

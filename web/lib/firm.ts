@@ -49,9 +49,17 @@ export async function firmContext(slug: string): Promise<{ session: FirmSession;
   return { session, company, brand: brandOf(company) };
 }
 
-/** Whether filings created from the portal file for real. Off unless the deployment turns it on. */
-export function liveFilings(): boolean {
-  return process.env.PORTAL_LIVE_FILINGS === "true";
+/**
+ * Whether filings of this type created from the portal, client links and public pages file for real.
+ * Decision 8 (Nov 26): filing types switch live one by one, once each is verified on the government
+ * site: list them in PORTAL_LIVE_KINDS (comma-separated kind ids, e.g. "nj-llc,fl-llc").
+ * PORTAL_LIVE_FILINGS=true switches every type at once. Off unless the deployment turns it on. The
+ * engine still refuses a real filing without a subscription when billing is required.
+ */
+export function liveFilings(kindId?: string): boolean {
+  if (process.env.PORTAL_LIVE_FILINGS === "true") return true;
+  if (!kindId) return false;
+  return (process.env.PORTAL_LIVE_KINDS ?? "").split(",").map((k) => k.trim()).filter(Boolean).includes(kindId);
 }
 
 /** Filings for a state: that state's own, plus the federal EIN, which goes with a business in any state. */

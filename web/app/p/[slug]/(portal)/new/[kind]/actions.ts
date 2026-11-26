@@ -17,7 +17,7 @@ export async function createFirmFiling(slug: string, kindId: string, emailId: st
   if (!NONCE.test(nonce)) return { ok: false, error: "This form has expired. Reload the page and try again.", issues: [] };
   const r = await submitIntake(kind, fd, {
     apiKey: session.apiKey, tenantId: session.tenantId, clientCompanyId: session.clientCompanyId,
-    submittedBy: session.email, source: "firm_portal", dryRun: !liveFilings(), allowSavedSignature: true, idempotencySeed: `${session.clientCompanyId}-${nonce}`,
+    submittedBy: session.email, source: "firm_portal", dryRun: !liveFilings(kind.id), allowSavedSignature: true, idempotencySeed: `${session.clientCompanyId}-${nonce}`,
   });
   if (!r.ok) return r;
   if (emailId) await markFiled(session.apiKey, session.clientCompanyId, emailId, r.result.filing.id);

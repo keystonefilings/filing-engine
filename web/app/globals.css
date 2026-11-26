@@ -133,3 +133,8 @@ details.more > summary { cursor: pointer; color: var(--accent); font-size: .92re
 .linkish { background: none; border: 0; padding: 0; color: var(--accent-2, var(--accent)); text-decoration: underline; cursor: pointer; font: inherit; }
 .check { display: block; margin: 4px 0; font-weight: 400; } .check input { width: auto; margin-right: 6px; }
 .bt-field { border: 1px solid var(--border); border-radius: 8px; padding: 8px 10px; min-height: 40px; background: var(--surface, #fff); }
+
+/* Site-wide beta notice (components/BetaBanner.tsx). */
+.beta-banner { display: flex; gap: 10px; align-items: baseline; justify-content: center; flex-wrap: wrap; padding: 8px 16px; background: #fff6d6; color: #4a3b00; border-bottom: 1px solid #ecd98a; font: 500 .85rem/1.4 system-ui, -apple-system, "Segoe UI", sans-serif; text-align: center; }
+.beta-banner strong { text-transform: uppercase; letter-spacing: .06em; font-size: .72rem; background: #4a3b00; color: #fff6d6; padding: 2px 7px; border-radius: 999px; }
+.beta-banner a { color: inherit; text-decoration: underline; }
