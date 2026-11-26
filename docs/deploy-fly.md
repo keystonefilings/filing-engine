@@ -132,6 +132,13 @@ workspace): OAuth client "CoFile Web" (Web application), client ID
 `GOOGLE_CLIENT_ID` and `GOOGLE_CLIENT_SECRET` are set in the Vercel project (Production); the engine
 gets the same client ID from `fly.toml`, to check that Google's ID token was issued to it.
 
+**Save to Google Docs (portal only).** A partner firm's filing page has "Save to Google Docs": it
+asks Google for the `https://www.googleapis.com/auth/documents` scope through the same callback,
+writes the filing's record into a new Doc in the person's Google account, and keeps no Google
+token. It isn't offered to enterprise accounts. The Docs scope is a sensitive scope: publishing
+the consent screen beyond test users needs Google's verification of it (privacy policy link,
+how the scope is used, a short demo video).
+
 While the consent screen is in Testing, only its test users can sign in with Google; add people
 under Google Auth Platform, Audience, or publish the app. It signs in existing accounts only (a
 Google-verified email that matches one); new firms still sign up with the form.

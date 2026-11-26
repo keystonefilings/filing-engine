@@ -1,6 +1,12 @@
 import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
-import { GOOGLE_CALLBACK_PATH, GOOGLE_COOKIE, googleIdToken } from "@/lib/google";
+import { GOOGLE_CALLBACK_PATH, GOOGLE_COOKIE, googleDocsToken, googleIdToken } from "@/lib/google";
+import { createGoogleDoc, filingDocContent } from "@/lib/google-docs";
+import { firmContext } from "@/lib/firm";
+import { filingTitle, type Filing } from "@/lib/engine";
+import { filingKind } from "@/lib/intake/forms";
+import { statusLabel } from "@/lib/status";
+import { publicUrl } from "@/lib/session";
 import { unseal } from "@/lib/seal";
 import { engine, EngineError, type SignInResult } from "@/lib/engine";
 import { finishSignIn } from "@/lib/sign-in";
@@ -9,8 +15,9 @@ import { finishSignIn } from "@/lib/sign-in";
 export async function GET(req: Request) {
   const url = new URL(req.url);
   const jar = await cookies();
-  const saved = unseal<{ state: string; nonce: string; verifier: string }>("google-oauth", jar.get(GOOGLE_COOKIE)?.value);
+  const saved = unseal<{ purpose?: "signin" | "docs"; state: string; nonce: string; verifier: string; slug?: string; filingId?: string }>("google-oauth", jar.get(GOOGLE_COOKIE)?.value);
   jar.delete({ name: GOOGLE_COOKIE, path: GOOGLE_CALLBACK_PATH });
+  if (saved?.purpose === "docs" && saved.slug && saved.filingId) return saveToDocs(req, url, saved as Required<Pick<typeof saved, "state" | "verifier" | "slug" | "filingId">>);
   const back = (why: string) => NextResponse.redirect(new URL(`/login?google=${why}`, req.url), 303);
   if (url.searchParams.get("error")) return back("cancelled");
   const code = url.searchParams.get("code");
@@ -26,4 +33,28 @@ export async function GET(req: Request) {
   }
   const problem = await finishSignIn(r, "google"); // redirects on success
   return NextResponse.redirect(new URL(`/login?google=${problem.includes("approval") ? "pending" : "failed"}`, req.url), 303);
+}
+
+/** Portal only: back from Google with Docs access; writes the filing's record and returns to its page. */
+async function saveToDocs(req: Request, url: URL, saved: { state: string; verifier: string; slug: string; filingId: string }) {
+  const page = (why: string) => NextResponse.redirect(new URL(`/p/${encodeURIComponent(saved.slug)}/filings/${encodeURIComponent(saved.filingId)}?doc=${encodeURIComponent(why)}`, req.url), 303);
+  if (url.searchParams.get("error")) return page("cancelled");
+  const code = url.searchParams.get("code");
+  if (!code || url.searchParams.get("state") !== saved.state) return page("expired");
+  const { session, company, brand } = await firmContext(saved.slug);
+  if (!company.partner) return page("off");
+  const token = await googleDocsToken(code, saved.verifier);
+  if (!token) return page("denied");
+  try {
+    const { filing } = await engine<{ filing: Filing }>(session.apiKey, `/v1/filings/${encodeURIComponent(saved.filingId)}`);
+    if (filing.clientCompanyId !== session.clientCompanyId) return page("failed");
+    const kind = filingKind(((filing.request.intake as { portal?: { kind?: string } } | undefined)?.portal?.kind) ?? "");
+    const content = filingDocContent(filing, {
+      title: filingTitle(filing), statusLabel: statusLabel(filing.status).label, firmName: brand.name, kindTitle: kind?.title,
+      filingUrl: `${publicUrl()}/p/${encodeURIComponent(saved.slug)}/filings/${encodeURIComponent(filing.id)}`, now: new Date(),
+    });
+    return page(await createGoogleDoc(token, content));
+  } catch {
+    return page("failed");
+  }
 }
