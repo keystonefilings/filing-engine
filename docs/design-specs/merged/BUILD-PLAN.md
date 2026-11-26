@@ -118,9 +118,9 @@ asset, with no layout work at that point.
    drawings, a hand-tuned 16 px favicon and a one-page usage sheet.
 3. **A hand engraver**: the real brass and steel plates (Harbor & Pine, Northgate, and the blank
    plate), plus test plates for the brass textures.
-4. **A photographer and crew** (producer, casting, location scout, prop stylist, retoucher): every
-   photograph in the spec's shot list, over about seven days. That includes portraits of real CoFile
-   team members, each with their written consent.
+4. **A photographer and crew**: on hold. The owner supplied the photography for every frame except
+   the team (Nov 26), and photographs of CoFile's people are deferred. The brief stays ready in case
+   real shoots replace the supplied scenes later.
 5. **A small film crew**: the 12-second film of the engraver at the bench.
 6. **A steel-engraving illustrator**: about ten one-ink vignettes for empty states, system pages and
    two emails.

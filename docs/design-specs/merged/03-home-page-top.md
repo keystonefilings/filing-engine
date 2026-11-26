@@ -71,8 +71,8 @@ ends in its 160 px foot margin, the way a sheet ends in its bottom margin. Where
 (into and out of the proof's Cotton 2 band, the Night band, the Close's photograph) the change of
 ground is the only edge, square and full bleed.
 
-**Where the photographs sit.** The first screen has no photograph except the small portraits of
-CoFile's own filing professionals beside the hero's note (D1). The first picture-sized photograph is
+**Where the photographs sit.** The first screen has no photograph (the small portraits of CoFile's
+own filing professionals beside the hero's note wait for C10, deferred by the owner on Nov 26). The first picture-sized photograph is
 the two doors in Firms, so the page's first image of a real place is a firm's name on a door,
 directly beside "Your name on the door." After that, photography is the setting under the product in
 Requests (Ana at the bakery counter), After (the desk where the papers come home) and Rehearsals
@@ -388,7 +388,7 @@ x: 120                       504  630                                       1012
   centred on the button's line, 24 px to its right. When the row doesn't fit the column (under about
   1260 px wide, and in Spanish) the link wraps under the button, left-aligned, 8 px below, with a
   48 px hit area.
-- **The note, with the people behind it:** 32 px below the buttons, up to three portraits of CoFile's
+- **The note, with the people behind it** (Deferred (owner, Nov 26): no photographs of CoFile's people for now.: the note stands alone, 32 px below the buttons, and the rest of this item applies when C10 returns): 32 px below the buttons, up to three portraits of CoFile's
   real filing professionals (C10, tight crops), 48 × 48 px each, square-cut, 8 px apart, no border,
   no circle, no ring: faces only (decisions 14 and 18); 12 px below them the note in `body` 18/29
   Founders Grotesk Text, Plate Ink (it is a selling line, not a footnote), three lines. Each
@@ -1520,7 +1520,7 @@ New items this part adds (beyond D7's list):
 | The proof, the three points | A short spoken description for each of the three points beside the sample proof, saying which part of it the point outlines (three items; also in the foundation's D7) |
 
 Items from D7 that this part uses: the alt text of the door photographs (C1, C2), of Ana's
-photograph (C5) and of each team portrait with the person's name and role (C10); the accessible name
+photograph (C5) and of each team portrait with the person's name and role (C10) (the portraits on hold: no photographs of CoFile's people for now); the accessible name
 of the replay control; the accessible name of the wipe handle; the word "Menu" on the phone's menu
 button and the menu sheet's accessible name.
 

@@ -63,7 +63,7 @@ programme (Greta, Amara). A printed programme is shop work too, so the scene sta
 | **6. The filings your clients already ask for.** New York, New Jersey, Florida and the IRS. | The shop's **sample cards**: one card per place, each listing what it can do, each filing marked with a small plate glyph that is cut, pressed or inked as it gets closer to live (Hal). |
 | **7. Try it free.** "In beta: rehearse a filing, free." | **House lights down.** The only dark band on the home page: an empty stage under a single ghost light, and the rehearsal set as a printed run sheet, every screen of the state's real website cued line by line. The last line, "Pay Now · held, on purpose", arrives like every other cue: no drama about stopping (Rosa, Tomás). |
 | **8. Simple prices.** "$45 a filing. EIN included with a formation." | The stationer's **price card**: "$45" set as the biggest number on the page, then four plain lines with dot leaders on heavy card stock, nothing in the small type but our name (Hal, Greta). |
-| **9. People behind it.** "Built and run by filing professionals. When a filing needs a person, one of them takes over." | A shop with people at the bench: real portraits of CoFile's real filing professionals beside that line in the hero, and at work on How it works, Pricing and Questions. Never models, never stock (all ten). |
+| **9. People behind it.** "Built and run by filing professionals. When a filing needs a person, one of them takes over." | A shop with people at the bench: real portraits of CoFile's real filing professionals beside that line in the hero, and at work on How it works, Pricing and Questions. Never models, never stock (all ten). **For now there are no photographs of CoFile's people (owner, Nov 26):** the line stands on its own words, and nothing takes the portraits' place. |
 
 The close, "Run one rehearsal. Then decide.", hangs the plate back on the door **blank**, waiting
 for the visitor's own firm name. They can type it there and watch it engrave, and the name carries
@@ -1119,7 +1119,7 @@ is a full-bleed photograph. No band is taller than about 1.3 screens on desktop 
 |---|---|---|---|---|
 | — | Beta notice | Cotton 2, 1 px Rule under it | Centred on the grid, one or two lines, 15 / 23 Graphite, the "Beta" chip in the rehearsal style (4.4); not dismissible on the home page | Wraps to four lines |
 | — | Header | Cotton, sticky | Lockup left; five links; "Log in"; the header CTA (6.7) | 64 px; lockup, "Log in", menu |
-| 1 | Hero | Cotton | The h1 across the full content width, one sentence per line (Elaine, Marcus); 48 px below it, words in c1–c4 (sub, buttons, the note with the 48 px team portraits) and **CoFile's desk sheet**, signed in as Harbor & Pine, in c6–c12, bleeding right, with **a Harbor & Pine client page** lying in front of it over its lower right (decision 5) | Words and both buttons first; the desk and the client page next |
+| 1 | Hero | Cotton | The h1 across the full content width, one sentence per line (Elaine, Marcus); 48 px below it, words in c1–c4 (sub, buttons, the note; its 48 px team portraits wait for C10, deferred) and **CoFile's desk sheet**, signed in as Harbor & Pine, in c6–c12, bleeding right, with **a Harbor & Pine client page** lying in front of it over its lower right (decision 5) | Words and both buttons first; the desk and the client page next |
 | 2 | Firms | Cotton | Picture c1–c7, bleeding left (two doors, one page); words c9–c12 | Words, then the doors as a two-card swipe |
 | 3 | Requests | Cotton | Words c1–c4; picture c6–c12 (Ana's photograph, her text, the draft sheet) | Words, then picture |
 | 4 | The proof | **Cotton 2**: the proof needs the quietest ground on the page (Hal) | Picture c1–c7 (the proof sheet, the payment slip under it); words c9–c12 | Words, then the proof full width |
@@ -1326,8 +1326,8 @@ named in D6 and keep to the spine: every new thing is one of the shop's objects 
 
 **The ratio.** On the home page, the product is the main object in eight of the nine bands (all but
 the Close); photography is the setting it sits on in four (Firms: the doors; Requests: the bakery;
-After: the desk; Rehearsals: the stage) and the whole picture in one (the Close: the blank plate),
-plus the team portraits beside the hero's note. By area, about **65% product, 30% photography, 5%
+After: the desk; Rehearsals: the stage) and the whole picture in one (the Close: the blank plate).
+(The team portraits beside the hero's note wait for C10, which is deferred: owner, Nov 26.) By area, about **65% product, 30% photography, 5%
 typographic** (the "$45"), and **0% illustration, 0% 3D**. Site-wide, about 60% product, 30%
 photography, 10% engraved vignettes.
 
@@ -1340,8 +1340,9 @@ blank plate (D3), with an SVG fallback and a static frame.
 **The hero has no photograph.** The first screen is CoFile's filing desk in CoFile's look, signed
 in as Harbor & Pine CPA (its small logo and name in the account label, its client filings as the
 rows), with a Harbor & Pine client page in front of it, overlapping its lower right, in the firm's
-Letterhead and colors, on plain cotton paper (decision 5). The only photographs in it are the
-team's 48 px square portraits beside the note, faces only, names in alt text (decisions 14 and 18).
+Letterhead and colors, on plain cotton paper (decision 5). It holds no photographs at all for now:
+the team's 48 px portraits beside the note wait for C10, which is deferred (owner, Nov 26; decisions
+14 and 18 on hold), so the note stands alone.
 The first photograph on the page is the two doors in Firms (decisions file).
 
 **The core commissions.** The art-direction writer expands each into a full brief and shot list;
@@ -1358,7 +1359,7 @@ the content and use of each is fixed here.
 | C7 | **The stage**: a real small theatre or school auditorium from the back of the house, house lights off, a single ghost light (a bare bulb in a wire cage on a stand) on a bare stage, the seats empty. 21:9 and 4:5 | Home 7; What we file "How a filing type goes live." | (Rosa T1, Amara P6, Tomás) |
 | C8 | **The firm approves**: a real CPA in her fifties or sixties at her own desk in her own office, reading glasses on, reading the proof on screen (composited), not pressing anything | How it works "You approve it."; For firms | (Hal P6, Elaine PH-07, Priya P3) |
 | C9 | **The proof at the printer**: a make-ready table, a business-card proof and a letterhead proof on cotton stock initialled in pencil, a loupe | How it works, beside "You've approved a proof before" | At a real engraving or letterpress shop; fictional names only (Hal P8, Elaine PH-08) |
-| C10 | **People at the bench**: CoFile's real filing professionals at their desks, from the side, at work; plus a tight portrait of each | Hero note (48 px square portraits, faces only); How it works; Pricing; Questions "Is a person involved?" | Real staff only, with consent and names in alt text; or the slot is dropped (all ten) |
+| C10 | **Deferred (owner, Nov 26): no photographs of CoFile's people for now.** When it returns: **People at the bench**: CoFile's real filing professionals at their desks, from the side, at work; plus a tight portrait of each | Hero note (48 px square portraits, faces only); How it works; Pricing; Questions "Is a person involved?" | Real staff only, with consent and names in alt text; or the slot is dropped (all ten) |
 | C11 | **The engraver**: a hand engraver at the bench cutting "Harbor & Pine CPA" into the brass plate, then fitting it beside the door; filmed (12 s silent cut for the site) and photographed | For firms head | Adapted from Rosa's sign-painter film and Tomás's gilder film; the craftsperson paid and credited `[copy needed]` |
 | C12 | **Paper scans**: cotton letter paper, heavy card stock for the price card, black card for dark mode, at 1200 dpi | Textures (4.8) | A reprographic studio (Hal P10) |
 

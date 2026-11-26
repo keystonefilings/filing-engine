@@ -258,7 +258,7 @@ DESKTOP 1440 (Cotton)                                                  showpiece
    1                       │ 2                            │     3            ← Miller Display
                            │                              │                    120/120, Plate Ink
   ┌──────────────────┐     │ ┌──────────────────────────┐ │    ┌──────────────────┐
-  │ C5 (alt frame):  │     │ │ C8: the firm owner at    │ │    │ C10: one of      │
+  │ C5 (alt frame):  │     │ │ C8: the firm owner at    │ │    │ C6: the papers   │
   │ Ana at the       │     │ │ her desk, reading the    │ │    │ CoFile's filing  │
   │ counter, thumbing│     │ │ proof on screen          │ │    │ professionals at │
   │ a text           │     │ │                          │ │    │ work, from the   │
@@ -284,9 +284,8 @@ DESKTOP 1440 (Cotton)                                                  showpiece
   photographs and leads sit on the same lines. It's the firm's step, set on a plain white sheet
   like the proof it describes, and like that proof it's in CoFile's look (10A.1.3).
 - **Photographs** 4:5 at 320 × 400 (the column less its inner margins), square-cut, 24 px to the
-  lead. Steps 1 and 2 are staged photographs and carry **no caption** (10A.0.5); step 3 carries
-  the person's name and role in 14/20 Graphite 12 px under it `[copy needed]` (C10: real staff
-  with consent). The three columns share one row grid (numeral, photograph, caption, lead,
+  lead. Steps 1 and 2 are staged photographs and carry **no caption** (10A.0.5); step 3 is staged
+  too (the owner's package, Nov 26) and carries no caption either. The three columns share one row grid (numeral, photograph, caption, lead,
   paragraph), so the caption row stays empty under steps 1 and 2 and the three leads still sit on
   one line.
   - Step 1 uses a second frame from the C5 session, closer, on the hands and the phone, so the
@@ -295,10 +294,13 @@ DESKTOP 1440 (Cotton)                                                  showpiece
   - Step 2 is C8, cropped to 4:5 on her face, the reading glasses and the screen. The proof
     composited on her screen is the proof in CoFile's look, as Home 4 shows it (the firm and
     client named in its head as text, no firm letterhead).
-  - Step 3 is C10's side-on frame at the desk.
+  - Step 3 is C6, the papers come back: `c06-papers-returned`, the envelope addressed to the example
+    firm on the walnut desk, cropped to 4:5. It was C10's side-on frame of CoFile's staff; there are no
+    photographs of CoFile's people for now (owner, Nov 26), and the papers coming back is what "CoFile
+    files it." ends in.
 - **Leads** "Your client asks.", "You approve it.", "CoFile files it." in `display-s` (Miller Text
   26/32), 12 px to the paragraph in `body`.
-- **If C10 can't be photographed with real staff**, all three photographs drop together and the
+- **If any one of the three photographs can't be used**, all three drop together and the
   steps stand on the numerals alone (the numerals then grow to 160/144, `price-xl`'s size, which
   is free on this page because it has no price). A triptych with a hole in it would say the wrong
   thing about the people.
@@ -325,7 +327,7 @@ PHONE 390
 │▐ [ C8, 4:3 ]   no caption    │
 │                              │ 48
 │ 3 · CoFile files it. · …     │
-│ [ C10, 4:3 ] name and role   │
+│ [ C6, 4:5 ] (no caption)     │
 └──────────────────────────────┘
 ```
 
@@ -639,8 +641,8 @@ h2 "Your filing desk, in your brand." · five items (as written):
 4. "Your saved answers (registered agent, organizer, signer, addresses) fill in every filing, so
    nobody types them twice."
 5. "CoFile is built and run by filing professionals. When a filing needs a person, one of them
-   takes over." This item is led by a 40 px square crop of one C10 portrait instead of a lozenge
-   (Hal, Priya), the only portrait in a list on the site; without C10, the lozenge stays.
+   takes over." This item keeps its lozenge: there are no photographs of CoFile's people for now (owner,
+   Nov 26). When C10 returns, a 40 px square crop of one portrait may lead it instead (Hal, Priya).
 
 The h2 and item 1 describe the desk as wearing the firm's color. The desk is now in CoFile's look,
 the same for every firm, with the firm's name and logo as its account (decisions file), so both
@@ -1144,7 +1146,8 @@ the headline (5.2). c1–c10 so the second line holds on one line at 1440.
 · lede "Pay for each live filing, or take a plan with filings included every month. Every plan is
 backed by filing professionals, and rehearsals are always free."
 
-**Under the lede, the people** (Elaine, Greta; C10): when real portraits exist, three 72 × 72 px
+**Under the lede, the people** (Elaine, Greta; C10). Not drawn for now: there are no photographs of
+CoFile's people (owner, Nov 26), so the lede stands alone. When real portraits exist, three 72 × 72 px
 square crops of CoFile's filing professionals in a row, 12 px apart, 32 px under the lede, no
 caption on the page, each with the person's name and role as alt text `[copy needed]`. "Every plan
 is backed by filing professionals", and here they are. Without consent, the row is dropped.
@@ -1438,7 +1441,8 @@ DESKTOP 1440 (Cotton)                                                     suppor
 - **Arriving at an anchor** (`/faq#approves`, the links from How it works and the footer) opens
   that answer, scrolls its row to 96 px below the header, and gives the row a Cotton 2 wash that
   fades over 2 s.
-- **"Is a person involved?"** carries the page's one picture inside its answer: a single C10
+- **"Is a person involved?"** has no picture for now (no photographs of CoFile's people, owner,
+  Nov 26). When C10 returns, it carries the page's one picture inside its answer: a single C10
   portrait of one of CoFile's filing professionals, 4:5, 200 × 250, floated right with 24 px
   around it, its alt text the person's name and role `[copy needed]` (Hal, Greta, Elaine). Without
   real portraits, nothing: no vignette, no stock.
@@ -2186,7 +2190,7 @@ field, "Menu", the engraver film's credit and description), these pages need:
 
 | Where | What |
 |---|---|
-| How it works, step 3 (10A.1.2) | The caption under the C10 photograph: the filing professional's name and role |
+| How it works, step 3 (10A.1.2) | The caption under the C10 photograph: the filing professional's name and role (on hold: no photographs of CoFile's people for now) |
 | How it works, the proof (10A.1.3) | A short spoken description for each of the five list items that outline their part of the sample proof (the detail rows, the fees and total, the state's review page, the Authorizations group, the button), five items |
 | For firms, the desk (10A.2.2) | New words for the list item "Your client sees your firm on the form and in every email. The only sign of us is a small “with CoFile”.": client pages and emails to clients no longer carry "with CoFile" (decisions file) |
 | For firms, the desk (10A.2.2) | Confirmation or new words for the h2 "Your filing desk, in your brand." and the item "Your filing desk carries your firm's name, logo and color.": the desk is now in CoFile's look, with the firm's name and logo as its account (decisions file) |
@@ -2195,8 +2199,8 @@ field, "Menu", the engraver film's credit and description), these pages need:
 | For firms, the studio (10A.2.2) | The accessible name of the studio's control group |
 | For firms, the studio (10A.2.2) | The accessible names of the three previews as thumbnail buttons (the client's page, the firm's page for a filing, an email to a client) |
 | For firms, close (10A.2.6) | The alt text pattern for the plate when it carries the visitor's typed name |
-| Pricing, title page (10A.4.1) | The names and roles of the filing professionals in the three portraits (alt text) |
-| Questions, "Is a person involved?" (10A.6.2) | The name and role of the person in the portrait (alt text) |
+| Pricing, title page (10A.4.1) | The names and roles of the filing professionals in the three portraits (alt text) (on hold: no photographs of CoFile's people for now) |
+| Questions, "Is a person involved?" (10A.6.2) | The name and role of the person in the portrait (alt text) (on hold: no photographs of CoFile's people for now) |
 | For platforms, "underneath" (10A.7.1) | The picture's accessible name (and a caption, if the owner wants one beyond the proof's label) |
 | Sign-up and Choose a new password (10A.9.2, 10A.12.2) | The two labels of the optional show-password control; without them it's left out |
 | Terms and Privacy (10A.15) | The accessible name of the contents list |

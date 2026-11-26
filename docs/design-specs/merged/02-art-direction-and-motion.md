@@ -497,6 +497,8 @@ where the subject sits.
 
 ### 7.5 The team: "Built and run by filing professionals"
 
+> **Deferred (owner, Nov 26): no photographs of CoFile's people for now.** C10 is not commissioned; every slot below shows the people there are, which today is none: the hero's note stands alone, Pricing has no row, the Questions answer has no picture, For firms keeps its lozenge, and How it works's steps stand on their numerals (10A.1.2). Nothing takes their place. This section is kept for when C10 returns, and decisions 14 and 18 then apply.
+
 The line is a claim about real people, so its pictures are of the real people, or there are none
 (all ten). This is commission C10.
 
@@ -1560,7 +1562,7 @@ Items already listed by the foundation (D7) are marked "(D7)"; the rest are new 
 | Where | What |
 |---|---|
 | Every photograph (C1 to C11) | Alt text, as 7.11 describes each (D7) |
-| The team (C10) | Each person's name and role, for alt text and for the captions on How it works, Pricing and Questions (D7) |
+| The team (C10) | Each person's name and role, for alt text and for the captions on How it works, Pricing and Questions (D7) (on hold: no photographs of CoFile's people for now) |
 | Home 1, the desk (L1) | **New:** a sample email address for Ana Ortiz, to show under her name in the desk's "Sent by" column; until one is supplied, her name stands alone |
 | The Close (M9) | The optional field's label; an accessible description of the engraving (D7) |
 | Moving pictures | The replay control's accessible name (D7) |

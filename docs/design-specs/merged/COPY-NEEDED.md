@@ -73,7 +73,7 @@ Items already listed by the foundation (D7) are marked "(D7)"; the rest are new 
 | Where | What |
 |---|---|
 | Every photograph (C1 to C11) | Alt text, as 7.11 describes each (D7) |
-| The team (C10) | Each person's name and role, for alt text and for the captions on How it works, Pricing and Questions (D7) |
+| The team (C10) | Each person's name and role, for alt text and for the captions on How it works, Pricing and Questions (D7) (on hold: no photographs of CoFile's people for now) |
 | Home 1, the desk (L1) | **New:** a sample email address for Ana Ortiz, to show under her name in the desk's "Sent by" column; until one is supplied, her name stands alone |
 | The Close (M9) | The optional field's label; an accessible description of the engraving (D7) |
 | Moving pictures | The replay control's accessible name (D7) |
@@ -102,7 +102,7 @@ New items this part adds (beyond D7's list):
 | The proof, the three points | A short spoken description for each of the three points beside the sample proof, saying which part of it the point outlines (three items; also in the foundation's D7) |
 
 Items from D7 that this part uses: the alt text of the door photographs (C1, C2), of Ana's
-photograph (C5) and of each team portrait with the person's name and role (C10); the accessible name
+photograph (C5) and of each team portrait with the person's name and role (C10) (the portraits on hold: no photographs of CoFile's people for now); the accessible name
 of the replay control; the accessible name of the wipe handle; the word "Menu" on the phone's menu
 button and the menu sheet's accessible name.
 
@@ -142,7 +142,7 @@ field, "Menu", the engraver film's credit and description), these pages need:
 
 | Where | What |
 |---|---|
-| How it works, step 3 (10A.1.2) | The caption under the C10 photograph: the filing professional's name and role |
+| How it works, step 3 (10A.1.2) | The caption under the C10 photograph: the filing professional's name and role (on hold: no photographs of CoFile's people for now) |
 | How it works, the proof (10A.1.3) | A short spoken description for each of the five list items that outline their part of the sample proof (the detail rows, the fees and total, the state's review page, the Authorizations group, the button), five items |
 | For firms, the desk (10A.2.2) | New words for the list item "Your client sees your firm on the form and in every email. The only sign of us is a small “with CoFile”.": client pages and emails to clients no longer carry "with CoFile" (decisions file) |
 | For firms, the desk (10A.2.2) | Confirmation or new words for the h2 "Your filing desk, in your brand." and the item "Your filing desk carries your firm's name, logo and color.": the desk is now in CoFile's look, with the firm's name and logo as its account (decisions file) |
@@ -151,8 +151,8 @@ field, "Menu", the engraver film's credit and description), these pages need:
 | For firms, the studio (10A.2.2) | The accessible name of the studio's control group |
 | For firms, the studio (10A.2.2) | The accessible names of the three previews as thumbnail buttons (the client's page, the firm's page for a filing, an email to a client) |
 | For firms, close (10A.2.6) | The alt text pattern for the plate when it carries the visitor's typed name |
-| Pricing, title page (10A.4.1) | The names and roles of the filing professionals in the three portraits (alt text) |
-| Questions, "Is a person involved?" (10A.6.2) | The name and role of the person in the portrait (alt text) |
+| Pricing, title page (10A.4.1) | The names and roles of the filing professionals in the three portraits (alt text) (on hold: no photographs of CoFile's people for now) |
+| Questions, "Is a person involved?" (10A.6.2) | The name and role of the person in the portrait (alt text) (on hold: no photographs of CoFile's people for now) |
 | For platforms, "underneath" (10A.7.1) | The picture's accessible name (and a caption, if the owner wants one beyond the proof's label) |
 | Sign-up and Choose a new password (10A.9.2, 10A.12.2) | The two labels of the optional show-password control; without them it's left out |
 | Terms and Privacy (10A.15) | The accessible name of the contents list |
