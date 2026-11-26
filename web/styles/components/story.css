@@ -1,0 +1,61 @@
+/* How it works (merged spec 10A.1) and For firms (10A.2): their own parts, on the bands in marketing.css. */
+@layer components {
+/* 10A.1.2 The steps: numeral, photograph, lead and paragraph on one row grid; the firm's step on a white sheet */
+.st-steps { padding-top: 0; }
+.st-steps-list { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 24px; align-items: start; margin: 0; padding: 0; list-style: none; }
+.st-step { position: relative; display: grid; grid-template-rows: auto auto auto 1fr; padding: 32px; min-width: 0; }
+.st-step.sheet { border-radius: var(--r-sheet); }
+.st-num { display: block; margin-left: -4px; font: 400 clamp(4.5rem, 3.75rem + 3vw, 7.5rem)/1 var(--font-display); font-variant-numeric: lining-nums; color: var(--text); }
+.st-photo { margin-top: 24px; }
+.st-photo img { aspect-ratio: 4 / 5; object-fit: cover; }
+.st-photo.is-files img { object-position: 52% 50%; }
+.st-lead { margin-top: 24px; color: var(--text); }
+.st-body { margin-top: 12px; color: var(--text); }
+@media (max-width: 1023px) {
+  .st-steps-list { grid-template-columns: 1fr; gap: 32px; }
+  .st-step { grid-template-columns: 240px minmax(0, 1fr); grid-template-rows: auto 1fr; column-gap: 32px; }
+  .st-num { grid-column: 1; grid-row: 1; }
+  .st-photo { grid-column: 1; grid-row: 2; margin-top: 16px; }
+  .st-lead { grid-column: 2; grid-row: 1; align-self: end; margin-top: 0; }
+  .st-body { grid-column: 2; grid-row: 2; }
+}
+@media (max-width: 599px) {
+  .st-steps-list { gap: 48px; }
+  .st-step { display: flex; flex-direction: column; padding: 0; }
+  .st-step.sheet { margin-inline: calc(-1 * var(--site-pad, 20px)); padding: 24px var(--site-pad, 20px); box-shadow: none; border-radius: 0; }
+  .st-photo { order: 4; margin-top: 24px; }
+  .st-photo img { aspect-ratio: 4 / 3; }
+  .st-lead { margin-top: 12px; }
+}
+
+/* 10A.1.3 The proof band: the printer's proof under the lede, the points, the closing remark */
+.st-printer { margin-top: 32px; }
+.st-printer img { aspect-ratio: 3 / 2; object-fit: cover; object-position: 50% 45%; }
+.st-proof-pic { display: flex; justify-content: flex-start; }
+@media (max-width: 1279px) { .st-proof-pic { justify-content: center; margin-right: 0 !important; } }
+
+/* 10A.1.5 Checks */
+.st-checks-words { grid-column: 1 / 5 !important; }
+.st-checks { grid-column: 6 / 13; grid-row: 1; margin-top: 0; }
+@media (max-width: 1279px) { .st-checks { margin-top: 40px; max-width: 792px; } }
+
+/* 10A.2.1 For firms' title page: the lede as a letter, its first letter a three-line initial */
+.pfront img { aspect-ratio: 4 / 5; object-fit: cover; }
+@supports (initial-letter: 3) {
+  @media (min-width: 600px) { .ff-letter::first-letter { initial-letter: 3; font-family: var(--font-display); color: var(--text); margin-right: 8px; } }
+}
+/* 10A.2.2 The desk and the studio */
+.ff-desk-pic .pdesk { max-height: 700px; }
+.ff-studio { margin-top: 48px; }
+/* 10A.2.3 The doors, as on the home page */
+.ff-door > span { display: block; }
+.ff-small { margin-top: 16px; color: var(--text-2); }
+.ff-doors .mk-pic { grid-column: 1 / 8; margin-left: calc(-1 * var(--site-pad)); }
+.ff-doors .mk-words { grid-column: 9 / 13; }
+@media (max-width: 1279px) { .ff-doors .mk-pic { margin-left: 0 !important; } }
+@media (max-width: 599px) { .ff-small { margin-top: 12px; } }
+/* 10A.2.6 The close on the blank plate */
+.ff .mk-close-aside { justify-self: end; width: min(486px, 100%); }
+@media (max-width: 1279px) { .ff .mk-close-aside { width: min(486px, 100%); margin-right: 0 !important; } }
+@media (max-width: 599px) { .ff .mk-close-aside { width: 100%; } }
+}
