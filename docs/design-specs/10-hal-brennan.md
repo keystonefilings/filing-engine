@@ -2,7 +2,7 @@
 
 **A visual design spec for cofile.app**
 Harold "Hal" Brennan, engraver and document designer, Philadelphia
-Written against BRIEF.md, version 2 (Nov 26, 2026). The copy in `web/app/page.tsx` is locked, and every headline, paragraph and label below is quoted from it. Where a design needs a word that doesn't exist yet, I've marked it `[copy needed]`.
+Written against BRIEF.md, version 3 (Nov 26, 2026), and the round 3 copy: the home page (`web/app/page.tsx`), its seven example pictures (`web/components/landing/Visuals.tsx`) and the seven pages behind it. The copy is locked, and every headline, line, price and label below is quoted from it. Where a design needs a word that doesn't exist yet, I've marked it `[copy needed]`.
 
 ---
 

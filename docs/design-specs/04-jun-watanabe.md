@@ -316,15 +316,15 @@ On wide screens the extra width is ma: it stays empty desk. The photographic pla
 An 8 px base with a 4 px half step. Tokens: `4, 8, 12, 16, 24, 32, 48, 64, 96, 128, 160, 200`.
 
 - **Vertical rhythm**: line heights are multiples of 2 px and blocks are spaced in multiples of 8, so baselines fall into step down the page.
-- **Selling sections** (hero, process, proof, firms, requests, after, rehearsals, coverage, enterprise, close): 160 px above and below on desktop, 112 on tablet, 96 on phone. These rooms are large and quiet.
-- **Support sections** (checks, catch, security): 96 px on desktop, 80 on tablet, 64 on phone, on the Shade ground. They are smaller rooms off the main corridor: easy to find, clearly secondary.
+- **Home-page sections** (hero, firms, requests, proof, after, coverage, rehearsals, pricing, close): 160 px above and below on desktop, 112 on tablet, 96 on phone. These rooms are large and quiet, which is right for so few words.
+- **Quiet rooms** (the checks section of How it works, the Security page's content, the security line under pricing): 96 px on desktop, 80 on tablet, 64 on phone, on the Shade ground where they are whole sections. They are smaller rooms off the main corridor: easy to find, clearly secondary.
 - **Heading to lede**: 24 px. **Lede to content**: 48 px desktop, 32 phone. **List items**: 20 px apart, with a 1 px Kage rule between items on lists of four or more.
 - **Inside a sheet**: 32 px padding on desktop, 20 px on phone; 40 px from the last content to the imprint.
 
 ### 6.4 How pages breathe
 
-- **Desktop**: most selling sections are a two-part composition, words on the desk on one side (cols 1 to 5) and a sheet or a photograph on the other (cols 7 to 12), with column 6 left empty as ma. The sides alternate down the page (words left, then right, then left) so the eye moves like reading a fold-out.
-- **Phone**: one column. Order follows the copy: heading, lede, then the object, then the list. Objects (sheets, photographs) take the full width minus 20 px margins; photographs may go edge to edge. Nothing ever sits side by side on a phone except a label and its value on the proof when both are short.
-- **Sticky thumb bar on phone**: after the hero's buttons scroll out of view, a 64 px bar rises from the bottom (`translateY` 100% → 0, 320 ms, paper land curve) holding "Run a free rehearsal" full width in Kaki. It sinks away again inside the close section (which has its own button), in the enterprise form, and whenever a field has focus. It respects `env(safe-area-inset-bottom)`.
+- **Desktop**: each home-page section is a two-part composition: a short column of words on the desk (cols 1 to 4) and one large picture (cols 6 to 12), with column 5 left empty as ma. The picture is always the bigger partner, because the brief is right that the pictures carry the page. The sides alternate down the page (words left, then right, then left) so the eye moves like reading a fold-out. Coverage and pricing are the two full-width sections, where the cards and the rate card span all twelve columns under the heading.
+- **Phone**: one column. Order follows the copy: heading, lede, the short list and its link, then the picture. Pictures take the full width minus 20 px margins, and photographs may go edge to edge. Nothing ever sits side by side on a phone except a label and its value on a sheet when both are short.
+- **Sticky thumb bar on phone**: after the hero's buttons scroll out of view, a 64 px bar rises from the bottom (`translateY` 100% → 0, 320 ms, paper land curve) holding "Run a free rehearsal" full width in Kaki. It sinks away again inside the close section (which has its own button), in the For platforms inquiry form, and whenever a field has focus. It respects `env(safe-area-inset-bottom)`.
 - **Tap targets**: 48 × 48 px minimum, 56 px tall for primary buttons on phone.
-- **Sheet widths**: the proof is 720 px wide on desktop (a sheet of letterhead at screen scale) and full width minus 20 px on phone. Forms sit on 720 px sheets. The letter-style sections ("The catch", Terms, Privacy) sit on 760 px sheets.
+- **Sheet widths**: the proof is 720 px wide on desktop (a sheet of letterhead at screen scale) and full width minus 20 px on phone. Forms sit on 720 px sheets. The letter-style pages (Terms, Privacy) and the Questions answers sit on 760 px sheets.
