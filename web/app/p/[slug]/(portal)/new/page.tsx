@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { firmContext, kindsForState, offeredKinds } from "@/lib/firm";
 import { firmPageUrl, publicKind, SERVICE_SLUGS, widgetSnippet } from "@/lib/public-pages";
-import { inboundAddress } from "@/lib/inbound";
+import { requestWays } from "@/lib/inbound";
 
 export const metadata = { title: "New filing" };
 
@@ -19,12 +19,21 @@ export default async function NewFilingPage({ params, searchParams }: { params: 
   const all = offeredKinds(company);
   const st = STATES.find((s) => s.id === state);
   if (!st) {
-    const inbox = await inboundAddress(session.apiKey, session.clientCompanyId);
+    const ways = await requestWays(session.apiKey, session.clientCompanyId);
     return (
       <div className="stack">
         <h1>New filing</h1>
         <p className="muted">Which state is the business in?</p>
-        {inbox ? <p className="small muted">Or email the details to <a href={`mailto:${inbox}`}>{inbox}</a> from {session.email}. We fill in the form from your email and send you a link to check it.</p> : null}
+        {ways.address || ways.sms || ways.whatsapp || ways.slackInstallUrl ? (
+          <div className="small muted">
+            <p style={{ marginBottom: 4 }}>Or send us the details and we fill in the form for you to check:</p>
+            <ul style={{ marginTop: 0 }}>
+              {ways.address ? <li>Email <a href={`mailto:${ways.address}`}>{ways.address}</a> from {session.email}.</li> : null}
+              {ways.sms || ways.whatsapp ? <li>{[ways.sms ? `Text ${ways.sms}` : "", ways.whatsapp ? `${ways.sms ? "or WhatsApp" : "WhatsApp"} ${ways.whatsapp}` : ""].filter(Boolean).join(" ")} from your mobile (add it under <a href={`${base}/password`}>your account</a>).</li> : null}
+              {ways.slackInstallUrl ? <li>Type <code>/file</code> in Slack (<a href={ways.slackInstallUrl}>add CoFile to your Slack</a>).</li> : null}
+            </ul>
+          </div>
+        ) : null}
         <div className="pick">
           {STATES.map((s) => {
             const n = kindsForState(all, s.id).length;

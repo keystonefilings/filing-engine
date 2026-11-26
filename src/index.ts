@@ -21,7 +21,7 @@ const app = buildServer({
   staffKeys: parseStaffKeys(process.env.STAFF_API_KEYS, config.production),
   // Dashboard session keys are signed with the approval-link secret (domain-separated).
   sessionSecret: config.approvalSigningSecret,
-  platformTenantId: config.platformTenantId, billing: sys.billing, inbound: sys.inbound,
+  platformTenantId: config.platformTenantId, billing: sys.billing, inbound: sys.inbound, twilio: sys.twilio, slack: sys.slack,
   google: config.googleClientId ? new GoogleIdTokens({ clientId: config.googleClientId }) : undefined,
   // Partner sign-ups wait for approval unless this is set to "automatic".
   partnerSignupMode: process.env.PARTNER_SIGNUP_MODE === "automatic" ? "automatic" : "approval",

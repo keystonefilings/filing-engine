@@ -3,6 +3,8 @@ import { z } from "zod";
 import type { Store } from "../store/types.js";
 import type { Auth } from "../users/routes.js";
 import type { InboundEmailService } from "./email.js";
+import type { TwilioChannel } from "./twilio.js";
+import type { SlackChannel } from "./slack.js";
 
 /**
  * V40: Resend's receiving webhook, and the firm-side reads and writes the web app's "from email" page
@@ -15,21 +17,77 @@ const Extracted = z.object({
   note: z.string().max(1000).optional(),
 });
 
-export function registerInbound(app: FastifyInstance, deps: { store: Store; inbound: InboundEmailService; authOf: (req: FastifyRequest) => Promise<Auth | null> }): void {
-  const { store, inbound } = deps;
+export function registerInbound(app: FastifyInstance, deps: { store: Store; inbound?: InboundEmailService; twilio?: TwilioChannel; slack?: SlackChannel; publicBaseUrl?: string; authOf: (req: FastifyRequest) => Promise<Auth | null> }): void {
+  const { store, inbound, twilio, slack } = deps;
 
-  // Resend signs the exact bytes it sent (Svix), so this route reads its body as text.
+  // Resend and Slack sign the exact bytes they sent, so these routes read their bodies as text.
   void app.register(async (hook) => {
     hook.removeContentTypeParser("application/json");
     hook.addContentTypeParser("application/json", { parseAs: "string", bodyLimit: 1_000_000 }, (_req, body, done) => done(null, body));
-    hook.post("/v1/inbound/email/resend", async (req, reply) => {
+    hook.removeContentTypeParser("application/x-www-form-urlencoded");
+    hook.addContentTypeParser("application/x-www-form-urlencoded", { parseAs: "string", bodyLimit: 100_000 }, (_req, body, done) => done(null, body));
+    if (inbound) hook.post("/v1/inbound/email/resend", async (req, reply) => {
       const raw = String(req.body ?? "");
       if (!inbound.verify(req.headers as Record<string, unknown>, raw)) return reply.code(400).send({ error: "bad signature" });
       const r = await inbound.handle(JSON.parse(raw) as { type?: string; data?: Record<string, unknown> });
       req.log.info({ status: r.status, id: r.id }, "inbound email");
       return { received: true };
     });
+    // V41: the /file command. Slack wants an answer within 3 seconds.
+    if (slack) hook.post("/v1/slack/command", async (req, reply) => {
+      const raw = String(req.body ?? "");
+      if (!slack.verify(req.headers as Record<string, unknown>, raw)) return reply.code(401).send({ error: "bad signature" });
+      return slack.command(Object.fromEntries(new URLSearchParams(raw)));
+    });
   });
+
+  // V41: adding the CoFile app to a Slack workspace.
+  if (slack) {
+    app.get("/v1/slack/install", async (_req, reply) => slack.configured ? reply.redirect(slack.installUrl(), 302) : reply.code(404).send({ error: "Slack isn't set up" }));
+    app.get("/v1/slack/oauth/callback", async (req, reply) => {
+      const q = req.query as { code?: string; state?: string; error?: string };
+      const page = (title: string, body: string) => reply.type("text/html").send(`<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${title}</title><style>body{font-family:system-ui,sans-serif;max-width:560px;margin:3rem auto;padding:0 1rem;color:#1b1b1b;line-height:1.5}</style></head><body><h1>${title}</h1><p>${body}</p></body></html>`);
+      if (q.error || !q.code || !q.state) return page("CoFile wasn't added", "The install was cancelled. You can start it again from Slack.");
+      const r = await slack.finishInstall(q.code, q.state);
+      const esc = (s: string) => s.replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]!);
+      return r.ok
+        ? page("CoFile is added to Slack", `CoFile is now in ${esc(r.team)}. Anyone there with a CoFile account can type <strong>/file</strong> and the filing they need; we answer with the form filled in to check and send.`)
+        : page("CoFile wasn't added", esc(r.error));
+    });
+  }
+
+  // V42-V43: texts and WhatsApp messages, through Twilio.
+  if (twilio) {
+    app.post("/v1/inbound/twilio", async (req, reply) => {
+      const params = Object.fromEntries(Object.entries((req.body ?? {}) as Record<string, unknown>).map(([k, v]) => [k, String(v)]));
+      if (!twilio.verify(params, req.headers["x-twilio-signature"] as string | undefined)) return reply.code(403).send({ error: "bad signature" });
+      return reply.type("text/xml").send(await twilio.incoming(params));
+    });
+    const person = async (req: FastifyRequest) => (await deps.authOf(req))?.user ?? null;
+    app.get("/v1/account/phone", async (req, reply) => {
+      const u = await person(req);
+      if (!u) return reply.code(401).send({ error: "sign in as a person to manage your phone" });
+      return { phone: u.phoneVerifiedAt ? u.phone : null, pending: u.phonePending && u.phonePending.expiresAt > new Date().toISOString() ? u.phonePending.phone : null, numbers: twilio.configured ? twilio.numbers() : null };
+    });
+    app.post("/v1/account/phone", async (req, reply) => {
+      const u = await person(req);
+      if (!u) return reply.code(401).send({ error: "sign in as a person to manage your phone" });
+      const r = await twilio.startPhone(u, String((req.body as { phone?: unknown } | undefined)?.phone ?? ""));
+      return r.ok ? { pending: r.phone } : reply.code(r.status).send({ error: r.error });
+    });
+    app.post("/v1/account/phone/confirm", async (req, reply) => {
+      const u = await person(req);
+      if (!u) return reply.code(401).send({ error: "sign in as a person to manage your phone" });
+      const r = await twilio.confirmPhone(u, String((req.body as { code?: unknown } | undefined)?.code ?? ""));
+      return r.ok ? { phone: r.phone } : reply.code(r.status).send({ error: r.error });
+    });
+    app.delete("/v1/account/phone", async (req, reply) => {
+      const u = await person(req);
+      if (!u) return reply.code(401).send({ error: "sign in as a person to manage your phone" });
+      await store.updateUser(u.id, { phone: undefined, phoneVerifiedAt: undefined, phonePending: undefined });
+      return { phone: null };
+    });
+  }
 
   const firmOf = async (req: FastifyRequest) => {
     const a = await deps.authOf(req);
@@ -53,7 +111,12 @@ export function registerInbound(app: FastifyInstance, deps: { store: Store; inbo
   app.get("/v1/client-companies/:id/inbound", async (req, reply) => {
     const c = await firmOf(req);
     if (!c) return reply.code(404).send({ error: "not found" });
-    return { address: inbound.configured ? inbound.address : null };
+    // Every way this firm's people can send a request.
+    return {
+      address: inbound?.configured ? inbound.address : null,
+      ...(twilio?.configured ? twilio.numbers() : { sms: null, whatsapp: null }),
+      slackInstallUrl: slack?.configured && deps.publicBaseUrl ? `${deps.publicBaseUrl}/v1/slack/install` : null,
+    };
   });
   app.get("/v1/client-companies/:id/inbound/:messageId", async (req, reply) => {
     const m = await messageOf(req);

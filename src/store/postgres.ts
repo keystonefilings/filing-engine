@@ -233,6 +233,7 @@ export class PostgresStore implements Store {
     return u;
   }
   async getUser(id: string) { return this.doc<UserRecord>(`select doc from users where id=$1`, [id]); }
+  async findUserByPhone(phone: string) { return this.doc<UserRecord>(`select doc from users where doc->>'phone' = $1 and doc ? 'phoneVerifiedAt' limit 1`, [phone]); }
   async findUserByEmail(email: string) { return this.doc<UserRecord>(`select doc from users where email=$1`, [email]); }
   async listUsers(tenantId: string) { return this.docs<UserRecord>(`select doc from users where tenant_id=$1 order by created_at`, [tenantId]); }
   async updateUser(id: string, patch: Partial<UserRecord>) {

@@ -97,5 +97,9 @@ export async function bootstrap(opts: { withExecutor: boolean; workerId?: string
     "site:IRS": config.siteConcurrency.IRS, "site:NY": config.siteConcurrency.NY, "site:NJ": config.siteConcurrency.NJ,
   });
   const service = new FilingService({ store, approvals, webhooks, queue, vault, drift, nameResolution, reviewGate, registeredAgents, notifier, executor, cardCodes, billing, limiter, dryRunDefault: config.dryRunDefault, workerId: opts.workerId });
-  return { store, artifacts, approvals, webhooks, queue, vault, secrets, drift, nameResolution, reviewGate, registeredAgents, notifier, email, harness, executor, service, billing, inbound };
+  const { TwilioChannel } = await import("./inbound/twilio.js");
+  const { SlackChannel } = await import("./inbound/slack.js");
+  const twilio = config.twilio.accountSid ? new TwilioChannel({ store, ...config.twilio, webhookUrl: `${config.publicBaseUrl}/v1/inbound/twilio`, webBaseUrl: config.webBaseUrl }) : undefined;
+  const slack = config.slack.clientId ? new SlackChannel({ store, ...config.slack, cipher, publicBaseUrl: config.publicBaseUrl, webBaseUrl: config.webBaseUrl, stateSecret: config.approvalSigningSecret }) : undefined;
+  return { store, artifacts, approvals, webhooks, queue, vault, secrets, drift, nameResolution, reviewGate, registeredAgents, notifier, email, harness, executor, service, billing, inbound, twilio, slack };
 }

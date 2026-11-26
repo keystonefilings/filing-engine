@@ -1,6 +1,7 @@
 import { brandStyle, firmContext } from "@/lib/firm";
 import { platformName } from "@/lib/brand";
 import Link from "next/link";
+import { personalSession } from "@/lib/session";
 import { TopBar } from "@/components/TopBar";
 import { BrandFont } from "@/components/BrandFont";
 
@@ -29,7 +30,7 @@ export default async function PortalLayout({ children, params }: { children: Rea
           { href: `${base}/signatures`, label: "Signatures" },
           ...(partner ? [{ href: `${base}/setup`, label: "Setup" }, { href: `${base}/billing`, label: "Billing" }] : []),
         ]}
-        right={<form action="/logout" method="post" className="row">{cobrand}{session.signedInWith === "password" ? <Link className="small muted" href={`${base}/password`} title="Change password">{session.email}</Link> : <span className="small muted">{session.email}</span>}<button className="btn small" type="submit">Sign out</button></form>}
+        right={<form action="/logout" method="post" className="row">{cobrand}{personalSession(session) ? <Link className="small muted" href={`${base}/password`} title="Change password">{session.email}</Link> : <span className="small muted">{session.email}</span>}<button className="btn small" type="submit">Sign out</button></form>}
       />
       <main className="wrap">{children}</main>
       {brand.supportEmail ? <footer className="wrap small muted" style={{ paddingTop: 0 }}>Questions? Email <a href={`mailto:${brand.supportEmail}`}>{brand.supportEmail}</a>.</footer> : null}

@@ -101,6 +101,21 @@ export const config = {
     /** On: a live filing needs a subscription in good standing. Off until prices are set. */
     required: env("BILLING_REQUIRED", "false") === "true",
   },
+  /** V42-V43: texts and WhatsApp through Twilio (one account; the webhook is <PUBLIC_BASE_URL>/v1/inbound/twilio). */
+  twilio: {
+    accountSid: process.env.TWILIO_ACCOUNT_SID || undefined,
+    authToken: process.env.TWILIO_AUTH_TOKEN || undefined,
+    smsFrom: process.env.TWILIO_SMS_FROM || undefined,
+    whatsappFrom: process.env.TWILIO_WHATSAPP_FROM || undefined,
+    apiBase: process.env.TWILIO_API_URL || undefined,
+  },
+  /** V41: the Slack app (command /file at <PUBLIC_BASE_URL>/v1/slack/command). */
+  slack: {
+    clientId: process.env.SLACK_CLIENT_ID || undefined,
+    clientSecret: process.env.SLACK_CLIENT_SECRET || undefined,
+    signingSecret: process.env.SLACK_SIGNING_SECRET || undefined,
+    apiBase: process.env.SLACK_API_URL || undefined,
+  },
   /** V37: the Google OAuth client id ("Sign in with Google"); the same id goes in the web app. */
   googleClientId: process.env.GOOGLE_CLIENT_ID || null,
   /** V18: Basis Theory private key (token:read) the worker uses to read a card at the payment screen. */

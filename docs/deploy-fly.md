@@ -150,6 +150,33 @@ read -s RESEND_INBOUND_WEBHOOK_SECRET && fly secrets set --stage --app keystone-
 Only an active firm user's own address is answered, and the answer goes to that address; anyone
 else gets no reply. The email's text is sealed like SSNs and deleted after 30 days.
 
+**Requests from Slack.** Not required to start. At api.slack.com/apps create an app (from
+scratch). Under Slash Commands add `/file` with the request URL
+`https://<your API>/v1/slack/command` and the hint "the filing you need, with the details". Under
+OAuth & Permissions add the redirect URL `https://<your API>/v1/slack/oauth/callback` and the bot
+scopes `commands`, `users:read` and `users:read.email`. Under Manage Distribution turn on public
+distribution so firms can add it to their own Slack. Then:
+
+```bash
+read -s SLACK_CLIENT_SECRET && read -s SLACK_SIGNING_SECRET && fly secrets set --stage --app keystone-filing-engine SLACK_CLIENT_ID=xxxx.xxxx SLACK_CLIENT_SECRET="$SLACK_CLIENT_SECRET" SLACK_SIGNING_SECRET="$SLACK_SIGNING_SECRET"
+```
+
+A firm adds it from the "add CoFile to your Slack" link on its New filing page. A person's Slack
+email must match their CoFile account; the answer is private to them.
+
+**Requests by text and WhatsApp (Twilio).** Not required to start, and both take days to weeks
+of registration. In Twilio: buy a US number and complete A2P 10DLC brand and campaign registration
+for it (texting); add a WhatsApp sender (Twilio walks you through Meta's business verification).
+Set the messaging webhook of both to `https://<your API>/v1/inbound/twilio` (POST). Then:
+
+```bash
+read -s TWILIO_AUTH_TOKEN && fly secrets set --stage --app keystone-filing-engine TWILIO_ACCOUNT_SID=ACxxxx TWILIO_AUTH_TOKEN="$TWILIO_AUTH_TOKEN" TWILIO_SMS_FROM=+1xxxxxxxxxx TWILIO_WHATSAPP_FROM=+1xxxxxxxxxx
+```
+
+`PUBLIC_BASE_URL` must be exactly the URL Twilio calls (it's part of Twilio's signature). People add
+their mobile number under their account and confirm it with a code we text them; messages from
+other numbers get no answer.
+
 **Subscriptions (Stripe).** Not required to start. In Stripe:
 
 1. Products: create a product per plan (Enterprise, Partner), each with a recurring price. Copy

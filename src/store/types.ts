@@ -256,6 +256,11 @@ export interface UserRecord {
   emailVerifiedAt?: string;
   /** Session keys signed out one by one (sign-out on one device); pruned once they expire. */
   revokedSessions?: { jti: string; exp: number }[];
+  /** V42-V43: a mobile number (E.164) for filing requests by text or WhatsApp, once confirmed by a code. */
+  phone?: string;
+  phoneVerifiedAt?: string;
+  /** A number waiting for its code: only a hash of the code. */
+  phonePending?: { phone: string; codeHash: string; expiresAt: string; tries: number };
   /** The latest password-reset link: only a hash of its secret. Marked used rather than removed. */
   passwordReset?: { tokenHash: string; expiresAt: string; sessionGen: number; requestedAt: string; usedAt?: string };
 }
@@ -293,8 +298,8 @@ export interface InboundMessageRecord {
   tenantId: string;
   clientCompanyId: string;
   userId: string;
-  channel: "email";
-  /** The provider's id for the message (Resend's email_id): a retried webhook finds it again. */
+  channel: "email" | "slack" | "sms" | "whatsapp";
+  /** The provider's id for the message (Resend's email_id, Twilio's MessageSid, Slack's trigger): a retried webhook finds it again. */
   providerId: string;
   from: string;
   subject: string;
@@ -427,6 +432,8 @@ export interface Store {
   createUser(u: UserRecord): Promise<UserRecord>;
   getUser(id: string): Promise<UserRecord | null>;
   findUserByEmail(email: string): Promise<UserRecord | null>;
+  /** The user who confirmed this mobile number (E.164). */
+  findUserByPhone(phone: string): Promise<UserRecord | null>;
   listUsers(tenantId: string): Promise<UserRecord[]>;
   updateUser(id: string, patch: Partial<UserRecord>): Promise<UserRecord>;
   /** V29: sealed portal logins (settings/db-vault.ts); the store never sees them unsealed. */

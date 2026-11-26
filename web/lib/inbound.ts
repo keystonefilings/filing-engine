@@ -4,7 +4,7 @@ import { emailReadingOn, fillForm, pickKind } from "./email-intake";
 
 /** V40: a filing request the firm emailed in (engine: src/inbound). */
 export interface InboundMessage {
-  id: string; from: string; subject: string; text?: string; receivedAt: string; purgedAt?: string; filingId?: string;
+  id: string; channel?: "email" | "slack" | "sms" | "whatsapp"; from: string; subject: string; text?: string; receivedAt: string; purgedAt?: string; filingId?: string;
   extracted?: { kind: string | null; byKind: Record<string, Record<string, string>>; note?: string; at: string };
 }
 
@@ -15,8 +15,11 @@ export async function inboundMessage(apiKey: string, firm: string, id: string): 
   return (await engine<{ message: InboundMessage }>(apiKey, base(firm, id)).catch(() => null))?.message ?? null;
 }
 
-export async function inboundAddress(apiKey: string, firm: string): Promise<string | null> {
-  return (await engine<{ address: string | null }>(apiKey, `/v1/client-companies/${encodeURIComponent(firm)}/inbound`).catch(() => null))?.address ?? null;
+export type RequestWays = { address: string | null; sms: string | null; whatsapp: string | null; slackInstallUrl: string | null };
+
+/** Every way this firm's people can send a request (email, text, WhatsApp, Slack). */
+export async function requestWays(apiKey: string, firm: string): Promise<RequestWays> {
+  return (await engine<RequestWays>(apiKey, `/v1/client-companies/${encodeURIComponent(firm)}/inbound`).catch(() => null)) ?? { address: null, sms: null, whatsapp: null, slackInstallUrl: null };
 }
 
 /** Which filing the email asks for, read once and kept with the message. */

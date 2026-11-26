@@ -40,7 +40,7 @@ export default async function NewKindPage({ params, searchParams }: { params: Pr
       <p className="small"><Link href={`/p/${encodeURIComponent(slug)}/new${kind.type === "ein_only" ? "" : `?state=${kind.state}`}`}>← Other filings</Link></p>
       <h1>{kind.title}</h1>
       <p className="muted">{kind.summary} Would your client rather fill it in? <Link href={`/p/${encodeURIComponent(slug)}/client-links?kind=${encodeURIComponent(kind.id)}`}>Send them a link</Link>.</p>
-      {emailed ? <p className="notice">Filled in from your email &ldquo;{emailed.subject || "(no subject)"}&rdquo;. Check every answer and add what&apos;s missing.</p> : null}
+      {emailed ? <p className="notice">Filled in from your message &ldquo;{emailed.subject || "(no subject)"}&rdquo;. Check every answer and add what&apos;s missing.</p> : null}
       {!liveFilings() ? <p className="notice warn">Test mode: filings from this portal are walked through the state site up to the final step and stopped there. Nothing is filed or paid.</p> : null}
       {clients.length ? (
         <form method="get" className="row" style={{ gap: 8 }}>

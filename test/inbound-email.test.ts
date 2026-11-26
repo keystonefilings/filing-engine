@@ -111,7 +111,7 @@ describe("emailing a filing request in", () => {
     expect(put.statusCode).toBe(200);
     expect((await store.getInbound(msg.id))!.extracted).toMatchObject({ kind: "ny-llc", byKind: { "ny-llc": { "formation.name.baseName": "Blue Harbor Consulting" } } });
     expect((await app.inject({ method: "PUT", url: `${url}/extracted`, headers: { "x-api-key": "k1" }, payload: { kind: "NY LLC!", byKind: {} } })).statusCode).toBe(422);
-    expect((await app.inject({ method: "GET", url: "/v1/client-companies/acme-cpa/inbound", headers: { "x-api-key": "k1" } })).json()).toEqual({ address: "file@in.cofile.app" });
+    expect((await app.inject({ method: "GET", url: "/v1/client-companies/acme-cpa/inbound", headers: { "x-api-key": "k1" } })).json()).toEqual({ address: "file@in.cofile.app", sms: null, whatsapp: null, slackInstallUrl: null });
   });
 
   it("removes the text and what was read after the retention period", async () => {

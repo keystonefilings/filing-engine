@@ -124,6 +124,7 @@ export class MemoryStore implements Store {
     this.users.set(u.id, u); return u;
   }
   async getUser(id: string) { return this.users.get(id) ?? null; }
+  async findUserByPhone(phone: string) { for (const u of this.users.values()) if (u.phone === phone && u.phoneVerifiedAt) return u; return null; }
   async findUserByEmail(email: string) { for (const u of this.users.values()) if (u.email === email) return u; return null; }
   async listUsers(tenantId: string) { return [...this.users.values()].filter((u) => u.tenantId === tenantId); }
   async updateUser(id: string, patch: Partial<UserRecord>) {

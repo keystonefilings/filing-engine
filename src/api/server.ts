@@ -66,6 +66,9 @@ export interface ApiDeps {
   billing?: BillingService;
   /** V40: filing requests emailed in (Resend receiving). */
   inbound?: InboundEmailService;
+  /** V41-V43: filing requests from Slack, and by text and WhatsApp through Twilio. */
+  slack?: import("../inbound/slack.js").SlackChannel;
+  twilio?: import("../inbound/twilio.js").TwilioChannel;
   /** V37: checks Google ID tokens for "Sign in with Google". */
   google?: import("../users/google.js").GoogleIdTokens;
 }
@@ -379,7 +382,7 @@ export function buildServer(deps: ApiDeps): FastifyInstance {
   registerIntakeLinks(app, { store: deps.store, authOf });
   registerCardCodes(app, { store: deps.store, service: deps.service, authOf });
   if (deps.billing) registerBilling(app, { store: deps.store, billing: deps.billing, authOf });
-  if (deps.inbound) registerInbound(app, { store: deps.store, inbound: deps.inbound, authOf });
+  if (deps.inbound || deps.twilio || deps.slack) registerInbound(app, { store: deps.store, inbound: deps.inbound, twilio: deps.twilio, slack: deps.slack, publicBaseUrl: deps.publicBaseUrl, authOf });
   registerPublicPages(app, { store: deps.store, service: deps.service, platformTenantId: deps.platformTenantId ?? "keystone" });
   registerUsers(app, {
     store: deps.store, authOf, staffOf, sessionSecret,
