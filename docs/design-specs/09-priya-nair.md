@@ -3,7 +3,7 @@
 **Designer:** Priya Nair, enterprise UX and service design, Toronto
 **Date:** November 26, 2026
 **Covers:** cofile.app public site, partner filing desks, client-facing pages, the proof, the enterprise dashboard, white-label surfaces, developer docs and emails.
-**Status of words:** every quoted string in this document is taken from the repo as it stands today. Where a new component needs a label that doesn't exist yet, I mark it **[new label]** and list it in the Copy notes appendix. I haven't rewritten anything in the design itself.
+**Status of words:** every quoted string presented as product copy is taken from the repo as it stands today (the home page, the desk, the engine's proof and emails); `{braces}` mark values the product fills in. Where a new component needs a label that doesn't exist yet, I mark it **[new label]** and list it in the Copy notes appendix. I haven't rewritten anything in the design itself.
 
 ---
 
@@ -520,7 +520,7 @@ A secondary, non-color signal for anything in rehearsal: 45° lines, 1 px, 8 px 
 | **Two readings match** | Checks section | Two fee readouts, "$103.50" from the proof and "$103.50" from the state's payment screen, slide together until their decimal points align. Then a 1 px ink rule draws between them and a small check appears. If you scroll back up, it doesn't replay. |
 | **Held, on purpose** | Rehearsals section | The rehearsal log fills in line by line (one line per 120 ms). The last line, "Pay Now: held, on purpose", arrives in violet; the Gate icon draws, then the hatch fades in over 300 ms. |
 | **Live status** | Filing detail | When a status changes while the page is open (server-sent events), the baton moves to its new station and the new event slides into the blueprint lane at `--t-standard`. A polite live region announces the new status label. |
-| **Code accepted** | Ready to pay | After "Pay and file" succeeds, a 60-minute ring appears around the card's icon and empties over the hour, showing how long the code is kept ("kept an hour at most"). It's a real countdown, not decoration. |
+| **Code accepted** | Ready to pay | After "Pay and file" succeeds, a 60-minute ring appears around the card's icon and empties over the hour, showing how long the code is kept (the locked lede: "We keep the code for an hour at most, then delete it."). It's a real countdown, not decoration. |
 
 ### 8.4 Interaction rules
 
@@ -673,7 +673,7 @@ Page loads use skeletons that match the final layout (table rows as 48 px bars i
 |---|---|
 | Stat tile | 20 px padding, label in Label `--ink-2`, number in Stat (36/40, tabular), a sub-line in Meta; whole tile is a link when it has one |
 | Card tile (payment card) | 64 × 40 card brand mark, "ending 4242" in Record, purpose in Meta; never a fake card graphic with a full number |
-| Copy button | 32 px square, copy icon, `aria-label` names the thing copied; on success the icon becomes a check for 1.5 s and a toast confirms |
+| Copy button | 32 px square with a 44 px hit area, copy icon, `aria-label` names the thing copied; on success the icon becomes a check for 1.5 s and a toast confirms |
 | Code block | Ink ground (section 4.5), 14/22 Record, a language tab and copy button in the top-right, horizontal scroll with an edge fade |
 | Drawer | 560 px from the right at `lg`, full-screen sheet below `md`; elevation 3; focus trapped; closes with Esc; the URL updates so a drawer can be linked |
 | Confirm dialog | For destructive actions only ("Remove", "Turn off", "Disconnect", revoking a key): 440 px, the action restated in the title, destructive button on the right, "Cancel" **[new label]** focused by default |
@@ -1004,7 +1004,7 @@ CoFile-branded (ink), with the app-shell rail and a denser scale (tables at 14/2
 
 A separate **workbench** look inside the same system: the Hand face at 16/26, Record for everything technical, and code blocks on the ink ground.
 
-- `/docs`: a three-column layout at `lg` (240 px nav, 720 px content, 240 px "On this page"). H1 "CoFile API", the locked intro (including "Not every filing type is live yet; see Coverage."), "Quick start" with the curl example, then the agent-readable files as three **download tiles**: "all docs in one Markdown file" (`/docs.md`), "OpenAPI 3.1" (`/openapi.json`) and "llms.txt", each with its path in Record and a copy-URL button.
+- `/docs`: a three-column layout at `lg` (240 px nav, 720 px content, 240 px "On this page" **[new label]** index). H1 "CoFile API", the locked intro (including "Not every filing type is live yet; see Coverage."), "Quick start" with the curl example, then the agent-readable files as three **download tiles**: "all docs in one Markdown file" (`/docs.md`), "OpenAPI 3.1" (`/openapi.json`) and "llms.txt", each with its path in Record and a copy-URL button.
 - Guides (`/docs/<slug>`): long-form, with the Turn Line used once in "Filings and the lifecycle" as a state diagram labelled with the API status ids in Record beside the locked labels.
 - `/docs/reference`: 25 endpoints. The left nav is grouped by resource. Each endpoint block has a method chip, the path in Record, description, parameters table, and a sticky right-hand code panel with curl, Node and Python tabs. **Method chips are monochrome** (ink outline, method in Record 700) instead of today's green, amber and red, which borrowed status meaning.
 - Webhooks pages show the `X-CoFile-Event`, `X-CoFile-Delivery` and `X-CoFile-Signature` headers in a definition table.
@@ -1265,7 +1265,7 @@ Component names match code names (`TurnLine/Compact`, `StatusChip/held`, `ProofS
 3. The proof scores 100 in Lighthouse accessibility and 90+ in performance on a mid-range Android profile, and passes a screen-reader walkthrough from the email to "Approval recorded".
 4. A rehearsal is identifiable on every surface it appears on (desk row, detail, intake, proof, email) by color, pattern and word, checked in grayscale.
 5. The coverage ladder's Live column reflects `liveFilings` per type, and an empty Live column renders as visibly empty.
-6. No customer-visible surface contains "Keystone", "sign in" in new strings, or a price outside the desk's Billing page.
+6. No customer-visible surface shows the old internal product name (scope.md lists the internal ids that keep it on purpose), uses "sign in" in a new string, or shows a price on a public page.
 7. Every quoted string in the build matches the repo's copy byte for byte (a test compares rendered text to the source strings).
 
 ### 13.7 How we'll know it works

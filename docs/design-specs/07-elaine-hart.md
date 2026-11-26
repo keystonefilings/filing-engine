@@ -1405,9 +1405,9 @@ titles and labels, which come from each filing type's definition in `lib/intake/
   consent block.
 - **Ready to pay.** A focused page. The lede ("Approved filings that pay the state with a saved card
   wait here…") then one sheet per card: card label and last four in `mono`, the filings waiting for
-  it as a fee table with a ruled total, the security code field (the card vault's hosted field, labelled "Security code for {card}"),
-  and "Pay and file" (`go lg`). "Nothing is waiting for a card right now."
-  as the empty state. A 60-minute keep rule appears as a small clock icon next to the code's sentence.
+  it as a fee table with a ruled total, the security code field (the card vault's hosted field,
+  labelled "Security code for {card}"), and "Pay and file" (`go lg`). "Nothing is waiting for a card
+  right now." is the empty state. A small clock icon sits beside the one-hour sentence.
 - **Billing.** Plan name and its price **from Stripe** (no price is ever hard-coded or shown
   publicly), a ruled invoice table, the registered-agent lines (each business with its renewal date),
   the plan picker as radio cards. Notices as the code gives them.
@@ -1446,7 +1446,7 @@ the timeline, because on a phone the thing to act on comes first and the history
  Ready to pay
  Approved filings that pay the state with a saved card wait here for the card's security code
  (the 3 or 4 digits on the card). Enter it once and every filing waiting for that card goes ahead.
- We keep the code for an hour at most, then delete it.                              🕐
+ We keep the code for an hour at most, then delete it.                     (clock icon)
  ┌─────────────────────────────────────────────────────────────────────────────────────────┐
  │ Firm card  ···· 4242                                                                    │
  │ Two Sisters Bakery LLC · New Jersey LLC formation                              $103.50 │
@@ -1470,7 +1470,8 @@ Example: `cofile.app/bestaccounting/llc-filing-new-york`. Entirely in the firm's
 the firm's brand bar, then a single column (columns 3 to 10 at `lg`) with the filing type's title
 as `h1` in the firm's heading font, the summary and the "After you send this…" sentence as the lede,
 the rehearsal banner when the type isn't live, the form, the "Next, we'll email you a proof to check…"
-line above "Send", and the terms line in `caption`. Footer: "Questions? Email …" with the firm's
+line above the code's button, "Send to {firm}" (for example "Send to Best Accounting"), in the
+firm's guarded color, and the terms line in `caption`. Footer: "Questions? Email …" with the firm's
 support address, and "with CoFile" small at the right. The neutral beta notice sits above the brand bar.
 
 ### 10.7 Client-facing pages
@@ -1644,8 +1645,8 @@ Rules for the proof:
 Behaviour notes: the "the filing company" definition line that the forms carry sits at the top of
 the Authorizations block, set as a definition (term in semibold, then the rest), because a client
 must know who that is before checking anything. Repeated groups (the code's "Add {item}" buttons,
-for example "Add member", with each block titled "{Item} {n}") add a new ruled block that scrolls into view with `t-base` and receives
-focus on its first field. A kept draft (the existing `useKeptForm`) restores silently; nothing
+for example "Add member", with each block titled "{Item} {n}") add a new ruled block that scrolls
+into view with `t-base` and receives focus on its first field. A kept draft (the existing `useKeptForm`) restores silently; nothing
 flashes.
 
 **The decision page (after approving):**
@@ -1670,7 +1671,7 @@ flashes.
 └──────────────────────────────────┘
 ```
 
-The time line under the heading is a value (when the approval was recorded), not new words; it is
+The time under the heading is a value (when the approval was recorded), not new words; it is
 the dated signature an editor puts on a press OK. On a rehearsal the frame is drawn with the hatch
 along its left side and the rehearsal paragraph follows.
 
@@ -1712,7 +1713,8 @@ sans throughout, the wordmark at the top of the rail (enterprise accounts see Co
   dashed `ink` border, "Copy", and the code's own line ("…: copy this key now. It won't be shown
   again.") as a `hold` notice directly above it.
 - **Webhooks:** endpoints as rows with the URL in `mono`, events as chips, recent deliveries as an
-  agate log with HTTP status codes in `mono` and tones (2xx go, 4xx and 5xx stop).
+  agate log with HTTP status codes in `mono`: 2xx in `ink` with a filled dot (a delivery is not an
+  approval, so it doesn't get the green), 4xx and 5xx in `stop` with the stop square.
 - **Setup:** "Payment methods", "State portal logins" (one ruled row per portal: NY DOS, NYS-100,
   NJ, IRS, FL, each with its status and "Disconnect" or "Not needed"), "Who's named on your filings",
   "Your registered agent in each state", "Defaults per portal", each as a numbered part on one page
@@ -1721,7 +1723,9 @@ sans throughout, the wordmark at the top of the rail (enterprise accounts see Co
   dashboard frame.
 - **Sign-ups** (platform tenant only): "Waiting for approval", "Decided", "Enterprise requests" as
   three ruled sections. Each pending sign-up is a row with the firm name, kind, states and volume,
-  and approve/decline buttons; enterprise requests show the inquiry form's answers as a quoted card.
+  and "Approve" (`ink sm`) and "Turn down" (`stop sm`); enterprise requests show the inquiry form's
+  answers as a quoted card with "Approve" and "Decline" (`quiet sm`). Decided rows move to "Decided"
+  with their outcome chip ("Approved" in the Go tone).
 
 **Dashboard overview at `xl`:**
 
@@ -2198,10 +2202,12 @@ These are suggestions for the copy owners. None of them is used in the design.
    next sentence, but counsel may want it checked against the "never promise will be submitted" rule.
 8. **Missing email copy:** "filing submitted", "documents back" and "EIN issued" have no messages
    in `src/comms/render.ts`; slots are designed in 10.11.
-9. **New interface words the design needs** (each marked **[copy needed]**): a skip link, the
-   Branding page's contrast-fix note, the language switch labels, the theme control, the `/join`
-   pause and the "download" link on the plain reader for `/llms.txt` and `/docs.md`, plus alt text
-   for photographs P1 to P3 and graphics G2 to G8.
+9. **New interface words the design needs** (each marked **[copy needed]** in the spec): a skip
+   link; the Branding page's contrast-fix note; the language switch labels; the light/dark/auto
+   control; the `/join` pause; the "download" link on the plain reader for `/llms.txt` and
+   `/docs.md`; the proof's index strip label for screen readers; the docs search placeholder; alt
+   text for photographs P1 to P3, graphics G2 to G8 and the thirteen G6 thumbnails; and, if they are
+   wanted, everything on the two proposed surfaces in 10.12.
 10. **A dateline for coverage.** An "as of" date on the coverage table would let a careful reader
     know how fresh the labels are. Editors date anything that changes.
 11. **Optional section kickers.** Short labels above each home page H2 would help scanning; the

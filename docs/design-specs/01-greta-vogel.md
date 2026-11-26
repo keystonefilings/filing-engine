@@ -598,7 +598,7 @@ L / XL  ────────────────────────
 
 Directly under the hero on mobile only: the four section links in a 2 × 2 grid of 56px cells with hairlines, so the page is navigable without the menu.
 
-**02 Process.** "You start it. Your client approves it. CoFile files it." H2 cols 2–9; lede cols 2–7. The three steps as a three-column table across cols 2–12, each step's title ("You start it.", "Your client approves it.", "CoFile files it.") in `t-sub` 75 over its paragraph. Each column is topped by a rule: hairline for steps 1 and 3, **a 3px ink rule for step 2**, because the lede says "your client is in charge of the middle one" and the design should say it too. Step numbers 1, 2, 3 in the reference style above each rule. Mobile: three stacked blocks, the same rules.
+**02 Process.** "You start it. Your client approves it. CoFile files it." H2 cols 2–9; lede cols 2–7. The three steps as a three-column table across cols 2–12, each step's title ("You start it.", "Your client approves it.", "CoFile files it.") in `t-sub` 75 over its paragraph. Each column is topped by a rule: hairline for steps 1 and 3, **a 2px heavy ink rule for step 2**, because the lede says "your client is in charge of the middle one" and the design should say it too. Step numbers 1, 2, 3 in the reference style above each rule. Mobile: three stacked blocks, the same rules.
 
 **03 The proof.** "Your client sees what the state will see, before the state does." Headline and lede cols 2–6. At L+ the section is taller than the others: cols 8–12 hold an **annotated specimen**, the full proof sheet of the sample filing at its true 375px width (never scaled, so no type falls below its minimum), running the height of the section; the six statements are set in cols 2–6 under the lede as a numbered list, each with a leader line across col 7 to the part of the sheet it describes. The ticks are gone (Appendix A.1): each of the six statements is numbered 1 to 6 as an annotation (7.3) and the leader line from its number lands on the part of the proof it describes. "For CPAs: it does for a business filing what the 8879 does for a return." is the sixth and has no leader line; it is set 65 Medium, the one statement for a professional. Mobile: the statements as a numbered list; the specimen below, unscaled, with the numbers in its margin.
 
@@ -834,6 +834,30 @@ Rows that need action sort first and are set in 65 Medium. The Rehearsal chip re
 
 **New filing.** Step one: "New filing", "Which state is the business in?", the rehearsal sentence with its "What we file" link, the request channels (email address, text, WhatsApp, Slack `/file`) as a small definition list. The three states are **three full-width rows**, not cards: state name in `t-heading`, the count ("2 filing types, plus the federal EIN") in ink-2, a chevron at the right, 80px tall, hairlines between. Step two: "All states" back link, "{State}: what are you filing?", the paragraph, then the filing types as rows: title in `t-sub` 75, the Live or Rehearsal chip directly after the title, summary in ink-2, fee note in `t-small`. "Your pages for clients" below as a sheet listing each permanent page URL in mono with a "Copy link" button and the widget snippet in a code block. Step three is the form (10.5).
 
+```
+ New filing
+ Which state is the business in?
+ Filing types go live one at a time; until then they run as rehearsals. See What we file …
+ ──────────────────────────────────────────────────────────────────────────
+  New York                                                               ›
+  {n} filing types, plus the federal EIN
+ ──────────────────────────────────────────────────────────────────────────
+  New Jersey                                                             ›
+  {n} filing types, plus the federal EIN
+ ──────────────────────────────────────────────────────────────────────────
+  Florida                                                                ›
+  {n} filing types, plus the federal EIN
+ ──────────────────────────────────────────────────────────────────────────
+
+ New Jersey: what are you filing?
+ ──────────────────────────────────────────────────────────────────────────
+  New Jersey LLC formation   ‖ Rehearsal                                 ›
+  Certificate of Formation for a domestic LLC, filed online through NJ Business Formation.
+  $103.50 by card: the state filing fee of $100 plus New Jersey's $3.50 portal fee …
+ ──────────────────────────────────────────────────────────────────────────
+```
+On a phone the same rows, full width; the chevron stays at the right edge, and the whole row is the target.
+
 **Filing detail.** Cols 2–8 for the record, cols 10–12 for the aside.
 
 ```
@@ -860,6 +884,30 @@ The timeline (9.6) is the spine of the page, from draft to proof to filed. Docum
 
 **Branding** is the most important setup page, because it is where the theming system meets the firm. Left (cols 2–6): "Your web address", "Name your clients see", Logo, "Main color", "Second color", Font, "Support email shown to clients", "Save and continue". Right (cols 8–12, sticky): **"Preview of a client's page"**, showing three live miniatures one above the other, at true size: the intake header, the proof's top with its decisive button, and the email header, each in light and dark (a two-up). Under each color field, the computed result: the swatch the firm chose, an arrow, and the swatch the system will use for print and for buttons, with their contrast ratios as numbers (for example `4.9 : 1`). When the system changes a color, the firm sees both and the reason is numeric. (The labels for this report are in Appendix B.)
 
+```
+ Step 2 of 3
+ Branding
+ Your clients see your name, logo and colors on the pages where they fill in and approve filings.
+
+ 1  Your web address                         │  Preview of a client's page
+    [ harbor-pine                    ]       │  ┌ light ───────────────┐ ┌ dark ────────────────┐
+ 2  Name your clients see                    │  │▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀│ │▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀│
+    [ Harbor & Pine CPA              ]       │  │[logo] Harbor & Pine  │ │[logo] Harbor & Pine  │
+ 3  Logo                                     │  │         with CoFile  │ │         with CoFile  │
+    [ Choose file ]  Remove logo             │  │ 1 LLC name, without… │ │ 1 LLC name, without… │
+ 4  Main color                               │  │   [               ]  │ │   [               ]  │
+    [■] [#8ec5ff]  ■ ■ ■ ■ ■ ■ ■ ■ ■ ■ ■ ■   │  │ [Send to Harbor & P…]│ │ [Send to Harbor & P…]│
+    ■ #8ec5ff  →  print ■ #245892  7.3 : 1   │  └──────────────────────┘ └──────────────────────┘
+               →  button ■ #8ec5ff  ink 10.2 : 1                       (proof top and email
+ 5  Second color                             │                          header below, same two-up)
+    [■] [#0f766e]  ■ ■ ■ ■ ■ ■ ■ ■ ■ ■ ■ ■   │
+ 6  Font                                     │
+    [ Standard (the device's own)  ▾]        │
+ 7  Support email shown to clients           │
+    [                                ]       │
+    [ Save and continue ]                    │
+```
+
 **Registered agents, Payments.** Reading layouts; per-state rows for agents ("Ours: Registered Agents, Inc., through CoFile ($59 a year per business, billed to your firm)" appears here in the desk only, never publicly); the payment routing form with the two radios ("One card for every filing", "A card for each type of filing") and the card selects, Basis Theory card fields styled to match 9.2 through their style API.
 
 **Client links.** Two parts: "Send a client a link" (Filing select, "Who it's for (shown to you and the client)", "Make link", then the link in mono with "Copy link" and "Email it from your mail app"), and "Links you sent" as a table (Filing, label, Status with chips "Waiting for the client" ○ or "Turned off", and "Used: open the filing" or "Turn off").
@@ -869,6 +917,23 @@ The timeline (9.6) is the spine of the page, from draft to proof to filed. Docum
 **Signatures.** "Saved signatures", the paragraph, the table (Signer, Last used, Remove), "No saved signatures yet." and "Add a signature" with the signature pad (9.3) and the consent as an authorization row.
 
 **Ready to pay.** "Ready to pay" and its paragraph. Then one block per card: the card's label and "ending 4242" in 65, the filings waiting for it as a short list with amounts right-aligned and a total line (accounting rules), then the security code field (mono 24px, 6ch wide, `inputmode="numeric"`, `autocomplete="cc-csc"`) and "Pay and file" (ink: paying is irreversible, so it is ink on firm pages too). Confirmation as the toast "Thanks. Filings for this card pay with it for the next hour."
+
+```
+ Ready to pay
+ Approved filings that pay the state with a saved card wait here for the card's security code
+ (the 3 or 4 digits on the card). Enter it once and every filing waiting for that card goes
+ ahead. We keep the code for an hour at most, then delete it.
+ ──────────────────────────────────────────────────────────────────────────
+  {card label} ending 4242
+  Two Sisters Bakery LLC · New Jersey LLC formation                $103.50
+  {second filing} · Florida LLC formation                          $  …
+  ─────────────────────────────────────────────────────────────────────────
+  Total                                                             $  …
+  ═════════════════════════════════════════════════════════════════════════
+  [ ••• ]   [ Pay and file ]                                        ink
+ ──────────────────────────────────────────────────────────────────────────
+```
+The total line here uses the same accounting rules as the proof, because it is the moment the money moves. The security code box is 6ch wide, so its shortness says "three or four digits" before the label does.
 
 **Billing.** "Billing": the plan and its price (shown here only), the Stripe portal link, and the table of businesses with our registered agent and their renewal dates. Notices ("Your plan is changing…", "Billing couldn't be loaded. Try again shortly.") as neutral and stop notices.
 
@@ -881,6 +946,20 @@ The firm's public page for one filing type, for example `cofile.app/bestaccounti
 ### 10.8 The enterprise dashboard `/dashboard`
 
 CoFile's own theme, denser (`t-body`, 40 to 48px rows), because its readers are operators and developers. Header nav: "Overview", "Filings", "Ready to pay", "Firms", "API keys", "Webhooks", "Setup", "Team", "Billing" (or "Sign-ups" for the platform tenant), "Docs".
+
+```
+ [■] CoFile   Overview  Filings  Ready to pay  Firms  API keys  Webhooks  Setup  Team  Billing  Docs
+ ──────────────────────────────────────────────────────────────────────────────────────────────
+  Filings                      Webhook deliveries              API keys
+  1,284                        9,906                           3          Manage keys
+ ──────────────────────────────────────────────────────────────────────────────────────────────
+  By status                         By state                        By month
+  ● Completed    ████████████ 812   NJ  ██████████████ 640          Sep  ██████ 301
+  ○ Waiting for… ███ 143            FL  ████████ 388                Oct  █████████ 455
+  ◔ Filing now   █ 31               NY  █████ 211                   Nov  ███████████ 528
+  ■ Failed       ▏ 9                IRS ██ 45
+```
+(The figures are placeholders for layout only.)
 
 - **Overview.** Three figures across cols 1–12 ("Filings", "Webhook deliveries", "API keys") in `t-title` tabular with their label above in `t-small`; "Manage keys" link. Then "By status", "By state", "By month" as **bar tables** (7.3) side by side at L, stacked on mobile. The setup notice ("Your account settings haven't been set up by the platform yet…") as a stop notice at the top when it applies.
 - **Filings.** The filings table with filters as a single row of selects (status, state, firm) above it; no chart. Filing detail as in the desk (10.6) plus the request JSON in a fold and the webhook deliveries for that filing.
@@ -950,6 +1029,34 @@ Sent through Resend; written as components (React Email) so the HTML and plain-t
 | Invitation | You're invited to {firm}'s filing portal | the join link |
 
 The rehearsal line ("Rehearsal: nothing will be filed or paid, even if you approve.") opens the approval email in a hold-tint block with the hold symbol, above everything else. "Don't forward this email: anyone with the link can open your proof." sits directly above the button, in 65 Medium. The brief also lists filing submitted, documents back and EIN issued emails; they use the same status template with the filing's timeline drawn as a list of stages, and need their copy confirmed (Appendix B).
+
+```
+ ┌ 600px ─────────────────────────────────────────────┐
+ │▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀ band, firm color ▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀│
+ │ [logo] Harbor & Pine CPA                           │
+ │                                                    │
+ │ ‖ Rehearsal: nothing will be filed or paid, even   │  hold-tint, rehearsals only
+ │   if you approve.                                  │
+ │                                                    │
+ │ Your proof is ready to approve: {title}            │  H1, 24/32 Bold
+ │                                                    │
+ │ Your proof is ready. Open the link to see every    │  17/26
+ │ detail and every fee, exactly as they'll go to the │
+ │ state, then approve it or ask for changes. Nothing │
+ │ is filed or paid until you approve. The link       │
+ │ expires, so please look soon.                      │
+ │                                                    │
+ │ Don't forward this email: anyone with the link can │  65 Medium, directly above
+ │ open your proof.                                   │  the button
+ │ ┌────────────────────┐                             │
+ │ │ Open your proof    │                             │  ink, 48px
+ │ └────────────────────┘                             │
+ │ https://api.cofile.app/approve/…                   │  mono, written out
+ │ ────────────────────────────────────────────────── │
+ │ {firm support email} · with CoFile                 │  14/20 ink-2
+ └────────────────────────────────────────────────────┘
+```
+The body sentence "Don't forward this email…" is the last sentence of the engine's body text; the template sets it as its own paragraph directly above the button. No other change to the words.
 
 ### 10.12 New surfaces I propose
 
@@ -1101,6 +1208,39 @@ The client-facing surfaces (intake, the proof, decision and error pages, client 
 - **Tokens:** one `tokens.json` in the W3C Design Tokens format is the source. Style Dictionary builds `tokens.css` (custom properties for light, dark and the structure of firm overrides), a TypeScript module for the app and the engine, and the email constants.
 - **Web:** the existing Next.js app. Today's `globals.css` and `landing.css` (two parallel token sets, `.lp` scoping, manila and serif) are replaced by `tokens.css` plus a small component library (`@cofile/ui`): Button, Field, Choice, Fold, SameAs, SignaturePad, StatusChip, CoverageDisc, Timeline, Table, Notice, Toast, Dialog, Sheet, ProofSheet, LineRef, FirmHeader, WithCoFile. CSS Modules; no utility framework is needed for a system this small.
 - **The engine's proof** (`src/approvals/render.ts`, server-rendered HTML at api.cofile.app) uses the same `tokens.css` and the same theme function, inlined as critical CSS under 14 KB, with fonts from the same origin. The proof must render and submit without JavaScript; a 6 KB script adds the correspondence highlight and the image viewer.
+- **Token output** (excerpt of the generated `tokens.css`; firm values are written by the theme function as inline custom properties on the page's root element, exactly as `brandStyle()` does today):
+
+```css
+:root {
+  --paper: #FFFFFF; --ground: #F2F2EE; --ink: #141414; --ink-2: #4A4A48; --ink-3: #6B6B68;
+  --print: #2F4C80; --print-tint: #EEF2F8; --rule: #141414; --hairline: #D9D9D4; --field-line: #85857F;
+  --go: #0B6E3F; --hold: #8F5B00; --stop: #B0201C;
+  --button: #141414; --button-text: #FFFFFF;
+  --band: var(--print); --firm-button: var(--button); --firm-button-text: var(--button-text);
+  --firm-mark: var(--print-tint); --firm-font: var(--sans);
+  --sans: "Formular Sans", "Univers Next Pro", "Helvetica Neue", Arial, system-ui, sans-serif;
+  --mono: "Formular Mono", "Univers Next Typewriter Pro", ui-monospace, Menlo, Consolas, monospace;
+  font: 400 1rem/1.5 var(--sans); font-variant-numeric: tabular-nums lining-nums;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --paper: #1A1A19; --ink: #EDEDE8; /* … */ } }
+:root[data-theme="dark"] { --paper: #1A1A19; --ink: #EDEDE8; /* … */ }
+```
+
+- **Theme function signature:**
+
+```ts
+type Surface = "client" | "desk";            // 7:1 or 4.5:1 print target
+interface FirmTheme {
+  light: Record<`--${string}`, string>;        // --print, --print-tint, --band, --firm-button, …
+  dark: Record<`--${string}`, string>;
+  logoPlate: { light: "none" | "ink" | "paper"; dark: "none" | "ink" | "paper" };
+  fontUse: "headings" | "name-and-h1" | "none";
+  report: { token: string; chosen: string; used: string; ratio: number; reason: "passed" | "darkened" | "lightened" | "protected-hue" | "pale-fill" }[];
+}
+function firmTheme(input: { primary?: string; secondary?: string; font?: BrandFontSpec | null; logo?: LogoInfo }, surface: Surface): FirmTheme;
+```
+
+The `report` array is what the Branding page shows (10.6) and what the nightly matrix asserts against.
 - **Theme function:** `@cofile/theme`, a pure TypeScript package used by both the web app and the engine, with OKLCH conversion, the seven steps of 11.3, and unit tests on the fixtures of 11.4 and the nightly matrix.
 - **Fonts:** self-hosted WOFF2, preloaded variable Sans (Latin core), `font-display: swap` with metric-matched fallbacks so nothing shifts.
 - **Emails:** React Email components rendered to HTML and text, sent through Resend, checked in an email-client rendering service across Gmail (web, iOS, Android), Apple Mail, Outlook (Windows, web) in light and dark.
