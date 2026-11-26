@@ -1,0 +1,32 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><script src="_records.js"></script><title>Copy Request Processing System: Entity Filing History (replica)</title>
+<script>
+function count() { return document.querySelectorAll("#history tbody input[type=checkbox]:checked").length; }
+function refresh() {
+  var n = count();
+  document.getElementById("n").textContent = String(n);
+  document.getElementById("plain").textContent = "$" + (n * 5).toFixed(2);
+  document.getElementById("total").textContent = "$" + (n * 5).toFixed(2);
+}
+function next() {
+  if (!count()) { document.getElementById("err").hidden = false; return; }
+  NYR.set("copies", count());
+  location.href = "copy-confirm.html";
+}
+document.addEventListener("change", function () { if (document.getElementById("n")) refresh(); });
+</script></head><body><script>NYR.chrome()</script>
+<h1>Entity Filing History</h1>
+<div id="err" role="alert" hidden>Select at least one document.</div>
+<script>var e = NYR.entity(); document.write('<h3>Entity Information</h3><p>DOS ID: ' + NYR.get("dosid", "") + '</p><p>Entity Name: ' + e.name + '</p><p>County: ' + e.county + '</p><p>Date of Initial Filing: ' + e.filed + '</p>');</script>
+<p>Proclamations of dissolution, annulment or revocation are not available here.</p>
+<table id="history"><thead><tr><th>Select</th><th>Description</th><th>Filing Date</th><th>Filing Number</th><th>Number of Pages</th><th>DOSID</th><th>Certcode</th></tr></thead><tbody>
+<script>NYR.entity().history.forEach(function (h) { document.write('<tr><td><input type="checkbox"></td><td>' + h.desc + '</td><td>' + h.date + '</td><td>' + h.number + '</td><td>' + h.pages + '</td><td>' + NYR.get("dosid", "") + '</td><td></td></tr>'); });</script>
+</tbody></table>
+<h3>Fee Description</h3>
+<table><tr><td>Number of Documents Selected: <span id="n">0</span></td></tr><tr><td>Plain Copy Fee ($5.00 per document)</td><td id="plain">$0.00</td></tr><tr><td>Certified Copy Fee</td><td>$0.00</td></tr><tr><td>Total Fee</td><td id="total">$0.00</td></tr></table>
+<h3>Requester Information</h3>
+<p>Requester: KEYSTONE FILINGS LLC, 1 MAIN ST, BROOKLYN, NY 11201</p>
+<p><label for="dist">*Distribution Email</label> <input id="dist" type="email" value="filings@keystone.example" readonly></p>
+<p><label for="cc">Cc Email</label> <input id="cc" type="email"></p>
+<p><label for="confirm">Confirm Email</label> <input id="confirm" type="email"></p>
+<p><button type="button" onclick="history.back()">&lt; Go Back</button> <button type="button">Reset</button> <button type="button" onclick="next()">Continue &gt;</button></p>
+</body></html>

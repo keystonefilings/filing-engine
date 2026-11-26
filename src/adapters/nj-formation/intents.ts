@@ -140,5 +140,39 @@ export const NJ_SCREENS = {
   },
 } satisfies Record<string, ScreenIntents>;
 
+/** The Add New Member / Director / Incorporators popups: the same fields (portal map 2026-11-24, Screen 8b). */
+const personModal = (screenKey: string, title: string): ScreenIntents => ({ ...NJ_SCREENS.memberModal, screenKey, title });
+
+/**
+ * NJ Domestic For-Profit Corporation (DP), from the guest walk of 2026-11-24
+ * (docs/portal-maps/nj-business-formation.md): the same wizard as the LLC, with the corporation's
+ * designators, a required total number of shares on Business Data, and Board of Directors (at
+ * least 1) then Incorporators (at least 1) in place of Members. Screens whose content differs
+ * from the LLC's have their own keys, so each gets its own approved snapshot.
+ *
+ * The walk stopped at the Registered Agent attestation, so Signatures, Review and Payment were
+ * seen for an LLC only (walk 2026-11-17). The corporation's versions keep their own keys: the
+ * first live sight of each halts for review instead of passing on the LLC's snapshot.
+ */
+export const NJ_DP_SCREENS = {
+  designator: { ...NJ_SCREENS.designator, screenKey: "nj.dp.designator", title: "Business Designator (corporation)" },
+  businessData: {
+    ...NJ_SCREENS.businessData,
+    screenKey: "nj.dp.business_data",
+    title: "Business Data (corporation)",
+    intents: [
+      ...NJ_SCREENS.businessData.intents,
+      { key: "stock", labels: ["Stock (Total Number of Shares)", "Total Number of Shares", "Stock"], kinds: ["text", "number"], required: true, note: "minimum 1; no par or no-par designation asked" },
+    ],
+  },
+  directors: { screenKey: "nj.dp.directors", title: "Board of Directors", intents: [], knownUnused: ["Add New Director"] },
+  directorModal: personModal("nj.dp.directors.add_modal", "Add New Director"),
+  incorporators: { screenKey: "nj.dp.incorporators", title: "Incorporators", intents: [], knownUnused: ["Add New Incorporators"] },
+  incorporatorModal: personModal("nj.dp.incorporators.add_modal", "Add New Incorporators"),
+  signatures: { ...NJ_SCREENS.signatures, screenKey: "nj.dp.signatures", title: "Signatures (corporation)" },
+  review: { ...NJ_SCREENS.review, screenKey: "nj.dp.review", title: "Review (corporation)" },
+  payment: { ...NJ_SCREENS.payment, screenKey: "nj.dp.payment", title: "Payment (corporation)" },
+} satisfies Record<string, ScreenIntents>;
+
 /** Exact availability wording on the designator screen. */
 export const NJ_NAME_AVAILABLE = /The Business Name .+ is available/i;

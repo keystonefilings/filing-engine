@@ -169,8 +169,11 @@ export function applyPolicies(raw: unknown, tenant: TenantSettings, client: Clie
     }
 
     if (state === "NJ") {
+      // A for-profit corporation lists directors and incorporators (given on the request), and its
+      // incorporators sign: E1, D2 and G3 apply to LLCs only.
+      const njLlc = (f as { njEntityType?: string }).njEntityType !== "for_profit_corporation";
       // E1 members.
-      fill(f, "members", "formation.members", "E1", p.njMembers, p.njMembers === "intake" ? intake.owners : undefined, "the members/managers list");
+      if (njLlc) fill(f, "members", "formation.members", "E1", p.njMembers, p.njMembers === "intake" ? intake.owners : undefined, "the members/managers list");
       // C1 registered agent. Skipped when the filing uses the new registeredAgentChoice model
       // (then RegisteredAgentService resolves it from tenant provisioning or a third party).
       if (f.registeredAgentChoice === undefined) {
@@ -191,9 +194,9 @@ export function applyPolicies(raw: unknown, tenant: TenantSettings, client: Clie
       const signerChoice = p.njSigner === "same_as_organizer" ? p.organizer : p.njSigner;
       const signer = p.njSigner === "same_as_organizer" ? organizerValue
         : pick(p.njSigner, { service_company: tenant.signer ?? tenant.organizer, firm: client.defaultSigner ?? client.organizer, client: owner });
-      fill(f, "signers", "formation.signers", "D2", signerChoice, signer ? [{ ...signer, title: "Authorized Representative" }] : undefined, "the signer");
+      if (njLlc) fill(f, "signers", "formation.signers", "D2", signerChoice, signer ? [{ ...signer, title: "Authorized Representative" }] : undefined, "the signer");
       // G3 extras.
-      if (f.additionalCertificates === undefined) {
+      if (f.additionalCertificates === undefined && njLlc) {
         if (p.njExtraCertificates === "per_entity") issues.push({ path: "formation.additionalCertificates", message: "G3: NJ formation extras are decided per entity and this filing does not say", severity: "error" });
         else {
           f.additionalCertificates = { certificateOfStanding: p.njExtraCertificates === "standing" || p.njExtraCertificates === "both", certifiedCopy: p.njExtraCertificates === "certified" || p.njExtraCertificates === "both" };

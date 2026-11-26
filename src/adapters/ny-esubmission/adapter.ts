@@ -8,6 +8,7 @@ import type { ScreenIntents } from "../../resolver/types.js";
 import type { ScreenStep, SiteAdapter, StepContext } from "../types.js";
 import { NY_ESUBMISSION_SCREENS } from "../ny-formation/intents.js";
 import { copyCc } from "../copies.js";
+import { drawdownPaymentStep, recordPaymentScreen } from "../ny-dos/common.js";
 
 /**
  * NY DOS E-Submission (docs/portal-maps/ny-dos-corporations.md, Screen L): the engine fills the
@@ -50,14 +51,8 @@ const ENTITY_SELECTION: ScreenIntents = {
     { key: "entityName", labels: ["Entity Name"], kinds: ["text"], required: false },
   ],
 };
-const PAYMENT: ScreenIntents = {
-  screenKey: "ny.esub.payment",
-  title: "Payment",
-  intents: [
-    { key: "drawdownAccount", labels: ["Drawdown Account"], kinds: ["select"], required: true },
-    { key: "paymentAuthorization", labels: ["Payment Authorization"], kinds: ["checkbox"], required: true, note: "STOP: ticked only inside the approved submit" },
-  ],
-};
+/** Screen L4 is the same draw-down payment page as the record filings' ("Payment (as H)"). */
+const PAYMENT: ScreenIntents = recordPaymentScreen("ny.esub.payment", "Payment");
 
 /** The generated PDF for this run, kept for the artifacts after submit. */
 const generated = new Map<string, { name: string; body: Buffer }>();
@@ -156,24 +151,9 @@ const filingInformation: ScreenStep = {
   },
 };
 
-const payment: ScreenStep = {
-  screen: PAYMENT,
-  paymentScreen: true,
-  submitScreen: true,
-  async fill(ctx) {
-    const acct = ctx.field("drawdownAccount");
-    const opts = (acct?.options ?? []).filter((o) => o.value && !/select one/i.test(o.label));
-    if (opts.length !== 1) throw new Error(`expected exactly one draw-down account, found ${opts.length}; pick one in the tenant settings first`);
-    await ctx.set("drawdownAccount", opts[0]!.label);
-  },
-  async advance(ctx) {
-    // Payment Authorization is part of the approved submit: a dry run stops before it is ticked.
-    await ctx.submit("ny.esub.submit", async () => {
-      await ctx.set("paymentAuthorization", true);
-      await ctx.clickButton(/^submit$/i);
-    });
-  },
-};
+// The account in force (or the only one listed), the balance against the approved total, then
+// Payment Authorization and Submit inside the submit guard: a dry run stops before it is ticked.
+const payment: ScreenStep = drawdownPaymentStep(PAYMENT);
 
 export const nyESubmissionAdapter: SiteAdapter = {
   site: "NY",

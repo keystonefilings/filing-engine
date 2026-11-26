@@ -9,6 +9,17 @@
 <div class="form-group"><label for="NaicsCode">NAICS Code (optional) <a href="#">Need NAICS code?</a></label><input id="NaicsCode" name="NaicsCode" maxlength="6" type="text"></div>
 <div class="form-group"><label for="Duration">Duration</label><input id="Duration" name="Duration" maxlength="12" type="text"></div>
 <div class="form-group"><label for="EffectiveDate">Effective Date</label><input id="effective-date-picker" name="EffectiveDate" type="text" value="11/17/2026"></div>
+<div id="dp-stock"></div>
+<script>/* A for-profit corporation (DP): Duration defaults to Perpetual, and Stock is required (portal map 2026-11-24, Screen 3). */
+if (NJ.get("type", "") === "DP") {
+  document.getElementById("Duration").value = "Perpetual";
+  document.getElementById("dp-stock").innerHTML = '<div class="form-group"><label for="TotalShares">Stock (Total Number of Shares) *</label><input id="TotalShares" name="TotalShares" type="text"><span id="stock-required" hidden>Required</span></div>';
+  document.currentScript.closest("form").addEventListener("submit", function (e) {
+    var v = document.getElementById("TotalShares").value;
+    if (!(Number(v) >= 1)) { e.preventDefault(); e.stopImmediatePropagation(); document.getElementById("stock-required").hidden = false; return; }
+    NJ.set("stock", v);
+  }, true);
+}</script>
 <input type="submit" class="btn btn-success" value="Continue">
 </form><div id="timeoutModal" class="modal"><div class="modal-body"><h3>Session Timeout Warning</h3>
 <p>Your session will expire soon.</p><input type="button" class="btn btn-success timeoutPrevent" value="Continue"> <input type="button" class="btn" value="Exit"></div></div>

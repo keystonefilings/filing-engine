@@ -1,0 +1,16 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><script src="_records.js"></script><title>Certificate of Amendment: Proposed Entity Name (replica)</title>
+<script>
+var TAKEN = ["HUDSON LEDGER LLC", "RIVER STONE LLC", "TAKEN NAME LLC"];
+function check() {
+  var n = NYR.val("new-name").toUpperCase().replace(/\s+/g, " ");
+  var ok = /(LLC|L\.L\.C\.|LIMITED LIABILITY COMPANY)$/.test(n) && TAKEN.indexOf(n) < 0;
+  setTimeout(function () { var r = document.getElementById("result"); r.textContent = ok ? "The Entity Name is Available." : "The Entity Name is not available."; r.hidden = false; if (ok) NYR.set("newname", n); }, 200);
+}
+function next() { if (NYR.get("newname", "")) location.href = "amendment-form.html"; }
+</script></head><body><script>NYR.chrome()</script>
+<h1>Certificate of Amendment (name change only) for a Domestic Limited Liability Company</h1>
+<h2>Proposed Entity Name</h2>
+<p><label for="new-name">*Entity Name</label> <input id="new-name" type="text"> <button type="button" onclick="check()">Check Name</button> <button type="button">RESET</button></p>
+<p id="result" hidden></p>
+<p><button type="button" onclick="history.back()">&lt; Previous</button> <button type="button" onclick="next()">Next &gt;</button></p>
+</body></html>

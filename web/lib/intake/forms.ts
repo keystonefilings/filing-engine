@@ -77,7 +77,7 @@ export interface FilingKind {
   title: string;
   summary: string;
   /** Engine request type and state. */
-  type: "formation" | "ein_only" | "payroll_registration" | "standing_certificate" | "paper_upload";
+  type: "formation" | "ein_only" | "payroll_registration" | "standing_certificate" | "paper_upload" | "dissolution" | "amendment" | "certificate_of_change" | "copy_request";
   state: "NY" | "NJ" | "FL" | "MO";
   /** Fixed values written into the request. */
   constants: Record<string, unknown>;
@@ -239,7 +239,7 @@ const nyLlc: FilingKind = {
     { id: "ny-payment", ref: "Screen F, Payment Authorization (STOP)", text: "I authorize the filing company to authorize payment of the state fee shown on the approval page. The Department of State does not refund fees." },
   ],
   gaps: [
-    "Dissolution, name-change amendment, certificate of change, copies, certificates of status and E-Submission (Screens G to L) are mapped but have no engine adapter yet.",
+    "The page after File Document (the filing receipt) is not mapped, so the filing runs as a dry run.",
   ],
 };
 
@@ -253,7 +253,7 @@ const nyCorp: FilingKind = {
   state: "NY",
   constants: { formation: { entityType: "LLC", nyEntityType: "business_corporation" } },
   map: NY_DOS,
-  feeNote: "State filing fee $125 (no tax on shares without par value). Optional: plain copy $5, certified copy $10, certificate of existence $25.",
+  feeNote: "State filing fee $125 (no tax on shares without par value). Shares with a par value add New York's tax on shares, 1/20 of 1% of their total par value; the state's page works it out, and the filing stops before payment if it differs. Optional: plain copy $5, certified copy $10, certificate of existence $25.",
   sections: [
     {
       title: "Name",
@@ -269,7 +269,9 @@ const nyCorp: FilingKind = {
       ref: "Screen D1: BCL main form",
       items: [
         f("formation.county", "County where the corporation's office will be", "select", { required: true, options: opts(...NY_COUNTIES), ref: "Screen D1, County" }),
-        f("formation.stockShares", "Number of shares the corporation may issue", "number", { required: true, min: 1, integer: true, help: "Shares without par value. Many new corporations authorize 200.", ref: "Screen D1, Shares" }),
+        f("formation.stockShares", "Number of shares the corporation may issue", "number", { required: true, min: 1, integer: true, help: "Many new corporations authorize 200 shares without par value.", ref: "Screen D1, Shares" }),
+        f("intake.portal.nyShareValue", "Share value", "radio", { defaultValue: "no_par", options: lv([["no_par", "No par value"], ["par", "Par value"]]), help: "No par value unless you pick Par value.", ref: "Screen D1, Share Value" }),
+        f("formation.stockParValueUsd", "Par value of each share (US dollars)", "number", { required: true, min: 0.000001, help: "For example 0.01. The tax on shares is 1/20 of 1% of the shares' total par value.", showIf: { path: "intake.portal.nyShareValue", equals: "par" }, ref: "Screen D1, Share Value (par amount)" }),
         f("formation.effectiveDate", "Effective date", "radio", { required: true, defaultValue: "upon_filing", options: lv([["upon_filing", "When filed"], ["specific", "On a later date"]]), ref: "Screen D1, Effective Date" }),
         f("formation.effectiveDateValue", "Effective on", "date", { required: true, showIf: { path: "formation.effectiveDate", equals: "specific" }, ref: "Screen D1, Effective Date" }),
       ],
@@ -326,7 +328,8 @@ const nyCorp: FilingKind = {
     { id: "ny-payment", ref: "Screen F, Payment Authorization (STOP)", text: "I authorize the filing company to authorize payment of the state fee shown on the approval page. The Department of State does not refund fees." },
   ],
   gaps: [
-    "Only shares without par value are supported; par-value shares (and their tax on shares) aren't mapped yet.",
+    "The tax on par-value shares is quoted from the statute (Tax Law s.180); the state's page has only been seen computing it for shares without par value. A different amount on the page stops the filing before payment.",
+    "The par amount field's exact label, format and limit were not captured on the walk.",
     "The optional registered agent, duration date, director-liability and preemptive-rights statements on the form aren't entered by the engine yet, so the form doesn't ask for them.",
   ],
 };
@@ -419,8 +422,90 @@ const njLlc: FilingKind = {
     { id: "nj-payment", ref: "Screen 13, Payment", text: "I authorize the filing company to pay the state fee shown on the approval page." },
   ],
   gaps: [
-    "NJ for-profit corporations (DP: shares, directors, incorporators) need engine support first.",
     "The Signatures, Contact Information, Review and Payment screens were not reached in the walkthrough; their exact fields are unconfirmed.",
+  ],
+};
+
+// ---------------------------------------------------------------- NJ for-profit corporation (Business Formation, DP)
+
+const NJ_CORP_ENDINGS = ["INC.", "INC", "CORP.", "CORP", "CORPORATION", "INCORPORATED", "COMPANY", "CO.", "CO", "LTD"];
+
+const njCorp: FilingKind = {
+  id: "nj-corp",
+  title: "New Jersey corporation formation",
+  summary: "Certificate of Incorporation for a domestic for-profit corporation (DP), filed online through NJ Business Formation.",
+  type: "formation",
+  state: "NJ",
+  constants: { formation: { entityType: "LLC", njEntityType: "for_profit_corporation" } },
+  map: NJ_BF,
+  feeNote: "State filing fee $100 (published schedule). The online checkout amount is checked at payment.",
+  sections: [
+    {
+      title: "Name",
+      ref: "Screens 1 and 2: Business Name, Business Designator",
+      items: [
+        f("formation.name.baseName", "Corporation name, without the ending", "text", { required: true, help: "Don't type Inc. or Corp. here; pick the ending below.", ref: "Screen 1, Business Name" }),
+        f("formation.name.designator", "Ending", "select", { required: true, defaultValue: "INC.", options: opts(...NJ_CORP_ENDINGS), ref: "Screen 2, Business Designator (DP)" }),
+      ],
+    },
+    {
+      title: "Business data",
+      ref: "Screens 3 to 5: Business Data, Purpose, Main Business Address",
+      items: [
+        f("formation.stockShares", "Total number of shares", "number", { required: true, min: 1, integer: true, help: "At least 1. New Jersey doesn't ask whether they have a par value.", ref: "Screen 3, Stock (Total Number of Shares)" }),
+        f("formation.naicsCode", "NAICS code (optional)", "text", { help: "2 to 6 digits.", ref: "Screen 3, NAICS Code" }),
+        f("formation.duration", "Duration (leave blank for perpetual)", "text", { maxLength: 12, ref: "Screen 3, Duration" }),
+        f("formation.effectiveDate", "Effective date", "radio", { required: true, defaultValue: "upon_filing", options: lv([["upon_filing", "When filed"], ["specific", "On a later date"]]), ref: "Screen 3, Effective Date" }),
+        f("formation.effectiveDateValue", "Effective on", "date", { required: true, showIf: { path: "formation.effectiveDate", equals: "specific" }, ref: "Screen 3, Effective Date" }),
+        f("formation.purpose", "Business purpose (optional)", "textarea", { maxLength: 300, help: "Left blank, the certificate reads \"General\".", ref: "Screen 4, Business Purpose" }),
+        ...address("formation.mainBusinessAddress", "Main business address (optional)", { ref: "Screen 5, Main Business Address" }),
+      ],
+    },
+    {
+      title: "Registered agent",
+      ref: "Screens 6 and 7: Registered Agent",
+      help: "Every New Jersey business needs a registered agent with a New Jersey street address.",
+      items: [
+        f("formation.registeredAgentChoice", "Registered agent", "radio", { required: true, defaultValue: "client_provided", options: lv([["client_provided", "I'll name the agent"], ["filing_company", "The filing company provides the agent"]]), ref: "Screen 6" }),
+        f("formation.registeredAgent.name", "Agent name", "text", { required: true, showIf: { path: "formation.registeredAgentChoice", equals: "client_provided" }, ref: "Screen 7, RA Name" }),
+        f("formation.registeredAgent.email", "Agent email (optional)", "email", { showIf: { path: "formation.registeredAgentChoice", equals: "client_provided" }, ref: "Screen 7, RA Email" }),
+        ...address("formation.registeredAgent.address", "Agent office", { required: true, state: "NJ", noPoBox: true, ref: "Screen 7, Office Address", showIf: { path: "formation.registeredAgentChoice", equals: "client_provided" } }),
+      ],
+    },
+    {
+      title: "Board of directors",
+      ref: "Screen 8b: Board of Directors",
+      items: [
+        {
+          kind: "group", path: "formation.directors", label: "Directors", itemLabel: "Director", min: 1, max: 10, ref: "Screen 8b, Add New Director",
+          help: "At least 1, up to 10, each with a street address.",
+          fields: [f("name", "Name", "text", { required: true }), ...address("address", "Address", { required: true })],
+        },
+      ],
+    },
+    {
+      title: "Incorporators",
+      ref: "Screen 8b: Incorporators",
+      help: "The incorporators sign the certificate.",
+      items: [
+        {
+          kind: "group", path: "formation.incorporators", label: "Incorporators", itemLabel: "Incorporator", min: 1, max: 10, ref: "Screen 8b, Add New Incorporators",
+          help: "At least 1, up to 10, each with an address.",
+          fields: [f("name", "Full name", "text", { required: true }), ...address("address", "Address", { required: true })],
+        },
+      ],
+    },
+    contactSection("Screen 13: Payment, Contact Information (LLC walk 2026-11-17)"),
+  ],
+  authorizations: [
+    { id: "nj-ra-attestation", ref: "Screen 7, Attestation checkbox (STOP)", text: "I attest that the registered agent information is correct for this business and that the agent named is aware of and has accepted the responsibility of acting as its registered agent, and I authorize the filing company to tick that attestation for me." },
+    { id: "nj-corp-signature", ref: "Screen 10, Signatures (STOP)", text: "Each incorporator named above authorizes the filing company to enter their name as a signer and tick their Signature Box on the Certificate of Incorporation, which the portal says indicates acceptance of the certificate and the intent to formally execute the filing." },
+    { id: "nj-payment", ref: "Screen 13, Payment", text: "I authorize the filing company to pay the state fee shown on the approval page." },
+  ],
+  gaps: [
+    "Signatures, Review and Payment were reached for an LLC only; a corporation's signer title list wasn't seen. Each incorporator signs, with the only title the list offers; the filing stops if it offers several.",
+    "A certificate of standing or certified copy can't be ordered with a corporation yet: their prices at its checkout haven't been seen.",
+    "Other provisions and the registered agent number aren't entered by the engine yet, so the form doesn't ask for them.",
   ],
 };
 
@@ -1144,7 +1229,221 @@ const nyAssumedName: FilingKind = {
   ],
 };
 
-export const FILING_KINDS: FilingKind[] = [nyLlc, nyCorp, njLlc, flLlc, flCorp, flLp, irsEin, nyNys100, njReg, nyAuthority, nyAssumedName];
+// ---------------------------------------------------------------- NY filings about an existing entity (DOS online, Screens G to K)
+
+/** The DOS ID and exact name: dissolution, amendment and change search on both and need an exact match. */
+function nyEntitySection(base: string, ref: string, nameRequired = true): Section {
+  return {
+    title: "The entity",
+    ref,
+    items: [
+      f(`${base}.dosId`, "NY DOS ID", "text", { required: true, maxLength: 10, help: "On the Department of State's entity search.", ref: `${ref}, DOS ID` }),
+      f(`${base}.name`, nameRequired ? "Name, exactly as on the state's records" : "Name, as on the state's records (optional)", "text", { required: nameRequired, help: nameRequired ? "The state searches for this name and the DOS ID together; both must match exactly." : "Checked against the record the DOS ID finds.", ref: `${ref}, Entity Name` }),
+    ],
+  };
+}
+
+/** Attestation and Signature: the typed name and Capacity of Signer (Screens G2, H3, I3). */
+function nySignerSection(base: string, ref: string): Section {
+  return {
+    title: "Signer",
+    ref,
+    items: [
+      f(`${base}.signer.name`, "Signer's full name", "text", { required: true, minWords: 2, help: "Typed on the form as the signature.", ref: `${ref}, Signature` }),
+      f(`${base}.signer.capacity`, "Signing as", "radio", { required: true, options: lv([["member", "Member"], ["manager", "Manager"], ["authorized_person", "Authorized person"]]), ref: `${ref}, Capacity of Signer` }),
+    ],
+  };
+}
+
+const nyRecordSignature = (id: string, ref: string, doc: string): Authorization => ({
+  id, ref,
+  text: `The signer named above authorizes the filing company to tick the certification and type their name as their signature on ${doc}: that they have read the statements, are authorized to sign, and that the statements are true and correct to the best of their knowledge and belief.`,
+});
+const nyRecordPayment = (id: string, ref: string, what: string, refund = false): Authorization => ({
+  id, ref,
+  text: `I authorize the filing company to authorize the ${what} shown on the approval page to be charged to the Department of State draw-down account this filing is paid from.${refund ? " The Department of State does not refund fees." : ""}`,
+});
+const NY_RECORD_GAPS = [
+  "The page after Submit (the filing receipt) is not mapped, so the filing runs as a dry run.",
+  "No copy is ordered: where the flow offers a plain copy was not visible in the walkthrough, only its $5 fee line. If the state adds one, the filing stops before payment.",
+];
+
+const nyDissolution: FilingKind = {
+  id: "ny-llc-dissolution",
+  title: "New York LLC dissolution",
+  summary: "Articles of Dissolution for a domestic LLC (Certificate of Dissolution-Cancellation, LLC Law §705), filed online with the NY Department of State.",
+  type: "dissolution",
+  state: "NY",
+  constants: {},
+  map: NY_DOS,
+  feeNote: "State filing fee $60.",
+  sections: [
+    nyEntitySection("dissolution.entity", "Screen G1: DOS ID and Entity Name Search"),
+    {
+      title: "Reason for dissolution",
+      ref: "Screen G2: Reason for Dissolution",
+      items: [
+        f("dissolution.reason", "The LLC is dissolving because of", "radio", { required: true, options: lv([
+          ["member_vote", "The vote or written consent of a majority in interest of the members"],
+          ["no_members", "There are no members of the limited liability company"],
+          ["dissolution_date", "The dissolution date set forth in the articles of organization or operating agreement"],
+          ["judicial_decree", "The entry of a decree of judicial dissolution"],
+        ]), ref: "Screen G2, Reason for Dissolution" }),
+      ],
+    },
+    nySignerSection("dissolution", "Screen G2: Attestation and Signature"),
+    contactSection("engine contact (DOS sends receipts to the service company's distribution email)"),
+  ],
+  authorizations: [
+    nyRecordSignature("ny-dissolution-signature", "Screen G2, Attestation and Signature (STOP)", "these articles of dissolution"),
+    nyRecordPayment("ny-dissolution-payment", "Screen G4, Payment Authorization (STOP)", "total fee", true),
+  ],
+  gaps: NY_RECORD_GAPS,
+};
+
+const nyNameChange: FilingKind = {
+  id: "ny-llc-name-change",
+  title: "New York LLC name change",
+  summary: "Certificate of Amendment (name change only) for a domestic LLC (LLC Law §211), filed online with the NY Department of State.",
+  type: "amendment",
+  state: "NY",
+  constants: { amendment: { kind: "name_change" } },
+  map: NY_DOS,
+  feeNote: "State filing fee $60.",
+  sections: [
+    nyEntitySection("amendment.entity", "Screen H1: DOS ID and Entity Name Search"),
+    {
+      title: "New name",
+      ref: "Screen H2: Proposed Entity Name",
+      items: [
+        f("amendment.newName.baseName", "New name, without the ending", "text", { required: true, help: "The state checks it is available before the form opens. Words like bank, insurance or school need state consent.", ref: "Screen H2, Entity Name (Check Name)" }),
+        f("amendment.newName.designator", "Ending", "select", { required: true, options: opts("LLC", "L.L.C.", "Limited Liability Company"), defaultValue: "LLC", ref: "Screen H2, Entity Name" }),
+      ],
+    },
+    nySignerSection("amendment", "Screen H3: Attestation and Signature"),
+    contactSection("engine contact (DOS sends receipts to the service company's distribution email)"),
+  ],
+  authorizations: [
+    nyRecordSignature("ny-amendment-signature", "Screen H3, Attestation and Signature (STOP)", "this certificate of amendment"),
+    nyRecordPayment("ny-amendment-payment", "Screen H5, Payment Authorization (STOP)", "total fee"),
+  ],
+  gaps: [...NY_RECORD_GAPS, "Only a domestic LLC's flow was walked; a corporation's name change isn't offered yet."],
+};
+
+const CH = "certificateOfChange";
+const changeShown = (k: string): Cond => ({ path: `intake.portal.${k}`, equals: "on" });
+
+const nyChange: FilingKind = {
+  id: "ny-llc-change",
+  title: "New York LLC certificate of change",
+  summary: "Certificate of Change by the entity for a domestic LLC (LLC Law §211-A): county, service of process address or email, registered agent's name or address. Filed online with the NY Department of State.",
+  type: "certificate_of_change",
+  state: "NY",
+  constants: {},
+  map: NY_DOS,
+  feeNote: "State filing fee $30.",
+  sections: [
+    nyEntitySection(`${CH}.entity`, "Screen I1: DOS ID and Entity Name Search"),
+    {
+      title: "What changes",
+      ref: "Screen I2: Change Selection",
+      help: "Tick each change. The state greys out the registered agent changes when no agent is on file.",
+      items: [
+        f("intake.portal.nyChangeCounty", "The county where the LLC's office is", "checkbox", { ref: "Screen I2, Entity County Location (Edit)" }),
+        f(`${CH}.county`, "New county", "select", { required: true, options: opts(...NY_COUNTIES), showIf: changeShown("nyChangeCounty"), ref: "Screen I3, County Change" }),
+        f("intake.portal.nyChangeSop", "Who receives legal papers (service of process) and where", "checkbox", { ref: "Screen I2, Service of Process Recipient and Mailing Address (Edit)" }),
+        f(`${CH}.serviceOfProcess.name`, "Name", "text", { required: true, showIf: changeShown("nyChangeSop"), ref: "Screen I3, Service of Process Name and Address Change" }),
+        ...address(`${CH}.serviceOfProcess.address`, "Mailing address", { required: true, state: "NY", ref: "Screen I3, Service of Process Name and Address Change", showIf: changeShown("nyChangeSop") }),
+        f("intake.portal.nyChangeSopEmail", "The email for service-of-process notices", "checkbox", { ref: "Screen I2, Service of Process Email Address (Add/Edit)" }),
+        f(`${CH}.serviceOfProcessEmail`, "New email address", "email", { required: true, showIf: changeShown("nyChangeSopEmail"), ref: "Screen I3, Service of Process Email Address Change" }),
+        f("intake.portal.nyChangeAgentName", "The registered agent's name", "checkbox", { ref: "Screen I2, Name of Registered Agent (Edit)" }),
+        f(`${CH}.registeredAgentName`, "New registered agent name", "text", { required: true, showIf: changeShown("nyChangeAgentName"), ref: "Screen I3, Change Registered Agent Name" }),
+        f("intake.portal.nyChangeAgentAddress", "The registered agent's address", "checkbox", { ref: "Screen I2, Registered Agent Address (Edit)" }),
+        ...address(`${CH}.registeredAgentAddress`, "New agent address", { required: true, state: "NY", ref: "Screen I3, Change Registered Agent Address (State is NY)", showIf: changeShown("nyChangeAgentAddress") }),
+      ],
+    },
+    nySignerSection(CH, "Screen I3: Attestation and Signature"),
+    contactSection("engine contact (DOS sends receipts to the service company's distribution email)"),
+  ],
+  authorizations: [
+    nyRecordSignature("ny-change-signature", "Screen I3, Attestation and Signature (STOP)", "this certificate of change"),
+    nyRecordPayment("ny-change-payment", "Screen I5, Payment Authorization (STOP)", "total fee"),
+  ],
+  gaps: [...NY_RECORD_GAPS, "Designating a first registered agent and revoking one are on the state's list but their sections weren't in the walkthrough, so they aren't offered."],
+};
+
+const nyCopies: FilingKind = {
+  id: "ny-copies",
+  title: "New York copies of filed documents",
+  summary: "Plain copies of documents on an entity's filing history, ordered online from the NY Department of State.",
+  type: "copy_request",
+  state: "NY",
+  constants: {},
+  map: NY_DOS,
+  feeNote: "$5 per document (plain copy).",
+  sections: [
+    nyEntitySection("copyRequest.entity", "Screen J1: Search Entity", false),
+    {
+      title: "Documents",
+      ref: "Screen J2: Entity Filing History",
+      items: [
+        {
+          kind: "group", path: "copyRequest.documents", label: "Documents to copy", itemLabel: "Document", min: 1, max: 25, ref: "Screen J2, Select",
+          help: "Each by its filing number, or by its description (with the filing date when several share it), as the state's filing history lists them.",
+          fields: [
+            f("filingNumber", "Filing number", "text", { ref: "Screen J2, Filing Number" }),
+            f("description", "Or: description (e.g. Articles of Organization)", "text", { ref: "Screen J2, Description" }),
+            f("filingDate", "Filing date (optional)", "date", { ref: "Screen J2, Filing Date" }),
+          ],
+        },
+      ],
+    },
+    contactSection("engine contact (DOS sends the copies to the service company's distribution email)"),
+  ],
+  authorizations: [nyRecordPayment("ny-copies-payment", "Screen J4, Payment Authorization (STOP)", "copy fees")],
+  gaps: [
+    "Certified copies aren't offered: where the copy type is chosen wasn't visible in the walkthrough.",
+    "If the state's search lists several entities to pick from, how one is picked isn't mapped; the filing stops there.",
+    "The page after Submit is not mapped, so the request runs as a dry run.",
+  ],
+};
+
+const nyStatus: FilingKind = {
+  id: "ny-status",
+  title: "New York certificate of status",
+  summary: "Certificate of Status (short form, or long form with every document filed), ordered online from the NY Department of State.",
+  type: "standing_certificate",
+  state: "NY",
+  constants: {},
+  map: NY_DOS,
+  feeNote: "$25 for either form.",
+  sections: [
+    {
+      title: "The entity",
+      ref: "Screen K: Search Entity",
+      items: [
+        f("standing.dosId", "NY DOS ID", "text", { required: true, maxLength: 10, help: "On the Department of State's entity search.", ref: "Screen K, DOS ID" }),
+        f("standing.entityName", "Name, as on the state's records", "text", { required: true, ref: "Screen K, Entity Name" }),
+        { kind: "note", text: "An entity dissolved before January 1, 1985 needs a written request to the Department of State instead." },
+      ],
+    },
+    {
+      title: "Certificate",
+      ref: "Screen K: Select Certificate of Status",
+      items: [
+        f("standing.form", "Which certificate", "radio", { required: true, defaultValue: "short", options: lv([["short", "Short form: the current status"], ["long_filing_history", "Long form: the current status and a list of every document filed"]]), ref: "Screen K, Short Form / Long Form" }),
+      ],
+    },
+    contactSection("engine contact (DOS sends the certificate to the service company's distribution email)"),
+  ],
+  authorizations: [nyRecordPayment("ny-status-payment", "Screen K, Payment Authorization (STOP)", "fee")],
+  gaps: [
+    "If the state's search lists several entities to pick from, how one is picked isn't mapped; the filing stops there.",
+    "The page after Submit is not mapped, so the request runs as a dry run.",
+  ],
+};
+
+export const FILING_KINDS: FilingKind[] = [nyLlc, nyCorp, njLlc, njCorp, flLlc, flCorp, flLp, irsEin, nyNys100, njReg, nyAuthority, nyAssumedName, nyDissolution, nyNameChange, nyChange, nyCopies, nyStatus];
 
 export function filingKind(id: string): FilingKind | undefined {
   return FILING_KINDS.find((k) => k.id === id);

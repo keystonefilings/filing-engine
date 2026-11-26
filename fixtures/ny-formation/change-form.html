@@ -1,0 +1,23 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><script src="_records.js"></script><title>Certificate of Change: Current Information and Changes (replica)</title>
+<script>function next() { if (!NYR.attested()) return; location.href = "change-preview.html"; }</script></head><body><script>NYR.chrome()</script>
+<h1>Certificate of Change: Current Information and Changes</h1>
+<div id="err" role="alert" hidden></div>
+<script>
+NYR.entityInfo();
+var picked = NYR.get("changes", []);
+var on = function (k) { return picked.indexOf(k) >= 0; };
+var states = '<option value="NY" selected>NY</option><option value="NJ">NJ</option><option value="CT">CT</option>';
+if (on("county")) document.write('<h3>County Change</h3><p>Current County: ' + NYR.entity().county + '</p><p><label for="new-county">*New County</label> <select id="new-county"><option value="">-- Select --</option><option>Albany</option><option>Kings</option><option>New York</option><option>Queens</option><option>Westchester</option></select></p>');
+if (on("sop")) document.write('<h3>Service of Process Name and Address Change</h3><p>Current: THE LLC, 40 WATER ST, BROOKLYN, NY 11201</p>'
+  + '<p><label for="sop-name">*Name</label> <input id="sop-name" type="text"></p><p><label for="sop-a1">*Mailing Address 1</label> <input id="sop-a1" type="text"></p><p><label for="sop-a2">Mailing Address 2</label> <input id="sop-a2" type="text"></p>'
+  + '<p><label for="sop-city">*City</label> <input id="sop-city" type="text"></p><p><label for="sop-state">*State</label> <select id="sop-state">' + states + '</select></p><p><label for="sop-zip">*Zip Code</label> <input id="sop-zip" type="text"></p>');
+if (on("sopEmail")) document.write('<h3>Service of Process Email Address Change</h3><p>Current Email Address: (none)</p><p><label for="sop-e1">*New Email Address</label> <input id="sop-e1" type="email"></p><p><label for="sop-e2">*Confirm Email Address</label> <input id="sop-e2" type="email"></p>');
+if (on("raName")) document.write('<h3>Change Registered Agent Name</h3><p>Current: OLD AGENT INC.</p><p><label for="ra-name">*Name</label> <input id="ra-name" type="text"></p>');
+if (on("raAddress")) document.write('<h3>Change Registered Agent Address</h3><p>Current: 9 OLD ST, ALBANY, NY 12207</p><p><label for="ra-a1">*Mailing Address1</label> <input id="ra-a1" type="text"></p><p><label for="ra-a2">Mailing Address2</label> <input id="ra-a2" type="text"></p>'
+  + '<p><label for="ra-city">*City</label> <input id="ra-city" type="text"></p><p>State: NY</p><p><label for="ra-zip">*Zip Code</label> <input id="ra-zip" type="text"></p>');
+NYR.attestation("Certificate of Change");
+NYR.filer();
+</script>
+<h3>Fees</h3><script>NYR.fees([["Certificate of Change, Domestic LLC Fee", 30]])</script>
+<p><button type="button" onclick="history.back()">&lt; Go Back</button> <button type="button">Reset</button> <button type="button" onclick="next()">Continue &gt;</button></p>
+</body></html>

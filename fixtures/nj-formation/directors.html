@@ -1,0 +1,31 @@
+<!doctype html><html><head><meta charset="utf-8"><title>State of NJ - Online Business Entity Filing</title><link rel="stylesheet" href="style.css"><script src="_shell.js"></script></head>
+<body><h1>Business Formation</h1>
+<nav><a href="#">Help</a> <a href="#">Retrieve Documents</a> <a href="#">New User</a> <a href="#">Login</a></nav>
+<!-- A for-profit corporation's Board of Directors (/Members), laid out as docs/portal-maps/nj-business-formation.md (2026-11-24, Screen 8b) describes it. -->
+<p>You have chosen to file a <strong>NJ Domestic For-Profit Corporation (DP)</strong> named: <strong id="nm"></strong></p><script>document.getElementById("nm").textContent=NJ.get("name","").toUpperCase()+" "+NJ.get("designator","")</script>
+<h2>Board of Directors</h2><p>List all Directors and the street address of each. You must have a minimum of 1 Director. You may list up to 10.</p>
+<table id="rows"><thead><tr><th>Name</th><th>Actions</th></tr></thead><tbody></tbody></table>
+<div class="form-actions"><a class="btn btn-success" id="add-director-btn" role="button" href="#">Add New Director</a></div>
+<form id="cf" onsubmit="event.preventDefault(); NJ.go('incorporators.html')"><input type="submit" class="btn btn-success" id="continue-btn" value="Continue" disabled></form>
+<div id="director-add-modal" class="modal"><div class="modal-body"><h3>Add New Director</h3>
+<form id="mf"><ul>
+<li><label for="Name">Name *</label><input id="Name" name="Name" type="text" aria-required="true"></li>
+<li><label for="StreetAddress1">Street Address 1 *</label><input id="StreetAddress1" name="StreetAddress1" type="text" aria-required="true"></li>
+<li><label for="StreetAddress2">Street Address 2</label><input id="StreetAddress2" name="StreetAddress2" type="text" aria-required="true"></li>
+<li><label for="City">City *</label><input id="City" name="City" type="text" aria-required="true"></li>
+<li><label for="State">State *</label><select id="State" name="State"><option value="">-- Select One --</option><option>New York</option><option>New Jersey</option><option>Pennsylvania</option></select></li>
+<li><label for="Zip">Zip Code *</label><input id="Zip" name="Zip" maxlength="5" type="text"> - <input id="ZipPlus" name="ZipPlus" maxlength="4" type="text"></li>
+</ul>
+<input type="submit" style="position:absolute;left:-9999px;width:1px;height:1px" tabindex="-1" aria-hidden="true">
+<div class="form-actions"><label class="btn btn-primary" onclick="return false">Save</label> <a class="btn btn-danger" href="#" onclick="document.getElementById('director-add-modal').classList.remove('open');return false">Close</a></div>
+</form></div></div>
+<script>
+const directors = NJ.get("directors", []);
+function render(){ const tb=document.querySelector("#rows tbody"); tb.innerHTML = directors.length ? "" : '<tr><td colspan="2">No Director Listed</td></tr>'; for (const m of directors) tb.insertAdjacentHTML("beforeend", `<tr><td>${m.name}</td><td><a href="#">Edit</a> <a href="#">Delete</a></td></tr>`); document.getElementById("continue-btn").disabled = !directors.length; }
+render();
+document.getElementById("add-director-btn").onclick = (e) => { e.preventDefault(); document.getElementById("director-add-modal").classList.add("open"); };
+document.getElementById("mf").addEventListener("submit", (e) => { e.preventDefault();
+  const g=(id)=>document.querySelector("#mf #"+id).value; directors.push({name:g("Name"),street:g("StreetAddress1"),city:g("City"),state:g("State"),zip:g("Zip")}); NJ.set("directors", directors); location.href="directors.html?ModalAddDirector=1"; });
+</script><div id="timeoutModal" class="modal"><div class="modal-body"><h3>Session Timeout Warning</h3>
+<p>Your session will expire soon.</p><input type="button" class="btn btn-success timeoutPrevent" value="Continue"> <input type="button" class="btn" value="Exit"></div></div>
+</body></html>

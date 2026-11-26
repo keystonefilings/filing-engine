@@ -1,0 +1,11 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><script src="_mo.js"></script><title>Principal office address (replica)</title></head><body><script>MO.header()</script>
+<h1>Principal office address</h1>
+<p>A PO box is allowed only with a physical street address.</p>
+<div id="err" role="alert" hidden></div>
+<p><label for="po-a1">Address</label> <input id="po-a1" type="text"></p>
+<p><label for="po-a2">Address 2</label> <input id="po-a2" type="text"></p>
+<p><label for="po-city">City</label> <input id="po-city" type="text"></p>
+<script>document.write('<p><label for="po-state">State</label> <select id="po-state">' + MO.states + '</select></p>');</script>
+<p><label for="po-zip">Zip</label> <input id="po-zip" type="text"></p>
+<p><button type="button" onclick="MO.next(['po-a1', 'po-city', 'po-state', 'po-zip'], 'review.html')">Next</button></p>
+</body></html>

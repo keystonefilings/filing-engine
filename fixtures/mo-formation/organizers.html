@@ -1,0 +1,27 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><script src="_mo.js"></script><title>Organizers (replica)</title>
+<script>
+function add() { document.getElementById("org-form").hidden = false; }
+function save() {
+  var o = { name: MO.val("org-name"), street: MO.val("org-a1"), city: MO.val("org-city"), state: MO.val("org-state"), zip: MO.val("org-zip") };
+  if (!o.name || !o.street || !o.city || !o.state || !o.zip) { document.getElementById("err").textContent = "A required field is missing."; document.getElementById("err").hidden = false; return; }
+  var list = MO.get("organizers", []); list.push(o); MO.set("organizers", list); location.href = "organizers.html";
+}
+function go() { if (!MO.get("organizers", []).length) { document.getElementById("err").textContent = "At least one organizer is required."; document.getElementById("err").hidden = false; return; } location.href = "office.html"; }
+</script></head><body><script>MO.header()</script>
+<h1>Organizers</h1>
+<p>Up to 5 organizers can be listed online; 6 or more need a paper filing.</p>
+<div id="err" role="alert" hidden></div>
+<table><thead><tr><th>Organizer</th><th>Address</th></tr></thead><tbody>
+<script>MO.get("organizers", []).forEach(function (o) { document.write("<tr><td>" + o.name + "</td><td>" + o.street + ", " + o.city + ", " + o.state + " " + o.zip + "</td></tr>"); });</script>
+</tbody></table>
+<p><button type="button" onclick="add()">Add Organizer</button></p>
+<div id="org-form" hidden>
+<p><label for="org-name">Organizer Name</label> <input id="org-name" type="text"></p>
+<p><label for="org-a1">Address</label> <input id="org-a1" type="text"></p>
+<p><label for="org-city">City</label> <input id="org-city" type="text"></p>
+<script>document.write('<p><label for="org-state">State</label> <select id="org-state">' + MO.states + '</select></p>');</script>
+<p><label for="org-zip">Zip</label> <input id="org-zip" type="text"></p>
+<p><button type="button" onclick="save()">Save Organizer</button></p>
+</div>
+<p><button type="button" onclick="go()">Next</button></p>
+</body></html>

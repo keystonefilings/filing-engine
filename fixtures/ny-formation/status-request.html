@@ -1,0 +1,24 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><script src="_records.js"></script><title>Certificate of Status Processing System (replica)</title>
+<script>function next() {
+  var t = document.querySelector('input[name="cert"]:checked');
+  if (!t) { document.getElementById("err").textContent = "1 error has occurred: Select Certificate of Status is required"; document.getElementById("err").hidden = false; return; }
+  NYR.set("cert", t.value);
+  NYR.searchRoute("status-review.html");
+}</script></head><body><script>NYR.chrome()</script>
+<h1>Certificate of Status Processing System</h1>
+<p>Entities dissolved before 1/1/1985 must be requested in writing.</p>
+<div id="err" role="alert" hidden style="color:red">Please select an entity from the list.</div>
+<h2>Search Entity</h2>
+<p><label for="dos-id">DOS ID</label> <input id="dos-id" type="text"></p>
+<p><label for="entity-name">Entity Name</label> <input id="entity-name" type="text"></p>
+<p><label for="an-id">Assumed Name ID</label> <input id="an-id" type="text"></p>
+<p><label for="an-name">Assumed Name</label> <input id="an-name" type="text"></p>
+<h2>Requester Information</h2>
+<p>Requester: KEYSTONE FILINGS LLC, 1 MAIN ST, BROOKLYN, NY 11201</p>
+<p><label for="dist">*Distribution Email</label> <input id="dist" type="email" value="filings@keystone.example" readonly></p>
+<p><label for="cc">Cc Email</label> <input id="cc" type="email"></p>
+<p><label for="confirm">Confirm Email</label> <input id="confirm" type="email"></p>
+<h2>Certificate</h2>
+<fieldset><legend>*Select Certificate of Status</legend><label><input type="radio" name="cert" value="SHORT"> Short Form (current status)</label> <label><input type="radio" name="cert" value="LONG"> Long Form (current status plus a list of all documents filed)</label></fieldset>
+<p><button type="button" onclick="history.back()">&lt; Go Back</button> <button type="button">Reset</button> <button type="button" onclick="next()">Continue &gt;</button></p>
+</body></html>
