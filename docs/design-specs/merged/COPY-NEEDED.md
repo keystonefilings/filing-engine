@@ -28,7 +28,7 @@ may change them:
 - Column heading **"Sent by"**; a **"Your client"** chip on filings a client sent through their
   link; **"Your team"** when the person isn't known.
 - The five steps under each status: **"Details", "Proof", "Filing", "With the state", "Done"**,
-  shown as "2 of 5 · Proof" (read aloud as "Step 2 of 5: Proof").
+  shown as "Proof, step 2 of 5" (read aloud as "Step 2 of 5: Proof").
 
 ## Part 1: the foundation
 

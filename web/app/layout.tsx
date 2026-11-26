@@ -1,5 +1,9 @@
 import type { Metadata } from "next";
+import "@/styles/tokens.css";
 import "./globals.css";
+import "@/styles/type.css";
+import "@/styles/registers.css";
+import "@/styles/base.css";
 import { platformName, supportEmail } from "@/lib/brand";
 import { BetaBanner } from "@/components/BetaBanner";
 

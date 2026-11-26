@@ -4,7 +4,7 @@ import { useKeptForm } from "./useKeptForm";
 import { useEffect, useState } from "react";
 import type { SetupState } from "@/app/p/[slug]/(portal)/setup/actions";
 import type { PaymentMethodRef, PaymentRouting } from "@/lib/engine";
-import { textOn } from "@/lib/brand";
+import { firmVars, inkMatch } from "@/lib/design/ink";
 import { ColorField, LogoField } from "./BrandFields";
 import { FONT_PRESETS } from "@/lib/fonts";
 
@@ -138,10 +138,20 @@ export function BrandingForm({ action, v, platform }: { action: Action; v: Brand
   );
 }
 
+/** The preview's colors, from the same ink match the firm's real pages use (it re-runs as the firm picks colors). */
+function previewStyle(color: string, color2: string): Record<string, string> {
+  try {
+    const ink = inkMatch(color, color2);
+    return { ...firmVars(ink), "--accent": ink.fill, "--accent-text": ink.on, "--accent-2": ink.ink, borderTop: `4px solid ${ink.firm2}` };
+  } catch {
+    return {}; // a half-typed color: keep the last good look
+  }
+}
+
 /** How a client's page will look with these choices. */
 export function BrandPreview({ name, logo, color, color2, platform }: { name: string; logo?: string; color: string; color2: string; platform?: string }) {
   return (
-    <div className="card" style={{ ["--accent" as string]: color, ["--accent-text" as string]: textOn(color), ["--accent-2" as string]: color2, borderTop: `4px solid ${color2}` }}>
+    <div className="card" style={previewStyle(color, color2)}>
       <p className="small muted" style={{ marginTop: 0 }}>Preview of a client&apos;s page</p>
       <div className="row">
         {/* eslint-disable-next-line @next/next/no-img-element */}

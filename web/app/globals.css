@@ -1,3 +1,7 @@
+/* Today's look, kept in the lowest cascade layer so the new design (web/styles, inside a register class)
+   always wins where a page has been rebuilt, and pages not yet rebuilt look exactly as before. */
+@layer legacy, tokens, base, components, pictures, utilities;
+@layer legacy {
 :root {
   /* Paper and ink (Nov 26): green only for approved, live and the button that moves a filing forward
      (a firm's own color replaces it on its pages), amber for a rehearsal's planned hold, red for a stop. */
@@ -146,3 +150,4 @@ details.more > summary { cursor: pointer; color: var(--accent); font-size: .92re
 .beta-banner { display: flex; gap: 10px; align-items: baseline; justify-content: center; flex-wrap: wrap; padding: 8px 16px; background: #FBEFD5; color: #1C2430; border-bottom: 1px solid #EBDDB8; font: 500 .85rem/1.4 "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", sans-serif; text-align: center; }
 .beta-banner strong { color: #8A5A00; font-weight: 600; }
 .beta-banner a { color: inherit; text-decoration: underline; }
+}

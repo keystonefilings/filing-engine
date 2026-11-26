@@ -1,0 +1,64 @@
+/* The semantic layer (merged spec 11.0, 13.2, and the Stripe model, decision 2).
+   Components read only these names (--page, --surface, --text, --action, --link…), never a palette token,
+   a firm token or a hex value. Which register a subtree is in decides whose look it wears:
+     .reg-cofile  CoFile's look, the same for every firm: the site, sign-up, the filing desk, the proof,
+                  the dashboard, emails to the firm
+     .reg-firm    the firm's branding only: what reaches a firm's clients (client form, client link pages,
+                  the firm's page for each filing, emails to clients), and previews of those pages
+     .reg-white   a platform's white label: like .reg-firm, with the platform's tokens
+   A firm page sets the --firm-* values inline from the ink match (web/lib/design/ink.ts). */
+
+@layer tokens {
+.reg-cofile {
+  --page: var(--cotton); --page-2: var(--cotton-2); --surface: var(--sheet); --text: var(--ink); --text-2: var(--graphite);
+  --line: var(--rule); --line-strong: var(--rule-strong);
+  --action: var(--brass); --action-hover: var(--brass-deep); --action-on: var(--ink);
+  --action-border: transparent; --action-edge: transparent;
+  --link: var(--ink); --link-line: var(--brass-line);
+  --focus: var(--ink); --focus-gap: #fff;
+  --select: var(--ink); --select-on: #fff; --select-fill: var(--brass-tint);
+  --row: var(--cotton-2); --halo: var(--brass-tint); --bullet: var(--brass-line);
+  --turn: var(--ochre); --turn-tint: var(--ochre-tint);
+  --font-firm: var(--font-sans-display);
+  background: var(--page); color: var(--text);
+}
+/* CoFile's own cards and panels on the dark page use Night Card, not white (4.6). */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .reg-cofile { --surface: var(--night-card); --action-on: var(--night); --focus-gap: var(--night); --row: var(--night-2); --halo: rgba(217,168,74,.18); --select-fill: rgba(217,168,74,.18); }
+}
+:root[data-theme="dark"] .reg-cofile { --surface: var(--night-card); --action-on: var(--night); --focus-gap: var(--night); --row: var(--night-2); --halo: rgba(217,168,74,.18); --select-fill: rgba(217,168,74,.18); }
+
+.reg-firm, .reg-white {
+  --page: var(--firm-wash); --page-2: var(--firm-wash); --surface: #fff; --text: var(--ink); --text-2: var(--graphite);
+  --line: var(--rule); --line-strong: var(--rule-strong);
+  --action: var(--firm-fill); --action-hover: var(--firm-fill-hover); --action-on: var(--firm-on);
+  --action-border: var(--firm-fill-border, transparent); --action-edge: var(--firm-fill-edge, transparent);
+  --link: var(--firm-ink); --link-line: var(--firm-ink);
+  --focus: var(--firm-ink); --focus-gap: #fff;
+  --select: var(--firm-fill); --select-on: var(--firm-on); --select-fill: var(--firm-row);
+  --row: var(--firm-row); --halo: color-mix(in srgb, var(--firm-tint) 50%, transparent);
+  --bullet: var(--firm); --turn: var(--firm-ink); --turn-tint: #fff;
+  background: var(--page); color: var(--text);
+  /* A firm's pages stay on light paper in dark mode: its logo and colors were chosen for white (4.6). */
+  color-scheme: light;
+}
+/* In dark mode only the page around a firm's sheet goes to Night; the sheet and its inks stay light. */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .reg-firm, :root:not([data-theme="light"]) .reg-white { --page: var(--night); }
+}
+:root[data-theme="dark"] .reg-firm, :root[data-theme="dark"] .reg-white { --page: var(--night); }
+
+/* Paper pins its own inks, in either mode (11.0): the proof, client sheets and every product picture. */
+.sheet {
+  color-scheme: light; background: #fff; color: #1D2130; border-radius: var(--r-sheet); box-shadow: var(--e-sheet);
+  --ink: #1D2130; --graphite: #555867; --rule: #DDD7CB; --rule-strong: #8A8578;
+  --done: #2E6B57; --done-tint: #E4F0EA; --ochre: #855A0C; --ochre-tint: #F7EDD8;
+  --madder: #9A2D2D; --madder-tint: #F8E6E3; --iron: #3F434F;
+  --brass-line: #A87A1E; --brass-ink: #7A5714;
+  --surface: #fff; --text: #1D2130; --text-2: #555867; --line: #DDD7CB; --line-strong: #8A8578;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .sheet { box-shadow: var(--e-sheet-dark); }
+}
+:root[data-theme="dark"] .sheet { box-shadow: var(--e-sheet-dark); }
+}
