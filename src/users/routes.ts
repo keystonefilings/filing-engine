@@ -8,7 +8,8 @@ import { dummyHash, hashPassword, passwordProblem, verifyPassword } from "./pass
 import { mintSessionKey, type SessionClaims } from "./session-token.js";
 import { PORTALS, portalDefaultsProblems } from "./portals.js";
 import { RateLimiter } from "./rate-limit.js";
-import type { ChannelSender } from "../comms/senders.js";
+import type { ChannelSender, OutboundMessage } from "../comms/senders.js";
+import { proseLetter } from "../comms/letter.js";
 import { FONT_CHOICES } from "../settings/fonts.js";
 import { PORTAL_LOGIN_KEYS, type DbVault } from "../settings/db-vault.js";
 import type { GoogleIdTokens } from "./google.js";
@@ -190,7 +191,20 @@ export function registerUsers(app: FastifyInstance, deps: UsersDeps): void {
   const signInLimit = new RateLimiter(60, 60_000);
   const publicFormLimit = new RateLimiter(30, 3_600_000);
 
-  const requireAuth = async (req: FastifyRequest, reply: FastifyReply): Promise<Auth | null> => {
+  /**
+   * Sends an account email without holding up the response. The provider reports a refused send
+   * (unverified domain, bad key, rate limit) as ok: false rather than throwing, so both are logged;
+   * otherwise a refused email leaves no trace. The address and link are not logged (links are credentials).
+   */
+  const sendAccountEmail = (to: { address: string; name?: string }, msg: OutboundMessage, what: string) => {
+    if (!deps.email) return;
+    void deps.email.send(to, msg).then(
+      (r) => { if (!r.ok) console.error(`${what} email not sent: ${r.detail ?? "refused"}`); },
+      (e) => console.error(`${what} email failed`, (e as Error).message),
+    );
+  };
+
+  const requireAuth =async (req: FastifyRequest, reply: FastifyReply): Promise<Auth | null> => {
     const a = await deps.authOf(req);
     if (!a) void reply.code(401).send({ error: "invalid api key" });
     return a;
@@ -308,12 +322,12 @@ export function registerUsers(app: FastifyInstance, deps: UsersDeps): void {
     });
     const link = `${deps.webBaseUrl}/reset-password?token=${encodeURIComponent(`${u.id}.${secret}`)}`;
     // Not awaited: how long a send takes must not tell the caller whether the account exists.
-    void deps.email?.send({ address: u.email, name: u.name }, {
+    sendAccountEmail({ address: u.email, name: u.name }, {
       subject: "Reset your password",
       body: `Someone asked to reset the password for the CoFile account ${u.email}. Open the link below within ${RESET_TTL_MINUTES} minutes to choose a new one. It works once.\n\nIf this wasn't you, ignore this email: your password stays the same.`,
       link,
       linkLabel: "Choose a new password",
-    }).catch((e) => console.error("password reset email failed", (e as Error).message));
+    }, "password reset");
     return reply.code(202).send(answer);
   });
 
@@ -392,12 +406,15 @@ export function registerUsers(app: FastifyInstance, deps: UsersDeps): void {
   });
 
   const sendVerification = (u: UserRecord, secret: string) => {
-    void deps.email?.send({ address: u.email, name: u.name }, {
-      subject: "Confirm your email for CoFile",
-      body: `Confirm that ${u.email} is your email to finish setting up the partner account for ${u.signup?.companyName ?? "your firm"}. The link works for ${VERIFY_TTL_DAYS} days.\n\nIf you didn't sign up, ignore this email.`,
+    const subject = "Confirm your email for CoFile";
+    const body = `Confirm that ${u.email} is your email to finish setting up the partner account for ${u.signup?.companyName ?? "your firm"}. The link works for ${VERIFY_TTL_DAYS} days.\n\nIf you didn't sign up, ignore this email.`;
+    sendAccountEmail({ address: u.email, name: u.name }, {
+      subject, body,
       link: `${deps.webBaseUrl}/verify-email?token=${encodeURIComponent(`${u.id}.${secret}`)}`,
       linkLabel: "Confirm my email",
-    }).catch((e) => console.error("confirmation email failed", (e as Error).message));
+      // The firm's name as typed at sign-up, in 600 (merged spec 10D.13).
+      letter: proseLetter(subject, body, { strong: u.signup?.companyName ? [u.signup.companyName] : [] }),
+    }, "confirmation");
   };
 
   // The link in the confirmation email. The web page asks for a button press first, so a mail
@@ -475,12 +492,17 @@ export function registerUsers(app: FastifyInstance, deps: UsersDeps): void {
     }
     const approved = await approvePartner(u, by);
     // The sign-up page told them we'd email once the account opens.
-    void deps.email?.send({ address: approved.email, name: approved.name }, {
+    const opened = {
       subject: "Your partner account is open",
       body: `Your account for ${u.signup!.companyName} is approved. Log in with the email and password you chose. Then set up your filing desk in three short steps: your firm, your branding and how state fees are paid. You can try a practice filing right away.${deps.supportEmail ? `\n\nQuestions? Email ${deps.supportEmail}.` : ""}`,
+    };
+    sendAccountEmail({ address: approved.email, name: approved.name }, {
+      ...opened,
       link: `${deps.webBaseUrl}/login`,
       linkLabel: "Log in",
-    }).catch((e) => console.error("approval email failed", (e as Error).message));
+      // A welcome: the blank Name Plate's place under the letterhead (decision 35), empty until it is engraved.
+      letter: proseLetter(opened.subject, opened.body, { vignette: "blank-plate" }),
+    }, "approval");
     return { user: publicUser(approved) };
   });
 
@@ -537,12 +559,16 @@ export function registerUsers(app: FastifyInstance, deps: UsersDeps): void {
     await deps.store.createUser(u);
     const secret = randomBytes(32).toString("base64url");
     await deps.store.updateUser(u.id, { passwordReset: { tokenHash: sha256(secret).toString("hex"), expiresAt: new Date(now().getTime() + 7 * 86_400_000).toISOString(), sessionGen: 0, requestedAt: at } });
-    void deps.email?.send({ address: u.email, name: u.name }, {
+    const ready = {
       subject: "Your CoFile account is ready",
       body: `Welcome, ${u.name}. The enterprise account for ${q.company} is set up. Open the link below to choose your password; it works for 7 days.\n\nAfter that you can add your team, API keys and webhooks from the dashboard.${deps.supportEmail ? `\n\nQuestions? Email ${deps.supportEmail}.` : ""}`,
+    };
+    sendAccountEmail({ address: u.email, name: u.name }, {
+      ...ready,
       link: `${deps.webBaseUrl}/reset-password?token=${encodeURIComponent(`${u.id}.${secret}`)}`,
       linkLabel: "Set my password",
-    }).catch((e) => console.error("welcome email failed", (e as Error).message));
+      letter: proseLetter(ready.subject, ready.body, { vignette: "blank-plate" }),
+    }, "welcome");
     const inquiry = await deps.store.updateInquiry(q.id, { status: "approved", decidedAt: at, decidedBy: by, tenantId });
     return reply.code(201).send({ inquiry, tenantId, user: publicUser(u) });
   });
@@ -570,12 +596,12 @@ export function registerUsers(app: FastifyInstance, deps: UsersDeps): void {
     await deps.store.updateUser(u.id, { passwordReset: { tokenHash: sha256(secret).toString("hex"), expiresAt: new Date(at.getTime() + 7 * 86_400_000).toISOString(), sessionGen: 0, requestedAt: at.toISOString() } });
     const link = `${deps.webBaseUrl}/reset-password?token=${encodeURIComponent(`${u.id}.${secret}`)}`;
     const firmName = c.portal.displayName ?? c.name;
-    void deps.email?.send({ address: u.email, name: u.name }, {
+    sendAccountEmail({ address: u.email, name: u.name }, {
       subject: `You're invited to ${firmName}'s filing portal`,
       body: `${by === "api key" ? "You've been given" : `${by} has given you`} access to ${firmName}'s filing portal. Open the link below to choose your password; it works for 7 days. Then log in with this email.`,
       link,
       linkLabel: "Set my password",
-    }).catch((e) => console.error("invite email failed", (e as Error).message));
+    }, "invite");
     return reply.code(201).send({ user: publicUser(u), link, expiresAt: new Date(at.getTime() + 7 * 86_400_000).toISOString() });
   });
 

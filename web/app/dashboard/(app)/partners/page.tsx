@@ -19,7 +19,7 @@ export default async function PartnersPage() {
   return (
     <div className="stack">
       <h1>Sign-ups</h1>
-      <p className="muted">{mode === "automatic" ? "New partner accounts open straight away, without a review." : "New partner accounts wait here for approval. Approving opens their dashboard; nothing is emailed, so let them know yourself."}</p>
+      <p className="muted">{mode === "automatic" ? "New partner accounts open straight away, without a review." : "New partner accounts wait here for approval. Approving opens their dashboard and emails them a link to log in."}</p>
 
       <h2>Waiting for approval</h2>
       {pending.length === 0 ? <p className="muted">None.</p> : (
