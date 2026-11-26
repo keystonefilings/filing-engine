@@ -32,19 +32,24 @@ with, Founders Grotesk Mono for everything a machine reads, and one point of Bra
 quietest of CoFile's pages: no photographs, no motion beyond the interface's own, no texture on the
 working grounds (the 3% cotton scan stays on the page ground only, off under cards and tables).
 
-The white-label hosted page and the embed widget are register 3: CoFile all but disappears. The
-firm's Letterhead (or, inside the widget, the host website itself) leads, and the only sign of us
-is the 13 px Imprint.
+The white-label hosted page and the embed widget are register 3: CoFile disappears. The firm's
+Letterhead (or, inside the widget, the host website itself) leads, and nothing of ours is drawn on
+them (decision 12): the one place our name appears is the product's own consent line, in the
+form's fine print (10C.18).
 
-**What the dashboard keeps from the filing desk.** Foundation 6.8 makes the dashboard "the same
-shell [as the filing desk] with CoFile's own lockup in place of a firm's Letterhead": a letterhead
-row, a rule, a 52 px navigation row, content on the 12-column grid to 1200 px at a 17 px base, and
-"narrow" pages in a centred 720 px column with an optional 320 px rail at 1280 px and up. A
-platform's staff and a firm's staff therefore learn one room.
+**The firm's filing desk shares this register** (decision 2). The treatment in 10C.1 and 10C.2
+(the shell's construction, the buttons, the notices, the tables, the chips, the fields, the plate
+field and dark mode) is the desk's too, and only the pages and their links differ, so the desk and
+the dashboard read as one product: a letterhead row, a rule, a 52 px navigation row, content on
+the 12-column grid to 1200 px at a 17 px base, and "narrow" pages in a centred 720 px column with
+an optional 320 px rail at 1280 px and up (foundation 6.8). On the desk the firm's name and logo
+are content, never its letterhead: the account label in the letterhead row shows the firm's logo
+at 24 px tall with its name, and no Firm Rule is drawn (the firm's-pages part). A platform's staff
+and a firm's staff therefore learn one room.
 
 **CoFile's letterhead, in the apps and in mail** (Hal): the horizontal lockup, then a **1 px Plate
-Ink rule** under it, full width. It is the plain counterpart of a firm's Firm Rule. The
-thick-and-thin stays reserved for the foot of the marketing site (D5).
+Ink rule** under it, full width. It is the plain counterpart of the Firm Rule that heads a firm's
+client pages. The thick-and-thin stays reserved for the foot of the marketing site (D5).
 
 **Buttons on the dashboard** (one Brass button per screen, D5):
 
@@ -65,7 +70,8 @@ color appears before the label.
 Night Card `#1F2230` with table heads on `#2A2D3B`, text Night Ink `#ECE8DF`, rules `#323646`,
 field borders `#6E7180`. Brass buttons keep Brass with Night text (8.3:1); Ink buttons invert to a
 Night Ink fill with Night text. Firm logos shown on the dashboard sit on the white logo plate (3.5).
-Anything that previews a firm's page (the Letterhead preview on a firm's page) stays a white sheet.
+Anything that previews a firm's client page (the preview on a firm's page, 10C.8) stays a white
+sheet.
 
 **When a deployment sets its own platform name** (`PLATFORM_NAME`, read by `platformName()`), the
 dashboard, the API-key log-in and the docs show that name where they show "CoFile" today. The
@@ -99,9 +105,9 @@ and the 1 px rule under it stays.
   (3.3). Right, vertically centred: the signed-in person's email (`s.email ?? s.name`) in `small`
   15 / 23; when the session is personal it is a link to `/dashboard/password` with the title
   "Change password", Plate Ink, underlined 1 px in Brass Line; for an API-key session it is plain
-  Graphite text. 16 px after it, "Log out" as an outline small button (40 px). The Imprint is not
-  here: this is CoFile's own room.
-- **The 1 px Plate Ink rule** under the row runs the full window width, like the desk's Firm Rule.
+  Graphite text. 16 px after it, "Log out" as an outline small button (40 px). On the desk the
+  same row also carries the firm's account label (10C.1).
+- **The 1 px Plate Ink rule** under the row runs the full window width.
 - **The navigation row**, 52 px, Cotton, sticky at the top once the letterhead row has scrolled
   away, with a 1 px Rule bottom edge. Links in `nav` 17 / 24 Founders Grotesk Text, Plate Ink, 28 px
   apart, in the product's order: "Overview", "Filings", "Ready to pay", "Firms", "API keys",
@@ -192,7 +198,7 @@ uses the quiet form (Verdigris on Verdigris Tint) (4.3). The product's status to
 | Product tone | Statuses (from `web/lib/status.ts`) | Chip |
 |---|---|---|
 | `ok` | "Approved", "EIN issued", "Submitted to the state", "Accepted by the state", "Completed" | Done, quiet ● |
-| `warn`, waiting on a person | "Needs information", "Waiting for approval", "Changes requested" | Your turn on CoFile's dashboard: Ochre on Ochre Tint ◆ |
+| `warn`, waiting on a person | "Needs information", "Waiting for approval", "Changes requested" | Your turn, in CoFile's form: Ochre on Ochre Tint ◆ |
 | `warn`, held | "On hold", "Paused: state site changed", "Name unavailable", "Being checked" | Attention ◐ |
 | `bad` | "Needs correcting", "Rejected by the state", "Failed", "Stopped" | Problem ▬ |
 | none | "Received", "Getting the state's review page", "Queued", "Filing now", "Final check" | In hand ○ (Iron outline) |
@@ -351,15 +357,25 @@ DESKTOP (wide page)
 │ ├─────────────────────────────┼────────────────────┼───────────────┼───────────────┼───────┤ │
 │ │ Two Sisters Bakery LLC      │ Harbor & Pine CPA  │ NJ formation  │ ◆ Waiting for │ ‹date›│ │
 │ │ f_‹id›                      │                    │               │   approval    │       │ │
-│ ├─────────────────────────────┼────────────────────┼───────────────┼───────────────┼───────┤ │
+│ │                             │                    │               │ ●●○○○         │       │ │ stage track,
+│ │                         │                    │               │ Proof, step 2 of 5│       │ │ one line in
+│ ├─────────────────────────────┼────────────────────┼───────────────┼───────────────┼───────┤ │ the product
 │ │ Two Sisters Bakery LLC      │ Harbor & Pine CPA  │ NJ formation  │ ● Approved    │ ‹date›│ │
-│ │ ┆◌ Test┆  f_‹id›            │                    │               │ Ready to pay: │       │ │
+│ │ ┆◌ Test┆  f_‹id›            │                    │               │ ●●●○○         │       │ │
+│ │                             │                    │               │ 3 of 5 ·      │       │ │
+│ │                             │                    │               │ Filing        │       │ │
+│ │                             │                    │               │ Ready to pay: │       │ │
 │ │                             │                    │               │ needs the     │       │ │
 │ │                             │                    │               │ card's code   │       │ │
 │ ├─────────────────────────────┼────────────────────┼───────────────┼───────────────┼───────┤ │
 │ │ Hudson Ledger LLC           │ Harbor & Pine CPA  │ NY formation  │ ● Completed   │ ‹date›│ │
+│ │                             │                    │               │ ●●●●●         │       │ │
+│ │                         │                    │               │ Done, step 5 of 5 │       │ │
 │ │ Orchard Lane Inc.           │ Harbor & Pine CPA  │ NJ payroll …  │ ● Submitted to│ ‹date›│ │
 │ │                             │                    │               │   the state   │       │ │
+│ │                             │                    │               │ ●●●●○         │       │ │
+│ │                             │                    │               │ 4 of 5 · With │       │ │
+│ │                             │                    │               │ the state     │       │ │
 │ └──────────────────────────────────────────────────────────────────────────────────────────┘ │
 └────────────────────────────────────────────────────────────────────────────────────────────┘
 ```
@@ -376,14 +392,24 @@ DESKTOP (wide page)
   - **Type**: the product's state and type ("NJ formation") in 15 / 23. (The desk's filing titles,
     such as "New Jersey LLC formation", would read better `[copy needed: confirm using the desk's
     filing titles here]`.)
-  - **Status**: the status chip; when a filing waits for a card's code, the product's link "Ready
-    to pay: needs the card's code" sits 6 px under the chip in 15 / 23, linking to Ready to pay.
+  - **Status**: the status chip, and 6 px under it the same five-step stage track the desk's
+    Filings ledger carries (the firm's-pages part, 10B.4; `web/components/StageTrack.tsx`), so a
+    status reads the same in both rooms: five 8 px dots, the reached ones Plate Ink and the rest
+    Rule (Night Ink and `#323646` in dark), then "Proof, step 2 of 5" in the `stage` style (13 / 18
+    Graphite, tabular; foundation 4.3), the steps being "Details", "Proof", "Filing", "With the
+    state" and "Done", read aloud as "Step 2 of 5: Proof". No track for a rejected, failed or
+    stopped filing. The dashboard's page doesn't render it yet (a build change: the desk's
+    component in this cell). When a filing waits for a card's code, the product's link "Ready to
+    pay: needs the card's code" sits 6 px under the track in 15 / 23, linking to Ready to pay.
   - **Created**: the date, `small` Graphite tabular.
+- **Firm, not "Sent by".** The desk's ledger names who sent each filing (its "Sent by" column);
+  the dashboard lists filings across all of a platform's firms, so this column names the firm, as
+  the product does.
 - The product shows up to 500 rows; the table keeps its head sticky under the navigation row when
   it is taller than the screen.
 - Empty: "No filings." in one row.
 - Phone: blocks (10C.2), each block headed by the filing title and its chips, then "Firm", "Type",
-  "Status", "Created" lines.
+  "Status" (the chip with its track under it), "Created" lines.
 
 ### 10C.6 Ready to pay (`/dashboard/pay`)
 
@@ -480,9 +506,9 @@ DESKTOP (wide page)
 
 ### 10C.8 A firm (`/dashboard/firms/<id>`)
 
-A narrow page that becomes two columns at 1024 px and up: the settings on the left, the firm's
-live Letterhead preview on the right, so the platform sees the firm's page change as it types
-(Marcus's live preview; Hal's Branding preview).
+A narrow page that becomes two columns at 1024 px and up: the settings on the left, a live
+preview of the firm's client page on the right, so the platform sees the page the firm's clients
+get change as it types (Marcus's live preview; Hal's Branding preview).
 
 ```
 DESKTOP (≥ 1024; the narrow column widens to the 12-column grid here)
@@ -503,10 +529,10 @@ DESKTOP (≥ 1024; the narrow column widens to the 12-column grid here)
 │ │ [ Choose file … ]                               │  │ │ formation details. What       │ │ │
 │ │ A PNG, JPEG or WebP picture. A wide logo on a   │  │ │ you'll need                   │ │ │
 │ │ clear background looks best. …                  │  │ │ [ Send for approval ]         │ │ │
-│ │ [ Remove logo ]   Use a link instead            │  │ │            ────               │ │ │
-│ │ Main color            Second color              │  │ │         with CoFile           │ │ │
-│ │ [■][#1d4e63]          [■][#2b5a47]              │  │ └───────────────────────────────┘ │ │
-│ │ ■■■■■■■■■             ■■■■■■■■■                 │  └───────────────────────────────────┘ │
+│ │ [ Remove logo ]   Use a link instead            │  │ └───────────────────────────────┘ │ │
+│ │ Main color            Second color              │  └───────────────────────────────────┘ │
+│ │ [■][#1d4e63]          [■][#2b5a47]              │                                        │
+│ │ ■■■■■■■■■             ■■■■■■■■■                 │                                        │
 │ │ Buttons and the top…  Links and highlights. …   │                                        │
 │ │ Support email shown to clients                  │                                        │
 │ │ [                                           ]   │                                        │
@@ -565,13 +591,13 @@ DESKTOP (≥ 1024; the narrow column widens to the 12-column grid here)
   - "Save filing desk", **Brass** (this page's primary). Results at the top of the card: "Saved.
     The filing desk is at /p/‹slug›." (Done) and the errors the product returns (Problem), focus
     moving to them.
-- **The preview** is the same live Letterhead preview the desk's Branding page uses (the firm's-
-  pages part), drawn here at 0.75 scale on a white sheet with `--e-sheet`, recomputing the ink
-  match on every keystroke. The product's words: "Preview of a client's page" (as a 14 / 20
-  Graphite caption above the sheet), and inside the sheet the logo, the name ("Your firm" when none
-  is typed), the Firm Rule, "Please fill in your LLC formation details." with "What you'll need" as
-  a link in `--firm-ink`, and "Send for approval" in `--firm-fill`. The Imprint sits at the sheet's
-  foot at its true 13 px (not scaled), because its size is the point. In dark mode the sheet stays
+- **The preview** is the same live client-page preview the desk's Branding page shows in its large
+  slot (the firm's-pages part), drawn here at 0.75 scale on a white sheet with `--e-sheet`,
+  recomputing the ink match on every keystroke. The product's words: "Preview of a client's page"
+  (as a 14 / 20 Graphite caption above the sheet), and inside the sheet the logo, the name ("Your
+  firm" when none is typed), the Firm Rule, "Please fill in your LLC formation details." with
+  "What you'll need" as a link in `--firm-ink`, and "Send for approval" in `--firm-fill`. Nothing of
+  CoFile is on the sheet, as on the client page itself (decision 12). In dark mode the sheet stays
   white.
 - **"Public pages and website widget"** (shown when the firm has public pages): a Sheet card titled
   in `section`, its help line, then one disclosure per filing: the summary "‹Filing title›: ‹page
@@ -584,8 +610,7 @@ DESKTOP (≥ 1024; the narrow column widens to the 12-column grid here)
   firm's portal only. If email isn't set up here yet, send it to them yourself." in `help`. Errors:
   "Set up the firm's portal first.", "Enter the person's email address.", "That email already has
   an account.", "The invitation couldn't be made just now. Try again in a minute."
-- **Phone:** one column, the preview after the form at full width and 0.75 scale, the Imprint
-  still 13 px.
+- **Phone:** one column, the preview after the form at full width and 0.75 scale.
 
 ### 10C.9 API keys (`/dashboard/keys`)
 
@@ -1082,8 +1107,9 @@ Specific pieces:
 - *Errors*: the error JSON example, then the code table with the codes in tabular Founders Medium.
 - *White-label firm portal*: the three numbered steps; beside step 1, at ≥ 1280 in the rail, the
   firm-page preview from 10C.8 at 0.6 scale with Harbor & Pine's data and its example label
-  ("Example · test details · not a real firm"), so a platform's developers see where a firm's logo,
-  colors and the Imprint will sit (Marcus's logo-bay diagram, as the real component).
+  ("Example · test details · not a real firm"), so a platform's developers see where a firm's logo
+  and colors will sit on the pages its clients get (Marcus's logo-bay diagram, as the real
+  component).
 
 **The reference (`/docs/reference`).**
 
@@ -1204,7 +1230,8 @@ All three are generated from the same catalog as the HTML docs, so they never di
 A subscriber's firm's own page for one filing, hosted for the platform. It is the same page, the
 same component and the same design as a firm's page for each filing on `cofile.app/<firm>/<service>`
 (the firm's-pages part): one white sheet in the firm's brand. What is specific here is where the
-platform and CoFile appear, which is almost nowhere (Greta, Elaine, Priya).
+platform and CoFile appear, which is nowhere but the consent line's fine print (Greta, Elaine,
+Priya; decision 12).
 
 ```
 DESKTOP (1440): page on --firm-wash                   PHONE (390): the sheet is the screen
@@ -1228,11 +1255,9 @@ DESKTOP (1440): page on --firm-wash                   PHONE (390): the sheet is 
 │     │ [ LLC                               ▾ ]  │ │  │ Next, Harbor & Pine CPA …    │
 │     │ …                                        │ │  │ By sending, you agree to …   │
 │     │ [ Send to Harbor & Pine CPA ] --firm-fill│ │  │ Questions about this form? … │
-│     │ Next, Harbor & Pine CPA checks it and …  │ │  │             ────             │
-│     │ By sending, you agree to CoFile's Terms …│ │  │          with CoFile         │
-│     │ Questions about this form? Email …       │ │  └──────────────────────────────┘
-│     │                 ────                     │ │
-│     │              with CoFile                 │ │
+│     │ Next, Harbor & Pine CPA checks it and …  │ │  └──────────────────────────────┘
+│     │ By sending, you agree to CoFile's Terms …│ │
+│     │ Questions about this form? Email …       │ │
 │     └──────────────────────────────────────────┘ │
 └──────────────────────────────────────────────────┘
 ```
@@ -1242,7 +1267,9 @@ DESKTOP (1440): page on --firm-wash                   PHONE (390): the sheet is 
 - **Head.** The product's top bar becomes the firm's Letterhead at the head of the sheet,
   left-aligned (a working piece, 3.5): the logo at the sheets' size (6,400 px², so Harbor & Pine's
   square symbol at 64 × 64), the typeset name in the firm's font where the logo rules call for it,
-  and the Firm Rule. The browser tab reads "‹Filing title› · ‹Firm›" (the product's title) with the
+  and the Firm Rule. The product's top bar also shows "with ‹platformName›" at its right; the
+  design drops it rather than moving it (decision 12; a build change), so the whole sheet belongs
+  to the firm. The browser tab reads "‹Filing title› · ‹Firm›" (the product's title) with the
   firm's monogram or square crop as its icon (3.5.7).
 - **The rehearsal notice**, when the filing type isn't live yet, exactly as written: "This page is
   in rehearsal for now. You can fill it in, but nothing will be filed with the state and nothing
@@ -1262,11 +1289,11 @@ DESKTOP (1440): page on --firm-wash                   PHONE (390): the sheet is 
   Service; your details are handled under its Privacy Policy." (`small` Graphite, the two documents
   as links in `--firm-ink`, opening in a new tab); and, when the firm set one, "Questions about this
   form? Email ‹Firm› at ‹email›." (`small` Graphite).
-- **The Imprint** at the foot of the sheet, centred, 24 px below the last line under its 40 px
-  hairline, **not a link** (3.4): "with CoFile" moves here from the product's top bar, so the top
-  of the page belongs entirely to the firm. When the deployment has its own platform name, it reads
-  "with ‹platformName›": "with" in Miller Text Italic, then the name in Founders Grotesk Medium
-  13 / 16, Graphite. CoFile's wordmark is only ever drawn as "CoFile".
+- **Nothing of ours at the foot.** The sheet ends under the footnote at its usual foot padding,
+  with no hairline and no mark of ours (decision 12). The consent line is the one place the
+  platform's name appears ("CoFile's Terms" on CoFile's own deployment), kept as the product writes
+  it and set as the form's normal fine print, as the authorization text is on the client form (the
+  firm's-pages part).
 - **After sending**, the form is replaced in place (a 200 ms cross-fade) by the product's result:
   "Thank you, we have your details." as an h2 in the firm's font, and "Next, the firm checks every
   detail and approves the filing. Nothing is filed or paid until it does. You can close this page."
@@ -1282,8 +1309,9 @@ DESKTOP (1440): page on --firm-wash                   PHONE (390): the sheet is 
 ### 10C.19 The embed widget (`embed.js` and `/embed/<account>/<firm>/<service>`)
 
 The firm's form inside the firm's own website. It must look as if the firm's own web designer
-built it (Priya): the host page is the letterhead, so the widget brings none, and CoFile is the one
-line "Filed with CoFile" at its foot.
+built it (Priya): the host page is the letterhead, so the widget brings none, and it shows nothing
+of CoFile (decision 12). The product's "Filed with ‹platformName›" line at its foot is dropped (a
+build change).
 
 **What the firm pastes** (shown on the firm's page in the dashboard and on the desk):
 `<script src="https://cofile.app/embed.js" data-account="…" data-firm="…" data-service="…" async></script>`.
@@ -1309,10 +1337,10 @@ CONTAINER 640 px (a firm's site, desktop)            CONTAINER 320 px (the same 
 │ │ Next, Harbor & Pine CPA checks it and …     │ │   │ │ [ LLC              ▾ ] │ │
 │ │ By sending, you agree to CoFile's Terms …   │ │   │ │ …                      │ │
 │ │ Questions about this form? Email …          │ │   │ │ [ Send to Harbor &   ] │ │
-│ │ Filed with CoFile                 (13 px)   │ │   │ │ [ Pine CPA           ] │ │
-│ └─────────────────────────────────────────────┘ │   │ │ Next, … · By sending … │ │
-│ (the firm's own footer)                         │   │ │ Filed with CoFile      │ │
+│ └─────────────────────────────────────────────┘ │   │ │ [ Pine CPA           ] │ │
+│ (the firm's own footer)                         │   │ │ Next, … · By sending … │ │
 └─────────────────────────────────────────────────┘   │ └────────────────────────┘ │
+                                                      │ (firm's footer)            │
                                                       └────────────────────────────┘
 ```
 
@@ -1326,17 +1354,15 @@ CONTAINER 640 px (a firm's site, desktop)            CONTAINER 320 px (the same 
 - **The firm's brand carries through**: the firm's font for the h1 and the fieldset legends, the
   button in `--firm-fill` with `--firm-on` and the label in the firm's font, links and focus rings in
   `--firm-ink`. Fields, labels and help are Founders Grotesk Text, as on every firm page. Only
-  Founders Grotesk Text Regular and Medium and the firm's font load, plus a subset of Miller Text
-  Italic holding just the glyphs of "Filed with" (about 3 KB); the wordmark is inline SVG.
+  Founders Grotesk Text Regular and Medium and the firm's font load.
 - **Sizes follow the frame, not the screen** (container queries): the h1 at 28 / 34 from 480 px of
   frame width (32 / 38 from 720 px), 24 / 30 below; the form column caps at 640 px and sits at the
   frame's left edge, aligned with the host page's own text; short fields pair (ZIP and state, the
   LLC name and its ending) from 560 px; everything is one column below. Minimum frame width 300 px
   (Hal).
-- **"Filed with CoFile"** at the widget's foot, left-aligned, 12 px below the last footnote line,
-  in the Imprint's setting ("Filed with" in Miller Text Italic, then the wordmark's small master),
-  13 / 16 Graphite, **not a link** (3.4). Nothing else of ours: the Terms line names CoFile because
-  the product's own words do.
+- **Nothing of ours at the foot.** The widget ends on its last footnote line, with 20 px of
+  padding under it. The consent line names CoFile because the product's own words do, set as the
+  form's normal fine print (10C.18).
 - **First paint**: the frame's page is server-rendered, so the host sees the white sheet with the
   h1 and the first fields at their final sizes as soon as the frame loads, never an empty 600 px
   box.
@@ -1346,8 +1372,8 @@ CONTAINER 640 px (a firm's site, desktop)            CONTAINER 320 px (the same 
   frame shrinks while its top is above the viewport, `embed.js` scrolls the frame's top into view
   (a small change to the script), so the visitor isn't left looking at the firm's footer.
 - **Unavailable**: inside the frame, a page that doesn't exist shows the product's own line "This
-  page isn't available any more." on the white sheet with "Filed with CoFile" under it, never the
-  site's 404 with CoFile's header inside someone else's website.
+  page isn't available any more." on the white sheet and nothing else, never the site's 404 with
+  CoFile's header inside someone else's website.
 - **Rehearsal**: the rehearsal notice as on the hosted page (10C.18).
 - **No motion** beyond the interface's own (focus, the cross-fade); no View Transitions inside the
   frame.
@@ -1360,8 +1386,8 @@ CONTAINER 640 px (a firm's site, desktop)            CONTAINER 320 px (the same 
 | API-key log-in | 1 | Cotton, a 480 px card | The lockup, centred | Miller Display | Brass | The lockup |
 | Docs | 1 | Cotton; code on Plate Ink | Lockup, 1 px Plate Ink rule, "API docs", "Dashboard" | Miller | None (links only) | The lockup |
 | `/docs.md`, `/llms.txt`, `/openapi.json` | Files | The browser's | — | Markdown headings | — | The platform name as the title |
-| White-label hosted page | 3 | `--firm-wash`; one white sheet | The firm's Letterhead | The firm's font | `--firm-fill` | The 13 px Imprint at the foot, not a link |
-| Embed widget | 3 | White sheet in the host page | None | The firm's font | `--firm-fill` | "Filed with CoFile", 13 px, not a link |
+| White-label hosted page | 3 | `--firm-wash`; one white sheet | The firm's Letterhead | The firm's font | `--firm-fill` | None: only the product's consent line names it, as fine print |
+| Embed widget | 3 | White sheet in the host page | None | The firm's font | `--firm-fill` | None: only the consent line, as on the hosted page |
 
 ### 10C.21 `[copy needed]` and copy notes for 10C
 
@@ -1388,6 +1414,12 @@ they are):
   approves." while the firm approves the proof (`src/inbound/requests.ts`).
 - `/docs.md`'s section names differ from the HTML guides' ("How a filing goes" against "Filings and
   the lifecycle"); aligning them is a copy choice.
+- Under decision 2 the filing desk is in CoFile's look, with the firm's name and logo as content,
+  and only the firm's client pages carry its colors. Two lines still describe a desk in the firm's
+  brand: the Firms lede "Give a firm its own branded filing desk, then invite its staff."
+  (`web/app/dashboard/(app)/firms/page.tsx`) and the White-label firm portal guide's "Give a CPA or
+  payroll firm its own branded filing portal." and "a portal on this site at /p/<slug>, in the
+  firm's own name, logo and color" (`web/app/docs/guides.tsx`).
 
 ---
 
@@ -1396,49 +1428,79 @@ they are):
 ### 10D.1 Two letterheads, one sheet
 
 Every email is one sheet of letterhead, the way a firm's own letters are (Hal: "one template, two
-letterheads"; Jun's sheet on a ground; Elaine's "emails are pages that arrive"). Emails **about a
-firm's filings, sent to the firm or its client**, carry the **firm's Letterhead** and the Imprint at
-the foot. Emails **from CoFile to its own customers** (accounts, and the notices a platform's staff
-get about the filings they run) carry **CoFile's letterhead** and no Imprint: it is our own letter.
+letterheads"; Jun's sheet on a ground; Elaine's "emails are pages that arrive"). Whose letterhead
+it carries follows who reads it, the way the receipts a business sends through Stripe carry the
+business's brand while Stripe's own mail to the business carries Stripe's (decision 2):
+
+- **Emails to the firm** (its approvers and staff, about its filings, its card and its account),
+  emails to a subscriber's staff, and CoFile's account emails carry **CoFile's letterhead** and are
+  sent as "CoFile". The firm is named in them as content, in the context line above the headline
+  (10D.5), never as their letterhead.
+- **Emails to the firm's clients** carry **the firm's Letterhead only** and are sent under the
+  firm's name. Nothing of CoFile appears on them: no lockup, no foot line, no mark (decision 12).
+
 The body, the button, the sizes and the build are the same in both, so one template serves every
 message.
 
-Who receives each email follows `src/comms/notifier.ts` and `src/users/routes.ts`:
+Who receives each email follows `src/comms/notifier.ts` and `src/users/routes.ts`. Several filing
+emails go to whoever the filing's settings name, so the letterhead is chosen **per recipient**: the
+firm's approvers and a partner firm's contact are the firm; the filing's own contact is the client.
+The notifier already sends each recipient a separate copy; the template is told which side the
+recipient is on (10D.2).
 
-| Email (subject as the product sends it) | Sent when | To | Letterhead | Button | Imprint |
-|---|---|---|---|---|---|
-| "Your proof is ready to approve: ‹filing›" | `filing.awaiting_approval` | The firm's approvers (a partner firm's contact) | The firm's | "Open your proof" | Linked |
-| "Completed: ‹filing›" (documents back; carries the EIN when the CP 575 is among them) | `filing.completed` | The firm, its client, or both, by the firm's "documents go to" setting | The firm's | "Open" (the filing page, when the firm has a desk) | Linked to the firm, plain to the client |
-| "Card security code needed: ‹filing›" | `filing.card_code_needed` | The card's owner | The firm's when it is a firm's card; CoFile's when it is the subscriber's own | "Enter security code" | Linked (firm's version) |
-| "More information needed: ‹filing›" | `filing.information_required` | The approvers, or the filing's contact | The firm's | none | Linked to the firm, plain to the client |
-| "Changes requested: ‹filing›" | `filing.changes_requested` | The approvers, or the filing's contact | The firm's | none | As above |
-| "Rejected by the state: ‹filing›" | `filing.rejected` | As "Completed" | The firm's | none | As above |
-| "You're invited to ‹firm›'s filing portal" | A person at a firm is invited | That person | The firm's | "Set my password" | Linked |
-| "Ready to check: ‹subject of their email›" | A firm's staff member emails in a request | That person | The firm's | "Open" | Linked |
-| EIN issued (parked: no copy yet, 10D.8) | `filing.ein_filed`, if the owner adds it | As "Completed" | The firm's | "Open" | As above |
-| "Choose a name: …", "Review before submit: …", "Site changed — review needed: …", "Portal bot check: …", "Failed: …", "Blocked: …", "Checking whether the state received: …" | The engine's problem and review events | The filing company's admin channels (the subscriber's staff) | CoFile's | "Choose a name", "Review the filing", or none | — |
-| "Filing by email works from a firm's portal" | A non-firm user emails in a request | That person | CoFile's | none | — |
-| "Confirm your email for CoFile" | Sign-up | The person signing up | CoFile's | "Confirm my email" | — |
-| "Reset your password" | A reset is asked for | The account's email | CoFile's | "Choose a new password" | — |
-| "Your partner account is open" | A partner sign-up is approved | The new partner | CoFile's | "Log in" | — |
-| "Your CoFile account is ready" | An enterprise request is approved | The new enterprise user | CoFile's | "Set my password" | — |
+| Email (subject as the product sends it) | Sent when | On CoFile's letterhead, sent as "CoFile" | On the firm's Letterhead, sent as the firm | Button |
+|---|---|---|---|---|
+| "Your proof is ready to approve: ‹filing›" | `filing.awaiting_approval` | The firm's approvers | The filing's contact, only when the firm has no approvers (a platform's own client, approving its white-label proof) | "Open your proof" |
+| "Completed: ‹filing›" (documents back; carries the EIN on the CP 575's row) | `filing.completed` | The firm, when its "documents go to" setting includes it | The filing's contact, when that setting includes the client | "Open" (the filing page, when the firm has a desk), on the firm's copy only |
+| "Card security code needed: ‹filing›" | `filing.card_code_needed` | The card's owner: the firm for its own card, the subscriber's staff for the subscriber's | Never | "Enter security code" |
+| "More information needed: ‹filing›" | `filing.information_required` | The approvers, when the firm must act | The filing's contact when there are no approvers: the request for details | none |
+| "Changes requested: ‹filing›" | `filing.changes_requested` | The approvers | The filing's contact when there are no approvers | none |
+| "Rejected by the state: ‹filing›" | `filing.rejected` | As "Completed" | As "Completed" | none |
+| "You're invited to ‹firm›'s filing portal" | A person at a firm is invited | That person | Never | "Set my password" |
+| "Ready to check: ‹subject of their email›" | A firm's staff member emails in a request | That person | Never | "Open" |
+| EIN issued (the fallback; its words `[copy needed]`, 10D.8) | An EIN was issued but the CP 575 wasn't saved | As "Completed" | As "Completed" | "Open", on the firm's copy only |
+| "Choose a name: …", "Review before submit: …", "Site changed — review needed: …", "Portal bot check: …", "Failed: …", "Blocked: …", "Checking whether the state received: …" | The engine's problem and review events | The filing company's admin channels (the subscriber's staff) | Never | "Choose a name", "Review the filing", or none |
+| "Filing by email works from a firm's portal" | A non-firm user emails in a request | That person | Never | none |
+| "Confirm your email for CoFile" | Sign-up | The person signing up | Never | "Confirm my email" |
+| "Reset your password" | A reset is asked for | The account's email | Never | "Choose a new password" |
+| "Your partner account is open" | A partner sign-up is approved | The new partner | Never | "Log in" |
+| "Your CoFile account is ready" | An enterprise request is approved | The new enterprise user | Never | "Set my password" |
+
+**A client link** isn't sent by CoFile today: on Client links the firm copies it, or sends it from
+its own mail app ("Email it from your mail app", `web/components/ClientLinkForm.tsx`), so it
+already reaches the client from the firm. If CoFile ever sends it, it is an email to a client, on
+the firm's Letterhead.
 
 The filing company's notices go to the subscriber's own staff, never to a firm or its clients
-(`renderMessage` marks them `admin`), so they carry CoFile's letterhead, with the firm named in a
-line above the headline (10D.12). The choice is in `DECISIONS.md`.
+(`renderMessage` marks them `admin`), so they carry CoFile's letterhead, with the firm named in the
+context line above the headline (10D.12; decision 33).
 
-**Sender and reply.** The From address stays `filings@cofile.app` (the verified sending domain).
-On the firm's emails the From **display name is the firm's name**, so the inbox row a firm owner
-or a client sees first reads "Harbor & Pine CPA", and Reply-To is the firm's support email when it
-set one; on CoFile's emails the display name is "CoFile" and Reply-To the support address
-(`DECISIONS.md`).
+**Sender and reply** (decision 37).
+
+- **On CoFile's letterhead**: From "CoFile <filings@cofile.app>" (the verified sending domain, as
+  the product sends today), Reply-To the support address.
+- **On the firm's Letterhead**: the From display name is the firm's name as its desk shows it
+  ("Name shown on the filing desk", else its name), so the inbox row a client sees first reads
+  "Harbor & Pine CPA". Reply-To is the firm: its "Support email shown to clients", or, when it set
+  none, its contact's email (a partner firm's contact, else its approvers), so a client's reply
+  never comes to CoFile. The From address is at the **firm's own email domain once the firm
+  connects one** in Setup (a new step on the desk's Setup, in the firm's-pages part; its words are
+  `[copy needed]`), used only once that domain's sending records are verified. Until then the
+  email goes from CoFile's sending address, `filings@cofile.app`, still under the firm's name.
 
 ```
-THE INBOX ROW (Apple Mail, desktop)
+THE INBOX ROWS (Apple Mail, desktop)
+THE FIRM'S INBOX: an email to the firm
 ┌───────────────────────────────────────────────────────────────────────────────────────────┐
-│ Harbor & Pine CPA                                                              ‹time›     │
+│ CoFile                                                                         ‹time›     │
 │ Your proof is ready to approve: NJ llc formation: Two Sisters Bakery LLC                  │
 │ Your proof is ready. Open the link to see every detail and every fee, exactly as …        │  ← the preheader
+└───────────────────────────────────────────────────────────────────────────────────────────┘
+THE CLIENT'S INBOX: an email to the firm's client (a filing with no approvers)
+┌───────────────────────────────────────────────────────────────────────────────────────────┐
+│ Harbor & Pine CPA                                                              ‹time›     │
+│ More information needed: NJ llc formation: Two Sisters Bakery LLC                         │
+│ Before we can file, we still need: ‹missing items›. Please send these details to …        │
 └───────────────────────────────────────────────────────────────────────────────────────────┘
 ```
 
@@ -1451,15 +1513,15 @@ readable with images off.
 
 | Part | Spec |
 |---|---|
-| **Ground** | Firm emails: `--firm-wash` (Bond `#F5F5F2` when the firm has no color), the mill tint under every firm sheet (3.5). CoFile's emails: Cotton 2 `#F3F0E8`. 24 px above and below the sheet on desktop |
+| **Ground** | The firm's Letterhead: `--firm-wash` (Bond `#F5F5F2` when the firm has no color), the mill tint under every firm sheet (3.5). CoFile's letterhead: Cotton 2 `#F3F0E8`. 24 px above and below the sheet on desktop |
 | **Sheet** | 600 px wide, `#FFFFFF`, a 1 px Rule `#DDD7CB` border (for clients that drop the ground), square corners, no shadow. Padding 32 px at the sides and head (the ceremonial head margin, 3.5), 40 px at the foot. Content width 536 px |
 | **Phone** (≤ 480 px, by media query; Gmail's apps honour it) | The sheet goes edge to edge: no ground, no border, 20 px padding, as the proof does on a phone (6.8) |
-| **Heading face** | Firm emails: the firm's font when it is one of the Google presets, loaded with a `<link>` (Apple Mail, iOS Mail, Samsung Mail and Outlook for Mac show it), then `-apple-system, "Segoe UI", Helvetica, Arial, sans-serif`: never Georgia, never Times, as on the web (3.7). CoFile's emails: `--font-email-head` (Georgia, "Times New Roman", serif) |
+| **Heading face** | The firm's Letterhead: the firm's font when it is one of the Google presets, loaded with a `<link>` (Apple Mail, iOS Mail, Samsung Mail and Outlook for Mac show it), then `-apple-system, "Segoe UI", Helvetica, Arial, sans-serif`: never Georgia, never Times, as on the web (3.7). CoFile's letterhead: `--font-email-head` (Georgia, "Times New Roman", serif) |
 | **Body face** | `--font-email-body` (`-apple-system, "Segoe UI", Helvetica, Arial, sans-serif`). Values set in Mono use the foundation's mono fallback (`ui-monospace, "SF Mono", Menlo, Consolas, monospace`). Miller and Founders are not loaded in mail |
-| **Sizes** | Headline 26 / 32 (24 / 30 on phones), 600 on firm emails, 400 Georgia on CoFile's; the filing-title line 18 / 26 500 Graphite; body 17 / 27 Plate Ink `#1D2130`; `small` 15 / 23 Graphite `#555867`; buttons 18 / 24 600; the Imprint 13 / 16. Nothing a person needs is under 15 px except the 13 px Imprint and 14 px Mono URLs |
-| **Spacing** | Letterhead to headline 32 px; headline to body 24 px; paragraphs 16 px apart; body to button 32 px; button to link fallback 16 px; last block to the Imprint 40 px |
-| **Links in text** | `--firm-ink` underlined on firm emails; Plate Ink underlined on CoFile's |
-| **Button** | One per email, left-aligned with the text: a letter, not a poster. A bulletproof table cell 56 px tall, padding 16 px 28 px, min-width 240 px, `--firm-fill` with `--firm-on` on firm emails, Brass `#D9A84A` with Plate Ink on CoFile's (7.4:1); 3 px radius, the `--chamfer` fallback (6.4). Outlook for Windows gets a VML `v:roundrect` 56 px tall and 280 px wide, `arcsize="6%"`, no stroke, the label centred. Full width on phones. The label is the product's `linkLabel`, or "Open" |
+| **Sizes** | Headline 26 / 32 (24 / 30 on phones), 600 on the firm's Letterhead, 400 Georgia on CoFile's; the filing-title line 18 / 26 500 Graphite; body 17 / 27 Plate Ink `#1D2130`; `small` 15 / 23 Graphite `#555867`; buttons 18 / 24 600. Nothing a person needs is under 15 px except the 14 px Mono URLs |
+| **Spacing** | Letterhead to headline 32 px (to the context line, on CoFile's letterhead); headline to body 24 px; paragraphs 16 px apart; body to button 32 px; button to link fallback 16 px; last block to CoFile's foot 40 px; on the firm's Letterhead the sheet ends 40 px under the last block |
+| **Links in text** | `--firm-ink` underlined on the firm's Letterhead; Plate Ink underlined on CoFile's |
+| **Button** | One per email, left-aligned with the text: a letter, not a poster. A bulletproof table cell 56 px tall, padding 16 px 28 px, min-width 240 px, `--firm-fill` with `--firm-on` on the firm's Letterhead, Brass `#D9A84A` with Plate Ink on CoFile's (7.4:1); 3 px radius, the `--chamfer` fallback (6.4). Outlook for Windows gets a VML `v:roundrect` 56 px tall and 280 px wide, `arcsize="6%"`, no stroke, the label centred. Full width on phones. The label is the product's `linkLabel`, or "Open" |
 | **Link fallback** | Under the button: "Or paste this link into your browser:" in `small` Graphite, then the URL in Mono 14 / 20 Graphite, `word-break: break-all` |
 | **Preheader** | The body's first sentence as hidden preview text (Hal: no new words), padded with zero-width spaces so clients don't pull in the letterhead's text. For a rehearsal, that first sentence is the rehearsal line, so the inbox shows it before the email is opened |
 | **Images** | PNG at 2× with `width` and `height` set, `display:block`, `border:0`. Every image has the alt text given below; decorative ones `alt=""`. Under 60 KB of images in any email; no background images |
@@ -1471,12 +1533,16 @@ parts lifted out of it: the rehearsal line, the list of missing items, the chang
 the documents and their EIN, the state's review-page attachment, the state reference, the support
 line and the business name and filing title. `src/comms/render.ts` already holds each of these as
 data; the build passes them to the template as fields beside the same words (a build change, not a
-copy change).
+copy change). Two more fields go with each recipient's copy: which side the recipient is on (the
+firm or its client), which chooses the letterhead, the sender, the Reply-To and whether the desk
+link is kept, and the firm's name for the context line.
 
 ### 10D.3 The firm's letterhead in mail
 
-Centred: emails are ceremonial pieces (3.5, 5.4). Everything below the Letterhead is set flush
-left for reading, and the Imprint closes the sheet centred.
+It heads only the emails that reach the firm's clients (10D.1). Centred: emails are ceremonial
+pieces (3.5, 5.4). Everything below the Letterhead is set flush left for reading, and nothing
+closes the sheet: it ends 40 px under its last block, with nothing of CoFile on it. The Branding
+page's preview of an email to a client (the firm's-pages part) is this sheet.
 
 ```
 ┌──────────────────────────── sheet, 600 ─────────────────────────────┐
@@ -1517,6 +1583,9 @@ left for reading, and the Imprint closes the sheet centred.
 
 ### 10D.4 CoFile's letterhead in mail
 
+It heads every email to the firm, to a subscriber's staff and every account email (10D.1), the same
+for every firm.
+
 ```
 ┌──────────────────────────── sheet, 600 ─────────────────────────────┐
 │                                32                                   │
@@ -1534,12 +1603,19 @@ left for reading, and the Imprint closes the sheet centred.
   lozenge in the letters' color (outside CoFile's own pages it never takes Brass Line, 3.3). Alt
   "CoFile", styled inline in Georgia 22 px Plate Ink for images-off.
 - 20 px, then CoFile's letterhead rule: 1 px Plate Ink, the full content width.
-- The headline in Georgia 26 / 32 (24 / 30 on phones), Plate Ink: CoFile's own emails are the only
-  mail set in a serif, the email-safe stand-in for Miller.
+- The headline in Georgia 26 / 32 (24 / 30 on phones), Plate Ink: mail on CoFile's letterhead is
+  the only mail set in a serif, the email-safe stand-in for Miller.
 - **The foot**: a 1 px Rule, 16 px, then the Shell's own line "CoFile · the filing desk behind your
   firm" in `small` Graphite, and the support line when the email has one (10D.5).
 
 ### 10D.5 Shared parts
+
+**The context line** (CoFile's letterhead only). Every email about a filing that carries CoFile's
+letterhead names the firm the filing belongs to in a line above the headline: the firm's name from
+the filing, `small` 15 / 23 600 Graphite, 32 px under the letterhead rule and 8 px above the
+headline, data only, no logo. It is 10D.12's construction (decision 33), used on every filing email
+to the firm too, the way the proof's head names the firm and its client as text. The firm's
+Letterhead needs none: it already names the firm.
 
 **The headline block.** The subject is the headline (Hal, Greta, Dev). Where the subject joins a
 phrase and a filing with ": ", the two halves are set on two lines without changing a character:
@@ -1567,33 +1643,25 @@ CoFile's own document card, a plain sheet with a 45° clipped corner and three g
 Graphite line, never a facsimile of any state's or the IRS's paper, 3.9; `alt=""`), 16 px, then
 the document's name in 17 / 24 600 Plate Ink.
 
-**The Imprint** (firm emails only), 40 px below the last block, centred: a 40 × 1 px Rule cell, 12 px,
-then "with CoFile" at 13 / 16 Graphite, "with" in Georgia Italic and "CoFile" in Georgia Regular
-with +0.01 em tracking: the email-safe Imprint, as **live text**, so it survives images-off and a
-forced dark mode (a PNG of the wordmark would vanish on an inverted sheet). Never bold, never the
-firm's color, never Brass. On emails to the firm, "CoFile" links to `https://cofile.app` in
-Graphite with no underline (a signature, 3.4); on emails to a client it is plain text. The
-notifier renders the HTML once per recipient, so the link follows the recipient.
-
 ### 10D.6 The proof is ready ("Your proof is ready to approve: …")
 
 The email that matters most: it asks the firm for its yes. It looks like the head of the proof it
-opens (Hal's proof card).
+opens (Hal's proof card): CoFile's letterhead, the firm named in the context line and the client's
+business as the card's title, as the proof itself names them (decision 2).
 
 ```
 DESKTOP (600)                                                PHONE (390)
-┌──────────────────────── ground: --firm-wash ──────────────────┐   ┌──────────────────────────────┐
-│ ┌────────────────────────── sheet ─────────────────────────┐ │   │           [⌂≈]               │
-│ │                          [⌂≈]                            │ │   │     Harbor & Pine CPA        │
-│ │                    Harbor & Pine CPA                     │ │   │ ════════════════════════════ │
-│ │ ════════════════════════════════════════════════════════ │ │   │ ──────────────────────────── │
-│ │ ──────────────────────────────────────────────────────── │ │   │ Your proof is ready to       │
-│ │ Your proof is ready to approve:          26 / 32, 600    │ │   │ approve:          24 / 30    │
-│ │ NJ llc formation: Two Sisters Bakery LLC  18 / 26 Graphite│ │   │ NJ llc formation: Two        │
-│ │ ┌┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┐  │ │   │ Sisters Bakery LLC           │
-│ │ ┆ ◌ Rehearsal: nothing will be filed or paid, even if  ┆  │ │   │ ┌┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┐ │
-│ │ ┆   you approve.                    (rehearsals only)  ┆  │ │   │ ┆ ◌ Rehearsal: nothing …   ┆ │
-│ │ └┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┘  │ │   │ └┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┘ │
+┌──────────────────────── ground: Cotton 2 ────────────────────┐   ┌──────────────────────────────┐
+│ ┌────────────────────────── sheet ─────────────────────────┐ │   │       (stacked lockup)       │
+│ │                   (the stacked lockup)                   │ │   │ ──────────────────────────── │
+│ │ ──────────────────────────────────────────────────────── │ │   │ Harbor & Pine CPA            │
+│ │ Harbor & Pine CPA                     small 600 Graphite │ │   │ Your proof is ready to       │
+│ │ Your proof is ready to approve:          Georgia 26 / 32 │ │   │ approve:          24 / 30    │
+│ │ NJ llc formation: Two Sisters Bakery LLC         18 / 26 │ │   │ NJ llc formation: Two        │
+│ │ ┌┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┐ │ │   │ Sisters Bakery LLC           │
+│ │ ┆ ◌ Rehearsal: nothing will be filed or paid, even if  ┆ │ │   │ ┌┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┐ │
+│ │ ┆   you approve.                    (rehearsals only)  ┆ │ │   │ ┆ ◌ Rehearsal: nothing …   ┆ │
+│ │ └┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┘ │ │   │ └┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┘ │
 │ │ Your proof is ready. Open the link to see every detail   │ │   │ Your proof is ready. Open    │
 │ │ and every fee, exactly as they'll go to the state, then  │ │   │ the link to see every detail │
 │ │ approve it or ask for changes. Nothing is filed or paid  │ │   │ and every fee, …             │
@@ -1607,36 +1675,37 @@ DESKTOP (600)                                                PHONE (390)
 │ │ │ Total to the state .......................  $103.50  │ │ │   │ [     Open your proof      ] │
 │ │ │                                             ═══════  │ │ │   │ Or paste this link into …    │
 │ │ └──────────────────────────────────────────────────────┘ │ │   │ ┌ review page ─────────────┐ │
-│ │ [ Open your proof ]   --firm-fill, 56 px                  │ │   │ │  (thumbnail, 100%)       │ │
+│ │ [ Open your proof ]   Brass, 56 px                       │ │   │ │  (thumbnail, 100%)       │ │
 │ │ Or paste this link into your browser:                    │ │   │ └──────────────────────────┘ │
 │ │ https://‹host›/approve/‹token›          Mono 14 Graphite │ │   │ Attached is a picture of …   │
-│ │ ──────────────────────────────────────────────────────── │ │   │            ────              │
-│ │ ┌ 160 ──────┐  Attached is a picture of the state's own  │ │   │         with CoFile          │
+│ │ ──────────────────────────────────────────────────────── │ │   │ ──────────────────────────── │
+│ │ ┌ 160 ──────┐  Attached is a picture of the state's own  │ │   │ CoFile · the filing desk …   │
 │ │ │ review    │  review page, filled in with your details; │ │   └──────────────────────────────┘
 │ │ │ page      │  every value on it is also listed as text  │ │
 │ │ │ thumbnail │  on the proof. When we file, we go ahead … │ │
 │ │ └───────────┘                              small 15 / 23 │ │
-│ │                          ────                            │ │
-│ │                       with CoFile                        │ │
+│ │ ──────────────────────────────────────────────────────── │ │
+│ │ CoFile · the filing desk behind your firm                │ │
 │ └──────────────────────────────────────────────────────────┘ │
 └──────────────────────────────────────────────────────────────┘
 ```
 
 (D4's example data. The link's path is a placeholder.)
 
-- **Headline**: "Your proof is ready to approve:" / the filing title.
+- **The context line** "Harbor & Pine CPA", then the **headline**: "Your proof is ready to
+  approve:" / the filing title.
 - **The rehearsal band**, on rehearsals only.
 - **The body**, one paragraph exactly as written.
 - **The proof card** (Hal), 24 px under the body: white, 1 px Rule, padding 20 px 24 px. The
-  client's business name in the heading face 600 at 22 / 28 (as `proof-title` heads the proof
-  itself), the filing type title under it in `small` Graphite, and at the right the Your-turn chip
-  "Ready to approve" (1 px `--firm-ink` border, `--firm-ink` text 14 / 18 600, the ◆ lozenge in
-  `--firm`, square-cut corners in Outlook). On phones the chip drops under the title. The card is
-  not a link; the button is the one way in. The event already carries the proof's fee lines, so
-  the card adds one row: "Total to the state" with dot leaders and their sum at 18 / 26 tabular,
-  the single rule above it and the double rule under it, exactly as the proof sets it ("$103.50" in
-  D4's example). Money never moves, in mail as anywhere.
-- **"Open your proof"**, then the link fallback.
+  client's business name in Georgia 22 / 28 Plate Ink (as `proof-title` heads the proof itself),
+  the filing type title under it in `small` Graphite, and at the right the Your-turn chip "Ready to
+  approve" in CoFile's form, as on the dashboard and the desk (Ochre `#855A0C` text 14 / 18 600 on
+  Ochre Tint `#F7EDD8`, the ◆ lozenge in Ochre, square-cut corners in Outlook). On phones the chip
+  drops under the title. The card is not a link; the button is the one way in. The event already
+  carries the proof's fee lines, so the card adds one row: "Total to the state" with dot leaders
+  and their sum at 18 / 26 tabular, the single rule above it and the double rule under it, exactly
+  as the proof sets it ("$103.50" in D4's example). Money never moves, in mail as anywhere.
+- **"Open your proof"** in Brass, then the link fallback.
 - **The state's review page**, when attached ("State review page.png"): 32 px, a 1 px Rule, 24 px,
   then a 160 px-wide thumbnail of the attachment shown inline (the same file, referenced by its
   content id, 1 px Rule frame, alt "State review page.png", not a link) beside the product's
@@ -1646,81 +1715,93 @@ DESKTOP (600)                                                PHONE (390)
   Graphite. On phones the thumbnail spans the width above the paragraph (Jun, Elaine, Priya). It is
   the state's real page, sent to the firm as the product's own record, so it is shown as it is,
   never redrawn.
-- **The Imprint**, linked.
+- **CoFile's foot** (10D.4).
+- **To the filing's contact** (a filing with no approvers, whose proof is a platform's white-label
+  proof, 10D.1), the same sheet is set on the firm's Letterhead and sent under the firm's name: the
+  firm's heading face at 600, no context line, the chip in the firm's Your-turn form (1 px
+  `--firm-ink` border, `--firm-ink` text, the ◆ in `--firm`), "Open your proof" in `--firm-fill`,
+  and nothing after the review page.
 
 ### 10D.7 Documents back ("Completed: …"), with the EIN
 
 The papers come home (the foundation's moment 5), so this is the one filing email with a picture:
-the engraved vignette of a returned envelope (D1, kind 4), in Graphite line as on a firm's pages.
+the engraved vignette of a returned envelope (D1, kind 4), in Plate Ink line like the blank plate
+on CoFile's welcome emails, on the firm's copy (decision 35). The firm's copy is on CoFile's
+letterhead; the client's copy, when the firm sends documents to its client, is on the firm's
+(10D.1).
 
 ```
 DESKTOP (600)
 ┌──────────────────────────────── sheet ─────────────────────────────────┐
-│                               [⌂≈]                                     │
-│                         Harbor & Pine CPA                              │
-│ ═══════════════════════════════════════════════════════════════════   │
-│ ───────────────────────────────────────────────────────────────────   │
-│ Completed:                                                26 / 32      │
-│ NJ llc formation: Two Sisters Bakery LLC                  18 / 26      │
+│                         (CoFile's letterhead)                          │
+│ Harbor & Pine CPA                                   small 600 Graphite │
+│ Completed:                                          Georgia 26 / 32    │
+│ NJ llc formation: Two Sisters Bakery LLC            18 / 26 Graphite   │
 │                                                                        │
 │ This filing is complete (state reference ‹reference›).    17 / 27,     │
 │                                                           ref in Mono  │
 │                          ┌────────────┐                                │
 │                          │  ✉ ⟋ (the  │   engraved vignette, 120 × 80, │
-│                          │  envelope) │   Graphite line, alt ""        │
+│                          │  envelope) │   Plate Ink line, alt ""       │
 │                          └────────────┘                                │
 │ Documents:                                                15 / 23 600  │
-│ ────────────────────────────────────────────────────────────────────  │
+│ ────────────────────────────────────────────────────────────────────   │
 │ [▤]  Certificate of Formation                             17 / 24 600  │
-│ ────────────────────────────────────────────────────────────────────  │
+│ ────────────────────────────────────────────────────────────────────   │
 │ [▤]  CP 575 EIN confirmation letter                                    │
 │      ┌ value plate ─────────────────────┐                              │
 │      │ EIN  00-0000000                  │   Mono 28 / 34 600, tabular  │
 │      └──────────────────────────────────┘                              │
-│ ────────────────────────────────────────────────────────────────────  │
-│ They're attached. You can also download them from the filing page.    │  small, Graphite
-│ [ Open ]                                                               │
+│ ────────────────────────────────────────────────────────────────────   │
+│ They're attached. You can also download them from the filing page.     │  small, Graphite
+│ [ Open ]                                                    Brass      │
 │ Or paste this link into your browser: …                                │
-│                              ────                                      │
-│                           with CoFile                                  │
+│ ────────────────────────────────────────────────────────────────────── │
+│ CoFile · the filing desk behind your firm                              │
 └────────────────────────────────────────────────────────────────────────┘
 ```
 
 (D4's example documents and EIN. The formation document's name comes from the state's file.)
 
-- **Headline**: "Completed:" / the filing title.
+- **The context line**, then the **headline**: "Completed:" / the filing title.
 - **The body's first paragraph** as written: "This filing is complete (state reference
   ‹reference›)." with the reference in Mono inside the sentence (5.5), or "This filing is
   complete." when there is none.
 - **When documents came back**: the envelope vignette, centred, 24 px below the body, then
   "Documents:" in `small` 600 Graphite and one document row per document, in the product's order,
   named by the product's labels.
-- **The EIN** (decisions file): when the documents include the IRS's CP 575, its row carries a value
+- **The EIN** (decision 34): when the documents include the IRS's CP 575, its row carries a value
   plate under the name: "EIN" and the number in Mono 28 / 34 600 (24 / 30 on phones), the largest
   figure in the email, because a firm and its client will use that number for as long as the
   business lives (Greta, Elaine). The number is read from the filing record, beside the letter that
-  proves it.
+  proves it. If an EIN was issued but the CP 575 wasn't saved, this email has no row to carry it,
+  and the fallback (10D.8) sends the number on its own.
 - **After the list**, in `small` Graphite, the product's closing words: "They're attached.", "‹n›
   more is too large to attach." or "‹n› more are too large to attach." when some didn't fit, and
   "You can also download them from the filing page." when the firm has a desk.
 - **When nothing has come back yet**: the product's "The state's documents will follow once it
   sends them." as a body paragraph, with no vignette and no list.
-- **"Open"** (the product's default label; a better one is listed in 10D.18) to the filing page on
-  the firm's desk, when there is one; otherwise no button.
-- **The Imprint**: linked when this copy goes to the firm, plain when it goes to the client.
+- **"Open"** in Brass (the product's default label; a better one is listed in 10D.18) to the filing
+  page on the firm's desk, when there is one; otherwise no button. Then CoFile's foot.
+- **The client's copy** is the same sheet on the firm's Letterhead, sent under the firm's name:
+  the same headline, body, document rows and EIN plate, and nothing of CoFile. It has no vignette
+  (the engravings belong to CoFile's letterhead, decision 35), and no button and no "You can also
+  download them from the filing page.", because the filing page is on the firm's desk, which a
+  client can't open (a build change: the notifier adds both for every recipient today).
 - **Phone**: the vignette at 96 × 64; the plate full width.
 
-### 10D.8 EIN issued (a stand-alone email, parked)
+### 10D.8 EIN issued (the fallback)
 
 The product has the status "EIN issued" and the engine emits `filing.ein_filed`, but no email for
 it and no words (Hal, Dev, Greta, Jun, Rosa, Tomás, Amara, Marcus and Priya all found the same).
-In this design the EIN reaches the firm in the documents-back email (10D.7). The stand-alone email
-is drawn here so it can ship the day its words exist, for the case where an EIN is issued during a
-formation's run, days before the formation's own papers come back.
+The EIN normally reaches the firm in the documents-back email, on the CP 575's row (10D.7). This
+stand-alone email is the fallback (decision 34): it goes out only when the EIN was issued but the
+IRS's letter wasn't saved, which shouldn't happen, so the firm is never left without the number.
 
 ```
 ┌──────────────────────────────── sheet ─────────────────────────────────┐
-│                          (the firm's Letterhead)                       │
+│                         (CoFile's letterhead)                          │
+│ Harbor & Pine CPA                                   small 600 Graphite │
 │ [copy needed: the headline]                               26 / 32      │
 │ NJ llc formation: Two Sisters Bakery LLC                  18 / 26      │
 │ [copy needed: the body, one or two sentences]             17 / 27      │
@@ -1728,24 +1809,28 @@ formation's run, days before the formation's own papers come back.
 │ │ EIN                                                   small      │   │
 │ │ 00-0000000                          Mono 36 / 44 600, tabular    │   │
 │ └──────────────────────────────────────────────────────────────────┘   │
-│ [▤]  CP 575 EIN confirmation letter     (when the letter is in)        │
-│ [ Open ]                                                               │
-│                              ────                                      │
-│                           with CoFile                                  │
+│ [ Open ]                                                    Brass      │
+│ Or paste this link into your browser: …                                │
+│ ────────────────────────────────────────────────────────────────────── │
+│ CoFile · the filing desk behind your firm                              │
 └────────────────────────────────────────────────────────────────────────┘
 ```
 
 - Subject, headline and body `[copy needed]`; the EIN plate at its largest (36 / 44, 28 / 34 on
-  phones); the CP 575 as a document row when it is already attached; "Open" to the filing page.
-- It would be sent on `filing.ein_filed` only while the filing is still running, so an EIN-only
-  filing, whose completion email already carries the EIN, never sends two.
+  phones), the one thing the email carries besides its words. No document row: the letter is what's
+  missing. "Open" to the filing page on the firm's desk, when there is one, then CoFile's foot.
+- **When it is sent**: once, when a filing completes with an EIN on its record (from
+  `filing.ein_filed`) and no CP 575 among its documents, right after the documents-back email and to
+  the same recipients (10D.1). A filing whose CP 575 was saved never sends it.
+- **The client's copy**, when the documents go to the client: the firm's Letterhead, no button, as
+  in 10D.7.
 
 ### 10D.9 Card security code needed ("Card security code needed: …")
 
 ```
 ┌──────────────────────────────── sheet ─────────────────────────────────┐
-│                (the firm's Letterhead, or CoFile's for the             │
-│                 subscriber's own card)                                 │
+│                         (CoFile's letterhead)                          │
+│ Harbor & Pine CPA                                   small 600 Graphite │
 │ Card security code needed:                                             │
 │ NJ llc formation: Two Sisters Bakery LLC                               │
 │ This filing is approved and ready to pay the state with ‹card›. A      │
@@ -1757,34 +1842,41 @@ formation's run, days before the formation's own papers come back.
 │ ┌ card slip ───────────────────────────────────────────────────────┐   │
 │ │ ‹Card name› ending ‹1234›                       ◐ Ready to pay   │   │
 │ └──────────────────────────────────────────────────────────────────┘   │
-│ [ Enter security code ]                                                │
+│ [ Enter security code ]                                     Brass      │
 │ Or paste this link into your browser: …                                │
-│                              ────                                      │
-│                           with CoFile          (firm's version only)   │
+│ ────────────────────────────────────────────────────────────────────── │
+│ CoFile · the filing desk behind your firm                              │
 └────────────────────────────────────────────────────────────────────────┘
 ```
 
-- **Letterhead by owner**: a firm's card gets the firm's Letterhead and the button opens the
-  desk's Ready to pay; the subscriber's own card gets CoFile's letterhead and the button opens the
-  dashboard's (10C.6).
+- **Always CoFile's letterhead** (decision 2): the card's owner is the firm (its own card) or the
+  subscriber's staff (the subscriber's own), never a client. The context line names the firm the
+  filing belongs to. A firm's card: the button opens the desk's Ready to pay; the subscriber's own
+  card: the dashboard's (10C.6).
 - **The body** as written, the card's name in 600 where it appears in the sentence.
 - **The card slip** under the body: white, 1 px Rule, padding 16 px 20 px, the card's name and last
   four in 17 / 24 600 and the Attention chip "Ready to pay" (◐, Ochre `#855A0C` on Ochre Tint, the
   status color every surface shares). No card artwork, no brand logo, no padlock.
-- **"Enter security code"** in the letterhead's button color, then the fallback link.
+- **"Enter security code"** in Brass, then the fallback link and CoFile's foot.
 - Nothing in the email asks for the code; the only field for it is on the Ready to pay page.
 
 ### 10D.10 More information needed ("More information needed: …")
 
+- **By recipient** (10D.1): to the firm's approvers, when the firm must act, on CoFile's
+  letterhead with the context line; to the filing's contact, as the request for details, on the
+  firm's Letterhead only, under the firm's name.
 - Headline "More information needed:" / the filing title.
 - The body is the product's sentence with its list set as a list (Hal, Priya): "Before we can file,
-  we still need:", then each missing item's label on its own line (17 / 27, a 7 px lozenge in
-  `--firm` hung 16 px into the margin, 8 px between items), then "Please send these details to
+  we still need:", then each missing item's label on its own line (17 / 27, a 7 px lozenge hung
+  16 px into the margin, 8 px between items: Ochre on CoFile's letterhead, a list waiting on the
+  reader as on Ready to pay, 10C.6; `--firm` on the firm's), then "Please send these details to
   whoever is preparing this filing for you. Nothing is filed or paid until then."
 - No button (the product sends no link).
-- The Imprint, linked or plain by recipient.
 
 ### 10D.11 Changes requested, and Rejected by the state
+
+Both follow the recipient (10D.1): CoFile's letterhead with the context line for the firm, the
+firm's Letterhead only for a client. The settings below are the same on both.
 
 **"Changes requested: …".** The body's sentence opens the email, "We received your change
 request:", then the comment as a quote: 17 / 27 italic in the body face, Plate Ink, with a 3 px
@@ -1835,10 +1927,11 @@ filing belongs to, in `small` 600 Graphite: the firm's name from the filing, dat
 - The appended "Questions? Email hello@cofile.app." becomes the support line in the foot.
 
 **Replies to a request sent by email.** "Ready to check: ‹subject›" goes to the firm's staff member
-who sent it, on the **firm's Letterhead** (the link opens their own desk): the product's reply ("We
-got your request. Open the link to see the form filled in from your message, check every answer, add
-what's missing, and send it. …") and "Open". "Filing by email works from a firm's portal" goes to a
-subscriber's user, on **CoFile's letterhead**, body only: "Sending a filing request this way works
+who sent it, on **CoFile's letterhead** with the context line naming the firm (the link opens their
+own desk, which is in CoFile's look): the product's reply ("We got your request. Open the link to
+see the form filled in from your message, check every answer, add what's missing, and send it. …")
+and "Open" in Brass. "Filing by email works from a firm's portal" goes to a subscriber's user, on
+**CoFile's letterhead**, body only: "Sending a filing request this way works
 for people who sign in to a firm's filing portal. Start the filing from your dashboard, or through
 the API." Both thread under the person's own message (the same subject line), so they read as
 answers.
@@ -1882,17 +1975,19 @@ the account is a CoFile account.
 
 ### 10D.15 Invitations and welcomes
 
-**"You're invited to ‹firm›'s filing portal"** is an invitation into the firm's own room, so it
-carries the **firm's Letterhead** (all ten): the one-line headline, the body as written ("‹person›
-has given you access to ‹firm›'s filing portal. Open the link below to choose your password; it
-works for 7 days. Then log in with this email." or "You've been given access …"), "Set my password"
-in `--firm-fill`, the fallback link and the linked Imprint.
+**"You're invited to ‹firm›'s filing portal"** is an invitation to work on the firm's filing desk.
+The ten designers gave it the firm's Letterhead; the desk is now in CoFile's look (decision 2), and
+the email goes to a person at the firm, so it carries **CoFile's letterhead** and is sent as
+"CoFile", with the firm named in its subject and body: the one-line headline, the body as written
+("‹person› has given you access to ‹firm›'s filing portal. Open the link below to choose your
+password; it works for 7 days. Then log in with this email." or "You've been given access …"),
+"Set my password" in Brass, the fallback link and CoFile's foot. No picture.
 
 **"Your partner account is open"** and **"Your CoFile account is ready"** welcome a new customer,
-on **CoFile's letterhead**, with the one picture CoFile's own mail carries: the engraved vignette of
-the **blank Name Plate** (D1, kind 4), 160 × 64 CSS px, Plate Ink line on white, centred 24 px
-under the letterhead rule, `alt=""`. The plate waits for their name: the shop's promise, one
-picture, no words added (Hal).
+on **CoFile's letterhead**, with the second of the two pictures CoFile's mail carries (10D.7 has
+the envelope): the engraved vignette of the **blank Name Plate** (D1, kind 4), 160 × 64 CSS px,
+Plate Ink line on white, centred 24 px under the letterhead rule, `alt=""`. The plate waits for
+their name: the shop's promise, one picture, no words added (Hal).
 
 ```
 ┌──────────────────────────────── sheet ─────────────────────────────────┐
@@ -1933,8 +2028,8 @@ around the sheet goes to Night.
 - For Outlook.com and the new Outlook, the same restatements are repeated under `[data-ogsb]` and
   `[data-ogsc]` selectors.
 - For clients that force their own dark mode (Gmail's apps, Outlook for Windows in dark), the design
-  is built to survive: the logo carries its baked white plate; the Imprint, the headline and every
-  value are live text that the client re-inks legibly; the Firm Rule's table rows and the button
+  is built to survive: the logo carries its baked white plate; the headline and every value are
+  live text that the client re-inks legibly; the Firm Rule's table rows and the button
   keep a color the client may shift but never lose; nothing depends on an image's background.
 
 | Client | Dark mode | What the reader sees |
@@ -1953,14 +2048,17 @@ and with a screen reader (VoiceOver on iOS Mail, NVDA with Outlook).
 ### 10D.17 The plain-text part
 
 Every email ships a plain-text part with the same words in the same order (Elaine, Greta, Rosa):
-the letterhead's name on the first line, a blank line, the headline (both halves on their own
-lines), a blank line, the rehearsal line when there is one, the body's paragraphs, the list items
-each on its own line led by "- ", the button's label on its own line with the link on the next,
-and for firm emails "with CoFile" as the last line.
+the letterhead's name on the first line ("CoFile", or the firm's name on the firm's Letterhead), a
+blank line, the context line on CoFile's letterhead, the headline (both halves on their own lines),
+a blank line, the rehearsal line when there is one, the body's paragraphs, the list items each on
+its own line led by "- ", the button's label on its own line with the link on the next, and on
+CoFile's letterhead the foot's line (and the support line, when there is one) at the end. An email
+on the firm's Letterhead ends with its last paragraph or link: nothing of CoFile follows.
 
 ```
-Harbor & Pine CPA
+CoFile
 
+Harbor & Pine CPA
 Your proof is ready to approve:
 NJ llc formation: Two Sisters Bakery LLC
 
@@ -1974,7 +2072,7 @@ open your proof.
 Open your proof
 https://‹host›/approve/‹token›
 
-with CoFile
+CoFile · the filing desk behind your firm
 ```
 
 Lines are left unwrapped in the file (mail clients wrap them); the wrap above is for this page.
@@ -1985,14 +2083,18 @@ Lines are left unwrapped in the file (mail clients wrap them); the wrap above is
 
 | Where | What |
 |---|---|
-| EIN issued (10D.8), if the owner wants a stand-alone email | Its subject, headline and body |
+| EIN issued (10D.8), the fallback sent only when the IRS letter wasn't saved | Its subject, headline and body |
+| Setup on the filing desk, the new step that connects the firm's own email domain (the firm's-pages part designs the step; 10D.1 depends on it) | Its words: the step's title, its explanation, its field labels and help, its results and errors |
 | "Completed: …" (10D.7) | Optional: a button label for the filing page; the product's default "Open" is used until then |
 | Every filing email's subject and its headline's second line | Whether the filing title uses the desk's titles ("New Jersey LLC formation") instead of the engine's "NJ llc formation" (also in 10C.21) |
-| The firm's emails' sender name, if the owner prefers it to name CoFile too | The wording, e.g. a "via" form (`DECISIONS.md`) |
 
 **Copy notes.** The product's link fallback "Or paste this link into your browser:" is 13 px in
 `src/comms/resend.ts`; the design sets it at 15 px (the floor for a line of more than six words).
-The reply to an emailed request says "your client approves" (10C.21).
+The reply to an emailed request says "your client approves" (10C.21). "More information needed"
+and "Rejected by the state" have one body each, written to a client ("Please send these details to
+whoever is preparing this filing for you.", "Contact whoever prepared this filing for you to fix
+it."), but they go to the firm's approvers whenever the firm has them (`src/comms/notifier.ts`), and
+now on CoFile's letterhead; the copy owner may want a firm's version of each sentence.
 
 ---
 
@@ -2010,8 +2112,17 @@ The reply to an emailed request says "your client approves" (10C.21).
   margins and gaps to 24 px below 1440.
 - **Who the "admin" notices go to.** Several designers put the filing company's notices ("Choose a
   name", "Review before submit" and the rest) in the firm's letterhead, but `renderMessage` sends
-  them to the subscriber's own staff, never to a firm. 10D puts them on CoFile's letterhead; the
-  choice is in the decisions file.
-- **The Imprint with another platform's name.** On a deployment that sets `PLATFORM_NAME`, the
-  hosted page's Imprint reads "with ‹name›" with the name typeset, never in CoFile's wordmark
-  (10C.18).
+  them to the subscriber's own staff, never to a firm. They are on CoFile's letterhead, with the
+  firm named in the context line, as the owner confirmed (decision 33); decision 2 now puts every
+  email to the firm there too.
+- **Emails split by recipient (a build change).** The notifier renders one message per event and
+  sends the same words to every recipient. 10D.1 needs each copy to know whether its recipient is
+  the firm (an approver, a partner firm's contact, a card's owner, a staff member) or the firm's
+  client (the filing's contact), and to pass that to the template, which then picks the letterhead,
+  the sender name, the From address (the firm's own domain once it is connected and verified) and
+  the Reply-To, and, on a client's copy of documents back, leaves off the desk link and its line
+  (10D.7). The stand-alone EIN email is new engine work too, as the fallback in 10D.8.
+- **The stage track on the dashboard.** 10C.5 gives the dashboard's Filings the desk's stage track
+  under each status chip, so the two ledgers read alike; the dashboard's page
+  (`web/app/dashboard/(app)/filings/page.tsx`) doesn't render it yet. "Sent by" stays the desk's:
+  the dashboard's column names the firm.

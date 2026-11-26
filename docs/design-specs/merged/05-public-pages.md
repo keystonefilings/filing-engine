@@ -164,9 +164,19 @@ PHONE: h2 34/38 · lede 19/30 · buttons full width, stacked 12 px apart
 - A moving picture plays once per page view when 40% in view and then rests in its final frame,
   with the 24 px replay control in its caption row (D2.2). With reduced motion every picture is
   in its final state.
-- Photographs are the foundation's commissions (C1–C12, D1). Engraved vignettes appear only on
-  the account and system pages here (D1.4); this part names three, for the art-direction writer
-  to commission with the rest of the set:
+- Photographs are the foundation's commissions (C1–C12, D1). **Staged photographs carry no
+  caption marking them as examples** (Ana, the firm owner, the doors, the engraver film, the
+  printer's proof, the stage): only product pictures carry their example labels, and a photograph
+  inside a labelled product picture shares its label (decisions file). The team's photographs
+  carry the person's name and role where this part shows one, never "example".
+- Pictures of CoFile's own working pages (the filing desk, a draft on the desk, the proof the firm
+  approves) are in **CoFile's look**, the same for every firm: the example firm appears in them
+  as content (its name, and its logo small in the desk's account label), never as their
+  letterhead, and its colors and font never touch them (2.4). The firm's brand appears only in
+  pictures of the pages its clients see: the client page, the firm's page for a filing, an email
+  to a client.
+- Engraved vignettes appear only on the account and system pages here (D1.4); this part names
+  three, for the art-direction writer to commission with the rest of the set:
 
 | # | Vignette | Used on |
 |---|---|---|
@@ -254,7 +264,7 @@ DESKTOP 1440 (Cotton)                                                  showpiece
   │ a text           │     │ │                          │ │    │ work, from the   │
   │ 4:5, 320 × 400   │     │ │ 4:5, 320 × 400           │ │    │ side · 320 × 400 │
   └──────────────────┘     │ └──────────────────────────┘ │    └──────────────────┘
-  Ana Ortiz · text …       │ Sample proof · test details …│    [caption: copy needed]
+  (no caption)             │ (no caption)                 │    [name and role: copy needed]
                            │                              │
   Your client asks.        │ You approve it.              │    CoFile files it.  ← display-s
   They fill in a short     │ You get the proof: one page  │    It fills in the      26/32
@@ -271,15 +281,20 @@ DESKTOP 1440 (Cotton)                                                  showpiece
 - **The middle column is a sheet** (Hal): Sheet `#FFFFFF`, `--e-sheet`, `--r-sheet`, 32 px inner
   margins on all sides, extending from 32 px above the numeral to 32 px below the paragraph. The
   outer two columns carry the same 32 px inner offset without the sheet, so the three numerals,
-  photographs and leads sit on the same lines. It's the firm's step, and the firm's sheet.
+  photographs and leads sit on the same lines. It's the firm's step, set on a plain white sheet
+  like the proof it describes, and like that proof it's in CoFile's look (10A.1.3).
 - **Photographs** 4:5 at 320 × 400 (the column less its inner margins), square-cut, 24 px to the
-  lead. Captions 14/20 Graphite 12 px under each: step 1 "Ana Ortiz · text message · example"
-  (her phone shows the text in CoFile's neutral bubble, D1 C5); step 2 "Sample proof · test
-  details · not a real business" (the proof is composited on her screen); step 3 the person's name
-  and role `[copy needed]` (C10: real staff with consent).
+  lead. Steps 1 and 2 are staged photographs and carry **no caption** (10A.0.5); step 3 carries
+  the person's name and role in 14/20 Graphite 12 px under it `[copy needed]` (C10: real staff
+  with consent). The three columns share one row grid (numeral, photograph, caption, lead,
+  paragraph), so the caption row stays empty under steps 1 and 2 and the three leads still sit on
+  one line.
   - Step 1 uses a second frame from the C5 session, closer, on the hands and the phone, so the
-    home page's Requests photograph isn't repeated.
-  - Step 2 is C8, cropped to 4:5 on her face, the reading glasses and the screen.
+    home page's Requests photograph isn't repeated. Her phone shows the text in CoFile's neutral
+    bubble (D1 C5).
+  - Step 2 is C8, cropped to 4:5 on her face, the reading glasses and the screen. The proof
+    composited on her screen is the proof in CoFile's look, as Home 4 shows it (the firm and
+    client named in its head as text, no firm letterhead).
   - Step 3 is C10's side-on frame at the desk.
 - **Leads** "Your client asks.", "You approve it.", "CoFile files it." in `display-s` (Miller Text
   26/32), 12 px to the paragraph in `body`.
@@ -301,24 +316,25 @@ PHONE 390
 │ Your client asks.  22/28     │
 │ They fill in a short form …  │ 17/27
 │ ┌──────────────────────────┐ │
-│ │ C5 alt frame, 4:3        │ │ 350 × 262
+│ │ C5 alt frame, 4:3        │ │ 350 × 262, no caption
 │ └──────────────────────────┘ │
-│ Ana Ortiz · text message · … │
 │                              │ 48
 │▐ 2 ─────── sheet, edge to edge│
 │▐ You approve it.             │
 │▐ You get the proof: one page …│
-│▐ [ C8, 4:3 ]                 │
-│▐ Sample proof · test details  │
+│▐ [ C8, 4:3 ]   no caption    │
 │                              │ 48
 │ 3 · CoFile files it. · …     │
+│ [ C10, 4:3 ] name and role   │
 └──────────────────────────────┘
 ```
 
 ### 10A.1.3 The proof (`#proof`): you've approved a proof before
 
 The page's moment (D3): a letterhead proof from the printer becomes the filing proof, and the
-list points at it (Marcus M10 and M11, Elaine's numbered callouts, Hal's printer's proof).
+list points at it (Marcus M10 and M11, Hal's printer's proof). The filing proof is in CoFile's look,
+as the firm gets it and as Home 4 shows it: the firm and its client named in its head as text, no
+firm letterhead, and nothing numbered beside it.
 
 h2 "You see what the state will see, before the state does." · the lede "You've approved a proof
 before: business cards, letterhead, an invitation at the printer. …" (as written) · the six items.
@@ -328,86 +344,96 @@ DESKTOP 1440 (Cotton)                                                           
  c1–c5 (486)                                c7–c12 (588) + bleed 120
 ┌──────────────────────────────────┐      ┌────────────────────────────────────────────┐
 │ You see what the state will see, │      │ ┌ the proof (picture size, 560) ─────────┐ │
-│ before the state does.  display-m│      │ │        [H&P]  Harbor & Pine CPA         │ │
-│                                  │      │ │ ═══════════════════════════════════════ │ │
+│ before the state does.  display-m│      │ │ Harbor & Pine CPA · Two Sisters Bakery  │ │
+│                                  │      │ │ LLC                  ◆ Ready to approve │ │
 │ You've approved a proof before:  │      │ │ ─────────────────────────────────────── │ │
-│ business cards, letterhead, an   │      │ │ Two Sisters Bakery LLC  ◆ Ready to…     │ │
-│ invitation at the printer. …     │  [1] │ │ Business name   TWO SISTERS BAKERY LLC  │ │
-│ (lede 22/34, as written)         │      │ │ Members         Ana Ortiz, Lucia Ortiz… │ │
-│                                  │      │ │ Main business…  88 Grove St, Jersey…    │ │
-│ ┌ C9, 3:2, 486 × 324 ──────────┐ │  [2] │ │ Formation filing fee ·········· $100.00 │ │
-│ │ the printer's proof, pencil  │ │      │ │ NJ portal fee, by card ··········· $3.50│ │
-│ │ initials, a loupe            │ │      │ │ ─────────────────────────────────────── │ │
-│ └──────────────────────────────┘ │      │ │ Total to the state ············ $103.50 │ │
-│                                  │      │ │ ═══════════════════════════════════════ │ │
-│ [1] Every name, address and      │  [3] │ │ New Jersey's own review page, filled in │ │
-│     answer, in the order the     │      │ │ ┌ Business Name  TWO SISTERS BAKERY ──┐ │ │
-│     state asks for them          │      │ │ └ Designator     LLC ───────────────────┘ │ │
-│ [2] Every fee in dollars and …   │  [4] │ │ Authorizations                          │ │
-│ [3] Where the state's website …  │      │ │ I authorize the filing company to pay   │ │
-│ [4] Each statement on the form,  │      │ │ the state fee shown on the proof. ▬▬▬▬  │ │
-│     and who made it, …           │  [5] │ │ [ Approve for filing ]  (Harbor)        │ │
-│ [5] One button. Until it's       │      │ │                 ────                    │ │
-│     pressed, nothing is …        │      │ │              with CoFile                │ │
-│ ─────────                        │      │ └─────────────────────────────────────────┘ │
-│ Like reviewing a return before   │      │ Sample proof · test details · not a real…  │
-│ you e-file it: nothing goes to   │      └────────────────────────────────────────────┘
-│ the state until you've signed    │       callout tiles [1]–[5] hang in the 28 px left
-│ off.   (lede, italic)            │       margin of the sheet, on Cotton
+│ business cards, letterhead, an   │      │ │ Business name   TWO SISTERS BAKERY LLC  │ │ (1)
+│ invitation at the printer. …     │      │ │ Members         Ana Ortiz, Lucia Ortiz… │ │
+│ (lede 22/34, as written)         │      │ │ Main business…  88 Grove St, Jersey…    │ │
+│                                  │      │ │ Formation filing fee ·········· $100.00 │ │ (2)
+│ ┌ C9, 3:2, 486 × 324 ──────────┐ │      │ │ NJ portal fee, by card ··········· $3.50│ │
+│ │ the printer's proof, pencil  │ │      │ │ ─────────────────────────────────────── │ │
+│ │ initials, a loupe            │ │      │ │ Total to the state ············ $103.50 │ │
+│ └──────────────────────────────┘ │      │ │ ═══════════════════════════════════════ │ │
+│  no caption                      │      │ │ New Jersey's own review page, filled in │ │ (3)
+│                                  │      │ │ ┌ Business Name  TWO SISTERS BAKERY ──┐ │ │
+│ ◆ Every name, address and answer,│      │ │ └ Designator     LLC ───────────────────┘ │ │
+│   in the order the state asks for│      │ │ Authorizations                          │ │ (4)
+│   them                           │      │ │ I authorize the filing company to pay   │ │
+│ ◆ Every fee in dollars and …     │      │ │ the state fee shown on the proof. ▬▬▬▬  │ │
+│ ◆ Where the state's website …    │      │ │┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓│ │ (5) shown pointed at:
+│ ◆ Each statement on the form, …  │      │ │┃        [ Approve for filing ]         ┃│ │ 2 px Plate Ink outline,
+│ ◆ One button. Until it's         │      │ │┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛│ │ Brass Tint wash
+│   pressed, nothing is … ← focused│      │ └─────────────────────────────────────────┘ │
+│ ─────────                        │      │ Sample proof · test details · not a real…  │
+│ Like reviewing a return before   │      └────────────────────────────────────────────┘
+│ you e-file it: nothing goes to   │       (1)–(5) are notes for this wireframe only:
+│ the state until you've signed    │       nothing is drawn beside the sheet
+│ off.   (lede, italic)            │
 └──────────────────────────────────┘
 ```
 
 - **Words** c1–c5, top-aligned with the proof's top edge (the column is longer than the picture).
   The lede is `lede`; the printer's photograph **C9** follows it 32 px below at 3:2, 486 × 324,
-  square-cut, its caption `[copy needed]` or none (fictional names only on the cards in it, D1
-  C9). The copy's own comparison, in a picture (Hal, Elaine, Marcus).
-- **The six items** 48 px below the photograph. Items one to five are led by a **callout tile**
-  instead of a lozenge: a 28 × 28 px tile with `--chamfer-s` corners, 1 px Plate Ink border, Sheet
-  fill, its number in Founders Grotesk Text Medium 14/18 tabular, Plate Ink, hung in the margin.
-  Item text `body`, 16 px apart. The sixth item, "Like reviewing a return before you e-file it:
-  nothing goes to the state until you've signed off.", is set apart as the closing remark in
-  `lede` in Miller Text Italic, Plate Ink, under a 40 px Rule hairline 24 px above it, with no
-  marker: it's the line every CPA will recognise (Hal, Elaine, Priya). It stays the last item of
-  the same list.
+  square-cut, with **no caption**: it's a staged photograph (10A.0.5), with fictional names only on
+  the cards in it (D1 C9). The copy's own comparison, in a picture (Hal, Elaine, Marcus).
+- **The six items** 48 px below the photograph, each led by the list's 7 px Brass Line lozenge
+  (10A.0.3), text `body`, 16 px apart. Items one to five point at the proof (below). The sixth
+  item, "Like reviewing a return before you e-file it: nothing goes to the state until you've
+  signed off.", is set apart as the closing remark in `lede` in Miller Text Italic, Plate Ink,
+  under a 40 px Rule hairline 24 px above it, with no marker: it's the line every CPA will
+  recognise (Hal, Elaine, Priya). It stays the last item of the same list.
 - **The picture** c7–c12: the proof at picture size (560 px wide, the proof component's
-  "picture" size from the firm-pages writer, the same as Home 4), showing D4's proof data, plus,
-  on this page only, a short **Authorizations** group above the button, so item four has a place
-  to point to: the product's own legend "Authorizations" (`web/components/IntakeForm.tsx`), the
-  product's own New Jersey statement "I authorize the filing company to pay the state fee shown
-  on the proof." (`web/lib/intake/forms.ts`, `nj-payment`), and who made it as a neutral 96 × 8 px
-  Rule bar, never an invented name (D1.1). The "New Jersey payment screen" slip under the sheet's
-  foot is left off on this page: the list doesn't mention it, and Home 4 owns it.
-- **Callout tiles on the picture**: the same five tiles hang in a 28 px margin left of the sheet,
-  each level with the top of its region (1 the details rows, 2 the fees, 3 the state's review
-  page, 4 the Authorizations group, 5 the button). They're CoFile's annotations, outside the
-  firm's sheet, in Plate Ink; nothing of CoFile's ink touches the proof itself.
-- **Pointing (M11, Marcus).** Hovering or focusing a list item one to five (each is a focusable
-  `button` wrapping the item's words) washes its region on the proof in `--firm-tint` `#DDEEF7`
-  (the proof's own "check this" highlight, 3.6) and fills its two tiles with Plate Ink, numbers in
-  Sheet, in `--t-quick` 120 ms. Leaving clears it. The tour goes at the reader's pace; nothing
-  plays on its own.
-- **The moment: the letterhead proof becomes the filing proof** (Marcus M10, D3), once, when the
-  picture is 40% in view, 1.6 s:
-  1. 0 ms: the sheet lies in place as a **letterhead proof**: Harbor & Pine's centred Letterhead
-     and Firm Rule at the top (exactly as on the proof), below it a letter's body in seven grey
-     Rule bars, and printer's **crop marks** at the four corners (0.5 px Plate Ink, 16 px arms,
-     8 px outside the sheet).
-  2. 0–300 ms: the crop marks fade (`--ease-exit`).
-  3. 200–1100 ms: the Letterhead stays perfectly still; the grey bars set into the proof's rows
-     one by one, 70 ms apart, each with `press-in` (D2): the title row and chip, three detail
-     rows, the fee rows with leaders drawing (`--t-draw`), the total with its single and double
-     rules, the review-page frame, the Authorizations group.
-  4. 1100–1450 ms: the "Approve for filing" button presses in last (it never pulses).
-  5. 1450–1600 ms: the callout tiles fade in beside their regions.
-  Reduced motion and no-JavaScript: the finished proof with its tiles. The replay control sits in
-  the caption row.
-- **Dark mode:** the page goes Night; the proof stays a white sheet with `--e-sheet-dark`; the
-  tiles become Night Ink outlines on Night.
-- **Tablet:** words c1–c8, then the picture c1–c8 (the proof at 560, centred, tiles in its left
-  margin). **Phone:** h2, lede, C9 (350 × 233), the six items (tiles hung in the 20 px margin),
-  then the proof in its phone layout, 318 px wide, keeping a 32 px gutter of Cotton on its left
-  where the five tiles hang at 24 px, level with their regions (so the tiles still never touch the
-  firm's sheet). No hover: the numbers do the pointing.
+  "picture" size from the firm-pages writer, the same as Home 4), in CoFile's look: its head names
+  the firm and its client as text ("Harbor & Pine CPA · Two Sisters Bakery LLC") with the "Ready to
+  approve" chip, then D4's proof data, then "Approve for filing" drawn as the proof's one Brass
+  button at the end, as Home 4 draws it (a picture of a button: `aria-hidden`, inert), and nothing
+  at its foot. On this page only, a short **Authorizations** group sits above the button, so item
+  four has a place to point to: the product's own legend "Authorizations"
+  (`web/components/IntakeForm.tsx`), the product's own New Jersey statement "I authorize the filing
+  company to pay the state fee shown on the proof." (`web/lib/intake/forms.ts`, `nj-payment`), and
+  who made it as a neutral 96 × 8 px Rule bar, never an invented name (D1.1). The "New Jersey
+  payment screen" slip under the sheet's foot is left off on this page: the list doesn't mention
+  it, and Home 4 owns it.
+- **No numbered callouts.** Nothing hangs in the margin beside the sheet and nothing numbers its
+  parts; the list does the pointing (decisions file).
+- **Pointing (M11, Marcus).** Items one to five each point at their part of the proof: one the
+  detail rows, two the fees and the total, three the state's review page, four the Authorizations
+  group, five the button. Each is a focusable `button` wrapping the item's own words, with a short
+  spoken description of the part it shows, linked by `aria-describedby` `[copy needed: five
+  descriptions]`. On hover or keyboard focus, and on tap on touch screens, the matching part of the
+  proof gets a **2 px Plate Ink outline**, 4 px outside the part with `--r-sheet` corners, and a
+  **Brass Tint `#F6EBD0` wash** behind it, fading in over 260 ms (`--ease-settle`); with reduced
+  motion both appear at once. Leaving or blurring the item clears them; on touch, a second tap or a
+  tap on another item does. One part at a time. The outline and wash are CoFile's mark-up on
+  CoFile's own proof, so they're in CoFile's ink, never the firm's color. The tour goes at the
+  reader's pace; nothing plays on its own. The closing remark points nowhere and isn't focusable;
+  without JavaScript the five are plain list items.
+- **The moment: the letterhead proof becomes the filing proof** (Marcus M10, D3; art direction's
+  M13), once, when the picture is 40% in view, 1.6 s:
+  1. 0 ms: the sheet lies in place as a **letterhead proof**, the printer's proof of the firm's own
+     stationery: Harbor & Pine's centred Letterhead and Firm Rule at the top, below it a letter's
+     body in seven grey Rule bars, and printer's **crop marks** at the four corners (0.5 px Plate
+     Ink, 16 px arms, 8 px outside the sheet).
+  2. 0–400 ms: the crop marks fade (`--ease-exit`).
+  3. 200–600 ms: the Letterhead and the grey bars fade out together. **The sheet stays exactly
+     where it is**: the same white sheet becomes the filing's proof, which the firm approves in
+     CoFile's look.
+  4. 400–1200 ms: the proof's head sets (the firm and its client named as text) and "Ready to
+     approve" presses in; then the rows set one by one, 70 ms apart, each with `press-in` (D2):
+     three detail rows, the fee rows with leaders drawing (`--t-draw`), the total with its single
+     and double rules, the review-page frame, the Authorizations group.
+  5. 1160–1600 ms: the "Approve for filing" button presses in last (it never pulses), and the
+     sheet rests.
+  The five items point only once the sheet has rested. Reduced motion and no-JavaScript: the
+  finished proof. The replay control sits in the caption row.
+- **Dark mode:** the page goes Night; the proof stays a white sheet with `--e-sheet-dark`, so the
+  Plate Ink outline and Brass Tint wash stay as they are, on white.
+- **Tablet:** words c1–c8, then the picture c1–c8 (the proof at 560, centred). **Phone:** h2,
+  lede, C9 (350 × 233), the six items, then the proof in its phone layout at the column's full
+  width (350 px). No hover: a tap on an item outlines its part, and the outline stays until the
+  item is tapped again or another item is, so it's waiting when the reader scrolls down to the
+  proof. Nothing scrolls on its own.
 
 ### 10A.1.4 Requests (`#requests`): the text becomes a filing
 
@@ -429,8 +455,8 @@ DESKTOP 1440 (Cotton)
 ┌──────────────────────────────────────────────┐    ┌─────────────────────────────────┐
 │  ╭─────────────╮                              │    │ Clients don't always fill in    │
 │  │ ┌─────────┐ │   ┌─────────────────────────┐│    │ forms. They text you. display-m │
-│  │ │Need an  │ │   │ [H&P] Harbor & Pine CPA ││    │                                 │
-│  │ │LLC for  │ │   │ ════════════════════════ ││    │ Send the request on as it is,   │
+│  │ │Need an  │ │   │ CoFile  [H&P] Harbor & … ││    │                                 │
+│  │ │LLC for  │ │   │ ──────────────────────── ││    │ Send the request on as it is,   │
 │  │ │the bak… │─┼───┤ Draft: New Jersey LLC …  ││    │ by email, text, WhatsApp or     │
 │  │ └─────────┘ │   │ Business name  TWO SIS… ◂││    │ Slack. … (lede, as written)     │
 │  │ Ana Ortiz · │   │ Members  Ana Ortiz, Lu… ◂││    │                                 │
@@ -443,6 +469,12 @@ DESKTOP 1440 (Cotton)
 ```
 
 - Slab 260 × 520 px; draft sheet 400 px wide; both sit on Cotton, the sheet with `--e-sheet`.
+- **The draft is a page of the desk, so it's in CoFile's look** (10A.0.5), the same crop as Home 3:
+  the desk's compact header (CoFile's lockup, then the account label with Harbor & Pine's logo
+  small and its name) over CoFile's 1 px Plate Ink rule, never the firm's Letterhead or Firm Rule.
+  The answers CoFile filled in are marked as the desk marks them, in CoFile's colors: a 3 px Brass
+  Line edge and a Brass Tint wash on each, with the "from the text" and "already filled" tags as on
+  Home 3 (11.3).
 - Motion: the home page's "Nobody retypes it" choreography (Home 3, 3.4 s, D3) plays on this
   instance once: the three phrases underline in Brass Line, leaders draw from the bubble to their
   rows, the two saved rows ink together without lines, the chip presses in last.
@@ -533,8 +565,9 @@ has scrolled away and leaves while the close's button is on screen.
 ## 10A.2 For firms (`/for-firms`)
 
 The page for the owner who is already interested, and it's about her firm: the engraver cutting
-the firm's name, her own name and color on four pieces of her desk at once, the two doors, her
-saved agent, and the blank plate waiting at the end (Marcus, Hal, Rosa's film structure).
+the firm's name, her own name and color on the three pages her clients see, all at once, the two
+doors, her saved agent, and the blank plate waiting at the end (Marcus, Hal, Rosa's film
+structure).
 
 Copy from `web/app/for-firms/page.tsx`.
 
@@ -570,7 +603,7 @@ DESKTOP 1440 (Cotton)                                                  above 96 
 │ typing the same agent address into a …    │     │          holds                   │
 │ (lede 22/34, 34 em, as written)           │     │ [❚❚]                             │
 │                                           │     └──────────────────────────────────┘
-│                                           │      [credit: copy needed]
+│                                           │      [credit: copy needed], no example caption
 └───────────────────────────────────────────┘
 ```
 
@@ -585,12 +618,14 @@ DESKTOP 1440 (Cotton)                                                  above 96 
   film's lower-left corner, 16 px in: `--chamfer`, Sheet fill at 100%, 1 px Rule border, a 16 px
   Plate Ink glyph; its accessible names `[copy needed]`. With reduced motion, Save-Data or no
   JavaScript the poster is the last frame and nothing plays. A text description for screen
-  readers and the craftsperson's credit under it, 14/20 Graphite `[copy needed]` (D7). Weight:
-  under 2.5 MB (AV1/H.264, 1008 × 1260 at 2×), loaded only once the head is in view.
+  readers and the craftsperson's credit under it, 14/20 Graphite `[copy needed]` (D7). The credit
+  is the only line under the film: though it shows Harbor & Pine's name being cut, it carries **no
+  caption marking it as an example** (10A.0.5). Weight: under 2.5 MB (AV1/H.264, 1008 × 1260 at
+  2×), loaded only once the head is in view.
 - **Tablet:** words c1–c8; the film under the lede at c1–c6, 4:5. **Phone:** words, then the film
   at 350 × 438, its own phone master (tighter on the hands and the plate).
 
-### 10A.2.2 The desk (`#desk`): your filing desk, in your brand, and the studio
+### 10A.2.2 The desk (`#desk`): your filing desk, and your brand in the studio
 
 h2 "Your filing desk, in your brand." · five items (as written):
 
@@ -598,35 +633,38 @@ h2 "Your filing desk, in your brand." · five items (as written):
 2. "Send one client a link, keep a permanent filing page for each filing you offer, or put the
    filing button on your own website."
 3. "Your client sees your firm on the form and in every email. The only sign of us is a small
-   “with CoFile”." The quoted words are set in the **Imprint** style itself (`imprint`, 13/16:
-   "with" in Miller Text Italic, then the wordmark's small master, Graphite), inside the 18 px
-   sentence; the curly quotes stay at the sentence's size. Ours, in small type, again, literally.
-   It's still text, read normally by a screen reader.
+   “with CoFile”." Set as plain text like the other items. Client pages and emails to clients no
+   longer carry "with CoFile" (decisions file), so this sentence no longer matches what the
+   client sees and needs new words `[copy needed]` (10A.17).
 4. "Your saved answers (registered agent, organizer, signer, addresses) fill in every filing, so
    nobody types them twice."
 5. "CoFile is built and run by filing professionals. When a filing needs a person, one of them
    takes over." This item is led by a 40 px square crop of one C10 portrait instead of a lozenge
    (Hal, Priya), the only portrait in a list on the site; without C10, the lozenge stays.
 
+The h2 and item 1 describe the desk as wearing the firm's color. The desk is now in CoFile's look,
+the same for every firm, with the firm's name and logo as its account (decisions file), so both
+lines need the copy owner's confirmation or new words `[copy needed]` (10A.17). The design below
+shows the desk as it is.
+
 The band's picture is **the desk**, and under it the **brand studio**: the visitor types a name and
-picks a color, and four pieces of the firm's own product take it at once (Marcus M12, Dev's dial,
+picks a color, and the three pages the firm's clients see take it at once (Marcus M12, Dev's dial,
 D3).
 
 ```
 DESKTOP 1440 (Cotton)                                                          showpiece
  c1–c5 (486)                                c7–c12 (588) + bleed 120 = 708
 ┌───────────────────────────────────┐   ┌────────────────────────────────────────────────┐
-│ Your filing desk, in your brand.  │   │ [H&P] Harbor & Pine CPA     with CoFile  ……▾   │ 76
-│                         display-m │   │ ═══════════════════════════════════════════════ │
-│ ◆ Your filing desk carries your   │   │ Filings  New filing  Ready to pay  Client links │ 52
-│   firm's name, logo and color.    │   │ Client filings                    [New filing]  │
-│ ◆ Send one client a link, …       │   │ Two Sisters Bakery LLC     ◆ Proof ready to …  │
-│ ◆ Your client sees your firm on … │   │ New Jersey LLC formation                        │
-│   small "with CoFile".  ← imprint │   │ Hudson Ledger LLC          ● Filed              │
-│ ◆ Your saved answers (registered  │   │ …   the desk, 1:1, cropped at 520 px tall       │
-│   agent, …) …                     │   └────────────────────────────────────────────────┘
-│ [▣] CoFile is built and run by …  │    Example · test details · not a real firm
-└───────────────────────────────────┘
+│ Your filing desk, in your brand.  │   │ [▱Co▱] CoFile◆     [H&P] Harbor & Pine CPA ▾   │ 76
+│                         display-m │   │ ────────────────────────────────────────────── │ 1 px ink
+│ ◆ Your filing desk carries your   │   │ Filings  New filing  Ready to pay  Client lin… │ 52
+│   firm's name, logo and color.    │   │ Client filings                   [New filing]  │
+│ ◆ Send one client a link, …       │   │ Two Sisters …  Ana Ortiz [Your client] ◆ Proof │
+│ ◆ Your client sees your firm on … │   │                                  ●●○○○ 2 of 5  │
+│ ◆ Your saved answers (registered  │   │ Hudson Ledger LLC  Your team     ● Filed  …    │
+│   agent, …) …                     │   │ …   the desk, 1:1, in CoFile's look (below)    │
+│ [▣] CoFile is built and run by …  │   └────────────────────────────────────────────────┘
+└───────────────────────────────────┘    Example · test details · not a real firm
                                                                                       48
 ┌ the studio tray (Cotton 2, 1 px Rule, 24 px padding), c1–c12 ────────────────────────────┐
 │ Name your clients see                Main color                          Font              │
@@ -634,28 +672,97 @@ DESKTOP 1440 (Cotton)                                                          s
 │  field 400 × 56                      10 swatches, 40 px, 8 apart; picker   select 260     │
 └──────────────────────────────────────────────────────────────────────────────────────────┘
                                                                                       24
-┌ c1–c4: a client's page ──┐ ┌ c5–c8: the proof's head ─┐ ┌ c9–c12: an email ──────────┐
-│ [H&P] Harbor & Pine CPA  │ │      [H&P]               │ │      [H&P]                  │
-│ ════════════════════════ │ │   Harbor & Pine CPA      │ │   Harbor & Pine CPA         │
-│ Start your New Jersey LLC│ │ ════════════════════════ │ │ ═══════════════════════════ │
-│ Business name            │ │ Two Sisters Bakery LLC   │ │ Your proof is ready         │
-│ [______________________] │ │ ◆ Ready to approve       │ │ ▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬       │
-│ Who owns it              │ │ [ Approve for filing ]   │ │ [ Open your proof ]         │
-│ [______________________] │ │          ────            │ │          ────               │
-│ [ Continue ]             │ │       with CoFile        │ │       with CoFile           │
-│          ────            │ └──────────────────────────┘ └─────────────────────────────┘
-│       with CoFile        │   each 384 × 440, 1:1, its live phone-width layout
-└──────────────────────────┘
+┌ c1–c6: the large slot, 588 × 600 ──────────────┐   ┌ c8–c12: the two thumbnails ────────┐
+│        ┌ a client's page, 390 wide, 1:1 ┐      │   │ ┌ the firm's page for a filing ──┐ │
+│        │ [H&P] Harbor & Pine CPA        │      │   │ │ [H&P] Harbor & Pine CPA        │ │
+│        │ ══════════════════════════════ │      │   │ │ ══════════════════════════════ │ │
+│        │ Start your New Jersey LLC      │      │   │ │ New Jersey LLC formation       │ │
+│        │ Business name                  │      │   │ │ ▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬         │ │
+│        │ [____________________________] │      │   │ └ 1:1 head crop, 390 × 200 ──────┘ │
+│        │ Who owns it                    │      │   │                                 16 │
+│        │ [____________________________] │      │   │ ┌ an email to a client ──────────┐ │
+│        │ [ Continue ]                   │      │   │ │          [H&P]                 │ │
+│        │                                │      │   │ │     Harbor & Pine CPA          │ │
+│        └ ─ cropped at the slot's foot ──┘      │   │ │ ══════════════════════════════ │ │
+│                                                │   │ │ its headline                   │ │
+└────────────────────────────────────────────────┘   │ └ 1:1 head crop, 390 × 200 ──────┘ │
+                                                     └────────────────────────────────────┘
+   the slot and the thumbnails' column are layout only (no border); each preview a live page in
+   its phone-width layout, at 1:1; nothing of CoFile's on any of the three; pressing a thumbnail
+   swaps it into the large slot
  Example · test details · not a real firm
 ```
 
-- **The desk** (c7–c12, bleeding right to 708 px): the live filing desk at 1:1 in Harbor & Pine's
-  brand, D4's desk data, cropped at 520 px tall: the Letterhead row with "with CoFile" at its
-  right (3.4), the Firm Rule, the navigation row with the desk's own labels ("Filings", "New
-  filing", "Ready to pay", "Client links", "Signatures", "Setup", "Billing", as many as the width
-  shows), "Client filings" and the four rows. The account-menu email is a neutral Rule bar (the
-  foundation's desk wireframe calls the address a placeholder). Same component as the hero
-  (Home 1), here wider and without the proof tucked behind.
+The desk at its picture size, in CoFile's look:
+
+```
+THE DESK, c7–c12 + bleed (708 px), 1:1
+┌──────────────────────────────────────────────────────────────────────────────┐
+│ [▱Co▱] CoFile◆                                  [H&P] Harbor & Pine CPA  ▾   │ 76, Cotton
+├──────────────────────────────────────────────────────────────────────────────┤ 1 px Plate Ink
+│ Filings   New filing   Ready to pay   Client links   Signatures   …          │ 52, Cotton
+│ ‾‾‾‾‾‾‾  2 px Brass Line under the current page                              │
+├──────────────────────────────────────────────────────────────────────────────┤ 1 px Rule
+│ Client filings                                              [ New filing ]   │
+│ ┌──────────────────────────────────────────────────────────────────────────┐ │
+│ │ Filing            Sent by                 Type            Status         │ │ head 14/18
+│ ├──────────────────────────────────────────────────────────────────────────┤ │
+│ │ Two Sisters       Ana Ortiz [Your client] New Jersey LLC  ◆ Proof ready  │ │
+│ │ Bakery LLC        (her email, once given) formation         to approve   │ │
+│ │                                                           ●●○○○          │ │ five 8 px dots
+│ │                                                       Proof, step 2 of 5 │ │ 13 px Graphite
+│ ├──────────────────────────────────────────────────────────────────────────┤ │
+│ │ Hudson Ledger LLC Your team               New York LLC    ● Filed        │ │
+│ │                                           formation       ●●●●●          │ │
+│ │                                                       Done, step 5 of 5  │ │
+│ ├──────────────────────────────────────────────────────────────────────────┤ │
+│ │ Hudson Ledger LLC Your team               EIN             ● Filed, IRS   │ │
+│ │                                                             letter saved │ │
+│ │                                                           ●●●●●          │ │
+│ │                                                       Done, step 5 of 5  │ │
+│ ├──────────────────────────────────────────────────────────────────────────┤ │
+│ │ Orchard Lane Inc. Your team               Payroll         ○ Submitted    │ │
+│ │                                           registration    ●●●●○          │ │
+│ │                                           (NJ-REG)        4 of 5 · With  │ │
+│ │                                                           the state      │ │
+└─ cropped under its fourth row, about 700 px; "Started" falls past the edge ──┘
+```
+
+- **The desk** (c7–c12, bleeding right to 708 px): the live filing desk at 1:1 in **CoFile's
+  look**, the same for every firm, as the desk itself is (10B.3, 10B.4; the dashboard's treatment,
+  10C.2), with D4's desk data, cropped just under its fourth row (about 700 px tall). Top to
+  bottom: the letterhead row on Cotton, CoFile's lockup at its left and at its right the **account
+  label**, Harbor & Pine's logo 24 px tall with its name; CoFile's 1 px Plate Ink rule; the
+  navigation row with the desk's own labels ("Filings", "New filing", "Ready to pay", "Client
+  links", "Signatures", "Setup", "Billing", as many as the width shows), "Filings" carrying its
+  2 px Brass Line underline; "Client filings" with the "New filing" button drawn as the desk draws
+  it (a picture of a button: `aria-hidden`, inert); then the ledger. No Firm Rule, no firm color
+  and no firm font anywhere on it: the firm is its content, never its letterhead. Any signed-in
+  email is a neutral Rule bar (the foundation's desk wireframe calls the address a placeholder).
+  Same component as the hero (Home 1), here wider and without the client page in front of it.
+- **The ledger** carries the desk's **"Sent by"** column and each filing's **five-step track**
+  (built in `web/app/p/[slug]/(portal)/page.tsx`, `web/components/StageTrack.tsx`,
+  `web/lib/sender.ts`, `web/lib/status.ts`; its words are with the copy owner in `COPY-NEEDED.md`).
+  Columns "Filing", "Sent by", "Type", "Status"; "Started" falls past the crop's right edge. D4's
+  four rows:
+
+| Filing | Sent by | Type | Status | Track |
+|---|---|---|---|---|
+| Two Sisters Bakery LLC | "Ana Ortiz" with the "Your client" chip; her email under it once an example address is supplied `[copy needed]` | New Jersey LLC formation | "Proof ready to approve" (your turn) | ●●○○○ "Proof, step 2 of 5" |
+| Hudson Ledger LLC | "Your team" | New York LLC formation | "Filed" | ●●●●● "Done, step 5 of 5" |
+| Hudson Ledger LLC | "Your team" | EIN | "Filed, IRS letter saved" | ●●●●● "Done, step 5 of 5" |
+| Orchard Lane Inc. | "Your team" | Payroll registration (NJ-REG) | "Submitted" (in hand) | ●●●●○ "With the state, step 4 of 5" |
+
+- **"Your client"** is a neutral chip, not a status: Cotton 2 fill, Graphite text, `chip` 14/18,
+  8 px after the client's name. The three filings the firm started read "Your team", the product's
+  words when the sender isn't known, so no staff address is invented (D1.1). D4 gives Ana no email
+  address, so until the copy owner supplies an example one her name stands alone, as the product
+  shows it when it has no email (art direction's L1).
+- **The track** sits 8 px under each status chip: five 8 px dots 4 px apart, the steps reached in
+  Plate Ink and the rest in Rule `#DDD7CB`, then 8 px and "Proof, step 2 of 5" in 13 px Graphite (the
+  steps: "Details", "Proof", "Filing", "With the state", "Done"). It's read aloud as one phrase,
+  "Step 2 of 5: Proof". A rejected, failed or stopped filing has no track; none of D4's rows is
+  one.
 - **The studio tray** (c1–c12, 48 px under the desk): Cotton 2, 1 px Rule border, `--r-sheet`,
   24 px padding, three of the product's own Branding controls with their own labels
   (`web/components/SetupForms.tsx`, `BrandFields.tsx`):
@@ -675,40 +782,56 @@ DESKTOP 1440 (Cotton)                                                          s
     Plex Sans", "Roboto", "Open Sans", "Lato", "Montserrat", "Source Serif (serif)",
     "Merriweather (serif)", "Lora (serif)"), 260 px, "Lora (serif)" selected.
   - The tray's group name for screen readers `[copy needed]`.
-- **The four previews** (the desk above, and three 384 × 440 crops below the tray), each a live
-  component at 1:1 on a white sheet with `--e-sheet`: a client's page ("Start your New Jersey
-  LLC", "Business name", "Who owns it", "Continue", the Imprint at its foot) in its phone-width
-  layout; the proof's head (the centred Letterhead, "Two Sisters Bakery LLC", the "Ready to
-  approve" chip, "Approve for filing", the Imprint); and the proof-ready email (the centred
-  Letterhead, the product's own "Your proof is ready", one grey Rule bar for its paragraph, the
-  product's own "Open your proof" button, the Imprint). Text inside them never drops under its
-  real size, and the Imprint is its true 13 px (Marcus).
-- **What a change does** (M12): typing changes the name everywhere on each keystroke (no
-  animation: it's typing); choosing a color re-inks all four, name first, then the Firm Rule, then
-  the buttons, chips and links, 60 ms stagger across the four, each a 240 ms crossfade. The ink
-  match (3.6) derives `--firm-fill`, `--firm-ink`, `--firm-wash` and the rest live, so a yellow or
-  a pale pink looks right at once and the visitor sees the system at work. The font applies to
-  the name, headings and client buttons only (3.7). **"with CoFile" never changes, never moves,
-  never takes the color.**
-  - Once the visitor edits the name, Harbor & Pine's logo is dropped from all four (we never put
+- **The three previews** (24 px under the tray), the three pages a firm's clients see, live and
+  all at once, set as the Branding page sets them (10B.7.5; art direction's L11): one large, two as
+  thumbnails that swap into the large slot. Each is a live component at 1:1 in its phone-width
+  layout, a 390 px white sheet with `--e-sheet`:
+  - **the large slot**, c1–c6 (588 × 600): the chosen preview centred in it, cropped at the slot's
+    foot; it starts with **a client's page**: the firm's Letterhead and Firm Rule, "Start your New
+    Jersey LLC", "Business name", "Who owns it", "Continue";
+  - **two thumbnails**, stacked 16 px apart in c8–c12, each a 1:1 crop of its page's head, 390 ×
+    200, so no text drops under its real size (Marcus): **the firm's page for a filing** (10B.24:
+    the Letterhead and Firm Rule, the filing type as its title, "New Jersey LLC formation", in the
+    firm's font, then its summary as grey Rule bars; in the large slot it shows the rest, one empty
+    field and the product's "Send to {firm}" button, here "Send to Harbor & Pine CPA"), and **an
+    email to a client**, the one the Branding page previews, set as it sets it (10B.7.5: the
+    email's centred Letterhead and Firm Rule and its headline; in the large slot, a grey Rule bar
+    for its paragraph and its button, where it has one).
+  - **Pressing a thumbnail** (each a `button`, its accessible name `[copy needed]`) swaps it into the
+    large slot and the large preview takes its place among the thumbnails, in one crossfade
+    (`--t-fade`); nothing slides.
+
+  Nothing of CoFile's appears on any of the three (decisions file). The proof and the desk aren't
+  previewed: they're CoFile's, the same for every firm, and the desk above already shows it.
+- **What a change does** (M12): typing changes the name on all three on each keystroke (no
+  animation: it's typing), including the "Send to {firm}" button. Choosing a color re-inks the
+  three, name first, then the Firm Rule, then the buttons and links, the large preview first and
+  the thumbnails 60 ms after it, each a 240 ms crossfade. The ink match (3.6) derives
+  `--firm-fill`, `--firm-ink`, `--firm-wash` and the rest live, so a yellow or a pale pink looks
+  right at once and the visitor sees the system at work. The font applies to the name, headings
+  and client buttons only (3.7). **The desk above never changes**: it's CoFile's, the same for
+  every firm, and stays the example desk with Harbor & Pine as its account.
+  - Once the visitor edits the name, Harbor & Pine's logo is dropped from all three (we never put
     one firm's logo beside another firm's name) and each Letterhead becomes the **typeset name
-    alone** at its no-logo size (3.5.5: 30/36 on the sheets, 20/26 in the desk row), with the
-    Firm Rule doing the work. The **monogram tile** (the plate's chamfered square in
-    `--firm-fill`, up to two initials in `--firm-on`) appears only where a square symbol is
-    unavoidable: the desk's account menu and the email's avatar. A firm looks finished before it
-    adds a logo (Marcus, with the foundation's no-logo rule).
+    alone** at its no-logo size (3.5.5: 30/36 on the sheets), with the Firm Rule doing the work.
+    The **monogram tile** (the plate's chamfered square in `--firm-fill`, up to two initials in
+    `--firm-on`) appears only where a square symbol is unavoidable: the email's avatar. A firm
+    looks finished before it adds a logo (Marcus, with the foundation's no-logo rule).
   - Emptying the field shows the product's own preview placeholder, "Your firm"
     (`BrandPreview`), in every Letterhead.
   - The chosen color is kept in the same `sessionStorage` record as the name and carried to
-    sign-up's letterhead preview (10A.9.3) and, for the firm-pages writer, to Branding.
-- **Reduced motion:** changes apply instantly. **No JavaScript:** the four previews show Harbor &
-  Pine and the controls are hidden (the band still reads).
+    sign-up's preview of the firm's client page (10A.9.3) and, for the firm-pages writer, to
+    Branding.
+- **Reduced motion:** changes and swaps apply instantly. **No JavaScript:** the three previews
+  show Harbor & Pine, the thumbnails don't swap and the controls are hidden (the band still reads).
 - **Tablet:** words c1–c8; the desk c1–c8 at 1:1 (754 px); the tray full width with the swatches
-  wrapping to two rows; the three crops in a horizontal row that snaps inside itself (each 320 px,
-  16 px peek). **Phone:** words; the desk in its phone layout (350 wide, cropped at 440); the tray
-  (each control full width; swatches two rows of five, 48 px targets; the picker and hex on their
-  own row); then the three crops as a snap row (300 px cards, 16 px peek, 12 px gaps), with 6 px
-  page dots under them, `aria-hidden`. No sticky controls (6.6).
+  wrapping to two rows; the large slot across c1–c8 (the 390 px sheet centred), the two thumbnails
+  side by side under it in c1–c4 and c5–c8, each cropped to its half's width, swapping as on
+  desktop. **Phone:** words; the desk in its phone layout (350 wide, cropped at 440, its rows as
+  the desk's phone cards, each with its "Sent by" and its track); the tray (each control full
+  width; swatches two rows of five, 48 px targets; the picker and hex on their own row); then the
+  three previews stacked at full width, 24 px apart, the client's page first, each cropped at
+  440 px, with no swapping (all three are in view in turn; L11). No sticky controls (6.6).
 
 ### 10A.2.3 The doors (`#brand`): your name on the door, ours in small type
 
@@ -719,8 +842,11 @@ carries each firm's own name, logo and color. Your clients never see another fir
 CoFile logo."
 
 The picture is **Two doors, one page** (Home 2, `TwoFirmsVisual`): the two door photographs (C1,
-C2), the same client page under Harbor & Pine and under Northgate Payroll, "with CoFile" at the
-foot of both, unmoved, and the brass wipe handle between them.
+C2), the same client page under Harbor & Pine and under Northgate Payroll, each entirely in its own
+firm's brand with nothing of ours on either, the 1 px hairline drawn between the two pages to show
+they are the same page (Priya), and the brass wipe handle. "Ours in small type." now points to the
+authorization's fine print on the client's form ("{firm}, filing through CoFile"), the only place a
+client meets our name; the picture draws nothing of CoFile's (decisions file).
 
 - Picture c1–c7 bleeding left, words c9–c12 (the home page's arrangement, since the copy repeats
   the home page's headline here).
@@ -730,8 +856,9 @@ foot of both, unmoved, and the brass wipe handle between them.
   visit (a `sessionStorage` flag): the signature belongs to the first time.
 - The two doors stay the two example firms; the visitor's typed name doesn't appear on them
   (foundation decision "Where the visitor types their own firm's name").
-- Caption "Two example firms · same page, each in its own brand". Phone: words, then the doors as
-  the home page's two-card swipe, resting on the left card.
+- Caption "Two example firms · same page, each in its own brand": the product picture's own label,
+  which the two door photographs inside it share; they carry no caption of their own (10A.0.5).
+  Phone: words, then the doors as the home page's two-card swipe, resting on the left card.
 
 ### 10A.2.4 The agent (`#agent`): your registered agent, or ours
 
@@ -743,10 +870,13 @@ filing or by plan. Pricing" ("Pricing" a link).
 
 Words c1–c5; picture c7–c12: photograph **C8**, the firm owner at her own desk reading the proof
 on screen (4:5, 486 × 608 in c8–c12 bleeding 120 px right), with a **detail plate** of the draft
-laid over its lower-left corner: a white sheet 400 px wide, the edge of Harbor & Pine's Letterhead
-and Firm Rule at its top (24 px of it), and two rows from D4's draft at 1:1, "Registered agent ·
-Your saved agent · already filled" and "Organizer and signer · Your saved answers · already
-filled", the "already filled" tags as on the home page (Elaine, Hal). It overlaps the photograph
+laid over its lower-left corner: a white sheet 400 px wide, the draft as the desk shows it, in
+CoFile's look (10A.0.5): at its top the edge of the desk's header (24 px of it, ending on CoFile's
+1 px Plate Ink rule; never a firm Letterhead or Firm Rule), and two rows
+from D4's draft at 1:1, "Registered agent · Your saved agent · already filled" and "Organizer and
+signer · Your saved answers · already filled", the "already filled" tags as on the home page
+(Elaine, Hal), each answer marked as the desk marks what CoFile filled in: a 3 px Brass Line edge
+and a Brass Tint wash, in CoFile's colors, not the firm's (11.3). It overlaps the photograph
 by 104 px to the left (into c7) and sits 64 px above its foot. The owner, her proof and her saved
 agent, in one picture: "Either way it's filled in on every filing."
 
@@ -757,15 +887,16 @@ agent, in one picture: "Either way it's filled in on every filing."
 │ Name your own registered agent …  │          │ proof at her desk, 4:5           │
 │ ◆ You approve every filing before │          │                                  │
 │   it goes to the state. How it …  │ ┌────────┴─────────────────────┐            │
-│ ◆ CoFile saves the state's …      │ │ ═════════ (letterhead edge)   │            │
-│ ◆ Pay per filing or by plan. …    │ │ Registered agent  Your saved … │ already    │
-└───────────────────────────────────┘ │ Organizer and signer  Your …   │ filled     │
+│ ◆ CoFile saves the state's …      │ │ ───────── (desk header edge)  │            │
+│ ◆ Pay per filing or by plan. …    │ │▌Registered agent  Your saved … │ already    │
+└───────────────────────────────────┘ │▌Organizer and signer  Your …   │ filled     │
                                       └────────┬─────────────────────┘            │
                                                └──────────────────────────────────┘
                                                 Example · test details · not a real firm
 ```
 
-- One caption for the figure, "Example · test details · not a real firm"; the photograph's alt
+- One caption for the figure, "Example · test details · not a real firm", the product picture's
+  label, which the photograph shares (it has no caption of its own, 10A.0.5); the photograph's alt
   text `[copy needed]` (D7).
 - No motion: the two rows are simply there, which is the point.
 - Phone: words, then C8 at 4:5 (350 × 438), then the detail plate full width, overlapping the
@@ -774,8 +905,8 @@ agent, in one picture: "Either way it's filled in on every filing."
 ### 10A.2.5 The page on a phone
 
 Header · beta notice · title page (no initial) · the film · the desk: words, desk, tray, the three
-crops · the doors: words, the swipe · the agent: words, C8, the detail plate · the close (below) ·
-footer.
+previews · the doors: words, the swipe · the agent: words, C8, the detail plate · the close (below)
+· footer.
 
 ### 10A.2.6 Close: your plate, waiting
 
@@ -1351,11 +1482,12 @@ stacked with offsets, never tilted, never in perspective (D1.1), front to back:
    Sisters Bakery LLC", "Ready to approve", the three detail rows, the fees and "Total to the state
    $103.50"), the "Approve for filing" button in Iron, and a support line drawn as a Rule bar where
    the platform's support contact goes ("A white-label setup, with your name and support contact on
-   the proof"). No Imprint: on white label CoFile is absent (2.4). 440 px wide, cropped at 520 px.
+   the proof"). Nothing of CoFile's on it: on white label CoFile is absent (2.4). 440 px wide,
+   cropped at 520 px.
 2. **In the middle, the embed widget** (the platforms writer's component) in Best Accounting's brand
-   (Best Blue `#1F4FD1`, Inter, its wide wordmark), showing its first two fields, with "Filed with
-   CoFile" at its foot in the Imprint style. 360 px wide, offset 120 px right and 88 px down from the
-   proof's top-left.
+   (Best Blue `#1F4FD1`, Inter, its wide wordmark), showing its first two fields, with nothing of
+   CoFile's at its foot: the widget too carries no "Filed with CoFile" (decisions file). 360 px wide,
+   offset 120 px right and 88 px down from the proof's top-left.
 3. **At the back and bottom, the stage**: a **code panel** on Night `#14161E` (the rehearsal's
    ground, 4.6), `--r-sheet`, 28 px padding, `code` 15/24 Founders Grotesk Mono in Night Ink, holding
    a trimmed request from the API guide (`web/app/docs/guides.tsx`, "Filings and the lifecycle"),
@@ -1549,13 +1681,13 @@ DESKTOP 1440 (Cotton)
 │                                       32   │      │                                      │
 │ Firm name                                  │      └──────────────────────────────────────┘
 │ [________________________________________] │       24
-│ Kind of firm                               │      ┌ the letterhead, Sheet, 588 × 176 ────┐
+│ Kind of firm                               │      ┌ a client page's head, 588 × 128 ─────┐
 │ [ Choose one                           ▾ ] │      │ [the name, as typed]       30/36     │
 │ ─────────────────────────── 1 px Rule       │      │ ═════════════════════════════════════│
 │ Your name                                  │      │ ─────────────────────────────────────│
-│ [________________________________________] │      │                ────                  │
-│ Work email                                 │      │             with CoFile              │
 │ [________________________________________] │      └──────────────────────────────────────┘
+│ Work email                                 │       nothing of CoFile's on it
+│ [________________________________________] │
 │ Password               Password again      │
 │ [__________________]   [__________________]│
 │ At least 12 characters. A short sentence   │
@@ -1584,10 +1716,10 @@ DESKTOP 1440 (Cotton)
 - Card 560 (496 inside) at c1; side panel c7–c12, top-aligned with the card. Neither is sticky
   (6.6): the plate is in view while "Firm name" is typed, which is when it matters.
 - **Tablet:** the card c1–c8 at 560, centred; the panel becomes a 16:9 strip (the plate, cropped
-  tight) inside the card under the lede, as on phones; the letterhead preview under the strip.
+  tight) inside the card under the lede, as on phones; the client-page preview under the strip.
 - **Phone:** words first, then the plate: kicker, heading, lede, then the **plate strip** (C3
   cropped 16:9 on the plate, the card's full width edge to edge, 350 × 197, no shadow), then "Firm
-  name" directly under it, so the field and the plate are on screen together. The letterhead
+  name" directly under it, so the field and the plate are on screen together. The client-page
   preview is dropped on phones. Fields one per row.
 
 ```
@@ -1640,26 +1772,29 @@ In the component's order, with its labels, options and help (10A.0.6 for the fie
   password field, for owners who'd rather see what they typed `[copy needed: its two labels]`.
   Without the words, it's left out.
 
-### 10A.9.3 The side panel: the plate and the letterhead
+### 10A.9.3 The side panel: the plate and the client page's head
 
 - **The plate:** photograph C3 (C4 in dark mode), the blank brass plate on Harbor & Pine's
   harbor-blue door in C1's light, at 4:5, 588 × 735, square-cut. The plate's face is framed at
   about 60% of the photograph's width, slightly above centre. Alt text: the foundation's C3 alt
   `[copy needed]`; the engraved name is not announced (the field already says it).
-- **The letterhead** under it (24 px): a Sheet 588 × 176 with `--e-sheet` and 32 px margins,
-  `aria-hidden`, showing the Letterhead the firm will have before it adds a logo (3.5.5):
+- **The client page's head** under it (24 px): a preview of the top of the firm's client pages,
+  the only place on sign-up the firm's brand is previewed, because only the pages its clients see
+  carry it (decisions file; the desk it is signing up for is CoFile's, the same for every firm). A
+  Sheet 588 px wide with `--e-sheet` and 32 px margins, 128 px tall with a one-line name (it grows
+  when the name wraps), `aria-hidden`, showing the Letterhead the firm's client pages will have
+  before it adds a logo (3.5.5):
   - the typed name, typeset alone at the no-logo size: 30/36, Founders Grotesk Medium (the
     fallback for a firm's name until it picks its font, 3.7), Plate Ink, wrapping to two balanced
     lines when long, never truncated; credentials ("CPA", "LLC", "PC" …) at 88% with +0.04 em;
   - 20 px below, the **Firm Rule** in Plate Ink (3 px, 2 px gap, 1 px at 35%), because no color has
     been chosen; if the visitor chose a color in For firms' studio, the rule is drawn in it with the
-    ink match's `--firm` and `--firm-2` (the firm's color lives inside the picture, 4.8);
-  - 24 px below, the **Imprint** centred under its 40 px hairline, 13 px, Graphite, exactly 3.4.
-    Ours in small type, from the first minute.
+    ink match's `--firm` and `--firm-2` (the firm's color lives inside the preview, 4.8).
+  - Nothing of CoFile's is on it: a client sees only the firm (decisions file).
 - **Empty** (nothing typed and nothing carried in): the plate is blank in good light, with no
-  push-in (that's the Close's camera move, not this page's); the letterhead shows a static
-  2 × 28 px Plate Ink caret where the name will go (it doesn't blink: nothing loops), the Firm Rule
-  and the Imprint.
+  push-in (that's the Close's camera move, not this page's); the preview shows a static
+  2 × 28 px Plate Ink caret where the name will go (it doesn't blink: nothing loops) and the Firm
+  Rule.
 
 ### 10A.9.4 The engraving
 
@@ -1670,8 +1805,8 @@ In the component's order, with its labels, options and help (10A.0.6 for the fie
 - **Typing:** each new letter is cut into the brass in about 90 ms with a glint at the bottom of
   the cut (the WebGL engraving lit from the C1 HDRI, D2); deleting fills a letter back in 60 ms; a
   pasted name cuts left to right at 30 ms a letter, never longer than 600 ms in all. If typing runs
-  ahead of the cutting by more than 400 ms, the plate jumps to the current text. The letterhead
-  updates on every keystroke with no animation.
+  ahead of the cutting by more than 400 ms, the plate jumps to the current text. The client-page
+  preview updates on every keystroke with no animation.
 - **Lettering** (as the home page's Close, so the plate is the same plate): the name exactly as
   typed, never forced to capitals or any case ("you don't change a person's name to fit a style",
   3.3), in Miller Display with the ampersand in Miller Display Italic (Greta's courtesy, 3.5), the
@@ -1694,8 +1829,8 @@ In the component's order, with its labels, options and help (10A.0.6 for the fie
 
 | State | What shows |
 |---|---|
-| **Empty** | The form as above; the plate blank; the letterhead with its caret |
-| **Pre-filled** | "Firm name" filled; the plate cut; the letterhead set; one light rake |
+| **Empty** | The form as above; the plate blank; the client-page preview with its caret |
+| **Pre-filled** | "Firm name" filled; the plate cut; the client-page preview set; one light rake |
 | **A field error** (on submit) | Under each field, its message in Madder with the ▬ bar and a 2 px Madder border: "Enter your firm's name.", "Pick what kind of firm you are.", "Enter your name.", "Enter your work email.", "The two passwords don't match.", and under the agreement row "Agree to the Terms of Service and Privacy Policy to create an account."; the Problem slip "Check the highlighted fields." above "Create account" takes focus. A server password rule comes back as "Password: …" in the same slip and under "Password" |
 | **Blocked or down** | Problem slip above the button: "Too many sign-ups from here. Try again later." or "We can't create your account right now. Try again in a minute."; every field keeps its value (the form keeps its state) and the plate keeps the name |
 | **Pending** | "Creating…", the button held pressed |
@@ -1871,13 +2006,40 @@ slip (`press-in`, 440 ms) and that's all.
 ## 10A.15 Terms of Service and Privacy Policy (`/terms`, `/privacy`)
 
 Long documents, so they're set as a well-printed booklet a careful owner might print and read with
-a pen (Hal, Elaine, Greta). Both use `LegalPage`; copy from `web/app/terms/page.tsx` and
+a pen (Hal, Elaine, Greta). On a wide screen the contents stay beside the text in a sticky rail, the
+current section marked, so a reader deep in section 11 can see where she is and jump back (Marcus,
+Elaine, Greta, Dev, Tomás, Priya, Rosa; decisions file); narrower, the contents sit at the top like a
+booklet's contents page. Both use `LegalPage`; copy from `web/app/terms/page.tsx` and
 `web/app/privacy/page.tsx`.
 
 ```
-DESKTOP 1440 (Cotton)                                                      support rhythm
- c1–c2 (180)  c3–c10 (792; the text at 68 ch, about 650 px)
-              Terms of Service                                  display-page 60/64
+DESKTOP 1440, AT 1280 PX AND WIDER (Cotton)                                support rhythm
+ c1–c3: the rail (240)      c4–c11 (792; the text at 68 ch, about 650 px)
+                            Terms of Service                          display-page 60/64
+                            Effective November 26, 2026. See also our Privacy Policy.
+                                                                      small, Graphite
+ ┌ the contents rail ───┐   These terms govern your use of CoFile: the website, the portals
+ ▌1. What CoFile does   │   and dashboards, the API and the messages we exchange with you. …
+ │ 2. What CoFile is not│                                               reading 19/30
+ │ 3. Accounts          │   1. What CoFile does            ← h2, the number inline: display-s
+ │ 4. …                 │                                    26/32, "1." Graphite tabular, the
+ │ …                    │   CoFile is software that fills    title Plate Ink; 64 above, 16 below
+ │ 10. Changes and      │   in and submits business filings on government websites at your
+ │     availability     │   direction: …
+ │ …                    │
+ │ 16. Contact          │   2. What CoFile is not
+ └──────────────────────┘   **CoFile is not a law firm or an accounting firm and does not give
+   no border (drawn here    legal, tax or accounting advice.** Using CoFile creates no …
+   to show its extent);       ← strong: Miller Text Bold
+   ui 17/24, 8 px apart;
+   the current section:
+   ▌ 2 px Brass Line rule,
+   its title Medium; sticks
+   96 px under the window's top
+
+BELOW 1280 PX (Cotton): the contents at the top
+ c1–c2        c3–c10 (the text at 68 ch)
+              Terms of Service                                  display-page
               Effective November 26, 2026. See also our Privacy Policy.   small, Graphite
               ─────────────────────────────────────────────────  1 px Rule, 48 above and below
          1.   What CoFile does                  9.   Other services            ← the contents:
@@ -1886,53 +2048,67 @@ DESKTOP 1440 (Cotton)                                                      suppo
          …                                     …                                  Graphite, hung;
          8.   Acceptable use                   16.   Contact                      titles linked
               ─────────────────────────────────────────────────
-              These terms govern your use of CoFile: the website, the portals and
-              dashboards, the API and the messages we exchange with you. …   reading 19/30
+              These terms govern your use of CoFile: …                 reading 19/30
 
          1.   What CoFile does                     ← h2: the number hung in c1–c2, right-aligned
-                                                     24 px short of the text; display-s 26/32;
-              CoFile is software that fills in and   number Graphite, title Plate Ink; 64 above,
-              submits business filings on government   16 below
-              websites at your direction: …
-
-         2.   What CoFile is not
-              **CoFile is not a law firm or an accounting firm and does not give legal, tax or
-              accounting advice.** Using CoFile creates no …   ← strong: Miller Text Bold
+                                                     24 px short of the text
+              CoFile is software that fills in and submits business filings on …
 ```
 
 - **Title:** the h1 at `display-page`; under it, 16 px, "Effective November 26, 2026. See also our
-  Privacy Policy." (or "… Terms of Service.") in `small` Graphite with its link.
-- **The contents** (Hal): the page's own h2s as links, in two columns on desktop (Terms 1–8 and
-  9–16; Privacy's ten as 5 and 5), `ui` 17/24, between two 1 px Rules with 48 px around. On Terms
-  the section number hangs to the left of each title in tabular Graphite (it's part of the heading's
-  text, split visually, not added); Privacy's headings have no numbers and the list has none. The
-  list is a `nav` whose accessible name is `[copy needed]`. It is not sticky (6.6): it's the
-  booklet's contents page, and the browser's find does the rest.
+  Privacy Policy." (or "… Terms of Service.") in `small` Graphite with its link. At 1280 px and
+  wider it sits on c4, over the text; below that, on c3.
+- **The contents** (Hal): the page's own h2s as links, set as CoFile's links (10A.0.3), in `ui`
+  17/24. On Terms each title is led by its section number in tabular Graphite (it's part of the
+  heading's text, split visually, not added); Privacy's headings have no numbers and the list has
+  none. The list is a `nav` whose accessible name is `[copy needed]`.
+  - **At 1280 px and wider, a sticky rail** (decisions file): 240 px wide from the left edge of c1,
+    in c1–c3, its first item level with the h1's cap height. Items 8 px apart, each with 14 px of
+    left padding; a title that wraps hangs its second line under the title, not under the number.
+    Once the page scrolls, the rail holds 96 px under the top of the window (the compact header
+    plus 36 px, as the anchors land, 10A.0.1) and stays in view to the end of the text; it never
+    rides over the footer. **The current section** is marked by a **2 px Brass Line `#A87A1E`
+    rule** down the left edge of its item, the item's full height, and its title in Founders
+    Grotesk Medium (`aria-current="location"`). The current section is the last whose heading has
+    passed a line a third of the way down the window; before the first heading nothing is marked,
+    and at the very foot of the page the last section is. The mark moves at once, with no slide:
+    nothing moves on these pages. Choosing an item jumps to its heading (landing 96 px under the
+    top, 10A.0.1) and moves focus to it. If the rail is ever taller than the window below the
+    header (a short window, or enlarged text), it stops being sticky and scrolls with the page; it
+    never scrolls inside itself. The header and this rail are the site's only sticky elements at
+    these widths (6.6).
+  - **Below 1280 px, the contents sit at the top**, between two 1 px Rules with 48 px around, in
+    two columns (Terms 1–8 and 9–16; Privacy's ten as 5 and 5), one on phones; on Terms the
+    numbers hang to the left of the titles. Not sticky: it's the booklet's contents page, and the
+    browser's find does the rest.
 - **The text:** Miller Text 400 at **19/30** (tablet 19/30, phone 18/29), Plate Ink, measure 68 ch,
-  starting on c3 (5.1: Miller Text carries long reading on CoFile's own pages). Paragraphs 16 px
-  apart, no indents. `strong` ("CoFile is not a law firm …", "CoFile is not a government agency",
-  Privacy's list leads) in **Miller Text Bold 700**, the one cut this part adds to 5.1, for these
-  two pages only, so legal emphasis stays emphatic without leaving the serif. Links underlined in
-  Brass Line.
+  starting on c4 beside the rail (c3 below 1280 px) (5.1: Miller Text carries long reading on
+  CoFile's own pages). Paragraphs 16 px apart, no indents. `strong` ("CoFile is not a law firm …",
+  "CoFile is not a government agency", Privacy's list leads) in **Miller Text Bold 700**, the one
+  cut this part adds to 5.1, for these two pages only, so legal emphasis stays emphatic without
+  leaving the serif. Links underlined in Brass Line.
 - **Headings:** Terms' "1. What CoFile does" … "16. Contact" in `display-s` (Miller Text 26/32),
-  the "1." hung in c1–c2 in Graphite, right-aligned 24 px short of the text column, the title on
-  c3 in Plate Ink; Privacy's unnumbered headings the same without the hung number. 64 px above
-  each, 16 px below.
+  the number in Graphite and the title in Plate Ink; Privacy's unnumbered headings the same without
+  the number. **At 1280 px and wider the number sits inline**, "1." then a space and the title, on
+  the text column's edge, since the rail now holds the margin. Below 1280 px it hangs in c1–c2,
+  right-aligned 24 px short of the text column, as the contents' numbers do. 64 px above each,
+  16 px below.
 - **Lists** (Privacy's "What we collect", "Sensitive information", "Who we share it with"): the
   support en rule hung in the margin, items 12 px apart, the bold lead ("Account details:", "Filing
   details:" …) in Miller Text Bold.
 - **No pictures, no motion.** The header (with its five links) and the footer as usual; no sticky
   phone bar.
 - **Print** (both pages): US Letter, 1 in margins; Miller Text 11/15 pt, headings 13/17 pt, the
-  contents printed; the header, beta notice and footer don't print; a running foot in Founders
-  Grotesk Text 8.5 pt, "CoFile · Terms of Service · 3" (the document's title and the page number;
-  no new words); links print their address in brackets after the link text (except the email, which
-  is already its own address); no heading at the foot of a page, no widows or orphans under three
-  lines.
-- **Tablet:** the hung numbers stay in a 96 px margin column; text c2–c8. **Phone:** the number moves
-  inline before its title ("1. What CoFile does" on one line at 22/28); the contents run as one
-  column; text 18/29 full width.
-- **Dark mode:** Night ground, Night Ink text, the rules `#323646`.
+  contents printed at the top as a list, whichever layout the screen used, and no rail; the header,
+  beta notice and footer don't print; a running foot in Founders Grotesk Text 8.5 pt, "CoFile ·
+  Terms of Service · 3" (the document's title and the page number; no new words); links print their
+  address in brackets after the link text (except the email, which is already its own address); no
+  heading at the foot of a page, no widows or orphans under three lines.
+- **Tablet:** the contents at the top; the hung numbers stay in a 96 px margin column; text
+  c2–c8. **Phone:** the number moves inline before its title ("1. What CoFile does" on
+  one line at 22/28); the contents run as one column; text 18/29 full width.
+- **Dark mode:** Night ground, Night Ink text, the rules `#323646`; the rail's current-section rule
+  in full Brass `#D9A84A`.
 
 ---
 
@@ -1963,8 +2139,9 @@ DESKTOP 1440 (Cotton), with the full header (five links) and the footer
   stays the screen's one Brass button.
 - Phone: the plate at 280 × 112, then the words and the button full width.
 - Dark mode: the plate in Night Ink on Night.
-- 404s under a firm's address (`/p/<firm>/…`, a client link) are the firm-pages writer's, in the
-  firm's Letterhead, never with CoFile's plate.
+- 404s under a firm's address are the firm-pages writer's: on the filing desk (`/p/<firm>/…`) in
+  CoFile's look, like every desk page; on a client link or the firm's page for a filing in the
+  firm's Letterhead, with nothing of CoFile's, never with CoFile's plate.
 
 ### 10A.16.2 Something went wrong (`error.tsx`)
 
@@ -1997,7 +2174,8 @@ DESKTOP 1440 (Cotton)
   Cotton 2 chip with 4 px padding, selected whole with one click (`user-select: all`). (The digest
   in the wireframe is a layout placeholder.)
 - "Try again" holds its pressed state while the page retries.
-- Firm-side errors use the firm's Letterhead and the same calm card (the firm-pages writer).
+- Errors on the filing desk use CoFile's look and the same calm card; errors on a page a firm's
+  client sees use the firm's Letterhead (the firm-pages writer).
 
 ---
 
@@ -2009,9 +2187,13 @@ field, "Menu", the engraver film's credit and description), these pages need:
 | Where | What |
 |---|---|
 | How it works, step 3 (10A.1.2) | The caption under the C10 photograph: the filing professional's name and role |
-| How it works, the proof (10A.1.3) | A caption for the printer's proof photograph C9, if one is wanted (fictional names only on the cards in it) |
+| How it works, the proof (10A.1.3) | A short spoken description for each of the five list items that outline their part of the sample proof (the detail rows, the fees and total, the state's review page, the Authorizations group, the button), five items |
+| For firms, the desk (10A.2.2) | New words for the list item "Your client sees your firm on the form and in every email. The only sign of us is a small “with CoFile”.": client pages and emails to clients no longer carry "with CoFile" (decisions file) |
+| For firms, the desk (10A.2.2) | Confirmation or new words for the h2 "Your filing desk, in your brand." and the item "Your filing desk carries your firm's name, logo and color.": the desk is now in CoFile's look, with the firm's name and logo as its account (decisions file) |
 | For firms, the film (10A.2.1) | The accessible names of the film's pause and play control |
+| For firms, the desk (10A.2.2) | An example email address for Ana Ortiz under her name in the "Sent by" column (as art direction's L1); until then her name stands alone |
 | For firms, the studio (10A.2.2) | The accessible name of the studio's control group |
+| For firms, the studio (10A.2.2) | The accessible names of the three previews as thumbnail buttons (the client's page, the firm's page for a filing, an email to a client) |
 | For firms, close (10A.2.6) | The alt text pattern for the plate when it carries the visitor's typed name |
 | Pricing, title page (10A.4.1) | The names and roles of the filing professionals in the three portraits (alt text) |
 | Questions, "Is a person involved?" (10A.6.2) | The name and role of the person in the portrait (alt text) |
@@ -2028,11 +2210,14 @@ field, "Menu", the engraver film's credit and description), these pages need:
   `ProofVisual` at picture size, `PapersVisual`, the run sheet and its house-lights moment, the
   sample cards, the price card's construction, the plate lettering at the Close).
 - **From the firm's pages and the proof:** the live components the pictures are built from (the
-  filing desk, the client page, the proof and its picture size, the proof-ready email), the ink
-  match and Letterhead in use, and the Branding page that receives the visitor's carried name and
+  filing desk in CoFile's look with its "Sent by" column and five-step track, the draft on the
+  desk, the client page, the firm's page for a filing, the proof in CoFile's look and its picture
+  size), the ink match and Letterhead in use on the pages clients see, and the Branding page whose
+  three previews For firms' studio matches and which receives the visitor's carried name and
   color.
-- **From the platforms part:** the embed widget shown under "underneath", and the API-key log-in
-  (`/dashboard/login`), which uses this part's card.
+- **From the platforms and emails part:** the embed widget shown under "underneath", the API-key
+  log-in (`/dashboard/login`), which uses this part's card, and the email to a client previewed in
+  For firms' studio.
 - **From components:** buttons, fields, chips, slips and their states; 10A.0.6 lists only what these
   pages need of them.
 - **For art direction:** the vignettes E1–E3 (10A.0.5), the second C5 frame for How it works'

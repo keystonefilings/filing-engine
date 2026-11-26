@@ -59,11 +59,11 @@ update at each stage" · inside the picture, the stand-in's record: the stages "
 
 **The idea: the order comes home** (Hal). One band up the firm approved the proof. Here the
 finished job comes back to it the way a stationer's order does: the record of the filing, a page of
-CoFile's filing desk, lies on the firm's own desk with every stage inked, and CoFile's envelope
-addressed to the firm opens beside it and gives up the two papers, which settle onto the record. The photograph makes it a real desk at
-the end of a working day; the record, the envelope and the papers are live HTML and SVG. It is the
-reward of the story half of the page, so it is calm and complete: nothing stamps, nothing
-celebrates.
+CoFile's filing desk, lies on a desk in the firm's office with every stage inked, and CoFile's
+envelope addressed to the firm opens beside it and gives up the two papers, which settle onto the
+record. The photograph makes it a real desk at the end of a working day; the record, the envelope
+and the papers are live HTML and SVG. It is the reward of the story half of the page, so it is calm
+and complete: nothing stamps, nothing celebrates.
 
 ### The band
 
@@ -87,9 +87,8 @@ celebrates.
 
 **What it shows.** Harbor & Pine's filed record for Two Sisters Bakery LLC, a page of CoFile's desk
 with Harbor & Pine as the account, lying on a walnut desk with its three stages inked; beside it an
-opened CoFile envelope addressed to Harbor & Pine CPA; and the
-two papers that came back in it, the state's Certificate of Formation and the IRS letter, lying
-side by side on the record. It reads in one glance as "done, and it's all here".
+opened CoFile envelope addressed to Harbor & Pine CPA; and the two papers that came back in it, the
+state's Certificate of Formation and the IRS letter, lying side by side on the record. It reads in one glance as "done, and it's all here".
 
 **Accessible name** (the stand-in's): "A filed record with the state's document and the IRS
 letter". The record's words are real text in reading order, the stages as an ordered list; the
@@ -106,17 +105,17 @@ blank right end and the photograph's props run into the bleed.
  y   0 ┌──────────────────────────────────────────────────────────────────────┬──────────┐
        │  walnut desk, top-down, north light                  ╲ pen         │          │
       40│   ┌───────────── record sheet, 416 × 540 ────────────┐ ╲╲           │          │
-       │   │ [▲≈] Harbor & Pine CPA               with CoFile │              │  ◯──◯    │
-       │   │ ════════════════════════════════════════════════ │              │ glasses  │
-       │   │ ──────────────────────────────────────────────── │              │          │
-       │   │ Two Sisters Bakery LLC          (Lora 600, 24)   │              │          │
+       │   │ [▭Co] CoFile              [▲≈] Harbor & Pine CPA │              │  ◯──◯    │
+       │   │ ──────────────────────────────────────────────── │              │ glasses  │
+       │   │                                                  │              │          │
+       │   │ Two Sisters Bakery LLC     (Miller Display, 24)  │              │          │
        │   │ New Jersey LLC formation                         │              │          │
        │   │ ●──────────────────────●───────────────────────● │              │          │
        │   │ Approved             Submitted             Filed │              │          │
      332│   │ ┌──────────────────┐ ┌──────────────────┐       │   ╱‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾╲  │
        │   │ │ New Jersey       │ │ IRS              │       │  ╱  flap, open        ╲ │
      452│   │ │ Certificate of   │ │ EIN letter       │       │ ┌───────────────────────┼──┐
-       │   │ │ Formation        │ │ (CP 575)         │       │ │                       │  │
+       │   │ │ Formation        │ │ (CP 575)         │       │ │ [▭Co] CoFile          │  │
        │   │ │ TWO SISTERS      │ │ EIN 00-0000000   │       │ │  Harbor & Pine CPA    │  │
        │   │ │ BAKERY LLC       │ │ ▬▬▬▬▬▬▬▬▬▬▬▬     │       │ │                       │  │
        │   │ │ ▬▬▬▬▬▬▬▬▬▬▬▬     │ │ ▬▬▬▬▬▬▬▬▬▬       │       │ └───────────────────────┼──┘
@@ -141,16 +140,16 @@ blank right end and the photograph's props run into the bleed.
   top right, the glasses at the lower left, no cup).
 - No paper of any kind in the photograph: every paper on the desk is live.
 
-**The record sheet** (live HTML; the product's filing record, set as a page of the firm's desk, so
-its Letterhead is the working, left-aligned kind and the Imprint sits at the right end of the
-Letterhead row, 3.4). 416 × 540, at picture x 24, y 40. Sheet `#FFFFFF`, `--r-sheet`, `--e-sheet`,
-40 px margins (content 336 px).
+**The record sheet** (live HTML; the product's filing record, set as a page of CoFile's filing desk
+with Harbor & Pine as the account, so it wears CoFile's look and the firm's name and logo are
+content in the desk's header row, never its letterhead; decision 2). 416 × 540, at picture x 24,
+y 40. Sheet `#FFFFFF`, `--r-sheet`, `--e-sheet`, 40 px margins (content 336 px).
 
 | y in the sheet | Element | Spec |
 |---|---|---|
-| 40–84 | Letterhead row | Harbor & Pine's square symbol at 44 × 44 (the desk row's clamp, 3.5); 12 px; "Harbor & Pine CPA" in Lora 600 20/26, Plate Ink. At the right end, vertically centred on the logo, the Imprint "with CoFile" at 13 px, Graphite (3.4). Nothing in the picture is focusable |
-| 104–110 | Firm Rule | 3 px Harbor `#1D4E63`, 2 px gap, 1 px Pine `#2B5A47`, full content width |
-| 134–164 | Title | "Two Sisters Bakery LLC" in Lora 600 24/30 (the `firm-name` size), Plate Ink |
+| 40–84 | The desk's header row | Both ends vertically centred in the 44 px row. Left: CoFile's horizontal lockup at 20 px tall, Plate Ink, its lozenge in Brass Line (10C.2), `aria-hidden`. Right end: the account label, Harbor & Pine's square symbol at 24 × 24, 8 px, "Harbor & Pine CPA" in Founders Grotesk Text Medium 15/20, Plate Ink. Nothing in the picture is focusable |
+| 104 | CoFile's rule | 1 px Plate Ink, full content width (10C.1). No Firm Rule |
+| 134–164 | Title | "Two Sisters Bakery LLC" in Miller Display 400 24/30 (the desk's title face, 10C.2, at the sheet's scale), Plate Ink |
 | 168–190 | The filing | "New Jersey LLC formation" in `help` (Founders Grotesk Text 15/22), Graphite |
 | 218–260 | The stage rule | Below |
 | 292–500 | The papers' place | The two document cards, 160 × 208 each, at content x 0 and x 176 (16 px apart) |
@@ -163,7 +162,7 @@ the hairline between two passed stages is overdrawn in 2 px Verdigris; a stage n
 only at the start of the motion) is a 1.5 px Rule Strong ring on white. The labels sit 16 px under
 the dots in Founders Grotesk Text Medium 15/20, Plate Ink: "Approved" left-aligned under the first,
 "Submitted" centred under the second, "Filed" right-aligned under the third. The dots are circles,
-not lozenges: the lozenge is the firm's "your turn" glyph (4.3), and a finished record has no turn
+not lozenges: the lozenge is the "your turn" glyph (4.3), and a finished record has no turn
 left in it.
 
 **The document cards** (CoFile's own document card, 3.9: the same component as the documents list
@@ -183,11 +182,14 @@ form layout or any state or IRS styling (3.9).
 **The envelope** (live SVG over the photograph, `aria-hidden`). A heavy white envelope in #10
 proportion, 280 × 122, at picture x 464, y 452, lying face up and square to the frame; its right
 54 px run into the bleed and are cropped by the viewport where there is no bleed. Face `#FFFFFF`,
-1 px Rule edge, `--e-sheet`. It is addressed in the firm's own font, the way a stationer sets a
-firm's name on its envelopes: "Harbor & Pine CPA" in Lora 600 16/22, Plate Ink, italic "&",
-small-cap "CPA", 28 px in from the left edge and 52 px down. No street address (D4 gives none), no
-stamp, no postmark, no window, no barcode, and no CoFile mark: the Name Plate never appears on a
-firm's surfaces (3.2), and Hal's blind-stamped plate on the flap is left out for that reason. Open,
+1 px Rule edge, `--e-sheet`. It is CoFile's envelope, because the papers come back to the firm in
+an email to the firm, and every email to the firm is in CoFile's look (decision 2, 10D.7): in its
+upper-left corner, 20 px in and 18 px down, CoFile's horizontal lockup at 16 px tall in Plate Ink,
+the lozenge in the letters' color as in mail (10D.4); and addressed, 28 px in from the left edge
+and 52 px down, to "Harbor & Pine CPA" in Founders Grotesk Text Medium 16/22, Plate Ink, the name
+set as content in CoFile's type, not the firm's. No street address (D4 gives none), no stamp, no
+postmark, no window, no barcode. Hal's blind-stamped plate on the flap stays out: the foundation
+drops the blind impression, and the lockup in the corner already says who sent it. Open,
 the flap lies flat above the envelope's top edge: a triangle 280 wide and 52 deep, the paper's
 inside in Cotton 2 `#F3F0E8` with a 1 px Rule edge, plain, with no security tint or pattern (3.9).
 At the start of the motion the flap is folded behind the envelope and not visible.
@@ -204,9 +206,9 @@ At the start of the motion the flap is folded behind the envelope and not visibl
 (Hal M5; the lift, arc and land from Jun M6; D3.)
 
 **Starting frame**, set by script while the band is still below the fold: the record in place with
-its Letterhead, title and filing line; the three dots as blind rings and the hairline plain; the
-stage labels already readable; the envelope closed (flap folded behind); the two papers inside it,
-hidden.
+its header row, rule, title and filing line; the three dots as blind rings and the hairline plain;
+the stage labels already readable; the envelope closed (flap folded behind); the two papers inside
+it, hidden.
 
 | t (ms) | Beat | Duration and easing |
 |---|---|---|
@@ -250,8 +252,8 @@ instantly and plays once more.
 ┌───────────────────────┬────┬──────────────────────────────────────────────────┬────────┐
 │                       │    │ ┌──────────────── photograph C6, 810 × 640 ──────────────┐│
 │ Then it's filed,      │    │ │  ┌──────── record 416 × 540 ───────┐   pen           ││
-│ and the papers        │    │ │  │ [▲≈] Harbor & Pine CPA  with CoFile│               glasses
-│ come back to you.     │    │ │  │ ═══════════════════════════════ │                 ││
+│ and the papers        │    │ │  │ [▭Co] CoFile [▲≈] Harbor & Pine CPA│               glasses
+│ come back to you.     │    │ │  │ ─────────────────────────────── │                 ││
 │   display-l 52/56     │    │ │  │ Two Sisters Bakery LLC          │                 ││
 │                       │    │ │  │ New Jersey LLC formation        │                 ││
 │ ◆ The state's         │    │ │  │ ●──────────●──────────●         │                 ││
@@ -269,10 +271,11 @@ instantly and plays once more.
 
 ### Laptop (1024–1279)
 
-The same arrangement on the narrower columns. The record narrows to 360 × 512 (32 px margins;
-cards 140 × 186, with "EIN 00-0000000" on two lines), the envelope to 220 × 96 at its right with
-the address in Lora 600 15/20, and the photograph runs from c6 to the viewport edge, cropping
-whatever passes it.
+The same arrangement on the narrower columns. The record narrows to 360 × 512 (32 px margins; the
+header row's lockup at 18 px tall, so the account label still fits beside it; cards 140 × 186,
+with "EIN 00-0000000" on two lines), the envelope to 220 × 96 at its right with its lockup at 14 px
+tall and the address in Founders Grotesk Text Medium 15/20, and the photograph runs from c6 to the
+viewport edge, cropping whatever passes it.
 
 ### Tablet (834)
 
@@ -295,11 +298,11 @@ at x 40, envelope at x 480), the label at the left margin under it.
 │                              │  40
 ├──────────────────────────────┤  photograph C6, phone crop, full bleed 390 × 640
 │   ┌──── record 326 × 434 ───┐│  record at x 32, y 24; 20 px margins
-│   │[▲≈] Harbor & Pine CPA   ││  logo 36, name Lora 600 17/22, Imprint
-│   │              with CoFile││  at the row's right end (one row at 390;
-│   │                         ││  drawn on two here for width)
-│   │ ═══════════════════════ ││
-│   │ Two Sisters Bakery LLC  ││  title Lora 600 20/26
+│   │[▭Co] CoFile             ││  the desk's header: lockup 16 tall, then
+│   │   [▲≈] Harbor & Pine CPA││  the account label at the row's right end,
+│   │                         ││  logo 24, name 14/20 Medium (one row at
+│   │ ─────────────────────── ││  390; two here for width); 1 px Plate Ink
+│   │ Two Sisters Bakery LLC  ││  rule; title Miller Display 20/26
 │   │ New Jersey LLC formation││
 │   │ ●─────────●──────────●  ││  stage labels 14/20 Medium
 │   │ Approved Submitted Filed││
@@ -310,8 +313,8 @@ at x 40, envelope at x 480), the label at the left margin under it.
 │   └─────────────────────────┘│
 │        ╱‾‾‾‾flap‾‾‾‾╲        │
 │       ┌────────────────────┐ │  envelope 220 × 96 at x 150, y 520;
-│       │ Harbor & Pine CPA  │ │  address Lora 600 15/20
-│       └────────────────────┘ │
+│       │ Harbor & Pine CPA  │ │  CoFile's lockup 14 tall at its top left;
+│       └────────────────────┘ │  address Founders Grotesk Medium 15/20
 ├──────────────────────────────┤
 │ Example record · sample   [↻]│  label 12 below, 20 px inset
 │ documents                    │
@@ -554,10 +557,11 @@ calls a rehearsal the whole filing performed on the state's real website with no
 band is set where the copy puts it: an empty theatre after hours, one ghost light left burning on
 the bare stage, and the rehearsal printed as the evening's run sheet, every screen cued line by
 line. It is the only dark band on the home page, the house lights down for the one part of the
-story that is a performance. The run sheet is a white sheet under Harbor & Pine's letterhead,
-because a rehearsal is the firm's own filing, run from its desk; the stage is CoFile's. The last
-line, "Pay Now · held, on purpose", is cued exactly like the six before it. The section sells a
-full run-through that costs nothing, not a stop.
+story that is a performance. The run sheet is a white sheet from CoFile's filing desk, with Harbor &
+Pine named as the account: a rehearsal is the firm's own filing, run from the desk, and the desk,
+like the stage, is CoFile's (decision 2). The last line, "Pay Now · held, on purpose", is cued
+exactly like the six before it. The section sells a full run-through that costs nothing, not a
+stop.
 
 ### The band
 
@@ -586,8 +590,9 @@ full run-through that costs nothing, not a stop.
 **What it shows.** A real small theatre seen from the back of the house, house lights off, a single
 ghost light on a bare stage, the seats empty; and lying in its light, Harbor & Pine's run sheet for a
 rehearsal of a New Jersey LLC formation, every line cued. **Accessible name** (the stand-in's):
-"Example rehearsal log". The photograph's alt text is `[copy needed]` (D7, "the stage"). The run
-sheet's words are real text in reading order, as a list.
+"Example rehearsal log". The photograph's alt text is `[copy needed]` (D7, "the stage"); it carries
+no caption of its own, since no photograph does (decision 15), and the run sheet's label is the
+picture's. The run sheet's words are real text in reading order, as a list.
 
 **The photograph (C7)**, desktop: a 3:2 crop of the 21:9 master, 810 × 540, from c6 to the viewport
 edge, square-cut. What this layout needs from the brief:
@@ -603,7 +608,8 @@ edge, square-cut. What this layout needs from the brief:
   red-white-and-blue, and no flags or emblems anywhere in the theatre (3.9).
 - In dark mode, 4% darker, never tinted.
 
-**The run sheet** (live HTML; the product's rehearsal log, set as a page of the firm's desk).
+**The run sheet** (live HTML; the product's rehearsal log, set as a page of CoFile's filing desk
+with Harbor & Pine as the account, in CoFile's look, decision 2).
 480 × 604, at picture x 186 (page x 816–1296, so its right edge stays 24 px inside c12), y 168: it
 lies across the lower part of the photograph and runs 232 px below it onto the stage ground, like a
 programme set down on the lip of the stage (Rosa). Sheet `#FFFFFF`, `--r-sheet`, `--e-sheet-dark`
@@ -611,8 +617,8 @@ programme set down on the lip of the stage (Rosa). Sheet `#FFFFFF`, `--r-sheet`,
 
 | y in the sheet | Element | Spec |
 |---|---|---|
-| 40–84 | Letterhead row | Harbor & Pine's square symbol at 44 × 44; 12 px; "Harbor & Pine CPA" in Lora 600 20/26, Plate Ink; the Imprint "with CoFile" at 13 px Graphite at the right end, vertically centred on the logo (3.4, the desk) |
-| 104–110 | Firm Rule | 3 px Harbor, 2 px gap, 1 px Pine |
+| 40–84 | The desk's header row | As on the record (9.5): CoFile's horizontal lockup at 20 px tall at the left, its lozenge in Brass Line, `aria-hidden`; at the right end the account label, Harbor & Pine's square symbol at 24 × 24, 8 px, "Harbor & Pine CPA" in Founders Grotesk Text Medium 15/20, Plate Ink; both vertically centred in the row |
+| 104 | CoFile's rule | 1 px Plate Ink, full content width (10C.1). No Firm Rule |
 | 134–158 | The head | The ghost-light glyph (4.4) at 14 px in Plate Ink, 8 px, then "Rehearsal · New Jersey LLC formation" in Founders Grotesk Text Medium 18/24, Plate Ink |
 | 162–182 | "test details" | `caption` 14/20, Graphite, aligned with the head's text |
 | 198 | The rehearsal rule | 1.5 px dashed Plate Ink, dash 4, gap 3, full content width: the spike tape, "dashed means rehearsal" (4.4) |
@@ -662,7 +668,8 @@ the sheet's right edge.
 
 **Starting frame**, set by script while the band is below the fold: a `#0E1016` layer over the
 photograph at 30% opacity (the house at 70% brightness); the run sheet in place with its
-Letterhead, head, "test details" and dashed rule; the seven cues at opacity 0; the pool hidden.
+header row, rule, head, "test details" and dashed rule; the seven cues at opacity 0; the pool
+hidden.
 
 | t (ms) | Beat | Duration and easing |
 |---|---|---|
@@ -698,9 +705,9 @@ opacity, not a filter). No flicker, no breathing bulb, no loop afterwards (D2.4)
 │                 │       │ ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓ fly space, near-black ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓ │
 │                 │       │     ╭─╮                                                          │
 │                 │       │     │●│ ghost light      ┌──────── run sheet 480 × 604 ────────┐  │
-│                 │       │     ╰┬╯                  │ [▲≈] Harbor & Pine CPA  with CoFile │  │
-│ In beta:        │       │      │                   │ ═══════════════════════════════════ │  │
-│ rehearse a      │       │ ░░░░░┴░░░ pool on the    │ ─────────────────────────────────── │  │
+│                 │       │     ╰┬╯                  │ [▭Co] CoFile [▲≈] Harbor & Pine CPA │  │
+│ In beta:        │       │      │                   │ ─────────────────────────────────── │  │
+│ rehearse a      │       │ ░░░░░┴░░░ pool on the    │                                     │  │
 │ filing, free.   │       │   boards                 │ ✧ Rehearsal · New Jersey LLC        │  │
 │  display-l      │       │                          │   formation (one line at 18 px)     │  │
 │                 │       │ ▀▄▀▄▀▄ seat backs ▀▄▀▄   │ test details                        │  │
@@ -751,9 +758,9 @@ ground below it; the label under the sheet.
 │           ╰┬╯                │
 │      ░░░░░░┴░░░░░            │
 │ ┌──────────────────────────┐ │  run sheet 350 wide, rising 64 px into
-│ │[▲≈] Harbor & Pine CPA    │ │  the photograph's bottom edge (Rosa);
-│ │               with CoFile│ │  20 px margins; logo 36; name 17/22;
-│ │ ════════════════════════ │ │  Imprint at the row's right end (one
+│ │[▭Co] CoFile              │ │  the photograph's bottom edge (Rosa);
+│ │    [▲≈] Harbor & Pine CPA│ │  20 px margins; header: lockup 16 tall,
+│ │ ──────────────────────── │ │  account label logo 24, name 14/20 (one
 │ │ ✧ Rehearsal · New Jersey │ │  row at 390; two here for width)
 │ │   LLC formation          │ │  head 16/22 Medium, two lines
 │ │ test details             │ │
@@ -1017,9 +1024,9 @@ they don't type, it is an empty plate in good light, and that is the invitation.
 
 **What it shows.** Harbor & Pine's door from C1, the same lock-off and light, with the brass plate
 blank: chamfered corners, two screws with their slots level, the bevel catching the late sun from
-the left, the face clean and evenly lit. It isn't labelled as an example: it shows no firm (Marcus).
-Its alt text is `[copy needed]` (D7, "the blank plate"), and it stays the same once a name is
-engraved, because the field holds the name.
+the left, the face clean and evenly lit. It carries no caption: no photograph does (decision 15),
+and this one shows no firm (Marcus). Its alt text is `[copy needed]` (D7, "the blank plate"), and
+it stays the same once a name is engraved, because the field holds the name.
 
 **What this band needs from the brief** (for the art-direction writer):
 
@@ -1342,19 +1349,20 @@ state or the IRS, and doesn't give legal or tax advice." · "Terms · Privacy ·
 hello@cofile.app" (each a link; the address `supportEmail()`) · and one control this design adds,
 the appearance switch, `[copy needed]`.
 
-**The idea: the foot of the letterhead** (Hal). Every sheet a firm's client sees ends with a small
-imprint; CoFile's own pages end the way a good letterhead does, with a thick-and-thin rule and the
-house's name and address line set small and well. It is the one place CoFile uses the rule device
-for itself (D5). No giant wordmark, no sitemap, no social icons, no newsletter box: the brand is
-confident being small (Dev).
+**The idea: the foot of the letterhead** (Hal). CoFile's own pages end the way a good letterhead
+does, with a thick-and-thin rule and the house's name and address line set small and well. It is
+the one place CoFile uses the rule device for itself (D5). No giant wordmark, no sitemap, no social
+icons, no newsletter box: the brand is confident being small (Dev).
 
 ### The band
 
 - Ground Cotton 2 `#F3F0E8`, full bleed, no texture. It follows the Close's photograph directly.
 - Padding 64 px above the rule, 48 px below the last line, plus `env(safe-area-inset-bottom)`.
 - The same footer on every page that uses the Shell: the home page, the seven pages behind it and
-  the account pages. Firm and client pages have no CoFile footer; their only sign of CoFile is the
-  Imprint (3.4).
+  the account pages. The filing desk and the dashboard are in CoFile's look too, but they end on
+  their own app shell (10B.3, 10C.2) and never take this footer. Client pages have no CoFile footer
+  and show nothing of CoFile except counsel's authorization text on the client form ("{firm},
+  filing through CoFile", decision 12).
 
 ### Desktop (1440)
 
