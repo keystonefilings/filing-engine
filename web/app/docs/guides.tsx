@@ -17,7 +17,7 @@ export const GUIDES: Guide[] = [
         <p>Every request carries your API key in the <code>x-api-key</code> header. Keys belong to your tenant: they see only your filings, client companies, webhooks and usage.</p>
         <Code>{`curl ${api}/v1/account -H "x-api-key: $COFILE_API_KEY"`}</Code>
         <Code>{`import os, requests\nr = requests.get("${api}/v1/account", headers={"x-api-key": os.environ["COFILE_API_KEY"]})\nprint(r.json())`}</Code>
-        <p>Create and revoke keys on the <Link href="/dashboard/keys">dashboard</Link> or with <code>POST /v1/api-keys</code>. A new key is shown once; only its prefix (for example <code>kfe_AbCdEfGh</code>) stays readable afterwards.</p>
+        <p>Create and revoke keys on the <Link href="/dashboard/keys">dashboard</Link> or with <code>POST /v1/api-keys</code>. A new key starts with <code>cofile_</code> and is shown once; only its prefix (for example <code>cofile_AbCdEfGh</code>) stays readable afterwards. Keys issued earlier start with <code>kfe_</code> and keep working.</p>
         <h2>Rotating a key</h2>
         <ol>
           <li>Create a new key and deploy it to your systems.</li>

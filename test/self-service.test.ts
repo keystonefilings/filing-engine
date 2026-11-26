@@ -1,7 +1,7 @@
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { buildServer } from "../src/api/server.js";
 import { FsArtifactStore } from "../src/artifacts/store.js";
-import { webhookUrlProblem } from "../src/api/self-service.js";
+import { API_KEY_PREFIX, hashApiKey, newApiKey, webhookUrlProblem } from "../src/api/self-service.js";
 import { seededStore, wire, njFormationRequest } from "./helpers.js";
 import type { FastifyInstance } from "fastify";
 
@@ -22,8 +22,8 @@ describe("self-service API keys", () => {
     const created = await app.inject({ method: "POST", url: "/v1/api-keys", headers: as("k1"), payload: { name: "website" } });
     expect(created.statusCode).toBe(201);
     const { key, apiKey } = created.json();
-    expect(key).toMatch(/^kfe_/);
-    expect(apiKey.prefix).toBe(key.slice(0, 12));
+    expect(key).toMatch(/^cofile_[A-Za-z0-9_-]{43}$/); // decision 17: new keys carry the CoFile prefix
+    expect(apiKey.prefix).toBe(key.slice(0, 15));
     expect(JSON.stringify(apiKey)).not.toContain(key);
 
     const account = await app.inject({ method: "GET", url: "/v1/account", headers: as(key) });
@@ -40,6 +40,20 @@ describe("self-service API keys", () => {
 
     expect((await app.inject({ method: "DELETE", url: `/v1/api-keys/${apiKey.id}`, headers: as("k1") })).statusCode).toBe(200);
     expect((await app.inject({ method: "GET", url: "/v1/account", headers: as(key) })).statusCode).toBe(401);
+  });
+
+  it("keeps accepting keys issued with the older kfe_ prefix (decision 17)", async () => {
+    const legacy = `kfe_${"a".repeat(43)}`;
+    await store.createApiKey({ id: "legacy-key", tenantId: "keystone", name: "old website", prefix: legacy.slice(0, 12), hash: hashApiKey(legacy), createdAt: "2026-11-20T12:00:00Z" });
+    const account = await app.inject({ method: "GET", url: "/v1/account", headers: as(legacy) });
+    expect(account.statusCode).toBe(200);
+    expect(account.json().tenantId).toBe("keystone");
+    // A stored hash alone isn't enough: a key without a self-service prefix is never looked up.
+    const other = `xyz_${"a".repeat(43)}`;
+    await store.createApiKey({ id: "no-prefix", tenantId: "keystone", name: "bad", prefix: other.slice(0, 12), hash: hashApiKey(other), createdAt: "2026-11-20T12:00:00Z" });
+    expect((await app.inject({ method: "GET", url: "/v1/account", headers: as(other) })).statusCode).toBe(401);
+    expect(newApiKey().key.startsWith(API_KEY_PREFIX)).toBe(true);
+    expect(API_KEY_PREFIX).toBe("cofile_");
   });
 
   it("refuses requests without a key", async () => {

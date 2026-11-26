@@ -203,14 +203,14 @@ export const ENDPOINTS: Endpoint[] = [
   {
     id: "list-keys", method: "GET", path: "/v1/api-keys", group: "API keys", auth: "api_key",
     summary: "List API keys (never the keys themselves)",
-    responses: [{ status: 200, description: "Keys with name, prefix, created, last used and revoked times.", example: { keys: [{ id: "…", name: "website", prefix: "kfe_AbCdEfGh", createdAt: "2026-11-24T15:00:00Z" }] } }],
+    responses: [{ status: 200, description: "Keys with name, prefix, created, last used and revoked times.", example: { keys: [{ id: "…", name: "website", prefix: "cofile_AbCdEfGh", createdAt: "2026-11-24T15:00:00Z" }] } }],
   },
   {
     id: "create-key", method: "POST", path: "/v1/api-keys", group: "API keys", auth: "api_key",
     summary: "Create an API key",
     description: "The key is returned once, in `key`. Store it now; only its prefix is kept readable. Up to 20 live keys.",
     body: "{ name }", bodyExample: { name: "website" },
-    responses: [{ status: 201, description: "Created.", example: { key: "kfe_…", apiKey: { id: "…", name: "website", prefix: "kfe_AbCdEfGh" } } }, { status: 409, description: "Already 20 live keys." }],
+    responses: [{ status: 201, description: "Created.", example: { key: "cofile_…", apiKey: { id: "…", name: "website", prefix: "cofile_AbCdEfGh" } } }, { status: 409, description: "Already 20 live keys." }],
   },
   {
     id: "revoke-key", method: "DELETE", path: "/v1/api-keys/{id}", group: "API keys", auth: "api_key",

@@ -12,7 +12,13 @@ import type { ApiKeyRecord, Store } from "../store/types.js";
  * locks) stay behind the staff key on PUT /v1/tenants/:id.
  */
 
-export const API_KEY_PREFIX = "kfe_";
+/** New keys start with this (decision 17, Nov 26). */
+export const API_KEY_PREFIX = "cofile_";
+/** Keys issued before Nov 26 start with kfe_; they keep working until revoked. */
+export const LEGACY_API_KEY_PREFIXES = ["kfe_"];
+const ACCEPTED_PREFIXES = [API_KEY_PREFIX, ...LEGACY_API_KEY_PREFIXES];
+/** Characters of a key kept readable after it is shown once: the prefix and 8 more. */
+const SHOWN_LENGTH = API_KEY_PREFIX.length + 8;
 
 export function hashApiKey(key: string): string {
   return createHash("sha256").update(key).digest("hex");
@@ -20,12 +26,12 @@ export function hashApiKey(key: string): string {
 
 export function newApiKey(): { key: string; prefix: string; hash: string } {
   const key = `${API_KEY_PREFIX}${randomBytes(32).toString("base64url")}`;
-  return { key, prefix: key.slice(0, 12), hash: hashApiKey(key) };
+  return { key, prefix: key.slice(0, SHOWN_LENGTH), hash: hashApiKey(key) };
 }
 
-/** Self-issued keys, looked up by hash. Only keys with the self-service prefix are looked up. */
+/** Self-issued keys, looked up by hash. Only keys with a self-service prefix (cofile_, or the older kfe_) are looked up. */
 export async function tenantFromStoredKey(store: Store, presented: string): Promise<{ tenantId: string; keyId: string } | null> {
-  if (!presented.startsWith(API_KEY_PREFIX) || presented.length > 200) return null;
+  if (!ACCEPTED_PREFIXES.some((p) => presented.startsWith(p)) || presented.length > 200) return null;
   const rec = await store.findApiKeyByHash(hashApiKey(presented));
   if (!rec || rec.revokedAt) return null;
   return { tenantId: rec.tenantId, keyId: rec.id };
