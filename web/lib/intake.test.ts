@@ -238,3 +238,28 @@ test("answers given once are reused, not asked again (V24)", () => {
   // Florida's correspondence is the filing contact: the form no longer asks for it.
   assert.ok(!allFields(filingKind("fl-llc")!).some((f) => f.path.startsWith("intake.portal.flCorrespondence")));
 });
+
+test("V40: answers read from an email are kept only when the form takes them", async () => {
+  const { checkAnswers, slots } = await import("./email-answers.ts");
+  const k = filingKind("ny-llc")!;
+  const out = checkAnswers(k, [
+    { field: "formation.name.baseName", value: "Blue Harbor Consulting" },
+    { field: "formation.name.designator", value: slots(k).find((x) => x.name === "formation.name.designator")!.field.options![0]!.value },
+    { field: "formation.name.designator", value: "Corp." },
+    { field: "formation.mainBusinessAddress.state", value: "ZZ" },
+    { field: "formation.mainBusinessAddress.zip", value: "11201" },
+    { field: "formation.effectiveDateValue", value: "next Tuesday" },
+    { field: "formation.unknown", value: "x" },
+    { field: "contact.email", value: "not an email" },
+    { field: "contact.firstName", value: "  " },
+  ]);
+  assert.deepEqual(Object.keys(out).sort(), ["formation.mainBusinessAddress.zip", "formation.name.baseName", "formation.name.designator"]);
+  // Repeated items: by position, within the form's limit.
+  const grouped = FILING_KINDS.find((x) => slots(x).some((s) => s.group))!;
+  const slot = slots(grouped).find((s) => s.group && s.field.type === "text")!;
+  const g = checkAnswers(grouped, [
+    { field: slot.name.replace(".N.", ".1."), value: "Sam Rivera" },
+    { field: slot.name.replace(".N.", `.${slot.group!.max}.`), value: "one too many" },
+  ]);
+  assert.deepEqual(Object.keys(g), [slot.name.replace(".N.", ".1.")]);
+});

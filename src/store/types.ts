@@ -283,6 +283,29 @@ export interface BillingAccountRecord {
   updatedAt: string;
 }
 
+/**
+ * V40: a filing request a firm emailed in. Nothing is filed from it: the sender gets a link to a form
+ * filled in from the email, checks it and sends it like any other. The text and what was read from
+ * it are sealed in the database and removed after the retention period, like SSNs.
+ */
+export interface InboundMessageRecord {
+  id: string;
+  tenantId: string;
+  clientCompanyId: string;
+  userId: string;
+  channel: "email";
+  /** The provider's id for the message (Resend's email_id): a retried webhook finds it again. */
+  providerId: string;
+  from: string;
+  subject: string;
+  text?: string;
+  receivedAt: string;
+  /** What the web app read from the text: the filing it asks for and form answers per filing kind. */
+  extracted?: { kind: string | null; byKind: Record<string, Record<string, string>>; note?: string; at: string };
+  filingId?: string;
+  purgedAt?: string;
+}
+
 /** V26: a link a firm sends one client to fill in one filing (the link itself is a sealed token in the web app). */
 export interface IntakeLinkRecord {
   id: string;
@@ -410,6 +433,12 @@ export interface Store {
   getVaultSecret(key: string): Promise<string | null>;
   putVaultSecret(key: string, tenantId: string, sealed: string): Promise<void>;
   deleteVaultSecret(key: string): Promise<void>;
+  createInbound(m: InboundMessageRecord): Promise<InboundMessageRecord>;
+  getInbound(id: string): Promise<InboundMessageRecord | null>;
+  findInboundByProvider(providerId: string): Promise<InboundMessageRecord | null>;
+  updateInbound(id: string, patch: Partial<InboundMessageRecord>): Promise<InboundMessageRecord>;
+  /** Messages received before the cutoff that still hold their text. */
+  listInboundToPurge(cutoff: string): Promise<InboundMessageRecord[]>;
   getBillingAccount(id: string): Promise<BillingAccountRecord | null>;
   getBillingAccountByCustomer(customerId: string): Promise<BillingAccountRecord | null>;
   putBillingAccount(b: BillingAccountRecord): Promise<BillingAccountRecord>;

@@ -123,6 +123,20 @@ fly secrets set --stage --app keystone-filing-engine EMAIL_FROM="CoFile <filings
 `EMAIL_FROM` must be an address on the verified domain, and `WEB_BASE_URL` is where the web
 front end runs: password-reset and log-in links in emails point there.
 
+**Filing by email (Resend receiving).** Not required to start. A firm's user writes to one
+address with what to file; we email back a link to the form filled in from the email (read by
+Claude in the web app, which needs `ANTHROPIC_API_KEY` there). Nothing is filed from an email. In
+Resend: add a receiving domain (for example `in.cofile.app`) and the MX record it shows; add a
+webhook to `https://<your API>/v1/inbound/email/resend` for the event `email.received` and copy
+its signing secret. The same `RESEND_API_KEY` reads each message's text.
+
+```bash
+read -s RESEND_INBOUND_WEBHOOK_SECRET && fly secrets set --stage --app keystone-filing-engine RESEND_INBOUND_WEBHOOK_SECRET="$RESEND_INBOUND_WEBHOOK_SECRET" INBOUND_EMAIL_ADDRESS=file@in.cofile.app
+```
+
+Only an active firm user's own address is answered, and the answer goes to that address; anyone
+else gets no reply. The email's text is sealed like SSNs and deleted after 30 days.
+
 **Subscriptions (Stripe).** Not required to start. In Stripe:
 
 1. Products: create a product per plan (Enterprise, Partner), each with a recurring price. Copy

@@ -27,9 +27,15 @@ interface Props {
   prefill?: Record<string, string>;
 }
 
-function initialState(kind: FilingKind, prefill: Record<string, string> = {}): { values: Raw; groups: Record<string, number[]>; next: number } {
+/**
+ * Starting values. A prefill names repeated items by position ("formation.members.1.name"); items
+ * get form ids from one counter shared by every group, so positions are mapped to ids here, and a
+ * group gets as many items as the prefill has.
+ */
+function initialState(kind: FilingKind, prefill: Record<string, string> = {}): { values: Raw; groups: Record<string, number[]>; next: number; prefill: Record<string, string> } {
   const values: Raw = {};
   const groups: Record<string, number[]> = {};
+  const mapped: Record<string, string> = { ...prefill };
   let next = 0;
   const defaults = (fields: (Field | Note)[], prefix: string) => {
     for (const f of fields) if (f.kind === "field" && f.defaultValue !== undefined) values[f.path ? `${prefix}.${f.path}` : prefix] = f.defaultValue;
@@ -37,18 +43,28 @@ function initialState(kind: FilingKind, prefill: Record<string, string> = {}): {
   for (const s of kind.sections) for (const it of s.items) {
     if (it.kind === "field" && it.defaultValue !== undefined) values[it.path] = it.defaultValue;
     if (it.kind === "group") {
-      const n = Math.max(it.min, it.min === 0 ? 0 : 1);
+      const re = new RegExp(`^${it.path.replace(/\./g, "\\.")}\\.(\\d+)(\\..*)?$`);
+      const positions = [...new Set(Object.keys(prefill).map((k) => re.exec(k)?.[1]).filter((x): x is string => x !== undefined).map(Number))].sort((a, b) => a - b).slice(0, it.max);
+      const n = Math.max(it.min, it.min === 0 ? 0 : 1, positions.length);
       groups[it.path] = Array.from({ length: n }, () => next++);
       for (const i of groups[it.path]) defaults(it.fields, `${it.path}.${i}`);
+      for (const k of Object.keys(prefill)) {
+        const m = re.exec(k);
+        if (!m) continue;
+        delete mapped[k];
+        const at = positions.indexOf(Number(m[1]));
+        if (at >= 0) mapped[`${it.path}.${groups[it.path][at]}${m[2] ?? ""}`] = prefill[k]!;
+      }
     }
   }
-  for (const [k, v] of Object.entries(prefill)) if (v && values[k] === undefined) values[k] = v;
-  return { values, groups, next };
+  for (const [k, v] of Object.entries(mapped)) if (v) values[k] = v;
+  return { values, groups, next, prefill: mapped };
 }
 
 export function IntakeForm({ kind, nonce, action, submitLabel = "Submit for approval", footnote, signatures = [], consentText, prefill }: Props) {
   const router = useRouter();
   const init = useMemo(() => initialState(kind, prefill), [kind, prefill]);
+  const startValues = init.prefill;
   const [values, setValues] = useState<Raw>(init.values);
   const [groups, setGroups] = useState(init.groups);
   const [counter, setCounter] = useState(init.next);
@@ -169,13 +185,13 @@ export function IntakeForm({ kind, nonce, action, submitLabel = "Submit for appr
     let control: React.ReactNode;
     switch (f.type) {
       case "textarea":
-        control = <textarea {...common} defaultValue={prefill?.[name] ?? f.defaultValue} maxLength={f.maxLength} />;
+        control = <textarea {...common} defaultValue={startValues[name] ?? f.defaultValue} maxLength={f.maxLength} />;
         break;
       case "select":
       case "usState": {
         const options = f.type === "usState" ? US_STATES.map((s) => ({ value: s, label: s })) : f.options ?? [];
         control = (
-          <select {...common} defaultValue={prefill?.[name] ?? f.defaultValue ?? ""}>
+          <select {...common} defaultValue={startValues[name] ?? f.defaultValue ?? ""}>
             {f.defaultValue === undefined || f.type === "usState" ? <option value="">Choose…</option> : null}
             {options.map((o) => <option key={o.value} value={o.value}>{o.label || "(none)"}</option>)}
           </select>
@@ -191,7 +207,7 @@ export function IntakeForm({ kind, nonce, action, submitLabel = "Submit for appr
             <div className={`choices${f.type === "yesno" ? " inline" : ""}`}>
               {options.map((o) => (
                 <label key={o.value} className="choice">
-                  <input type="radio" name={name} value={o.value} disabled={!shown} defaultChecked={f.defaultValue === o.value} />
+                  <input type="radio" name={name} value={o.value} disabled={!shown} defaultChecked={(startValues[name] ?? f.defaultValue) === o.value} />
                   <span>{o.label}</span>
                 </label>
               ))}
@@ -230,7 +246,7 @@ export function IntakeForm({ kind, nonce, action, submitLabel = "Submit for appr
       case "checkbox":
         return (
           <div className="field" key={name} hidden={!shown}>
-            <label className="choice"><input type="checkbox" {...common} defaultChecked={f.defaultValue === "on"} /><span>{label}</span></label>
+            <label className="choice"><input type="checkbox" {...common} defaultChecked={(startValues[name] ?? f.defaultValue) === "on"} /><span>{label}</span></label>
             {f.help || issue ? <p className="help" id={`${id}-help`}>{issue ? <span style={{ color: "var(--bad)" }}>{issue}. </span> : null}{f.help}</p> : null}
           </div>
         );
@@ -238,7 +254,7 @@ export function IntakeForm({ kind, nonce, action, submitLabel = "Submit for appr
         const type = f.type === "email" ? "email" : f.type === "tel" ? "tel" : f.type === "number" ? "number" : f.type === "date" ? "date" : f.type === "month" ? "month" : "text";
         const numeric = f.type === "zip" || f.type === "ssn" || f.type === "fein";
         control = (
-          <input {...common} type={type} defaultValue={prefill?.[name] ?? f.defaultValue} maxLength={f.maxLength} min={f.min} max={f.max} step={f.integer ? 1 : undefined} placeholder={f.placeholder}
+          <input {...common} type={type} defaultValue={startValues[name] ?? f.defaultValue} maxLength={f.maxLength} min={f.min} max={f.max} step={f.integer ? 1 : undefined} placeholder={f.placeholder}
             inputMode={numeric ? "numeric" : undefined} autoComplete={f.type === "ssn" || f.type === "fein" ? "off" : undefined}
             spellCheck={f.type === "ssn" ? false : undefined} />
         );

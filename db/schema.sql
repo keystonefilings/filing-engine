@@ -171,6 +171,16 @@ create table if not exists vault_secrets (
   updated_at timestamptz not null default now()
 );
 
+-- V40: filing requests firms email in (text sealed under DATA_ENCRYPTION_KEY, purged with SSNs).
+create table if not exists inbound_messages (
+  id uuid primary key,
+  tenant_id text not null,
+  client_company_id text not null,
+  provider_id text not null unique,
+  received_at timestamptz not null,
+  doc jsonb not null
+);
+
 -- V33: each paying account's Stripe subscription (apart from settings, which approvals are bound to).
 create table if not exists billing_accounts (
   id text primary key,

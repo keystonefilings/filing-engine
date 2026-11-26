@@ -69,7 +69,7 @@ export async function bootstrap(opts: { withExecutor: boolean; workerId?: string
   // Outbound communication. Email goes through Resend when RESEND_API_KEY is set; Slack, WhatsApp
   // and SMS senders are not built yet, so those messages (and email without a key) are recorded only.
   const email: ChannelSender = config.email.resendApiKey
-    ? new ResendEmailSender({ apiKey: config.email.resendApiKey, from: config.email.from, replyTo: config.email.replyTo })
+    ? new ResendEmailSender({ apiKey: config.email.resendApiKey, from: config.email.from, replyTo: config.email.replyTo, apiUrl: `${config.email.resendApiBase}/emails` })
     : new LogChannelSender("email", { print: !config.production });
   if (config.production && !config.email.resendApiKey) {
     console.warn("RESEND_API_KEY is not set: approval links, password resets and notices are recorded, not emailed");
@@ -80,6 +80,11 @@ export async function bootstrap(opts: { withExecutor: boolean; workerId?: string
   const { CardCodes } = await import("./payments/card-codes.js");
   const cardVault = config.basisTheoryApiKey ? new BasisTheoryCardVault({ apiKey: config.basisTheoryApiKey }) : undefined;
   const cardCodes = new CardCodes(store);
+  const { InboundEmailService } = await import("./inbound/email.js");
+  const inbound = new InboundEmailService({
+    store, webhookSecret: config.email.inboundWebhookSecret, resendApiKey: config.email.resendApiKey ?? undefined,
+    address: config.email.inboundAddress, apiBase: config.email.resendApiBase, email, webBaseUrl: config.webBaseUrl, platformName: config.platformName,
+  });
   const { BillingService } = await import("./billing/service.js");
   const { StripeClient } = await import("./billing/stripe.js");
   const billing = new BillingService({
@@ -92,5 +97,5 @@ export async function bootstrap(opts: { withExecutor: boolean; workerId?: string
     "site:IRS": config.siteConcurrency.IRS, "site:NY": config.siteConcurrency.NY, "site:NJ": config.siteConcurrency.NJ,
   });
   const service = new FilingService({ store, approvals, webhooks, queue, vault, drift, nameResolution, reviewGate, registeredAgents, notifier, executor, cardCodes, billing, limiter, dryRunDefault: config.dryRunDefault, workerId: opts.workerId });
-  return { store, artifacts, approvals, webhooks, queue, vault, secrets, drift, nameResolution, reviewGate, registeredAgents, notifier, email, harness, executor, service, billing };
+  return { store, artifacts, approvals, webhooks, queue, vault, secrets, drift, nameResolution, reviewGate, registeredAgents, notifier, email, harness, executor, service, billing, inbound };
 }

@@ -13,6 +13,7 @@
     "coverage": "node --experimental-strip-types scripts/coverage.ts"
   },
   "dependencies": {
+    "@anthropic-ai/sdk": "1.8.0",
     "@basis-theory/web-elements": "3.5.0",
     "next": "15.5.28",
     "react": "19.1.1",

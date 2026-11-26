@@ -88,6 +88,10 @@ const isMasked = (v: string) => /^\*{3}-\*{2}-[\d*]{4}$/.test(v);
 export async function purgeSensitive(store: Store, opts: { retentionDays: number; now?: Date }): Promise<string[]> {
   const cutoff = new Date((opts.now ?? new Date()).getTime() - opts.retentionDays * 86_400_000).toISOString();
   const purged: string[] = [];
+  // V40: emailed-in requests keep only who sent what subject and when.
+  for (const m of await store.listInboundToPurge(cutoff)) {
+    await store.updateInbound(m.id, { text: undefined, extracted: undefined, purgedAt: (opts.now ?? new Date()).toISOString() });
+  }
   for (const f of await store.listFilingsByStatus([...TERMINAL])) {
     if (f.sensitivePurgedAt || f.updatedAt > cutoff) continue;
     let found = false;

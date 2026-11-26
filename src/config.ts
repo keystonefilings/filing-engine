@@ -106,9 +106,14 @@ export const config = {
   /** Email through Resend (comms/resend.ts). No key: every message is recorded, none is sent. */
   email: {
     resendApiKey: process.env.RESEND_API_KEY || null,
+    /** Only for a local stand-in; unset in production. */
+    resendApiBase: (process.env.RESEND_API_URL || "https://api.resend.com").replace(/\/+$/, ""),
     /** A sender on a domain verified in Resend. */
     from: env("EMAIL_FROM", "CoFile <filings@cofile.app>"),
     replyTo: process.env.EMAIL_REPLY_TO || undefined,
+    /** V40: where firms email filing requests (a Resend receiving address), and its webhook's signing secret. */
+    inboundAddress: process.env.INBOUND_EMAIL_ADDRESS || undefined,
+    inboundWebhookSecret: process.env.RESEND_INBOUND_WEBHOOK_SECRET || undefined,
   },
   /** Name-resolution AI generator (the only LLM in a filing). No key -> deterministic static generator. */
   anthropicApiKey: process.env.ANTHROPIC_API_KEY || null,

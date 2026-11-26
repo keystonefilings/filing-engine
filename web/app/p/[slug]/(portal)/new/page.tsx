@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { firmContext, kindsForState, offeredKinds } from "@/lib/firm";
 import { firmPageUrl, publicKind, SERVICE_SLUGS, widgetSnippet } from "@/lib/public-pages";
+import { inboundAddress } from "@/lib/inbound";
 
 export const metadata = { title: "New filing" };
 
@@ -13,15 +14,17 @@ const STATES = [
 export default async function NewFilingPage({ params, searchParams }: { params: Promise<{ slug: string }>; searchParams: Promise<{ state?: string }> }) {
   const { slug } = await params;
   const { state } = await searchParams;
-  const { company } = await firmContext(slug);
+  const { session, company } = await firmContext(slug);
   const base = `/p/${encodeURIComponent(slug)}`;
   const all = offeredKinds(company);
   const st = STATES.find((s) => s.id === state);
   if (!st) {
+    const inbox = await inboundAddress(session.apiKey, session.clientCompanyId);
     return (
       <div className="stack">
         <h1>New filing</h1>
         <p className="muted">Which state is the business in?</p>
+        {inbox ? <p className="small muted">Or email the details to <a href={`mailto:${inbox}`}>{inbox}</a> from {session.email}. We fill in the form from your email and send you a link to check it.</p> : null}
         <div className="pick">
           {STATES.map((s) => {
             const n = kindsForState(all, s.id).length;

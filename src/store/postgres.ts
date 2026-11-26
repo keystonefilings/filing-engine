@@ -4,7 +4,7 @@ import path from "node:path";
 import { randomUUID } from "node:crypto";
 import {
   ClientCompanyOwnershipError,
-  type ApiKeyRecord, type InquiryRecord, type IntakeLinkRecord, type BillingAccountRecord, type UserRecord, type SignatureRecord, type ApprovalRecord, type DriftHaltRecord, type FilingRecord, type MessageRecord, type NameResolutionRecord, type ReviewGateRecord, type RunRecord, type Store, type SubmitIntentRecord, type WebhookDeliveryRecord,
+  type ApiKeyRecord, type InquiryRecord, type IntakeLinkRecord, type BillingAccountRecord, type InboundMessageRecord, type UserRecord, type SignatureRecord, type ApprovalRecord, type DriftHaltRecord, type FilingRecord, type MessageRecord, type NameResolutionRecord, type ReviewGateRecord, type RunRecord, type Store, type SubmitIntentRecord, type WebhookDeliveryRecord,
 } from "./types.js";
 import type { ClientCompanySettings, TenantSettings } from "../settings/schema.js";
 import type { PageSnapshot } from "../resolver/types.js";
@@ -249,6 +249,35 @@ export class PostgresStore implements Store {
     await this.pool.query(`insert into vault_secrets (key, tenant_id, sealed) values ($1,$2,$3) on conflict (key) do update set sealed = excluded.sealed, updated_at = now()`, [key, tenantId, sealed]);
   }
   async deleteVaultSecret(key: string) { await this.pool.query(`delete from vault_secrets where key=$1`, [key]); }
+  // V40: the text and what was read from it are one sealed value when a key is set.
+  private sealInbound(m: InboundMessageRecord): unknown {
+    if (!this.cipher) return m;
+    const { text, extracted, ...rest } = m;
+    return { ...rest, sealed: this.cipher.seal(JSON.stringify({ text, extracted })) };
+  }
+  private openInbound(doc: (InboundMessageRecord & { sealed?: string }) | null): InboundMessageRecord | null {
+    if (!doc) return null;
+    if (!doc.sealed || !this.cipher) return doc;
+    const { sealed, ...rest } = doc;
+    return { ...rest, ...(JSON.parse(this.cipher.open(sealed)) as Pick<InboundMessageRecord, "text" | "extracted">) };
+  }
+  async createInbound(m: InboundMessageRecord) {
+    await this.pool.query(`insert into inbound_messages (id, tenant_id, client_company_id, provider_id, received_at, doc) values ($1,$2,$3,$4,$5,$6)`, [m.id, m.tenantId, m.clientCompanyId, m.providerId, m.receivedAt, this.sealInbound(m)]);
+    return m;
+  }
+  async getInbound(id: string) { return this.openInbound(await this.doc(`select doc from inbound_messages where id=$1`, [id])); }
+  async findInboundByProvider(providerId: string) { return this.openInbound(await this.doc(`select doc from inbound_messages where provider_id=$1`, [providerId])); }
+  async updateInbound(id: string, patch: Partial<InboundMessageRecord>) {
+    const cur = await this.getInbound(id);
+    if (!cur) throw new Error("message not found");
+    const next = { ...cur, ...patch, id };
+    await this.pool.query(`update inbound_messages set doc=$2 where id=$1`, [id, this.sealInbound(next)]);
+    return next;
+  }
+  async listInboundToPurge(cutoff: string) {
+    const rows = await this.docs<InboundMessageRecord & { sealed?: string }>(`select doc from inbound_messages where received_at < $1 and not (doc ? 'purgedAt') limit 500`, [cutoff]);
+    return rows.map((d) => this.openInbound(d)!);
+  }
   async getBillingAccount(id: string) { return this.doc<BillingAccountRecord>(`select doc from billing_accounts where id=$1`, [id]); }
   async getBillingAccountByCustomer(customerId: string) { return this.doc<BillingAccountRecord>(`select doc from billing_accounts where customer_id=$1`, [customerId]); }
   async putBillingAccount(b: BillingAccountRecord) {

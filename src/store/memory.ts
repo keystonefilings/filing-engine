@@ -1,7 +1,7 @@
 import { randomUUID } from "node:crypto";
 import {
   ClientCompanyOwnershipError,
-  type ApiKeyRecord, type InquiryRecord, type IntakeLinkRecord, type BillingAccountRecord, type UserRecord, type SignatureRecord, type ApprovalRecord, type DriftHaltRecord, type FilingRecord, type MessageRecord, type NameResolutionRecord, type ReviewGateRecord, type RunRecord, type Store, type SubmitIntentRecord, type WebhookDeliveryRecord,
+  type ApiKeyRecord, type InquiryRecord, type IntakeLinkRecord, type BillingAccountRecord, type InboundMessageRecord, type UserRecord, type SignatureRecord, type ApprovalRecord, type DriftHaltRecord, type FilingRecord, type MessageRecord, type NameResolutionRecord, type ReviewGateRecord, type RunRecord, type Store, type SubmitIntentRecord, type WebhookDeliveryRecord,
 } from "./types.js";
 import type { ClientCompanySettings, TenantSettings } from "../settings/schema.js";
 import type { PageSnapshot } from "../resolver/types.js";
@@ -133,6 +133,15 @@ export class MemoryStore implements Store {
   async getVaultSecret(key: string) { return this.vaultSecrets.get(key) ?? null; }
   async putVaultSecret(key: string, _tenantId: string, sealed: string) { this.vaultSecrets.set(key, sealed); }
   async deleteVaultSecret(key: string) { this.vaultSecrets.delete(key); }
+  inbound = new Map<string, InboundMessageRecord>();
+  async createInbound(m: InboundMessageRecord) { this.inbound.set(m.id, m); return m; }
+  async getInbound(id: string) { return this.inbound.get(id) ?? null; }
+  async findInboundByProvider(providerId: string) { return [...this.inbound.values()].find((m) => m.providerId === providerId) ?? null; }
+  async updateInbound(id: string, patch: Partial<InboundMessageRecord>) {
+    const m = this.inbound.get(id); if (!m) throw new Error("message not found");
+    const next = { ...m, ...patch, id: m.id }; this.inbound.set(id, next); return next;
+  }
+  async listInboundToPurge(cutoff: string) { return [...this.inbound.values()].filter((m) => m.receivedAt < cutoff && !m.purgedAt); }
   billingAccounts = new Map<string, BillingAccountRecord>();
   async getBillingAccount(id: string) { return this.billingAccounts.get(id) ?? null; }
   async getBillingAccountByCustomer(customerId: string) { return [...this.billingAccounts.values()].find((b) => b.customerId === customerId) ?? null; }
