@@ -19,6 +19,8 @@ interface Props {
   submitLabel?: string;
   /** Shown above the submit button. */
   footnote?: React.ReactNode;
+  /** The page shows the fee note under its summary (client pages, merged spec 10B.24), so the form leaves it out. */
+  feeNoteAbove?: boolean;
   /** The company's saved signatures, for a form that is signed. */
   signatures?: { id: string; signerName: string; createdAt: string }[];
   /** The consent a signer accepts when saving a new signature (from the engine). */
@@ -65,7 +67,7 @@ function initialState(kind: FilingKind, prefill: Record<string, string> = {}): {
   return { values, groups, next, prefill: mapped };
 }
 
-export function IntakeForm({ kind, nonce, action, submitLabel = "Create the proof", footnote, signatures = [], consentText, prefill, filerName, forClient }: Props) {
+export function IntakeForm({ kind, nonce, action, submitLabel = "Create the proof", footnote, signatures = [], consentText, prefill, filerName, forClient, feeNoteAbove }: Props) {
   const router = useRouter();
   const init = useMemo(() => initialState(kind, prefill), [kind, prefill]);
   const startValues = init.prefill;
@@ -184,7 +186,9 @@ export function IntakeForm({ kind, nonce, action, submitLabel = "Create the proo
     const id = `f-${name.replace(/[^a-zA-Z0-9]/g, "-")}`;
     const value = values[name] ?? "";
     const issue = fieldIssues.get(name);
-    const common = { id, name, disabled: !shown, "aria-required": f.required === true ? true : undefined, "aria-invalid": issue ? true : undefined, "aria-describedby": f.help || issue ? `${id}-help` : undefined };
+    // Decision 38: an answer the form filled in (the firm's saved agent) is marked until someone changes it.
+    const filled = startValues[name] !== undefined && (values[name] ?? startValues[name]) === startValues[name];
+    const common = { id, name, disabled: !shown, "aria-required": f.required === true ? true : undefined, "aria-invalid": issue ? true : undefined, "aria-describedby": f.help || issue ? `${id}-help` : undefined, "data-filled": filled ? "" : undefined };
     const label = <>{f.label}{f.required === true ? <span className="req" aria-hidden>*</span> : null}</>;
     let control: React.ReactNode;
     switch (f.type) {
@@ -401,7 +405,7 @@ export function IntakeForm({ kind, nonce, action, submitLabel = "Create the proo
       {footnote}
       <div className="row">
         <button className="btn primary" type="submit" disabled={pending}>{pending ? "Sending…" : submitLabel}</button>
-        {kind.feeNote ? <span className="small muted">{kind.feeNote}</span> : null}
+        {kind.feeNote && !feeNoteAbove ? <span className="small muted">{kind.feeNote}</span> : null}
       </div>
       {kind.feeAside ? <p className="small muted">{kind.feeAside}</p> : null}
     </form>

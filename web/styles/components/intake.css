@@ -1,0 +1,134 @@
+/* The client's form (merged spec 10B.24, 11.3) on the firm's pages. The form's markup (components/IntakeForm.tsx)
+   keeps its logic; these rules give it the new look inside .intake2, reading only semantic tokens, so the
+   firm's ink-matched colors do the rest. */
+@layer components {
+.client2 { min-height: 100vh; padding: 48px 24px 96px; background: var(--page); }
+.client2-sheet { display: grid; gap: 24px; }
+.client2-title { font-family: var(--font-firm, var(--font-sans-display)); font-weight: 600; font-size: clamp(1.75rem, 1.5214rem + 0.9524vw, 2rem); line-height: clamp(2.125rem, 1.8964rem + 0.9524vw, 2.375rem); color: #1D2130; text-wrap: balance; }
+.client2-title .client2-for { display: block; font-weight: 400; color: var(--text-2); }
+.client2-title .client2-for .sep { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+.client2-summary { font-size: 1.125rem; line-height: 1.75rem; color: #1D2130; max-width: 64ch; }
+.client2-fee { margin-top: -8px; font-size: 0.9375rem; line-height: 1.4375rem; color: var(--text-2); font-variant-numeric: tabular-nums; max-width: 64ch; }
+.client2-note { font-size: 1rem; line-height: 1.5rem; }
+.client2-foot { font-size: 0.9375rem; line-height: 1.4375rem; color: var(--text-2); }
+.client2.is-embed { min-height: 0; padding: 16px; background: transparent; }
+.client2.is-embed .sheet2 { box-shadow: none; padding: 0; background: transparent; }
+@media (max-width: 599px) { .client2 { padding: 0; } .client2:not(.is-embed) > .client2-sheet { min-height: 100dvh; align-content: start; } }
+
+.intake2 form { display: grid; gap: 24px; max-width: var(--form-max); counter-reset: section; }
+.intake2 fieldset { border: 0; border-top: 1px solid var(--line); border-radius: 0; background: none; margin: 24px 0 0; padding: 20px 0 0; display: grid; gap: 24px; min-width: 0; }
+.intake2 legend { position: relative; float: left; width: 100%; padding: 0; margin: 0 0 8px; font-family: var(--font-firm, var(--font-sans-display)); font-weight: 600; font-size: 1.375rem; line-height: 1.75rem; color: #1D2130; }
+.intake2 legend + * { clear: both; }
+.intake2 form > fieldset > legend::before { counter-increment: section; content: counter(section); position: absolute; left: -32px; top: 3px; font: 500 1rem/1.375rem var(--font-sans-display); font-variant-numeric: tabular-nums; color: var(--link); }
+@media (max-width: 899px) { .intake2 form > fieldset > legend::before { position: static; display: inline-block; margin-right: 12px; } }
+/* In the widget the form sits on the firm's own page with no margin to hang into */
+.client2.is-embed .intake2 form > fieldset > legend::before { position: static; display: inline-block; margin-right: 12px; }
+.intake2 .field { display: grid; gap: 8px; min-width: 0; }
+.intake2 .field[hidden], .intake2 [hidden] { display: none; }
+.intake2 .field > label, .intake2 .label { font-size: 1rem; line-height: 1.375rem; font-weight: 500; color: #1D2130; }
+.intake2 .req { color: var(--link); margin-left: 2px; }
+.intake2 .help { margin: 0; font-size: 0.9375rem; line-height: 1.375rem; color: var(--text-2); max-width: 64ch; }
+.intake2 .muted { color: var(--text-2); }
+.intake2 :where(input:not([type="checkbox"]):not([type="radio"]):not([type="hidden"]):not([type="file"]), select, textarea) {
+  width: 100%; min-height: 56px; padding: 0 16px; font-family: var(--font-sans); font-size: 1.125rem; line-height: 1.5rem;
+  color: #1D2130; background: #fff; border: 1px solid var(--line-strong); border-radius: var(--r-sheet);
+}
+.intake2 textarea { min-height: 120px; padding: 14px 16px; resize: vertical; }
+.intake2 select { appearance: none; padding-right: 44px; background: #fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1.5l5 5 5-5' fill='none' stroke='%231D2130' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") no-repeat right 16px center; }
+@media (hover: hover) { .intake2 :where(input:not([type="checkbox"]):not([type="radio"]), select, textarea):hover { border-color: var(--graphite); } }
+.intake2 :where(input, select, textarea):focus { border-color: var(--focus); }
+/* Decision 38: an answer the form filled in for the client wears the firm's edge and row wash until it is changed */
+.intake2 :where(input, select, textarea)[data-filled] { box-shadow: inset 3px 0 0 var(--firm); background-color: var(--firm-row); }
+.intake2 [aria-invalid="true"] { border-color: var(--madder) !important; box-shadow: inset 0 0 0 1px var(--madder); }
+
+/* Choices, consents and authorizations: the whole label is the target */
+.intake2 .choices { display: grid; gap: 4px; }
+.intake2 .choices.inline { display: flex; flex-wrap: wrap; gap: 4px 24px; }
+.intake2 .choice, .intake2 .auth { display: grid; grid-template-columns: 24px 1fr; gap: 12px; align-items: start; min-height: 48px; margin: 0; padding: 12px 0; border: 0; border-radius: 0; background: none; cursor: pointer; font-size: 1rem; line-height: 1.5rem; font-weight: 400; color: #1D2130; }
+.intake2 .choice > span { padding-top: 1px; }
+/* Authorizations: a choice row each, Rule hairlines between them, the whole row the target; checked rows wash in the firm's row tint */
+.intake2 .auth { padding: 16px; font-size: 1.0625rem; line-height: 1.625rem; border-top: 1px solid var(--line); transition: background-color var(--t-quick) var(--ease-settle); }
+.intake2 .auth + .auth { margin-top: -24px; }
+.intake2 .auth:last-of-type { border-bottom: 1px solid var(--line); }
+.intake2 .auth:has(input:checked) { background: var(--filled, var(--firm-row)); }
+.intake2 .auth .please { color: var(--madder); }
+.intake2 .choice input, .intake2 .auth input { appearance: none; width: 24px; height: 24px; margin: 0; border: 1.5px solid var(--line-strong); border-radius: var(--r-sheet); background: #fff; display: grid; place-content: center; cursor: pointer; }
+.intake2 .choice input[type="radio"] { border-radius: 50%; }
+.intake2 .choice input[type="checkbox"]:checked, .intake2 .auth input:checked { background: var(--select); border-color: var(--select-line); }
+.intake2 .choice input[type="checkbox"]:checked::after, .intake2 .auth input:checked::after { content: ""; width: 12px; height: 7px; border: solid var(--select-on); border-width: 0 0 2px 2px; transform: translateY(-2px) rotate(-45deg); }
+.intake2 .choice input[type="radio"]:checked { border-color: var(--select-line); }
+.intake2 .choice input[type="radio"]:checked::after { content: ""; width: 10px; height: 10px; border-radius: 50%; background: var(--select-line); }
+.intake2 .choice input:focus-visible, .intake2 .auth input:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+
+/* Paired fields */
+.intake2 .field-row { display: grid; gap: 16px; align-items: end; }
+.intake2 .field-row.n2 { grid-template-columns: 2fr 1fr; }
+.intake2 .field-row.n3 { grid-template-columns: 2fr 1fr 1fr; }
+@media (max-width: 599px) {
+  .intake2 .field-row.n2 { grid-template-columns: 1fr; }
+  .intake2 .field-row.n3 { grid-template-columns: 1fr 1fr; }
+  .intake2 .field-row.n3 > :first-child { grid-column: 1 / -1; }
+}
+
+/* "Same as" and small buttons */
+.intake2 .same-as { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+.intake2 .btn.small { display: inline-flex; align-items: center; min-height: 40px; padding: 8px 16px; font: 500 0.9375rem/1.25rem var(--font-sans); color: #1D2130; background: transparent; border: 1px solid var(--line-strong); border-radius: 4px; corner-shape: bevel; cursor: pointer; }
+@media (hover: hover) { .intake2 .btn.small:hover { background: var(--row); border-color: #1D2130; } }
+.intake2 .btn.small:disabled { background: var(--cotton-2); color: var(--graphite); border-color: var(--rule); cursor: not-allowed; }
+
+/* Folded optional sections */
+.intake2 details.fold { border: 0; border-top: 1px solid var(--line); border-radius: 0; background: none; margin: 0; }
+.intake2 details.fold[open] > summary { border-bottom: 0; }
+.intake2 details.more { margin: 0; }
+.intake2 details.fold > summary, .intake2 details.more > summary { list-style: none; display: flex; align-items: center; gap: 12px; cursor: pointer; }
+.intake2 details.fold > summary { justify-content: space-between; min-height: 64px; padding: 0; font-family: var(--font-firm, var(--font-sans-display)); font-weight: 600; font-size: 1.375rem; line-height: 1.75rem; color: #1D2130; }
+.intake2 details > summary::-webkit-details-marker { display: none; }
+.intake2 details.fold > summary::after, .intake2 details.more > summary::before { content: ""; flex: none; width: 16px; height: 10px; background: currentColor; mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='10' viewBox='0 0 16 10'%3E%3Cpath d='M1.5 1.5l6.5 6.5 6.5-6.5' fill='none' stroke='black' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center / contain no-repeat; transition: transform 240ms var(--ease-settle); }
+.intake2 details[open].fold > summary::after, .intake2 details[open].more > summary::before { transform: rotate(180deg); }
+.intake2 details.fold > fieldset { border-top: 0; padding-top: 8px; padding-bottom: 24px; }
+.intake2 details.more > summary { min-height: 48px; margin: 0; font: 500 1rem/1.375rem var(--font-sans); color: var(--link); }
+.intake2 details.more > summary .muted { font-weight: 400; }
+.intake2 details.more > summary::before { width: 12px; height: 8px; }
+.intake2 details.more[open] { display: grid; gap: 24px; }
+.intake2 details.more[open] > :not(summary) { border-left: 2px solid var(--line-strong); padding-left: 16px; }
+
+/* Repeating groups */
+.intake2 .group-item { display: grid; gap: 16px; margin: 0; padding: 20px; background: #fff; border: 1px solid var(--line); border-radius: var(--r-sheet); }
+.intake2 .item-title { margin: 0; font-size: 1.0625rem; display: flex; justify-content: space-between; align-items: center; gap: 12px; font: 500 1.0625rem/1.5rem var(--font-sans); }
+.intake2 .cols { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+@media (max-width: 599px) { .intake2 .cols { grid-template-columns: 1fr; } .intake2 .group-item { padding: 16px; } }
+
+/* Notices inside the form */
+.intake2 .notice { margin: 0; padding: 16px 20px; border-radius: var(--r-sheet); background: var(--page-2, var(--firm-wash)); color: #1D2130; font-size: 1rem; line-height: 1.5rem; }
+.intake2 .notice.ok { background: var(--done-tint); }
+.intake2 .notice.ok::before { content: ""; display: inline-block; width: 12px; height: 12px; margin-right: 10px; border-radius: 50%; background: var(--done); vertical-align: -1px; }
+.intake2 .notice.bad { background: var(--madder-tint); box-shadow: inset 2px 0 0 var(--madder); }
+.intake2 .notice.bad::before { content: ""; display: inline-block; width: 12px; height: 4px; margin-right: 10px; background: var(--madder); vertical-align: 3px; }
+.intake2 .issues { margin: 8px 0 0; padding-left: 20px; }
+
+/* The submit row: the firm's one button */
+.intake2 .row { display: flex; flex-wrap: wrap; align-items: center; gap: 12px 16px; }
+.intake2 .btn.primary {
+  display: inline-flex; align-items: center; justify-content: center; min-height: 56px; min-width: min(320px, 100%); max-width: 100%; padding: 16px 28px;
+  font-family: var(--font-firm, var(--font-sans-display)); font-weight: 600; font-size: 1.125rem; line-height: 1.5rem; text-align: center; text-wrap: balance;
+  background: var(--action); color: var(--action-on); border: 1px solid var(--action-border); box-shadow: inset 4px 0 0 var(--action-edge);
+  border-radius: 6px; corner-shape: bevel; cursor: pointer; transition: background-color var(--t-quick) var(--ease-press);
+}
+@supports not (corner-shape: bevel) { .intake2 .btn.primary, .intake2 .btn.small { border-radius: 3px; } }
+@media (hover: hover) { .intake2 .btn.primary:hover { background: var(--action-hover); } }
+.intake2 .btn.primary:active { transform: translateY(1px); box-shadow: inset 0 1px 0 rgba(29,33,48,.18); }
+.intake2 .btn.primary:disabled { cursor: progress; transform: translateY(1px); }
+@media (max-width: 599px) { .intake2 .btn.primary { width: 100%; } }
+
+/* The signature pad: a white sheet, a baseline with an "x", strokes in signature ink */
+.intake2 .sigpad { background: #fff; border: 1px solid var(--line-strong); border-radius: var(--r-sheet); }
+}
+
+/* The beta strip on a client page (merged spec 10B.1.8): inside the sheet, under the Firm Rule, so the firm's name
+   comes first; the site-wide strip above the page hides itself. Never in the embed. */
+@layer components {
+body:has(.client2) > .beta-banner { display: none; }
+.client2-beta { display: flex; gap: 12px; align-items: baseline; margin-top: -8px; padding: 0 0 12px; border-bottom: 1px solid var(--line); font-size: 0.9375rem; line-height: 1.4375rem; color: var(--text-2); }
+.client2-beta > .chip2 { flex: none; position: relative; top: -1px; }
+@media (max-width: 599px) { .client2-beta { flex-direction: column; gap: 8px; } }
+}
