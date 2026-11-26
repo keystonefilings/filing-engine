@@ -125,7 +125,8 @@ describe("fee figures confirmed on the live checkouts (decision 16)", () => {
     expect(filingKind("nj-llc")!.feeNote).toContain("certificate of standing $52");
     const { readFileSync } = await import("node:fs");
     // Round 3 (Nov 26): the checks moved from the home page to How it works.
-    const home = readFileSync("web/app/how-it-works/page.tsx", "utf8");
+    // The page wraps figures in spans for their numerals, so compare the words with the tags taken out.
+    const home = readFileSync("web/app/how-it-works/page.tsx", "utf8").replace(/<[^>]+>/g, "");
     expect(home).toContain("By card, New Jersey&apos;s standing certificate costs $52 for an LLC and $27 for a corporation");
   });
 });
