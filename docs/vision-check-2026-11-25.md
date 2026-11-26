@@ -207,6 +207,23 @@ code (with tests) or, for items that need a person, when that step has happened.
 *needs* name what has to come from outside the code (a live walk, a vendor account, a decision).
 Rows refer to the status tables above.
 
+### What's waiting on you (Nov 26)
+
+Built and tested; each switches on when its accounts and keys are set (steps in docs/deploy-fly.md):
+
+- **Resend:** verify `cofile.app` (SPF, DKIM) and set `RESEND_API_KEY` (V1). For filing by email,
+  a receiving domain (MX record), the webhook's signing secret and `INBOUND_EMAIL_ADDRESS` (V40).
+- **Claude API key** in the web app (`ANTHROPIC_API_KEY`): reads requests sent by email, Slack,
+  text and WhatsApp (V40-V43).
+- **Basis Theory:** a public key (web) and a private key (engine) for saved cards (V18).
+- **Stripe:** the two prices, a restricted key, the webhook secret, then `BILLING_REQUIRED=true` (V33).
+- **Google:** an OAuth client for "Continue with Google" (V37).
+- **Slack:** a Slack app with the `/file` command (V41).
+- **Twilio:** a number with A2P 10DLC registration, and a WhatsApp sender (Meta verification) (V42-V43).
+- **Live walks with you:** NY drawdown deposit and post-submit pages, Sunbiz checkout, the IRS
+  Assignment screen, the NJ checkout (V9-V12); the checkout walks also let the adapters type saved
+  cards (V18).
+
 ### Step 1: honest and safe
 - [x] V1. Resend email sender behind `ChannelSender`, wired as the default email sender (row 18). **Done in code** (`src/comms/resend.ts`; approval links, password resets and partner approvals). *To turn on: a Resend API key and DNS verification of the sending domain (`docs/deploy-fly.md`, step 3).*
 - [x] V2. Password reset (forgot password, then a link to set a new one) and change password (row 12). **Done**: `/forgot-password`, `/reset-password`, and Password pages in both dashboards; links are single-use, last an hour and end every session.
