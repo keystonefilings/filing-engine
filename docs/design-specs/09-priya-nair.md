@@ -254,3 +254,281 @@ their looks are briefed in section 4.5.
   official emblem, anywhere on the site, in any illustration, in any photograph.
 
 ---
+
+## 4. Color
+
+### 4.1 CoFile's own palette (light)
+
+CoFile is these eight values and nothing else. Contrast figures are against the ground they are
+used on.
+
+| Name | Hex | Role | Contrast |
+|---|---|---|---|
+| **Graphite** | `#1B1F24` | All text; CoFile's primary buttons; the tag; the footer and the rehearsal stage band | 14.9 : 1 on Chalk |
+| **Chalk** | `#F5F3EE` | Page ground on cofile.app and on the filing desk. A whisper warm, so blues, greens and burgundies all sit well on it | — |
+| **Paper** | `#FFFFFF` | Cards, forms, the proof, every client page. Client pages are pure white so a firm's color reads true | — |
+| **Chalk Deep** | `#ECE9E2` | Support bands (Checks, The catch), the beta bar, table header rows | — |
+| **Stone** | `#E3DFD7` | Hairlines and dividers (decorative only) | — |
+| **Pebble** | `#8E9399` | Field borders, checkbox outlines, the open frame in empty states | 3.1 : 1 on Paper (passes non-text contrast) |
+| **Slate** | `#59606A` | Secondary text, captions, "with CoFile" | 5.7 : 1 on Chalk, 6.4 : 1 on Paper |
+| **Iris** | `#5B4BD6` | **Rehearsal, and only rehearsal** | 6.1 : 1 on Paper |
+
+### 4.2 Status colors
+
+Status is always color **plus a glyph plus words**, never color alone, because some firms' house
+colors are green, red or amber, and some readers can't tell those apart.
+
+| Tone | Text / glyph | Tint (chip and notice ground) | Used for (the product's own labels) |
+|---|---|---|---|
+| **Leaf** | `#1D7A50` | `#E4F2EA` | Live, Approved, Submitted to the state, Accepted by the state, EIN issued, Completed |
+| **Marigold** | `#8F5600` | `#FFF0D4` | Waiting for approval, Needs information, Changes requested, Ready to pay, On hold, Name unavailable, Being checked, Paused: state site changed |
+| **Brick** | `#B42318` | `#FDECEA` | Needs correcting, Rejected by the state, Failed, Stopped |
+| **Slate** | `#59606A` | `#EFEDE8` | Received, Queued, Filing now, Getting the state's review page, Final check |
+| **Iris** | `#5B4BD6` | `#EEEBFF` | Rehearsal (chips, notices, the beta tag, the run sheet) |
+
+All text-on-tint pairs pass 5 : 1 or better.
+
+### 4.3 Dark mode
+
+| Name | Hex | Role |
+|---|---|---|
+| Night | `#121417` | Ground |
+| Graphite 2 | `#1A1D21` | Surfaces, cards |
+| Graphite 3 | `#23272C` | Raised surfaces, menus, the proof card on cofile.app |
+| Seam | `#30353B` | Hairlines |
+| Pebble Dark | `#6B7178` | Field borders |
+| Chalk Text | `#EEECE7` | Text (15.6 : 1 on Night) |
+| Slate Dark | `#A8AEB6` | Secondary text (8.4 : 1 on Night) |
+| Iris Dark | `#A99BFF` | Rehearsal |
+| Leaf / Marigold / Brick Dark | `#5CCB8E` / `#F2B65A` / `#FF8A7A` | Status text; their tints are the same hues at 16% over Graphite 2 |
+
+CoFile's primary button inverts in dark mode: Chalk Text fill, Night label.
+
+### 4.4 The house color engine
+
+A firm gives us one or two hex codes. The product's branding help asks for a dark main color
+because button text is white, but people pick what's on their letterhead, so the system must
+make any color work without changing its hue. All derivations happen in OKLCH, which keeps the hue
+stable as lightness changes.
+
+| Token | Derived how | Used for |
+|---|---|---|
+| `--house` | The firm's main color, exactly | The 4px band; monogram tile; primary button fill (when it passes); timeline nodes; checkbox fill; the desk's selected-nav bar |
+| `--house-on` | White if white on `--house` ≥ 4.5 : 1; else Graphite if that ≥ 4.5 : 1 | Text on house-colored buttons and tiles |
+| `--house-button` | `--house` if either label color passes; otherwise `--house-ink` | Primary button fill, so mid-tones like a bright pink still get a legible button in their own hue |
+| `--house-ink` | Lower OKLCH L in 0.02 steps (reducing chroma if it leaves sRGB) until ≥ 4.5 : 1 on Paper | Focus rings, numbered markers, link text when there is no second color |
+| `--house-2` / `--house-2-ink` | The second color, and its ink derived the same way | Links and highlights, as the product help says |
+| `--house-wash` | 6% `--house` over Paper | The title band on client pages; hovered rows; selected cards |
+| `--house-tint` | 14% `--house` over Paper | `mark` highlights on the proof; "filled in from your message" highlights |
+| `--house-dark-ink` | Raise L until ≥ 4.5 : 1 on Graphite 2 | Links and markers in dark mode |
+| `--house-dark-wash` | 14% `--house` over Graphite 2 | Title band in dark mode |
+
+The engine replaces today's `textOn()` luminance threshold with a real contrast check. The 4px band
+always uses the exact hex: it is decorative, and it is the firm's.
+
+Rules for house color:
+
+- **Never** for body text, large backgrounds, status chips, errors, or anything that must mean
+  "problem". Brick means problem everywhere, even for a firm whose color is red.
+- If a firm's color sits within ΔE 12 of Leaf, Marigold, Brick or Iris, status chips keep their
+  colors (the glyph and label carry the meaning) and the Branding preview shows them side by side
+  so the firm sees it's fine.
+- No second color set: `--house-2` = `--house-ink`.
+
+### 4.5 The demo houses (site imagery and QA)
+
+| Firm | Main | Second | Logo case it proves |
+|---|---|---|---|
+| Harbor & Pine CPA | Pine `#1F5C4B` | Brass `#8A5F14` | Mid logo, preset font (Lora) |
+| A payroll firm `[copy needed: name]` | Cobalt `#1F4FD1` | — | Wide sans wordmark, no name beside it |
+| A title company `[copy needed: name]` | Teal `#0F766E` | — | JPEG with a dark box: becomes a tile |
+| A fractional CFO firm `[copy needed: name]` | Slate `#334155` | Coral `#C2410C` | Square monogram mark, name beside it |
+| A bookkeeping and tax practice `[copy needed: name]` | Purple `#7E22CE` | — | Uploaded display font, headings only |
+| A family CPA practice `[copy needed: name]` | Amber `#B45309` | — | Warm mid-tone; white text still passes (5.0 : 1) |
+
+The five extra mains are five of the nine "ready colors" the Branding page already offers. The
+Re-dress swatch row on the home page uses exactly those nine, so what a visitor plays with on the
+site is what they'll pick on day one.
+
+The QA gallery adds 18 hostile cases: yellow `#F2C200`, neon `#39FF14`, pale pink `#F9C5D1`,
+near-white `#F5F5F5`, pure black, red-plus-green, a 64px logo, a 4000px logo, a white logo on
+transparent, a logo with 40% padding, a photo as a logo, a script font, a very condensed font, a
+40-character firm name, a 2-letter firm name, a Spanish firm name with accents, a firm with no logo,
+and a firm whose color is identical to Leaf.
+
+### 4.6 How color is used, by surface
+
+| Surface | Neutral | House | CoFile accent |
+|---|---|---|---|
+| cofile.app pages | ~85% Chalk and Paper, ~10% Graphite | Up to ~5%, only inside product imagery and the Worn mark | Iris for rehearsal mentions |
+| Filing desk | Chalk ground, Paper cards, Graphite text | Band, nameplate, primary buttons, selection | Iris rehearsal chips |
+| Client pages and the proof | Paper ground | Band, title wash, the one primary button, highlights | Iris rehearsal notice; Slate "with CoFile" |
+| Enterprise dashboard and docs | Chalk, Paper, Graphite | None (it's CoFile's own room) | Iris for rehearsals and `"dryRun": true` |
+
+### 4.7 Tokens
+
+```css
+:root {
+  --graphite: #1B1F24;  --chalk: #F5F3EE;  --paper: #FFFFFF;  --chalk-deep: #ECE9E2;
+  --stone: #E3DFD7;     --pebble: #8E9399; --slate: #59606A;  --iris: #5B4BD6;
+  --leaf: #1D7A50;  --leaf-tint: #E4F2EA;  --marigold: #8F5600; --marigold-tint: #FFF0D4;
+  --brick: #B42318; --brick-tint: #FDECEA; --neutral-tint: #EFEDE8; --iris-tint: #EEEBFF;
+  /* Set per firm by the house engine; Harbor & Pine shown */
+  --house: #1F5C4B; --house-on: #FFFFFF; --house-button: #1F5C4B; --house-ink: #1F5C4B;
+  --house-2: #8A5F14; --house-2-ink: #8A5F14; --house-wash: #F1F5F4; --house-tint: #DDE7E4;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --graphite: #EEECE7; --chalk: #121417; --paper: #1A1D21; --chalk-deep: #23272C;
+    --stone: #30353B; --pebble: #6B7178; --slate: #A8AEB6; --iris: #A99BFF;
+    --leaf: #5CCB8E; --marigold: #F2B65A; --brick: #FF8A7A;
+  }
+}
+:root[data-theme="dark"] { /* same values as the media query block */ }
+```
+
+---
+
+## 5. Typography
+
+### 5.1 Typefaces
+
+| Role | Face | Weights | Why |
+|---|---|---|---|
+| **CoFile Sans**: headlines, UI, body | **GT America Standard** (Grilli Type), licensed for web, app and desktop | Regular 400, Medium 500. Bold 700 only for the large stat numerals on the dashboard | A grotesk with American gothic warmth: confident in a 64px sentence, plain in a 15px table. Real tabular figures, distinct I / l / 1, a generous x-height. Crucially, it is **not** in the firm font menu, so no firm page is ever mistaken for CoFile, and CoFile never looks like a firm |
+| **CoFile Mono**: what the state will see | **GT America Mono** (Grilli Type) | Regular 400 | Used for one meaning: values as they'll be typed into the state's form (on the proof and in the desk), plus reference numbers, links, EINs, API keys and code. Shares GT America's proportions, so it sits in a sentence without jolting |
+| **The firm's font** | Whatever the firm picks: a preset (Inter, IBM Plex Sans, Roboto, Open Sans, Lato, Montserrat, Source Serif, Merriweather, Lora) or its own upload | 400 and 600 | See 5.2 |
+| **Emails** | System stack: `-apple-system, "Segoe UI", Helvetica, Arial, sans-serif`; mono `ui-monospace, Menlo, Consolas, monospace` | 400, 600 | Web fonts are unreliable in mail clients |
+
+Fallbacks for CoFile Sans: `"Helvetica Neue", Arial, system-ui, sans-serif`, with a metric-adjusted
+`@font-face` fallback (`size-adjust`, `ascent-override`) so the page doesn't jump when the font
+arrives.
+
+One family, two cuts. No serif on CoFile's own pages: I want the firm's own typography, which is
+often a serif logo, to be the only "voice" with personality on a firm's page, and CoFile's site to
+read like the calm frame around it.
+
+### 5.2 Where the firm's font goes
+
+The firm's font is used where it shines and kept away from where it can hurt.
+
+| Element | Preset font | Uploaded font |
+|---|---|---|
+| Firm name in the nameplate | Firm font 600 | Firm font 600 |
+| H1 and H2 on client pages, the proof title, desk page titles | Firm font 600 | Firm font 600 |
+| Primary button labels on client pages | Firm font 600 | CoFile Sans Medium (uploaded fonts often lack the weights or glyphs a button needs) |
+| Body, labels, fields, help, tables, chips | CoFile Sans | CoFile Sans |
+| Values on the proof | CoFile Mono | CoFile Mono |
+
+"Standard (the device's own)" uses `system-ui` for the firm roles. Every firm font gets a
+metric-matched fallback generated at upload, so a slow font never reflows the proof.
+
+### 5.3 Scale: cofile.app
+
+| Token | Desktop | Tablet | Phone | Weight | Tracking | Use |
+|---|---|---|---|---|---|---|
+| display-1 | 64 / 68 | 52 / 56 | 40 / 44 | 500 | −0.02em | Hero headline |
+| display-2 | 48 / 54 | 40 / 46 | 32 / 38 | 500 | −0.015em | Section headlines |
+| display-3 | 36 / 42 | 32 / 38 | 28 / 34 | 500 | −0.01em | Support section headlines (Checks, The catch, Security) |
+| title-1 | 28 / 34 | 26 / 32 | 24 / 30 | 500 | −0.005em | Close tagline, auth card titles |
+| title-2 | 22 / 28 | 21 / 28 | 20 / 26 | 500 | 0 | Card titles, step titles, h3 |
+| lede | 21 / 33 | 20 / 31 | 19 / 30 | 400 | 0 | Section ledes |
+| body | 18 / 29 | 18 / 29 | 17 / 27 | 400 | 0 | Lists, paragraphs |
+| small | 15 / 22 | 15 / 22 | 15 / 22 | 400 | 0 | Notes, footnotes, the beta note |
+| kicker | 16 / 22 | 16 / 22 | 15 / 20 | 500 | +0.01em | Hero kicker, sentence case |
+| caption | 13 / 18 | 13 / 18 | 13 / 18 | 500 | +0.01em | Figure captions, chip labels |
+| mono | 16 / 24 | 16 / 24 | 15 / 22 | 400 | 0 | Values, code |
+
+### 5.4 Scale: the desk, client pages and the proof
+
+| Token | Size / line | Weight | Use |
+|---|---|---|---|
+| page-title | 32 / 40 (phone 28 / 34) | Firm font 600 | Desk page titles, client page H1 |
+| proof-title | 34 / 40 (phone 28 / 34) | Firm font 600 | The filing title on the proof |
+| section | 21 / 28 | 600 (firm font on client pages, CoFile Sans Medium on the desk) | Fieldset legends, card titles |
+| body | 16 / 24 desk; **17 / 26 client pages and the proof** | 400 | Paragraphs |
+| label | 15 / 20 | 500 | Field labels |
+| field | 17 / 24 | 400 | Text in inputs (17px stops iOS zooming and is kind to older eyes) |
+| help | 15 / 22 | 400 | Help under fields |
+| table | 15 / 22 | 400 | Desk tables |
+| proof-label | 15 / 22 | 500, Slate | Left column of Filing details |
+| proof-value | 16 / 24 | Mono 400, Graphite | Right column of Filing details |
+| fee | 17 / 24 | 400, tabular figures; total 600 | State fees |
+| chip | 13 / 16 | 500 | Status chips (the smallest text in the product) |
+| tag-line | 12 / 16 | 400 + 500 | "with CoFile" |
+
+### 5.5 Details
+
+- **Sentence case everywhere.** No all-caps labels or kickers; older readers recognize word shapes,
+  and all-caps is harder for them. The only uppercase on any page is the state's own values
+  (TWO SISTERS BAKERY LLC), which is exactly the point.
+- **Figures**: tabular lining in tables, fees, timestamps and the coverage table; proportional in
+  prose. Dollar amounts always show cents on the proof and the fee rows ($103.50, $3.50).
+- **Measure**: body 60–68 characters; ledes max 620px; headlines balanced with `text-wrap: balance`.
+- **Hero line break**: "Your client approves the proof." / "Then CoFile files it." Two sentences,
+  two lines on desktop, never a widow.
+- **Links** are always underlined (1px, offset 3px, Slate-mixed underline that becomes solid on
+  hover). Some firms' second colors are weak; the underline carries the meaning.
+- **Weights**: nothing lighter than 400, ever.
+
+---
+
+## 6. Layout
+
+### 6.1 Grid and breakpoints
+
+| Breakpoint | Width | Columns | Margins | Gutter |
+|---|---|---|---|---|
+| Phone | < 640px | 4 | 20px | 16px |
+| Tablet | 640–1023px | 8 | 32px | 20px |
+| Desktop | 1024–1439px | 12 | 48px | 24px |
+| Wide | ≥ 1440px | 12, content max 1200px, centered | auto | 24px |
+
+Color fields and photographs may bleed to the viewport edge on any breakpoint; text never does.
+
+### 6.2 Spacing
+
+A 4px base: 4, 8, 12, 16, 24, 32, 48, 64, 96, 128, 160.
+
+| Rhythm | Desktop | Tablet | Phone |
+|---|---|---|---|
+| Section padding (top and bottom) | 128px (160px around the hero and the Re-dress) | 96px | 72px |
+| Support section padding | 96px | 72px | 56px |
+| Headline to lede | 24px | 20px | 16px |
+| Lede to content | 56px | 48px | 32px |
+| List item gap | 16px | 16px | 14px |
+
+The home page alternates **open** sections (Chalk, generous, with imagery) and **support**
+sections (Chalk Deep or Paper bands, tighter, text-only). The eye learns that the open ones are the
+story and the tight ones are the reference.
+
+### 6.3 Product layouts
+
+| Layout | Spec |
+|---|---|
+| Desk shell | Fixed left sidebar 256px (the nameplate on top), content area max 1120px with 48px padding. Phone: top bar with nameplate and a menu button; the sidebar becomes a full-height sheet |
+| Wide page | Tables and lists: full content width |
+| Narrow page | Forms, setup, filing detail: 720px column; optional 320px right rail on ≥ 1280px |
+| Client page | 680px column, centered on Paper; header full width; title band full width in `--house-wash` |
+| The proof | 680px column; phone: full width with 20px margins |
+| Auth pages | One 480px card (sign-up: 560px plus a preview panel) centered on Chalk |
+| Docs | 240px left nav, 720px article, optional 360px right column for code on ≥ 1360px |
+
+### 6.4 Shape and depth
+
+| Token | Value | Use |
+|---|---|---|
+| radius-xs | 4px | Chip insides, the tag in UI |
+| radius-s | 8px | Fields, buttons 40–48px, logo tiles |
+| radius-m | 12px | Cards, notices |
+| radius-l | 16px | The proof card, phone cards, big panels |
+| radius-xl | 28px | Hero color field's open corner, section photographs |
+| e0 | none | Most things |
+| e1 | `0 0 0 1px #E3DFD7, 0 1px 2px rgba(27,31,36,.05)` | Cards |
+| e2 | `0 8px 24px rgba(27,31,36,.08), 0 0 0 1px rgba(27,31,36,.04)` | Menus, the elevated middle step |
+| e3 | `0 28px 64px rgba(16,24,22,.22)` | The proof floating on the hero field; phone cards in imagery |
+
+Depth is used for one reason: to show what sits on top of what (the proof on the firm's color,
+the client's phone in front of the desk). Never for decoration.
+
+---
