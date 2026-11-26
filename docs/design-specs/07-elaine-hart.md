@@ -59,7 +59,7 @@ pride. The second is the printer's quiet signature.
 
 A *nameplate* is also the plate on an office door: the firm's name in gold leaf on the glass.
 
-The copy says it in eight words: **"Your name on the door. Ours in small type."** And the hero says
+The copy says it in nine words: **"Your name on the door. Ours in small type."** And the hero says
 it again: **"Say yes, under your own name."** Both meanings of "nameplate" deliver those lines, and
 I've built the whole site around them. The firm is the publisher and the editor. Its client is the
 story. CoFile is the press and the small type.
@@ -71,7 +71,7 @@ story. CoFile is the press and the small type.
 | **Nobody retypes anything.** | The graphics desk draws Ana's text being lifted, phrase by phrase, into the drafted filing, with the firm's saved answers already sitting in their rows. The photograph shows how little it took: one thumb, 5:40 in the morning, flour on her wrist. |
 | **You stay in charge.** | The proof is designed as a page proof on the editor's desk, and the firm is the editor. In print, nothing runs until the editor passes the proof for press. The client's business name is the headline; the fees are set like a statement, with a double rule under the total; one button, in the firm's own color. |
 | **It's done, and the papers come back.** | Newsrooms have always said a correspondent *files* a story. "Then it's filed": the record closes with an end mark, the little square a magazine puts after the last word of a finished article. The photograph shows the hand-over: the accountant sliding the folder across the café table to the two sisters. |
-| **The filings your clients already ask for.** | New York, New Jersey, Florida and the IRS set like the markets panel on a financial front page: four boxes, everything in them readable at a glance. |
+| **The filings your clients already ask for.** | New York, New Jersey, Florida and the IRS set like the markets panel on a financial front page: four columns, everything in them readable at a glance. |
 | **Try it free.** | A rehearsal is shown as a photographer's contact sheet: every frame of the state's real website shot, in order, and nothing published. |
 | **Simple prices.** | Set like a printer's rate card. The figures are the biggest thing in the section, lined up the way accountants line up figures. |
 | **People behind it.** | "Built and run by filing professionals" gets what a newspaper gives a columnist: a real photograph next to the byline. The people who take over a filing are photographed at work, not illustrated. |
@@ -96,7 +96,7 @@ how easy it is. There is no lock, shield, vault or seal anywhere in this system.
    dashboard, account emails): CoFile's wordmark, Press Black type on Coated White, Gold Leaf spent
    on the call to action and the end mark.
 2. **The firm's pages** (the filing desk, the proof the firm approves, the page for each filing it
-   offers, client link pages, the intake form, emails to its client): the firm's nameplate leads;
+   offers, client link pages, the intake form, emails about its filings): the firm's nameplate leads;
    the firm's color takes Gold Leaf's place; CoFile shrinks to the small type.
 3. **White label** (platform-hosted pages, the embed widget): the platform's nameplate only; CoFile
    is absent, or a single "Filed with CoFile" line in the embed.
