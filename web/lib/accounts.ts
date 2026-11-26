@@ -3,6 +3,7 @@
 import { redirect } from "next/navigation";
 import { engine, EngineError, type Account, type ClientCompany, type SignInResult } from "./engine";
 import { readSession, writeSession } from "./session";
+import { finishSignIn } from "./sign-in";
 
 export type FormState = { error?: string; issues?: Record<string, string>; ok?: boolean; message?: string; link?: { href: string; label: string } } | null;
 
@@ -37,20 +38,7 @@ export async function signInWithEmail(_prev: FormState, fd: FormData): Promise<F
     }
     return { error: "We can't sign you in right now. Try again in a minute." };
   }
-  const { user, sessionKey, expiresAt } = r;
-  if (user.kind === "enterprise") {
-    const account = await engine<Account>(sessionKey, "/v1/account");
-    await writeSession({ kind: "tenant", apiKey: sessionKey, tenantId: user.tenantId, name: account.name, signedInWith: "password", email: user.email });
-    redirect("/dashboard");
-  }
-  if (!user.clientCompanyId) return { error: "Your account is waiting for approval. We'll email you when it's ready." };
-  const { clientCompany } = await engine<{ clientCompany: ClientCompany }>(sessionKey, `/v1/client-companies/${encodeURIComponent(user.clientCompanyId)}`);
-  const slug = clientCompany.portal?.slug;
-  if (!slug) return { error: "Your dashboard isn't set up yet. Contact us and we'll fix it." };
-  await writeSession({ kind: "firm", apiKey: sessionKey, tenantId: user.tenantId, clientCompanyId: user.clientCompanyId, slug, email: user.email, signedInWith: "password", expiresAt });
-  // Only partner firms (signed up themselves) have the setup guide; a firm an enterprise set up goes straight in.
-  const done = clientCompany.partner?.setupDone ?? [];
-  redirect(`/p/${encodeURIComponent(slug)}${clientCompany.partner && done.length < 3 ? "/setup" : ""}`);
+  return { error: await finishSignIn(r, "password") };
 }
 
 const TYPES = new Set(["cpa", "payroll", "cfo", "title", "other"]);

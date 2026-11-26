@@ -12,8 +12,8 @@ import { seal, unseal } from "./seal";
  */
 
 /** signedInWith "password": the apiKey is a short-lived session key the engine issued at email sign-in. */
-export interface TenantSession { kind: "tenant"; apiKey: string; tenantId: string; name: string; signedInWith?: "api_key" | "password"; email?: string }
-export interface FirmSession { kind: "firm"; apiKey: string; tenantId: string; clientCompanyId: string; slug: string; email: string; signedInWith?: "invite" | "password"; expiresAt?: string }
+export interface TenantSession { kind: "tenant"; apiKey: string; tenantId: string; name: string; signedInWith?: "api_key" | "password" | "google"; email?: string }
+export interface FirmSession { kind: "firm"; apiKey: string; tenantId: string; clientCompanyId: string; slug: string; email: string; signedInWith?: "invite" | "password" | "google"; expiresAt?: string }
 export type Session = TenantSession | FirmSession;
 
 const COOKIE = "kfe_session";
@@ -88,4 +88,9 @@ export function readStaffInvite(token: string): StaffInvite | null {
 
 export function readClientIntake(token: string): ClientIntake | null {
   return unseal<ClientIntake & Record<string, unknown>>("client-intake", token);
+}
+
+/** A person signed in with their own account (password or Google): the key is an engine session. */
+export function personalSession(s: { signedInWith?: string } | null | undefined): boolean {
+  return s?.signedInWith === "password" || s?.signedInWith === "google";
 }

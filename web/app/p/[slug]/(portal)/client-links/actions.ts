@@ -1,7 +1,7 @@
 "use server";
 
 import { firmContext, offeredKinds } from "@/lib/firm";
-import { clientIntakeLink, INVITE_TTL } from "@/lib/session";
+import { clientIntakeLink, INVITE_TTL, personalSession } from "@/lib/session";
 import { recordLink, revokeLink } from "@/lib/intake-links";
 import { revalidatePath } from "next/cache";
 import { newNonce } from "@/lib/intake/submit";
@@ -17,7 +17,7 @@ export async function makeClientLink(slug: string, _prev: LinkResult, fd: FormDa
   const base = { tenantId: session.tenantId, clientCompanyId: session.clientCompanyId, slug, kind: kind.id, nonce: newNonce(), label };
   const from = company.portal?.displayName || company.name;
   let link: string, ttl = INVITE_TTL.client, days: number | undefined;
-  if (session.signedInWith !== "password") {
+  if (!personalSession(session)) {
     link = clientIntakeLink({ ...base, apiKey: session.apiKey });
   } else if (process.env.PLATFORM_API_KEY?.trim()) {
     // With the site's platform key set, the link carries no key at all and lasts 30 days.

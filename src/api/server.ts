@@ -66,6 +66,8 @@ export interface ApiDeps {
   billing?: BillingService;
   /** V40: filing requests emailed in (Resend receiving). */
   inbound?: InboundEmailService;
+  /** V37: checks Google ID tokens for "Sign in with Google". */
+  google?: import("../users/google.js").GoogleIdTokens;
 }
 
 function filingTitle(f: FilingRecord | null): string {
@@ -382,7 +384,7 @@ export function buildServer(deps: ApiDeps): FastifyInstance {
   registerUsers(app, {
     store: deps.store, authOf, staffOf, sessionSecret,
     platformTenantId: deps.platformTenantId ?? "keystone", partnerSignupMode: deps.partnerSignupMode ?? "approval",
-    email: deps.email, webBaseUrl: deps.webBaseUrl ?? "http://localhost:3000", secrets: deps.secrets,
+    email: deps.email, webBaseUrl: deps.webBaseUrl ?? "http://localhost:3000", secrets: deps.secrets, google: deps.google,
   });
 
   // ---- Approval link (client-facing, decision 2) ----

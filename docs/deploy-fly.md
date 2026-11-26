@@ -123,6 +123,19 @@ fly secrets set --stage --app keystone-filing-engine EMAIL_FROM="CoFile <filings
 `EMAIL_FROM` must be an address on the verified domain, and `WEB_BASE_URL` is where the web
 front end runs: password-reset and log-in links in emails point there.
 
+**Sign in with Google.** Not required to start. In Google Cloud, APIs & Services, Credentials:
+create an OAuth client of type Web application, with the authorized redirect URI
+`https://cofile.app/auth/google/callback` (your `PORTAL_PUBLIC_URL` plus `/auth/google/callback`).
+The consent screen needs only the `openid` and `email` scopes. Set `GOOGLE_CLIENT_ID` and
+`GOOGLE_CLIENT_SECRET` in the web app and the same `GOOGLE_CLIENT_ID` on the engine:
+
+```bash
+fly secrets set --stage --app keystone-filing-engine GOOGLE_CLIENT_ID=xxxx.apps.googleusercontent.com
+```
+
+It signs in existing accounts only (a Google-verified email that matches one); new firms still sign
+up with the form.
+
 **Filing by email (Resend receiving).** Not required to start. A firm's user writes to one
 address with what to file; we email back a link to the form filled in from the email (read by
 Claude in the web app, which needs `ANTHROPIC_API_KEY` there). Nothing is filed from an email. In

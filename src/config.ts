@@ -101,6 +101,8 @@ export const config = {
     /** On: a live filing needs a subscription in good standing. Off until prices are set. */
     required: env("BILLING_REQUIRED", "false") === "true",
   },
+  /** V37: the Google OAuth client id ("Sign in with Google"); the same id goes in the web app. */
+  googleClientId: process.env.GOOGLE_CLIENT_ID || null,
   /** V18: Basis Theory private key (token:read) the worker uses to read a card at the payment screen. */
   basisTheoryApiKey: process.env.BASIS_THEORY_API_KEY || null,
   /** Email through Resend (comms/resend.ts). No key: every message is recorded, none is sent. */

@@ -11,6 +11,7 @@ import { RateLimiter } from "./rate-limit.js";
 import type { ChannelSender } from "../comms/senders.js";
 import { FONT_CHOICES } from "../settings/fonts.js";
 import { PORTAL_LOGIN_KEYS, type DbVault } from "../settings/db-vault.js";
+import type { GoogleIdTokens } from "./google.js";
 
 /**
  * Dashboard accounts.
@@ -63,6 +64,8 @@ export interface UsersDeps {
   webBaseUrl: string;
   /** V29: where connected portal logins are sealed; absent without DATA_ENCRYPTION_KEY. */
   secrets?: DbVault;
+  /** V37: checks Google ID tokens for "Sign in with Google". Absent: that route refuses. */
+  google?: GoogleIdTokens;
   now?: () => Date;
 }
 
@@ -230,6 +233,25 @@ export function registerUsers(app: FastifyInstance, deps: UsersDeps): void {
     if (u.status !== "active") return reply.code(403).send({ error: "this account can't sign in", status: u.status });
     if (u.kind === "partner" && !u.clientCompanyId) return reply.code(403).send({ error: "your account is waiting for approval", status: "pending" });
     await deps.store.updateUser(u.id, { failedSignIns: 0, lockedUntil: undefined, lastSignInAt: at.toISOString() });
+    return { user: publicUser(u), ...issue(u) };
+  });
+
+  // V37: sign in with Google, for an existing account whose email Google has verified.
+  app.post("/v1/auth/google", async (req, reply) => {
+    if (!deps.google) return reply.code(404).send({ error: "Google sign-in isn't set up" });
+    const body = (req.body ?? {}) as { idToken?: unknown; nonce?: unknown };
+    if (typeof body.idToken !== "string" || typeof body.nonce !== "string" || body.idToken.length > 8000) return reply.code(422).send({ error: "send idToken and nonce" });
+    if (!signInLimit.take("all")) return reply.code(429).send({ error: "too many sign-in attempts; try again in a minute" });
+    const id = await deps.google.verify(body.idToken, body.nonce).catch(() => null);
+    if (!id) return reply.code(401).send({ error: "Google didn't confirm this sign-in" });
+    let u = await deps.store.findUserByEmail(id.email);
+    if (!u) return reply.code(404).send({ error: "no account uses this Google email", status: "no_account" });
+    // Google has confirmed the address, which is what our confirmation email checks.
+    if (!emailConfirmed(u)) u = await deps.store.updateUser(u.id, { emailVerifiedAt: now().toISOString() });
+    if (u.status === "pending") return reply.code(403).send({ error: "your account is waiting for approval", status: "pending" });
+    if (u.status !== "active") return reply.code(403).send({ error: "this account can't sign in", status: u.status });
+    if (u.kind === "partner" && !u.clientCompanyId) return reply.code(403).send({ error: "your account is waiting for approval", status: "pending" });
+    await deps.store.updateUser(u.id, { lastSignInAt: now().toISOString() });
     return { user: publicUser(u), ...issue(u) };
   });
 

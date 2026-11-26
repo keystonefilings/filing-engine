@@ -4,6 +4,7 @@ import { config } from "./config.js";
 import { parseApiKeys, parseStaffKeys } from "./api/keys.js";
 import { exitOnStartupProblems } from "./startup-check.js";
 import { purgeSensitive } from "./store/sensitive.js";
+import { GoogleIdTokens } from "./users/google.js";
 
 /**
  * Cloud tier: API + approval pages + webhook delivery. With WORKER_ENABLED=true the
@@ -21,6 +22,7 @@ const app = buildServer({
   // Dashboard session keys are signed with the approval-link secret (domain-separated).
   sessionSecret: config.approvalSigningSecret,
   platformTenantId: config.platformTenantId, billing: sys.billing, inbound: sys.inbound,
+  google: config.googleClientId ? new GoogleIdTokens({ clientId: config.googleClientId }) : undefined,
   // Partner sign-ups wait for approval unless this is set to "automatic".
   partnerSignupMode: process.env.PARTNER_SIGNUP_MODE === "automatic" ? "automatic" : "approval",
   email: sys.email, webBaseUrl: config.webBaseUrl, platformName: config.platformName, webhooks: sys.webhooks, secrets: sys.secrets ?? undefined,
