@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import "@/styles/fonts.css";
 import { licensedFonts } from "@/lib/licensed-fonts";
+import { THEME_SCRIPT } from "@/lib/theme";
 import "@/styles/tokens.css";
 import "./globals.css";
 import "@/styles/type.css";
@@ -20,8 +21,9 @@ export function generateMetadata(): Metadata {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   const fonts = licensedFonts();
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <head>
+        <script dangerouslySetInnerHTML={{ __html: THEME_SCRIPT }} />
         {fonts.preload ? <link rel="preload" href={fonts.preload} as="font" type="font/woff2" crossOrigin="" /> : null}
         {fonts.css ? <style>{fonts.css}</style> : null}
         <link rel="preconnect" href="https://fonts.googleapis.com" />
