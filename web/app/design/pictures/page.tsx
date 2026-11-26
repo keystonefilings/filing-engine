@@ -43,7 +43,7 @@ export default function PicturesGallery() {
       <JsMark />
       <ExampleFonts />
       <style>{`.gpic{padding:64px 0;overflow-x:clip}.gpic+.gpic{border-top:1px solid var(--line)}.gpic.is-night{background:var(--stage)}.gpic.is-night .gpic-id,.gpic.is-night .gpic-title{color:#ECE8DF}.gpic-id{font:500 .875rem/1.25rem var(--font-sans);color:var(--text-2)}.gpic-title{margin:4px 0 32px;font:400 2rem/2.5rem var(--font-display)}.gpic-row{display:flex;flex-wrap:wrap;gap:32px;align-items:flex-start}.gpic-stage{min-width:0}.gpic-half{max-width:708px}`}</style>
-      <div className="hm mk">
+      <div className="hm st">
         <Item id="L1" title="The desk, and the page the firm's clients see" where="Home 1"><div className="gpic-half"><HeroDesk /></div></Item>
         <Item id="L1" title="The desk, wider and still" where="For firms"><div className="gpic-half"><FullDesk /></div></Item>
         <Item id="L2" title="The client page in two brands" where="part of L2"><div className="gpic-row"><ClientPagePicture firm="hp" /><ClientPagePicture firm="ng" /></div></Item>

@@ -4,7 +4,8 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useId, useRef, useState, type CSSProperties, type ReactNode } from "react";
 import { PLATE_BOX } from "@/lib/photography";
-import { FIRM_NAME_EVENT, FIRM_NAME_MAX, plateBlocked, plateText, readFirmName, writeFirmName } from "@/lib/firm-name";
+import { plateText } from "@/lib/plate-lettering";
+import { FIRM_NAME_EVENT, FIRM_NAME_MAX, readName, writeName } from "./carry";
 import { Engraving } from "./Engraving";
 import { reducedMotion } from "./motion";
 import { ThemedPhoto } from "./ThemedPhoto";
@@ -46,7 +47,7 @@ export function ClosePlate({ children }: { children: ReactNode }) {
 
   // Back in the same tab: the field pre-filled and the name already cut, with no animation and no push-in.
   useEffect(() => {
-    const n = readFirmName();
+    const n = readName();
     if (n) { stored.current = true; setName(n); }
     const onName = (e: Event) => setName((e as CustomEvent<string>).detail);
     window.addEventListener(FIRM_NAME_EVENT, onName);
@@ -56,8 +57,8 @@ export function ClosePlate({ children }: { children: ReactNode }) {
   // Written 300 ms after typing settles and on pagehide; removed when the field is emptied.
   useEffect(() => {
     window.clearTimeout(save.current);
-    save.current = window.setTimeout(() => writeFirmName(name), 300);
-    const hide = () => writeFirmName(name);
+    save.current = window.setTimeout(() => writeName(name), 300);
+    const hide = () => writeName(name);
     window.addEventListener("pagehide", hide);
     return () => window.removeEventListener("pagehide", hide);
   }, [name]);
@@ -94,7 +95,7 @@ export function ClosePlate({ children }: { children: ReactNode }) {
     stored.current = false;
     window.clearTimeout(idle.current);
     // 700 ms after the last keystroke the late sun rakes across the plate once, at most once every 6 s.
-    if (plateText(v) && !plateBlocked(v) && !reducedMotion()) {
+    if (plateText(v) && !reducedMotion()) {
       idle.current = window.setTimeout(() => {
         if (performance.now() - lastRake.current > 6000) { lastRake.current = performance.now(); setRake((k) => k + 1); }
       }, 700);
@@ -118,11 +119,11 @@ export function ClosePlate({ children }: { children: ReactNode }) {
               id={`${id}-firm`} type="text" autoComplete="organization" autoCapitalize="words" spellCheck={false} maxLength={FIRM_NAME_MAX}
               enterKeyHint="go" aria-describedby={`${id}-plate`} data-private="" data-ph-no-capture="" value={name}
               onChange={(e) => onChange(e.target.value)} onFocus={() => setFocus(true)} onBlur={() => setFocus(false)}
-              onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); writeFirmName(name); router.push("/signup"); } }}
+              onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); writeName(name); router.push("/signup"); } }}
             />
             <span id={`${id}-plate`} className="sr-only">{PLATE_DESCRIBE}</span>
           </div>
-          <Link className="btn2 is-action pclose-btn" href="/signup" data-brass-cta="" onClick={() => writeFirmName(name)}>Run a free rehearsal</Link>
+          <Link className="btn2 is-action pclose-btn" href="/signup" data-brass-cta="" onClick={() => writeName(name)}>Run a free rehearsal</Link>
         </div>
       </div>
       {strip ? (
@@ -144,12 +145,12 @@ export function ClosePlate({ children }: { children: ReactNode }) {
 export function StillPlate() {
   const [name, setName] = useState("");
   useEffect(() => {
-    setName(readFirmName());
+    setName(readName());
     const onName = (e: Event) => setName((e as CustomEvent<string>).detail);
     window.addEventListener(FIRM_NAME_EVENT, onName);
     return () => window.removeEventListener(FIRM_NAME_EVENT, onName);
   }, []);
-  const shown = plateBlocked(name) ? "" : plateText(name);
+  const shown = plateText(name);
   return (
     <div className="pstill">
       <ThemedPhoto day="c03-close-day-mobile" dusk="c04-close-dusk-mobile" alt={shown ? PLATE_ALT_NAMED(shown) : PLATE_ALT} />

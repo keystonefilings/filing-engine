@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useRef, useState, type CSSProperties, type ReactNode } from "react";
 import { SWATCHES } from "@/components/BrandFields";
 import { FONT_PRESETS } from "@/lib/fonts";
-import { FIRM_NAME_EVENT, readFirmColor, readFirmName, writeFirmColor, writeFirmName } from "@/lib/firm-name";
+import { announceName, readColor, readName, writeColor, writeName } from "./carry";
 import { ClientPagePicture } from "./ClientPagePicture";
 import { colorStyle, FIRMS, FirmName, HarborPineLettering, HarborPineSymbol } from "./examples";
 
@@ -38,9 +38,9 @@ export function BrandStudio() {
   const save = useRef(0);
 
   useEffect(() => {
-    const n = readFirmName();
+    const n = readName();
     if (n) { setName(n); setEdited(n !== HP.name); }
-    const c = readFirmColor();
+    const c = readColor();
     if (c) setColor(c);
   }, []);
 
@@ -63,9 +63,9 @@ export function BrandStudio() {
   const onName = (v: string) => {
     setName(v); setEdited(true);
     window.clearTimeout(save.current);
-    save.current = window.setTimeout(() => { writeFirmName(v); window.dispatchEvent(new CustomEvent(FIRM_NAME_EVENT, { detail: v })); }, 300);
+    save.current = window.setTimeout(() => { writeName(v); announceName(v); }, 300);
   };
-  const onColor = (c: string) => { setColor(c); setStamp((s) => s + 1); if (HEX.test(c)) writeFirmColor(c); };
+  const onColor = (c: string) => { setColor(c); setStamp((s) => s + 1); if (HEX.test(c)) writeColor(c); };
 
   const shown = name.trim() || "Your firm";
   const logo = !edited;

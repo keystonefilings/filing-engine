@@ -406,9 +406,6 @@
   .pdraft-title, .pdraft-chip, .pdraft-hr { margin-inline: 20px; }
   .pdraft-rows > div { padding-inline: 20px; }
 }
-.mk-pic.is-bleed-left .pslab-wrap { justify-content: flex-end; }
-.mk-pic.is-bleed-left .pic-slab .pic-cap { padding-left: min(120px, var(--site-pad)); }
-@media (max-width: 1279px) { .mk-pic.is-bleed-left .pic-slab .pic-cap { padding-left: 0; } }
 .pslab .pbubble p { font-size: 1rem; line-height: 1.5625rem; }
 .pslab-draft { position: relative; z-index: 1; width: 400px; flex: none; margin: 48px 0 0 -48px; }
 @media (max-width: 1279px) and (min-width: 600px) { .pslab-wrap { justify-content: center; } }
@@ -786,10 +783,10 @@
 /* The engraving (D3): each letter's black enamel fill, its groove's shadowed and lit lips, a glint as it is cut */
 .eng { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; font-family: var(--font-display); pointer-events: none; }
 .eng-l { transition: transform 120ms var(--ease-settle); }
-.eng-shadow { fill: rgba(58, 36, 6, 0.6); transform: translate(-0.8px, -0.9px); }
-.eng-lip { fill: rgba(255, 238, 196, 0.8); transform: translate(0.7px, 1px); }
+.eng-shadow { fill: rgba(58, 36, 6, 0.6); transform: translate(-1px, -1.1px); }
+.eng-lip { fill: rgba(255, 238, 196, 0.8); transform: translate(0.85px, 1.2px); }
 .eng-fill { fill: #1D2130; fill-opacity: 0.9; }
-.eng-glint { fill: none; stroke: #FFF4D8; stroke-width: 0.8; opacity: 0; }
+.eng-glint { fill: none; stroke: #FFF4D8; stroke-width: 1; opacity: 0; }
 @media (prefers-reduced-motion: no-preference) {
   .eng-l.is-cut :is(.eng-shadow, .eng-lip) { animation: eng-groove 90ms var(--ease-press) var(--cut-d, 0ms) both; }
   .eng-l.is-cut .eng-glint { animation: eng-glint 60ms linear calc(var(--cut-d, 0ms) + 90ms) both; }
@@ -801,8 +798,8 @@
 @keyframes eng-groove { from { opacity: 0; } }
 @keyframes eng-glint { 0% { opacity: 0; } 50% { opacity: 0.9; } 100% { opacity: 0; } }
 @keyframes eng-fill { from { fill-opacity: 0; } }
-@keyframes eng-rake { from { transform: translateX(0); } to { transform: translateX(629px); } }
-.eng-sunband { transform: translateX(629px); }
+@keyframes eng-rake { from { transform: translateX(0); } to { transform: translateX(755px); } }
+.eng-sunband { transform: translateX(755px); }
 
 /* ── L11 For firms' studio and previews, L12 the saved agent (10A.2.2, 10A.2.4) ────────────────────────────── */
 .pstudio-tray { display: grid; grid-template-columns: minmax(0, 400px) minmax(0, 1fr) minmax(0, 260px); gap: 24px 32px; align-items: start; padding: 24px; background: var(--page-2); border: 1px solid var(--line); border-radius: 2px; }

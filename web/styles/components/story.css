@@ -1,7 +1,28 @@
-/* How it works (merged spec 10A.1) and For firms (10A.2): their own parts, on the bands in marketing.css. */
+/* How it works (merged spec 10A.1) and For firms (10A.2): their own parts, on the shared page head, bands, two-column
+   grid, lists and close of components/site-pages (styles/components/site-pages.css). These pages carry the biggest
+   pictures, so their bands stack below 1280 px, and their pictures may bleed up to 120 px into the margin. */
 @layer components {
+.st [id] { scroll-margin-top: 96px; }
+@media (min-width: 1280px) {
+  .st .st-pic-left > .pg2-pic { grid-column: 1 / span 6; grid-row: 1; }
+  .st .st-pic-left > .pg2-words { grid-column: 8 / span 5; grid-row: 1; }
+  .st .st-bleed-right { margin-right: calc(-1 * min(120px, var(--site-pad))); }
+  .st .st-bleed-left { margin-left: calc(-1 * min(120px, var(--site-pad))); }
+  /* A caption row never runs into the bleed: its replay control ends on the grid */
+  .st .st-bleed-right .pic-cap { padding-right: min(120px, var(--site-pad)); }
+  .st .st-bleed-left .pic-slab .pic-cap { padding-left: min(120px, var(--site-pad)); }
+  .st .st-bleed-left .pslab-wrap { justify-content: flex-end; }
+}
+@media (max-width: 1279px) {
+  .st .pg2-two.st-two { grid-template-columns: minmax(0, 1fr); row-gap: 48px; }
+  .st .pg2-two.st-two > * { grid-column: 1 / -1; grid-row: auto; }
+  .st .pg2-two.st-two > .pg2-words { max-width: 792px; }
+}
+@media (max-width: 599px) { .st .pg2-two.st-two { row-gap: 40px; } }
+.st-list { margin-top: 48px; }
+@media (max-width: 599px) { .st-list { margin-top: 32px; } }
+
 /* 10A.1.2 The steps: numeral, photograph, lead and paragraph on one row grid; the firm's step on a white sheet */
-.st-steps { padding-top: 0; }
 .st-steps-list { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 24px; align-items: start; margin: 0; padding: 0; list-style: none; }
 .st-step { position: relative; display: grid; grid-template-rows: auto auto auto 1fr; padding: 32px; min-width: 0; }
 .st-step.sheet { border-radius: var(--r-sheet); }
@@ -31,31 +52,52 @@
 /* 10A.1.3 The proof band: the printer's proof under the lede, the points, the closing remark */
 .st-printer { margin-top: 32px; max-width: 486px; }
 .st-printer img { aspect-ratio: 3 / 2; object-fit: cover; object-position: 50% 45%; }
+.st-points { margin-top: 48px; }
+.st-points .st-remark { margin-top: 32px; padding: 24px 0 0; font: italic 400 clamp(1.1875rem, 1.1179rem + 0.2857vw, 1.375rem)/clamp(1.875rem, 1.7821rem + 0.381vw, 2.125rem) var(--font-serif); }
+.st-points .st-remark::before { left: 0; top: 0; width: 40px; height: 1px; background: var(--line); transform: none; }
 .st-proof-pic { display: flex; justify-content: flex-start; }
-@media (max-width: 1279px) { .st-proof-pic { justify-content: center; margin-right: 0 !important; } }
+@media (max-width: 1279px) { .st-proof-pic { justify-content: center; } }
+@media (max-width: 599px) { .st-points { margin-top: 32px; } }
 
 /* 10A.1.5 Checks */
-.st-checks-words { grid-column: 1 / 5 !important; }
-.st-checks { grid-column: 6 / 13; grid-row: 1; margin-top: 0; }
-@media (max-width: 1279px) { .st-checks { margin-top: 40px; max-width: 792px; } }
+@media (min-width: 1280px) {
+  .st .st-checks-words { grid-column: 1 / span 4; }
+  .st .st-checks { grid-column: 6 / span 7; grid-row: 1; }
+}
+.st-checks > li + li { margin-top: 8px; }
+.st-num-fig { font-variant-numeric: tabular-nums lining-nums; }
 
-/* 10A.2.1 For firms' title page: the lede as a letter, its first letter a three-line initial */
+/* 10A.2.1 For firms' title page: the lede as a letter under a three-line initial; the engraver as its frontispiece */
+.ff-head .pg2-head-words { grid-column: 1 / span 7; }
+.ff-front { grid-column: 9 / span 4; margin: 38px calc(-1 * min(120px, var(--site-pad))) 0 0; min-width: 0; }
 .pfront img { aspect-ratio: 4 / 5; object-fit: cover; }
+@media (max-width: 1023px) {
+  .ff-head .pg2-head-words { grid-column: 1 / -1; }
+  .ff-front { grid-column: 1 / span 6; margin: 40px 0 0; }
+}
+@media (max-width: 599px) { .ff-front { grid-column: 1 / -1; margin-top: 32px; } }
 @supports (initial-letter: 3) {
   @media (min-width: 600px) { .ff-letter::first-letter { initial-letter: 3; font-family: var(--font-display); color: var(--text); margin-right: 8px; } }
 }
 /* 10A.2.2 The desk and the studio */
 .ff-desk-pic .pdesk { max-height: 700px; }
 .ff-studio { margin-top: 48px; }
-/* 10A.2.3 The doors, as on the home page */
+/* 10A.2.3 The doors, as on the home page: the picture in c1–c7 bleeding left, the words in c9–c12 */
 .ff-door > span { display: block; }
 .ff-small { margin-top: 16px; color: var(--text-2); }
-.ff-doors .mk-pic { grid-column: 1 / 8; margin-left: calc(-1 * var(--site-pad)); }
-.ff-doors .mk-words { grid-column: 9 / 13; }
-@media (max-width: 1279px) { .ff-doors .mk-pic { margin-left: 0 !important; } }
+@media (min-width: 1280px) {
+  .st .ff-doors > .pg2-pic { grid-column: 1 / span 7; grid-row: 1; margin-left: calc(-1 * var(--site-pad)); }
+  .st .ff-doors > .pg2-words { grid-column: 9 / span 4; grid-row: 1; }
+}
 @media (max-width: 599px) { .ff-small { margin-top: 12px; } }
 /* 10A.2.6 The close on the blank plate */
-.ff .mk-close-aside { justify-self: end; width: min(486px, 100%); }
-@media (max-width: 1279px) { .ff .mk-close-aside { width: min(486px, 100%); margin-right: 0 !important; } }
-@media (max-width: 599px) { .ff .mk-close-aside { width: 100%; } }
+.ff-close-in { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); column-gap: 24px; align-items: center; }
+.ff-close-words { grid-column: 1 / span 6; min-width: 0; }
+.ff-close .pg2-close-h2, .ff-close .pg2-close-lede { max-width: 34em; }
+.ff-close-aside { grid-column: 8 / span 5; justify-self: end; width: min(486px, 100%); margin-right: calc(-1 * min(120px, var(--site-pad))); }
+@media (max-width: 1279px) {
+  .ff-close-in { display: block; }
+  .ff-close-aside { width: min(486px, 100%); margin: 48px 0 0; }
+}
+@media (max-width: 599px) { .ff-close-aside { width: 100%; margin-top: 40px; } }
 }
