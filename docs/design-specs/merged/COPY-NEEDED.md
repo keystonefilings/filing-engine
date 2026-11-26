@@ -2,13 +2,22 @@
 
 The copy is locked, so the merged design uses only words that exist. Where a design needs words the site doesn't have yet (alt text, accessible names for controls, captions, small labels), each part marks it `[copy needed]` and lists it. This file gathers those lists, part by part, as each part wrote them, so the copy owner can write them in one pass. Some items repeat across parts where two surfaces need the same words.
 
-## Slips found in the live copy
+## Slips found in the live copy (fixed Nov 26)
 
-Found by the merge writers and checked against the code. They are copy decisions, so nothing was changed.
+Found by the merge writers, checked against the code and fixed at the owner's request:
 
-- **"…no filing deskal now."** A typo in the dashboard's message after a firm's filing desk is turned off: "Saved. This firm has no filing deskal now." (`web/app/dashboard/(app)/firms/[id]/actions.ts:56`).
-- **"1 approved filing is ready to pay and need…"** With one filing, the verb should be "needs". On the filing desk (`web/app/p/[slug]/(portal)/page.tsx:28`) and the dashboard (`web/app/dashboard/(app)/page.tsx:30`).
-- **"…until you send it and your client approves."** The reply to a request forwarded by text or email still says the client approves (`src/inbound/requests.ts:46`), though the firm now approves the proof. The API docs and catalog also say "the client approves" (`web/app/docs/guides.tsx`, `web/lib/api-catalog.ts`, `web/lib/docs-export.ts`); that may be right for platforms, whose approvers are set per account.
+- **"…no filing deskal now."** The dashboard's message after a firm's filing desk is turned off now
+  reads "Saved. This firm has no filing desk now." (`web/app/dashboard/(app)/firms/[id]/actions.ts`).
+- **"1 approved filing is ready to pay and need…"** With one filing it now reads "needs"; with
+  several, "need" (the filing desk, `web/app/p/[slug]/(portal)/page.tsx`, and the dashboard,
+  `web/app/dashboard/(app)/page.tsx`).
+- **"…until you send it and your client approves."** The reply to a request forwarded by email,
+  text or Slack now says "…until you send it and you approve the proof." to a partner firm, and
+  "…until you send it and the proof is approved." to a firm a subscriber set up, whose approvers
+  may be other people (`src/inbound/requests.ts`). The Slack `/file` help, shown before CoFile
+  knows who is typing, says "…until you do and the proof is approved." (`src/inbound/slack.ts`).
+  The API docs and catalog still say "the client approves"; that is left as is, since a
+  platform's approvers are set per account.
 
 ## Part 1: the foundation
 

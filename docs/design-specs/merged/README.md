@@ -62,7 +62,7 @@ state, and code). A firm's own font sets its name and headings on its pages.
 | [7. Platforms and emails](07-platforms-and-emails.md) | 10C, 10D | The dashboard, the API docs, white-label and embed, every email | 20,400 |
 | [8. Components and production](08-components-and-production.md) | 11 to 14 | Every component and state, craft notes, tools and tokens as code, the asset list, 14 commissions, the build order in nine phases, what to strip from today | 20,100 |
 | [Decisions for you](DECISIONS.md) | | 39 choices, with the options and what changes if you choose otherwise | 8,100 |
-| [Words the design needs](COPY-NEEDED.md) | | Every `[copy needed]` item, and three slips found in the live copy | 2,500 |
+| [Words the design needs](COPY-NEEDED.md) | | Every `[copy needed]` item, and three slips found in the live copy (fixed) | 2,500 |
 
 Credits in parentheses, such as "(Hal)" or "(from Rosa and Tomás)", name the designer an idea
 comes from.

@@ -27,7 +27,7 @@ export default async function Overview() {
     <div className="stack">
       <h1>{account.name}</h1>
       {billing?.billed && !billing.canFileLive ? <p className="notice warn">Real filings need an active subscription; rehearsals are free. <Link href="/dashboard/billing">Subscribe</Link></p> : null}
-      {payCount ? <p className="notice warn">{payCount === 1 ? "1 approved filing is" : `${payCount} approved filings are`} ready to pay and need a card&apos;s security code. <Link href="/dashboard/pay">Pay and file</Link></p> : null}
+      {payCount ? <p className="notice warn">{payCount === 1 ? "1 approved filing is ready to pay and needs" : `${payCount} approved filings are ready to pay and need`} a card&apos;s security code. <Link href="/dashboard/pay">Pay and file</Link></p> : null}
       {!account.configured ? <p className="notice warn">Your account settings haven&apos;t been set up by the platform yet, so filings can&apos;t be approved or run. Ask the platform team to configure tenant <code>{account.tenantId}</code>.</p> : null}
       <div className="grid">
         <div className="card"><div className="muted small">Filings</div><div className="stat">{usage.filings.total}</div><div className="small muted">{usage.filings.live} live, {usage.filings.total - usage.filings.live} rehearsals</div></div>
