@@ -295,9 +295,17 @@
 .shell2-content .dash2-password > .card > strong:first-child { display: block; font: 500 1.375rem/1.75rem var(--font-sans-display); }
 .dash2-password #phone-code { width: 200px; max-width: 100%; font: 400 1.5rem/2rem var(--font-mono); letter-spacing: 0.3em; }
 .dash2-pw-line { font-size: 1.0625rem; line-height: 1.625rem; }
+.shell2-content .dash2-pw form > .help { margin: 4px 0 24px; }
+.shell2-content .dash2-pw form > .notice { margin: 24px 0 0; }
 
 /* ---- Billing (10C.14): the plan card, its price in Miller ---- */
 .shell2-content .dash2-billing .card > .row:first-child > strong { font: 500 1.375rem/1.75rem var(--font-sans-display); }
+.shell2-content .dash2 .dash2-billing .card.stack > * + * { margin-top: 16px; }
+.shell2-content .dash2 .dash2-billing .card.stack > .notice { margin-bottom: 0; }
+.shell2-content .dash2 .dash2-billing .card.stack > .help { margin-top: 24px; }
+/* "No subscription yet" is the neutral chip: no glyph, Graphite words on a Rule Strong edge */
+.shell2-content .dash2-billing .badge:not(.ok, .warn, .bad) { color: var(--text-2); border-color: var(--line-strong); }
+.shell2-content .dash2-billing .badge:not(.ok, .warn, .bad)::before { display: none; }
 .shell2-content .dash2-billing .card > .row:first-child + p:not(.notice):not(.small) { font: 400 2.25rem/2.625rem var(--font-display); font-variant-numeric: lining-nums tabular-nums; }
 @media (max-width: 599px) {
   .shell2-content .dash2-billing .card > .row:first-child { flex-direction: column; align-items: flex-start; }
@@ -322,7 +330,13 @@
 .shell2-content .dashlogin2-card { padding: 32px; box-shadow: var(--e-sheet); }
 .dashlogin2-card .btn { width: 100%; }
 .dashlogin2-card .help { margin-top: 16px; }
-.dashlogin2-alt { margin-top: 24px; }
+.dashlogin2 .dashlogin2-alt { margin: 24px 0 0; }
+body:has(.dashlogin2) > .beta-banner { display: none; }
+.dashlogin2-beta { background: var(--page-2); border-bottom: 1px solid var(--line); }
+.dashlogin2-beta > div { box-sizing: border-box; display: grid; grid-template-columns: auto 1fr; gap: 12px; align-items: baseline; max-width: 1296px; margin-inline: auto; padding: 12px 48px; font: 400 0.9375rem/1.4375rem var(--font-sans); color: var(--text-2); text-wrap: pretty; }
+.dashlogin2-beta .chip2 { position: relative; top: -1px; }
+.dashlogin2-beta a { color: var(--link); text-decoration: underline; text-decoration-color: var(--link-line); text-underline-offset: 3px; }
+@media (max-width: 599px) { .dashlogin2-beta > div { grid-template-columns: minmax(0, 1fr); gap: 6px; justify-items: start; padding-inline: 20px; } }
 @media (max-width: 599px) {
   .shell2-content.dashlogin2-in { padding-top: 40px; }
   .dashlogin2 .dashlogin2-in a.dashlogin2-mark { justify-content: flex-start; margin-bottom: 40px; }
