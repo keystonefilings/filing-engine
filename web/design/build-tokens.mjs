@@ -3,7 +3,7 @@
 //   web/styles/type.css       one class per type role (.t-<role>), fluid between 390 and 1440 px
 //   web/lib/design/tokens.ts  the same values as constants, for the proof renderer, emails and canvas work
 // Run with `npm run tokens`. `npm run tokens -- --check` fails if the outputs are out of date.
-import { readFileSync, writeFileSync, existsSync } from "node:fs";
+import { readFileSync, writeFileSync, existsSync, mkdirSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { dirname, join } from "node:path";
 
@@ -114,16 +114,23 @@ export const layout = ${JSON.stringify(t.layout, null, 2)} as const;
 export type ColorToken = keyof typeof color.light;
 `;
 
+// The engine renders the proof and emails itself (src/approvals, src/comms), so it gets the same constants
+// and an exact copy of the ink match. Edit web/lib/design/ink.ts; this copies it.
+const repo = join(web, "..");
+const copied = (from) => `// Copied by web/design/build-tokens.mjs from web/${from}. Don't edit: change the original and run \`npm run tokens\` in web/.\n`;
+const inkSrc = readFileSync(join(web, "lib", "design", "ink.ts"), "utf8");
 const outputs = [
   [join(web, "styles", "tokens.css"), tokensCss],
   [join(web, "styles", "type.css"), typeCss],
   [join(web, "lib", "design", "tokens.ts"), tokensTs],
+  [join(repo, "src", "design", "tokens.ts"), copied("lib/design/tokens.ts") + tokensTs.split("\n").slice(1).join("\n")],
+  [join(repo, "src", "design", "ink.ts"), copied("lib/design/ink.ts") + inkSrc],
 ];
 if (process.argv.includes("--check")) {
   const stale = outputs.filter(([p, s]) => !existsSync(p) || readFileSync(p, "utf8") !== s).map(([p]) => p);
   if (stale.length) { console.error(`Out of date; run npm run tokens:\n${stale.join("\n")}`); process.exit(1); }
   console.log("tokens up to date");
 } else {
-  for (const [p, s] of outputs) writeFileSync(p, s);
-  console.log(`wrote ${outputs.map(([p]) => p.replace(web + "/", "")).join(", ")}`);
+  for (const [p, s] of outputs) { mkdirSync(dirname(p), { recursive: true }); writeFileSync(p, s); }
+  console.log(`wrote ${outputs.map(([p]) => p.replace(repo + "/", "")).join(", ")}`);
 }
