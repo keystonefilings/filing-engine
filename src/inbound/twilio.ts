@@ -1,6 +1,7 @@
 import { createHash, createHmac, randomInt, timingSafeEqual } from "node:crypto";
 import type { Store, UserRecord } from "../store/types.js";
 import { RequestIntake } from "./requests.js";
+import { RateLimiter } from "../users/rate-limit.js";
 
 /**
  * V42-V43: filing requests by text message and WhatsApp, both through Twilio (one webhook, one
@@ -50,6 +51,10 @@ export class TwilioChannel {
   private readonly now: () => Date;
   private readonly fetchImpl: typeof fetch;
   private readonly intake: RequestIntake;
+  /** Texts cost money and can be abused (SMS pumping): a few codes per person, and per number, an hour. */
+  private readonly perUser = new RateLimiter(5, 3_600_000);
+  private readonly perNumber = new RateLimiter(3, 3_600_000);
+  private readonly overall = new RateLimiter(200, 3_600_000);
   constructor(private readonly o: TwilioOptions) {
     this.now = o.now ?? (() => new Date());
     this.fetchImpl = o.fetchImpl ?? fetch;
@@ -86,6 +91,7 @@ export class TwilioChannel {
     const other = await this.o.store.findUserByPhone(phone);
     if (other && other.id !== user.id) return { ok: false, status: 409, error: "this number is already used by another account" };
     if (!this.configured || !this.o.smsFrom) return { ok: false, status: 503, error: "texting isn't set up yet" };
+    if (!this.perUser.take(user.id) || !this.perNumber.take(phone) || !this.overall.take("all")) return { ok: false, status: 429, error: "too many codes sent; try again in an hour" };
     const code = String(randomInt(0, 1_000_000)).padStart(6, "0");
     const sent = await this.send(phone, `Your CoFile code is ${code}. It works for 10 minutes.`);
     if (!sent) return { ok: false, status: 502, error: "we couldn't text that number; check it and try again" };

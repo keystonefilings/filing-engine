@@ -81,6 +81,13 @@ describe("texts and WhatsApp", () => {
     expect((await app.inject({ method: "POST", url: "/v1/account/phone", headers: { "x-api-key": "k1" }, payload: { phone: "212-555-0199" } })).statusCode).toBe(401);
   });
 
+  it("limits how many codes are texted", async () => {
+    const send = (phone: string) => app.inject({ method: "POST", url: "/v1/account/phone", headers: { "x-api-key": leeKey }, payload: { phone } });
+    const codes = [];
+    for (let i = 0; i < 4; i++) codes.push((await send("718-555-0100")).statusCode);
+    expect(codes).toEqual([200, 200, 200, 429]); // three to one number an hour
+  });
+
   it("answers a text from a confirmed number with the link, and WhatsApp the same way", async () => {
     const r = await sms({ MessageSid: "SM100", From: "+12125550100", To: "+18005550100", Body: "NY LLC for Blue Harbor Consulting, organizer Sam Rivera" });
     expect(r.headers["content-type"]).toMatch(/xml/);
