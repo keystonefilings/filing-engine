@@ -6,6 +6,7 @@ import { logoSrc } from "@/lib/brand";
 import { brandOf, brandStyle } from "@/lib/firm";
 import { Chip } from "@/components/ui/Chip";
 import { Notice } from "@/components/ui/Sheet";
+import { Vignette } from "@/components/Vignette";
 
 export const metadata = { title: "Firms" };
 
@@ -31,7 +32,12 @@ export default async function FirmsPage() {
     <div className="dash2-firms">
       <h1>Firms</h1>
       <p className="muted">The CPA, payroll and other firms you file for. Give a firm its own branded filing desk, then invite its staff.</p>
-      {clientCompanies.length === 0 ? <Notice>No firms yet. Add one with <code>PUT /v1/client-companies/&#123;id&#125;</code> (see the <a href="/docs/reference">API reference</a>).</Notice> : (
+      {clientCompanies.length === 0 ? (
+        <div className="dash2-empty">
+          <Vignette name="v01-blank-plate" size={120} />
+          <Notice>No firms yet. Add one with <code>PUT /v1/client-companies/&#123;id&#125;</code> (see the <a href="/docs/reference">API reference</a>).</Notice>
+        </div>
+      ) : (
         <div className="dash2-table">
           <table>
             <thead><tr><th scope="col">Firm</th><th scope="col">Filing desk</th><th scope="col" className="is-num">Approvers</th></tr></thead>

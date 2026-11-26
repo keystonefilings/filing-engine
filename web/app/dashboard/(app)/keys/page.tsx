@@ -3,6 +3,7 @@ import { engine, type ApiKeyInfo } from "@/lib/engine";
 import { requireTenant } from "@/lib/session";
 import { NewKeyForm } from "@/components/NewKeyForm";
 import { Chip } from "@/components/ui/Chip";
+import { Vignette } from "@/components/Vignette";
 import { createKey, revokeKey } from "./actions";
 
 export const metadata = { title: "API keys" };
@@ -24,7 +25,7 @@ export default async function KeysPage() {
         <table>
           <thead><tr><th scope="col">Name</th><th scope="col">Key</th><th scope="col">Last used</th><th scope="col"><span className="sr-only">Revoke</span></th></tr></thead>
           <tbody>
-            {keys.length === 0 ? <tr className="is-empty"><td colSpan={4}>No keys created here yet.</td></tr> : keys.map((k) => (
+            {keys.length === 0 ? <tr className="is-empty"><td colSpan={4}><span className="dash2-empty-row"><Vignette name="v10-ruled-sheet" size={120} /><span>No keys created here yet.</span></span></td></tr> : keys.map((k) => (
               <tr key={k.id} className={k.revokedAt ? "is-revoked" : undefined}>
                 <th scope="row">{k.name}<span className="dash2-sub">created {DAY.format(new Date(k.createdAt))}</span></th>
                 <td data-label="Key"><code className="dash2-path">{k.prefix}…</code></td>

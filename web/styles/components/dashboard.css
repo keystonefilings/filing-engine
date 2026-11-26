@@ -13,6 +13,12 @@
 .dash2 .notice2 ul { margin: 8px 0 0; padding-left: 20px; }
 .dash2 form > .notice2:first-child, .dash2 form > .dash2-result:first-child { margin-bottom: 24px; }
 .dash2-result:focus { outline: none; }
+/* Empty states (10C.2): the engraved vignette 120 px wide, 32 px over the product's line */
+.dash2-empty { display: grid; justify-items: start; gap: 32px; max-width: 640px; }
+.dash2-empty > .notice2 { justify-self: stretch; margin: 0; }
+.shell2-content .dash2-empty > p { margin: 0; font-size: 1.0625rem; line-height: 1.625rem; }
+.dash2-empty.is-lead { margin-bottom: 24px; }
+.dash2-empty-row { display: grid; justify-items: start; gap: 16px; padding-block: 8px; }
 .dash2-sub { display: block; margin-top: 2px; font: 400 0.9375rem/1.4375rem var(--font-sans); color: var(--text-2); }
 .dash2 .dash2-id { display: block; margin-top: 2px; padding: 0; font: 400 0.875rem/1.25rem var(--font-mono); color: var(--text-2); background: none; overflow-wrap: anywhere; }
 .dash2 .dash2-path { padding: 0; font: 400 0.9375rem/1.375rem var(--font-mono); color: var(--text); background: none; overflow-wrap: anywhere; }
@@ -20,6 +26,8 @@
 .dash2-when { font-variant-numeric: tabular-nums; }
 .dash2 .dash2-mono, .dashlogin2 .dash2-mono { font-family: var(--font-mono); }
 .dash2 input[readonly] { background: var(--page-2); border-color: var(--line); }
+/* A field's control fills its column (the shared rules size it by its content) */
+.dash2 .field > :is(input:not([type=checkbox], [type=radio], [type=color], [type=file], [type=hidden]), select, textarea) { box-sizing: border-box; width: 100%; }
 .dash2 .choice { align-items: flex-start; padding-block: 12px; }
 .dash2 .choice input { margin-top: 2px; }
 .dash2 .choices { gap: 0; }
@@ -158,7 +166,8 @@
 .dash2-pay .card { max-width: 640px; }
 .shell2-content .dash2-pay .card > strong:first-child { display: block; padding-bottom: 16px; border-bottom: 1px solid var(--line); font: 500 1.375rem/1.75rem var(--font-sans-display); color: var(--text); }
 .dash2-pay .card > strong:first-child .muted { font: 400 1rem/1.375rem var(--font-sans); }
-.shell2-content .dash2-pay .card > ul { display: grid; gap: 8px; margin: 0; padding: 0; list-style: none; font: 500 1rem/1.5rem var(--font-sans); }
+.shell2-content .dash2-pay .card > .notice { margin: 16px 0 0; }
+.shell2-content .dash2-pay .card > ul { display: grid; gap: 8px; margin: 16px 0 0; padding: 0; list-style: none; font: 500 1rem/1.5rem var(--font-sans); }
 .dash2-pay .card > ul li { position: relative; padding-left: 20px; }
 .dash2-pay .card > ul li::before { content: ""; position: absolute; left: 1px; top: 0.6em; width: 7px; height: 7px; background: var(--ochre); transform: rotate(45deg); }
 .dash2-pay .card > ul li .muted { font-weight: 400; }
@@ -181,7 +190,7 @@
 .dash2-firm-page { max-width: 720px; margin-inline: auto; }
 .dash2 .dash2-back { margin: 0 0 24px; font: 400 0.9375rem/1.4375rem var(--font-sans); }
 .dash2-firm-page > h2:first-of-type { margin-top: 32px; }
-.dashfirm2 { display: grid; gap: 32px; }
+.dashfirm2 { display: grid; grid-template-columns: minmax(0, 1fr); gap: 32px; }
 .dashfirm2-on { margin-bottom: 24px; }
 .dashfirm2-on .choice { padding-bottom: 4px; }
 .dashfirm2-on .help { margin-left: 32px; }
@@ -298,7 +307,7 @@
 
 /* ---- Sign-ups (10C.15) ---- */
 .dash2-signups .dash2-table { margin-bottom: 8px; }
-.dash2-decide { display: flex; flex-wrap: wrap; gap: 8px; }
+.dash2-decide { display: flex; gap: 8px; }
 .dash2-message { min-width: 22ch; max-width: 40ch; white-space: normal; }
 .shell2-content .dash2-signups .chip2 code { padding: 0; font: inherit; font-family: var(--font-mono); background: none; }
 @media (max-width: 599px) { .dash2-decide { flex-direction: column; } .dash2-decide :is(form, .btn) { width: 100%; } .dash2-message { max-width: none; } }
