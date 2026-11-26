@@ -104,12 +104,27 @@ ${m.primaryColor && /^#[0-9a-fA-F]{6}$/.test(m.primaryColor) ? `<style>button.pr
 <div class="brandbar" style="display:flex;align-items:center;gap:.6rem;padding-top:.6rem">${m.logoUrl ? `<img src="${esc(m.logoUrl)}" alt="" style="max-height:40px;max-width:160px">` : ""}${m.brandName ? `<strong style="color:#333">${esc(m.brandName)}</strong>` : ""}${m.poweredBy ? `<span style="color:#777;font-size:.85em;margin-left:auto">with ${esc(m.poweredBy)}</span>` : ""}</div>`;
 }
 
+/**
+ * Decision 3 (Nov 26): approving also authorizes paying the fees shown, up to the stated maximum
+ * (the fee cap, else the total), with a no-refund warning. Counsel to confirm the wording; the
+ * version is recorded on each approval.
+ */
+export const APPROVAL_CONSENT_VERSION = "2026-11-26";
+export function approvalConsent(fees: { amountUsd: number }[], feeCapUsd?: number): string {
+  const total = fees.reduce((s, f) => s + f.amountUsd, 0);
+  const max = feeCapUsd ?? total;
+  const upTo = feeCapUsd !== undefined ? "the maximum you authorize" : "the total shown";
+  return "By approving, you confirm every detail below is correct and authorize its submission exactly as shown, "
+    + `and payment of the fees shown, up to ${upTo} ($${max.toFixed(2)}). `
+    + "Government fees generally can't be refunded once paid, even if the filing is rejected.";
+}
+
 export function renderReviewPage(m: ReviewPageModel): string {
   const total = m.fees.reduce((s, f) => s + f.amountUsd, 0);
   return `${brandedTop(m, m.brandName ? `${m.brandName}: approve filing` : "Approve filing")}
 ${m.practice ? `<div class="note"><strong>Practice filing: nothing will be filed or paid, even if you approve.</strong></div>` : ""}<h1>${esc(m.filingTitle)}</h1>
 <p>Filing reference ${esc(m.filingId)}. Please decide by ${esc(plainDeadline(m.expiresAt))}. After that, this link stops working and you'll need a new one.</p>
-<div class="note">By approving, you confirm every detail below is correct and authorize its submission exactly as shown.
+<div class="note">${esc(approvalConsent(m.fees, m.feeCapUsd))}
 ${m.einInRun ? " While filing, we'll get the EIN from the IRS and enter it on the state form. It's the only detail added after you approve." : ""}
 Government sites don't save drafts, so once you approve, the whole filing is sent in one go. Please check everything now.</div>
 ${m.reviewImageUrl ? `<h2>The state's review page</h2><p>This is a picture of the state's own review page, filled in with your details. When we file, we go ahead only if the state shows exactly this page again; if anything is different, we stop before paying.</p><p><img src="${esc(m.reviewImageUrl)}" alt="Picture of the state's review page for this filing. Every value on it is also listed as text under Filing details." style="max-width:100%;border:1px solid #ddd;border-radius:6px"></p>` : ""}
@@ -120,7 +135,7 @@ ${m.feeCapUsd !== undefined ? `<tr><th>Maximum you authorize</th><td>$${m.feeCap
 <form method="post" action="${esc(m.postUrl)}">
 ${m.requireCode ? `<p><label>One-time code sent to you<br><input name="code" inputmode="numeric" autocomplete="one-time-code" required></label></p>` : ""}
 <p><label>What should change? (Needed only if you ask for changes)<br><textarea name="comment" rows="3"></textarea></label></p>
-<p><button class="primary" name="decision" value="approve">Approve and authorize submission</button>
+<p><button class="primary" name="decision" value="approve">Approve, and authorize submission and payment</button>
 <button name="decision" value="request_changes">Request changes</button></p>
 </form>${m.supportEmail ? `<p style="color:#555">Questions: ${esc(m.supportEmail)}</p>` : ""}</body></html>`;
 }

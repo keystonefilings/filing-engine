@@ -46,7 +46,7 @@ export function isPlatformTenant(tenantId: string): boolean {
 
 /** Where people reach us (decided Nov 26). One setting for the site, its emails and the legal pages. */
 export function supportEmail(): string {
-  return process.env.SUPPORT_EMAIL?.trim() || "hello@cofile.com";
+  return process.env.SUPPORT_EMAIL?.trim() || "hello@cofile.app";
 }
 
 /** The version of the Terms and Privacy Policy a sign-up agrees to (the effective date). */

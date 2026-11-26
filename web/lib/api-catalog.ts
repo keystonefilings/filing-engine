@@ -88,7 +88,7 @@ export const ENDPOINTS: Endpoint[] = [
   {
     id: "record-approval", method: "POST", path: "/v1/filings/{id}/approval", group: "Filings", auth: "api_key",
     summary: "Record the client's approval",
-    description: "When you collect the client's approval in your own app instead of sending them the approval link. The same single decision as the link: it applies to the exact data and fees waiting for approval. You vouch for who approved (`approvedBy`); send `code` if the firm requires a one-time code.",
+    description: "When you collect the client's approval in your own app instead of sending them the approval link. The same single decision as the link: it applies to the exact data and fees waiting for approval. Show the approver the same consent as the approval page: approving authorizes submitting the filing exactly as shown and paying the fees shown, up to the fee cap (or the total when there is none), and government fees generally can't be refunded once paid. You vouch for who approved (`approvedBy`); send `code` if the firm requires a one-time code.",
     body: "{ decision, approvedBy, comment?, code? }", bodyExample: { decision: "approve", approvedBy: "Sam Rivera, in our client portal" },
     responses: [{ status: 200, description: "The filing, now approved and queued.", example: { filing: { id: "f_123", status: "queued" } } }, { status: 409, description: "No approval is waiting, or it was already decided." }],
   },

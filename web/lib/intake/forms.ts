@@ -327,7 +327,7 @@ const nyCorp: FilingKind = {
     contactSection("Screen F, E-mail Address"),
   ],
   authorizations: [
-    { id: "ny-corp-signature", ref: "Screen D1, Signature of Incorporator (STOP)", text: "The incorporator named above authorizes the filing company to type their name as the incorporator's signature on this Certificate of Incorporation and to certify that the statements in it are true and correct." },
+    { id: "ny-corp-signature", ref: "Screen D1, Signature of Incorporator (STOP)", text: "I am the incorporator named above. I authorize the filing company to type my name as the incorporator's signature on this Certificate of Incorporation, and I certify that the statements in it are true and correct." },
     { id: "ny-payment", ref: "Screen F, Payment Authorization (STOP)", text: "I authorize the filing company to pay the state fee shown on the approval page. The Department of State does not refund fees." },
   ],
   gaps: [
@@ -502,7 +502,7 @@ const njCorp: FilingKind = {
   ],
   authorizations: [
     { id: "nj-ra-attestation", ref: "Screen 7, Attestation checkbox (STOP)", text: "I attest that the registered agent information is correct for this business and that the agent named is aware of and has accepted the responsibility of acting as its registered agent, and I authorize the filing company to check that box for me." },
-    { id: "nj-corp-signature", ref: "Screen 10, Signatures (STOP)", text: "Each incorporator named above authorizes the filing company to enter their name as a signer and check their Signature Box on the Certificate of Incorporation, which the portal says indicates acceptance of the certificate and the intent to formally execute the filing." },
+    { id: "nj-corp-signature", ref: "Screen 10, Signatures (STOP)", text: "I am an incorporator named above, and each other incorporator named above has authorized me to give this authorization for them. I authorize the filing company to enter each incorporator's name as a signer and check their Signature Box on the Certificate of Incorporation, which the portal says indicates acceptance of the certificate and the intent to formally execute the filing." },
     { id: "nj-payment", ref: "Screen 13, Payment", text: "I authorize the filing company to pay the state fee shown on the approval page." },
   ],
   gaps: [
@@ -563,7 +563,7 @@ function flCopies(statusFee: string, copyFee: string): Section {
   };
 }
 
-const flRaAuth: Authorization = { id: "fl-ra-signature", ref: "Registered Agent Signature (STOP)", text: "The person named to accept for the registered agent authorizes the filing company to type their name as the agent's signature accepting the appointment. (Typing another person's name without authority is forgery under s.831.06 F.S.)" };
+const flRaAuth: Authorization = { id: "fl-ra-signature", ref: "Registered Agent Signature (STOP)", text: "I am the person named above to accept for the registered agent. I authorize the filing company to type my name as the agent's signature accepting the appointment. (Typing another person's name without authority is forgery under s.831.06 F.S.)" };
 const flTerms: Authorization = { id: "fl-disclaimer", ref: "Entry screen, disclaimer checkbox (STOP)", text: "I authorize the filing company to accept the Sunbiz filing disclaimer for this filing." };
 const flPay: Authorization = { id: "fl-payment", ref: "Tyler Payment Services hand-off", text: "I understand a submitted Florida filing can't be changed, cancelled or refunded, everything in it becomes public record, and I authorize payment of the fee shown on the approval page." };
 
@@ -602,7 +602,7 @@ const flLlc: FilingKind = {
     flCopies("$5", "$30"),
     contactSection("Correspondence Name / E-mail"),
   ],
-  authorizations: [flTerms, flRaAuth, { id: "fl-llc-signature", ref: "Electronic Signature (STOP)", text: "The authorized representative named above authorizes the filing company to type their name as the electronic signature, affirming the facts are true (false information is a third-degree felony under s.817.155 F.S.) and acknowledging the annual report duty." }, flPay],
+  authorizations: [flTerms, flRaAuth, { id: "fl-llc-signature", ref: "Electronic Signature (STOP)", text: "I am the authorized representative named above. I authorize the filing company to type my name as the electronic signature, I affirm the facts are true (false information is a third-degree felony under s.817.155 F.S.), and I acknowledge the annual report duty." }, flPay],
   gaps: ["Review, payment and final submit screens after the signatures are not mapped yet."],
 };
 
@@ -638,7 +638,7 @@ const flCorp: FilingKind = {
     flCopies("$8.75", "$8.75"),
     contactSection("Correspondence Name / E-mail"),
   ],
-  authorizations: [flTerms, flRaAuth, { id: "fl-corp-signature", ref: "Electronic Signature of Incorporator (STOP)", text: "The incorporator named above authorizes the filing company to type their name as the incorporator's electronic signature, affirming the facts are true (s.817.155 F.S.)." }, flPay],
+  authorizations: [flTerms, flRaAuth, { id: "fl-corp-signature", ref: "Electronic Signature of Incorporator (STOP)", text: "I am the incorporator named above. I authorize the filing company to type my name as the incorporator's electronic signature, and I affirm the facts are true (s.817.155 F.S.)." }, flPay],
   gaps: ["Officers and directors are collected but the engine adapter does not enter them yet.", "Review, payment and final submit are not mapped yet."],
 };
 
@@ -673,7 +673,7 @@ const flLp: FilingKind = {
     flCopies("$8.75", "$52.50"),
     contactSection("Correspondence Name / E-mail"),
   ],
-  authorizations: [flTerms, flRaAuth, { id: "fl-gp-signatures", ref: "GP Signature per block (STOP)", text: "Each general partner named above authorizes the filing company to type their name as their signature, affirming the facts are true (s.817.155 F.S.)." }, flPay],
+  authorizations: [flTerms, flRaAuth, { id: "fl-gp-signatures", ref: "GP Signature per block (STOP)", text: "I am a general partner named above, and each other general partner named above has authorized me to give this authorization for them. I authorize the filing company to type each general partner's name as their signature, and I affirm the facts are true (s.817.155 F.S.)." }, flPay],
   gaps: ["Review, payment and final submit are not mapped yet."],
 };
 
@@ -913,7 +913,7 @@ const nyNys100: FilingKind = {
     contactSection("P8, Contact Information"),
   ],
   authorizations: [
-    { id: "nys100-attest", ref: "A13, I attest to the above (STOP)", text: "The submitter named above affirms that the answers are true to the best of their knowledge and belief, and authorizes the filing company to check \"I attest to the above\" and submit the registration for them." },
+    { id: "nys100-attest", ref: "A13, I attest to the above (STOP)", text: "I am the submitter named above. I affirm that the answers are true to the best of my knowledge and belief, and I authorize the filing company to check \"I attest to the above\" and submit the registration for me." },
   ],
   gaps: [
     "Ready to Submit (the final screen) is not mapped yet, so the engine fills up to Submitter Information and stops there.",
@@ -1065,7 +1065,7 @@ const njReg: FilingKind = {
   authorizations: [
     { id: "njreg-employment", ref: "Screen 11, employment attestation (STOP)", text: "I confirm the Yes/No employment answers above accurately reflect the business's employment activities, and I understand NJ payroll tax filings are required for any \"Yes\"." },
     { id: "njreg-tax", ref: "Screen 11, taxable activities attestation (STOP)", text: "I confirm the Yes/No answers above accurately reflect the business activities subject to New Jersey taxes." },
-    { id: "njreg-perjury", ref: "Screen 11, perjury declaration and typed name (STOP)", text: "The authorized representative named above declares under penalty of perjury that the information is true, correct and complete, and authorizes the filing company to check the declaration box and type their name as the signature." },
+    { id: "njreg-perjury", ref: "Screen 11, perjury declaration and typed name (STOP)", text: "I am the authorized representative named above. I declare under penalty of perjury that the information is true, correct and complete, and I authorize the filing company to check the declaration box and type my name as the signature." },
   ],
   gaps: [
     "Only the business-entity registration option is covered; sole proprietorships and partnerships (option 2) and options 3 to 7 are not.",
@@ -1106,7 +1106,7 @@ function filerSection(base: string): Section {
 const esubSign: Authorization = {
   id: "ny-esub-signature",
   ref: "Form signature line (STOP)",
-  text: "The signer named above authorizes the filing company to place their saved signature on this New York form, only once this filing is approved, and confirms what the form states is true.",
+  text: "I am the signer named above. I authorize the filing company to place my saved signature on this New York form, only once this filing is approved, and I confirm what the form states is true.",
 };
 const esubPay: Authorization = {
   id: "ny-esub-payment",

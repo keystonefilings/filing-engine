@@ -10,9 +10,15 @@ import { parsePng, sealImage, sha256 } from "../signatures/sealed.js";
  * (src/signatures/apply.ts). The image never leaves the engine through the API.
  */
 
+/**
+ * Decision 4 (Nov 26): limited to forms that name this signer (src/signatures/apply.ts already checks
+ * the name), without "filed in my name", and revocable at any time (DELETE /v1/signatures/:id; a
+ * revoked signature is refused at filing time). Each saved signature keeps the text it was agreed under.
+ */
 export const SIGNATURE_CONSENT =
-  "I adopt this image as my signature. I authorize it to be placed on New York Department of State forms for this company, " +
-  "only on a filing that has been approved for submission, and I understand each approved filing is signed and filed in my name.";
+  "I adopt this image as my signature. I authorize it to be placed only on New York Department of State forms for this company " +
+  "that name me as the signer, and only on a filing that has been approved for submission. " +
+  "I can revoke this authorization at any time; once it is revoked, my signature won't be placed on any further filing.";
 
 const CreateBody = z.object({
   clientCompanyId: z.string().min(1).max(100),

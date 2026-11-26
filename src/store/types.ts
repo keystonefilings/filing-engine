@@ -55,6 +55,8 @@ export interface ApprovalRecord {
   createdAt: string;
   expiresAt: string;
   decidedAt?: string;
+  /** The approval consent the approver agreed to (approvals/render.ts APPROVAL_CONSENT_VERSION). */
+  consentVersion?: string;
   decidedVia?: { ip?: string; userAgent?: string; recipient?: string };
   comment?: string;
 }

@@ -221,11 +221,13 @@ Built and tested; each switches on when its accounts and keys are set (steps in 
 - **Slack:** a Slack app with the `/file` command (V41).
 - **Twilio:** a number with A2P 10DLC registration, and a WhatsApp sender (Meta verification) (V42-V43).
 - **Copy decisions:** of the 19 questions from the copy review (docs/copy-review-2026-11-26.md), price
-  wording, the filing company, the terms and privacy pages and the support address were decided and
-  done on Nov 26; the rest (consent scope, signature consent, declarations, EIN designee, filing
+  wording, the filing company, the terms and privacy pages, the support address (hello@cofile.app),
+  the approval consent (now covering fee payment) the saved-signature consent (limited
+  and revocable) and first-person declarations were decided and done on Nov 26; the rest (EIN designee, filing
   statuses, leaving practice mode, the agent option, turnaround times, hosts, fees, key prefix,
   Florida professional entities, the Certificate of Existence upload) wait for you. Have counsel
-  review the Terms and Privacy Policy (governing law, liability cap, legal entity name).
+  review the Terms and Privacy Policy (governing law, liability cap, legal entity name) and the
+  approval consent, saved-signature consent and declaration wording.
 - **Live walks with you:** NY drawdown deposit and post-submit pages, Sunbiz checkout, the IRS
   Assignment screen, the NJ checkout (V9-V12); the checkout walks also let the adapters type saved
   cards (V18). Also the pages V13 and V14 couldn't map: each NY record filing's confirmation, the NJ

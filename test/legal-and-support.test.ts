@@ -17,7 +17,7 @@ let app: FastifyInstance;
 beforeAll(async () => {
   store = await seededStore();
   const w = wire(store);
-  app = buildServer({ service: w.service, approvals: w.approvals, store, artifacts: new FsArtifactStore("var/test-artifacts"), publicBaseUrl: "http://api.test", apiKeys: { k1: "keystone" }, sessionSecret: "session-secret-for-tests-0123456789", email, webBaseUrl: "http://web.test", platformTenantId: "keystone", partnerSignupMode: "automatic", platformName: "CoFile", supportEmail: "hello@cofile.com" });
+  app = buildServer({ service: w.service, approvals: w.approvals, store, artifacts: new FsArtifactStore("var/test-artifacts"), publicBaseUrl: "http://api.test", apiKeys: { k1: "keystone" }, sessionSecret: "session-secret-for-tests-0123456789", email, webBaseUrl: "http://web.test", platformTenantId: "keystone", partnerSignupMode: "automatic", platformName: "CoFile", supportEmail: "hello@cofile.app" });
   await app.ready();
 });
 afterAll(async () => { await app.close(); });
@@ -46,13 +46,44 @@ describe("terms at sign-up", () => {
 describe("support address", () => {
   it("ends staff notices, never a client's email", async () => {
     const sent: { address: string; msg: OutboundMessage }[] = [];
-    const n = new Notifier({ store, senders: { email: { channel: "email", async send(to, msg) { sent.push({ address: to.address, msg }); return { ok: true }; } } }, publicBaseUrl: "http://api.test", supportEmail: "hello@cofile.com" });
+    const n = new Notifier({ store, senders: { email: { channel: "email", async send(to, msg) { sent.push({ address: to.address, msg }); return { ok: true }; } } }, publicBaseUrl: "http://api.test", supportEmail: "hello@cofile.app" });
     const w = wire(store);
     const { filing } = await w.service.createFiling(njFormationRequest({ dryRun: true }));
     const tenant = { ...(await store.getTenant("keystone"))!, adminChannels: [{ channel: "email" as const, address: "ops@firm.test" }] };
     await n.notify({ id: "e1", type: "filing.failed", tenantId: "keystone", filingId: filing.id, occurredAt: new Date().toISOString(), data: { error: "x" } }, filing, tenant);
     await n.notify({ id: "e2", type: "filing.awaiting_approval", tenantId: "keystone", filingId: filing.id, occurredAt: new Date().toISOString(), data: { approvalLink: "http://api.test/approve/t" } }, filing, tenant);
-    expect(sent.find((m) => m.address === "ops@firm.test")!.msg.body).toMatch(/Questions\? Email hello@cofile\.com\.$/);
-    expect(sent.find((m) => m.address !== "ops@firm.test")!.msg.body).not.toContain("hello@cofile.com");
+    expect(sent.find((m) => m.address === "ops@firm.test")!.msg.body).toMatch(/Questions\? Email hello@cofile\.app\.$/);
+    expect(sent.find((m) => m.address !== "ops@firm.test")!.msg.body).not.toContain("hello@cofile.app");
+  });
+});
+
+describe("approval consent (decision 3)", () => {
+  it("covers paying the fees shown up to the stated maximum, warns about refunds, and is recorded", async () => {
+    const { renderReviewPage, approvalConsent, APPROVAL_CONSENT_VERSION } = await import("../src/approvals/render.js");
+    const fees = [{ label: "Filing fee", amountUsd: 125 }, { label: "Copy", amountUsd: 5 }];
+    expect(approvalConsent(fees, 200)).toMatch(/payment of the fees shown, up to the maximum you authorize \(\$200\.00\)/);
+    expect(approvalConsent(fees)).toMatch(/up to the total shown \(\$130\.00\)/);
+    expect(approvalConsent(fees)).toMatch(/can't be refunded once paid/);
+    const html = renderReviewPage({ filingId: "f1", filingTitle: "T", payload: {}, fees, feeCapUsd: 200, expiresAt: "2026-12-01T00:00:00Z", einInRun: false, postUrl: "#", requireCode: false });
+    expect(html).toContain("Approve, and authorize submission and payment");
+    expect(html).toContain("up to the maximum you authorize ($200.00)");
+
+    const w = wire(store);
+    const { filing } = await w.service.createFiling(njFormationRequest({ dryRun: true }));
+    const a = (await store.getApproval((await store.getFiling(filing.id))!.currentApprovalId!))!;
+    await w.service.onApprovalDecision(a.token, "approve", {});
+    expect((await store.getApproval(a.id))!.consentVersion).toBe(APPROVAL_CONSENT_VERSION);
+  });
+});
+
+describe("saved-signature consent (decision 4)", () => {
+  it("covers only forms that name the signer, drops 'filed in my name', and is revocable", async () => {
+    const { SIGNATURE_CONSENT } = await import("../src/api/signatures.js");
+    expect(SIGNATURE_CONSENT).toMatch(/that name me as the signer/);
+    expect(SIGNATURE_CONSENT).toMatch(/only on a filing that has been approved for submission/);
+    expect(SIGNATURE_CONSENT).toMatch(/I can revoke this authorization at any time/);
+    expect(SIGNATURE_CONSENT).not.toMatch(/filed in my name/);
+    const r = await app.inject({ method: "GET", url: "/v1/signatures?clientCompanyId=acme-cpa", headers: { "x-api-key": "k1" } });
+    expect(r.json().consentText).toBe(SIGNATURE_CONSENT);
   });
 });

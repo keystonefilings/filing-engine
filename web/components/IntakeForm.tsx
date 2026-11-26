@@ -374,7 +374,7 @@ export function IntakeForm({ kind, nonce, action, submitLabel = "Submit for appr
       })}
       <fieldset>
         <legend>Authorizations</legend>
-        <p className="help" style={{ marginTop: 0 }}>The state form asks for these.{filerName ? <> Here, &quot;the filing company&quot; means {filerName}, the company that enters this filing on the government site.</> : null} Each one is shown again on the approval page before anything is filed.</p>
+        <p className="help" style={{ marginTop: 0 }}>The state form asks for these. Each statement is made by the person who checks its box, so a statement that begins &quot;I am&quot; should be checked by the person named; if that&apos;s your client, send them a client link instead.{filerName ? <> Here, &quot;the filing company&quot; means {filerName}, the company that enters this filing on the government site.</> : null} Each one is shown again on the approval page before anything is filed.</p>
         {kind.authorizations.map((a) => (
           <label key={a.id} className="auth">
             <input type="checkbox" name={`${AUTH_PREFIX}${a.id}`} />

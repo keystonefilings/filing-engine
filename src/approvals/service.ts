@@ -5,7 +5,7 @@ import type { ClientCompanySettings, TenantSettings } from "../settings/schema.j
 import { settingsMatchSnapshot, takeSettingsSnapshot } from "../settings/snapshot.js";
 import { canonicalHash } from "./hash.js";
 import { mintOneTimeCode, mintToken, verifyToken } from "./token.js";
-import { maskSensitive } from "./render.js";
+import { APPROVAL_CONSENT_VERSION, maskSensitive } from "./render.js";
 import type { FeeLine } from "../fees/table.js";
 
 export interface ApprovalDeps {
@@ -137,6 +137,7 @@ export class ApprovalService {
     const updated = await this.deps.store.updateApproval(a.id, {
       status: decision === "approve" ? "approved" : "changes_requested",
       decidedAt: this.now().toISOString(),
+      ...(decision === "approve" ? { consentVersion: APPROVAL_CONSENT_VERSION } : {}),
       decidedVia: { ip: via.ip, userAgent: via.userAgent, recipient: via.recipient },
       comment: via.comment,
     });
