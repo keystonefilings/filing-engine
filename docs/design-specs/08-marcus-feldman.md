@@ -287,7 +287,7 @@ In dark mode, shadows are dropped below e3; surfaces separate by lightness (`--s
 | Product renders | The sample proof, the rehearsal log, the text-to-draft sequence, the coverage strip, rendered from the real components with the test details on the home page. Never screenshots of real filings. | Built in-house from the component library; final polish by an interactive motion studio |
 | Pencil illustration | Single-weight line drawings in `--pencil-line`, 1.5 px at 1×: empty states, setup steps, 404 and error, email headers. Subjects: sheets, crop marks, a registration ring, an envelope, a stamp pad, a phone with a sheet on it. No people, no mascots. | A technical illustrator who works in single-weight line (architectural or patent-drawing tradition) |
 | Photography | Close-ups only: hands holding a printed proof, a phone held at a kitchen table, a stack of state documents in a folder. Real offices in New York, New Jersey and Florida. No faces presented as customers, no captions suggesting anyone pictured uses CoFile. | A documentary or editorial photographer used to small-business settings, with model releases |
-| Data visuals | The coverage control strip (8.11), the fee check diagram ("Checked twice"), the filing timeline | In-house, from tokens |
+| Data visuals | The coverage control strip (9.11), the fee check diagram ("Checked twice"), the filing timeline | In-house, from tokens |
 | 3D | None. It fights the paper metaphor and the page-weight budget. | |
 
 **Social proof without fake proof.** We have no customers to quote yet and we won't invent any. The persuasive assets are evidence: the rehearsal log, the coverage table with honest labels, "the catch", and the security blocks. Designed with the same care a logo bar usually gets.
@@ -320,7 +320,7 @@ In dark mode, shadows are dropped below e3; surfaces separate by lightness (`--s
 | Moment | Where | Sequence |
 |---|---|---|
 | **The press check** | Home hero | The sheet rises 12 px and fades in (320 ms). Pencil crop marks draw at its corners (400 ms). Callouts 1 to 4 draw in, 120 ms apart. Total under 1.3 s; text and CTAs are static. |
-| **Callout to check** | Hero and the "proof" section | Tapping a callout draws a pencil leader to a note holding the matching check from the list (8.6). The matching rows on the sheet get `--pencil-wash`. |
+| **Callout to check** | Hero and the "proof" section | Tapping a callout draws a pencil leader to a note holding the matching check from the list (mapping in 9.3). The matching rows on the sheet get `--pencil-wash`. |
 | **Text to draft** | "Clients don't fill in forms" | The phrases "me and my sister, 50/50" and "in Jersey City" underline in pencil (300 ms each), then the drafted rows "Members" and "Main business address" fade in beside the arrow line. |
 | **Checked twice** | "Checked twice. Filed once." | Two fee figures, the proof's "Total to the state $103.50" and the log row "Payment: $100.00 + $3.50 NJ portal fee", slide toward each other and a single tick lands between them ("matches the proof"). |
 | **The planned hold** | "Rehearse on the real stage" | Log rows appear one at a time, 350 ms apart. The last row, "Pay Now: held, on purpose", lands with the amber hold mark on the stamp spring. |
@@ -338,7 +338,7 @@ With `prefers-reduced-motion: reduce`, every sequence renders its final state im
 
 | Variant | Light | Use |
 |---|---|---|
-| Primary (go) | `--go` fill, white text, 8 radius | One per view: the action that moves things forward ("Run a free rehearsal", "Create account", "Send the proof to my client") |
+| Primary (go) | `--go` fill, white text (dark mode: #04140C text on the lighter dark-mode green), 8 radius | One per view: the action that moves things forward ("Run a free rehearsal", "Create account", "Send the proof to my client") |
 | Secondary | `--sheet` fill, 1.5 px `--ink` border, ink text | The alternative ("See what your client sees", "Request changes") |
 | Quiet | No border, ink text, underline on hover | Tertiary ("Log in" in the nav) |
 | Destructive | `--sheet` fill, `--stop` border and text | "Turn off" a client link, revoking a key |
@@ -388,6 +388,15 @@ The same anatomy at three sizes: the hero sample (marketing), the live preview (
 
 Sheet radius 2, e3 shadow on marketing, e1 inside the app. Callout numerals are Proof Marks glyphs in pencil, 28 px circles, sitting in a 40 px left gutter outside the content so they never overlap filing details.
 
+The callouts open notes that hold the existing checks from the home page's "proof" section, word for word:
+
+| Callout | Points at | Note text (existing) |
+|---|---|---|
+| 1 | Business name, members, address | "Every name, address and answer, in the order the state asks for them" |
+| 2 | The fee table | "Every fee in dollars and cents, from a verified fee table" |
+| 3 | New Jersey's review page | "Where the state's website allows it, a picture of the state's own review page, filled in" |
+| 4 | The button | "One button. Until it's pressed, nothing is submitted and nothing is paid." |
+
 ### 9.4 Status chips
 
 Height 28, radius 6, 15 / 20 weight 600, glyph 14 px left of the label. Labels are exactly those in `web/lib/status.ts`.
@@ -400,7 +409,7 @@ Height 28, radius 6, 15 / 20 weight 600, glyph 14 px left of the label. Labels a
 | Neutral | `--neutral-wash`, `--ink-2` | ring | "Received", "Getting the state's review page", "Queued", "Final check" |
 | Working | neutral, ring glyph rotates 1.2 s linear (static under reduced motion) | rotating ring | "Filing now" |
 
-A "Rehearsal" badge sits next to the status chip on any rehearsal filing: hold styling with the two-bar glyph, so the planned hold and the rehearsal share one visual.
+Amber means "paused, not wrong": a rehearsal's planned hold, and any wait for a person (an approval, missing information, a staff check). Red is reserved for a filing that has stopped and needs a new one. A "Rehearsal" badge sits next to the status chip on any rehearsal filing: hold styling with the two-bar glyph, so the planned hold and the rehearsal share one visual.
 
 ### 9.5 Timeline
 
@@ -568,7 +577,7 @@ On xs the order is kicker, H1 (38 / 42), sub, both CTAs full width, beta note, t
 
 **2. Process.** "You start it. Your client approves it. CoFile files it." Three cards in a row with large numerals 1, 2, 3; the middle card ("Your client approves it.") is a raised sheet with crop marks and the others are flat. That's the lede ("your client is in charge of the middle one") said visually.
 
-**3. The proof.** The biggest section. Desktop: the sheet pinned on the left (sticky, 7 columns) while the six checks scroll on the right. As each check reaches the reading line, the matching part of the sheet highlights in pencil wash: check 1 to callout 1 rows, check 2 to fees, check 3 to the state's page, check 4 to the consent line under the button, check 5 to the button. The sixth, "For CPAs: it does for a business filing what the 8879 does for a return.", is set apart as a pull line at H3 size with a pencil rule, because that sentence is the one that makes a CPA nod. On xs, the sheet comes first, then the checks as a list with the ticks.
+**3. The proof.** The biggest section. Desktop: the sheet pinned on the left (sticky, 7 columns) while the six checks scroll on the right. As each check reaches the reading line, the matching part of the sheet highlights in pencil wash: check 1 to the rows at callout 1, check 2 to the fees at callout 2, check 3 to the state's page at callout 3, checks 4 and 5 to the button and the line beneath it at callout 4. The sixth, "For CPAs: it does for a business filing what the 8879 does for a return.", is set apart as a pull line at H3 size with a pencil rule, because that sentence is the one that makes a CPA nod. On xs, the sheet comes first, then the checks as a list with the ticks.
 
 **4. Firms.** Split 5 / 7. Right side: a picture of the co-branding: the brand bar of a filing desk with "Harbor & Pine CPA" large and "with ◉ CoFile" small at the end, with pencil dimension lines showing the size difference. The heading says it; the image measures it.
 
@@ -639,7 +648,7 @@ The desk is co-branded: the firm's logo and name lead the top bar, the firm's ac
  Set up your account
  Three short steps, plus registered agents if you want them. You can change any of them later.
 ┌──────────────────────────────────────┬──────────────────────────────┐
-│ ✓ Your firm                 [Change] │  ┌ [your logo] Your Firm ───┐│
+│ ✓ Your firm                 [Change] │  ┌ [logo] [firm name] ──────┐│
 │ ● Branding           [Set up branding]│  │ Two Sisters Bakery LLC   ││
 │ ○ Payment             [Set up payment]│  │ … [Approve for filing]   ││
 │ ┌ Registered agents (optional) ────┐ │  └──────────────────────────┘│
@@ -675,9 +684,9 @@ My sequencing change: "Start a filing" appears as soon as "Your firm" and "Brand
 ┌──────────────────────────────────────────────┬──────────────────┐
 │ Fields marked * are required.                │  mini proof      │ sticky, 320 wide
 │ Filing contact                               │  ┌ your logo ──┐ │
-│ The person the filing company and the state  │  │ Name  ░░░░░ │ │ pencil placeholders
-│ contact about this filing. …                 │  │ Members ░░░ │ │
-│ First name* [_______]  Last name* [_______]  │  │ Fees  $200… │ │ fills as typed
+│ The person the filing company and the state  │  │ [label] ░░░ │ │ pencil placeholders
+│ contact about this filing. …                 │  │ [label] ░░░ │ │  labels come from
+│ First name* [_______]  Last name* [_______]  │  │ [fee]  $··· │ │ the form itself
 │ Email* [__________]    Phone* [__________]   │  └─────────────┘ │
 │ ▸ More options (optional)                    │                  │
 │ …                                            │                  │
@@ -797,8 +806,8 @@ The neutral beta strip sits above the brand bar on these pages. Expired or used 
 │    or paid, even if you approve.     │
 │ [Filing title]                       │  H1 26/32
 │ Filing reference … Please decide by …│
-│ ┌ By approving, you confirm every    ┐│  consent note, hold-free
-│ │ detail below is correct …          ││  neutral sheet, ink left rule
+│ ┌ By approving, you confirm every    ┐│  consent note: neutral sheet,
+│ │ detail below is correct …          ││  2 px ink left rule
 │ └────────────────────────────────────┘│
 │ The state's review page · Filing details · State fees │ sticky jump bar
 │ The state's review page              │
@@ -903,7 +912,7 @@ CoFile-branded, denser (44 px rows, 15 / 22 tables), dark mode by default for de
 └──────────────┴──────────────────────────────────────────────────────────────┘
 ```
 
-**Setup in detail.** It's the enterprise's activation page, so it's ordered by what blocks a first filing: "State portal logins" first (each portal a row: NY DOS, NYS-100, NJ, IRS, FL, with a sealed or not-connected state, the existing "Not needed" or "Only for a prepaid Sunbiz E-file account." note where it applies, and a connect action that opens a sheet with the login fields), then "Who's named on your filings", then "Payment methods". A connected login shows only "sealed" with the date, never any part of the secret. When the account isn't configured yet, the existing notice ("Your account settings haven't been set up yet, so nothing here can be saved. We'll do that with you first.") sits at the top and every form below is shown read-only rather than hidden, so the buyer can see what's coming.
+**Setup in detail.** It's the enterprise's activation page, so it's ordered by what blocks a first filing: "State portal logins" first (each portal a row: NY DOS, NYS-100, NJ, IRS, FL, with a sealed or not-connected state, the existing "Not needed" or "Only for a prepaid Sunbiz E-file account." note where it applies, and a connect action that opens a sheet with the login fields), then "Who's named on your filings", then "Payment methods". A connected login shows only that it's connected, with the existing "Sealed as soon as it arrives and never shown again, here or anywhere. Only a filing run reads it." beside it, never any part of the secret. When the account isn't configured yet, the existing notice ("Your account settings haven't been set up yet, so nothing here can be saved. We'll do that with you first.") sits at the top and every form below is shown read-only rather than hidden, so the buyer can see what's coming.
 
 **API keys and webhooks in detail.** Keys show the readable prefix in Mono and never the secret after creation. Webhook endpoints show the last 50 deliveries with event name, HTTP status as a chip (2xx go, 4xx hold, 5xx and timeouts stop), duration and a resend action. Event names use the docs' names so a developer can search one from the other.
 
@@ -953,15 +962,15 @@ Per email:
 - **Changes requested, completed, rejected, filing submitted, documents back, EIN issued.** One layout: subject as heading, the body, and a summary block with the filing title and the state reference in Mono when there is one. Documents-back and EIN emails name the documents as file rows (type icon, file name) that link to the filing; the files themselves are never attached, because attachments get forwarded.
 - **Account emails** (confirm, reset, account open, account ready, invitations): CoFile-branded, the Register mark at 28 px, one button, the link's expiry stated where the product states it. An invitation shows the inviting firm's logo above the heading.
 
-### 10.9 Internal staff surfaces (platform tenant)
+### 10.9 Staff queues and admin action pages
 
-CoFile's own staff use the dashboard with three extra queues. They're internal, but they're where "stop and ask rather than guess" actually happens, so they get real design.
+CoFile's own staff (the platform tenant) see two extra queues in the dashboard, and a filing company's admins (a partner firm's or an enterprise's) get action pages from the admin emails. Few people see these, but they're where "stop and ask rather than guess" actually happens, so they get real design.
 
 | Queue | What staff see | Design |
 |---|---|---|
-| Sign-ups | "Waiting for approval" and "Enterprise requests", with the existing explanations | One row per firm or company: name, kind of firm, states, volume band, sign-up time. Approve (go) and decline (destructive) at the row's end. Enterprise requests show the free-text message folded. |
-| Drift reviews | Filings stopped because a state changed its form ("Site changed — review needed") | A split comparison: the approved form snapshot on the left, the state's current screen on the right, the changed regions outlined in pencil with a numbered list of differences below. Decisions at the bottom as three equal buttons for the engine's three outcomes (accepted, corrected, rejected); there's no staff screen for this today, so its labels are [copy: C15]. The affected filings listed underneath with their firms. |
-| Review gate, name options, reconciliation | "Review before submit", "Choose a name", "Checking whether the state received" | Each opens on the captured screen on a white plate with the filing summary beside it; actions match the email's link label. Reconciliation items show a prominent hold notice, because "Please don't file it again" is the instruction that prevents a double filing. |
+| Sign-ups (CoFile staff) | "Waiting for approval" and "Enterprise requests", with the existing explanations | One row per firm or company: name, kind of firm, states, volume band, sign-up time. Approve (go) at the row's end, and decline (destructive) where the product offers it. Enterprise requests show the free-text message folded. |
+| Drift reviews (CoFile staff) | Filings stopped because a state changed its form ("Site changed — review needed") | A split comparison: the approved form snapshot on the left, the state's current screen on the right, the changed regions outlined in pencil with a numbered list of differences below. Decisions at the bottom as three equal buttons for the engine's three outcomes (accepted, corrected, rejected); there's no staff screen for this today, so its labels are [copy: C15]. The affected filings listed underneath with their firms. |
+| Review gate, name options, reconciliation (the filing company's admins) | "Review before submit", "Choose a name", "Checking whether the state received" | Each opens on the captured screen on a white plate with the filing summary beside it; actions match the email's link label. Reconciliation items show a prominent hold notice, because "Please don't file it again" is the instruction that prevents a double filing. |
 
 ### 10.10 The go-live moment
 
@@ -1269,7 +1278,6 @@ Phases 0 and 1 overlap on purpose: the proof and the instrumentation are one tea
 11. **No measurement exists.** There's no event that tells us how many visitors start a sign-up, how many confirmed firms rehearse, or where they stop. Phase 0 exists because of this.
 12. **The proof was designed for desktop.** A max-width page with a two-column table and a desktop screenshot is hard work at 360 px. The client is on a phone; design the proof for the phone first and let desktop be the variant.
 13. **Nothing is in Spanish.** Spanish-first owners meet the intake form, the proof and the emails in English only, while approving a legal filing. Plan the translation now (C10); the design is ready for it.
-14. **Payment cards are asked for in setup with no context about rehearsals.** Even if Payment stays before the first rehearsal, the step should say plainly, through its placement, that rehearsals never use the card. Today the card form comes before any mention of rehearsals on that page.
 
 ## Appendix B: copy notes
 
@@ -1292,4 +1300,3 @@ These are suggestions for the copy owner. None of them appear in the design abov
 - **C15.** Labels for the staff drift-review decisions (accepted, corrected, rejected).
 - **C16.** The first-rehearsal path card on an empty desk, if E18 runs: a heading and short step labels.
 - **C17.** After confirming their email, a first-time user lands on a login headed "Welcome back". Fine if A3 is fixed; odd if not.
-- **C18.** The login's "Firms go to their filing desk, platforms to their dashboard." could sit under the sign-up page's enterprise link as well; today a platform buyer who clicks "Run a free rehearsal" learns only at the bottom of the form that it's for firms.

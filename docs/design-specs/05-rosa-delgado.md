@@ -382,7 +382,7 @@ Business name *
 
 ### 9.4 The proof sheet (shared by the home sample and the real proof)
 
-A white sheet (`--surface`) with a 14 px radius, a 1 px `--line` border and the **three corner marks** in `--ink-3` set 12 px outside its corners (on phones, 8 px). The firm bar sits on top. Inside are numbered sections. On the home sample, the numbered callouts 1 to 4 are 28 px Añil discs with paper numerals, and each callout's meaning is written out in the list beside it (section 3 of home), so the numbers aren't the only link between the two. The full page anatomy is in 10.4.
+A white sheet (`--surface`) with a 14 px radius, a 1 px `--line` border and the **three corner marks** in `--ink-3` set 12 px outside its corners (on phones, 8 px). The firm bar sits on top. Inside are numbered sections. On the home sample, the numbered callouts 1 to 4 are 28 px Añil discs with paper numerals. The checklist in home section 3 repeats the same numbers (decorative, `aria-hidden`) beside the items they illustrate: 1 by "Every name, address and answer…", 2 by "Every fee…", 3 by "…a picture of the state's own review page…" and 4 by "One button…". The hero's numbers lead somewhere, and the words carry the meaning. The full page anatomy is in 10.4.
 
 ### 9.5 Status chips
 
@@ -822,7 +822,7 @@ PHONE 360
 
 - **How the twin works:** when the engine captures the state's review page, it also records the on-screen box of each value it typed (the browser it drives already knows where each one is). The proof uses those boxes to draw a thin register tick between each detail row and its spot on the picture. Hovering or focusing a detail outlines its spot on the picture in Añil (a 2 px outline, 140 ms fade). Where a box couldn't be recorded, the row simply has no tick. **This needs a small engine change** (box coordinates saved with the review artifact) and nothing else.
 - The ticks and outlines are decoration: `aria-hidden`, with the text list as the accessible truth, exactly as the locked `alt` text says.
-- Under 1024 px, the twin collapses to the phone order above: picture first, then the details, with no ticks.
+- Under 1024 px, the twin collapses to the phone order above: the text details first, then the picture, with no ticks.
 
 **The decision page (after approval):**
 
@@ -1065,6 +1065,67 @@ Measured on real inputs:
 The branding page (10.3) shows the firm's color next to "On buttons", and a readability report listing each automatic fix in plain words (copy needed). Nothing is changed silently. The firm can't turn the clamp off.
 
 **Testing:** a CI job fuzzes 10,000 random colors and 200 fonts through the clamp and checks every output pair against its target, in light and dark.
+### 11.5 Derived states and dark mode, worked through
+
+Hover and pressed states move **away from the text color**: darker under white text, lighter under ink text. Each derived state is re-measured against its target. If one fails, it falls back to the default fill with a border change instead. Measured examples:
+
+| Firm color (as clamped) | Text | Hover | Pressed | Link on Papel (4.5:1) | Dark-mode action on `#161D27` |
+|---|---|---|---|---|---|
+| Saffron `#F4C430` | ink | `#FFD252` (12.02) | `#FFDE88` (13.22) | `#8C6D02` (4.56) | `#F4C430` as is (10.32), dark text 11.25 |
+| Teal `#32B8A8` (approve) | ink | `#44C5B5` (8.15) | `#4FCFBE` (9.06) | `#098073` (4.52) | `#2BB3A3` (6.52), dark text 7.11 |
+| Pine `#2F6F5E` | white | `#1F6150` (7.28) | `#0F5545` (8.73) | `#2F6F5E` as is (5.52) | `#51907E` (4.55), dark text 4.96 |
+| Navy `#1D3557` | white | `#112849` (14.75) | `#071E3E` (16.61) | as is (11.56) | `#6A86AD` (4.54), dark text 4.95 |
+| Red `#D62828` | (hue guard) | — | — | as is for links | `#EF453E` (4.51) for the bar rule and links only |
+
+In dark mode the proof's approve button targets 7:1 against dark text too. For pine and navy, that means lifting lightness further than the 4.5:1 values above (the clamp keeps stepping until it gets there).
+
+### 11.6 Where a firm's colors appear
+
+| Element | Main color | Second color |
+|---|---|---|
+| Primary buttons (desk, intake, proof, emails) | Yes, clamped (proof at 7:1) | Fallback under the hue guard |
+| Links | The link step of the main color | — |
+| The firm bar's 4 px top rule | If no second color | Yes |
+| Current nav item (desk) | Tint (main color at 12% over surface, re-checked for 7:1 ink text) | — |
+| Selected radio cards, checked boxes | Fill of the box only (the label stays ink) | — |
+| Focus ring | **Never** (always Tinta or Papel) | Never |
+| Status chips, notices, errors | **Never** | Never |
+| Page background, text | **Never** | Never |
+
+### 11.7 Font presets, classified
+
+| Preset (label as in the product) | Body | Headings | Note |
+|---|---|---|---|
+| Standard (the device's own) | Yes | Yes | Zero bytes to download: best on slow phones |
+| Inter, IBM Plex Sans, Roboto, Open Sans, Lato | Yes | Yes | — |
+| Montserrat | Yes, from 18 px | Yes | It sets about 12% wider, so Spanish wraps sooner; the layout already allows for it |
+| Source Serif (serif), Merriweather (serif), Lora (serif) | Yes | Yes | The proof's values stay in the mono either way |
+| Upload | After the 11.3 checks | Yes | Script and display faces: firm name and headings only |
+
+Every preset is self-hosted and subset like CoFile's own fonts (no Google Fonts call from a client page), and each carries a computed `size-adjust` from its x-height, so 18 px looks like 18 px in every preset.
+
+### 11.8 Enterprise tenants and the embed
+
+Enterprise accounts set the same inputs for their own brand and for each firm under them. Differences: the proof and emails name the enterprise's support contact; "with CoFile" appears only if the tenant turns it on; and the beta notice on their hosted pages is the neutral one. The clamp, the hue guard, the fixed status colors and the minimum sizes apply to them exactly as to partner firms. A platform's brand team can preview everything in the dashboard's firm detail console before it goes live.
+
+### 11.9 The theme package's contract
+
+```
+input:  { color: "#F4C430", color2: "#1D3557", font: "lora", logoUrl: "…", mode: "light" }
+output: {
+  "--action": "#F4C430", "--action-text": "#141B26", "--action-edge": "#8A6A00",
+  "--action-hover": "#FFD252", "--action-pressed": "#FFDE88",
+  "--approve": "#F4C430", "--approve-text": "#141B26",
+  "--link": "#8C6D02", "--firm-rule": "#1D3557",
+  "--firm-font": "'Lora', Georgia, serif", "--firm-font-size-adjust": "computed",
+  logoPlate: false,
+  report: [ { item: "buttons", ratio: 10.53, changed: false },
+            { item: "links", ratio: 4.56, changed: true }, … ]
+}
+```
+
+The same function runs in the web app, in the engine for the proof and emails, and in the Figma plugin that previews firm themes, so design, build and production can't drift apart.
+
 
 ---
 
@@ -1110,6 +1171,46 @@ Tokens in 4.4. The state's review page and the signature pad always sit on white
 ### 12.5 Slow phones and bad connections
 
 Budgets for client pages: **HTML plus CSS under 60 KB compressed, under 120 KB of JavaScript (intake only; the proof uses none), fonts under 92 KB in total.** The review image loads after the text, sized to fit (AVIF and WebP, at 1x and 2x). Target: the proof is readable and its button usable within 3 seconds on a low-end Android device on slow 3G (400 kbps, 400 ms round trip). A failed submit keeps everything typed and offers to send again.
+### 12.6 Keyboard, zoom and magnification
+
+| Situation | Requirement |
+|---|---|
+| Tab order | Follows reading order on every page; no positive `tabindex`; the skip link first |
+| Menus and disclosures | Open with Enter or Space; Esc closes and returns focus; no hover-only menus |
+| Radio cards and pickers | Arrow keys move within a radio group; picker cards are plain links (Tab between them) |
+| Tables with row links | One tab stop per row (the first-cell link), not one per cell |
+| Signature pad | Reachable and skippable by keyboard; the typed alternative is fully keyboard-operable |
+| 200% text | No clipping or overlap; labels and buttons wrap |
+| 400% zoom (320 px) | One column, no horizontal scroll except inside code blocks with wrapping turned off |
+| Screen magnifier (ZoomText, macOS Zoom at 4x) | Status words sit next to the item they describe (never at the far edge of a wide row); notices sit above the task they affect |
+| Voice control | Every visible label is the start of its accessible name, so "Click Approve" works on the proof |
+
+### 12.7 Plain reading and cognitive load
+
+- One primary action per screen. On phones, one section per screen on the intake.
+- Help text is shown, never hidden behind "?" tooltips, which are hard to open with a tremor and invisible to many screen-reader users.
+- Deadlines are shown as dates and times in words ("December 3, 2026, 5:00 PM Eastern"), as the engine already writes them, never as countdown timers that add pressure.
+- Nothing times out while someone is typing on the intake. Answers are kept on the device, and the link's own lifetime is stated where the copy already says it.
+- Numbers that matter (fees, totals, the EIN) are never inside images and never only in a chart.
+
+### 12.8 Research and testing protocol
+
+Each phase in 13 ends with a moderated round, remote and in person, in English and Spanish:
+
+| Participants (at least 8 per round) | Tasks |
+|---|---|
+| 2 screen-reader users (one VoiceOver on iPhone, one TalkBack on a low-end Android) | Client: fill in the intake from a client link, then find the total and approve the proof |
+| 2 adults 65 or over, at least one a firm owner | Firm: start a filing for a client, send the proof, find which filing types are live |
+| 2 Spanish-first business owners (NJ, FL or Puerto Rico) | Client: the same tasks with the Spanish build, once it exists; until then, in English, noting where they get stuck |
+| 1 person with a tremor or limited dexterity | Approve on a phone; request changes instead; sign |
+| 1 low-vision participant using magnification | Read the coverage table; check a fee |
+
+**Success measures:** every participant completes the approve task without help; nobody approves when they meant to request changes; every participant can say, unprompted, whether a sample filing will really be filed (the rehearsal test); and every participant can find the total before approving. A failure on any of these blocks the phase.
+
+### 12.9 Pseudo-localization for layout testing
+
+Until real Spanish exists, every story and every page in the test build has a pseudo-localized mode: each English string padded to 135% length with accented letters and ¿¡ marks (for example "[Àpprövé, åñd åüthörîzé šübmîššîöñ åñd pâýméñt ¡¿~~~~~~]"). It catches truncation, fixed widths and missing glyphs without anyone translating the locked copy before the glossary and legal review are done.
+
 
 ---
 
@@ -1128,6 +1229,35 @@ Budgets for client pages: **HTML plus CSS under 60 KB compressed, under 120 KB o
   4. **Weeks 10–13: filing desk, setup console.**
   5. **Weeks 14–16: dashboard, docs, drift reviews.**
   6. **Spanish:** glossary research runs alongside phases 1–2; launch after the glossary and legal review.
+### 13.1 Token files
+
+```
+tokens/
+  core.json          spacing, radii, durations, easings, type scale
+  color.light.json   paper, surface, sunk, ink 1–3, lines, Añil ramp, focus
+  color.dark.json    the same names, dark values
+  status.json        approved, rehearsal, stop, info, neutral × text, tint, fill (light and dark), glyph names
+  syntax.json        code colors (9.14)
+  firm.schema.json   the theme package's input contract (11.9)
+```
+
+Style Dictionary builds CSS custom properties (`--cf-*` for CoFile's own, `--firm-*` for clamped firm values), a TypeScript map for the engine's server-rendered proof and emails, and Figma variables, all from these files. Hand-typed hex values in components fail CI.
+
+### 13.2 Component inventory
+
+Button, Link-button, Field (text, select, textarea, file, SSN, date-of-birth, one-time code), Choice (radio, checkbox, radio card), Same-as chips, Fieldset and Fold, Error summary, Notice (info, ok, hold, stop), Beta notice, Rehearsal notice, Status chip, Ladder meter, Timeline, Table (with phone layout and filters), Firm bar, Public header and Menu sheet, Sidebar nav, Proof sheet (with frame, details list, fees table, consent block, register twin), Decision page, Secret / copy field, Code block, Dialog, Toast, Empty state, Stepper (setup and intake steps), Stat tile, Chart with table toggle, Email template set.
+
+### 13.3 Definition of done (every component and page)
+
+1. Light, dark and forced-colors versions reviewed.
+2. axe clean, plus a manual check with VoiceOver and NVDA.
+3. Works at 320 px, at 200% text and with the 1.4.12 text-spacing overrides.
+4. Every state from section 9 built: default, hover, focus, pressed, loading, error, unavailable, empty.
+5. Pseudo-localized at 135% without truncation.
+6. On client pages: meets the 12.5 budgets on the slow-3G profile.
+7. Uses only tokens; no raw hex.
+8. Uses only locked copy, or is listed in Appendix B as copy needed.
+
 
 ---
 
@@ -1143,6 +1273,9 @@ Budgets for client pages: **HTML plus CSS under 60 KB compressed, under 120 KB o
 8. **The docs use status colors for HTTP methods** (GET green, DELETE red).
 9. **Sign-up and log-in have no H1** (their top heading is an H2).
 10. **The proof loads Google Fonts**, sending a client's IP address to a third party on a legal page.
+11. **Emails fall back to a button that just says "Open"** when no label is set, which tells a screen-reader user nothing when they're tabbing through links.
+12. **The beta notice is amber**, the same family as a rehearsal's hold, so a warning tone sits on every page for something that's simply a fact.
+13. **The coverage table's explanatory note is set small and muted**, though it holds the answer to the question every firm asks: which types are live.
 
 ## Appendix B: Copy notes
 
@@ -1151,7 +1284,7 @@ Suggestions only. The design above uses the locked words.
 - **Labels the design needs that don't exist yet:** Menu; Close; Skip to main content; Show / Hide (SSN); Copy and Copied; Continue and "Step 2 of 5" (phone steps); Month / Day / Year; a visually hidden "Error:"; "View as table"; "Reduce motion"; English / Español; the readability-report lines in Branding; a note for answers prefilled from the firm's saved answers; the "Same as" confirmation; an H1 for each proof error page; the drift review screen; a line on the proof for "how the state will record this" when accents are stripped.
 - **The masked SSN** ("***-**-1234") is read aloud as a run of "star"s; it needs a spoken label such as one meaning "ending in 1234".
 - **The home sample's button says "Approve for filing"**, but the real proof says "Approve, and authorize submission and payment". For trust, the sample should show the real label.
-- **"Sign in" survives** in "Signing in…", "Google sign-in", "This account can't sign in" and "You're not signed in to this filing desk". The rule is "log in".
+- **"Sign in" survives** in "Signing in…", "Google sign-in", "This account can't sign in", "You're not signed in to this filing desk" and the password hint "Changing it signs you out on every other device." The rule is "log in" and "log out".
 - **"Test" and "test run" survive** in the desk's filings list badge, the filing detail's run summary and the Signatures page. They should say "rehearsal".
 - **"The approver"** appears in the status next-steps. Partner copy should say "your client". "Your filing company will…" reads oddly on a firm's own desk, where the firm *is* the filing company.
 - **The proof's title** is built from codes ("NJ formation: …"), and "Filing reference" is a long ID that can't be read aloud easily. Use a plain title and a short reference.
@@ -1159,3 +1292,9 @@ Suggestions only. The design above uses the locked words.
 - **"Filed with CoFile"** (embed) and **"with CoFile"** (elsewhere): pick one.
 - **"Ask the platform team to configure tenant …"** on the dashboard is engine jargon.
 - **The missing-information email** has no button or link to act on.
+- **"Your partner account is open"** says "You can try a practice filing right away." The word is "rehearsal" now.
+- **The invitation subject says "filing portal"**; partner copy calls it the filing desk.
+- **Emails with no button label** fall back to "Open"; the completed email in particular needs a real label.
+- **No emails exist yet** for "filing submitted" and "EIN issued", though the brief lists both and the engine emits both events.
+- **The change-request confirmation and the approval errors** need H1s, and "That code didn't match. Go back…" would be easier if the proof re-showed itself with the error at the code field (the words would then drop "Go back").
+- **Search and filter labels** for the desk and dashboard tables, the code-block wrap toggle, the heading anchor link, the timeline's accessible name and the billing retry button all need words.

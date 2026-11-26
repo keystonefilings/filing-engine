@@ -174,7 +174,7 @@ Rules: body text on the proof ≥ 7:1; captions ≥ 4.5:1 everywhere; every stat
 
 ### 5.1 Typefaces
 
-| Role | Launch | Phase 2 (commissioned) |
+| Role | Launch | Phase 4 (commissioned) |
 |---|---|---|
 | Display and UI on CoFile surfaces | **Instrument Sans** (variable, width 75–100, weight 400–700) | **Trace Sans**: variable grotesk, width 80–100, weight 380–720, optical size 12–96 |
 | Default client-facing text (when a firm keeps the default font preset) | **Atkinson Hyperlegible Next** (variable): built for low-vision readers, full Spanish coverage | same |
@@ -262,7 +262,7 @@ Home at `lg`: copy in columns 1–5, the pinned Stage viewport in 7–12 (16:11,
 
 1. **Real recorded rehearsals.** The primary image source: captured screens from a rehearsal on the state's real website, filled in with test details ("Two Sisters Bakery LLC", Ana and Lucia Ortiz, 88 Grove St, as in the locked sample). Each capture sits in a thin "ghost browser" frame whose address bar shows the real address in mono (for New Jersey, `njportal.com/DOR/BusinessFormation/…`). The captures are not redrawn, recolored or "improved". The only edits are masking session identifiers and any field that isn't test data. Whether state insignia need masking is counsel's call; my default is to leave the captures unaltered and keep them small enough to read as evidence, not decoration. The footer's "isn't affiliated with any state or the IRS" line stays on every page that shows them.
 2. **The sample proof as live HTML**, never a screenshot: real text, selectable, translatable and readable by screen readers. In the scene it's rendered into a texture from that same HTML, so the two can never disagree.
-3. **The documents that come back**, photographed once. A short commissioned still series of the returned papers for the test business: a certificate-of-formation printout and an EIN confirmation letter layout, with every identifying number replaced by test values and a visible "test details" stamp in the margin. Shot top-down on a matte warm-gray desk (`#D6D4CB` range), soft daylight from the left, 50 mm, no hands, no props, no coffee cups. Used in "The papers come back to you." and in the filing detail's empty Documents state.
+3. **Blank papers, never fake documents.** A rehearsal stops before the last button, so no certificate or EIN letter exists for the test business, and the site must never show one: a mocked-up state certificate or IRS letter would imply a filing that never happened. For "The papers come back to you." I commission a short still-life series of **blank** paper: plain sheets, an empty envelope, a thin stack, with no letterheads, seals, numbers or names. Shot top-down on a matte warm-gray desk (`#D6D4CB` range), soft daylight from the left, 50 mm, no hands, no props, no coffee cups. In the scene, the same blank sheets are labeled only with the locked list's own words (the state's documents, the EIN, one record).
 4. **No people photography on CoFile's pages.** The firms are the humans in this story, and they put their own faces on their own pages. On firm-facing marketing, a stock accountant would be a lie, and a stock "founder" would be worse.
 
 ### 7.2 3D
@@ -283,7 +283,7 @@ One scene family: **glass panes on a dark stage.** Each pane is a 16:10 rounded 
 | Real-time scene and player | A real-time 3D / creative-coding studio with shipped WebGL production sites and a record of performance work on mid-range phones | The Glass Engine player (8.4), shaders, the recording format and importer, the tier 1 storyboard renderer |
 | Typefaces | An independent type foundry with variable-font and hinting experience | Trace Sans and Trace Mono (5.1) |
 | Mark refinement | A small identity studio, or the foundry above | Masters of the Held Ring, the small-size master, the icon family on 16 and 20 px grids |
-| Document stills | A still-life / product photographer | 6 frames of the returned papers, test details only |
+| Paper still life | A still-life / product photographer | 6 frames of blank paper (sheets, an envelope, a stack): no letterheads, seals, numbers or names (7.1) |
 | Sound (optional, phase 3) | A UI sound designer | 5 cues (key tick, scan, match, hold, stop), each under 40 KB, mono, normalized to −18 LUFS, off by default |
 | Spanish | A legal-translation agency experienced with US Hispanic readers, with counsel reviewing consents | Spanish versions of client pages, the proof and client emails |
 | Accessibility audit | An independent accessibility firm with testers who use screen readers and magnifiers daily | An audit before each phase ships |
@@ -338,7 +338,7 @@ Typing in scenes: 28 ms per character, capped at 600 ms per field (long addresse
 
 **6. The firm swap** ("Your name on the door. Ours in small print.", 1.2 s per firm). The sample proof re-skins through three fictional example firms: Harbor & Pine CPA plus two more whose names the copy owner supplies (Appendix B), with deliberately difficult brand colors, a pale yellow `#F4B400` and a mid pink `#E91E63`. The theming system's fixes happen visibly (11.3): the yellow button takes dark text and gains an edge; the pink darkens one step to `#E41B60`. "with CoFile" stays the same size and color through all three. It rests on Harbor & Pine.
 
-**7. The stop variant** ("Checked twice. Filed once.", on demand only, 1.6 s). Triggered from the first check's sentence ("If the two differ, it stops before paying and tells you why."). The same fee lock, but the state's amount differs by a test amount: the bracket doesn't close, the run line ends in the Stopped glyph in `--stop`, and the pane dims. The caption area labels it an example. It never autoplays, so no visitor ever lands on a red stop without asking for it.
+**7. The stop variant** ("Checked twice. Filed once.", on demand only, 1.6 s). Triggered from the first check's sentence ("If the two differ, it stops before paying and tells you why."). The same fee lock, but the state's amount differs: the bracket doesn't close, the run line ends in the Stopped glyph in `--stop`, and the pane dims. This is the one sanctioned exception to "only real recordings", so it's built to look like a diagram, not evidence: the state side is a neutral, untextured pane with a single amount on it, never a captured or doctored state screen, and its caption calls it an example (wording in Appendix B). It never autoplays, so no visitor lands on a red stop without asking for it.
 
 ### 8.4 The Glass Engine scene
 
@@ -630,7 +630,7 @@ On phones the bar's CTA never truncates: under 400 px, "Log in" and "Run a free 
 | 4 | "Your name on the door. Ours in small print." | The lede, four checks | Moment 6, the firm swap |
 | 5 | "Clients don't fill in forms. They text you." | The lede | Moment 2. Ana's bubble ("Need an LLC for the bakery. It's me and my sister, 50/50, in Jersey City." · "Ana Ortiz · text message · example") flies into a draft that ends Waiting |
 | 6 | "Checked twice. Filed once." | The lede, five checks; the stop variant (moment 7) attached to the first; "see Security" links to `#security` | Moment 4, the fee lock |
-| 7 | "The papers come back to you." | The lede, three checks | The panes recede; the document stills slide forward and file themselves into one filing record card: what was approved, what was filed, what the state sent back |
+| 7 | "The papers come back to you." | The lede, three checks | The panes recede; three blank sheets (7.1) slide forward, labeled with the locked list's words, and file themselves into one record card: what was approved, what was filed, what the state sent back. No mock certificate or EIN letter ever appears |
 | 8 | "Rehearse on the real stage." | Both ledes ("… with no audience …", "Try one on a filing you know by heart …") | **The Run** (storyboard below) |
 | 9 | "New York, New Jersey, Florida and the IRS." | Full width, Daylight: the lede, the board and table (9.11), footnote, mail link | The viewport unpins and releases |
 | 10 | "Every filing service has a catch. Here's ours." | Full width, Daylight: the lede, then the five points as large numbered rows (48 px mono numerals in `--text-3`, text at `lede` size, 32 px rhythm, hairlines between). No animation: honesty doesn't perform | none |
@@ -715,7 +715,7 @@ The desk is the firm's room with CoFile's furniture: the firm's logo, name, colo
 │ Ready to pay ②│                                                                │
 │ Client links  │ ┌ Progress on the state site ──────────────────────────────┐  │
 │ Signatures    │ │ ▮▮▮▮▮▮▮▮▯▯▯▯▯  Members · 10:44:12                         │  │
-│ Setup         │ │ ┌ Live run view (phase 2) ─────────────┐  Business Name ✓ │  │
+│ Setup         │ │ ┌ Live run view (phase 3) ─────────────┐  Business Name ✓ │  │
 │ Billing       │ │ │ njportal.com/DOR/BusinessFormation/… │  Designator    ✓ │  │
 │               │ │ │ [ latest captured screen, 16:10 ]    │  …               │  │
 │               │ │ └──────────────────────────────────────┘  Members      ◔ │  │
@@ -734,7 +734,7 @@ The desk is the firm's room with CoFile's furniture: the firm's logo, name, colo
 | **New filing, step 1** | "New filing" / "Which state is the business in?" and the locked note linking "What we file". Three 160 px state cards (New York, New Jersey, Florida), each with its count line ("2 filing types, plus the federal EIN"). The "Or send us the details and we fill in the form for you to check:" list beneath, with the firm's own intake address and numbers in mono |
 | **New filing, step 2** | "{State}: what are you filing?" and its lede. Filing-type cards with a **Live** (Closed, go) or **Rehearsal** (Held, hold) chip at the top-left, the summary and the fee note. "Your pages for clients" card below: each permanent URL and widget snippet in a mono code block with a copy button |
 | **New filing, the form** | One column, max 720 px: fieldsets, folds, "Same as" chips, the Authorizations fieldset (9.2). A **summary bar** (sticky bottom on phones and tablets, a sticky right column at `lg`) holds the fee note and "Send the proof to my client". The hold band heads the form when the type isn't live |
-| **Filing detail** | As wireframed: title, status chip, Rehearsal chip, meta line; the timeline (9.5); the next-step notice; **Progress on the state site**, promoted from a closed `details` to an open panel with the run strip and step list (screen name and time per step); **Live run view** (phase 2): while a run is active, a 16:10 panel shows the latest captured screen, masked as recorded screens already are, updated per `filing.step`, with screen name and time. It moves only when the real engine moves. Then "Link to the proof" (the link in a secret code block with copy, and the locked emailed-to line), the signer note, Documents, the EIN in 20 px mono, "Save to Google Docs" with its locked note, and the missing-information form when needed |
+| **Filing detail** | As wireframed: title, status chip, Rehearsal chip, meta line; the timeline (9.5); the next-step notice; **Progress on the state site**, promoted from a closed `details` to an open panel with the run strip and step list (screen name and time per step); **Live run view** (phase 3): while a run is active, a 16:10 panel shows the latest captured screen, masked as recorded screens already are, updated per `filing.step`, with screen name and time. It moves only when the real engine moves. Then "Link to the proof" (the link in a secret code block with copy, and the locked emailed-to line), the signer note, Documents, the EIN in 20 px mono, "Save to Google Docs" with its locked note, and the missing-information form when needed |
 | **Client links** | "Send a client a link": the form on the left; "Links you sent" as a table with chips ("Used: open the filing" as the row link) |
 | **From email / text** | "Request by {email, text, …}": the original message in the same bubble component as the home page (now with real content), beside "This looks like a request for: …" with each extracted value in mono, linked to its field, and "Open the filled-in form" (forward). The 30-day deletion line as an info notice |
 | **Signatures** | "Saved signatures" with its locked explanation; one card per signature (the image on white, signer's name, the forms it applies to); "No saved signatures yet." empty state; "Add a signature" opens the pad and consent |
@@ -1009,3 +1009,88 @@ The derivation ships with a visual test of 24 hostile palettes (neon yellow, whi
 - Fixed light islands in dark mode: the signature pad, the state's review page picture, captured screens (on a white plate, never inverted) and logos that fail the contrast check.
 - Firm themes run the dark derivation (11.3); a firm previews both modes on its Branding page, and the proof's dark mode is tested on OLED phones at 30% brightness.
 - Emails carry both palettes; clients that force-invert colors get logos on plates and buttons with explicit text colors.
+
+---
+
+## 13. Production
+
+### 13.1 Stack
+
+- **Site:** the existing Next.js app. Tokens as CSS custom properties generated from one source: Tokens Studio in Figma → Style Dictionary → `tokens.css`, `tokens.ts` and the email inliner's JSON. The engine's proof renderer at api.cofile.app inlines the same generated CSS, so the proof and the home sample can't drift.
+- **Scene:** three.js (WebGL2) with custom GLSL in an OffscreenCanvas worker; a pre-generated MSDF atlas for the mono face; KTX2/Basis textures through the Basis transcoder (WASM, loaded with the scene); a 6 KB loader for capability detection and tier choice. A lint rule keeps WebGL imports out of desk, client, proof and dashboard bundles.
+- **Live data:** the desk's run strip and live run view, and the dashboard's run board and delivery tail, subscribe to server-sent events relayed from the engine's existing `filing.step` and webhook events. No polling faster than every 10 s as a fallback.
+- **Theming:** an OKLCH derivation module (11.3) shared by the site, the engine's proof renderer and the email renderer, unit-tested against 2,000 random colors plus every swatch in today's picker.
+- **Emails:** React Email templates rendered to HTML and sent through Resend; tested across major clients, light and dark, with images on and off.
+- **CI gates:** Lighthouse budgets (8.5) on `/`, a sample filing desk, a sample intake and a sample proof; axe on every route; visual regression for each skin (CoFile, three sample firms, one tenant) in light and dark at 375, 768 and 1280 px; a reduced-motion snapshot of the home page; the recording snapshot check (13.3).
+
+### 13.2 Design-system files
+
+| File | Contents |
+|---|---|
+| `CoFile Foundations` (Figma) | Tokens (Daylight, Stage, status, viz), type scales (5.3), grid, spacing, radii, elevation |
+| `CoFile Mark` | The Held Ring master and small master, lockups, clear-space sheets, the icon family on 16 and 20 px grids, "with CoFile" |
+| `CoFile Components` | Every component in section 9 in three skins, all states, light and dark |
+| `CoFile Pages` | Every route in section 10 at 375, 768, 1280 and 1600 px, light and dark |
+| `Glass Engine Storyboards` | Frames F0–F8, the seven moments with timing sheets, tier 1 filmstrip frames, tier 2 CSS fallbacks |
+| `Theming Lab` | The derivation on 24 hostile palettes (11.8) |
+| `Email Kit` | Both skins, every email in 10.11 |
+| Code | `@cofile/tokens`, `@cofile/ui` (React components), `@cofile/glass` (the scene, isolated package), `@cofile/theme` (derivation) |
+
+### 13.3 The run recording (the asset everything depends on)
+
+A rehearsal of the NJ LLC formation with test details, exported by the engine as `nj-llc.run.json` plus textures:
+
+- `steps[]`: screen key, screen name, URL, start and end time, and for each field its rectangle on the capture and the value typed (test details only).
+- `captures[]`: one per screen, KTX2 at 2048 and 1024 px plus WebP stills for tier 1, with sensitive fields masked exactly as recorded screens already are.
+- `fees`: what the proof showed and what the payment screen showed, as numbers and as rectangles on the capture.
+- `snapshot`: the hash of the adapter's approved form snapshot it was recorded against, and the recording date.
+- `events[]`: the webhook events the run emitted, with test-detail bodies, for the docs' event replay.
+
+At build time, `snapshot` is checked against the adapter's current approved snapshot. If the state has changed its form since, the home page drops to tier 1 with that recording's stills and the text log, and staff get an alert to re-record. The site never plays a screen the state no longer shows. Recordings are made once by staff, never per visitor: no visitor's page load ever touches a state website.
+
+### 13.4 Asset list
+
+- Mark masters (SVG; PNG at 16, 32, 180 and 512 px; a maskable app icon); the favicon set from the small master.
+- The icon family as an SVG sprite and as PUA glyphs in the commissioned fonts.
+- Social cards (1200 × 630): the Held Ring and the page's locked headline on Stage, one per public page.
+- Run recordings: NJ LLC (phase 2), FL LLC (phase 3), more as types are rehearsed.
+- 6 blank-paper stills; MSDF atlases; a 64 × 64 blue-noise texture; email glyph PNGs at 1× and 2×.
+- Three sample firm themes for previews, tests and the firm swap.
+
+### 13.5 Phases
+
+| Phase | Weeks | Ships |
+|---|---|---|
+| **1: Foundations and honesty** | 1–6 | Tokens, launch typefaces, the mark and icon family, status chips on every surface; the coverage board; the proof restyled and reordered; the theming derivation and Branding report; rehearsal bands; Spanish for client surfaces underway. Home page at tiers 0–1 (storyboard, no WebGL) |
+| **2: The Run** | 7–14 | The Glass Engine scene (tiers 2–3) for the hero and the Run; the fee lock, registration and the hold; the recording pipeline and snapshot check; the desk's run strip and the open progress panel; the docs' event replay |
+| **3: Live** | 15–22 | Live run view on the filing detail; the dashboard's run board and delivery tail; the full-screen rehearsal page; the firm swap and words-into-fields moments; blank-paper stills; optional sound; Spanish for firm pages |
+| **4: Commissioned type** | In parallel, lands around month 8 | Trace Sans and Trace Mono replace the launch faces on CoFile surfaces |
+
+---
+
+## 14. Appendix
+
+### 14.1 What I'd push back on in the current site
+
+1. **It describes the engine instead of showing it.** The product records every screen of a real rehearsal, and the site reduces that to a seven-row table. The most persuasive asset CoFile has goes unused.
+2. **The hold is buried.** "Pay Now: held, on purpose" is the single most trust-building line on the site, and it's set as a muted cell in a log. It should be the climax.
+3. **Paper and ink says "stationery", not "careful machine".** Manila and a folder tab with a check make CoFile look like a forms vendor. The mark is fussy at 16 px and says nothing about what the product does.
+4. **Green does two jobs.** It's both the marketing CTA and the "approved / live" status, so "Run a free rehearsal" and "Live" look related. I split them: Trace Blue for CoFile's CTAs, green only for filings moving forward.
+5. **The sample proof isn't the real proof.** Different order (the real one leads with the state's page) and a different button label. "See what your client sees" should be literally true.
+6. **Firm colors are only half fixed.** `textOn` flips between white and near-black text, but a mid-tone like `#E91E63` fails both, and nothing gives a pale button an edge.
+7. **"Progress on the state site" is closed by default** on the filing detail and labeled "test run". The best live evidence in the desk is hidden.
+8. **Coverage chips lean on color.** "Live" and "Rehearsed to the payment screen" differ mostly by hue; shape must carry it.
+9. **The proof's details render the engine's key paths as one long table.** On a phone that's a wall of rows; grouping by person and address costs nothing and changes no words.
+
+### 14.2 Copy notes (suggestions only; the design above uses the locked copy as it stands)
+
+1. **Sample proof button.** The home page sample says "Approve for filing"; the real proof says "Approve, and authorize submission and payment". Suggest the sample uses the real label.
+2. **"Test" and "test run" leftovers.** The desk's filings list shows a "Test" badge on rehearsals; the filing detail says "test run" / "filing run"; Signatures says "never on a preview or test run". Suggest "Rehearsal" throughout.
+3. **"Sign in" leftovers.** "You're not signed in to this filing desk", the "Signed out" page title, the "Signing in…" pending label on login, Team's "People who sign in to this dashboard", and Password's "You signed in with an API key". Suggest the "log in" forms the locked terms ask for.
+4. **Branding help.** "Button text is white, so choose a dark color." stops being true with 11.3. Suggest something like "Any color works; we adjust the shade if needed so button text stays readable."
+5. **Dashboard setup notice.** "Ask the platform team to configure tenant …" uses internal words the copy review asked to avoid.
+6. **Next-step text on the desk.** "Your filing company will offer alternatives" and "Your filing company has been told and will follow up" read oddly when the reader *is* the firm.
+7. **"Every detail below."** The proof's consent pins itself above the details. If the layout ever moves it next to the button, the word must change with it.
+8. **Missing email copy.** There's no body copy yet for "filing submitted" and "EIN issued" emails; "Completed" stands in for "documents back".
+9. **New labels this design needs** (for the copy owner to write): the Stage window's pause, play and replay controls; the stop-variant control (or approval to use the sentence "If the two differ, it stops before paying and tells you why." as its accessible name) and its "this is an example" caption; the language switch; the light / dark / system switch; the Branding report rows (11.7); the full-screen rehearsal page's title and its link from the Run's caption; the live run view's heading; the live run board's heading ("Running now" in my wireframe is a placeholder); names for the two extra example firms in the firm swap; an optional "recorded on {date}" line under the Run; a Spanish note above the state's English review page.
+10. **"Filing reference."** The proof shows the internal filing id; if firms quote it to clients, a shorter human reference would read better on a phone.

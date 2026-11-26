@@ -544,7 +544,7 @@ The most important component on the site. It must be unmistakable on a phone, at
 │ TWO SISTERS BAKERY LLC            │  value in Data mono 16/24
 │ ─────────────────────────────     │
 │ ③  State fees                    │
-│ Nothing is charged on this page.. │
+│ Nothing is charged on this page…  │
 │ Formation filing fee    $ 100.00  │  Fee style, decimal-aligned
 │ NJ portal fee, by card  $   3.50  │
 │ ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━  │  2 px ink rule
@@ -903,8 +903,8 @@ A firm's public page for one filing: the firm's header (logo, name, 4 px top rul
 
 - **Intake `/i/<token>`:** the firm header with "with CoFile" (phone: bottom). The Stage banner when in rehearsal ("This page is in rehearsal for now. … To file for real, contact {firm}."). H1, the summary, the form, the footnote ("Next, you'll get a proof to check. Nothing is filed until it's approved."), the Terms and Privacy line, and [Send to {firm}] as primary L. Progress is shown as a slim section index at the top on phones (section names only, from the form's own legends).
 - **The proof:** §9.3.
-- **After deciding:** the same branded page. "Approval recorded" with a filled Go disc that draws in (`t-5`), then the locked paragraph (the rehearsal or the live version). Request changes shows "Thank you. Your change request is recorded, and nothing will be filed from this link. …" with a Your move glyph.
-- **Expired and invalid links** (all four locked messages: "This link to the proof has expired. Ask whoever sent it for a new one.", "isn't valid", "already recorded", "That code didn't match…"): the firm's header (when known), a single sheet, the message in Body 20/32, a neutral glyph (never a Stop octagon: the client did nothing wrong), and the firm's support email. The code-mismatch message gets a "Go back" action ⟨copy to come⟩.
+- **After deciding:** the same branded page. "Approval recorded" with a filled Go disc that draws in (`t-5`), then the locked paragraph (the rehearsal or the live version). Request changes shows "Thank you. Your change request is recorded, and nothing will be filed from this link. …" with a neutral Moving glyph, because the next move is the firm's, not the client's.
+- **Expired and invalid links.** For the proof, the engine's locked messages: "This link to the proof has expired. Ask whoever sent it for a new one.", "This link to the proof isn't valid. …", "A decision was already recorded with this link, so there's nothing more to do here.", "That code didn't match. …" and "We couldn't record your decision because this link has expired or was already used. …". For the intake link: "This link has expired or isn't valid", "This link can't be used" with its reason ("This link was already used. …", "This link was turned off by whoever sent it. …", "This link has expired. …") and "This filing is no longer offered". All of them use the firm's header (when known), a single sheet, the message in Body 20/32, a neutral glyph (never a Stop octagon: the client did nothing wrong) and the firm's support email. The code-mismatch message gets a "Go back" action ⟨copy to come⟩.
 
 **Intake on a phone (`/i/<token>`)**
 
@@ -958,7 +958,7 @@ Built for developers and operations people, so it's denser than the desk: Body s
 
 | Page | Design |
 |---|---|
-| **Overview** | Account name as H1. Banners (subscription, Ready to pay, setup missing). Four stat sheets: Filings ("N live, M rehearsals", with a split bar solid green vs dashed marigold), Webhook deliveries ("pending, failed"), API keys ([Manage keys]). Then "By status" (a horizontal bar per status family), "By state", "By month" (columns). "As of …" in Caption mono |
+| **Overview** | Account name as H1. Banners (subscription, Ready to pay, setup missing). Three stat sheets: Filings ("N live, M rehearsals", with a split bar solid green vs dashed marigold), Webhook deliveries ("pending, failed"), API keys ([Manage keys]). Then "By status" (a horizontal bar per status family), "By state", "By month" (columns). "As of …" in Caption mono |
 | **Filings** | A full table with filter chips by family and by state. Waiting rows carry "Ready to pay: needs the card's code" as a Your move chip |
 | **Firms / firm detail** | Table of firms with "Filing desk" status ("Not set up" in Moving grey). Firm detail: the same branding preview as the desk's Branding setup, plus invite staff |
 | **API keys** | Keys table: name, the prefix `cofile_` + 8 in mono, created, "Last used", [Revoke]. A new key appears once in a `--sheet-2` secret box with a dashed border and a copy button |
@@ -1063,7 +1063,8 @@ Two templates, one system.
 │                          VML fallback        │
 │ Or paste this link into your browser: ...    │   13/18 grey
 │ ─────────────────────────────────────────    │
-│ Questions? ⟨firm support email⟩   with CoFile│   co-brand only for partner firms' clients
+│ Questions? Email ⟨firm address⟩. with CoFile │   the desk's locked contact line, reused;
+│                                              │   co-brand only for partner firms' clients
 └──────────────────────────────────────────────┘
 ```
 
@@ -1098,7 +1099,7 @@ Two templates, one system.
 | Enterprise account ready | Enterprise contact | 2 | "Your CoFile account is ready" | "Set my password" | Go |
 | Invitation | Firm staff | 1 (the firm's brand) | "You're invited to {firm}'s filing portal" | "Set my password" | Your move |
 
-Sender and reply-to: client messages come from the firm's name, with the firm's support address as reply-to (as the code allows). CoFile's account emails come from CoFile with hello@cofile.app.
+Sender and reply-to: client messages should come from the firm's name, with the firm's support address as reply-to, so a client who replies reaches their firm. Today the Resend sender and reply-to are set once for the whole site, so this needs a per-firm sender name and reply-to (a build note, not a copy change). CoFile's account emails come from CoFile with hello@cofile.app.
 
 ### 10.10 New surfaces I'd add
 
@@ -1199,6 +1200,21 @@ Status families, the consent panel, the proof's order, field sizes and type size
 - No thin type: text never below weight 400, Press never below 500.
 - Testing with real people: sessions with readers over 60, screen reader users (VoiceOver iOS, TalkBack, NVDA) and Spanish-first business owners, on the proof and the intake form first.
 
+**The proof, as a screen reader hears it** (the build is tested against this order):
+
+1. The skip link, then the firm's header as a `banner` landmark: the firm's name (the logo's alt text is the firm's name, or empty when the name is also shown as text).
+2. On a rehearsal: the Stage banner as a `note`, "Rehearsal: nothing will be filed or paid, even if you approve."
+3. `h1`, the filing title. The reference and the deadline. The instruction "Government sites don't save drafts…".
+4. `h2` "The state's review page", the image with its locked alt text.
+5. `h2` "Filing details", the masked-SSN sentence when present, then a table with row headers.
+6. `h2` "State fees", "Nothing is charged on this page…", then a table, with Total and "Maximum you authorize" as row headers.
+7. The consent panel as a `group` labeled by its first sentence.
+8. "One-time code sent to you", when required.
+9. The button "Approve, and authorize submission and payment", described by the consent panel, so the consent is read again on focus.
+10. "Request changes", "Questions: {email}", then "with CoFile" in the `contentinfo` landmark.
+
+**Keyboard and input:** Tab follows reading order. Enter or Space approves. The approve button disables itself after the first press (`aria-disabled` and `aria-busy`) and the server treats a repeat as the same decision, so a double tap never sends twice. Voice-control users can say every visible label, because accessible names always start with the visible text. The signature pad needs a non-drawing route for people who can't draw: see Appendix B.
+
 **Spanish.** Every layout allows text 30% longer than English. Buttons wrap to two lines and grow, and never truncate. Pages set `lang="es"` when translated. Uppercase is limited to the kicker, and accents stay on capitals (`ÉXITO`, not `EXITO`). Dates follow Spanish order when translated. Client pages get a language switch top right ⟨copy to come⟩, remembered per link. The translation itself is a copy job: the consent and authorization texts need counsel, and until they're translated the English consent stays the binding text, shown in full.
 
 **Dark mode.** Every surface supports it, following the system setting, with a manual switch (system, light, dark) in the footer and in the desk's account menu. Fixed exceptions: the state's review page image and signature tiles always sit on white, code blocks are always Press Black, and the Poster hero swaps Register Blue for Overprint Violet with Register Blue plates.
@@ -1214,6 +1230,18 @@ Status families, the consent panel, the proof's order, field sizes and type size
 - **The proof** (server HTML from `src/approvals/render.ts`): one inlined CSS file generated from tokens plus the firm theme, computed server side by `@cofile/theme`. Approving needs no JavaScript, and the lock motion is CSS only.
 - **Emails:** React Email components rendered to HTML and sent through Resend. Tested across Outlook (VML buttons), Gmail, Apple Mail and their dark modes.
 - **Quality:** Storybook with visual regression, axe and Playwright accessibility checks in CI, the theme fuzz suite. Budgets: home LCP under 2.0 s on a mid-range phone on 4G, under 170 KB of JS before the 3D loads, display font subset under 90 KB, text font under 70 KB for two weights.
+
+**QA matrix.**
+
+| Area | Coverage |
+|---|---|
+| Phones | iPhone SE (375), a current iPhone (393), Pixel (412), a budget Android at 360 with a slow CPU, landscape on each |
+| Tablets and desktop | 768, 1024, 1280, 1440, 1920, plus 200% browser zoom at 1280 |
+| Browsers | Safari iOS (last two majors), Chrome Android, and Chrome, Edge, Firefox and Safari on desktop (last two majors) |
+| Email | Outlook 365 and 2019 on Windows, Outlook on Mac, Gmail web, iOS and Android, Apple Mail, Yahoo, each in light and dark |
+| Assistive technology | VoiceOver on iOS and macOS, TalkBack, NVDA with Firefox, JAWS with Chrome, voice control, Windows High Contrast, reduced motion |
+| Themes | The 12 sample firms in Figma, plus the fuzz suite (§11.3) |
+| Languages | English, and Spanish as soon as any translated page exists, with pseudo-localization (+30% length, accented characters) from day one |
 
 **Figma library.** 00 Foundations, 01 Identity, 02 Components, 03 Poster pages, 04 Desk, 05 Counter (with a theming playground of 12 sample firms, including the five in §11.3), 06 Dashboard and Docs, 07 Email, 08 Motion (storyboards, linked Rive files).
 
@@ -1260,3 +1288,7 @@ These are suggestions only. None of them appear in the design above.
 9. The proof's H1 is assembled from raw parts (state code, type with an underscore replaced, name). Using the filing type's title ("New Jersey LLC formation") would read better.
 10. **New words this design needs** (marked ⟨copy to come⟩): the phone overflow menu label; the footer "reduce motion" and theme switches; a "Go back" action on the code-mismatch page; the Spanish switch; the explanation when CoFile adjusts a firm's color or font; body text for the "filing submitted" and "EIN issued" emails (the status labels exist, the emails don't); the status page and the rehearsal report.
 11. The rehearsal timeline ends on **"held, on purpose"**, borrowed from the home page's log. Confirm it can be used as a product label.
+12. The **"Completed" email's button says "Open"** (the default when no label is set). The copy review already flagged bare "Open" buttons. Something like "See the documents" would match what the email is for.
+13. The **"More information needed" email has no link or button.** It asks the client to send details "to whoever is preparing this filing for you", which is a dead end on a phone. A link to the client's intake (when one exists) or a reply-to the firm would close it.
+14. **The signature pad has no non-drawing route.** Someone who can't draw with a mouse or finger can't sign a New York form, so the product needs a decision (typed signature, or "send the signer a client link" as the stated alternative) before the words can be written.
+15. The **proof's deadline line** ("Please decide by December 3, 2026, 5:00 PM Eastern") is the most important sentence on a phone after the title. It's fine as written; I'd only ask that the "Eastern" time zone stays spelled out in Spanish too.

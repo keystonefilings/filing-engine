@@ -184,7 +184,7 @@ On every page a firm's client sees (intake, the proof, permanent service pages) 
 | Position, desktop | Right end of the firm header, baseline-aligned with the firm name |
 | Position, phone | Header right if the firm name is 18 characters or fewer; otherwise in the page footer, centered |
 | Link | Goes to cofile.app in a new tab, with `aria-label` "with CoFile (opens in a new tab)" |
-| In the widget | The existing "Filed with CoFile" line, same style, at the bottom of the frame |
+| In the widget | The existing "Filed with CoFile" line, same style, at the bottom of the frame (on enterprise widgets it follows the enterprise's setting, below) |
 | On white-label enterprise pages | Absent unless the enterprise opts in; the enterprise's own name and support contact appear instead |
 
 It must stay legible. I've seen "powered by" marks pushed down to 10 px gray on gray. This one passes AA and stays a real link, because a client who wants to know who handles their SSN deserves to be able to find out.
@@ -386,7 +386,7 @@ Why these faces:
 | Fee line | Atkinson Mono 400, tabular | 17 / 26, right-aligned |
 | Fee total | Atkinson Mono 700, tabular | 22 / 28 |
 | Consent note | Atkinson Next 400 | 17 / 26 |
-| Approve button | Atkinson Next 700 | 18 / 24 |
+| Approve button | Atkinson Next 700 | 19 / 24 (large text under WCAG, see 12.1) |
 
 ### 5.3 Numerals, fees and codes
 
@@ -784,7 +784,7 @@ The desk is co-branded: the firm's logo and color on the rail and buttons, CoFil
 │              │ COFILE · 1 ──────────────────────────────────────────────────────────────│
 │              │  …                                   [◔ Filing now]           ○○●○        │
 │ with CoFile  │ THE STATE · 0 (folded)   DONE · 12 (folded)                               │
-│ ana@hp.com   │                                                                           │
+│ jo@harbor…   │                                                                           │
 │ [Log out]    │                                                                           │
 └──────────────┴──────────────────────────────────────────────────────────────────────────┘
 ```
@@ -817,7 +817,7 @@ The desk is co-branded: the firm's logo and color on the rail and buttons, CoFil
 └────────────────────────────────────┴──────────────────────────────────────────────────┘
 ```
 
-The preview renders the real components with the computed theme, never a mock. The checks list shows ratios, plus the before and after swatch whenever the algorithm adjusted the color **[new labels for the check names and messages]**. The locked help texts stay under each field. One of them ("Button text is white, so choose a dark color.") stops being true under automatic contrast; see Copy notes.
+The preview renders the real components with the computed theme, never a mock. The logo field gains an optional second upload for dark backgrounds **[new label]** (11.3). Sample names in the preview are the firm's own; no invented client data appears. The checks list shows ratios, plus the before and after swatch whenever the algorithm adjusted the color **[new labels for the check names and messages]**. The locked help texts stay under each field. One of them ("Button text is white, so choose a dark color.") stops being true under automatic contrast; see Copy notes.
 
 **Setup: Details, Agents, Payments.** Single-column forms in cards, with paired fields. Payments shows the two locked radio cards ("One card for every filing", "A card for each type of filing, with one main card for the rest"), then the card selects in a two-column row. Saved cards are shown as card tiles (brand mark, "ending 4242", purpose) inside a Basis Theory-hosted add-card frame, styled to match the field spec.
 
@@ -839,7 +839,7 @@ When the engine returns issues, the locked alert ("Please fix these and submit a
 ```
 ← Filings
 Two Sisters Bakery LLC   [◉ Waiting for approval] [▌Rehearsal]
-New Jersey LLC formation · started Nov 26, 2026, 10:14 AM by ana@harborpine.com (client link)
+New Jersey LLC formation · started Nov 26, 2026, 10:14 AM by jo@harborpine.example
 ┌ Turn Line, full blueprint (9.4) ─────────────────────────────────────────────────────────┐
 └──────────────────────────────────────────────────────────────────────────────────────────┘
 ┌ notice ── The approver has a link to check exactly what will be filed and approve it. ───┐
@@ -959,8 +959,8 @@ CoFile-branded (ink), with the app-shell rail and a denser scale (tables at 14/2
 | Overview | Account name as H1; the locked notices (subscription, ready to pay, configuration). Row 1: three stat tiles: "Filings" (with "{n} live, {n} rehearsals"), "Webhook deliveries" (with pending and failed), "API keys" with "Manage keys". Row 2: a **turn strip**, filings by whose turn as one stacked horizontal bar with counts per lane, so a stuck queue shows at once. Row 3: "By status", "By state", "By month" as direct-labelled bars (status bars in their tones, others in the categorical set). "As of {time}." in Meta. |
 | Filings | A full-width table with filters (status, state, firm, rehearsal/live), the id under each title in Record, status chip and turn glyph. Row click opens a filing drawer (560 px) with the blueprint and events, so an operator can triage without losing their place. The "Test" badge becomes the Rehearsal chip. |
 | Firms, firm detail | Table of firms with id in Record. Detail: "Filing desk" settings, "Public pages and website widget" with URLs and snippet in code blocks, "Invite staff". |
-| API keys | Table (name, prefix `cofile_xxxxxxxx` in Record, created, revoke). A new key appears once in a `--surface-sunk` well with copy, and a notice that it won't be shown again **[new label if not present]**. |
-| Webhooks | Endpoints table plus a per-endpoint **delivery log**: event type in Record, response code chip (2xx `done`, 4xx/5xx `stop`, pending `progress`), retry count, timestamp. Signing secret shown once. |
+| API keys | Table (name, prefix `cofile_xxxxxxxx` in Record, created, revoke). A new key appears once in a `--surface-sunk` well with a copy button, under the locked line "{name}: copy this key now. It won't be shown again." set as an `act` notice. |
+| Webhooks | Endpoints table plus a per-endpoint **delivery log**: event type in Record, response code chip (2xx `done`, 4xx/5xx `stop`, pending `progress`), retry count, timestamp. A new signing secret is shown once, with the locked "Copy each new signing secret now; it won't be shown again." |
 | Setup | Long settings page with a sticky section index on the left: "Payment methods", "State portal logins", "Who's named on your filings", "Your registered agent in each state", "Defaults per portal". The portal logins table shows each portal (NY DOS, NYS-100, NJ, IRS, FL) with "Pays by" and a login status chip ("Connected {date} by {name}" as `done`, "Not needed" as plain Meta). |
 | Ready to pay | Same pay tickets as the desk, with "({firm}'s card)" owner tags. |
 | Billing, Team, Password | Standard card and table layouts with locked copy. |
@@ -1064,7 +1064,7 @@ Step B exists because firms with light brands (golds and sky blues) deserve to s
 
 1. **Trim** transparent or flat-color margins (within ΔE 2 of the corner pixels).
 2. **Detect the background.** If the logo has an opaque, near-white background, it gets a white plate with 8 px padding and `--r-sm` everywhere, including dark mode. If it's transparent and its mean luminance against the page background is under 2:1 (a white logo on a white page), it gets a plate in `--firm-accent`.
-3. **Optical sizing.** Logos are sized by area, not height: target 2,400 px² in the client header, clamped to 40 px tall and 160 px wide (desk rail 200 × 48). A square monogram and a long wordmark look equally heavy.
+3. **Optical sizing.** Logos are sized by area, not height: target 4,000 px² in the client header, clamped to 40 px tall and 160 px wide. A 4:1 wordmark lands at 126 × 32, a 2:1 lockup at 80 × 40 and a square monogram at 40 × 40, so they look equally heavy. The desk rail uses a 6,000 px² target clamped to 200 × 48.
 4. **Dark mode:** use the uploaded dark version if there is one; otherwise keep the plate.
 5. Serve as AVIF/WebP at 1×, 2× and 3×, plus a PNG for email.
 
@@ -1109,7 +1109,7 @@ Partner firms that signed up with CoFile directly sit under the platform's own t
   },
   "dark": { "accent": "#5BC38F", "onAccent": "#0E1317", "tint": "#10281B", "link": "#5BC38F", "ratios": { "onAccent": 8.58 } },
   "bands": { "red": false, "violet": false },
-  "logo": { "light": "/logo/7d1e…", "dark": null, "plate": "white", "box": [148, 36] },
+  "logo": { "light": "/logo/7d1e…", "dark": null, "plate": "white", "box": [126, 32] },
   "font": { "role": "voice", "stack": "'Lora', Georgia, serif", "checks": { "spanish": true, "xHeight": 0.5, "weights": [400, 600] } }
 }
 ```
@@ -1122,7 +1122,7 @@ Version bumps invalidate every cached theme, so a change to the algorithm reache
 
 ### 12.1 Accessibility
 
-Target: WCAG 2.2 AA everywhere, and AAA (7:1) for text contrast on the proof, the intake form and client emails, because those are read by the oldest and least technical readers, often on a phone outdoors.
+Target: WCAG 2.2 AA everywhere, and AAA for text contrast on the proof, the intake form and client emails, because those are read by the oldest and least technical readers, often on a phone outdoors. In practice: body text and values at 7:1 or more (ink on white is 17.6:1); captions and "with CoFile" at 6.1:1, which is AAA only for large text, so nothing a client must read to decide uses that color; the firm-colored approve and submit buttons at 4.5:1 or more, with their labels set at 19 px bold, which counts as large text, so 4.5:1 meets AAA.
 
 - **Size and reflow.** Base 17 px on client pages; nothing a reader must act on is below 15 px. Zoom to 400% reflows to one column with no horizontal scroll, except data tables, which scroll inside their container with a visible edge fade and a "scroll" affordance on the first column.
 - **Focus.** Always visible: the double ring (2 px inner `--focus-inner`, 2 px outer `--focus-outer`) works on any firm color, white or black. Skip link "Skip to content" **[new label]** on every page. Focus order follows reading order; drawers and dialogs trap focus and return it.
@@ -1272,6 +1272,7 @@ Service measures, tracked per filing type and per firm, reviewed monthly with th
 9. **Partner firms don't hear about their own stops.** Admin-audience emails ("Site changed — review needed", "Failed", "Blocked", "Checking whether the state received") go to the account's admin channels. For a partner firm, that's CoFile's platform account, so the firm finds out only by opening its desk. Route them to the firm's users too (2B.2).
 10. **Staff emails have no button.** A stop email that says what happened but doesn't link to the filing leaves the reader searching. Every admin template gets a button to the filing detail page.
 11. **After approval, the client goes quiet.** The client hears nothing between "Approval recorded" and "Completed", which for a Florida examiner review can be weeks. A read-only client status page (10.9) closes that gap.
+12. **Enterprise hosted pages show "with CoFile" today**, while the proof for an enterprise's firm (correctly, per the scope) shows only the enterprise's name. The client sees CoFile on the form and not on the proof. Make it one setting, off by default for enterprises.
 
 ### 14.2 Copy notes
 

@@ -652,6 +652,7 @@ All of these use one quiet layout: the CoFile header (mark, "Log in"), a single 
 | `/login` | "Log in", "Welcome back", "Firms go to their filing desk, platforms to their dashboard.", "Continue with Google", email, password, "Forgot your password?", "Log in". | "Continue with Google" first (most firm staff have Google Workspace), a hairline, then email and password. The error messages from the code appear as Stop notices above the form. |
 | `/forgot-password`, `/reset-password`, `/verify-email` | As in the code ("Reset your password", "Choose a new password", "Confirm your email", "One click and your email is confirmed."). | Password fields have a show/hide toggle (icon, with the field's label as its accessible name). The 12-character hint stays visible, not a tooltip. |
 | `/invite-expired`, expired client links, approval errors | "This link has expired or isn't valid" plus its line. | The *torn* state: a 64 px drawing of a paper slip with its seal half torn off. The same illustration on every expired link, so people learn it. |
+| `/session-ended` | A redirect to the log-in page or the desk's signed-out page. | On the log-in page, "Your session ended. Log in again to carry on." as a Your-turn notice above the form; "Your password is changed. Log in with the new one." and "Your account is ready. Log in to set it up." as Done notices in the same place. |
 | `/join/<token>` | A redirect. | Design the in-between: a blank paper page with the firm's logo (if known) or the Kaku, fading in after 400 ms only if the redirect is slow. |
 | `/terms`, `/privacy` | Legal text. | Paper voice for headings, body at 18/30, 38em measure, numbered clauses with hanging numbers, a sticky contents select on phones. Version and date at the top in the record voice. |
 | 404 | "Page not found", "The link may be old or mistyped.", "Go to the home page". | The carved Kaku impression, large, but with its halves 6 px apart: the one place the mark itself shows a mismatch. |
@@ -686,7 +687,7 @@ PHONE: Filings
 
 **Branding.** "Step 2 of 3", "Branding", the line, then a split: controls on the left, a **live preview** on the right (on phones, a preview sheet pinned under the controls, collapsible). Controls: "Your web address", "Name your clients see"; logo (drop zone, "Use a link instead", "Remove logo"); "Main color" and "Second color" (swatch, hex field, the ready colors row); "Font" (the presets as radio cards, each label set in its own face, plus "Your own font (uploaded)"); "Support email shown to clients"; "Save and continue". Wireframe and rules in 11.5. The preview shows the client's phone view of the intake form's top and the proof's decision area, in light and dark side by side, with any automatic correction shown openly (11.3): a small note under the preview names what was adjusted. `[copy needed]` for that note.
 
-**Details, Registered agents, Payments.** One form each, same layout as sign-up. Agents: one sheet per state the firm files in, "Ours: Registered Agents, Inc., through CoFile ($59 a year per business, billed to your firm)" as one radio card option, "Your own" as the other. Payments: the saved cards as card-shaped rows (brand mark, last four in the record voice), the Basis Theory field inside a sheet with its own 3:1 border, and the assignment of cards to filing types as a table of selects.
+**Details, Registered agents, Payments.** One form each, same layout as sign-up. Agents: one sheet per state the firm files in, with the agent's fields ("Agent name", "Agent email (optional)", "Suite (optional)", "City", "ZIP") and "Save agents". On the filing forms, the registered-agent choice shows our service as a radio card with its existing label, "Ours: Registered Agents, Inc., through CoFile ($59 a year per business, billed to your firm)", and on the client's pages as "{firm}'s registered agent service (Registered Agents, Inc.)", with no price. Payments: the saved cards as card-shaped rows (brand mark, last four in the record voice), the Basis Theory field inside a sheet with its own 3:1 border, and the assignment of cards to filing types as a table of selects.
 
 **New filing.** Three steps, each its own view, with the step's choice summarized at the top of the next view.
 
@@ -772,7 +773,7 @@ Documents as rows with a file icon, label and kind; the EIN as "EIN:" with the n
 
 ### 10.4 The client's intake: `/i/<token>`, `/<firm>/<service>`, `/e/<tenant>/<firm>/<service>`
 
-The same page in three wrappers. The firm owns it entirely: firm brand bar (logo, name), the firm's color and font, "with CoFile" once at the bottom (3.5). The beta notice in its neutral wording. If the type isn't live, the rehearsal band with "This page is in rehearsal for now…" sits above the title and is repeated in short form above the button.
+The same page in three wrappers. The firm owns it entirely: firm brand bar (logo, name), the firm's color and font, "with CoFile" once at the bottom (3.5). The beta notice in its neutral wording. If the type isn't live, the rehearsal band with "This page is in rehearsal for now…" sits above the title, and the ◌ "Rehearsal" chip sits directly above the button so the reminder is where the decision is.
 
 ```
 PHONE: intake
@@ -812,7 +813,7 @@ PHONE: intake
 |---|---|
 | Link expired | Torn slip, "This link has expired or isn't valid", "Ask whoever sent it for a new one." under the firm's bar |
 | Link can't be used / type withdrawn | Same layout: "This link can't be used" or "This filing is no longer offered" |
-| Rehearsal type | Rehearsal band at the top and in short form above the button |
+| Rehearsal type | Rehearsal band at the top, the ◌ "Rehearsal" chip above the button |
 | EIN only | The IRS line ("…exactly what will be sent to the IRS…"); the phrase "state's own review page" never appears on IRS pages |
 | Prefilled by the firm | Values present, no marker for the client |
 | Conditional question appears | Revealed under its cause with `t-fold`; disappears the same way, and its answer is kept in case it comes back |
@@ -829,7 +830,7 @@ This page is where the whole design pays off. The client opens it from an email 
 ```
 PHONE: the proof                         …continued
 ┌───────────────────────────────┐        ┌───────────────────────────────┐
-│ [logo] Harbor & Pine CPA      │        │ State fees                    │
+│ [logo] Harbor & Pine CPA      │        │ ③ State fees                  │
 │◌ Rehearsal: nothing will be   │        │ Nothing is charged on this    │
 │  filed or paid, even if you   │        │ page. These fees are paid to… │
 │  approve.                     │        │ Formation filing fee  $100.00 │
@@ -837,35 +838,40 @@ PHONE: the proof                         …continued
 │ NJ formation:                 │        │ ───────────────────────────── │
 │ Two Sisters Bakery LLC        │        │ Total               $103.50   │
 │ Filing reference f_8c2… Please│        │                               │
-│ decide by December 3, 2026,   │        │ ┌─ decision ────────────────┐ │
-│ 5:00 PM Eastern. After that…  │        │ │◌ Rehearsal: nothing will… │ │
-│                               │        │ │By approving, you confirm  │ │
-│ ① The state's review page     │        │ │every detail below is      │ │
-│ This is a picture of the      │        │ │correct and authorize its  │ │
-│ state's own review page…      │        │ │submission exactly as      │ │
-│ ┌───────────────────────────┐ │        │ │shown, and payment of the  │ │
-│ │ [ state page, tap to zoom]│ │        │ │fees shown, up to the total│ │
-│ └───────────────────────────┘ │        │ │shown ($103.50). Government│ │
-│ ② Filing details              │        │ │fees generally can't be …  │ │
-│ Business name                 │        │ │Government sites don't save│ │
-│ TWO SISTERS BAKERY LLC        │        │ │drafts, so once you approve│ │
-│ Members                       │        │ │One-time code sent to you  │ │
-│ Ana Ortiz, Lucia Ortiz (50/50)│        │ │[ _ _ _ _ _ _ ]            │ │
-│ …                             │        │ │[Approve, and authorize    │ │
-│ ③ …                           │        │ │ submission and payment  ] │ │
-│ ┃ Total  $103.50 · Dec 3 ─────│ sticky │ │[ Request changes        ] │ │
-└───────────────────────────────┘        │ └───────────────────────────┘ │
-                                         │ Questions: help@harborpine…   │
-                                         │        ▣ with CoFile          │
-                                         └───────────────────────────────┘
+│ decide by December 3, 2026,   │        │ ┌─ ④ decision ──────────────┐ │
+│ 5:00 PM Eastern. After that…  │        │ │◌ Rehearsal: nothing will  │ │
+│┌─────────────────────────────┐│        │ │  be filed or paid, even … │ │
+││By approving, you confirm    ││ the    │ │ Total          $103.50    │ │
+││every detail below is correct││ terms  │ │ One-time code sent to you │ │
+││and authorize its submission ││ sheet  │ │ [                       ] │ │
+││exactly as shown, and payment││        │ │[Approve, and authorize    │ │
+││of the fees shown, up to the ││        │ │ submission and payment  ] │ │
+││total shown ($103.50). Govern││        │ │[ Request changes        ] │ │
+││ment fees generally can't be…││        │ └───────────────────────────┘ │
+││Government sites don't save  ││        │ Questions: help@harborpine…   │
+││drafts, so once you approve… ││        │        ▣ with CoFile          │
+│└─────────────────────────────┘│        └───────────────────────────────┘
+│ ① The state's review page     │
+│ This is a picture of the      │
+│ state's own review page…      │
+│ ┌───────────────────────────┐ │
+│ │ [ state page, tap to zoom]│ │
+│ └───────────────────────────┘ │
+│ ② Filing details              │
+│ Business name                 │
+│ TWO SISTERS BAKERY LLC        │
+│ …                             │
+│ ┃ Total  $103.50 · Dec 3 ─────│ sticky
+└───────────────────────────────┘
 ```
 
-- **Order.** Firm bar; rehearsal band (if a rehearsal); title; reference and deadline; ① the state's review page (where there is one); ② Filing details; ③ State fees; ④ the decision sheet. The approval consent moves from the top of today's page into the decision sheet, directly above the button, because it describes what the button does. It is the same text, at full `body-proof` size, never folded.
+- **Order.** Firm bar; rehearsal band (if a rehearsal); title; reference and deadline; the terms sheet; ① the state's review page (where there is one); ② Filing details; ③ State fees; ④ the decision sheet.
+- **The terms sheet.** The approval consent stays at the top, because its words say "every detail below" and must stay true. But it is no longer a beige note like any other: it is a sheet of its own with a 2 px ink left rule, set at full `body-proof` size, never folded, with the EIN sentence and "Government sites don't save drafts…" inside it. The approve button is tied to it with `aria-describedby`, and the decision sheet repeats the one figure the consent turns on, the "Total", right above the button. (If the consent could sit beside the button, it would be better still; see Copy notes.)
 - **The state's review page** sits on a Kami plate with its existing explanation above it and its alt text. Tap opens it full-screen with pinch-zoom and a 1:1 view; values that appear in the filing details carry a faint Kihada highlight in the picture (from the rehearsal's field coordinates) so the client can match picture to text.
 - **Filing details** follow the state's order, grouped under the state's section names, label above value on phones. Values in the record voice. Masked SSNs show the existing masking sentence once, above the first masked value.
 - **The sticky line.** A 48 px bar at the bottom of the viewport shows "Total" and the amount, and the deadline date, until the fee section scrolls into view; then it slides away (`t-leave`). Tapping it scrolls to the fees. It never contains the approve button: an always-present approve button invites approving without reading.
 - **The reading rail.** A 2 px line down the left edge (inside the margin) fills as each section passes through the viewport. It never blocks the button. It just shows, calmly, that every section has been seen.
-- **The decision sheet.** A sheet at `e1` with a 2 px ink top rule. One-time code (when required) as six separate digit boxes, `autocomplete="one-time-code"`, numeric keypad. Then the primary, 56 px, full width, the firm's corrected color, with the label wrapping to two lines if it must (never truncated). Then "Request changes" as secondary; choosing it reveals "What should change? (Needed only if you ask for changes)" with a `t-fold` and moves focus into it. Then "Questions:" and the firm's email.
+- **The decision sheet.** A sheet at `e1` with a 2 px ink top rule. The rehearsal band again (for a rehearsal), then "Total" and the amount in `fee-total`, then the one-time code (when required) as one 56 px field, `autocomplete="one-time-code"`, numeric keypad. Then the primary, 56 px, full width, the firm's corrected color, with the label wrapping to two lines if it must (never truncated). Then "Request changes" as secondary; choosing it reveals "What should change? (Needed only if you ask for changes)" with a `t-fold` and moves focus into it. Then "Questions:" and the firm's email.
 - **Pressing approve:** the seal sequence (8.3, 1).
 
 **Every state of the proof.** The engine renders this page as HTML; every state below must work without JavaScript, with JavaScript adding only the motion, the rail, the sticky line and the zoom.
@@ -874,10 +880,10 @@ PHONE: the proof                         …continued
 |---|---|
 | Opening | Firm bar and title paint first; the review picture's plate reserves its aspect ratio |
 | Rehearsal | Kohaku band at the top and again inside the decision sheet; the rehearsal seal variant afterwards |
-| Live filing | No band. The decision sheet's 2 px ink top rule and the firm-color button. Absence of the amber band is never the only signal: the consent text itself names payment and the amount. |
+| Live filing | No band. The terms sheet, the total above the button, and the firm-color button. Absence of the amber band is never the only signal: the consent text itself names payment and the amount. |
 | With the state's review page | Section ① as specified |
 | Without one (IRS, or where the state's site doesn't allow it) | Section ① is left out; numbering starts at Filing details; the words "state's review page" don't appear |
-| EIN in the run / after acceptance | The existing EIN sentence appended to the consent block, as today |
+| EIN in the run / after acceptance | The existing EIN sentence inside the terms sheet, after the consent, as today |
 | Masked SSNs | The masking sentence once, above the first masked value; values like `***-**-1234` in the record voice |
 | Fee cap | An extra fee row, "Maximum you authorize", with "(if the state asks for more, we stop before paying)" on its own line in `small`; the consent's amount is the cap |
 | One-time code | "One-time code sent to you" above one 56 px field with `autocomplete="one-time-code"` (iOS and Android fill it from the message). Wrong code: the proof stays, Stop notice "That code didn't match…", field cleared, focus back in it, `stop` haptic |
@@ -903,8 +909,7 @@ PHONE: the proof                         …continued
 CoFile-branded, denser, desktop-leaning but fully usable on phones. Left rail from `md`: "Overview", "Filings", "Ready to pay", "Firms", "API keys", "Webhooks", "Setup", "Team", "Billing", "Docs" (and "Sign-ups" for the platform tenant).
 
 - **Overview.** Your-turn notices first ("Real filings need an active subscription; rehearsals are free.", ready to pay). Then three figure tiles: Filings, Webhook deliveries, API keys (number in `fee-total` mono, label in `small`), then "By status", "By state", "By month" as bar lists (7.3).
-- **Filings.** The desk's table plus columns for firm and reference (record voice), filters as segmented controls by status tone.
-- **Firms / firm detail.** Table (Firm, Filing desk, Approvers); detail shows the firm's brand as a live mini-preview, its desk link, approvers, and its filings.
+- **Firms.** "Firms", the existing line ("The CPA, payroll and other firms you file for…"), the table ("Firm", "Filing desk", "Approvers"), with "Not set up" as a ○ chip in the desk column. Empty: "No firms yet. Add one with" and the endpoint in mono, linking to the API reference.
 - **API keys.** The existing explanation ("Keys you create here. A key we set up for you isn't listed here…"), then the create form: "Key name" (placeholder "Key name, e.g. Production server") and "Create key". A new key appears once in a dashed `--sunken` well in the record voice with "Copy" beside it (`settle` haptic on copy). The table: "Name", "Key" (the `cofile_` prefix and 8 characters visible), "Last used", and "Revoke" as removal; revoked keys show a – "Revoked" chip. Empty: "No keys created here yet."
 - **Filings.** Filters "All firms" and "Show" as selects on phones and segmented controls from `md`. Columns "Filing", "Firm", "Type", "Status", "Created". "Ready to pay: needs the card's code" as a ◐ chip that links to Ready to pay. Empty: "No filings."
 - **Webhooks.** The existing explanation, then one sheet per endpoint: "URL (https)" in the record voice, "Signing secret ends in" with the last characters in mono and its sentence about changing it, then "Every event" / "Or only these events" as radio cards; the event list appears under the second with each event name in mono. "Remove this endpoint" as removal, "Add another endpoint" as secondary, "Save endpoints" as primary. Under each saved endpoint, a delivery strip: the last 30 deliveries as 8 px ticks (● Matsuba delivered, ■ Beni failed), each tick a button opening that delivery.
@@ -921,13 +926,30 @@ CoFile-branded, denser, desktop-leaning but fully usable on phones. Left rail fr
 
 ### 10.9 Developer docs `/docs`
 
-The developer is the second reader, and they are reading code. Same system, different density:
+The developer is the second reader, and they are reading code. The two readers meet in only three places: the header's "For platforms" link, the home page's Enterprise section (where `"dryRun": true` and "Read the API docs" sit in the record voice), and the coverage chips, which are identical in the docs. Everything else about the docs is the same system at a different density:
 
 - **Layout.** Left rail navigation, content at 720 px, and from `lg` a right column for code examples that stays beside the prose it belongs to.
 - **Code.** Mono 14/22 on `--sunken`, a quiet syntax palette from the status inks at reduced chroma (strings Matsuba, numbers Kohaku, keys Ai, comments `--ink-3`), never Beni (red in code reads as an error). Copy button on every block.
 - **Reference.** Each of the 25 endpoints as a block: method pill (`GET`, `POST`, `PUT`, `DELETE` in outline only, with the method word, no color coding by verb), path in mono, a one-line summary, then request and response. Webhook events list with the signature verification sample.
 - **Coverage on the docs home** reuses the coverage chip system exactly. `"dryRun": true` gets the ◌ glyph wherever it's explained, tying the developer's flag to the public word "rehearsal".
 - **Machine-readable.** `/openapi.json`, `/llms.txt` and `/docs.md` are linked from the docs home under "For your tools and AI agents" as three rows with a download icon. They are plain files; no design applies inside them, and they must not carry presentation markup.
+
+```
+DESKTOP: /docs/reference
+┌──────────────┬──────────────────────────────────┬──────────────────────────┐
+│ Overview     │ POST  /v1/filings                │ curl -X POST \           │
+│ Guides       │ Create a filing…                 │   https://api.cofile.app │
+│  Authentic…  │                                  │   /v1/filings \          │
+│  Filings and │ Request                          │   -H "Authorization: …"  │
+│  the lifecy… │  dryRun   boolean   ◌ rehearsal  │   -d '{ "dryRun": true,  │
+│ Reference    │  state    "NY" | "NJ" | "MO" |   │         … }'             │
+│  Endpoints   │           "FL"                   │                   [Copy] │
+│ OpenAPI      │ Response 201                     │ { "filing": { "id": …,   │
+│ (JSON)       │  filing.status  ◔ Received       │   "status": "created" }} │
+└──────────────┴──────────────────────────────────┴──────────────────────────┘
+```
+
+On phones the three columns become one: navigation as a sticky select, then prose, then each code sample directly under the paragraph it illustrates, scrolling sideways inside its own block (the page itself never scrolls sideways). Field tables become stacked definition lists: name and type in mono on one line, the description below.
 
 ### 10.10 Emails (Resend)
 
@@ -952,7 +974,7 @@ One template, 560 px, sent as the firm (logo, name, color) on client emails and 
 
 | Email | Subject and button (existing) | Design note |
 |---|---|---|
-| Approval request | "Your proof is ready to approve: {title}", "Open your proof" | The only email with a large button. |
+| Approval request | "Your proof is ready to approve: {title}", "Open your proof" | The only client email whose button runs the full width of the email: it is the one that starts the decision. |
 | Security code needed | "Card security code needed: {title}", "Enter security code" | Links to Ready to pay. "Never reply to this email with the code." set apart in `small` 600. |
 | Missing information | "More information needed: {title}" | The missing items as a list, not a comma-joined sentence. |
 | Filing submitted, documents back, EIN issued | Status labels "Submitted to the state", "Completed", "EIN issued"; `[copy needed]` for bodies | The EIN in the record voice at 24 px. Documents as a list with file names. |
@@ -1101,7 +1123,7 @@ Before each phase ships: moderated sessions with eight firm staff over 50 on the
 
 ### 14.1 What I would push back on in the current site
 
-1. **The proof gets the least design of any surface.** It is an 860 px desktop table with inline styles, two narrow columns on a phone, and the consent sits at the top, far from the button it describes. It is the one page where someone authorizes an irreversible payment.
+1. **The proof gets the least design of any surface.** It is an 860 px desktop table with inline styles, two narrow columns on a phone, the consent is a beige note that looks like every other note, and nothing ties it or the amount to the button. It is the one page where someone authorizes an irreversible payment.
 2. **Green does three jobs** (approved, live, the forward button). The moment a firm's color replaces the button green, the meaning splits. Action and status must be separate systems.
 3. **Amber also does two jobs.** In the desk, the "warn" tone covers both a rehearsal's planned hold and "someone needs to act". A rehearsal hold is good news; a waiting approval is a to-do. They need different glyphs and tones.
 4. **Coverage labels are right, but they read as a list, not a path.** Without the ladder, "Rehearsed to the payment screen" and "Live" are two chips of similar weight.
@@ -1118,7 +1140,8 @@ Suggestions only. None of these are applied in the design above.
 3. "Signing in…" on the log-in button, "You're not signed in to this filing desk", "they can sign in at the log-in page" and "Last signed in" use "sign in", which the words table rules out.
 4. The account-approved email says "You can try a practice filing right away"; the current word is "rehearsal".
 5. The proof's title is built from internal ids ("NJ formation: …"). The plain filing type title ("New Jersey LLC formation"), as on the intake and the home sample, would read better.
-6. The home page's sample proof says "Approve for filing"; the real button says "Approve, and authorize submission and payment". The section is called "See what your client sees", so the sample might show the real label.
-7. `nextStep()` lines on the firm's own desk speak of "The approver" and "Your filing company"; partner copy elsewhere says "your client" and speaks to the firm as "you".
-8. The dashboard's "Ask the platform team to configure tenant …" and the webhooks page's "The engine posts…" use words the copy review keeps out of non-developer copy.
-9. Slots that need new words, marked `[copy needed]`: the branding preview's note about automatic adjustments; the bodies of the "Submitted to the state", documents-back and "EIN issued" emails; the client's sealed copy link; the client follow-along page; the Spanish language switcher.
+6. The approval consent says "every detail below is correct", which pins it to the top of the proof. If counsel agrees to "every detail on this page", the consent could sit directly beside the button it describes.
+7. The home page's sample proof says "Approve for filing"; the real button says "Approve, and authorize submission and payment". The section is called "See what your client sees", so the sample might show the real label.
+8. `nextStep()` lines on the firm's own desk speak of "The approver" and "Your filing company"; partner copy elsewhere says "your client" and speaks to the firm as "you".
+9. The dashboard's "Ask the platform team to configure tenant …" and the webhooks page's "The engine posts…" use words the copy review keeps out of non-developer copy.
+10. Slots that need new words, marked `[copy needed]`: the branding preview's note about automatic adjustments; the bodies of the "Submitted to the state", documents-back and "EIN issued" emails; the client's sealed copy link; the client follow-along page; the Spanish language switcher; the accessible name of a sheet's close control; the proof's notice when the connection drops while approving.

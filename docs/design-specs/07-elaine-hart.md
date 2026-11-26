@@ -1547,6 +1547,8 @@ viewport.
 
 Rules for the proof:
 
+- **The beta notice.** The neutral notice ("This service is in beta. …") sits above the brand bar
+  in its slim form, as on every firm page, and scrolls away; only the rehearsal band is sticky.
 - **The terms come first, because the copy says "below".** The approval consent reads "By approving,
   you confirm every detail below is correct…". The word "below" fixes its position: it must stand
   above the details. So the whole note from `render.ts` (the consent, the EIN sentence when there is
@@ -1684,12 +1686,11 @@ the important pages get print stylesheets designed with the same care as the scr
 Working pages for product managers and engineers. The 240 px rail, content on the remaining grid,
 sans throughout, the wordmark at the top of the rail (enterprise accounts see CoFile, not a firm).
 
-- **Overview** (the account name as `h1`): a top row of four figures set as a newspaper's market
-  strip (counts by status, Ready to pay, webhook deliveries, keys), each a large tabular numeral in
-  `fee-total` with its label from the page ("By status", "Webhook deliveries") in small caps, column
-  rules between. Then "By status" as a horizontal stacked bar in status tones with the chip legend,
-  and recent filings as a data table. Notices ("Real filings need an active subscription; rehearsals
-  are free.") as ruled `warn` notices.
+- **Overview** (the account name as `h1`): the page's three figures ("Filings", "Webhook
+  deliveries", "API keys") set as a newspaper's market strip, then "By status", "By state" and "By
+  month" as charts in the house style, and the "As of …" line as a dateline (wireframe below).
+  Notices ("Real filings need an active subscription; rehearsals are free.", "Pay and file") as ruled
+  `warn` notices above the strip.
 - **Filings:** the data table at compact density, filters by status and firm as chip toggles, the
   rehearsal chip on rehearsal rows, filing references in `mono`.
 - **Firms** and **firm detail** (the firm name as `h1`, "Filing desk", "Invite staff"): a firm's
@@ -1718,28 +1719,35 @@ sans throughout, the wordmark at the top of the rail (enterprise accounts see Co
 │              │ {account name}                                                     (h1 44/50) │
 │ ▍Overview    │ ▍Real filings need an active subscription; rehearsals are free. Subscribe     │
 │  Filings     │ ───────────────────────────────────────────────────────────────────────────── │
-│  Ready to pay│   1,284        │      3          │     99.6%           │     4               │
-│  Firms       │ FILINGS        │ READY TO PAY    │ WEBHOOK DELIVERIES  │ KEYS                │
-│  API keys    │ ───────────────────────────────────────────────────────────────────────────── │
-│  Webhooks    │ BY STATUS                                                                     │
-│  Setup       │ ███████████████████▓▓▓▓▓▓░░░░░░░▒▒  (stacked bar in status tones, glyph legend)│
-│  Team        │ ● Completed 812  ‖ Waiting for approval 41  ○ Filing now 6  ■ Failed 3  …     │
-│  Billing     │ ───────────────────────────────────────────────────────────────────────────── │
-│  Sign-ups    │ FILING            FIRM            TYPE               STATUS        STARTED    │
-│  Docs ↗      │ …                                                                             │
-│              │                                       [Pay and file]  [Manage keys]           │
-│ m.lee@… ▾    │                                                                               │
+│  Ready to pay│ FILINGS                │ WEBHOOK DELIVERIES        │ API KEYS                 │
+│  Firms       │ 1,284                  │ 12,907                    │ 4                        │
+│  API keys    │ 0 live, 1,284 rehearsals│ 3 pending, 0 failed      │ Manage keys              │
+│  Webhooks    │ ───────────────────────────────────────────────────────────────────────────── │
+│  Setup       │ BY STATUS                                                                     │
+│  Team        │ ███████████████████ ▓▓▓▓▓▓ ░░░░░░░ ▒▒   one stacked bar in status tones       │
+│  Billing     │ ● Completed 812  ‖ Waiting for approval 41  ○ Filing now 6  ■ Failed 3  …     │
+│  Sign-ups    │ ─────────────────────────────────────┬─────────────────────────────────────── │
+│  Docs ↗      │ BY STATE                             │ BY MONTH                               │
+│              │ New Jersey  ████████████  611        │  ▁▃▅▆█   columns, ink, tabular labels  │
+│ m.lee@… ▾    │ Florida     ███████  402             │                                         │
+│              │ New York    ████  271                │                                         │
+│              │ As of 11/26/2026, 4:10:22 PM.                                                 │
 └──────────────┴───────────────────────────────────────────────────────────────────────────────┘
 ```
 
-(The figures and the strip's labels other than "By status" and "Webhook deliveries" stand for
-whatever the overview page reports; the strip renders the page's own data and labels. Figures in
-`fee-total` 32 px tabular, labels in small caps 12 px, column rules between, no sparklines unless
-the page has a time series to show.)
+(The figures are illustrative; the labels are the page's own: "Filings" with "{n} live, {m}
+rehearsals", "Webhook deliveries" with "{n} pending, {m} failed", "API keys" with "Manage keys", then
+"By status", "By state", "By month" and the "As of …" line, which I set as a dateline in `caption`
+directly under the h1 rather than at the foot, because a reader judges every figure by its date.)
 
-The stacked bar follows the house rules for charts: one bar, 16 px tall, segments in status tones
-in the order Go, Wait, In motion, Stop, each segment separated by a 2 px `sheet` gap so adjacent
-tones never touch; the legend uses chips, so the bar is never the only way to read the counts.
+The figure strip is a market strip: three columns with column rules, the label in small caps 12 px
+`ink-2`, the figure in Record Sans 700 32/40 tabular, the subline in `ui-small`. Charts follow the
+house rules: "By status" is one 16 px stacked bar, segments in status tones in the order Go, Wait,
+In motion, Stop, separated by 2 px `sheet` gaps, with a chip legend so the bar is never the only way
+to read the counts. "By state" and "By month" are not status data, so they are drawn in `ink` only:
+horizontal bars with the value at the bar's end, and columns with the month labels below, no
+gridlines beyond a baseline and one hairline at the maximum, values on hover and in a visually
+hidden table for screen readers.
 
 ### 10.9 White-label surfaces
 
@@ -1835,6 +1843,87 @@ Messages for "filing submitted", "documents back" and "EIN issued" don't have wr
 repository yet (`src/comms/render.ts` covers completed and rejected). I've designed their slots, a
 heading, one paragraph, a documents list block and a button, and listed them in Appendix B
 **[copy needed]**.
+
+**The approval request on a phone (client frame):**
+
+```
+┌──────────────────────────────────┐
+│▔▔▔▔▔▔▔▔ 4 px firm color ▔▔▔▔▔▔▔▔▔│
+│ [logo] Harbor & Pine CPA         │
+│                                  │
+│ Your proof is ready to approve:  │  serif 26/32 (system serif fallback)
+│ Two Sisters Bakery LLC           │
+│▧ Rehearsal: nothing will be filed│  only on rehearsals
+│  or paid, even if you approve.   │
+│ Your proof is ready. Open the    │  18/28
+│ link to see every detail and     │
+│ every fee, exactly as they'll go │
+│ to the state, then approve it or │
+│ ask for changes. Nothing is filed│
+│ or paid until you approve. The   │
+│ link expires, so please look     │
+│ soon.                            │
+│ ┌──────────────────────────────┐ │
+│ │       Open your proof        │ │  52 px, firm's guarded color
+│ └──────────────────────────────┘ │
+│ https://api.cofile.app/…         │  mono 13, the full link
+│ Don't forward this email: anyone │  semibold line
+│ with the link can open your      │
+│ proof.                           │
+│ ──────────────────────────────── │
+│ help@harborpine.example          │  12/16 ink-3
+│ with CoFile                      │
+└──────────────────────────────────┘
+```
+
+The heading in the email body is the subject line as rendered, so the reader sees in the message
+exactly what she saw in her inbox. The body's last sentence is moved onto its own line in the same
+words; nothing else is reordered.
+
+**Every message, its frame and its mark:**
+
+| Message (subject as in the code) | Audience | Frame | Button (from the code) | Mark at the heading |
+|---|---|---|---|---|
+| Your proof is ready to approve: {filing} | Client | Client | Open your proof | Wait glyph |
+| More information needed: {filing} | Client | Client | none (the body says whom to send it to) | Wait glyph |
+| Changes requested: {filing} | Client | Client | none | Wait glyph |
+| Completed: {filing} | Client | Client | none | Go glyph |
+| Rejected by the state: {filing} | Client | Client | none | Stop glyph |
+| Filing submitted / documents back / EIN issued | Client | Client | **[copy needed]** | Go glyph |
+| Card security code needed: {filing} | Card owner | CoFile (or the firm's frame on a firm's account) | Enter security code | Wait glyph |
+| Choose a name: {filing} | Firm or enterprise staff | CoFile | Choose a name | Wait glyph |
+| Review before submit: {filing} | Staff | CoFile | Review the filing | Wait glyph, with the captured screen inline on a white mat |
+| Site changed — review needed: {filing} | Staff | CoFile | none | Stop glyph |
+| Portal bot check: {filing} | Staff | CoFile | none | Stop glyph |
+| Failed: {filing} / Blocked: {filing} | Staff | CoFile | none | Stop glyph |
+| Checking whether the state received: {filing} | Staff | CoFile | none | Wait glyph |
+| Reset your password | Account holder | CoFile | from the account template | none |
+| Confirm your email for CoFile | New firm | CoFile | from the account template | none |
+| Your partner account is open / Your CoFile account is ready | New firm or enterprise | CoFile | from the account template | Go glyph |
+| You're invited to {firm}'s filing portal | Firm staff | The firm's frame | from the invitation template | none |
+
+Rules for every email: one button at most; the link printed in full below it; no images that carry
+words (a blocked-images reader loses nothing but the logo, whose `alt` is the firm's name); 640 px
+max; dark-mode safe; a plain-text part identical in words; the firm's support address in the footer
+of client mail, hello@cofile.app in the footer of CoFile mail.
+
+### 10.12 Surfaces I would add
+
+The brief allows new surfaces where the design needs them. Two would earn their place; both need
+copy before they can ship, so they are proposals, not part of the locked site.
+
+- **The changes column (`/changes`).** A dated, reverse-chronological log, set like a newspaper's
+  corrections column: each time a filing type switches live, each time a state changes a form and
+  CoFile re-verifies it, one ruled entry with the date in tabular figures, the filing type, the
+  jurisdiction and the coverage label before and after (ladder glyphs, old to new). It is the
+  coverage table's memory, and it is what a cautious CPA would check before trusting a "Live"
+  label. Linked from the coverage footnote. **[copy needed]** for the page title, lede and entry
+  formats.
+- **A state-site status page (`status.cofile.app`).** For enterprise buyers and their on-call
+  engineers: one row per state portal (NY DOS, NYS-100, NJ, IRS, FL) with whether CoFile is
+  currently filing there, paused for a drift review, or seeing the portal down, in the status chip
+  system, with a 90-day strip of daily squares per portal. Same two inks, same chips, no marketing.
+  **[copy needed]** throughout.
 
 ---
 
@@ -1942,6 +2031,26 @@ upload, a condensed display upload, and the ten presets. A theme ships only if a
 - **Testing:** VoiceOver on iOS and macOS, TalkBack, NVDA with Firefox, JAWS with Chrome, voice
   control, and moderated sessions with readers over 65 and readers with low vision, on their own
   phones. The proof is tested end to end with each before it ships.
+
+**The proof, as a screen reader hears it.** The order is the visual order, which is the copy's
+order:
+
+1. Page title (the code's "{firm}: approve filing"), then the banner landmark: the firm's name
+   (the logo's `alt` is empty because the name follows as text) and "with CoFile".
+2. On rehearsals, the rehearsal note, exposed as a `note` region, before the heading.
+3. `h1` with the filing title; the reference and deadline paragraph.
+4. The terms block, as a `region` labelled by its first words, read in full.
+5. "Filing details" (`h2`), then the details as a table whose row headers are the labels; masked
+   SSNs are read as "ending in 1234" through a visually hidden prefix on the masked value.
+6. "State fees" (`h2`), the fee table with its caption, each amount read as currency, "Total" and
+   "Maximum you authorize" as rows.
+7. "The state's review page" (`h2`), its paragraph, the picture with its long alt text from the code.
+8. The decision: the recap total, the one-time code field (when required), then "Approve, and
+   authorize submission and payment", then "Request changes".
+9. The questions line.
+
+The sticky index strip is a `nav` with `aria-label` from the firm's page title **[copy needed]**,
+placed after the banner and skippable by the skip link. Markers inside headings are `aria-hidden`.
 
 ### 12.2 Spanish
 
@@ -2088,5 +2197,18 @@ These are suggestions for the copy owners. None of them is used in the design.
 12. **The red asterisk.** The copy review noted the * marker is unexplained; the design drops it and
     marks only optional fields, which the forms already do.
 13. **"Invitations now come by email"** on `/invite-expired`: "now" will date the page.
+14. **"every detail below" in the approval consent** (`approvalConsent()` in `render.ts`) fixes the
+    consent's position above the details, so the design keeps it there. If counsel would accept
+    "every detail on this page", the whole consent could sit directly above the approve button, which
+    is where I would put it. Until then, the design repeats only the total at the button.
+15. **"filing portal" in the invitation subject** ("You're invited to {firm}'s filing portal"): the
+    partner area is the firm's "filing desk".
+16. **"Signed out"** is the signed-out page's tab title; the house words are "log in" and "log out".
+17. **Tooltip-only copy.** The "Rehearsal" chip on the New filing page carries its explanation in a
+    `title` tooltip, which touch screens and many screen readers never show. The design shows it as
+    a visible line; copy owners may want a shorter version for that position.
+18. **Raw JSON field names on the proof.** `humanKey()` turns field paths into labels ("Base name",
+    "Formation › Members 1 › Name"). Labels like these are copy the client reads at the moment of
+    approval; a reviewed label map per filing type would read better than the automatic one.
 
 Approve the proof. Then it's filed. ▪

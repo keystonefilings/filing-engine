@@ -344,7 +344,7 @@ Information graphics are allowed where they replace words with something more ex
 - **The coverage scale** (Harvey balls, 9.10): five stages as a circle filled in quarters.
 - **The timeline** of a filing (9.6).
 - **Bar tables** in the dashboard: numbers with a horizontal bar of proportional length in `--print` at 8px height, no axes, no grid lines, values printed at the end of the bar. No pie or donut charts anywhere; they cannot be read to a decimal.
-- **Annotated specimens**: the proof with leader lines to the six statements in "Your client sees what the state will see, before the state does." Leader lines 1px print color, horizontal and vertical only, ending in a 4px dot on the specimen.
+- **Annotated specimens**: the sample proof in the hero (the copy's callouts 1 to 4) and the full proof in "Your client sees what the state will see, before the state does." (the six statements). Annotations are a commentary layer *outside* the specimen and must never be confused with the specimen's own line numbers: annotation numerals in `t-sub` 75 **ink**, set in the page's reference column outside the sheet, with 1px ink leader lines (horizontal and vertical only) ending in a 4px ink dot at the edge of the block they mark. The specimen's own line numbers stay inside the sheet, 13px, print color.
 
 ### 7.4 What to commission
 
@@ -439,7 +439,7 @@ The rule: **on firm pages, the button that moves the client's work forward uses 
 
 ### 9.3 Checkboxes, radios, signature pad
 
-- **Checkbox:** 24px box, 2px `--print` border. Checked: an 12px ink square fills the center. It is the CoFile mark. Focus ring outside. The whole label is the hit area; authorization statements (`.auth`) are full-width rows with 16px padding and a 1px hairline frame, so a long legal sentence is one tappable object.
+- **Checkbox:** 24px box, 2px `--print` border. Checked: a 12px ink square fills the center. It is the CoFile mark. Focus ring outside. The whole label is the hit area; authorization statements (`.auth`) are full-width rows with 16px padding and a 1px hairline frame, so a long legal sentence is one tappable object.
 - **Radio:** 24px circle, 2px `--print` border, selected shows a 12px ink disc.
 - **Signature pad:** always paper `#FFFFFF`, also in dark mode, 160px tall, 1px `--print` border, one 1px ink baseline at 72% of the height running from 24px to the right edge. The surrounding copy is unchanged.
 
@@ -453,10 +453,10 @@ The proof is the most important component and is specified in full in 10.4. As a
 ├───────────────────────────────────────────────────────────────────┤
 │ ‖ Rehearsal notice (only when a rehearsal)                        │
 │ H1 · reference and deadline                                       │
-│ A   The state's review page (where possible)                      │
-│ B   Filing details        1 … n, numbered rows                    │
-│ C   State fees            amounts, total with rules               │
-│ D   Declaration           consent text, directly above the button │
+│     The state's review page (where possible), numbered callouts   │
+│     Filing details        1 … n, numbered rows                    │
+│     State fees            amounts, total with rules               │
+│     Declaration           consent text, directly above the button │
 │ ═══ heavy rule                                                    │
 │     [ Approve, and authorize submission and payment ]             │
 │ ─── rule                                                          │
@@ -465,11 +465,11 @@ The proof is the most important component and is specified in full in 10.4. As a
 └───────────────────────────────────────────────────────────────────┘
 ```
 
-The part letters A to D are margin marks, not headings; the headings are the copy's own.
+The headings are the copy's own ("The state's review page", "Filing details", "State fees"). There is no third numbering for the parts: line numbers for details, and nothing else, so a first-time founder has one system to learn.
 
 ### 9.5 Status chips
 
-Two sizes, no fills, no borders, no pills:
+Two sizes, no fills, no pills; only the header size has a border:
 
 - **Inline** (tables, lists): 12px symbol, 4px gap, label `t-small` 65 in ink. Height 20px.
 - **Header** (filing detail, the proof): 16px symbol, label `t-body` 65, inside a 1px border in the tone color, 32px tall, 12px padding. "Rehearsal" in the header always uses this size.
@@ -478,7 +478,7 @@ Two sizes, no fills, no borders, no pills:
 
 ### 9.6 Timeline
 
-Vertical. Three columns: time (right-aligned, tabular, `t-small` ink-2, 96px), the line (a 1px `--hairline` vertical rule with the status symbol centered on it), and the event (status label in 65, the next-step sentence from `nextStep()` below in `t-small`). Completed events carry their symbol; the current event is set in 75 Bold; future events are listed in `--ink-3` with an empty 12px ring so the client and firm can see what is still to come. The line between completed events is ink; the line into the future is hairline.
+Vertical. Three columns: time (right-aligned, tabular, `t-small` ink-2, 96px), the line (a 1px `--hairline` vertical rule with the status symbol centered on it), and the event (status label in 65, the next-step sentence from `nextStep()` below in `t-small`). Completed events carry their symbol; the current event is set in 75 Bold; future events are listed in `--ink-3` with a 12px dotted ring (the same mark as "Planned" in the coverage table: not yet reached) so the client and firm can see what is still to come. The line between completed events is ink; the line into the future is hairline.
 
 ### 9.7 Tables
 
@@ -591,7 +591,8 @@ L / XL  ────────────────────────
 ```
 
 - Cols 2–6: kicker in `t-sub` 65 print color (not uppercase, not letterspaced); H1 `t-display`; sub `t-body-l` ink-2; CTAs on one line with 16px between; the beta note in `t-small` ink-2, max 52ch.
-- Cols 8–12: the sample proof, rendered by the real proof component at 375px wide (the width of a phone), not scaled down. The callouts 1 to 4 sit in col 7 as hanging `t-ref` numerals in print color, each aligned with the top of the block it marks. They are the proof's own part marks; no leader lines, no circles.
+- Cols 8–12: the sample proof, rendered by the real proof component at 375px wide (the width of a phone), not scaled down, with the copy's sample content (including its own button, "Approve for filing").
+- The callouts 1 to 4 are **annotations** (7.3): numerals in `t-sub` 75 ink in col 7, outside the sheet, each with a short 1px ink leader to the top of the block it marks (the details, the fees, New Jersey's page, the approval). Inside the sheet, the specimen carries its own **line numbers** 1 to 3 beside the three details in 13px print color, and the excerpt of New Jersey's review page carries the matching callout square 1 beside "Business Name". The two numberings are kept apart by size, color and position: commentary outside, in ink; the form's own numbers inside, in print. The reader learns the signature idea in the first screen without being told.
 - The highlighted values (`<mark>`) are drawn as a 3px print-tint underlay behind the value, never yellow.
 - Mobile: kicker, H1 (36/44), sub, CTAs stacked full width, beta note, then the sample proof full width with callouts inline at its left edge.
 
@@ -603,11 +604,11 @@ Directly under the hero on mobile only: the four section links in a 2 × 2 grid 
 
 **04 Firms.** "Your name on the door. Ours in small print." Headline and lede cols 2–6; the four statements as a numbered list cols 8–12. Below, across cols 2–12, a **specimen strip**: the header of Harbor & Pine CPA's proof shown three times side by side, in three different firm colors, each with its computed print color and button color, so the reader sees that the firm's color changes the print and never the ink. The third uses a pale color and shows the automatic fix (a darker print color, ink button text). Under the strip, the "with CoFile" mark at its real 13px with a 1px dimension line and "13 px" in `t-ref`. Mobile: the three headers stacked.
 
-**05 Requests.** "Clients don't fill in forms. They text you." Headline and lede cols 2–6. Cols 8–12: the message is typeset as a **quotation**, not a cartoon bubble: a 1px hairline frame on Ground, 24px padding, the message in `t-body-l` 56 Italic, and the source line "Ana Ortiz · text message · example" in `t-small` ink-2 under it. Three phrases in the message carry a 1px print underline and a superscript reference numeral: "me and my sister" (1), "50/50" (2), "Jersey City" (3). Below, the arrow line "↳ read into a drafted New Jersey LLC formation for your team to check" in mono, then a three-row draft table: line numbers 1–3 against the field labels "Members", "Members" (ownership), "Main business address", with the drafted values in ink. The reader sees exactly which words became which line.
+**05 Requests.** "Clients don't fill in forms. They text you." Headline and lede cols 2–6. Cols 8–12: the message is typeset as a **quotation**, not a cartoon bubble: a 1px hairline frame on Ground, 24px padding, the message in `t-body-l` 56 Italic, and the source line "Ana Ortiz · text message · example" in `t-small` ink-2 under it. The phrases that were read carry a 1px print underline and, as a superscript, the line number of the field they filled in the New Jersey LLC schedule: "me and my sister" and "50/50" the members line, "Jersey City" the address line. Below, the arrow line "↳ read into a drafted New Jersey LLC formation for your team to check" in mono, then a small draft in the form's own style: the business name line as an **empty box** (the message did not say), the members line with "Ana Ortiz" in ink, a second empty box and "(50/50)", and the main business address line with empty boxes for the street and ZIP and "Jersey City" and "NJ" in ink. The reader sees exactly which words became which line, and that the empty boxes are what "Someone at your firm checks the draft" means.
 
 **06 Checks.** "Checked twice. Filed once." Headline and lede cols 2–6; the five statements numbered cols 8–12. Above the list, the **second-check figure**: two columns, "verified fee table" and "the state's payment screen" (phrases from the first statement), each with `$103.50` in `t-heading` tabular, joined by an equals sign that appears last (8.3). The final statement's link "Security" is a normal underlined link.
 
-**07 After.** "The papers come back to you." Headline and lede cols 2–6. Cols 8–12: the three statements as a numbered list, and beneath them a horizontal **timeline strip** for a sample filing using the real status labels: Waiting for approval, Approved, Submitted to the state, Accepted by the state, EIN issued, Completed. Each is a tick mark on a 1px rule with its label below; the documents (schematics, 7.1) hang under "Accepted by the state" and "EIN issued". Mobile: the strip becomes the vertical timeline component (9.6).
+**07 After.** "The papers come back to you." Headline and lede cols 2–6. Cols 8–12: the three statements as a numbered list, and beneath them a horizontal **timeline strip** for a sample filing using the real status labels: Waiting for approval, Approved, Submitted to the state, Accepted by the state, EIN issued, Completed. Each is a short vertical stroke on a 1px rule with its label below; the documents (schematics, 7.1) hang under "Accepted by the state" and "EIN issued". Mobile: the strip becomes the vertical timeline component (9.6).
 
 **08 Rehearsals.** "Rehearse on the real stage." Both ledes cols 2–6. Cols 8–12: the rehearsal log as a ruled ledger, mono `t-mono`:
 
@@ -628,7 +629,7 @@ Results right-aligned. Line 7 is the only colored line: hold symbol and "held, o
 
 **09 Coverage.** "New York, New Jersey, Florida and the IRS." H2 and lede cols 2–9; legend right-aligned at cols 10–12; the coverage table (9.10) across cols 2–12; the note below cols 2–9. Rows keep the copy's order, which already runs from furthest along to least. No filters, no tabs: sixteen rows fit on one screen at L.
 
-**10 The catch.** "Every filing service has a catch. Here's ours." Here the design makes its one rhetorical gesture. The five points are **set at `t-heading` (24/32), larger than any body text on the page**, as a numbered list with the numerals hanging in the reference column at the same size. Fine print set large. Cols 2–10. The lede "We'd rather tell you now than have you find out later." in `t-sub` above.
+**10 The catch.** "Every filing service has a catch. Here's ours." Here the design makes its one rhetorical gesture. The five points are **set at `t-heading` (24/32), larger than any body text on the page**, as a numbered list with the numerals hanging in the reference column at the same size. Fine print set large. Cols 2–10. The lede "We'd rather tell you now than have you find out later." in `t-lede` above.
 
 **11 Security.** "Security". The five blocks as a **definition table**: heading in col 2–5 (`t-sub` 75), text in cols 6–12 (`t-body-l`), hairline between rows. Each heading has its pictogram (lock, card, link, signature line, separated sheets) at 24px in the reference column. A table, because this is what security reviewers will copy into a questionnaire.
 
@@ -695,22 +696,22 @@ The page people sign. Designed for a 360px phone first. All text 7:1 or better. 
 │ link stops working and you'll need │
 │ a new one.                         │
 ├────────────────────────────────────┤
-│ A  The state's review page         │
+│    The state's review page         │
 │    This is a picture of the state's│
 │    own review page, filled in …    │
 │   ┌──────────────────────────────┐ │
-│   │  [screenshot]   ①      ②     │ │  tap opens viewer, pinch zoom
+│   │  [screenshot]  [1]    [9]    │ │  tap opens viewer, pinch zoom
 │   └──────────────────────────────┘ │
 ├────────────────────────────────────┤
-│ B  Filing details                  │
+│    Filing details                  │  numbers from the type's schedule
 │ 1  Business name                   │  label: t-label in print
 │    TWO SISTERS BAKERY LLC          │  value: t-body-l ink
-│ 2  Members                         │
-│    Ana Ortiz, Lucia Ortiz (50/50)  │
-│ 3  Main business address           │
+│ 7  Main business address           │
 │    88 Grove St, Jersey City NJ …   │
+│ 9  Members                         │
+│    Ana Ortiz, Lucia Ortiz (50/50)  │
 ├────────────────────────────────────┤
-│ C  State fees                      │
+│    State fees                      │
 │    Nothing is charged on this page.│
 │    Formation filing fee    $100.00 │
 │    NJ portal fee, by card    $3.50 │
@@ -721,7 +722,7 @@ The page people sign. Designed for a 360px phone first. All text 7:1 or better. 
 │    (if the state asks for more, we │
 │    stop before paying)             │
 ├────────────────────────────────────┤
-│ D  By approving, you confirm every │
+│ ▌  By approving, you confirm every │  declaration, print bar
 │    detail below is correct and …   │
 │    Government sites don't save     │
 │    drafts, so once you approve …   │
@@ -744,13 +745,13 @@ The page people sign. Designed for a 360px phone first. All text 7:1 or better. 
 
 Rules for the build:
 
-- **Order.** Rehearsal notice; H1 with reference and deadline; A, the state's review page (only where possible; absent for IRS filings); B, Filing details; C, State fees; D, the declaration; the decision. The consent paragraph (from `approvalConsent()` with the EIN sentences and "Government sites don't save drafts…") moves from the top of the page to **directly above the button**. A short reminder at the top is not needed: the rehearsal notice and the deadline are the two facts the reader needs before reading.
-- **A, the picture.** Full sheet width, 1px hairline frame, numbered callouts drawn by the engine on the capture as 24px print-colored squares with paper numerals, matching the line numbers in B. Tapping the picture opens a full-screen viewer (paper, 1px ink border, pinch and double-tap zoom to 200%, close button top right). Alt text unchanged.
-- **B, Filing details.** On phones, label above value. At 720px, a two-column table: line number in the reference column, label (40%), value (60%). Nested values (members, addresses) are grouped under a sub-label in 65 Medium with their own lines numbered 2.1, 2.2. The SSN sentence sits directly above the first masked value, not at the top of the table. Values in sans; masked numbers in mono.
-- **The authorizations** the client is making appear as the last group of B, each statement in full in `t-body-l`, each with the marked box (they were checked on the intake form). They are statements, so they read as sentences, not table cells.
-- **C, State fees.** The fee table with accounting rules (5.3). "Nothing is charged on this page. These fees are paid to the state when the filing is submitted." above it in ink-2.
-- **D and the decision.** The declaration in `t-body-l` ink with a 4px print-colored left bar. Then the one-time code field if required (single input, `inputmode="numeric"`, mono 24px, letter-spacing 0.3em, `autocomplete="one-time-code"`). Then a 2px ink rule. Then the decisive button. Then a 1px rule, and the second path: the comment field and "Request changes". Separating the two paths keeps the textarea out of the space between the declaration and the button.
-- **Sticky total.** When section C has scrolled out of view upward, a 44px strip pins to the top: the firm's name at the left and "Total $103.50" at the right in tabular 75 Bold. It shows money, not a button.
+- **Order.** Rehearsal notice; H1 with reference and deadline; the state's review page (only where possible; absent for IRS filings); Filing details; State fees; the declaration; the decision. The consent paragraph (from `approvalConsent()` with the EIN sentences and "Government sites don't save drafts…") moves from the top of the page to **directly above the button**. A short reminder at the top is not needed: the rehearsal notice and the deadline are the two facts the reader needs before reading.
+- **The state's review page.** Full sheet width, 1px hairline frame, numbered callouts drawn by the engine on the capture as 24px print-colored squares with paper numerals, matching the line numbers in Filing details. Tapping the picture opens a full-screen viewer (paper, 1px ink border, pinch and double-tap zoom to 200%, close button top right). Alt text unchanged.
+- **Filing details.** On phones, label above value. At 720px, a two-column table: line number in the reference column, label (40%), value (60%). Nested values (members, addresses) are grouped under a sub-label in 65 Medium with their sub-lines numbered as in 9.12 (9.1, 9.2). The SSN sentence sits directly above the first masked value, not at the top of the table. Values in sans; masked numbers in mono.
+- **The authorizations** the client is making appear as the last group of Filing details, each statement in full in `t-body-l`, each with the marked box (they were checked on the intake form). They are statements, so they read as sentences, not table cells.
+- **State fees.** The fee table with accounting rules (5.3). "Nothing is charged on this page. These fees are paid to the state when the filing is submitted." above it in ink-2.
+- **The declaration and the decision.** The declaration in `t-body-l` ink with a 4px print-colored left bar. Then the one-time code field if required (single input, `inputmode="numeric"`, mono 24px, letter-spacing 0.3em, `autocomplete="one-time-code"`). Then a 2px ink rule. Then the decisive button. Then a 1px rule, and the second path: the comment field and "Request changes". Separating the two paths keeps the textarea out of the space between the declaration and the button.
+- **Sticky total.** Once the H1 has scrolled out of view, a 44px strip pins to the top (hidden while the State fees table itself is on screen): the firm's name at the left and "Total $103.50" at the right in tabular 75 Bold. It shows money, not a button.
 - **The H1** today reads "NJ formation: TWO SISTERS BAKERY LLC", built from engine field names. The design sets whatever the engine supplies; Appendix B asks for the filing type's own title.
 
 **Decision page.** Same firm header. "Approval recorded" as H1, the paragraph from the engine (the rehearsal version or the live version, unchanged). For a live filing, below it, the timeline component showing "Approved" done and the next stages to come in ink-3. For a change request: the change-request paragraph, as its own page with the same header. Nothing else: no "share", no "rate us".
@@ -842,11 +843,11 @@ Rows that need action sort first and are set in 65 Medium. The Rehearsal chip re
  10:42  ●──  Received                                    aside:
  10:44  ●──  Getting the state's review page             Link to the proof
  10:51  ○══  Waiting for approval                        We emailed this link to …
-        ○    Approved                                    https://api.cofile.app/…  [Copy]
-        ○    Filing now                                  Documents
-        ○    Submitted to the state                      – (none yet)
-        ○    Accepted by the state                       Save to Google Docs
-        ○    Completed
+        ◌    Approved                                    https://api.cofile.app/…  [Copy]
+        ◌    Filing now                                  Documents
+        ◌    Submitted to the state                      –
+        ◌    Accepted by the state                       Save to Google Docs
+        ◌    Completed
  ▸ Progress on the state site (rehearsal, running)
 ```
 
@@ -989,7 +990,7 @@ Green is deliberately not protected: many accounting firms are green, a green-pr
 **Step 2: print color.**
 
 - Normal: hold h and C (C capped at 0.20), lower L in steps of 0.01 until contrast against `--paper` is at least **4.5:1** (labels are 14 to 16px Medium). If the chosen color already passes, use it unchanged. `--print-tint` = the print color at L 0.96, C × 0.25.
-- Protected: `--print` = neutral print `#3E4451` (9.8:1), `--print-tint` = `#EEEFF2`. The firm's color is still used for the band and the logo plate's surroundings, so the brand remains on the page.
+- Protected: `--print` = neutral print `#3E4451` (9.8:1), `--print-tint` = `#EEEFF2`. The firm's color is still used for the band, and for the firm's typed name in the header when it reaches 4.5:1, so the brand remains on the page.
 - Dark mode: raise L from the light print value until contrast against dark paper `#1A1A19` is at least 4.5:1, capping L at 0.86 so the color does not become white. Protected colors use `#AEB4C2`.
 
 **Step 3: band.** `--band` = the main color exactly as chosen, if its contrast against paper is at least 1.5:1 (it must be visible as a band); otherwise the print color from step 2. The band is never adjusted for hue; it is the firm's own color.
