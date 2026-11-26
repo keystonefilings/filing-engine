@@ -265,3 +265,9 @@
 .desk2-quiet p { margin: 0; color: var(--text-2); }
 .signed2-vignette { margin: 0 0 24px !important; line-height: 0; }
 }
+
+/* The ledger draws its own hairlines between rows; the shared table rule's per-cell bottom borders would double them
+   and draw lines inside the phone cards */
+@layer components {
+.shell2-content .ledger2 tbody :is(th, td) { border-bottom: 0; }
+}
