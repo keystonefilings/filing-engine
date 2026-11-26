@@ -1183,7 +1183,7 @@ Each page ends with its close, a Marigold poster with the inverted Ink ticket, e
 
 - On Paper. The h2 is display-l in cols 1–9, and the lede ("You've approved a proof before: business cards, letterhead, an invitation at the printer. …") is `lede` in cols 1–7.
 - **P4, the printer's proof**, sits at 4:5 in cols 9–12, aligned to the h2's cap height: the copy's analogy, seen before the product.
-- **The annotated proof** (M15) follows: a sticky stage about 2.4 viewports tall. The proof sheet (Harbor & Pine, Two Sisters) is centered in cols 4–9 and its content scrolls inside a 760 px window. Items 1 to 3 are annotations on the left (cols 1–3) and items 4 and 5 on the right (cols 10–12), each with a Vermilion number disc and a leader line to its region. The sheet uses the real proof content (§10.3, "The proof").
+- **The annotated proof** (M15) follows: a sticky stage about 2.4 viewports tall. The proof sheet (Harbor & Pine, Two Sisters) is centered in cols 4–9 and its content scrolls inside a 760 px window. Items 1 to 3 are annotations on the left (cols 1–3) and items 4 and 5 on the right (cols 10–12), each with a Vermilion number disc and a leader line to its region. The sheet uses the real proof content (§10.10).
 - Item 6, "Like reviewing a return before you e-file it: nothing goes to the state until you've signed off.", is pulled out under the stage as a centered display-m line (max 24 em). It's the sentence that makes a CPA nod, so it gets its own beat.
 - Under that, **P3, the sign-off** (Harbor & Pine's founder reading the proof), at 16:9 across cols 2–11: the firm approving, in person.
 - **Phone:** P4 full width at 4:3. The proof inside a generic phone frame, sticky at 62vh, with the six items scrolling beneath as captions; each item's arrival scrolls the phone's proof to its region. Then the pulled-out line, then P3.
@@ -1359,4 +1359,422 @@ The same picture as home §9.3 ("The text becomes the filing"), at full size, wi
   - The **inquiry form** sits in cols 7–12 as a Poster Paper card (16 px radius, 32 px padding) with Ink text, the standard fields (§11.2) and a Marigold "Send" button. Its fields: "Name", "Company", "Work email", "Phone (optional)", "States you file in", "Filings per month" and "What you'd like to do (optional)". The spam trap stays visually hidden.
   - Paper on Ink Night gives the form the best possible contrast, and it's the one bright object on the page.
 - **Phone:** the head, then I7 full width, the items and the form card.
+
+### 10.8 Sign-up, log-in, password and verification, Terms and Privacy, 404 and errors
+
+**Sign-up: "Set up your firm's filing desk"** (`/signup`).
+
+- Kicker "For firms", h2 "Set up your firm's filing desk", lede "For firms that file for their clients. Confirm your email, put your name and logo on the door, and choose which card pays the state's fees. Your first filing can be a free rehearsal: nothing filed, nothing paid."
+- **Layout:** the form card in cols 1–6 (Poster Paper ground, white card, 16 px radius, 40 px padding). In cols 8–12, a **sticky live preview** of the visitor's own filing desk header.
+
+```
+┌──────────────────────────── PAPER ───────────────────────────────────┐
+│ ── FOR FIRMS                                  ┌──────────────────────┐│
+│ Set up your firm's filing desk                │▀▀▀▀ ink rule ▀▀▀▀▀▀▀▀││
+│ For firms that file for their clients. …      │ [AB] [typed firm     ││ ← whatever they type
+│ ┌────────────────────────────────────┐        │      name]           ││   in "Firm name"
+│ │ Firm name   [typed firm name      ]│        │          with CoFile ││
+│ │ Choose one  [CPA or accounting firm▾]│      │ ──────────────────── ││
+│ │ Your name   [                     ]│        │ Your desk is clear.  ││ ← the desk's real
+│ │ Work email  [                     ]│        │ Start a filing …     ││   empty state
+│ │ Password    [                     ]│        │  ░ I4 empty desk ░   ││
+│ │ At least 12 characters. A short …  │        └──────────────────────┘│
+│ │ …                                   │                               │
+│ │ ☐ I agree to the Terms of Service … │                               │
+│ │ [        Create account          ]  │                               │
+│ └────────────────────────────────────┘                                │
+│ Building a filing product? See CoFile for platforms.                  │
+└───────────────────────────────────────────────────────────────────────┘
+```
+
+- **The preview** renders the visitor's typed firm name, live, in the filing desk header. It updates on every keystroke with a 120 ms crossfade. The initial tile shows their initials in House Ink (they pick a color later, in Setup), with the 16 px "with CoFile" credit at the right. Beneath is the desk's real empty state ("Your desk is clear. Start a filing (it can be a free rehearsal), or send a client a link with your logo on it.") with I4. The first thing a new firm sees on our site is **its own name on its own desk**.
+  - Before anything is typed, the preview shows a soft placeholder bar (no invented name).
+  - It has no label, and the "example" rule doesn't apply: it isn't an example, it's theirs. It's marked `aria-hidden`, since it repeats what they typed.
+- "Create account" is the Marigold primary button, full width.
+- **Phone:** the preview becomes a compact 72 px header strip pinned above the form, showing just the initial tile and the typed name, so the delight survives on a small screen.
+
+**"Check your email"** (`/signup/sent`) and **"Confirm your email"** (`/verify-email`).
+
+- These use the **stage-door card**: a centered 520 px Paper card with a 6 px Ink top rule on a Poster Paper ground. Inside: the kicker "Your filing desk", the h2 and the copy, then I6 (the envelope) at 160 px above the h2 on "Check your email".
+- On "Confirm your email", "One click and your email is confirmed." is followed by the Marigold button "Confirm my email". The resend form sits below a hairline, under "Lost the email, or the link expired? …", with "Send a new link" as a secondary button.
+
+**Log in** (`/login`).
+
+- **Split screen** on desktop. The left 50% is a full-height close-up crop of **gold leaf on glass**: a detail from the P1 gilding, cropped so tightly that no name is readable (just the gleam of gilded letter edges), so no example label is needed. The right 50% is Poster Paper with the card.
+- Card contents: kicker "Log in", h2 "Welcome back", lede "Firms go to their filing desk, platforms to their dashboard.", "Continue with Google" (a secondary button with the Google "G" mark per Google's guidelines), a hairline, "Email" and "Password", "Forgot your password?" as a quiet link, and the Marigold "Log in" button. Below the card: "New here? Set up your firm's filing desk. Enterprise developers can also log in with an API key."
+- Notices ("Your session ended. Log in again to carry on." and the rest) appear as notices (§11.3) above the form.
+- **Phone:** the gold detail becomes a 120 px band across the top.
+
+**Password and invitation pages** (`/forgot-password`, `/reset-password`, `/invite-expired`): the stage-door card.
+
+- "Forgot password": kicker "Forgot password", h2 "Reset your password", copy, "Email", "Email me a reset link", "Back to log in".
+- "Reset": "New password", "New password again", help "At least 12 characters. A few unrelated words work well.", "Set new password".
+- "This link has expired or isn't valid" with "Ask whoever sent it for a new invitation. …". This one has a softer card with no Ink rule.
+
+**Terms and Privacy** (`/terms`, `/privacy`).
+
+- Programme, long-form. The h1 is display-m. A **sticky contents rail** in cols 1–3 lists the numbered sections; the text runs in cols 5–11 at `body` 19 px, max 66 ch, line height 1.65.
+- Section numbers ("3. Accounts") are in Marquee 700, with the number in Ochre Ink so it stays readable on Programme. Section titles are at `title` size.
+- Links are underlined. There are no pictures.
+- **Phone:** the rail becomes a collapsible "contents" `details` at the top (`[copy needed: its label]`).
+
+**404: "Page not found"** (`/not-found`).
+
+- Full-bleed **P6, the ghost light**, clean plate, darkened to 60% Aubergine: an empty stage with one bulb.
+- In a Paper card at the lower left: "Page not found", "The link may be old or mistyped." and the Marigold button "Go to the home page".
+- It's gently funny, and on-brand: nobody's on stage.
+
+**Error: "Something went wrong"** (`/error`).
+
+- **I5, the empty-stage spotlight illustration**, at 280 px on Poster Paper. It's lighter than the photograph, because an error shouldn't feel dramatic.
+- The copy "This page couldn't load just now. It's usually a short hiccup on our side." with "Try again" (Marigold primary) and "Log in again" (secondary).
+- On firm pages, the error and 404 use the firm's house style instead: House Canvas, the firm header, I5 drawn in the firm's color.
+
+### 10.9 The firm's filing desk (`/p/<firm>`)
+
+**The house style throughout:** House Canvas `#F6F6F3` ground, white sheets, the firm's marquee rule, the Headliner frame (§3.4), the firm's font for headings, Atkinson for everything factual, and "with CoFile" at 16 px at the right end of the header. No Marigold anywhere.
+
+**The shell.**
+
+```
+┌──────────────────────────────────────────────────────────────────────────────────┐
+│▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀ firm main color, 6 px ▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀│
+│ [logo] Harbor & Pine CPA                       owner@harborpine.example [Log out]  with CoFile │
+├──────────────────────────────────────────────────────────────────────────────────┤
+│  Filings   New filing   Ready to pay (2)   Client links   Signatures   Setup   Billing │
+│  ▔▔▔▔▔▔▔                                                                         │
+├──────────────────────────────────────────────────────────────────────────────────┤
+│                              page content, max 1120 px                            │
+└──────────────────────────────────────────────────────────────────────────────────┘
+```
+
+- **Header band:** white, 76 px tall. The logo is optically sized and followed by the firm's name. On the right are the signed-in email (a link to the password page), a "Log out" secondary small button, and the credit.
+- **Tabs** (from the portal layout): "Filings · New filing · Ready to pay · Client links · Signatures", plus "Setup · Billing" for partner firms. They're `label` 16 px Atkinson 600 with 48 px targets. The current tab gets a 3 px underline in the firm's main color with House Ink text; the rest are House Ink 2.
+  - "Ready to pay" shows a count badge when cards are waiting: a 20 px firm-color pill with white tabular numerals.
+  - On phones the tabs become a horizontal scroll strip with the current tab scrolled into view, and a 24 px fade at the right edge hints at more.
+- **Footer:** "Questions? Email …" (when the firm set a support email) at `small` in House Ink 2.
+
+**Filings (overview).**
+
+- The h1 "Filings" (firm font) with the "New filing" firm primary button at the right.
+- **Notices** (billing, "ready to pay and need your card's security code", "need someone to act") are full-width notices (§11.3), the Your turn ones in firm tint.
+- **The table** ("Filing · Type · Status · Started") is a white sheet with a 16 px radius and 64 px rows.
+  - Filing names are firm Second color links, Atkinson 600.
+  - "Rehearsal" is the dashed chip.
+  - Status is the status chip, and rows whose status is a Your turn status get a 6% firm tint.
+  - Dates use tabular figures.
+  - The header row is in Atkinson 600 at 15 px, House Ink 2.
+- **Empty state:** I4, the empty desk in the firm's color, at 200 px, with "Your desk is clear. Start a filing (it can be a free rehearsal), or send a client a link with your logo on it." and the buttons "New filing" (primary) and "Send a client a link" (secondary).
+- **Phone:** rows become cards: the filing name, then the type and date on one line, with the chip top right.
+
+**Setup: "Set up your account"** (Your firm · Branding · Payment · Registered agents).
+
+- A **three-step track** across the top: three numbered stops joined by a 2 px line, filled in the firm's color as each step completes ("Step 2 of 3" as the label).
+- Each step is a white card with an I9 spot (a door, a swatch fan, a card), the step title ("Your firm", "Branding", "Payment"), its one-line description, and its button ("Set up your firm", "Set up branding", "Set up payment"). Completed cards switch to a ● Done marker and a quieter secondary button.
+- "Registered agents (optional)" is a fourth, dashed-outline card ("Add agents" / "Change agents").
+- When all three steps are done, the head reads "You're set up" with "Start a filing" as the primary button.
+
+**Branding** (the most important setup page: it's where the promise of the home page comes true).
+
+```
+┌────────────────────────────── HOUSE CANVAS ──────────────────────────────────────┐
+│ Step 2 of 3                                                                      │
+│ Branding                                                                         │
+│ Your clients see your name, logo and colors on the pages where they fill in …    │
+│ ┌──────────────────────────────┐   ┌───────────────────────────────────────────┐ │
+│ │ Logo                          │   │  LIVE PREVIEW (sticky)                    │ │
+│ │ ┌ drop a PNG, JPEG or WebP ─┐ │   │  ┌ desk header ──────────────────────────┐│ │
+│ │ └───────────────────────────┘ │   │  │▀▀▀▀▀▀▀ main color ▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀││ │
+│ │ A PNG, JPEG or WebP picture. …│   │  │ [logo] Your Firm Name     with CoFile ││ │
+│ │ Or a link to your logo        │   │  └───────────────────────────────────────┘│ │
+│ │ Main color  [■] [#1f4fd1] ●●●●│   │  ┌ client form (phone) ┐ ┌ proof (phone) ┐│ │
+│ │ Buttons and the top of the …  │   │  │ Start your …        │ │ Two Sisters … ││ │
+│ │ Second color [■] [#……]  ●●●● │   │  │ [ Continue ]        │ │ [Approve …]   ││ │
+│ │ Links and highlights. …       │   │  └─────────────────────┘ └───────────────┘│ │
+│ │ Font  [ System           ▾ ] │   │                                            │ │
+│ └──────────────────────────────┘   └───────────────────────────────────────────┘ │
+└──────────────────────────────────────────────────────────────────────────────────┘
+```
+
+- **Controls** (cols 1–5):
+  - **Logo:** a large drop zone, 160 px tall with a dashed Field Border. Once uploaded, the trimmed logo shows on both a white and a dark plate, so the firm sees how it behaves in dark mode. Help text and errors use the existing words.
+  - **Main color** and **Second color:** each is a color well (48 × 48 px), a hex field (Atkinson Mono, 110 px) and the row of ready colors as 32 px swatches. If the system had to darken the button shade for contrast, a second, smaller swatch appears beside the chosen one, joined by a short arrow: the shade the button will actually use (`[copy needed: a few words explaining the adjusted shade]`).
+  - **Font:** a select with each option previewed in its own face, plus an upload field for "Your own font (uploaded)".
+- **The live preview** (cols 7–12, sticky) shows three of the firm's own surfaces at once: the desk header, the client form on a phone and the proof on a phone, using the firm's real name and logo with sample filing data. Every change re-tints all three with the up-sweep (§8.5). It's the home page's division picture, now with the firm's own brand.
+
+**New filing.**
+
+- **Step 1, "Which state is the business in?":** three large **state cards** (New York, New Jersey, Florida), each a white sheet 200 px tall. The state name is set in the firm's font at 32 px over its count line ("2 filing types, plus the federal EIN"). On hover the card lifts 2 px and gains a 2 px firm-color border. No maps or outlines.
+  - Above the cards is the small rehearsal note with its link to What we file.
+  - Below the cards is the "Or send us the details…" list, with channel icons (email, text, WhatsApp, Slack) at 20 px before each line. Addresses and numbers are in Atkinson Mono with a copy button.
+- **Step 2, "{State}: what are you filing?":** a grid of **filing-type cards**, two per row on desktop. Each has its title (firm font, 22 px), the Live or Rehearsal chip, its summary (`small`) and its fee note.
+  - "Your pages for clients" is a white card listing each page URL in Atkinson Mono with a copy button, and the widget code in a code block (Ink Night, Atkinson Mono 14 px, Paper text, with a copy button).
+- **Step 3, the form** (`/new/<kind>`):
+  - Above the form: "← Other filings" as a breadcrumb, the h1 (the kind's title), the summary with its "Send them a link" link, the rehearsal notice (dashed border) and "Filled in from your message …" (a notice in firm tint).
+  - "Start from a client you filed for before" is a compact select-plus-button row.
+  - The intake form (§10.11), with the submit "Create the proof" and the footnote "Next you get the proof to approve. Nothing is filed until you do."
+
+**Filing detail.**
+
+```
+┌──────────────────────────────── HOUSE CANVAS ────────────────────────────────────┐
+│ ← Filings                                                                        │
+│ Two Sisters Bakery LLC                                ◐ Waiting for approval  ⌐Rehearsal¬ │
+│ New Jersey LLC formation · started 11/26/2026, 9:14 AM by …                      │
+│                                                                                  │
+│ ┌▌─────────────────────────────────────────────────────────────────────────────┐ │
+│ │▌ Your proof is ready                                                          │ │
+│ │▌ Check every detail and fee exactly as they'll go to the state, then approve │ │
+│ │▌ it or ask for changes. Nothing is filed until you approve.                  │ │
+│ │▌ [   Open the proof and approve it   ]                                       │ │
+│ │▌ We also emailed the link to owner@…                                          │ │
+│ └▌─────────────────────────────────────────────────────────────────────────────┘ │
+│  ○ Received ── ◐ Waiting for approval ── ○ Approved ── ○ Filing now ── ○ Submitted to the state ── ○ Completed │
+│ ┌ Documents ───────────────────────────┐   EIN: 00-0000000                         │
+│ │ [record still, in firm color]        │                                          │
+│ │ Certificate of Formation  ↓          │                                          │
+│ └──────────────────────────────────────┘                                          │
+│ ▸ Progress on the state site (rehearsal, …)                                       │
+└──────────────────────────────────────────────────────────────────────────────────┘
+```
+
+- **Title:** the business name set at `title-name` (44 px, firm font). The page's filing title is split visually, with the type moved into the meta line. It's a display of the existing data, with no new words. Then the status chip and Rehearsal chip, then the meta line in House Ink 2.
+- **"Your proof is ready"** is the page's hero whenever the filing is waiting for approval: a white card with a **6 px firm-color left bar**. It holds its title at `h2`, the copy, the firm primary button "Open the proof and approve it" (56 px, full width on phones) and the email line in `small`. It's the firm's moment of authority, so it's the biggest thing on the page.
+- **The status journey:** a horizontal track using the product's own status labels (Received, Waiting for approval, Approved, Filing now, Submitted to the state, Accepted by the state, Completed), with past stops ●, the current stop pulsing once, and future stops ○. On phones it's vertical.
+- **Notices:** "Approved and ready to pay. …" (Your turn tint) and the error notices (Problem tone).
+- **"Documents"** shows, on the card's left, a still of the 3D **papers-home record in the firm's color**, with the same picture as the home page now holding *their* papers. The list of documents is on the right, each with a download icon.
+- **"EIN: …":** the EIN is set at `fee-total` size (34 px, tabular, Atkinson 700). It's a number firms copy into a dozen places, so it gets a copy button beside it.
+- **"Save to Google Docs"** is a secondary small button with its explanation in `small`.
+- **"Progress on the state site"** is a `details` styled as the **run sheet** (§11.8), with each step and its time on hairlines.
+
+**Client links: "Send a client a link."**
+
+- The h1 and its lede.
+- The **link form** is a white card: "Filing" (select), "Who it's for (shown to you and the client)" (text) and "Make link" (primary).
+- The **made link** appears as a ticket-like strip in the firm's tint: the URL in Atkinson Mono, "Copy link" (primary small) and "Email it from your mail app" (secondary small).
+- **"Links you sent":** a table with For, Filing, Made and Status columns. Status uses chips: "Waiting for the client" in Your turn style but in House Ink 2 (it's the client's turn, not the firm's); "Used: open the filing" as a link; "Turned off" and "Expired" as Neutral. "Turn off" is a small destructive-outline button.
+
+**Requests from a text or email: "Request by text message"** (or by email, Slack, WhatsApp).
+
+- The h1, then the "From …" meta line.
+- **The message is shown as the same bubble component as the home page** (Paper-white bubble, 22 px radius), under the channel icon. It's the home picture made real.
+- **"This looks like a request for: …"** is a white card with the filing type in Atkinson 700, the count line ("We filled in 4 answers from your message.") and the firm primary "Open the filled-in form".
+- "Not this filing? Choose another" and "Your message" are `details` with º ring toggles.
+- "Already sent as a filing." is a Done-tone notice.
+
+**Signatures: "Saved signatures."**
+
+- The explanation sits at the top in `body`, House Ink 2.
+- A table (Signer, Saved, Last used, and a "Remove" destructive small button) or the empty line "No saved signatures yet.".
+- **"Add a signature":** "Signer's full name", "Signer's email (optional)", the note, and the **signature pad**: a white panel 200 px tall with a 1 px Field Border, a dotted baseline at 70% height, and the ink drawn in House Ink with pressure-sensitive width (1.5–3.5 px). The consent checkbox and "Save signature" follow.
+
+**Ready to pay.**
+
+- The explanation, then one white card per waiting card. Each shows the card label and its last four digits, the filings waiting for it (each a small row with the business name and type), the security-code field (the vault's hosted field, styled to match §11.2: 56 px, 18 px, Field Border) and "Pay and file" (firm primary).
+- "Nothing is waiting for a card right now." is the empty state, with I4.
+- After entry: "Thanks. Filings for this card pay with it for the next hour." as a Done notice.
+
+**Billing.**
+
+- The plan picker uses the **plan tickets** from the Pricing page (§11.7) in **house style**: white tickets with House Ink outlines, the current plan's ticket outlined 2 px in the firm's main color with "Your plan" in its stub. The Marigold featured ticket belongs to CoFile's own pages and isn't used here.
+- Buttons are "Choose this plan" / "Switch to this plan" (firm primary small), and the explanatory paragraph sits beneath in `small`.
+
+### 10.10 The proof (the page the firm approves) and "Approval recorded"
+
+The proof is now the firm's page: it's where the firm signs off, on its filing desk and by email. It's built from `src/approvals/render.ts` and carries the firm's brand at the top. I design it as **a printer's proof**: a single white sheet, set with care, with one decision at the end.
+
+```
+┌───────────────────────────── HOUSE CANVAS ──────────────────────────────────┐
+│▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀ firm main color, 6 px ▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀│
+│   ┌─────────────────────────────────────────────────────────────────────┐   │
+│   │ [logo, presenting scale] Harbor & Pine CPA              with CoFile │   │
+│   │ ━━━━━━━━━━━━━━━━━━━━━ reading progress (firm color, 2 px) ━━━━━━━━━│   │
+│   │ ┌┄ Rehearsal: nothing will be filed or paid, even if you approve. ┄┐│   │
+│   │ NJ LLC FORMATION                                  ← credit caps      │   │
+│   │ TWO SISTERS BAKERY LLC                            ← title-name 44 px │   │
+│   │ Filing reference … Please decide by **December 3, 2026, 5:00 PM     │   │
+│   │ Eastern**. After that, this link stops working …                     │   │
+│   │ ┌▌ By approving, you confirm every detail below is correct … ──────┐│   │
+│   │ │▌ … Government sites don't save drafts, so once you approve, …    ││   │
+│   │ └▌──────────────────────────────────────────────────────────────────┘│   │
+│   │ The state's review page                                              │   │
+│   │ This is a picture of the state's own review page, filled in …        │   │
+│   │ ┌──────────────────────────────────────────┐                         │   │
+│   │ │   [ image, neutral frame, tap to zoom ]  │                         │   │
+│   │ └──────────────────────────────────────────┘                         │   │
+│   │ Filing details                                                       │   │
+│   │ Social Security numbers are masked on this page. …                   │   │
+│   │  FORMATION › NAME                                ← group heading     │   │
+│   │  Base name ............................ TWO SISTERS BAKERY           │   │
+│   │  Designator ........................... LLC                          │   │
+│   │  …                                                                   │   │
+│   │ State fees                                                           │   │
+│   │ Nothing is charged on this page. …                                   │   │
+│   │  Formation filing fee .................................. $100.00     │   │
+│   │  NJ portal fee, by card .................................. $3.50     │   │
+│   │  Total ................................................. $103.50     │   │
+│   │ What should change? (Needed only if you ask for changes)             │   │
+│   │ [                                                               ]    │   │
+│   │ [      Approve, and authorize submission and payment            ]    │   │
+│   │ [                     Request changes                           ]    │   │
+│   │ Questions: …                                                         │   │
+│   └─────────────────────────────────────────────────────────────────────┘   │
+└─────────────────────────────────────────────────────────────────────────────┘
+```
+
+- **The sheet:** white, max 820 px wide, centered on House Canvas, with a 16 px radius, 56 px padding on desktop (24 px on phones) and a soft shadow (`0 1px 2px rgba(0,0,0,.05), 0 20px 40px -24px rgba(0,0,0,.18)`). On phones the sheet goes edge to edge with no radius.
+- **The header:** the marquee rule, then the firm's logo at presenting scale (up to 64 px), the firm name at 24 px in its font, and "with CoFile" at 15 px on the right (in the footer on phones). The **reading-progress line** (2 px, firm main color) runs along the bottom edge of the header and stays sticky as the firm scrolls.
+- **The rehearsal note** (practice filings only) is the dashed-border neutral notice at `body` size, with the first word "Rehearsal:" in Atkinson 700.
+- **The title.** The filing title is set in two visual parts: the type prefix in credit caps (16 px, House Ink 2) and the business name at `title-name` (44 px, firm font, House Ink). The business name is the title of the show. It's one `<h1>`, styled with two spans and no new words.
+- **The reference and deadline line** is `body`, House Ink 2, with the deadline phrase in Atkinson 700, House Ink.
+- **The consent note** is a calm terms panel: House Canvas fill, a 4 px House Ink left bar, 20 px padding, `body` 17 px. It's not an alarm: no yellow, no icons. It holds the consent text, the EIN sentences when present, and "Government sites don't save drafts…".
+- **"The state's review page"** has its h2 at 26 px in the firm font and its explanation at `body`. The image sits in a neutral frame (1 px House Rule, 10 px radius, House Canvas padding of 8 px). It opens in a full-screen viewer with pinch-zoom on tap. Any state seal visible in the screenshot stays as the state shows it, at its real size, never enlarged or used as decoration.
+- **"Filing details"** uses the masked-SSN note (`small`, House Ink 2) and then the table. Labels (th) are 40% wide at `label` 16 px, House Ink 2, and values (td) are `value` (Atkinson 600, 18 px, House Ink, tabular figures), on House Rule hairlines with 14 px vertical padding. **Grouping:** when the "›" path prefix changes (for example "Members 1 › …"), the prefix becomes a group heading row in credit caps, and the rows beneath show only the last part of the label. That's a visual regrouping of the existing strings: nothing is added. Highlighted values (business name, addresses) get the 12% firm Second tint behind them.
+- **"State fees":** the h2, then "Nothing is charged on this page. …", then the fee table with amounts right-aligned on the decimal point. The **Total** row is set at `fee-total` (34 px). The "Maximum you authorize" row follows in `body`, with its parenthesis in House Ink 2.
+- **The decision:**
+  - The **one-time code**, when required, is one large field (64 px tall, Atkinson Mono 28 px, letter-spacing 0.3 em, centered).
+  - "What should change? (Needed only if you ask for changes)" is a textarea of 4 rows.
+  - **"Approve, and authorize submission and payment"** is the firm primary: **full width**, 60 px tall, Atkinson 700 at 19 px, allowed to wrap to two lines in Spanish.
+  - **"Request changes"** is the secondary: full width, 56 px, white with a 1.5 px Field Border.
+  - The two buttons are stacked, never side by side, with 12 px between them, so nobody taps the wrong one.
+- **"Questions: …"** is `small`, House Ink 2.
+- **Dark mode:** the canvas goes dark, and the sheet stays white (§4.5).
+- **Print:** a print stylesheet sets the sheet at A4 or US Letter with the header and marquee rule kept, the buttons hidden, and the URL printed in the footer. Firms will print proofs.
+
+**"Approval recorded"** (and the change-request and error responses) use the same header and sheet. The h1 "Approval recorded" is at 36 px in the firm font, with a **3 px firm-color underline drawn beneath it** (500 ms) and the paragraph at `body`. The other responses ("Thank you. Your change request is recorded, …", "That code didn't match. …", "We couldn't record your decision …") use the same template without the underline. These are all branded pages, never bare text.
+
+### 10.11 The firm's filing pages, the client form and client link pages
+
+These are the only pages a firm's **client** ever sees, and on them the firm's brand is everything. CoFile appears only as the small credit and in the legal footnote's links.
+
+**A filing page** (for example `cofile.app/bestaccounting/llc-filing-new-york`), from `PublicIntake.tsx`:
+
+```
+┌──────────────────────────────── HOUSE CANVAS ───────────────────────────────┐
+│▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀ firm main color, 6 px ▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀│
+│ [logo, presenting scale]  Best Accounting                        with CoFile │
+├─────────────────────────────────────────────────────────────────────────────┤
+│ ┌ This service is in beta. … (neutral beta bar) ┐                           │
+│  ┌ rail ───────┐  ┌──────────────── sheet, 680 px ────────────────────────┐ │
+│  │ ● Business  │  │ ┌┄ This page is in rehearsal for now. … contact Best ┄┐│ │
+│  │ ○ Members   │  │ New York LLC formation          ← h1, firm font 36 px  │ │
+│  │ ○ Addresses │  │ {summary} After you send this, Best Accounting checks │ │
+│  │ ○ Authoriz… │  │ every detail and fee and approves exactly what will …  │ │
+│  │             │  │ Fields marked * are required.                          │ │
+│  │ (sticky,    │  │ ① Business ───────────────────────────────────────     │ │
+│  │  ≥1024 px)  │  │   Business name *  [                               ]   │ │
+│  └─────────────┘  │ ② Members ─────────────────────────────────────────    │ │
+│                   │   ┌ member card ──────────────────────── Remove ┐      │ │
+│                   │   └─────────────────────────────────────────────┘      │ │
+│                   │   [ ┄┄┄┄┄┄┄┄┄┄┄┄┄ Add member ┄┄┄┄┄┄┄┄┄┄┄┄┄┄ ]           │ │
+│                   │ …                                                       │ │
+│                   │ Next, Best Accounting checks it and approves the filing.│ │
+│                   │ Nothing is filed until they do.                         │ │
+│                   │ By sending, you agree to CoFile's Terms of Service; …   │ │
+│                   │ [            Send to Best Accounting              ]     │ │
+│                   └─────────────────────────────────────────────────────────┘ │
+└─────────────────────────────────────────────────────────────────────────────┘
+```
+
+- **Header** at presenting scale, with the credit on the right (moved to the footer on phones). The neutral beta bar sits beneath it.
+- **The rehearsal notice** (types that aren't live) is the dashed neutral notice. It names the firm in Atkinson 700.
+- **The h1** is the filing type's title in the firm font at 36 px. The summary sentence is `body`, House Ink 2; the fee note is `small`.
+- **The form** (`IntakeForm.tsx`) sits on a single 680 px white sheet:
+  - **Sections are fieldsets.** Each legend has a **numbered ring** (28 px, a 2 px ring in the firm's main color with the number in the firm font) and the section title at 24 px in the firm font, on a House Rule line that runs to the right edge.
+  - **A sticky section rail** on desktop (≥ 1024 px) lists the legends with ○ / ● marks as sections are completed. The current one has a 3 px firm-color left bar. On phones it becomes a 3 px progress bar under the header.
+  - **Fields**, groups, "Same as" chips, the signature pad and the authorization cards are as in §11.2. Repeated groups (members, signers) are white cards with a House Rule border and "Remove" as a small text button, with "Add {item}" as a full-width dashed button in the firm's Second color.
+  - **"More options"** is a disclosure with a º ring toggle.
+  - **Authorizations:** the legend, its explanation paragraph, and each statement as a **checkbox card**: a 28 px checkbox and the statement at `body`, in a bordered card that takes a 6% firm tint and a 2 px firm border when checked.
+  - **Errors:** "Please fix these and submit again." appears as a Problem-tone notice at the top, listing each issue as a link to its field. Each field shows its message beneath it, with a ◆ glyph.
+  - **The footnotes,** then **"Send to {firm}"**: the firm primary, full width, 60 px. While sending, the label reads "Sending…" and a 2 px white bar runs inside the button.
+- **The success state:** the "Thank you." notice becomes a full white panel. The title at `h2` gets the 3 px firm-color underline drawing beneath it, with the message at `body`. Calm, warm, done.
+- **Phone:** the sheet goes edge to edge, fields are full width, and the submit button is full width at the end of the form. It's deliberately **not** sticky, so the client reads the footnote first.
+
+**Client link pages** (`/i/<token>`) use the same template, with the link's filing type set, the summary line "… After you send this, {firm} checks every detail and approves it. Nothing is filed until they do." and the footnote "Next, {firm} checks it and approves the filing. Nothing is filed until they do." The link's error states ("This link has expired or isn't valid" / "Ask whoever sent it for a new one.", "This link can't be used", "This filing is no longer offered") use a house-style stage-door card: the firm's header, then a centered white card with the message. The firm stays the brand even when something's wrong.
+
+### 10.12 Platforms: the dashboard, API docs, the white-label hosted page and the embed widget
+
+**The dashboard** (`/dashboard`). CoFile's own, so the theatre style, but calm, because it's a working tool.
+
+- **Shell:** a 248 px left sidebar in Ink Night, with the *Cº* + CoFile lockup in Paper at the top and the nav ("Overview · Filings · Ready to pay · Firms · API keys · Webhooks · Setup · Team · Billing", or "Sign-ups" for the platform's own tenant, then "Docs") in Atkinson 600 at 16 px, Plum Mist. The active item is in Paper with a 4 px Marigold left bar. The content area is Poster Paper, with white cards (16 px radius, 1 px Rule) at max 1200 px. On phones the sidebar becomes a 56 px top bar with a menu sheet.
+- **Overview:**
+  - Stat cards ("Filings", "Webhook deliveries", "API keys" with "Manage keys"), each with a big tabular numeral (Marquee 48 px, Box Office figures) and its label in credit caps.
+  - The charts "By status", "By state" and "By month" are **horizontal bars only** (no pies or donuts): Ink bars, with the current month or the largest bar in Marigold, values in tabular figures at the bar end, and labels left-aligned. They're drawn in SVG with no gridlines beyond a single baseline.
+  - Notices ("Real filings need an active subscription; rehearsals are free.", "Pay and file") are standard notices.
+- **Filings:** the filter row ("All firms" and "Show" selects), then the table (Filing · Firm · Type · Status · Created) with the "Test" dashed chip and "Ready to pay: needs the card's code" in the Waiting tone (on CoFile's own pages that's Ochre, not a firm color).
+- **Firms:** a table (Firm · Filing desk). Each firm's row shows its own logo on a 32 px logo plate and a link to its desk: the platform sees its firms in their own brands.
+- **API keys:** the "Authentication" note, then a table (Name · Last used · Revoke as a destructive small button, "Revoked" as a Neutral chip). A newly created key is shown once in an Ink Night code block (Atkinson Mono 16 px, Marigold) with a copy button and a 2 px Marigold border.
+- **Webhooks:** the explanation paragraph, the endpoints list, and the secret in a code block.
+- **Setup, Team, Billing, Sign-ups:** standard forms and tables in the same style.
+
+**API docs** (`/docs`).
+
+- **Layout:** the TopBar ("API docs · Dashboard"), then three columns at ≥ 1280 px:
+  - **Left:** the nav (240 px, Programme ground, sticky): "Overview", the "Guides" head in credit caps, the guide links, the "Reference" head, "Endpoints", "OpenAPI (JSON)".
+  - **Center:** the content, max 68 ch, Poster Paper, `body` 18 px.
+  - **Right:** sticky code samples (Ink Night panels) at ≥ 1440 px. Below 1440, code sits inline.
+- **Headings** are in Marquee (`display-m` for the h1, `title` for h2s). Body is Atkinson.
+- **Code blocks:** Ink Night `#100D16`, Atkinson Mono 15 px, line height 1.6, 20 px padding, 12 px radius, and a copy button at top right.
+  - Syntax colors: keys in Paper `#F3ECE0`, strings in Marigold `#FFB21E`, numbers and booleans in `#FF6B47`, punctuation in Plum Mist `#B9B0C2`, comments in `#8C8299`.
+  - In the quick start, the line `"dryRun": true` gets a full-width Marigold Wash line highlight at 14% opacity. It's the rehearsal, for developers.
+- **Endpoint headers** have a method chip, then the path in Atkinson Mono 18 px. Chips: GET is an Ink outline, POST is a Marigold fill with Ink text, PUT is an Ink fill with Paper text, and DELETE is a Brick outline.
+- **Field tables:** the name in mono, the type in Ink 2 and the description in `body`, on Rule hairlines.
+- **Webhook events** are listed as mono chips.
+- **Phone:** the nav collapses into a top `details` (`[copy needed: its label]`), and code blocks scroll horizontally inside their own box. The page itself never scrolls sideways.
+
+**The white-label hosted page** (`/e/<account>/<firm>/<service>`). It's identical to a firm's filing page (§10.11), in the subscribing platform's firm's brand, with the neutral beta bar and the small credit. Nothing on it uses CoFile's colors or fonts.
+
+**The embed widget** (`/embed/…`, inside the firm's own website).
+
+- No header and no beta bar. The form sits in a white sheet with a 12 px radius and 16 px padding. The firm's main color, second color and font carry through, and the 6 px marquee rule runs along the sheet's top edge.
+- The rehearsal notice appears when relevant. "Filed with CoFile" sits at the bottom at 14 px, Credit Grey, centered.
+- The widget sets no page background, so the host page shows around the sheet, and it auto-resizes (`EmbedResizer`).
+- A `data-theme` attribute gives a dark variant (a `#1E1E21` sheet) for host sites with dark backgrounds.
+
+### 10.13 Emails
+
+Two families: **the firm's** (anything about a filing, sent to the firm's people) and **CoFile's** (sign-up and account).
+
+**Shared build:** 600 px max width, table-based, with VML buttons for Outlook. The type stack is `"Atkinson Hyperlegible Next", Verdana, Arial, sans-serif`: Verdana is the closest widely available fallback for legibility. Body is 17 px with line height 1.55, headlines 26 px bold, and buttons 52 px tall with a 10 px radius, full width under 480 px. Logos and the wordmark are PNG at 2×. All text is live text, never images of text. A `color-scheme: light dark` meta is included, logos sit on white plates so they survive dark-mode inversion, and there's a plain-text part for every email.
+
+**The firm's emails** ("Your proof is ready to approve", "Completed", "More information needed", "Changes requested", "Rejected by the state", "Card security code needed", "Choose a name", "Review before submit", "Site changed — review needed", and the rest):
+
+```
+┌──────────────────────── 600 px ────────────────────────┐
+│▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀ firm main color, 6 px ▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀│
+│ [logo] Harbor & Pine CPA                                │
+│ ───────────────────────────────────────────────────── │
+│ NJ LLC FORMATION                    ← credit caps        │
+│ TWO SISTERS BAKERY LLC              ← 30 px              │
+│ Your proof is ready to approve      ← 26 px bold         │
+│ ┌┄ Rehearsal: nothing will be filed or paid, … ┄┐        │
+│ Your proof is ready. Open the link to see every         │
+│ detail and every fee, exactly as they'll go to …        │
+│ [             Open your proof              ]  ← firm color│
+│ ┌ state review page thumbnail (attached) ┐              │
+│ └────────────────────────────────────────┘              │
+│ ───────────────────────────────────────────────────── │
+│ with CoFile                                              │
+└─────────────────────────────────────────────────────────┘
+```
+
+- **The header** is the firm's (the marquee rule, the logo on white, the name), on a House Canvas outer ground with a white inner sheet.
+- **The headline block.** The subject's two parts are shown visually as in the proof: the filing title's type prefix in credit caps, the business name at 30 px, then the subject's phrase ("Your proof is ready to approve", "Completed", …) at 26 px bold. All of them are existing words.
+- **The body** is the rendered body text at 17 px. The rehearsal line, when present, is the dashed neutral box. The button uses the email's own label ("Open your proof", "Enter security code", "Choose a name", "Review the filing"), in the firm color with white text; the default label is "Open".
+- **"Completed"** adds the **papers-home still** (the folio composited in the firm's own color on the server, 520 × 300 px) above the "Documents: …" list. Each document is a row with a document glyph. "They're attached." and "You can also download them from the filing page." sit in `small`.
+- **The proof email** shows the attached state review page as an inline thumbnail (CID image, 520 px wide, in a neutral frame) with its existing explanatory sentence.
+- **Problem emails** (rejected, failed, site changed) use the same template. A small ◆ in Brick precedes the headline phrase. No red banners.
+- **EIN issued.** There's no template in the product yet. I'd design it like "Completed", with the EIN set as the hero (Atkinson 700, 34 px, tabular, letter-spacing 0.04 em) and the IRS letter attached. Its subject, headline and body are `[copy needed]`.
+- **The footer** has "with CoFile" (the credit: the word "with" in live text plus the wordmark PNG at 16 px cap height, alt "CoFile") and the firm's support line where set.
+- **The invitation** "You're invited to {firm}'s filing portal" uses this firm template too, because it's an invitation to the firm's desk.
+
+**CoFile's emails** ("Confirm your email for CoFile", "Your partner account is open", "Your CoFile account is ready", "Reset your password"):
+
+- A Poster Paper outer ground and an inner Paper sheet with grain baked into a light background image (with a solid fallback).
+- **Header:** the *Cº* + CoFile lockup PNG (32 px tall).
+- **Headline block:** a 48 px Ink hairline, then the subject phrase as the headline (26 px bold, Ink).
+- The body at 17 px, then the button with the email's own label ("Confirm my email", "Log in", "Set my password"): Marigold with Ink text, 10 px radius. The ticket shape isn't attempted in email, because Outlook can't draw it.
+- **Footer:** the legal line ("CoFile is not a law firm or a government agency, …") at 14 px in Ink 2, the support email, and the 48 × 6 px Marigold bar as the last element.
+
+---
 

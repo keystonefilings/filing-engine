@@ -572,7 +572,7 @@ column at 64 characters.
 
 ### 6.6 Breathing
 
-The home page has about 330 words and nine pictures. That ratio is the brief: a firm owner should be
+The home page has about 330 words and eleven visual pieces (§9.0). That ratio is the brief: a firm owner should be
 able to get the whole argument from the headlines and pictures alone, in under a minute, at any
 scroll speed. So: one idea per screen, generous space around every headline, nothing competing with
 a picture's main object, and no section taller than about 1.3 screens on desktop.
@@ -739,7 +739,10 @@ Very little, on purpose; the light does the illustrating.
   in the light.
 - Every picture keeps its small example label from the copy ("Example · test details · not a real
   firm", "Sample proof · test details · not a real business" and so on), set in the caption style,
-  Slate, under the picture's bottom-left corner.
+  Slate, under the picture's bottom-left corner. A picture I add that shows example details (the
+  How it works triptych, the For firms swatch desk and agent cards, the For platforms head) reuses
+  the label of the stand-in it draws from, or gets one marked `[copy needed]`. Light-only pictures
+  (the lamp, the waiting door) and the real team's portraits need none.
 
 ### 7.9 What never appears
 
@@ -2346,3 +2349,350 @@ the Pane to `--firm-wash-dark`, and every logo on a light plate (#FFF9EF, radius
 a firm's dark logo never disappears.
 
 ---
+## 11. Components
+
+Every component has a CoFile version (on CoFile's own pages) and a firm version (on a firm's pages
+and its clients' pages), and the only difference between them is which tokens they read: Lamp and
+Fraunces for CoFile, `--firm-*` and the firm's font for the firm.
+
+### 11.1 Buttons
+
+| Kind | Look | Sizes |
+|---|---|---|
+| **Primary (CoFile)** | Lamp #F5B53F fill, Ink text, Atkinson Next 650 17 px, radius 10. Hover: #F8C25A plus the light sweep (§8.4). Press: #E9A52B, 1 px down | 56 px on heroes and closes, 52 px default, 44 px small (header) |
+| **Primary (firm)** | `--firm-ink` fill, `--firm-on` text, same shape. Hover: lightness +0.05. Press: lightness −0.04. No light sweep: the firm's pages stay still | Same |
+| **Secondary** | Sunlit fill, 1.5 px Ink border (firm version: 1.5 px `--firm-ink`), Ink text | Same |
+| **Quiet / arrow link** | No box. Ink text 650 with a 1 px underline at 4 px offset that thickens to 2 px on hover; a trailing → that moves 3 px right on hover. Used for "See pricing", "For firms", "How it works", "See all plans" | 48 px tall tap area |
+| **Danger** | Sunlit fill, 1.5 px Brick border, Brick text ("Remove", "Revoke", "Turn down") | 40 px small |
+| **Disabled** | #E7E3D9 fill, #7C8087 text, no border, `cursor: not-allowed` | |
+| **Pending** | The product's own pending labels ("Sending…", "Creating…", "Signing in…", "Saving…", "Confirming…"); the light sweep repeats slowly (1.6 s) on CoFile buttons; firm buttons dim to 85% | |
+| **Focus (all)** | A 3 px Ink outline at 2 px offset (Moonlit on Night), plus a 6 px halo of Lamp at 35% (CoFile) or `--firm-tint` (firm). Never removed | |
+
+Minimum width 120 px; labels never truncate; long labels ("Approve, and authorize submission and
+payment") wrap inside the button with 1.2 line height and 14 px vertical padding.
+
+### 11.2 Fields
+
+- **Text inputs and selects**: 52 px tall (56 on phones), radius 8, Sunlit fill, 1.5 px border in
+  #8B9096 (3.3:1 against Shade, so the field edge is visible to low vision), 17 px Atkinson Next
+  text, 16 px side padding. Focus: border in Ink (firm: `--firm-ink`) plus the halo. Filled values
+  that go to the state are shown in Mono in read-only and review views, Atkinson while editing.
+- **Labels** above the field, Atkinson Next 600 16 px, 8 px gap; help text under it in the small
+  style, Slate; the required "*" in Ink after the label, never red.
+- **Errors**: border 2 px Brick, the message under the field in 15 px Brick with the short-bar
+  icon, and the field's label keeps its color. The form's summary notice links to each one.
+- **Textarea**: same, min 3 rows, resizes vertically.
+- **Checkbox and radio**: 24 px, 2 px Ink border, radius 6 (checkbox) or round (radio); checked
+  state filled Ink (firm: `--firm-ink`) with a Sunlit mark. The whole row (box plus label) is the
+  target, min 44 px tall.
+- **Radio cards** (Kind of firm, how state fees are paid): Sunlit cards, 1.5 px Line border, 20 px
+  padding, the selected one with a 2 px `--firm-ink` (or Ink) border and a `--firm-tint` fill.
+- **Pill toggles** ("Same as", "Same person as"): 32 px tall pills, Sunlit with a Line border; on,
+  `--firm-tint` with a `--firm-ink` dot.
+- **Code boxes** (card security code, one-time code): separate 56 × 56 boxes in Mono 24 px, 8 px
+  apart, auto-advancing, pasting fills all.
+- **File drop** (logo, font): a 160 px tall area, 1.5 px dashed Line border, radius 12; on drag-over
+  the border becomes solid Ink and the area warms to Lamp tint (firm pages: `--firm-tint`). Once
+  chosen, the file shows as it will appear (the logo on its Pane color; the font as a specimen line
+  of the firm's name).
+- **Color field**: a 44 px swatch button opening the system picker, beside a Mono hex input; under
+  it, the adaptor's live result as three small swatches (button, wash, glow).
+- **Signature pad**: a Sunlit surface 4:1 (min 120 px tall), a 1 px Slate baseline at 70% height
+  with a small "×" at its left, strokes in Ink at 2.5 px with velocity-based width (2 to 3.2 px).
+  "Clear" as a quiet button `[copy needed]` if the product lacks one.
+
+### 11.3 Cards and surfaces
+
+| Card | Spec |
+|---|---|
+| **Sunlit card** (default) | #FFF9EF, radius 14, 32 px padding (20 on phones), 1 px Lit line border, the sun-following shadow: `0 1px 1px rgba(28,31,36,.05), var(--sun-x) 8px 20px -8px rgba(28,31,36,.12), calc(var(--sun-x) * 2) 28px 48px -24px rgba(28,31,36,.14)` |
+| **Picture frame** | No border, no background of its own: the picture sits in the light on Shade. Its caption under the bottom-left corner, 12 px below |
+| **Window tile** (P6, state picker, State by state) | Sunlit, radius 14, a 6 px inner shadow along its bottom edge (the sill), the glass glow per §9.6 |
+| **Document card** (P5, Documents, emails) | #FFFDF8, radius 2, 1 px Lit line border, portrait, kicker + title + Mono line + gray text bars. Never a facsimile of a government document |
+| **Stat card** (dashboard) | Sunlit card, the label in 15 px Slate, the number in Atkinson Next 650 44/48 tabular |
+| **"Your proof is ready" card** (filing detail) | Sunlit card with the firm's doorlight wash across its top 120 px, and the firm's primary button. The brightest card on its page |
+| **Plan card** | §11.6 |
+
+### 11.4 The proof, as a component
+
+The proof sheet is one component used in five places (the proof page itself, P4 on the home page, How
+it works, the filing desk's preview, the email header for "Completed"), always assembled from the
+same parts: **Pane → rehearsal band (when a rehearsal) → title and status → consent note → the
+state's review page → details table → fees table → decision**. The marketing pictures use the parts
+the stand-in shows; the product uses all of them. Spacing between parts 32 px; inside a part,
+16 px. Values always Mono, fees always tabular and right-aligned, the button always the firm's.
+
+### 11.5 Chips, badges and labels
+
+All chips: 28 px tall, radius 14, 12 px side padding, Atkinson Next 600 14 px, an 8 to 10 px leading
+glyph, 6 px gap.
+
+| Chip | Look |
+|---|---|
+| **Coverage: Live** | Ink fill, Moonlit text, the lit Lamp dot with its glow |
+| **Coverage: Rehearsed to the payment screen** | Lamp tint fill, Ink text, the half dot |
+| **Coverage: recorded, offered** | Sunlit fill, 1 px #B9BDC3 border, Ink text, the empty ring |
+| **Coverage: Planned** | Transparent, dashed border, Slate text, the dashed ring |
+| **"Your turn"** ("Proof ready to approve", "Ready to approve", "Waiting for approval") | `--firm-tint` fill (CoFile pages: Lamp tint), `--firm-ink` text, a filled dot in the firm's color |
+| **Done** ("Filed", "Accepted by the state", "Completed", "EIN issued", "Matches the proof") | Fern tint fill, Fern text, a filled dot |
+| **In progress** ("Submitted", "Received", "Queued", "Filing now", "For your team to check") | #ECEDEA fill, Slate text, a ring |
+| **Needs information** ("Needs information", "Changes requested", "On hold") | Ochre tint fill, Ochre text, a ring with a gap |
+| **Problem** ("Rejected by the state", "Failed", "Needs correcting") | Brick tint fill, Brick text, a short bar |
+| **Rehearsal / Test** | Lamp tint fill, Ink text, the ghost-light glyph |
+| **Source markers** ("from the text", "already filled") | 24 px pills: Lamp tint with a beam glyph; `--firm-tint` with the firm's dot |
+| **Example label** (every picture's caption) | Not a chip: caption style, Slate, 14 px, no box |
+
+### 11.6 Prices: the strip and the plan cards
+
+- **The price strip** (home): one Sunlit bar split into four cells with 1 px Lit line rules, 40 px
+  padding, bold items in Fraunces 40/44 lining, lines under them in Atkinson Next 17 Slate. Phone:
+  2 × 2. Never icons, badges or strikethroughs.
+- **Plan cards** (Pricing, Billing): §10.4. Name 650 18; price in Fraunces 56/60 lining with its unit
+  in Atkinson 18 Slate on the baseline; the sub-line in the small style; a rule; items with Doorlight
+  markers; the people line with a portrait marker. The middle plan (Growth) is raised 8 px, with a
+  1.5 px Ink border and the lamp's glow behind it. On Billing, the current plan takes a 2 px
+  `--firm-ink` border instead.
+- **Figures**: "$45", "$250", "$1,000" always with lining, tabular figures and a thin space before
+  "a month" in the layout (not in the text).
+
+### 11.7 Notices
+
+A Sunlit or tinted band, radius 10, 16 × 20 px padding, a 20 px icon at the left, body 16/24.
+
+| Notice | Fill | Rule / icon |
+|---|---|---|
+| Info ("Filled in from your message …", next steps) | #ECEDEA | Slate ring |
+| Good ("Saved to Google Docs.", "Already sent as a filing.") | Fern tint | Fern dot |
+| Needs someone ("… ready to pay …", "Real filings need an active subscription …") | Ochre tint | Ochre ring with a gap |
+| Problem (errors, "Billing couldn't be loaded.") | Brick tint | Brick bar; icon-first style with a 3 px left rule when the firm's brand is red (§3.6) |
+| **Rehearsal** (every "This page is in rehearsal for now. …" and "Rehearsal: …") | Lamp tint | The ghost-light glyph; never a warning triangle |
+
+### 11.8 Tables
+
+- **Data tables** (Filings, coverage, links, keys): Sunlit card, header row in Atkinson Next 650 14 px
+  Slate on a 1 px Ink rule, rows 60 px min with a 1 px Lit line between, cell padding 16 px, the first
+  column in 650; hover slides a light patch under the row; sortable headers get a small arrow
+  glyph. Phones: rows become blocks (first column as the title, the rest as label-value lines).
+- **Key-value tables** (the proof, a filing's details): label 38% Slate 15 px, value Mono 17 px Ink,
+  52 px rows, no outer border.
+- **Fee tables**: label left, amount right on tabular figures, total in 650 over a 1 px Ink rule.
+
+### 11.9 Navigation
+
+- **Site header and phone menu**: §9.0.
+- **Firm's nav row** and **dashboard sidebar**: §10.9 and §10.12.
+- **Docs nav**: 248 px, section titles in 650 14 px Slate, items 16 px Ink, the current one with a
+  3 px Ink bar at its left; collapses to a top disclosure on phones.
+- **Back links** ("← Filings", "← Other filings", "← All states"): the quiet link style with a
+  leading ←, 15 px, 24 px above the h1.
+- **Footer**: §9.0.
+
+### 11.10 The day arc
+
+The one diagram in the system: a filing's stages as points along the sun's path.
+
+- A 1 px arc (Ink at 30%, Moonlit at 30% on Night), its height 18% of its width, spanning the
+  container. Stages as 12 px dots along it, evenly spaced, with labels under them in Atkinson Next
+  600 15 px (the product's status labels, or the stand-in's "Approved", "Submitted", "Filed").
+- Passed stages: dots filled Fern. The current stage: a 20 px Daylight disc with a 24 px glow (the
+  sun) on CoFile's pages, a filled dot in the firm's secondary (or primary) color with a 6 px halo on
+  the firm's pages. Future stages: empty rings.
+- A problem stage (rejected, failed) shows its dot as the Brick short bar, and the arc after it
+  dashes.
+- Phones: the arc flattens into a straight row (up to four stages) or a vertical list (more).
+
+### 11.11 Lists, disclosures, code, tooltips
+
+- **List markers**: Doorlight markers (8 × 11 px, Ink at 70%, or Lamp on Night) for "what you get"
+  lists; 6 px Slate en rules for reassurance lists; numerals in Atkinson Next 650 for ordered lists.
+- **Disclosures** (`details`): a 56 px summary row with a chevron, the body 16 px below it.
+- **URLs, keys and snippets**: Mono on a #ECEDEA pill (inline) or a Night block (multi-line), with a
+  copy button that confirms by turning its icon into a Fern dot for 1.2 s, label `[copy needed]`.
+- **Tooltips**: Ink fill, Moonlit 14 px text, radius 8, 8 × 12 px padding, a 6 px arrow; on hover
+  after 300 ms and on focus at once.
+
+---
+
+## 12. Craft notes
+
+- **Dark mode.** System preference by default, with a toggle in the footer `[copy needed]`. It's the
+  evening shift (§4.5): lamps instead of sun, the same day arc compressed to 18:00 to 22:00, every
+  logo on a light plate, every firm color through `--firm-ink-dark`. The theatre, the close and For
+  platforms are dark in both modes. The proof and the intake form honor dark mode too, with values
+  at full Moonlit contrast.
+- **Phones.** Every picture has its own phone composition (§9). Tap targets 48 px min, primary
+  buttons 56 px, fields 56 px. The sticky bottom CTA after the hero (§6.3). Phones get Tier B by
+  default: CSS light and short video loops, no 3D unless the frame probe says the phone can.
+  Nothing on the client's pages (intake form, client link) loads WebGL at all, ever.
+- **Older eyes.** Body never below 17 px, nothing below 14 px except the deliberate 12 px "with
+  CoFile". Text contrast at least 7:1 for body and 4.5:1 for everything else, including over the
+  light layer (the text guard). Atkinson Hyperlegible for every word that matters. Sentence case,
+  no letter-spaced capitals. Labels above fields, never placeholder-only. Focus rings always
+  visible. The site works at 200% zoom and in Windows high-contrast mode (the light layer switches
+  off under `forced-colors: active`).
+- **Spanish.** Spanish runs about 20 to 30% longer. No fixed widths on buttons, chips, nav items or
+  price cells; headlines balance rather than force breaks; chips wrap to two lines inside the table
+  on phones; the nav collapses to the menu below 1100 px when its labels need it; the gilded names
+  fit by size and then by a second line. Fraunces and both Atkinson faces cover Spanish fully
+  (á é í ó ú ñ ü ¿ ¡).
+
+---
+## 13. Production
+
+### 13.1 Tools
+
+| Job | Tools |
+|---|---|
+| Layout, components, tokens | Figma with variables for every token (light, dark, the hours, the firm tokens); tokens exported to CSS custom properties |
+| Mark, wordmark, lettering, glyphs | Glyphs (the wordmark as a tiny font, plus SVG and pixel masters); the gilded lettering and stroke paths as SVG |
+| 3D | Blender (modelling, lighting to match the photographs, baking gobos and light maps); Substance 3D Painter (oak, steel, brass, floorboards, acrylic); gltf-transform (Draco or meshopt compression, KTX2 textures via KTX-Software) |
+| Real-time | three.js for the door scenes; OGL plus hand-written WebGL2 shaders for the light layer, the sunbeam, the light table and the stage; Theatre.js to choreograph the 3D moments with keyframes, and its exported JSON drives production |
+| DOM motion | CSS and the Web Animations API for UI; GSAP ScrollTrigger only for the two scroll-scrubbed moments (M7, the How it works sticky proof) |
+| Text in 3D | msdf-atlas-gen for MSDF atlases of the example firms' lettering and of the sign-up page's live gilding (a roman and a block alphabet) |
+| Video fallbacks | ffmpeg (AV1 with SVT-AV1, HEVC, H.264 last resort), posters as AVIF |
+| Color | culori (OKLCH) inside the brand adaptor, run server-side when a firm saves Branding |
+| Email | MJML, tested on Litmus or Email on Acid across Apple Mail, Gmail, Outlook (Windows and web), iOS and Android |
+| Quality | Lighthouse CI and WebPageTest against the budgets below; Playwright visual tests of every page in all three tiers and both modes; axe and manual screen-reader passes (VoiceOver, NVDA, TalkBack) |
+
+### 13.2 How it's built (progressive enhancement)
+
+1. **Tier C first, and complete.** Server-rendered HTML and CSS: every picture as live DOM UI plus a
+   still AVIF of its light. This is the site. It ships before anything else.
+2. **Tier B on top.** CSS gobo layers and video loops, loaded after the first paint.
+3. **Tier A on top of that.** A `LightLayer` client island loads on idle after LCP (and never before
+   the first interaction on phones). Each 3D scene is a dynamic import triggered by an
+   IntersectionObserver one viewport ahead, and only one three.js scene is alive at a time: leaving
+   a scene disposes it.
+4. **The firm's and clients' pages never load any of it.** No WebGL, no video, no light layer: the
+   Pane, the doorlight wash (a static gradient) and fast forms.
+
+### 13.3 Performance budgets
+
+| Measure | Budget |
+|---|---|
+| LCP (home, mid-range Android over 4G) | ≤ 1.8 s. The LCP element is the hero headline, never a picture |
+| CLS | < 0.02: every picture reserves its box |
+| INP | < 150 ms |
+| First-load transfer (HTML, CSS, fonts, JS before idle) | ≤ 300 KB |
+| Fonts | Fraunces subset to Latin and Spanish, three axes, about 85 KB; Atkinson Next variable about 60 KB; Mono subset about 30 KB. Fraunces and Atkinson Next preloaded, `font-display: swap` with metric-matched fallbacks (`size-adjust`) so nothing jumps |
+| JS before idle | ≤ 70 KB gzip |
+| Light layer chunk | ≤ 45 KB gzip, plus its gobos (about 180 KB each as KTX2, fetched per section) |
+| three.js shared chunk | about 150 KB gzip, fetched once, only in Tier A |
+| Each 3D scene | ≤ 120 KB JS plus its assets (§7.2) |
+| Each video loop | ≤ 600 KB |
+| Whole home page after a full scroll | Tier A ≤ 3.5 MB · Tier B ≤ 2.2 MB · Tier C ≤ 900 KB |
+| GPU | ≤ 2 ms a frame for the light layer, ≤ 8 ms for a 3D scene, on Intel Iris Xe |
+| Firm's pages and client pages | ≤ 120 KB JS, no WebGL, no video |
+| The proof page | ≤ 60 KB JS in total |
+
+### 13.4 Asset list
+
+| # | Asset | Format | From |
+|---|---|---|---|
+| 1 | Doorlight mark: vector, pixel masters (16, 20, 24 px), app icons | SVG, PNG | Lettering artist |
+| 2 | CoFile wordmark: vector, pixel masters (11, 12, 14 px), lockups | SVG, a small font file | Lettering artist |
+| 3 | "with CoFile" lockup, screen and 2× email PNG | SVG, PNG | Lettering artist |
+| 4 | Example firm logos: Harbor & Pine roundel and horizontal, Northgate Payroll, Best Accounting | SVG | Illustrator |
+| 5 | Gilded lettering for Harbor & Pine CPA and Northgate Payroll, with stroke paths | SVG | Lettering artist |
+| 6 | Two real gilded door panels (Harbor & Pine, Northgate) for scanning and filming | Glass | Glass gilder |
+| 7 | Scans: gold and silver leaf normal and roughness maps, oak, steel, brass | 1K KTX2 | 3D studio |
+| 8 | Gobos G1–G9 | KTX2 2048², AVIF 1600 | 3D studio from the light studies |
+| 9 | 3D scenes: the door, two doors, light table, homecoming desk, the stage | glTF (Draco or meshopt) | 3D studio |
+| 10 | HDR environments: bright office, golden-hour room, theatre | 1K HDR | Photographer and 3D studio |
+| 11 | MSDF atlases: roman and block gilding alphabets | PNG plus JSON | 3D studio |
+| 12 | Video loops for Tier B: P2 doors (×2), P7 stage, P9 door glow, the For firms film loop | AV1, HEVC, posters AVIF | 3D studio and film crew |
+| 13 | Tier C stills for every picture, light and dark | AVIF | 3D studio |
+| 14 | Light studies (all hours, HDR brackets, plates) | RAW, EXR | Architectural photographer |
+| 15 | Portraits of CoFile's filing professionals (at least 9 people) | RAW, graded JPEG | Portrait photographer |
+| 16 | Firms and clients series | RAW, graded JPEG | Portrait photographer |
+| 17 | The gilding film: 20-second loop, 45-second film | ProRes masters, web encodes | Craft-film director |
+| 18 | Icon set (about 30 icons) and the ghost-light glyph | SVG | Icon designer |
+| 19 | Empty-state and error vignettes (desk, door gap, corridor) | SVG | Illustrator |
+| 20 | Blue-noise dither tile, plaster tile | PNG | 3D studio |
+| 21 | Email headers: documents in golden light, the waiting door in daylight | 2× JPEG | 3D studio |
+| 22 | Open Graph cards: one per page, each a still from its picture | 1200 × 630 PNG | 3D studio |
+
+### 13.5 What I'd commission, and the briefs
+
+1. **A lettering artist who also draws type.** The Doorlight mark (§3.1), the CoFile wordmark
+   (§3.2) with its pixel masters, the "with CoFile" lockup, and the gilded lettering for the two
+   example doors in a sign painter's tradition: roman capitals for Harbor & Pine, block capitals for
+   Northgate Payroll, each with stroke paths in a real gilder's stroke order. Brief: "Small type
+   that is beautiful at 11 px; big lettering that is beautiful on glass. Never quote any real firm's
+   or company's mark."
+2. **A traditional glass gilder (a sign-painting studio).** Letter two real glass door panels with
+   the example firms' names, water-gilded, burnished with matte centres, outlined and shaded, each
+   signed tiny "with CoFile" in the corner. Allow the film crew and the scanning team in for the
+   whole process. Two days of lettering, one of filming.
+3. **A real-time 3D and WebGL studio.** The light layer, the five scenes, the gilding shader, the
+   tier system and every fallback, built to the budgets in §13.3. Brief: "Light first. The UI in
+   every picture is live DOM: you light it, you don't render it. Every moment must have a good end
+   frame and must complete without scrolling."
+4. **An architectural and interiors photographer.** The light studies (§7.4 A). Brief: "We're
+   photographing light, not rooms. Same room, every hour from 07:30 to 22:00, HDR brackets and clean
+   plates, a gray card in every frame."
+5. **A documentary portrait photographer.** The people behind it, firms, and clients (§7.4 B, C, D).
+   Brief: "Real people in real light. Nobody looks at the camera unless they're thinking. No stock
+   gestures: no handshakes, no pointing at screens, no laughing at salads."
+6. **A craft-film director** with a small macro crew. The gilding film (§7.4 E).
+7. **An icon designer.** The 24 px set and the ghost-light glyph (§7.6), sharing the mark's 20.6°
+   lean on diagonals.
+8. **An accessibility specialist** with a panel of low-vision testers aged 40 to 70, twice: on the
+   Tier C build, and on Tier A before launch.
+9. **A Spanish-speaking typographer** to review every page set in Spanish (line breaks, the gilded
+   names, chips).
+10. **An email developer** for both email families and their dark modes.
+
+### 13.6 The order to build in
+
+Each phase ships on its own.
+
+| Phase | What | Why first |
+|---|---|---|
+| 0 | Tokens, the brand adaptor, the three faces, the mark and wordmark | Everything reads from them |
+| 1 | Components, then the proof page | The proof is the firm's most important moment in the product |
+| 2 | The firm's pages: filing desk, setup and branding with the live preview, client pages and the intake form, emails | Firms and their clients use these every day; the brand promise is kept here |
+| 3 | The home page and the seven pages behind it in **Tier C**: every picture as live DOM plus stills, the day's static light per section | A complete, fast, beautiful site, with every picture designed |
+| 4 | **Tier B**: CSS light layers and the video loops | Most phones and older laptops |
+| 5 | **Tier A light layer** | The day, in real time |
+| 6 | **3D scenes**: the two doors (home), then the door (For firms, Close, setup done), the stage, homecoming, the light table | In the order the home page sells |
+| 7 | **Sign-up's live gilding** (M12) | The conversion moment, built on the door scene |
+| 8 | The dashboard and API docs in the full visual language | Platforms come with a team that's already talking to us |
+| 9 | Performance, accessibility and tier tuning on real devices; Spanish pass | Before any launch announcement |
+
+---
+
+## 14. What I'd strip from today's visuals
+
+Visuals only; the words stay.
+
+- **The manila folder tab with a check cut into its edge.** It says "filing cabinet" and "approved",
+  which makes CoFile look like paperwork and compliance, the opposite of "say yes, under your own
+  name." It's also CoFile's mark being clever where the firm's name should be the hero. Replaced by
+  the Doorlight, which is small, warm and about the firm's door.
+- **The paper-and-ink palette** (the cream #F7F3EA and #FFFDF8 grounds, the #1C2430 ink, the
+  #FBEFD5 note boxes): it reads as stationery and legal pads, the look of every legal-tech site, and
+  it puts everything on paper when the story is about light and a firm's own colors. Replaced by a
+  lit room: Shade, Sunlit, Ink, Lamp, Night.
+- **The green primary button** (#1F6B4F) on CoFile's pages and on the proof. On the proof the
+  firm's own color must lead; on CoFile's pages, green plus a tick reads "approved, compliant", which
+  is the safety story the brief says not to sell. Replaced by Lamp on CoFile's pages and
+  `--firm-ink` on the firm's.
+- **The blue email button** (#1f4fd1): unbranded, neither the firm's color nor ours. Replaced by the
+  two email families.
+- **IBM Plex Sans and Mono with Source Serif 4.** Competent, but the voice of a developer tool, and
+  a serif without warmth. Replaced by Fraunces for the voice, and Atkinson Hyperlegible for every
+  word that has to be read exactly, under an open license that works on firms' own sites.
+- **A green tick before every list item.** It turns every benefit into a compliance checklist, and
+  makes the selling lists and the reassurance lists look the same. Replaced by Doorlight markers for
+  what you get, and plain en rules for reassurance.
+- **The same two-column band for every section.** No rhythm, no hierarchy, no day. Replaced by the
+  4 + 7 alternation with light from the text side, two full-bleed night sections, and the hour.
+- **The stand-in pictures** (bordered boxes of labeled HTML and chips). They did their job: they
+  showed what each picture has to say. Each is replaced by a designed picture (§9) that says it
+  without needing to be read.
+- **Color-only status dots** in the state tiles. Replaced by the shape-coded coverage lamps, which
+  work in grayscale and for color-blind readers.
+- **The highlighter marks on the sample proof** and the **yellow note box** for the consent on the
+  proof page. Highlighter yellow reads as "error found", and a yellow box reads as a warning.
+  Replaced by the light table's glow on the key values and a firm-colored rule for the consent.

@@ -2131,3 +2131,600 @@ chip and "Switch to this plan", "Choose this plan" or "Not available yet" as the
 paragraph at 15/22 Slate. The registered-agent services panel as a card below.
 
 ---
+
+### 10.26 The proof (the page the firm approves)
+
+The firm approves the proof, on its desk and by email, and the proof wears the firm's own brand.
+That matters even though the client never sees it: it's the firm's signature on the work, and it
+should feel like signing off a return on the firm's own letterhead. It is rendered on the server
+(`src/approvals/render.ts`), so every value below is an inline-able token, and the page must look
+right with no JavaScript.
+
+```
+Phone (390), top to bottom                     Desktop: the same column, 680px, centered on Paper
+┌▬▬▬▬▬▬▬▬▬▬▬▬▬ 4px house band ▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬┐
+│ [logo] Harbor & Pine CPA     ▪ with CoFile │  nameplate, 64px
+├────────────────────────────────────────────┤
+│ ◌ Rehearsal: nothing will be filed or paid,│  Iris band, only for a rehearsal
+│   even if you approve.                     │
+├░░░░░░░░░░░░ house wash ░░░░░░░░░░░░░░░░░░░░┤
+│ Two Sisters Bakery LLC …                   │  firm font 28/34 (34/40 desktop)
+│ Filing reference 7f3c…. Please decide by   │  15/22, reference in Mono,
+│ December 3, 2026, 5:00 PM Eastern. After … │  the deadline in Medium
+├────────────────────────────────────────────┤
+│ ┃ By approving, you confirm every detail   │  the consent note: 17/26,
+│ ┃ below is correct and authorize …         │  3px house-ink rule on the left
+│ ┃ Government sites don't save drafts, …    │
+│                                            │
+│ The state's review page                    │  firm font 21/28
+│ This is a picture of the state's own …     │
+│ ┌────────────────────────────────────────┐ │  the real screenshot, framed:
+│ │      (the state's review page)         │ │  1px Pebble, radius 8; tap to open
+│ └────────────────────────────────────────┘ │  full size
+│ Filing details                             │
+│ Social Security numbers are masked …       │
+│ FORMATION                                  │  group header from the first segment
+│ Business name    TWO SISTERS BAKERY LLC    │  label 15 Medium Slate / value Mono 16
+│ Members › 1 › Name   Ana Ortiz             │  nested segments as a Slate prefix
+│ …                                          │
+│ State fees                                 │
+│ Nothing is charged on this page. …         │
+│ Formation filing fee            $100.00    │  tabular, right-aligned
+│ NJ portal fee, by card            $3.50    │
+│ ────────────────────────────────────────── │  1.5px Graphite
+│ Total                           $103.50    │  600
+│ ┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄ │
+│ Maximum you authorize  $110.00 (if the …)  │  Medium, on a dashed rule
+├▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬ house band ▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬┤
+│ One-time code sent to you  [ _ _ _ _ _ _ ] │  Mono 22, letter-spaced
+│ What should change? (Needed only if you    │
+│ ask for changes)  [                     ]  │
+│ [ Approve, and authorize submission and  ] │  house button, 56px, full width
+│ [ payment                                ] │
+│ [ Request changes                        ] │  secondary, 52px
+├────────────────────────────────────────────┤
+│ Questions: hello@harborpine.example        │  14 Slate
+│ ▪ with CoFile                              │
+└────────────────────────────────────────────┘
+```
+
+(The reference, the fee cap and the email in this sketch stand for whatever the filing carries.
+Group headers like "FORMATION" are drawn from the payload's own keys and set in small caps,
+not in all-caps letters.)
+
+- **Ground**: Paper everywhere; the title band in the house wash, full bleed.
+- **Nameplate**: the logo at the proof size from section 3.5; the firm's name in its font, 600
+  17px; "with CoFile" at the right end for partner firms. A platform's white-label proof shows the
+  platform's name and support contact and no CoFile mark, as it does today.
+- **Rehearsal band**: Iris tint, Iris text 16/24 Medium, a dashed Iris tag before it. It replaces
+  today's yellow note: a rehearsal is not a warning.
+- **The consent note** is legal text that matters, so it is set at full body size (17/26), never
+  small or grey, with a 3px house-ink rule on its left and 20px padding. The EIN sentences join it
+  as the renderer adds them.
+- **Filing details**: the renderer's rows, grouped visually where the label prefix changes: a
+  group header in 13px Medium small caps, Slate, 24px above. Labels 15/22 Medium Slate (40% width
+  on desktop; on phone the label sits above its value). Values in CoFile Mono 16/24, wrapping
+  anywhere for long addresses. Stone hairlines.
+- **State fees**: the same table with tabular figures right-aligned, the total in 600 under a
+  1.5px Graphite rule, and "Maximum you authorize" on its own row under a dashed Pebble rule, its
+  explanation in 15px Slate.
+- **The decision card**: a Paper card under a 4px house band, 24px padding. The one-time code field
+  (when required) in CoFile Mono at 22px with 0.3em tracking; the change field at 17px, 3 rows; then
+  the buttons. "Approve, and authorize submission and payment" is the house button at 56px, full
+  width on phone and 100% of the column on desktop (it's a long label and should never be squeezed);
+  "Request changes" is a 52px secondary under it.
+- **Phone helper**: once the reader has scrolled past "State fees", a 64px Paper bar with a Stone
+  top hairline offers "Approve, and authorize submission and payment" fixed at the bottom of the
+  screen, so the firm doesn't hunt for it on a long filing. It never appears before the fees
+  have been on screen.
+- **Approving** (motion): the button's fill sweeps a lighter house tint (240ms), the label is
+  replaced by a three-dot progress (no new words), then the decision page loads. Where the browser
+  supports cross-document View Transitions, the nameplate is a named element and holds perfectly
+  still while the body cross-fades (240ms).
+- **Decision page** (`renderDecisionPage`): the same top, the heading in the firm's font at 28/34,
+  the paragraphs at 17/26. After an approval, illustration I9 in the house color sits above the
+  heading at 120px; after a change request, nothing (it isn't a celebration).
+- **Print**: a print stylesheet makes the proof a clean document a partner can file: nameplate and
+  band at the top of page one, the firm name and filing reference in a running header, all
+  details and fees, no form, no buttons, page numbers in the footer. Eleven-point body.
+- **Dark mode**: follows the device. Ground Graphite 2; values Chalk Text; the screenshot keeps a
+  white mat around it so the state's bright page doesn't glare; the house wash uses its dark
+  derivation; the logo sits on its white plinth.
+
+### 10.27 A page for each filing (`cofile.app/<firm>/<filing>`)
+
+For example `cofile.app/bestaccounting/llc-filing-new-york`: a firm's permanent page for one
+filing, which its clients open from an email, a text or the firm's own website. Phone first.
+
+```
+Phone
+┌▬▬▬▬▬▬▬▬▬▬▬▬▬▬ 4px house band ▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬┐
+│ [logo] Best Accounting        ▪ with CoFile │  white header, 64px
+├░░░░░░░░░░░░░░ house wash ░░░░░░░░░░░░░░░░░░░┤
+│ New York LLC formation                     │  firm font 28/34
+│ Articles of Organization for a domestic    │  17/26 Slate
+│ LLC, … After you send this, Best           │
+│ Accounting checks every detail and fee …   │
+├────────────────────────────────────────────┤
+│ ◌ This page is in rehearsal for now. …     │  Iris notice (only if not live)
+│ State filing fee $200, paid only after …   │  15/22
+│ Fields marked * are required.              │
+│ ┌ Name ──────────────────────────────────┐ │  each section a card
+│ │ …                                      │ │
+│ └────────────────────────────────────────┘ │
+│ ┌ Authorizations ────────────────────────┐ │
+│ └────────────────────────────────────────┘ │
+│ Next, Best Accounting checks it and …      │
+│ By sending, you agree to CoFile's Terms …  │  13/18 Slate
+│ [        Send to Best Accounting        ]  │  house button, 56px
+│ Questions about this form? Email …         │
+└────────────────────────────────────────────┘
+```
+
+("Best Accounting" stands for the firm's display name; the slug in the brief's example is all the
+copy gives us.)
+
+- Paper ground, the client page layout (680px on desktop, centered, with the title band and header
+  full bleed).
+- The rehearsal notice ("This page is in rehearsal for now. …") is Iris, not yellow.
+- Sections are Paper cards with a 1px Stone edge, legends in the firm's font; fields at 56px tall
+  on phone (section 11) with 17px text.
+- The submit label "Send to {firm}" is in the firm's font when it's a preset. The legal line
+  ("By sending, you agree to CoFile's Terms of Service; …") at 13/18 Slate, its links underlined.
+- **Sent**: the form is replaced by a confirmation panel: illustration I9 in the firm's color at
+  120px, "Thank you, we have your details." in the firm's font at 24/30, and "Next, the firm checks
+  every detail and approves the filing. Nothing is filed or paid until it does. You can close this
+  page." at 17/26. The client's last impression is the firm's color, not ours.
+- Desktop: the same column, with the header's nameplate at full client-page size.
+
+### 10.28 The client link page (`/i/<token>`)
+
+The same design as 10.27 with the link's label after the title in Slate ("New Jersey LLC formation
+· Ana Ortiz"), its own lede ("After you send this, {firm} checks every detail and approves it.
+Nothing is filed until they do.") and footnote, and the support line at the foot. Signing, when a
+form needs it, uses the signature pad full width. Dead or used links show the neutral page from
+10.14.
+
+---
+
+### 10.29 Platforms: the dashboard (`/dashboard`)
+
+CoFile's own room, used by a platform's staff. It wears CoFile: graphite, chalk, the Open mark.
+It shares the desk's shell (section 10.15) with CoFile's nameplate (Open mark and wordmark) in place
+of a firm's, and a Graphite selection bar instead of a house one. Nav: Overview, Filings, Ready to
+pay, Firms, API keys, Webhooks, Setup, Team, Billing (or Sign-ups for the platform's own account),
+Docs.
+
+- **Overview**: the account's name as the title. Notices as Your-turn cards (section 10.16). Three
+  stat cards: "Filings" with the total in GT America Bold 40px tabular and the "… live, …
+  rehearsals" line drawn as a 6px split bar (Leaf for live, Iris for rehearsals) above its words;
+  "Webhook deliveries" with delivered, pending and failed; "API keys" with its count and "Manage
+  keys". Then the three charts, "By status", "By state", "By month", as horizontal bars (12px tall,
+  radius 2, values right-aligned in tabular figures): status bars in their status tones, state and
+  month bars in Graphite, the current month in Graphite with the others at 45%. "As of …" in 13px
+  Slate Mono.
+- **Filings**: the firm filter select, then the table with the filing id under each title in Mono
+  13px Slate and the Iris rehearsal chip.
+- **Firms** and **a firm**: the list with ids in Mono; a firm's page with "Filing desk", "Public
+  pages and website widget" (each page's address as a Mono pill with copy, the widget code in a
+  code block) and "Invite staff".
+- **API keys**: the table with key prefixes in Mono; a new key appears once in a Chalk Deep panel
+  in Mono 17px with a copy button, beside the existing words about it being shown once.
+- **Webhooks**, **Setup**, **Team**, **Billing**, **Sign-ups**: tables and forms from section 11.
+  State portal logins list each portal by name with its connect form; nothing on screen ever shows
+  a stored secret.
+
+### 10.30 API docs (`/docs`)
+
+```
+Desktop (≥ 1360)
+┌ header: ▢▪ CoFile    API docs   Dashboard ───────────────────────────────────────────────────┐
+├──────────────┬───────────────────────────────────────────┬────────────────────────────────────┤
+│ Overview     │ CoFile API                                │                                    │
+│ Guides       │ File state business paperwork from your … │  ┌ curl ─────────────────────────┐ │
+│  Authentic…  │                                           │  │ curl https://…/v1/filings \   │ │
+│  Filings and │ Quick start                               │  │  -H "x-api-key: $COFILE_…"    │ │
+│  the lifecy… │ 1  Get an API key from the dashboard.     │  └───────────────────────────────┘ │
+│  …           │ 2  Set up the client company …            │                                    │
+│ Reference    │ 3  Create a filing with "dryRun": true, … │                                    │
+│  Endpoints   │ 4  Add a webhook endpoint …               │                                    │
+│  OpenAPI     │                                           │                                    │
+└──────────────┴───────────────────────────────────────────┴────────────────────────────────────┘
+```
+
+- Chalk ground; a 240px nav (section headers "Guides" and "Reference" in 13px Medium Slate small
+  caps; links 15px, the current one with a Graphite bar); a 720px article at 17/28; from 1360px a
+  right column where code blocks for the current section sit sticky. Below 1360px code sits inline.
+- **Code blocks**: Graphite `#16191D` ground, radius 12, 20px padding, CoFile Mono 14/22, Chalk Text
+  type. Syntax: keys `#C9C3FF`, strings `#9ED6B4`, numbers `#F2B65A`, comments `#8A9099`,
+  punctuation `#A8AEB6`. A copy button top right `[copy needed: "Copy" and "Copied"]`.
+- **Rehearsal in code**: wherever `"dryRun": true` or `/dry-run` appears, in prose or in a block, it
+  is underlined with a 2px Iris rule and gets Iris tint behind it. Developers learn the same color
+  language as firms.
+- **Endpoints** (`/docs/reference`): each endpoint a section with its method chip and path in Mono
+  20px. Method chips are outline Mono chips, 12px Medium: GET Slate, POST Graphite filled, PUT and
+  PATCH Graphite outline, DELETE Brick outline. "Query", "Body" and "Responses" in 13px Medium small
+  caps; status codes in Mono chips.
+- **Guide cards** on the docs home: a two-column grid of Paper cards, title 18px Medium, summary 15px
+  Slate.
+- Tables (statuses, events, fees) use the product table.
+
+### 10.31 The white-label hosted page (`/e/<account>/<firm>/<filing>`)
+
+A platform's firm's page for one filing: exactly the design of 10.27, with that firm's nameplate,
+house colors and font. CoFile's mark appears where the product shows it today and nowhere else.
+
+### 10.32 The embed widget
+
+The firm's form inside the firm's own website, in a frame. It must look as if the firm's web
+designer built it.
+
+- No header, no band, no page ground of its own: Paper with 16px padding, radius 12, and a 1px
+  Stone edge so it sits cleanly on any site. The firm's font for headings; CoFile Sans for fields.
+- The house button for "Send to {firm}"; the rehearsal notice in Iris when the filing isn't live.
+- "Filed with CoFile" at the foot, 12px Slate, with the tag.
+- Works from 300px to 720px wide; the frame resizes to its content as it does now. Light only,
+  because the host page's theme can't be known.
+
+### 10.33 Emails
+
+**The template** (one system for every email):
+
+| Part | Spec |
+|---|---|
+| Frame | 600px, centered; outer ground Chalk `#F5F3EE`; a Paper card with radius 12 where the client supports it; 32px padding (20px under 480px) |
+| Top | A 4px band in the house color (a table cell's background), then the nameplate: the logo as a PNG at 2×, 40px tall, **always on a white plinth** so dark-mode inversion in mail apps can't ruin it, and the firm's name in 18px bold system sans |
+| Body | 16/24 system sans, `#1B1F24`; headings 20/28 bold |
+| Button | A bulletproof button (table cell plus VML for Outlook): house-button color, house-on label, 16px bold, 48px tall, radius 8, at least 220px wide. Under it, the fallback link in 13px Slate |
+| Rehearsal line | When present, a full-width Iris-tint panel with Iris text, above the body |
+| Foot | The support line ("Questions? Email …") in 13px Slate, then "with CoFile" (a 6px Graphite square cell plus text) for partner firms |
+| Dark mode | `color-scheme: light dark`, explicit dark styles for the apps that honor them; the plinth protects the logo in the ones that invert |
+| Preheader | Hidden preview text `[copy needed: one line per email]` |
+| Plain text | Every email ships a plain-text part with the same words |
+
+**The emails**
+
+| Email | Brand | Subject (as the code has it) | Its one button | Design note |
+|---|---|---|---|---|
+| The proof is ready (to the firm) | The firm's | "Your proof is ready to approve: {filing}" | "Open your proof" | The firm's own nameplate. When the state's review page is attached, a 240px thumbnail of it sits above the button in a 1px Pebble frame |
+| Documents back (completed) | The firm's | "Completed: {filing}" | The filing page link `[copy needed: a button label; it has none today]` | Each document listed as a row with a small page icon and its name, attachments noted as the body says |
+| EIN issued | The firm's | `[copy needed: subject and body; no template exists yet]` | `[copy needed]` | The EIN set in Mono 28px on a Chalk Deep panel, the IRS letter as an attachment row |
+| More information needed | The firm's | "More information needed: {filing}" | none | The missing items as a bulleted list |
+| Changes requested | The firm's | "Changes requested: {filing}" | none | The comment quoted in a Chalk Deep panel |
+| Rejected by the state | The firm's | "Rejected by the state: {filing}" | none | Brick rule on the left of the reason; never a red banner |
+| Card security code needed | The firm's | "Card security code needed: {filing}" | "Enter security code" | The card glyph with its last four digits |
+| Firm operations (choose a name, review before submit, site changed, failed, blocked, checking) | The firm's | As in `src/comms/render.ts` | "Choose a name" / "Review the filing" where present | The same template, body only |
+| Confirm your email | CoFile's | "Confirm your email for CoFile" | "Confirm my email" | CoFile's nameplate: the Open mark and wordmark on Paper, a Graphite band, a Graphite button |
+| Reset your password | CoFile's | "Reset your password" | "Choose a new password" | As above |
+| Your partner account is open; Your CoFile account is ready | CoFile's | As in `src/users/routes.ts` | Their link | As above, with illustration I9 drawn in Graphite at 96px |
+| Invited to a firm's filing desk | The firm's | "You're invited to {firm}'s filing portal" | Its link | The firm's nameplate; "with CoFile" in the foot |
+
+The email to a client asking them to fill in a link is written in the firm's own mail app from
+the Client links page, so it carries the firm's own email design, not ours.
+
+---
+
+## 11. Components
+
+One library serves cofile.app, the desk, the client pages, the dashboard and the home page's
+pictures. Every component reads the house tokens, so the same button is Graphite on cofile.app,
+Pine on Harbor & Pine's desk and Ember on Northgate's.
+
+### 11.1 Buttons
+
+| Kind | Fill | Label | Border | Use |
+|---|---|---|---|---|
+| Primary (CoFile pages) | Graphite `#1B1F24`; hover `#2B3138`; pressed `#0F1215` | White | none | "Run a free rehearsal", "Create account", "Log in" |
+| Primary (firm pages) | `--house-button`; hover 8% darker in OKLCH; pressed 14% darker | `--house-on` | none | "New filing", "Create the proof", "Approve, and authorize submission and payment", "Send to {firm}" |
+| Secondary | Transparent; hover 4% Graphite (or house-ink) wash | Graphite (or house-ink) | 1.5px Graphite (or house-ink) | "See pricing", "Request changes", "Send a client a link" |
+| Quiet | Transparent | Graphite, underlined on hover | none | "Log in" in the header, "Log out" |
+| Destructive | Transparent; on confirm, Brick fill with white | Brick | 1.5px Brick | "Remove", "Turn off" |
+
+| Size | Height | Padding | Label | Radius |
+|---|---|---|---|---|
+| Large | 56px | 0 28px | 17px Medium | 10px |
+| Default | 48px | 0 22px | 16px Medium | 8px |
+| Small | 40px | 0 16px | 15px Medium | 8px |
+| Compact (tables only) | 32px | 0 12px | 14px Medium | 6px |
+
+- Pressed: translate 1px down, 80ms. Focus: section 11.18.
+- Busy: the label stays (the code already swaps in "Sending…", "Saving…") and a three-dot progress
+  sits after it; the button keeps its width.
+- Disabled: 40% opacity, no hover.
+- Labels never truncate; long labels wrap to two lines and the button grows (Spanish, and "Approve,
+  and authorize submission and payment").
+- Full width on phone for every page's main action.
+
+### 11.2 Links
+
+Inherit the text color (Graphite, or `--house-2-ink` on firm pages), always underlined: 1px,
+offset 3px, the underline at 45% of the text color, going solid on hover (160ms). "Next" links with
+an arrow ("For firms", "How it works", "See all plans") are 18px Medium with a 16px arrow icon that
+moves 3px right on hover. External links get the external-link icon at 14px.
+
+### 11.3 Fields
+
+| Part | Spec |
+|---|---|
+| Label | Above the field, 15/20 Medium Graphite, 8px gap. Required: a Slate asterisk after it (the form explains "Fields marked * are required.") |
+| Input | 48px tall (56px on client pages on phone), 17px text, 14px horizontal padding, Paper fill, 1.5px Pebble `#8E9399` border, radius 8 |
+| Hover | Border Graphite at 70% |
+| Focus | Border 2px Graphite (house-ink on firm pages) and a 4px ring in the house wash (Chalk Deep on CoFile pages) |
+| Help | Under the field, 15/22 Slate, max 64 characters a line |
+| Error | Border 2px Brick; the message under it in 15px Brick after a 16px round "!" icon; the page's own error summary as a Brick notice at the top with links to each field |
+| Values the state will see | The Mono variant: CoFile Mono 17px, for EINs, references, slugs, codes and API keys |
+| Select | The same box with a 20px chevron; options in the native list |
+| Textarea | Minimum 3 rows, resizable vertically, the counter ("120 / 500") in 13px Slate tabular |
+| File drop | 120px tall, dashed 1.5px Pebble border, radius 12, an upload icon and the native button; a dragged file turns the border solid house-ink |
+| Color | A 44px swatch button opening the picker, the hex in a Mono field, the nine ready colors as 32px rounded squares |
+
+### 11.4 Choices
+
+- **Checkbox and radio**: 22px, 1.5px Pebble border (radius 6 for checkbox, round for radio);
+  checked fill Graphite on CoFile pages, the house color on firm pages, with a white glyph.
+- **Choice rows**: for radios and yes/no fields with long labels, a full-width row (min 56px,
+  16px padding, 1px Stone border, radius 10); selected rows take a 2px house-ink border and the
+  house wash. "Yes" / "No" sit as two rows side by side.
+- **Authorization rows**: as choice rows, with the statement at 17/26 and the whole row clickable.
+
+### 11.5 Cards
+
+Paper, radius 16 (12 inside dense desk pages), 24px padding in the desk and 32px on cofile.app,
+`e1`. A card that leads a page (the proof-ready card, the match card) gets a 4px house band across
+its top. Cards never nest more than one level.
+
+### 11.6 Chips, squares and pills
+
+- **Status chip**: 28px tall, radius 14, 13/16 Medium, 10px horizontal padding, a 10px glyph
+  before the label: Leaf (a filled circle with a tick), Marigold (a half-filled circle), Brick (a
+  filled circle with "!"), Slate (a hollow circle), Iris (a dashed circle). Tints and text from
+  section 4.2. Labels are the product's own (`lib/status.ts`).
+- **Status squares**: 12px squares (radius 2.5) for coverage: solid Leaf for Live, solid Iris for
+  rehearsed, a 1.5px Pebble outline for recorded or offered, a dashed outline for planned. Always
+  with an accessible label.
+- **Source pills** (in the Requests picture and the forms filled from a message): 24px tall,
+  radius 12, 12px Medium; "from the text" on house tint with house-ink text, "already filled" on
+  the neutral tint.
+- **Mono pills**: page addresses, ids, `/file`: CoFile Mono 14px on Chalk Deep, radius 6, 4px ×
+  8px padding, with an optional copy button.
+
+### 11.7 Notices
+
+A rounded panel (radius 12, 16px × 20px padding, a 1px border in the tone at 30%) with a 20px icon
+and the sentence at 16/24. Tones: information (Slate), someone's turn (Marigold), problem (Brick),
+done (Leaf), rehearsal (Iris), from your message (house tint). The tone the product calls `warn`
+splits in two: rehearsal notices become Iris, and only genuine "someone needs to act" notices stay
+Marigold.
+
+### 11.8 Price card and price strip
+
+**Price card** (Pricing page, Billing):
+
+```
+┌─────────────────────────────┐
+│ Starter                     │  title-2, 22/28 Medium
+│                             │
+│ $250  a month               │  48/52 Medium tabular + 18px Slate on the baseline
+│ or $2,500 a year (2 months  │  15/22 Slate
+│ free)                       │
+│ ─────────────────────────── │  1px Stone
+│ ▪ 6 filings a month         │  17/26, Graphite tags
+│ ▪ $40 for each filing past  │
+│   that                      │
+│ ◉ A filing professional     │  20px portrait tile as the bullet
+│   takes over when a filing  │
+│   needs one                 │
+│ [ Switch to this plan ]     │  Billing only
+└─────────────────────────────┘
+```
+
+Paper, radius 16, 32px padding, `e1`, equal heights in a row. The emphasized card (Growth on the
+Pricing page; "Your plan" on Billing) gets a 1.5px Graphite outline and rises 8px. On Billing, the
+current plan carries the Leaf "Your plan" chip at the top right.
+
+**Price strip** (home page): section 9.8. Four cells between 1.5px Graphite rules, the term in
+title-1 tabular, its description in body Slate.
+
+### 11.9 Tables
+
+- Header row: Chalk Deep, 14/20 Medium Slate, sentence case, 44px.
+- Rows: 56–60px, 16px text (15px in dense desk tables), Stone hairlines, a house-wash hover on firm
+  pages and Chalk Deep hover on CoFile pages.
+- Numbers right-aligned in tabular figures; dates in tabular figures in Slate.
+- The first column holds the link, in Medium.
+- Rows that need the firm: a 3px house bar on the left edge.
+- Under 640px, every table becomes a list of cards (first column as the title, the rest as label and
+  value pairs, chips on their own line).
+
+### 11.10 Navigation
+
+- **Site header** and **menu sheet**: section 9.0.2.
+- **Desk sidebar** and **phone top bar**: section 10.15. The dashboard uses the same with CoFile's
+  nameplate.
+- **Docs nav**: section 10.30.
+- **Back links** ("← Filings", "← Other filings", "All states"): 15px Medium with a 16px left
+  arrow, above the title, 16px gap.
+- **Steps** ("Step 2 of 3"): 13px Medium Slate above the title, plus three 24 × 4px segments, done
+  ones filled with the house color.
+
+### 11.11 The nameplate, the band and "with CoFile"
+
+The nameplate (logo rules, monogram tile), the 4px band and "with CoFile" are components with the
+rules in sections 3.4 and 3.5 built in; nobody places a firm's logo by hand anywhere in the
+product.
+
+### 11.12 The proof
+
+Section 10.26. Built twice from one set of tokens: as the server-rendered page and as the React
+component behind the home page's picture P4 and the Branding preview, with a visual test that
+keeps the two identical.
+
+### 11.13 Stage track
+
+Tags (14px, the last stage 18px) joined by a 2px line; done in the house color, current ringed with
+a 2px house-ink ring and 2px Paper gap, future as a Pebble outline. Labels 13/18 Medium under each
+tag, centered; on phone, longer tracks turn vertical with labels to the right.
+
+### 11.14 Accordion
+
+Section 10.7: 72px rows, 20/28 Medium questions, a plus that turns into a minus, Stone hairlines,
+the open answer at 18/29. Built on `details` and `summary` so it works without JavaScript.
+
+### 11.15 Code blocks
+
+Section 10.30: Graphite `#16191D`, radius 12, CoFile Mono 14/22, a copy button, Iris marking for
+`"dryRun": true`. Inline code: CoFile Mono at 0.92em on Chalk Deep, radius 4, 2px × 5px padding.
+
+### 11.16 Documents
+
+Paper thumbnails at Letter ratio with the generic faces from section 7.2: 96 × 124px in lists,
+190 × 246px in pictures. A 1px Stone edge, radius 3, `e2` when fanned. The label under the
+thumbnail, never on it.
+
+### 11.17 Signature pad
+
+A Paper area 180px tall (140px on phone), full width, 1px Pebble border, radius 12. A 1px Pebble
+baseline at 72% of the height with a 14px "×" glyph at its left end in Slate. Ink is Graphite, a
+2.5px pressure-smoothed stroke. A small secondary "clear" button at the top right (label as the
+component has it). The consent statement under it as an authorization row.
+
+### 11.18 Focus and states
+
+- **Focus ring**: a 2px outline in Graphite (house-ink on firm pages; Chalk Text on dark), offset
+  2px, on every interactive element, shown for keyboard focus (`:focus-visible`). Never removed.
+- **Hover**: 160ms; never the only way to see something.
+- **Selected**: the house wash plus a 3px house bar (desk) or a 2px house-ink border (choices).
+- **Loading**: skeleton bars in Chalk Deep with a slow 1.6s shimmer (off with reduced motion) for
+  lists; a three-dot progress for buttons.
+- **Empty**: an illustration from section 7.4, the page's sentence, its buttons.
+
+---
+
+## 12. Craft notes
+
+**Dark mode.** cofile.app, the desk, the dashboard and the docs follow the device, with a manual
+choice stored per viewer (`data-theme`). Client pages and the proof follow the device too. House
+colors never invert: the band and the hero's Pine field stay their exact hex; text and links use
+the dark ink derivation; washes mix over Graphite 2. Logos always sit on a white plinth in dark
+mode unless the firm one day uploads a dark version. The Rehearsals band is the one section that is
+dark in both modes; in dark mode it lifts to Graphite 2 with a stronger Iris glow so it still reads
+as a stage. Photographs get no filter in dark mode; their captions switch to Slate Dark.
+
+**Phones.** Clients are mostly on phones, and so are firm owners between meetings. Every page works
+at 320px with 20px margins and no sideways scrolling; text comes before its picture; main buttons
+go full width at 56px; fields are 56px tall on client pages, with 17px text so iOS doesn't zoom;
+tap targets are never smaller than 48px. The proof's fixed approve bar appears only after the fees
+have been seen. Pictures are designed at phone size, not shrunk: the desk shows its real phone
+layout, and the proof is the real phone proof.
+
+**Older eyes.** Body text is 18px on cofile.app and 17px on client pages and the proof; nothing a
+person must read is under 15px (chips at 13px are always read with their glyphs and context).
+Graphite on Chalk is 14.9 : 1, Slate is 5.7 : 1, and no reading text uses a weight under 400 or a
+grey lighter than Slate. Links are always underlined. Sentence case everywhere. Line height is at
+least 1.5 for body text. Everything holds at 200% zoom without sideways scrolling. Motion never
+carries meaning on its own.
+
+**Spanish.** Plan for Spanish running 20–30% longer. No fixed-width buttons, chips or nav items;
+buttons wrap to two lines; the header nav folds into the menu as soon as it doesn't fit; headlines
+use balanced wrapping, and the hero's display-1 clamps down so "Say yes, under your own name." in
+Spanish still sits on two lines on desktop. Price cells and tiles grow in height, never squeeze
+type. Mono values (business names, addresses) are the client's own data and wrap anywhere. Every
+picture's text is live text, so pictures translate with the page. GT America and every firm font
+preset cover the Spanish accents and ñ; the house font upload checks for them `[copy needed: a
+message if an uploaded font lacks them]`.
+
+---
+
+## 13. Production
+
+### 13.1 Tools
+
+- **Figma** for the system and all page designs, with variables for every token and **variable
+  modes per house** (CoFile, Harbor & Pine, Northgate, and the 24 QA firms) and per theme, so any
+  frame can be switched into any firm's brand with one click.
+- **The house engine** as a small TypeScript package (OKLCH derivations, contrast checks, logo trim
+  and classification, monogram generation) used by the web app, the proof renderer, the email
+  renderer and a Figma plugin, so design and product compute the same colors.
+- **Storybook** for every component, with a house switcher and a theme switcher in the toolbar;
+  visual regression tests run each component across all 26 houses in light and dark.
+- **Playwright** screenshots of every page in a few houses at 320, 390, 768, 1024 and 1440px, plus
+  a Spanish pseudo-locale (+30% length) pass.
+- **Accessibility**: axe in CI, plus manual screen-reader passes on the proof, the client form and the
+  home page pictures.
+- **Photography**: shot tethered with a digital tech, color-checked against the Pine and Ember
+  swatches printed on the set.
+
+### 13.2 Asset list
+
+| Group | Assets |
+|---|---|
+| Identity | The Frame and Tag mark (Open, Worn, Mono, Reverse, Tag only) as SVG; the wordmark (regular and small-size masters) as SVG and outlined; the lockup; "with CoFile" as a coded component and as email cells; favicon set (16, 32, 48 ICO, 180, 192, 512, maskable 512, SVG with a dark media query); the social card (1200 × 630, Chalk, the Open mark, room for one line of existing copy) |
+| Type | GT America Standard (Regular, Medium, Bold) and GT America Mono (Regular) web, app and desktop licenses, with a white-label clause covering firm pages served from cofile.app; metric-matched fallbacks |
+| Example firms | Harbor & Pine CPA: logo (mid, symbol-only, monogram), color sheet, door vinyl artwork, letterhead and business-card artwork for the printer's proof shoot, pocket folder, mug. Northgate Payroll: wide wordmark, symbol, office props. QA firm logos (five), plus the 18 hostile cases |
+| Photography | P1–P10 from section 7.3 plus the alternate P5 frame for For firms, each delivered as retouched masters and in the crops listed; screen-replacement renders for P3 and P4 |
+| Illustration | I1–I12 from section 7.4 as SVG with `currentColor` fills |
+| Icons | About 40 icons at 20 and 24px (section 7.5) |
+| Pictures (code) | P1 desk, P2 one page two houses, P3 text reads in, P4 proof, P5 homecoming, P6 state tiles, P7 run sheet with screen ghosts, the price strip, the empty frame, the round trip (How it works), underneath (For platforms) |
+| Generic objects | Six document faces (certificate, EIN letter, receipt and three others), thirteen screen ghosts, the card glyph |
+| Templates | The email template (section 10.33), the proof renderer's styles, the print stylesheet |
+| Texture | The 256px blue-noise grain tile |
+
+### 13.3 What to commission
+
+1. **A type studio's custom-lettering team**: the wordmark (both masters) and final drawing of the
+   mark, to the construction in section 3.1.
+2. **A brand-identity studio** that has designed for professional services: Harbor & Pine CPA's and
+   Northgate Payroll's complete identities, the props for the shoot, and the five QA firm logos
+   (deliberately varied: a serif monogram, a sans wordmark, a JPEG on a box, a script, a tiny square).
+3. **A documentary portrait photographer** with producer, casting director, set and prop stylist,
+   digital tech and retoucher: the shot list in section 7.3, two shoot days in New Jersey and New
+   York and one in Florida, plus a day with CoFile's own filing professionals.
+4. **An illustrator** working in simple geometric line: I1–I12 and the icon set, drawn to the
+   mark's geometry.
+5. **An interactive developer with motion craft** (or our own front-end team with a motion
+   designer's direction): the eleven code pictures and their motion, as live components.
+6. **An accessibility consultancy**: an audit of the proof, the client form and the desk, and
+   moderated sessions with firm owners over 55 and with Spanish-speaking clients on their own phones.
+7. **Research**: six to eight firm owners to react to the home page's pictures in their own brand
+   (we load their real logo and color into the house engine for the session) before the build is
+   final.
+
+### 13.4 Build order
+
+1. **Foundations**: tokens, the type licenses and fallbacks, the house engine (with its tests), the
+   nameplate and "with CoFile" components, the mark and wordmark.
+2. **The proof** (server renderer and component, plus print) and **the proof email**: the page the
+   firm signs, and the first thing a firm judges.
+3. **The client's pages**: the page for each filing, the client link page, the embed widget, their
+   confirmation states and dead ends, and the client-facing emails.
+4. **The desk**: the shell, Filings, Branding (with the live kit preview), Setup, New filing and the
+   form, the filing record.
+5. **The home page**: the eleven pictures as live components with sample data first, then layout,
+   then the shoot's photographs, then motion last.
+6. **The pages behind it**: How it works, For firms, What we file, Pricing, Security, Questions, For
+   platforms.
+7. **Account pages**: sign-up with the nameplate preview, log-in, password, verification, Terms,
+   Privacy, 404 and errors.
+8. **The remaining desk pages**: client links, requests, signatures, Ready to pay, billing.
+9. **Platforms**: the dashboard, the docs, the hosted page.
+10. **All remaining emails**, then the dark mode, Spanish, older-eyes and phone passes across
+    everything, and the house QA gallery run before launch.
+
+---
+
+## 14. What I'd strip from today's visuals, and why
+
+| Today | Why it goes |
+|---|---|
+| **The manila folder-tab mark with a check cut into it** (`FolderTab`, the `.seal` class) | It says paperwork and approval stamp, the wrong story: a filing service's mark, not a firm's. The new mark makes room for the firm and puts CoFile in the corner |
+| **The paper-and-ink palette** (the cream grounds, the manila and the warm off-whites, `#F7F3EA` and `#FFFDF8` on the proof, `#FBEFD5` notes) | Cream tints every firm's color yellow and makes every firm look like it's on old parchment. Firm pages need a true white so the house color reads as the firm chose it |
+| **Three typefaces** (Source Serif 4, IBM Plex Sans, IBM Plex Mono) | Too many voices, and IBM Plex Sans and Source Serif are both in the firm font menu, so CoFile and a firm could look identical. One family with one mono, not in the menu |
+| **The green ticks on every list** (`Tick`) | Repetitive, and a check on every line reads as verification, not benefit. Small Graphite tags carry lists in CoFile's voice and leave color to the firms |
+| **Rehearsals shown as yellow warnings** (`notice warn`, the `nx-reh` chip) | A free rehearsal is the offer. It gets Iris, a calm invitation, everywhere it appears |
+| **The fixed green `#1F6B4F` and blue `#1f4fd1` buttons** on the proof and in emails | They are CoFile's colors imposed on the firm's pages. Every button on a firm page is the firm's color, through the house engine |
+| **`textOn()`'s luminance threshold** for button text | It picks white or black by a cut-off, not by contrast. The engine checks the real ratio and derives a legible button in the firm's own hue |
+| **CoFile's name leading the partner desk's top bar**, with the firm's logo squeezed in on the right | The copy says the desk carries the firm's name, logo and color. The firm's nameplate leads; CoFile moves to the foot of the sidebar |
+| **The single brand bar and a logo capped at 40 × 160px** on the proof | Logos come in every shape. The nameplate trims, classifies and tiles them so each one looks intended |
+| **The sample visuals as tables in boxes** (the stand-ins in `Visuals.tsx`) | They describe the pictures without showing them. Each becomes a live, finished picture of a firm's real working day |
+| **Mono-everything** (every value, label and log line in IBM Plex Mono) | Mono now means one thing: what the state will see. Everything else is in the sans |
+| **Uppercase, letterspaced labels and kickers** | Hard for older readers. Sentence case everywhere; only the state's own values are in capitals |

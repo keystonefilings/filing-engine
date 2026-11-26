@@ -50,7 +50,7 @@ Each part of the picture answers part of the copy's story:
 
 The light on the site follows one good working day. At the top of the home page it is early morning: low light from the left, cool shadows, a window frame softly crossing the desk. As you scroll, the light climbs to midday and then turns into late-afternoon gold from the right. By the close, "Run one rehearsal. Then decide.", the sun is low and warm on a blank sheet of letterhead waiting for your firm's name.
 
-The home page reads in that light: your client's text arrives in the morning, you approve the proof before lunch, and the papers come back to your desk in the afternoon. Nobody is told this. It is felt, the way you feel the time of day in a room. The pages behind the home page each keep one hour: How it works and For firms are mid-morning, What we file and Pricing are midday, Security and Questions are a calm, even overcast light, For platforms is late afternoon.
+The home page reads in that light: your client's text arrives in the morning, you approve the proof before lunch, and the papers come back to your desk in the afternoon. Nobody is told this. It is felt, the way you feel the time of day in a room. The pages behind the home page each keep one hour: For firms and How it works are morning, What we file is midday, Pricing and For platforms are late afternoon, and Security and Questions have a calm, even, overcast light.
 
 ### What the concept is not
 
@@ -651,7 +651,7 @@ What it shows: Harbor & Pine CPA's filing desk, as a sheet of the firm's letterh
 - **The sheet**: Washi, 620 × 520 px on desktop (cols 7 to 12, overhanging the content edge by 40 px into the margin), rotated −1.5° because it is resting on a desk in a picture. Shadow from the 08:00 light (`--sx` +8, `--sy` +10). Paper grain at 2.5%. On phone, full width minus 20 px, rotated −1°.
 - **The head**: 4 px painted edge in harbor teal `#1E5A5C`; 96 px head with a 6% brass tint; the H&P emblem (supplied with a white box, which melts into the paper by multiply) at 44 px tall; "Harbor & Pine CPA" in Lora 600, 20 px, Sumi. At the right of the head, "Filing desk" in Whitney Medium 15 px, Usuzumi.
 - **The desk row**: "Client filings" in Lora 24 px on the left, and a "New filing" button in teal with Washi text, 40 px tall, on the right. In the picture it is not a working button; it has no hover.
-- **The slips**: each filing is a slip of Paper back, 64 px tall on desktop (two lines plus padding), separated by 8 px, each with a hairline border and its own tiny shadow. Left: the business name in Lora 18 px, Sumi; under it the filing in Whitney 15 px, Usuzumi. Right: a status chip (11.6). The rows, from the stand-in: "Two Sisters Bakery LLC" / "New Jersey LLC formation" / "Proof ready to approve" (Ai dot); "Hudson Ledger LLC" / "New York LLC formation" / "Filed" (leaf dot); "Hudson Ledger LLC" / "EIN" / "Filed, IRS letter saved" (leaf dot, plus a 14 px document glyph: there is a letter on this one); "Orchard Lane Inc." / "Payroll registration (NJ-REG)" / "Submitted" (Usuzumi dot).
+- **The slips**: each filing is a slip of Paper back, 64 px tall on desktop (two lines plus padding), separated by 8 px, each with a hairline border and its own tiny shadow. Left: the business name in Lora 18 px, Sumi; under it the filing in Whitney 15 px, Usuzumi. Right: a status chip (11.6). The rows, from the stand-in: "Two Sisters Bakery LLC" / "New Jersey LLC formation" / "Proof ready to approve" (Ai dot); "Hudson Ledger LLC" / "New York LLC formation" / "Filed" (leaf dot); "Hudson Ledger LLC" / "EIN" / "Filed, IRS letter saved" (leaf dot, plus a 14 px document glyph: there is a letter on this one); "Orchard Lane Inc." / "Payroll registration (NJ-REG)" / "Submitted" (leaf dot, as "Submitted to the state" is on the real desk).
 - **The waiting slip**: Two Sisters Bakery LLC is lifted 3 px with a deeper shadow and a 3 px brass marker on its left edge. Of everything on the desk, it is the one waiting for you to approve.
 - **The foot**: the imprint, "with CoFile", 40 px below the last slip.
 - **Objects**: the fountain pen and the celadon cup at the plate's upper right, cropped by the edge. Nothing else.
@@ -1070,7 +1070,7 @@ What it shows: one rehearsal, from start to finish, typed out like a theatre's r
 - **Motion**: M8, "The light passes".
 - **States**: typing, complete, reduced motion (complete, in warm light).
 
-**Why it sells**: a rehearsal looks like what it is, a complete performance on the real stage, warm and free. The most generous color on the site is on it.
+**Why it sells**: a rehearsal looks like what it is, the whole filing performed on the state's real website with no audience, warm and free. The most generous color on the site is on it.
 
 ### 9.8 Pricing: the rate card
 
@@ -1329,7 +1329,7 @@ DESKTOP
 
 On phone, the same sheet full width. That is the whole page: clear, well set, findable, and quiet.
 
-### 10.6 Questions (`/faq`) · even midday light
+### 10.6 Questions (`/faq`) · overcast, even light
 
 **Head**: kicker "Questions" / H1 "Questions, answered." / lede "Something else? hello@cofile.app".
 
@@ -1673,3 +1673,219 @@ Every email is one sheet of letterhead on a Morning ground, 600 px wide, built w
 | **"More information needed: …"**, **"Changes requested: …"**, **"Card security code needed: …"**, **"Choose a name: …"**, **"Review before submit: …"**, **"Site changed — review needed: …"**, **"Rejected by the state: …"**, **"Failed: …"**, **"Blocked: …"**, **"Checking whether the state received: …"** | The firm (and the card's owner for the security code) | The firm's | The same sheet. A 3 px left edge on the first paragraph says the kind of message: Ai when someone needs to act, Beni when something went wrong, none otherwise. Buttons use the code's labels ("Enter security code", "Choose a name", "Review the filing"). |
 | **"Confirm your email for CoFile"**, **"Reset your password"**, **"Your partner account is open"**, **"Your CoFile account is ready"** | The person signing up | CoFile's own | Head: the CoFile mark and wordmark (image with live-text fallback "CoFile"), no painted edge. Button in Kaki with Sumi text. No imprint at the foot (it is our own letter); instead the footer line "CoFile is not a law firm or a government agency…" in 14 px Usuzumi. |
 | **"You're invited to …'s filing portal"** | A firm's team member | The firm's | The firm's letterhead, because the invitation is into the firm's room. |
+
+---
+
+## 11. Components
+
+All sizes are desktop / phone where they differ. Every component exists in two dresses: **CoFile's** (Kaki and Ai, on CoFile's own pages) and **the firm's** (the firm's colors and font, on the firm's and the client's pages). The shapes never change between dresses.
+
+### 11.1 Buttons
+
+| Button | Look | Sizes |
+|---|---|---|
+| **Primary, CoFile** ("Run a free rehearsal", "Create account", "Send") | Kaki `#EC8F52` fill, Sumi text in Whitney Semibold 18 px, radius 12 px, a 2 px "key edge" at the bottom (`inset 0 -2px 0 #DB7A3C`), a small shadow from the current light | 52 / 56 px tall, 28 px side padding, min width 160 px; full width on phone |
+| **Primary, firm** ("New filing", "Approve, and authorize submission and payment", "Send to …", "Open the proof and approve it") | The firm's main color, the computed text color (dark or white), radius 10 px, the key edge in the same color darkened 12% | As above |
+| **Quiet** ("See pricing", "Log in", "Questions") | Transparent (or Washi at 70% over photographs), 1 px Sumi border, Sumi text | Same heights |
+| **Text** ("For firms", "How it works", "See all plans") | Ai (or the firm's safe color), underlined, followed by a 16 px arrow glyph that moves 3 px on hover | Body size |
+| **Small** ("Log out", "Save to Google Docs") | Quiet style | 40 px tall, 16 px text, radius 10 px |
+| **Remove** ("Remove logo", removing a member) | Quiet style with Beni text; destructive steps confirm in a sheet (11.12) | Small |
+| **Icon** (menu, replay, copy) | 44 px circle, Washi, 1 px Kage | Always with an accessible name |
+
+**States.** Hover: one band of first light passes across once (8.5); the quiet button fills with Washi. Press: down 1 px, key edge flattens to 1 px (120 ms). Focus: a 3 px Ai ring with a 2 px Washi gap (the firm's safe color on firm pages). Disabled: Paper back fill, Pale ink text, no key edge, no shadow. Busy: the code's own busy label ("Sending…", "Saving…", "Creating…") replaces the label, and a 2 px line of ink draws along the bottom edge from left to right on a loop; no spinners anywhere. Labels never truncate: in Spanish they wrap to two lines and the button grows.
+
+### 11.2 Fields
+
+- **Text, email, password, phone, date**: 52 / 56 px tall, Washi, 1 px Kage border, radius 8 px, 16 px side padding, value in Whitney 18 px Sumi (the firm's font on client pages). Label above in `label`, 8 px gap; help text below in `small` Usuzumi, 6 px gap. No placeholder text except where the code already has one ("https://").
+- **Focus**: border to Sumi 1.5 px plus a 4 px glow of Asa (the firm's main color at 18% on firm pages), 160 ms.
+- **Error**: border Beni 1.5 px; under the field a 16 px icon (a small round mark with an exclamation, from the icon set) and the code's message in Beni `small`, tied to the field with `aria-describedby`. On submit, a summary slip at the top of the form with the code's line ("Please fix these and submit again.") and a link to each field.
+- **Select**: the same box with a 16 px chevron; the native picker on phone.
+- **Textarea**: 120 px minimum, grows with its content.
+- **Checkbox**: 24 px, radius 6 px, Kage border; checked is Sumi with a Washi check mark (in a control, a check is just a control). The whole label line is the tap target.
+- **Radio choice cards**: each choice a full-width card, 64 px minimum, a 24 px radio at the left, the choice's words in `body`. Selected: border Sumi 1.5 px (the firm's main color on firm pages), lifted 2 px.
+- **Logo drop zone**: the empty letterhead head (10.11).
+- **Color well**: a 44 px square swatch with a 2 px board edge, beside its hex field.
+- **One-time code**: six 56 px boxes, Typewriter 24 px, auto-advancing, pasting fills all six.
+- **Card security code**: the card vault's own secure field, inside our field frame, styled through the vault's options to match the font, size and border, so the client never sees a seam.
+- **Font select**: each option set in its own face.
+- **Repeating groups** ("Member", "Signer", "Provision"): each item a small card with its fields, "Add" and "Remove" as small quiet buttons, the item's number in Pale ink at the card's corner.
+
+### 11.3 Sheets, cards and slips
+
+| Surface | Look | Use |
+|---|---|---|
+| **Sheet** | Washi, radius 4 px, light-driven shadow (8.2), paper grain 2.5%, padding 32 / 20 px | Every page and picture that carries a name |
+| **Letterhead sheet** | A sheet with the 4 px painted edge, the head (3.5) and the imprint at its foot | The filing desk, client pages, the proof, emails, the pictures |
+| **Index card** | A sheet with radius 6 px, a heading in GT Alpina, a 1 px Sumi rule under the heading | Coverage, steps, states, setup steps |
+| **Thick card** | A sheet with a visible board edge (`box-shadow: 0 2px 0 #DCD9D1, 0 3px 0 #CFCBC2` under the light shadow) | The rate card, plan cards |
+| **Slip** | Paper back, radius 4 px, 1 px Kage, a tiny shadow (`0 1px 2px rgba(42,53,80,.08)`), 56 to 64 px tall | Filing rows, notices, updates, questions, saved answers |
+| **Photo print** | A photograph with a 12 px white border, rotated 1 to 2°, with its own shadow | People and places in pictures |
+| **Phone frame** | 7.4 | Client pages in pictures |
+
+Linked sheets and slips lift on hover (8.5). Rotation appears only in pictures and on resting cards on public pages, never on a working page.
+
+### 11.4 The proof, as a component
+
+The proof is rendered on the server (`src/approvals/render.ts`) and must look perfect with plain HTML and inline styles, so its design is deliberately simple to build.
+
+- **Width**: 760 px sheet on a Morning ground on desktop; full width on phone.
+- **Anatomy, in the code's order**: letterhead head (painted edge, logo, brand name) · rehearsal band (when a rehearsal) · title (the firm's font, 30 / 26 px) · reference and decide-by line · consent panel · "The state's review page" with its print · "Filing details" table · "State fees" table with the accountant's rules · one-time code (when required) · "What should change?" · the two buttons · "Questions: …" · the imprint.
+- **Section headings** ("The state's review page", "Filing details", "State fees") in the firm's font, 22 px, 48 px above, 16 px below, with a 1 px Kage rule above each one, like the folds of a long letter.
+- **Tokens it needs** (all inline): the firm's main color, its computed text color, its font stack, Washi, Morning, Sumi, Usuzumi, Kage, Paper back, the Typewriter stack.
+- **Print**: a print stylesheet sets the proof on US Letter with the firm's head, no shadows, no ground, values in Typewriter at 11 pt, and the buttons hidden. A firm that prints it holds a real printer's proof.
+- **Sample proofs** on CoFile's pages add the pencil numerals and the printer's proof underneath; the real proof never has them.
+
+### 11.5 Price cards
+
+- **Rate card** (home): one thick card with four compartments (9.8).
+- **Plan card** (Pricing and Billing): a thick card per plan (10.4). Plan name in `display-3`, price in `figure-xl` with the letterpress inset, unit beside the baseline, a 1 px rule, items with Kage dashes, the takeover line last.
+- **The middle plan** (Growth) lifted 8 px with a 4 px Kaki painted edge.
+- **The current plan** on Billing carries the firm's painted edge instead, and a slip on it with the plan's status.
+- Figures are tabular lining; "$1,000" keeps its comma; prices never wrap.
+
+### 11.6 Chips and the stage glyphs
+
+**Status chips** (the plain-language labels in `web/lib/status.ts`): 28 px tall, radius 6 px (a small paper label, not a pill), Paper back fill, 1 px Kage border, text in `micro` Medium Sumi, an 8 px dot at the left.
+
+| Tone | Dot | Examples |
+|---|---|---|
+| Needs attention (the code's `warn`) | Ai | "Waiting for approval", "Needs information", "Changes requested", "Name unavailable", "On hold", "Paused: state site changed", "Being checked" |
+| Done (`ok`) | Leaf | "Approved", "Submitted to the state", "Accepted by the state", "EIN issued", "Completed" |
+| Went wrong (`bad`) | Beni | "Needs correcting", "Rejected by the state", "Failed", "Stopped" |
+| Neutral (no tone) | Usuzumi | "Received", "Getting the state's review page", "Queued", "Filing now" (its dot breathes), "Final check" |
+
+**Rehearsal chips**: on CoFile's pages, Asa fill with a 1 px Kaki deep border and Sumi text ("Rehearsal"). On the firm's and the client's pages, Washi fill with a 1 px dashed Sumi border ("Rehearsal", "Test"). **Live chip**: Sumi fill, Washi text, a leaf dot.
+
+**The stage glyphs**: a family drawn from the mark, a small 3:4 sheet (16 to 18 px tall) that fills as a filing type gets closer to live. Each glyph always travels with its words.
+
+```
+  Planned        Offered, not      Screens recorded,   Rehearsed to the     Live
+                 yet rehearsed     rehearsal next      payment screen
+  ┌┄┄┄┐          ┌───┐             ┌───┐               ┌───┐                ┌───┐
+  ┆   ┆          │   │             │───│               │▓▓▓│ (head Kaki)    │███│
+  ┆   ┆          │   │             │── │               │── │                │███│
+  └┄┄┄┘          └───┘             └───┘               └───┘                └───┘
+  dotted         outline           outline + lines     Kaki head + lines    full ink
+```
+
+On the firm's pages the Rehearsed glyph's head is Sumi at 40% instead of Kaki. The home page's legend groups "Screens recorded" and "Offered" under the copy's one label, shown with the outline glyph.
+
+### 11.7 Notices
+
+- **Slip notices**: Paper back slips with a 3 px left edge (Ai: something needs you; Beni: something went wrong; Leaf: done), `body` text, the action link at the right (under the text on phone).
+- **Rehearsal notices**: the trial-print hatch (4.4), Sumi text, no edge color.
+- **The beta banner**: 9.0. On firm pages, Paper back instead of Asa.
+- **Toasts** (a saved setting): a slip rises from the bottom of the viewport (320 ms land), stays 4 s, sinks away; never covers a primary button; announced politely to screen readers.
+
+### 11.8 Tables
+
+- On a sheet. Header row in `label` Usuzumi with a 1 px Sumi rule under it. Rows 56 px, `body`, 1 px Kage hairlines, no zebra stripes. Numbers right-aligned in tabular figures. Hovering a row tints it Paper back; tables don't lift.
+- First column wraps; other columns don't. Horizontal scroll is never used on phone: below 600 px each row becomes a slip with its first column as the title and the others as labelled lines.
+
+### 11.9 Code blocks
+
+Paper back, radius 6 px, 20 px padding, Typewriter 15 / 22 px, a copy button (icon) at the top right. Syntax in three quiet inks only: keys Ai, strings Sumi, numbers and booleans in a deep persimmon `#A85A22` (4.8:1 on Paper back), comments Usuzumi. Highlighted lines (`"dryRun": true`) on Asa. At night: ground `#24262B`, text `#ECEAE5`, keys `#A5B4EA`, numbers `#F09A62`.
+
+### 11.10 The signature pad
+
+A small sheet of cotton paper (Washi, grain at 4%), 3:1, at least 160 px tall on phone, with a 1 px Kage baseline at 70% of its height and a small "×" in Pale ink at the line's start. The ink is Sumi, and the stroke width varies from 1.2 to 3.2 px with speed (slower is thicker, like a brush pen), smoothed into curves, so a signature looks signed rather than plotted. The clear control is a small quiet button with the code's label; the consent line sits under the pad as a checkbox row.
+
+### 11.11 Navigation
+
+- **Public header** (9.0), with the ribbon mark under the current page.
+- **Phone menu**: a sheet sliding down from under the header, the page names at 24 px Alpina, buttons at the bottom.
+- **Filing desk**: the letterhead top bar and, on phone, the bottom tab bar (10.11).
+- **Dashboard**: the left rail (10.13).
+- **Docs**: the three-column layout (10.13).
+- **Back links** ("← Filings", "All states"): `small`, Sumi, the arrow as a glyph, 48 px tap height.
+
+### 11.12 Disclosures, sheets and toasts
+
+- **Disclosures** (Questions, "More options (optional)", "Progress on the state site", widget code): the folded note (8.5), a 16 px fold glyph.
+- **Modal sheets**: on phone, a sheet rising from the bottom (520 ms land) with a 4 px grab handle, dismissed by swiping down (spring, 8.3); on desktop, a centered sheet over a Morning scrim at 60% with a 4 px blur. Focus is trapped and returns to where it was.
+- **Toasts**: 11.7.
+
+### 11.13 Icons, portraits and captions
+
+- **Icons**: the commissioned set (7.5), 24 px, 1.5 px stroke, Sumi; 20 px in dense tables; never decorative alone, never ticks, locks or shields.
+- **Portrait cluster**: 40 px (16 px on plan cards) round portraits overlapping by a quarter, each with a 2 px Washi ring and its own small shadow.
+- **Example captions**: `micro`, Usuzumi, on the desk under the picture's lower left, 12 to 16 px below it.
+
+---
+
+## 12. Craft notes
+
+**Dark mode.** "The desk at night" (4.3). The desk, the chrome and the dashboards go dark and a warm lamp replaces the window. **Paper stays paper**: the proof, the client's pages, the letterhead previews, emails and the home-page pictures keep a dimmed paper (`#ECEAE4`), so every firm's logo, which was made for white paper, always reads. The plates switch to their night passes (P1, P6). The Kaki button keeps Sumi text. Charts and code switch to their night inks. Dark mode follows the system setting; a small toggle in the footer overrides it (`[copy needed]`).
+
+**Phones.** Designed first. One column, the copy's order, pictures full width after their words, the sticky thumb bar for "Run a free rehearsal" (6.4), the filing desk's bottom tab bar, 48 px minimum tap targets and 56 px primary buttons, nothing important hidden behind hover (every hover state has a tap or in-view equivalent), `env(safe-area-inset-*)` everywhere, no horizontal scrolling except the two deliberate swipes (the fanned phones, the plan names row). The client's form and the proof are tested one-handed on a 375 px phone with large text turned on.
+
+**Readable for older eyes.** Body never under 18 px; nothing anywhere under 14 px, including our own "small type". Body text at 13.8:1 to 15.6:1 contrast, secondary text at least 5.3:1. GT Alpina Regular, never Light, and nothing thinner than Whitney Book. Sizes in rem, so the reader's own text size scales everything; at 200% the layout reflows to one column without clipping. No all-caps, no tracking-out of small text, no text on photographs except on calm, graded areas of the desk with at least 7:1 contrast. Links are underlined. Color never carries meaning alone: every chip and glyph has words. Focus rings are thick and visible. Motion can be turned off, and every moment still tells its story when it is.
+
+**Spanish text length.** Plan for 25 to 35% more length. Headlines use `text-wrap: balance` and fluid sizes with room for a third line on desktop and a fifth on phone; the hero's hand-set breaks become automatic balancing in Spanish. Buttons wrap to two lines and grow, never truncate ("Ejecuta un ensayo gratis" fits; "Abrir la prueba y aprobarla" wraps). Chips wrap inside their 28 px minimum height. The coverage cards and plan cards are sized by their longest Spanish row, not their English one. Typewriter values stay exactly as the state needs them, in English. Both type families have the full Spanish character set, and GT Alpina's ¿ and ¡ are checked at display sizes.
+
+---
+
+## 13. Production
+
+### 13.1 Tools
+
+- **Design**: Figma, with variables for the two modes (day, night), the ten hours of light and the two dresses (CoFile, firm); the component library mirrors section 11 one to one. A "firm switcher" in the Figma file re-dresses every firm-facing frame with Harbor & Pine CPA, Northgate Payroll or a deliberately difficult test firm (a neon yellow color, a square logo in a white box, Montserrat).
+- **Tokens**: exported from Figma into Style Dictionary, then to CSS custom properties, the inline-style constants the proof renderer uses, and the email template's constants. One source for all three.
+- **Photography**: tethered capture, Capture One for the daylight grade, Photoshop for compositing passes; every plate exported as AVIF with a WebP fallback at 1× and 2×, with art-directed crops served through `<picture>`; light and gobo passes as greyscale WebP.
+- **Motion**: the motion studio prototypes each signature moment in After Effects against a Blender paper simulation (118 gsm stiffness) for reference, and delivers timing sheets (keyframes, curves, durations). The front-end team builds them with CSS and the Web Animations API, no animation library on public pages.
+- **Quality**: Playwright visual snapshots of every picture at its hour, in day and night, with and without reduced motion, at 375, 768, 1280 and 1440 px; automated contrast checks on every token pair and on each test firm's computed colors; a manual pass with VoiceOver and TalkBack; email rendering tests across the major clients.
+
+### 13.2 What to commission
+
+| Who (kind of studio or artist) | What | Notes |
+|---|---|---|
+| Type foundry (Grilli Type) | GT Alpina (Regular, Regular Italic, Typewriter) web and app licenses; the custom CoFile wordmark drawing with the sheet-shaped tittle | Wordmark in two rounds of review |
+| Type foundry (Hoefler&Co) | Whitney and Whitney ScreenSmart (Book, Medium, Semibold) web licenses | |
+| Lettering artist | Ten pencil-drawn circled numerals (SVG), matched to GT Alpina | For sample proofs and the docs |
+| Identity illustrator | The mark's final drawing, favicon cuts, app icon | From 3.1, on the 48 grid |
+| Still-life photographer, set builder, paper stylist | Plates P1 to P7 with all passes | Two studio days and one golden-hour session |
+| Traditional sign painter | "Harbor & Pine CPA" gilded in 23-carat gold leaf on a glass door panel, for P2 | The door can be a set piece in the studio |
+| Letterpress studio | The Harbor & Pine CPA business-card proof sheet (P3); a blank 600 gsm cotton card for the rate card (P5) | Printed in the firm's teal |
+| Documentary portrait photographer, with a casting and consent producer | The three people sets (7.3) | Real team, real practitioners, a real bakery |
+| Paper artist | Six white paper-relief vignettes, photographed in the P1 light | 7.5 |
+| Icon designer | About 40 icons and the five stage glyphs | 7.5, 11.6 |
+| Brand designer | Harbor & Pine CPA and Northgate Payroll identities (and two spares), built only from what the product allows | 7.7 |
+| Motion studio | Reference prototypes and timing sheets for M1 to M10 | 8.4 |
+
+### 13.3 The asset list
+
+- **Identity**: mark (SVG: full, 64 px-and-up with crease, favicon cut), wordmark (SVG), horizontal and stacked lockups, "with CoFile" imprint (SVG and live-text version), favicons (16, 32, 48, SVG), app icons (180, 192, 512, 1024), email PNGs of the mark at 1× and 2×.
+- **Type**: the font files above, Latin subsets for preload.
+- **Photography**: P1 to P7 in every crop and pass; the people sets (about 30 selects, each in 4:5, 3:2 and a 1:1 portrait crop for the round portraits).
+- **Illustration**: 6 paper-relief vignettes, 40 icons, 5 stage glyphs, 10 pencil numerals, the fold glyph, the document glyph (also as email PNG).
+- **Example firms**: 2 (+2) logo files (one JPEG with a white box, one transparent PNG), their colors and preset fonts.
+- **Textures and light**: the gobo (2048 × 1024 WebP), the warm-wash gradients (as tokens), paper grain tiles, the night lamp gradient, the raking-light pass for the rate card.
+- **Components**: the phone frame, the neutral state-screen frame, the envelope (layered for its animation), the obi band.
+- **Code**: tokens package, the light controller (about 2 KB), the motion scheduler (under 18 KB), the logo normalizer (area sizing and white-box detection), the firm-color guard (contrast and darkening).
+
+### 13.4 The order to build in
+
+1. **The system** (weeks 1 to 2): tokens, type, color in both modes, the light and shadow model, the logo and firm-color rules. Casting and the photography bookings start now, because people take longest.
+2. **The firm's and the client's pages first** (weeks 2 to 4): the letterhead sheet, fields, buttons, chips; the client's filing page, client link page and intake form; the proof and its decision page; the emails. These are seen by real clients and firms today, and they carry the firm's name.
+3. **The home page with stand-in plates** (weeks 3 to 5): every picture built as live components on quick phone-camera plates of a real desk, so the page can be judged and tested while the real photographs are made.
+4. **The photographs land** (weeks 5 to 6): plates and people swapped in, graded to the hours.
+5. **Motion** (weeks 5 to 7): M1 to M10, each behind its reduced-motion still, which is built first.
+6. **The seven pages behind the home page** (weeks 6 to 7), reusing the home page's pictures and components.
+7. **The filing desk and setup** (weeks 7 to 9), Branding first, because it is where "your name on the door" is made.
+8. **Platforms** (weeks 9 to 10): the dashboard, docs, the white-label page and the widget.
+9. **The quiet pages** (week 10): sign-up and log-in polish, Terms, Privacy, 404 and errors with their vignettes.
+
+---
+
+## 14. What I'd strip from today's visuals, and why
+
+- **The folder-tab mark with a check cut into its edge.** A manila folder says storage and a check says "approved by us". The brand should say "your name". It becomes a blank letterhead whose head is left for the firm.
+- **Ticks on every list.** On a home page of about 330 words, a green tick before every line turns the whole page into a compliance checklist, and it puts "verified" at the visual center of the brand. Lists become quiet hairline dashes; sample proofs get pencil numerals.
+- **The manila, cream and green palette.** It reads as an office-supply cabinet, and the green is the color of a passed check. The new palette is daylight on paper, with the firm's color in front and our persimmon only where it means "try it".
+- **IBM Plex Sans, IBM Plex Mono and Source Serif 4.** Competent, but they make CoFile read like technical documentation. Two of them are also on the list of fonts a firm can choose (IBM Plex Sans and Source Serif), so a firm that picked one would look like CoFile instead of itself. CoFile's own faces (GT Alpina, Whitney) are kept off the firm's list, so a firm's pages never look like ours.
+- **Monospace for every value everywhere.** The typewriter face is now reserved for one meaning: "exactly what will be typed into the state's form".
+- **Bands of equal weight.** Every section sat in the same full-width band at the same volume. Now there are large quiet rooms for the selling sections, smaller rooms for the reassurance, and one day of light running through them.
+- **The stand-ins' fake buttons and boxed figures.** Disabled look-alike buttons inside framed boxes made the pictures feel like diagrams. The pictures become real components on real paper, and the buttons that look pressable are pressable.
+- **The "Matches the proof" strip in the proof picture.** A picture built around matching is the wrong story for the brand; the words already say "Every fee checked again before paying".
+- **"with CoFile" in the corner of the firm's top bar.** It sat in the firm's head, next to the firm's own name. It moves to the foot of the sheet, where a printer's imprint belongs, at the smallest size on the site.
+- **The proof's thin brand bar.** A 4 px top border, a 40 px logo and grey text is not a letterhead. The proof gets the firm's full head, painted edge, font and the accountant's double rule under the total, so the firm is proud to put its name on it.

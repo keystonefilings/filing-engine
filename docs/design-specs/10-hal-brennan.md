@@ -305,6 +305,7 @@ Base size is **18px on CoFile's own pages and 17px in the filing desk and dashbo
 | Token | Face | Desktop size / line | Phone size / line | Weight, tracking | Used for |
 |---|---|---|---|---|---|
 | `display-xl` | Plate Roman Display | 64 / 68 | 40 / 44 | 400, −0.5% | Hero headline only |
+| `display-page` | Plate Roman Display | 56 / 60 | 38 / 42 | 400, −0.4% | The h1 on the seven pages behind the home page |
 | `display-l` | Plate Roman Display | 48 / 54 | 32 / 38 | 400, −0.3% | Section headlines (h2) |
 | `display-m` | Plate Roman Deck | 32 / 38 | 26 / 32 | 500, 0 | Page titles in the desk, auth card titles, the proof's h1 |
 | `display-s` | Plate Roman Deck | 24 / 30 | 22 / 28 | 500, 0 | Step titles, h3, the proof's h2 |
@@ -417,7 +418,7 @@ Everything we show should look **made by hand, lit by daylight, and owned by a r
 
 | # | Shot | Use | Notes |
 |---|---|---|---|
-| P1 | **Harbor & Pine's door.** A painted wooden office door, deep green-black, in a brick rowhouse office on a quiet street (no house numbers, no shop signs). Mounted beside it is a **real brass name plate, hand-engraved "Harbor & Pine CPA"** (from the engraver, 13.3). Late-afternoon raking sun from the left so the engraving reads in light and shadow. Three frames: wide (door and step), medium (plate and doorframe), macro (the engraved letters filling the frame). | Home section 2, left door; For firms | Tripod lock-off. Shoot the plate straight on, lens axis perpendicular, to make compositing simple. Bracket for HDR. Shoot a 360° HDRI from the plate's position for the WebGL reflections. |
+| P1 | **Harbor & Pine's door.** A painted wooden office door, deep green-black, in a brick rowhouse office on a quiet street (no house numbers, no shop signs). Mounted beside it is a **real brass name plate, hand-engraved "Harbor & Pine CPA"** (from the engraver, 13.2). Late-afternoon raking sun from the left so the engraving reads in light and shadow. Three frames: wide (door and step), medium (plate and doorframe), macro (the engraved letters filling the frame). | Home section 2, left door; For firms | Tripod lock-off. Shoot the plate straight on, lens axis perpendicular, to make compositing simple. Bracket for HDR. Shoot a 360° HDRI from the plate's position for the WebGL reflections. |
 | P2 | **Northgate Payroll's door.** A different building and a different temperament: a glazed aluminium-framed door in a converted mill or a small modern office park, mid-morning daylight. Mounted beside it is a **brushed-steel plate of the same shape, engraved "Northgate Payroll"** in a geometric sans, filled with black. The same lens, height and framing as P1's medium frame so the two sit side by side as a pair. | Home section 2, right door | The two doors must feel like two real firms that have never met. |
 | P3 | **The blank plate.** P1's lock-off and light, with a **blank** brass plate of the same size (two screws, slots level, the bevel catching the light). | The close; the signup preview; the base plate for rendering any firm name live | Same session, same 20 minutes of sun as P1. |
 | P4 | **The blank plate at dusk.** P3's medium frame, 30 minutes after sunset, with warm light from the transom above the door and the blank plate catching the street light. | The close in dark mode; the social card | |
@@ -471,7 +472,7 @@ Only three pieces, all of them physical things rather than abstractions:
 
 ### 7.6 Texture and ornament
 
-- **The blind impression** is the site's signature finish. It's an uninked emboss, drawn in CSS as `box-shadow: inset 0 1px 1.5px var(--blind-shadow), inset 0 -1px 0 var(--blind-light)` on containers, and the letterpress text-shadow on type. It's used for **rehearsal** things (the chip, the rehearsal log, the "Planned" plate glyphs) and for the 404 plate. The text inside a blind element is always inked in Graphite or Ink, so it's always readable. The emboss is decoration around legible text, never the text itself.
+- **The blind impression** is the site's signature finish. It's an uninked emboss, drawn in CSS as `box-shadow: inset 0 1px 1.5px var(--blind-shadow), inset 0 -1px 0 var(--blind-light)` on containers, and the letterpress text-shadow on type. It's used for **rehearsal** things (the rehearsal chip and band, the rehearsal log, the "Rehearsed to the payment screen" plate glyph), for the "Beta" chip and for the 404 plate. The text inside a blind element is always inked in Graphite or Ink, so it's always readable. The emboss is decoration around legible text, never the text itself.
 - **Rules.** Hairlines in Rule (1px). The **thick-and-thin** (3px + 2px gap + 1px) is the Firm Rule on firm sheets, and in Plate Ink it's the top of CoFile's footer. Nowhere else.
 - **The lozenge** ◆ (a 7px square turned 45°, in Copper) is the bullet for every list on CoFile's pages. It replaces the green ticks, so a list reads as a list rather than a checklist. On firm pages the lozenge takes the firm's Main color.
 - **Dot leaders** on fees and price-list-style rows.
@@ -515,13 +516,13 @@ Print doesn't slide or bounce. It arrives in two beats: the **impression** (the 
 
 | # | Where | What moves | Duration | What it sells |
 |---|---|---|---|---|
-| M1 | Hero, the desk | The Firm Rule draws, Harbor & Pine's name inks in, the four rows set, and the proof behind slides out a little | 2.2s | "Under your own name": the first thing that happens on the site is a firm's name being set |
+| M1 | Hero, the desk | The Firm Rule draws, Harbor & Pine's name inks in, the four rows set, and the proof behind slides out a little | 2.2s | "under your own name": the first thing that happens on the site is a firm's name being set |
 | M2 | Section 2, the two doors | Light rakes across two engraved plates, each name lifts into its client page, the pages ink in, and "with CoFile" appears last and small. Then the visitor can wipe one page into the other firm's brand | 4.2s + interaction | "Your name on the door. Ours in small type." **The signature moment** |
 | M3 | Section 3, the text | Phrases in Ana's message underline and run along leader lines into the drafted filing; the saved answers ink in | 3.4s | "Nobody retypes it" |
 | M4 | Section 4, the proof | The proof is laid down, the fee leaders draw, the total sets, and the button presses in last | 2.0s | One page, one button, yours to press |
 | M5 | Section 5, after | Three stages ink along a rule, then two documents rise out of the envelope | 2.4s | "The papers come back to you" |
 | M6 | Section 6, coverage | Four place cards are dealt onto the table | 0.7s | Plain, ready, real |
-| M7 | Section 7, rehearsal | A raking light crosses the blind-embossed log, revealing every row | 2.4s | "Rehearse a filing, free": the full impression, no ink |
+| M7 | Section 7, rehearsal | A raking light crosses the blind-embossed log, revealing every row | 2.4s | "rehearse a filing, free": the full impression, no ink |
 | M8 | The close | A slow push-in on the blank plate | 8s, once | Your name could go here |
 | M9 | Signup | Each letter of the firm's name is cut into the brass as it's typed | 90ms a letter | It's already yours |
 | M10 | Everywhere | Buttons press like a key into paper | 80 / 160ms | Pressing something should feel made |
@@ -1264,7 +1265,7 @@ Desktop
 ```
 
 - Cotton band, 96px above and 112px below.
-- Kicker as on the home page. h1 at 56/60 desktop (38/42 phone), Plate Roman Display, `text-wrap: balance`. Lede `lede`.
+- Kicker as on the home page. h1 at `display-page` (56/60 desktop, 38/42 phone), `text-wrap: balance`. Lede `lede`.
 - Text in cols 1–7, and the **frontispiece** (a picture, when the page has one) in cols 9–12, aligned to the h1's cap height. On phone the frontispiece goes under the lede at full width.
 - The h1 has a 2px Copper rule 48px long above the kicker, the same mark as the hero kicker, so every page is visibly part of one book.
 
@@ -1729,3 +1730,230 @@ Clients see only these, so they're entirely the firm's.
 - The firm's color and font apply. The fields and buttons are ours.
 - At the foot: **"Filed with CoFile"** in the imprint style, left-aligned, 13px.
 - It sizes to its content (the existing resizer). Its minimum width is 300px, where it switches to the phone layout.
+
+---
+
+## 11. Components
+
+Every component exists in two inks: **CoFile** (Copper on Cotton) and **Firm** (the firm's ink-matched Main color on the firm's tinted ground). The tokens swap, and the shapes never change.
+
+### 11.1 Buttons
+
+| Kind | Look | Sizes |
+|---|---|---|
+| **Primary** | Fill Copper (CoFile) or the firm color (Firm). Text Cotton/white, Founders Grotesk Medium 18px, +0.2% tracking. 45° chamfered corners (`corner-shape: bevel`, 6px; fallback 3px radius). No icon unless a → is needed for a link that leaves the page | 56px tall (hero, close, the proof's 60px), 48px default, 40px small, 44px in the header. Horizontal padding 28 / 24 / 16px. Minimum width 120px |
+| **Secondary** | 1px Rule Strong outline, transparent fill, Ink text. Hover: Cotton 2 fill (CoFile) or a 4% firm-color tint (Firm) | Same heights |
+| **Quiet** | Text only, Ink, 1px underline offset 4px. Used for "Log in" and in-sentence actions | Same text sizes |
+| **Danger** | 1px Madder outline, Madder text. Only for "Remove" and "Turn off" | 40px small |
+| **Picture of a button** (inside example pictures) | Identical to a primary, `aria-hidden`, not focusable, `cursor: default`, no hover | As drawn |
+
+- **States.** Hover darkens the fill to Copper Deep or the deepened firm color (`t-quick`). Press is the deboss (M10). **Focus** is a 3px outline in Copper (or the firm's deepened color, or Plate Ink if that's too light) at a 3px offset, never removed. **Disabled** is the blind look: the fill becomes Cotton 2, the text Graphite, with the emboss inset. **Pending** keeps the pressed state with the component's own pending label ("Sending…").
+- **Text.** Labels never truncate. In Spanish they wrap to two lines, and the button grows in height before it gets wider than its column.
+
+### 11.2 Fields
+
+- **Text inputs, selects, textareas:** 56px tall (48px in the desk's dense tables), white fill, 1px Rule Strong border, the chamfer at 4px, 16px horizontal padding. Text is `input` 18px Ink.
+- **Labels sit above the field**, always visible, in `label` (16px Founders Medium). There are no floating labels and no placeholder-as-label. Help text goes below in `small` Graphite, and "(optional)" is in Graphite in the label.
+- **Focus:** the border goes to 2px in the CoFile or firm color, plus the focus ring.
+- **Error:** a 2px Madder border, with the message below in 15px Madder beside a 16px outlined lozenge glyph (not a red circle with an exclamation mark). The summary at the top of the form ("Please fix these and submit again.") is a Madder notice slip listing the fields as links.
+- **Select:** the same box with a 12px chevron drawn as two 1.5px strokes.
+- **Checkbox:** 24px square, 1.5px Rule Strong border, the chamfer at 3px. Checked: a fill in the CoFile or firm color with a white 2px tick. (The one place a tick belongs is a box the user ticks.)
+- **Radio:** 24px circle, the same logic, with a 10px inner dot.
+- **The plate field** (read-only values to copy: links, URLs, API keys, widget snippets): Cotton 2 fill, no border, the chamfer, the value in Founders Mono 15px for keys and snippets or Founders Text for URLs, and a "Copy" small secondary button inside the right end. On copy, the button's label swaps for 2s to the component's own confirmation, or `[copy needed]` where it has none.
+- **"Same as" / "Same person as" buttons:** small secondary buttons (40px) in a row under the address or person, preceded by the label in `small` Graphite.
+- **Repeating groups** (members, managers): each item in its own white card inside the form, with a 1px Rule border, the item's number in the `kicker` style ("1", "2"), and "Remove" as a quiet button at its top right. Add buttons (the form's own wording) are secondary with a + glyph.
+- **"More options (optional)"**: a disclosure with a 16px chevron.
+- **The logo drop zone, color swatch, font select and signature pad:** see Branding and Signatures (10.11).
+- **The one-time code and card-code fields:** Founders Mono 24px, letter-spaced, centred, with as many character cells drawn underneath as characters are expected (blind-embossed cells).
+
+### 11.3 The intake form
+
+The form a client fills in, and the firm too. It's long, so it's broken into the form's own **sections**:
+
+- Each section opens with a **section head**: the section title in Plate Roman Deck 22px (the firm's font on firm pages), a 1px Rule above it, and 40px of space.
+- "Fields marked * are required." sits once at the top in `small`. The asterisks are in the firm's color.
+- One field per row on phone. On desktop, short fields pair up (city / state / ZIP as 3 columns: 6/2/4 of 12).
+- **"Authorizations"**: a legend with its explanation in `small`, then each statement as a **declaration row**: a 24px checkbox, then the statement in `body`, with 16px between rows and a 1px Rule above the group. They're set in full and never truncated.
+- **Prefilled answers** (saved answers, from a past client, from a message) look like any other entered value, and the form's own notice slip at the top says where they came from.
+- The submit button ("Create the proof" for the firm, "Send to <firm>" for a client) is full width on phone and left-aligned at 320px minimum on desktop, under the footnote.
+
+### 11.4 Chips
+
+Chips are 30px tall with 14px Founders Medium text, 12px horizontal padding, a 12px glyph at the left with 6px after it, and the chamfer at 4px. They never wrap mid-word. Long labels ("Rehearsed to the payment screen") may wrap to a second line, and the chip grows.
+
+| Chip | Look | Used for |
+|---|---|---|
+| **Done** | Verdigris fill, white text, inked plate glyph | "Live", "Filed", "Filed, IRS letter saved", "Completed", "Accepted by the state", "Submitted to the state", "EIN issued", "Approved", "Matches the proof" |
+| **Action** | 1px border and text in the CoFile or firm color, filled lozenge glyph | "Proof ready to approve", "Ready to approve", "Waiting for approval": anything that waits for the firm |
+| **In hand** | 1px Ink outline, Ink text, outline plate glyph | "Submitted", "Received", "Queued", "Filing now", "Final check", "For your team to check" |
+| **Blind** | Embossed, no fill, Ink text, blind plate glyph | "Rehearsal", "Test", "Rehearsed to the payment screen", "Beta" |
+| **Warn** | Ochre text on its tint, outlined lozenge | "Needs information", "Changes requested", "On hold", "Name unavailable", "Paused: state site changed", "Being checked" |
+| **Bad** | Madder text on its tint, outlined lozenge | "Needs correcting", "Rejected by the state", "Failed", "Stopped" |
+| **Outline / dotted** | See the coverage stages (10.3) | "Screens recorded, rehearsal next", "Offered, not yet rehearsed", "Planned" |
+
+The tone comes from the existing `statusLabel` tones (ok, warn, bad, none), with "Waiting for approval" moved to **Action** on the firm's desk, because it's the firm's turn.
+
+### 11.5 Notices
+
+**The notice slip** replaces every yellow box. It's a white strip with a 4px left rule in the tone's color (Plate Ink for plain, the firm color or Copper for info, Ochre, Madder or Verdigris), 16px padding and `body` text. The link inside is underlined. There's no icon, except the blind plate glyph on rehearsal notices, which use the **blind band** instead (9.7, 10.12, 10.13).
+
+### 11.6 Tables
+
+- **Ledger tables** (desk Filings, client links, signatures, coverage, keys, webhooks): no outer border. The header row is in the `kicker` style (13–14px caps, Graphite) with a 1px Ink rule beneath. Body rows are 56–64px with 1px Rule between them. Numbers are tabular and right-aligned, and dates are tabular. There's no zebra striping. Hover: Cotton 2 (CoFile) or a 4% firm tint (Firm).
+- **The proof's tables:** label column at 38%, the group heads, dot leaders on fees (10.12).
+- **On phone,** every ledger table becomes a list of row cards: the primary cell in 17px Medium, the others as `small` lines beneath, and the chip last. There's no horizontal scrolling, except in the docs' parameter tables, which scroll inside a framed box with a fade at the edge.
+
+### 11.7 Cards and sheets
+
+| Component | Look |
+|---|---|
+| **Sheet** | White, 2px radius, the sheet shadow (6.3). The proof, forms, the desk in pictures |
+| **Card** | White, 1px Rule border, no shadow, 24–32px padding. Cards inside sheets and on the desk |
+| **Sample card** | A card with a place or state name in Plate Roman Display 36px, a 24px rule and a list (9.6, 10.3, 10.11) |
+| **Price card** | White, a 2px Rule Strong edge line along its bottom and right (card thickness), the sheet shadow, dot-leader price lines (9.8). Plan cards (10.4) are cards, with Growth on the heavier stock |
+| **Document card** | Letter-proportioned white card: the kicker (place), title (Plate Roman Deck), value (tabular) and five blind-ruled lines (9.5). Never a state's or the IRS's styling |
+| **Stat tile** | A card with the label in the kicker style, the figure in `figure-l` and a `small` line |
+| **The bubble** | Cotton 2 (Night Card in dark), Ink, 17/25, 2px radius, an 8px tail at the bottom-left, max 320px wide, with the caption beneath in 13px Graphite. It's never styled like any messaging app |
+| **The draft card** | A sheet with a head, a chip, and rows with source tags (9.3) |
+| **The record card and the stage rule** | A hairline with lozenges, labels beneath, inked when passed and blind when not (9.5, 10.11) |
+| **The slip** | A narrow card tipped 0.6° on desktop (10.4), or tucked under a sheet (9.4) |
+
+### 11.8 The proof
+
+The proof is a component with three sizes: **picture** (home and How it works, 560px, sample data, with the button as a picture), **page** (10.12, 760px, live) and **email card** (10.14, a 520px summary). All three share the letterhead, the title row, the details, the leadered fees and the button. Only the page size has the terms panel, the form and the full screenshot.
+
+### 11.9 Navigation
+
+- **Public header and phone menu** (9.0). **Desk header and nav** (10.11). **Dashboard header** (10.15). **Docs rails** (10.15).
+- **Breadcrumb-style back links** ("← Filings", "← Other filings", "All states"): 15px Founders Medium, Copper or the firm color, with the arrow as a drawn 14px glyph.
+- **Text links** in running text: underlined 1px at a 3px offset, Copper on CoFile pages, the firm's link color on firm pages. Visited links don't change color.
+- **"For firms →", "How it works →"**: section-end links at 18px Founders Medium with a 16px drawn arrow that moves 3px right on hover (`t-quick`).
+- **Skip link:** "Skip to content" `[copy needed]` as the first focusable element, appearing as a primary button at top left on focus.
+
+### 11.10 Lists, disclosures and code
+
+- **Lozenge lists:** a 7px lozenge (square turned 45°) in Copper or the firm color, aligned to the first line's x-height centre. Text indent 24px. Items 16–20px apart.
+- **Ordered lists** (steps, a plan's ordered items): Plate Roman Text old-style numerals in Copper, hanging in the margin.
+- **Disclosures:** the FAQ style (10.6), with the filled lozenge when open. In the desk, a 16px chevron.
+- **Code:** inline code is Founders Mono at 0.9em on Cotton 2 with 4px padding. Blocks are in the docs style (10.15).
+
+### 11.11 Icons and glyphs
+
+One small set, drawn on a 24px grid with a 1.5px stroke, square caps, mitred joins and **45° chamfers** where a corner would otherwise be square, so they belong with the plate. The icons are: arrow (→ ← ↓), chevron, external link, copy, upload, download, document, envelope, speech bubble, phone, plus, minus, close, menu, replay, edit, pen, card, calendar, search.
+
+The **plate glyphs** (16 × 10px) carry status: inked, blind, outline, outline with lines, dotted (10.3).
+
+No padlock, shield, key, vault, seal, badge, star, flag or check-in-a-circle icon exists in the set.
+
+---
+
+## 12. Craft notes
+
+**Dark mode ("Night stock").** It follows the system setting, with an override in the footer `[copy needed: label]` stored per browser. CoFile's pages go to Night, Night Card and Ink (4.3). **Every firm sheet stays white**: the proof, forms, client pages, emails and the example pictures of them. A firm's logo was made for white paper, and I won't print it on black. Photographs darken 4%. The home close switches to P4, the dusk plate. Vignettes swap to Cotton line work. Blind impressions use the dark values. The letterpress text-shadow is off. Copper lightens to `#DE8D62` with dark button text.
+
+**Phones.** Sheets go edge to edge, and pictures keep a 12–20px margin and their shadow, so the visitor can always tell a picture of a page from the page. Tap targets are at least 48 × 48px. The sticky bottom bar carries "Run a free rehearsal" on CoFile's pages only, never on firm pages. Forms use the right `inputmode` and `autocomplete` values everywhere. Nothing needs hover: every hover effect has a focus or tap equivalent, or is pure decoration.
+
+**Older eyes.**
+
+- Body text is 18px on CoFile's pages and 17px in the desk, and never under 15px anywhere (13px only for the imprint and picture captions).
+- Ink on Cotton is 15.3:1, Graphite 5.9:1, and every text color passes 4.5:1 on its ground. Controls pass 3:1.
+- Links are underlined. Labels are always visible. There are no thin weights under 24px, no light grey text and no all-caps longer than a few words.
+- The layout survives 200% zoom and 400% reflow (the phone layout) with nothing cut off.
+- Motion is gentle, once only, and off with reduced motion.
+
+**Spanish (about 25–30% longer).**
+
+- No fixed widths on buttons, chips or nav. Buttons and chips grow in height.
+- The header switches to the "≡" menu at a wider breakpoint when `lang="es"` (1240px rather than 1100px).
+- Headlines use `text-wrap: balance`. Body text in `lang="es"` blocks gets `hyphens: auto`, but headlines, names, buttons and the proof's values never hyphenate.
+- Kickers can wrap to two lines.
+- The price card's leaders shorten to absorb longer labels, and below 40px of leader the right item drops under the left one.
+- Plate Roman's accented capitals must clear at 1.06 line height (5.4). Test with "Ú" and "Ñ" in headlines.
+- Firm names with accents ("Contadores Peña & Asociados") are tested in every letterhead size.
+
+**Firms' worst cases**, tested before launch: a 6:1 wordmark logo, a square monogram, a white-on-transparent logo (shown on a 6% grey plate in light mode, `[copy needed]` to tell the firm), a 72-character firm name, a pale yellow brand color, a neon green, near-black, and no logo or color at all. Every one has to look like a firm someone would trust.
+
+---
+
+## 13. Production
+
+### 13.1 Tools
+
+- **Design:** Figma, with the token set as variables in four modes (CoFile Light, CoFile Night, Firm Light, Firm Night). The firm modes are driven by two variables, Main and Second, plus the ink-match rules prototyped in a plugin script so designers see deepened colors live.
+- **Type:** the foundry works in Glyphs, and delivers variable WOFF2 plus static OTF, and test pages in English and Spanish.
+- **Illustration:** copper plates, a burin and a press (or a pressure-sensitive tablet at 4×), with 2400dpi scans vectorized by hand in Illustrator and optimized with SVGO.
+- **Photography:** medium-format digital tethered to Capture One, with an HDRI rig for the plate scenes.
+- **3D:** Blender with Cycles (or Houdini and Redshift, at the studio's choice) for the plate under the print.
+- **Real-time:** three.js (exact pinned version) for the brass engraving and the raking light, with SDF text generated at build time for the example names and at runtime for signup.
+- **Motion:** Web Animations API, with no animation framework. Prototype in Figma, then in code.
+- **Build:** CSS custom properties for every token. Each moving picture is a single React component with a `reduced` static state, and the stand-ins in `Visuals.tsx` are replaced one by one, keeping their figure labels and captions.
+- **QA:** automated contrast checks on every token pair and on generated firm colors (a test that fuzzes 1,000 random brand colors through the ink match and asserts 4.5:1), Playwright visual tests in both modes and both languages, and testing with real readers over 60 on real phones.
+
+### 13.2 What to commission
+
+| # | Who (kind of studio or artist) | What | When |
+|---|---|---|---|
+| 1 | **An independent type foundry** with a record in Scotch romans and screen hinting | Plate Roman (Display, Deck, Text; Regular, Medium, Italic), the CoFile wordmark, the "Co" for the mark | Weeks 1–26; interim Miller faces from day one |
+| 2 | **A hand engraver** (a working bench engraver, the kind who still cuts nameplates and trophies by hand) | Two brass name plates ("Harbor & Pine CPA" and a blank one), one brushed-steel plate ("Northgate Payroll"), the Name Plate mark cut at 120mm for tracing, and one copper plate for the 3D reference | Weeks 2–6 |
+| 3 | **A small identity studio** | The two example firm identities: Harbor & Pine CPA and Northgate Payroll (logos, colors, letterhead lockups), plus Best Accounting for the service-page mockups | Weeks 2–5 |
+| 4 | **An interiors and still-life photographer** (and a print-trained retoucher) | P1–P10, with casting for the CPA, the two sisters and CoFile's own filing professionals | Weeks 6–9 |
+| 5 | **A steel-engraving illustrator** | V1–V10 | Weeks 4–12 |
+| 6 | **A letterpress and blind-embossing studio** | Real blind-embossed samples of the Name Plate, the rehearsal log rows and the price card, for scanning (P10) and for normal maps | Weeks 4–7 |
+| 7 | **A product-visualization 3D studio** | The plate under the print (render and loop) | Weeks 8–12 |
+| 8 | **A creative-technology studio** | The brass engraving shader, the raking light and the two-door sequence, with their fallbacks | Weeks 8–14 |
+| 9 | **A reprographic scanning studio** | Paper textures (P10) | Week 5 |
+
+### 13.3 The asset list
+
+**Identity:** the Name Plate (SVG at full, simplified and favicon drawings; light and dark), the wordmark (SVG), the lockups (horizontal, stacked), favicons (16, 32, 180, 512, plus a maskable 512), and the social card (1200 × 630, light and dusk versions).
+
+**Type:** Plate Roman (variable WOFF2 and static instances) and licenses for Founders Grotesk, Founders Grotesk Text and Founders Grotesk Mono (web and app) and the interim Miller Display and Miller Text.
+
+**Tokens:** color (4 modes), type scale, spacing, shadows, chamfer, motion (JSON and CSS).
+
+**Photographs:** P1, P2, P3 (with matching HDRIs), P4, P5, P6, P7 (full and clean plate), P8, P9 (if real staff are available), P10 scans. All at 4000px on the long edge, delivered as AVIF and WebP at 640, 1280, 1920 and 2560 wide.
+
+**Video:** the plate raking-light clips for P1 and P2 (1.2s each), and the plate under the print loop (6s).
+
+**Illustration:** V1–V10, SVG plus a 2× PNG for email, light and dark.
+
+**Glyphs and icons:** 20 icons and 5 plate glyphs, SVG, on the 24px and 16px grids.
+
+**Components:** the seven home pictures rebuilt (desk, two doors, text-to-draft, proof, papers, sample cards, blind log), the price card, the page close, and every component in section 11, each in CoFile and Firm inks.
+
+**Email:** one master template (MJML or hand-built tables), two letterheads, and the 15 messages in 10.14.
+
+**Print:** stylesheets for the proof, Terms and Privacy.
+
+### 13.4 The order to build in
+
+1. **Weeks 1–2: tokens, type (interim), the sheet, the Letterhead and the ink match.** This is the foundation, and it's the part that makes any firm look good. Build the fuzz test for the ink match now.
+2. **Weeks 2–4: the proof page (10.12) and the client pages (10.13).** They're where the firm's brand meets its clients and where the firm decides. They're live product, so they ship before any marketing art.
+3. **Weeks 3–6: the home page with live-HTML pictures** (desk, text-to-draft, proof, sample cards, blind log, price card), using the interim fonts, the engraved vignettes as sketches, and photo placeholders drawn as blind plates in the right proportions.
+4. **Weeks 5–8: the filing desk** (header, Filings, Setup and the Branding proofing room, New filing, Filing detail), then client links, requests, signatures, Ready to pay and billing.
+5. **Weeks 6–9: the seven pages behind the home page,** account pages, legal booklets, the 404 and errors.
+6. **Weeks 8–10: emails.**
+7. **Weeks 9–12: photography lands.** Two doors, the blank plate and the papers replace their placeholders, and the close goes live.
+8. **Weeks 10–14: motion and real-time.** M1–M10, the two-door sequence with the wipe, the brass engraving at signup, the raking light, and the plate under the print.
+9. **Weeks 12–16: the dashboard, docs and embed.**
+10. **Week 26: Plate Roman arrives** and replaces the interim faces across the site in one release, with a visual regression pass.
+
+---
+
+## 14. What I'd strip from today's visuals, and why
+
+| Today | Why it goes |
+|---|---|
+| **The manila folder-tab mark with a check cut into it** (and its code alias, `Seal`) | A folder is office supplies, not pride, and a check on a tab is an approval mark. It builds the brand on "approved", which is exactly what the brief says not to do. The Name Plate replaces it: a plate waiting for the firm's name. |
+| **The cream "paper" ground `#F7F3EA` and manila tones** | Cream and manila drift toward old documents and filing cabinets, and a short step from parchment. Cotton is a clean, warm white like good letter paper. |
+| **IBM Plex Sans, IBM Plex Mono and Source Serif 4** | They're good faces, but they belong to technology companies and documentation sites, and a cousin of one is a federal-website standard. They don't carry a firm's pride. |
+| **Monospace values on the proof and in the pictures** ("TWO SISTERS BAKERY LLC" in Plex Mono) | A client's business name set like computer output makes the proof look like a log file. Values go into Founders Grotesk Text with tabular figures. |
+| **Green ticks before every list item** | Fifty ticks on a page read as a compliance checklist and keep saying "verified" when the copy is saying "yours". Lists get the lozenge, and ticks stay inside checkboxes where a person ticks them. |
+| **The numbered callout circles on the sample proof** | They look like an inspector's mark-up and explain nothing on their own. The list beside the picture does the explaining. |
+| **The yellow highlighter `<mark>`** | It's a schoolbook highlighter on the client's own name. It becomes the firm's 10% wash with a fine underline. |
+| **Yellow and orange notice boxes** (`#FBEFD5`) and the colored "held, on purpose" | They turn reassurance into warning and draw the eye to stopping. Notices become slips, rehearsal notices become the blind band, and the held row is set like every other row. |
+| **The 4px colored top border as the firm's "brand bar"** | A stripe isn't a letterhead. The Firm Rule (thick and thin, under a properly sized logo) is. |
+| **"with CoFile" at the same height as the firm's name, top right** | It competes with the firm's name. It moves to the foot as the imprint (in the desk header it stays right but drops to 13px Graphite). |
+| **The plain HTML stand-ins in `Visuals.tsx`** | They did their job, which was to say what each picture must show. Each is replaced by its designed picture, keeping its figure label and its example caption. |
+| **Round chips with colored dots** (`r3-dot`) | A dot's color carries meaning on its own, which fails anyone who can't tell the greens apart. The plate glyphs differ in shape as well as ink. |
+| **Generic cards with drop shadows on everything** | Shadows go to sheets only, which makes paper look like paper and lets cards be cards. |

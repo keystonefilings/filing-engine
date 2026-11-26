@@ -265,7 +265,7 @@ A scale of about 1.3 (close to a perfect fourth), with two jumps where the poste
 | `body` | 20 px | 19 px | 18 px | 1.6 | 0 | Regular | Reading text, list items. |
 | `ui` | 18 px | 18 px | 18 px | 1.35 | 0 | Medium | Buttons, field text, navigation on the desk. |
 | `small` | 16 px | 16 px | 16 px | 1.5 | +0.005 em | Regular | Captions, help text, table cells on the desk, the beta notice, the legal line. The smallest reading size on the site. |
-| `fine` | 13 px | 13 px | 13 px | 1.3 | +0.02 em | Regular | "with CoFile" and "Filed with CoFile" only. Small print, as promised. |
+| `fine` | 13 px | 13 px | 13 px | 1.3 | +0.02 em | Regular | "with CoFile" and "Filed with CoFile" only. Small type, as promised. |
 | `mono` | 16 px | 16 px | 15 px | 1.55 | 0 | Regular | Code, keys, references, URLs. |
 
 ### 5.3 How the type is set
@@ -946,7 +946,7 @@ Saved cards held in a card vault, never in our database. Security            c1�
 - **The headline:** "$45" at `numeral` size (240 px at 1440, 112 px on a phone), Suisse Int'l Medium, Ink, with the "$" hanging into the left margin so the 4 aligns with the text edge. " a filing." follows on the same baseline at `display-2` (84 px). "EIN included with a formation." is the second line at `display-2`. On phones, "$45" stands on its own line and "a filing." starts the next.
 - **The strip:** a timetable row under a 2 px Ink rule, four cells on columns 1–3, 4–6, 7–9 and 10–12, divided by 1 px Hairlines. In each, the bold part at `title` size (34 px Medium): "Pay as you go", "$25", "$15", "Plans from $250"; the plain part under it at `body` 20 px Graphite. A 1 px Hairline closes the strip. On phones the strip becomes a two-by-two grid.
 - **Then:** "State fees separate. Rehearsals free. See all plans" at 18 px Medium, the last three words as a link with an arrow.
-- **The security line:** 48 px further down, alone, at 16 px Graphite in columns 1–8, with "Security" as an underlined link. It is set quietly and completely, like the small print at the foot of a good contract, because it is reassurance for the reader who looks for it.
+- **The security line:** 48 px further down, alone, at 16 px Graphite in columns 1–8, with "Security" as an underlined link. It is set quietly and completely, like the last clause of a good contract, because it is reassurance for the reader who looks for it.
 - **Motion:** none. Prices hold still.
 
 ### 9.10 Section 9: Close
@@ -1501,3 +1501,244 @@ Email clients are poor typesetters, so the emails are built to survive: 600 px w
 - **The EIN message:** its words are not written yet (`[copy needed]` for subject and body). Its design: the EIN number alone on a line at 32 px bold in tabular figures, the largest thing in the email, with the business name above it at 17 px. A number a client will use for the rest of its life deserves to be set large once.
 - **Dark-mode mail apps:** the head sits on a white table cell so the firm's logo always has its white plate; text colours are set explicitly so clients that invert colours keep 7:1.
 - **Plain-text versions** mirror every message in the same order, with the link on its own line.
+
+---
+
+## 11. Components
+
+Every component is square-cornered, flat and shadowless. Shapes are made by rules and fields, the way a compositor makes them with brass rule and furniture.
+
+### 11.1 Buttons
+
+| Kind | Look | Sizes | States |
+|---|---|---|---|
+| **Primary, CoFile pages** ("Run a free rehearsal", "Create account", "Send") | Ink `#121212` fill, Paper text, Suisse Int'l Medium | 56 px tall, 28 px side padding, 18 px text. Header: 48 px. Hero: 64 px, 20 px text. Close: 72 px, 22 px text. | Hover: fill `#33332F`. Press: 1 px down, fill `#000000`. Focus: 3 px Ink outline, 3 px offset (on Ink fields: Poster Yellow). Busy: the copy's own pending label ("Sending…", "Creating…") with the button kept at its width. Disabled: Ground fill, Graphite text. |
+| **Primary, firm pages** ("New filing", "Create the proof", "Send to Best Accounting", "Approve, and authorize submission and payment") | The firm's main colour fill (or its darkened version, 3.4), white text | 56 px (64 px for the proof's approve button), 18 px Medium | Hover: the fill 8% darker in OKLCH lightness. Press and focus as above, focus ring in Ink. |
+| **Primary, dark mode (CoFile pages)** | Poster Yellow fill, Ink text | as above | Hover: `#FFD666`. |
+| **Outline** ("Request changes", "Log out", "Continue with Google", "Try again") | 2 px Ink border, no fill, Ink text | same heights as primary | Hover: Ground fill. |
+| **Text link with arrow** ("See pricing", "For firms", "How it works", "See which are live today", "See all plans") | 18–20 px Medium Ink, 1.5 px underline, → after a 0.3 em space | | Hover: underline 3 px, arrow moves 4 px right (`t-ui`). |
+| **Quiet** ("Turn off", "Remove logo") | 16 px Medium Graphite, underlined | | Hover: Ink. |
+
+- Labels are sentence case, never capitals, and may wrap to two lines rather than shrink.
+- Minimum target 48 × 48 px everywhere; 56 px for primary buttons on phones.
+- On phones, primary buttons in forms and in the hero are full width.
+
+### 11.2 Fields
+
+| Part | Specification |
+|---|---|
+| Label | Above the field, 18 px Medium Ink, 8 px gap. "(optional)" in Regular Graphite after it. |
+| Input | 56 px tall, white, 1.5 px Graphite `#54544F` border (7.6:1 against white, well over the 3:1 a field edge needs), square, 16 px side padding, 19 px Ink text. |
+| Help | Under the field, 16 px Graphite, 8 px gap. |
+| Focus | Border 2 px Ink plus a 3 px Ink outline at 2 px offset. Never colour alone. |
+| Error | Border 2 px Signal Red, a 3 px Signal Red bar inside the left edge, the message at 16 px Medium Signal Red under the field. The label stays Ink. |
+| Select | The same box with a 2 px-stroke chevron 20 px from the right. Long lists (fonts, filings) open as a custom list with 48 px rows. |
+| Checkbox, radio | 28 px, 2 px Ink border. Checked: Ink fill with a white mark (2.5 px stroke, square caps) / a 12 px Ink dot. The label at `body` beside it, the whole row clickable. |
+| Textarea | At least 3 rows, 19 px text, resizes vertically. |
+| Codes (one-time code, card security code) | 64 px tall, 28 px tabular figures, 0.3 em letter spacing, numeric keyboard. |
+| Colour | A 56 px swatch beside a hex field in Suisse Int'l Mono. |
+| Upload | A 160 px drop area, 1.5 px dashed Graphite border, help text inside; after upload, the file shown as it will be used. |
+
+Forms stack fields 24 px apart; sections 48 px apart under a 1 px Hairline and a section title.
+
+### 11.3 Panels
+
+Three kinds, no others:
+
+- **Hairline panel:** white with a 1 px Hairline edge (filing types, the draft, documents).
+- **Ground panel:** `#F2F2EF` fill, no edge (notices, the alternative request ways, the inquiry form, code).
+- **Rule panel:** white with a 4 px rule along its top, in Ink on CoFile's pages or the firm's main colour on the firm's (the "Your proof is ready" panel, plan columns, state boards).
+
+Padding 24 px (32 px for the main panel of a page). No rounded corners, no shadows, no gradients, no glass.
+
+### 11.4 The proof
+
+The single most important component. It is built once and used in three places: the real proof the firm approves, the sample on the home page (9.5), and the full annotated sample on How it works (10.2).
+
+| Part | Specification |
+|---|---|
+| **Sheet** | White. Text column 640 px; sheet 760 px with 60 px side padding on desktop; full screen width with 20 px padding on phones. On desktop it lies on a Ground page. |
+| **Crop marks** | At each corner, one horizontal and one vertical 1 px line, 20 px long, Graphite at 50%, starting 10 px outside the corner. Desktop only. `aria-hidden`. |
+| **Name plate** | 3.4, with "with CoFile" (or nothing, for white-label) at the right. Then the 4 px main-colour rule across the sheet's full width. |
+| **Notes** (rehearsal, consent, SSN masking) | Ground panels with a 4 px Ink bar at the left, 18 px Ink text, 16 px × 20 px padding. The first word of the rehearsal note, "Rehearsal", in Medium. |
+| **Title** | The filing's title in the firm's font at `display-3` (56 px desktop, 32 px phone); the client's business name in large type. |
+| **Reference and deadline** | 18 px Ink; the filing reference in Suisse Int'l Mono; the deadline ("December 3, 2026, 5:00 PM Eastern") in tabular figures. |
+| **Section heads** ("The state's review page", "Filing details", "State fees") | 26 px Medium in the firm's font, 48 px above, with a 1 px Hairline above that. |
+| **The state's review page** | The picture at the column's full width, 1 px Hairline frame, its explanation above it at `body`. |
+| **Details table** | Two columns: label 40% at 16 px Graphite, value 60% at 19 px Medium Ink. Rows of at least 52 px with 1 px Hairlines; long values wrap. Masked numbers ("***-**-1234") in tabular figures. On phones: label above value. |
+| **Fees table** | Labels left at 18 px; amounts right-aligned in tabular figures at 19 px. "Total" at 22 px Semibold with a 2 px Ink rule above. "Maximum you authorize" and its explanation at 16 px Graphite. |
+| **One-time code, comment** | Fields as 11.2. |
+| **Buttons** | 10.12. |
+| **Print** | A print stylesheet removes the crop marks and the Ground, sets the text at 10.5 pt, keeps the name plate and rule, and fits the proof on Letter or A4 so a firm can keep it in the client's file. |
+| **Marketing-only extras** | The yellow highlighter, the marginal numerals and the payment-screen slip appear only on the samples on CoFile's own pages, never on a real proof. |
+
+### 11.5 Chips
+
+Small rectangular labels, 28 px tall, 10 px side padding, 16 px Medium, square corners.
+
+| Chip | Look |
+|---|---|
+| "Live" | Live Green fill, white text. |
+| "Rehearsal", "Test" | 1.5 px Ink outline, Ink text. |
+| "Ready to approve" (sample proof) | 1.5 px outline and text in the firm's main colour. |
+| "For your team to check" (the draft) | 1.5 px Ink outline. |
+| "Beta" (banner) | Poster Yellow fill, Ink text. |
+| "Matches the proof" | Not a chip: 16 px Medium Live Green text after a 12 px Live Green square. |
+
+### 11.6 Status
+
+A status is always a **square and a label**: a 12 px square, 8 px, then the product's status label at 16 px Medium.
+
+| Meaning | Labels (from the product) | Square |
+|---|---|---|
+| Done | "Completed", "Accepted by the state", "Submitted to the state", "Approved", "Filed", "Filed, IRS letter saved" | Live Green, filled |
+| Waiting for the firm | "Waiting for approval", "Proof ready to approve", "Needs information", "Changes requested", "Name unavailable" | On a firm's pages: the firm's main colour, filled. On CoFile's dashboard: Amber, filled. |
+| Under way | "Received", "Queued", "Filing now", "Getting the state's review page", "Final check", "Being checked" | Ink, hollow (2 px border) |
+| Paused | "On hold", "Paused: state site changed" | Amber, hollow |
+| Did not go through | "Needs correcting", "Rejected by the state", "Failed", "Stopped" | Signal Red, filled |
+
+### 11.7 Tables and timetables
+
+- **Head row:** 16 px Medium Graphite, 2 px Ink rule under it. On long tables the head sticks under the header on desktop.
+- **Rows:** 56 px (72 px on the desk overview), 1 px Hairlines, no stripes. Text left; figures right in tabular figures.
+- **Phones:** each row becomes a block, the first column as its title at 18 px Medium and the others as label–value lines at 16 px.
+- **The timetable** (What we file): the route line of five stops (10.4) in the last column.
+- **The boards** (home coverage, What we file "State by state"): a 6 px Ink bar, the place name at `display-3`, rows of 56 px.
+
+### 11.8 Prices
+
+- **Price columns** (Pricing, Billing): a rule on top (4 px Ink; 8 px Poster Yellow for Growth on the public page; 4 px firm colour for "Your plan" on Billing), the plan name at `title`, the figure at `display-3` in tabular figures with its unit (" a filing", " a month") at 20 px Regular on the same baseline, the annual line at 16 px Graphite, items with hanging en rules. Columns divided by 1 px Hairlines; no boxes, ribbons or badges.
+- **The price strip** (home 8): four cells under a 2 px Ink rule, bold part at `title`, plain part at `body` Graphite.
+- **The price as a picture:** "$45" at `numeral` size (7.3).
+- Figures are never animated, never struck through, never shown with "from" in small type when the copy says "Plans from $250" at full size.
+
+### 11.9 Navigation
+
+- **Public header:** 9.1.
+- **Desk navigation:** 10.12.
+- **Dashboard and docs navigation:** 10.13.
+- **Phone menu:** a full-screen white sheet, links at `title` size, the primary button pinned at the bottom, closed with a 2 px-stroke × (accessible name `[copy needed]`).
+- **Breadcrumb-style back links** ("← Filings", "All states"): 16 px Medium, underlined.
+- **Current page:** a 3 px underline, offset 6 px, in Ink (CoFile) or the firm's main colour (desk).
+
+### 11.10 Lists
+
+- **En-rule lists** replace every tick on the site: an en dash in Ink, hanging 24 px to the left of the text (into the margin on desktop; as an indent on phones), items at `body`, 16 px apart. On the home page's short lists, items sit 20 px apart with a 1 px Hairline between them.
+- **Marginal numerals** (the proof samples, How it works): 16 px Medium Graphite in the margin, aligned to the first baseline.
+- **Dot leaders** (the rehearsal programme): middle dots every 12 px between the item and its result.
+- **Definition lists** (Pricing): the bold lead in a left column, the rest in a right column, rows with Hairlines.
+
+### 11.11 Notices
+
+A Ground panel with a 4 px bar on the left and the text at 18 px Ink. The bar's colour says what kind: Ink for information and rehearsals; Amber for something waiting on someone; Signal Red for errors; Live Green for done ("Saved to Google Docs."). The link inside is underlined. Notices that appear after an action are announced (`role="status"`). No icons.
+
+### 11.12 The message shape
+
+For a client's text or email (home 3, How it works, Filing request): Ground fill, corner radius 28 px except 6 px at the top left, 28 px × 32 px padding, text at `title` (34 px) on marketing pictures and 22 px on the desk. Its source line ("Ana Ortiz · text message · example") sits under it at 16 px Graphite. The only rounded shape in the system, because a text message is round in everybody's memory.
+
+### 11.13 Disclosures
+
+Questions and "Progress on the state site": a full-width row with a 1 px Hairline above, the summary at 24 px Medium (20 px on phones, 18 px on the desk), a plus/minus at the right in a 2 px stroke. Opening animates height in `t-ui`.
+
+### 11.14 The highlighter
+
+Poster Yellow `#FFC933` behind Ink text, 0.92 em tall, centred 0.04 em below the x-height middle, with 0.12 em overhang left and right, square ends. Only on CoFile's own marketing pictures (9.4, 9.5, 10.2, the `"dryRun": true` in the docs). Never on a firm's real page.
+
+### 11.15 Links and focus
+
+- Links: underlined (1.5 px, offset 0.18 em), in the colour of the text around them; hover thickens the underline to 3 px. On a firm's page, links may take the second colour if it passes 4.5:1, and keep the underline.
+- Focus: a 3 px Ink outline with 2 to 3 px offset on every interactive element, Poster Yellow on Ink fields. Visible on mouse focus too, because older users tab more than designers expect.
+
+---
+
+## 12. Craft notes
+
+**Dark mode.** CoFile's pages and the filing desk follow the system setting (4.2). Yellow fields turn dark with yellow headlines; Ink fields go to pure black with a hairline edge. Specimens keep their white sheets, because they are pictures of paper. Black-and-white photographs are not inverted or dimmed. The proof, the firm's client pages and the widget are always light. Test every firm colour on `#141413` too: where the desk uses the firm's colour as text or a square on dark, it is lightened in OKLCH until it reaches 4.5:1.
+
+**Phones.** Design at 390 px first and check at 360 and 430. Pictures run edge to edge; text has 20 px margins. Primary actions are full width and 56 px tall; the public site keeps "Run a free rehearsal" in a bar at the bottom of the screen after the hero. Nothing depends on hover. No horizontal page scroll at any width down to 320 px; tables and code scroll inside themselves. Forms use the right keyboards (`inputmode`, `autocomplete`) and never zoom on focus (inputs at 19 px).
+
+**Older eyes.** Body text 18 to 20 px, never below 16 px except "with CoFile". Every line of text 7:1 or better, except display type of 56 px and more, which is at least 4.5:1 (on the firm's colour fields). Weights Regular and above only. Links always underlined. No type over busy photographs. Meaning never by colour alone: squares come in three shapes and every status has its words. The pages reflow to one column at 200% zoom. With `prefers-contrast: more`, Hairlines become Graphite and Ground panels gain a 1 px Graphite edge.
+
+**Spanish text length.** Plan for 25 to 30% more length. The hand-set headline breaks are for English; with `lang="es"` they switch to `text-wrap: balance`, and display sizes step down one level when a word would overflow its column (container queries, not viewport guesses). Buttons wrap to two lines rather than truncate. Nothing has a fixed width that holds text. The two-size headline of section 2 keeps its second sentence small in every language. Hyphenation `auto` for Spanish body text, never in headlines. "¿" and "¡" hang into the margin like opening quotes. Test every specimen with Spanish strings and names with accents ("Lucía Ortiz Muñoz").
+
+---
+
+## 13. Production
+
+### 13.1 Tools
+
+- **Figma** for layouts and the component library, with the tokens of sections 4 to 6 as variables (light and dark modes, three breakpoints).
+- **Glyphs** for the wordmark and the Cº mark, delivered as SVG and as hand-hinted bitmaps for the favicons.
+- **The existing Next.js app** for the build: tokens as CSS custom properties, components replacing today's, specimens as real React components fed with sample data. No CSS framework is needed.
+- **Motion:** CSS transitions and the Web Animations API with `IntersectionObserver` (8.5). No animation library, no video, no Lottie.
+- **Photography:** shot on a medium-format digital back, processed in Capture One, retouched in Photoshop, delivered as 16-bit TIFF masters and AVIF/WebP derivatives at 640, 1280 and 2560 px.
+- **Quality checks:** visual regression screenshots (Playwright) of every specimen and page at 390, 834 and 1440 px in light and dark; automated contrast checks (axe, plus a custom test that runs the 24-logo, many-colour firm set of 10.12 through the name plate and button rules).
+
+### 13.2 Tokens
+
+`--paper #FFFFFF`, `--ink #121212`, `--yellow #FFC933`, `--graphite #54544F`, `--hairline #D9D9D4`, `--ground #F2F2EF`, `--live #0A7D45`, `--amber #B86E00`, `--red #B3261E`, with their dark values (4.2); `--firm-main`, `--firm-main-button` (the contrast-safe version), `--firm-second`, `--firm-tint`, `--firm-font`; the type scale (`--numeral` … `--fine`) as `clamp()` values; spacing `--s1` … `--s10`; motion `--t-press`, `--t-ui`, `--t-place`, `--t-sheet`, `--ease-place`, `--ease-ui`.
+
+### 13.3 Asset list
+
+| Group | Assets |
+|---|---|
+| **Identity** | Wordmark SVG (Ink, Paper); Cº mark SVG (Ink; Paper with Yellow bar); favicons 16, 32, 48 px (hand-hinted PNG) and SVG; touch icon 180 px; app icons 192 and 512 px on Poster Yellow; "with CoFile" as live text (no image). |
+| **Type** | Suisse Int'l Regular, Medium, Semibold and italics; Suisse Int'l Mono Regular and Medium; WOFF2 subsets; licence covering firm pages and the widget. |
+| **Example firms** | Harbor & Pine CPA, Northgate Payroll and Best Accounting logos (SVG and a white-background JPEG of each, to test the real case), colours and font choices (3.5). |
+| **Props** | The bronze "Harbor & Pine CPA" door plate; the folder label "TWO SISTERS BAKERY LLC"; the letterhead proof for the printer photograph (fictional firm). |
+| **Photographs** | P1 to P7 (7.4), each with its crops. P4 when the real team can be photographed. |
+| **Specimens** (React components) | Desk, OnePageTwoFirms (two and three fields), TextToDraft, ProofSample (home and annotated), Papers, StateBoards, RehearsalProgramme, PriceFigure, CodeSpecimen, EmbedSpecimen, NamePlatePreview (sign-up). |
+| **Components** | Everything in section 11, including the proof's print stylesheet. |
+| **Icons** | Arrow right, arrow down, external, copy, upload, close, plus, minus, chevron, menu, sheet outline (documents), signature "×". |
+| **Emails** | The two families (10.14), every message, HTML and plain text. |
+| **Sharing images** | The two generated templates (7.7). |
+
+### 13.4 What to commission
+
+| Who (kind of studio or artist) | What | Roughly |
+|---|---|---|
+| A type designer who works in grotesque lettering | The wordmark, the Cº mark, the hinted favicons | 3 weeks |
+| The foundry (Swiss Typefaces) | Web, desktop and app licences for Suisse Int'l and Suisse Int'l Mono | at once |
+| A documentary photographer with a black-and-white portrait practice, with a producer for casting, locations and releases | P1, P2, P3, P5, P6, P7 in four shoot days in New Jersey and New York; P4 on a later day with the real team | 4 + 1 days, then 2 weeks of edit and retouching |
+| A sign engraver and a prop printer | The bronze door plate, the folder label, the letterhead proof | 2 weeks, before the shoot |
+| A small identity studio (or our own designer) | The three fictional firms' logos, which must look like plausible small-firm logos and nothing like CoFile | 1 week |
+| A front-end developer who specialises in motion | M1 to M9, reduced-motion states, performance on low-end phones | 2 weeks |
+| An email developer | The two families, tested in Outlook, Gmail and Apple Mail, light and dark | 1 week |
+| An accessibility auditor | A full audit before launch, including screen-reader passes on the specimens | 1 week |
+
+No illustration studio, no 3D house, no motion house. The money goes into type, photographs and the craft of the build.
+
+### 13.5 The order to build in
+
+1. **Tokens and type** (week 1). Nothing else can be judged until the real face and the real sizes are on screen.
+2. **Identity** (weeks 1–3, in parallel): wordmark, Cº, "with CoFile".
+3. **The name plate system** and the firm colour and font rules, with the 24-logo test (weeks 2–3). Every firm page depends on it.
+4. **The proof** (weeks 3–4): the real page, its print version, then the samples.
+5. **The specimens** with the example firms' kits (weeks 4–5).
+6. **The home page** (weeks 5–6).
+7. **The seven inner pages** (weeks 6–7).
+8. **The firm's pages**: desk, intake, the page for each filing, client links, requests, signatures, Ready to pay, billing (weeks 7–9).
+9. **Emails** (week 8).
+10. **Sign-up, log-in, account pages, legal pages, 404 and errors** (week 9).
+11. **Dashboard, API docs, white-label page and widget** (week 10).
+12. **Photography**: props in weeks 2–3, the shoot in week 4, the edit in weeks 5–6, placed in week 7.
+13. **Motion** (week 10), last on purpose: every page must already sell without it.
+14. **Dark mode, Spanish and accessibility** (week 11), then the audit.
+
+---
+
+## 14. What I'd strip from today's visuals, and why
+
+| Today | Why it goes | In its place |
+|---|---|---|
+| **The manila folder-tab mark with a check cut into it** | A check is a seal of approval, and a folder tab is the oldest cliché of document software. It also puts CoFile's brand on stopping and approving, which the brief rules out. | The Cº, the "and Company" of firms' names, drawn small. |
+| **The warm cream ground** (the `#F7F3EA` paper on the proof) | Every white-background JPEG logo shows as a box on it, and it makes the product look antique. | Pure white paper. Warmth comes from yellow, people and type. |
+| **Three typefaces** (Source Serif 4 headlines, IBM Plex Sans text, IBM Plex Mono values) | Three voices on one page. The serif headlines whisper where the copy speaks plainly, and mono values make a bakery's name look like code. | One grotesque for everything, and mono only for machines. |
+| **A green tick before every list item** | Ticks turn every benefit into a box someone checked. Down a whole page, it reads as a compliance checklist, and it builds the look around verifying. | En rules, as a book would set them. |
+| **Numbered callout circles on the sample proof** | Circles are the language of instruction manuals. | Marginal numerals, as in an annotated edition. |
+| **"Matches the proof" as a green badge, and "held, on purpose" in its own warning tone** | They make the checks and the stop the loudest moments of their pictures. | Alignment of figures for the match; the held line set like every other line. |
+| **Coloured dots as the only sign of a filing's stage** | Three dots in three colours are hard to tell apart for older and colour-blind eyes. | Squares in three shapes (filled green, filled ink, hollow), always with the words available. |
+| **Soft rounded buttons and bordered cards everywhere** | Generic, and a bordered card around everything is a page with no hierarchy. | Square, flat rules and fields; three kinds of panel only. |
+| **Small, muted grey type for lines that sell** (such as "Built and run by filing professionals…") | Muted small type says "fine print". These lines are promises. | Full-size Ink type. Small type is reserved for one phrase: "with CoFile". |
+| **The same text-beside-picture layout in every section** | Nine identical spreads in a row make a page that is easy to scroll past. | Alternating sides, full-bleed fields and one poster rhythm: yellow, white, firm colour, black, yellow. |
+| **The "H&P" letters in a box as the example firm's logo** | A placeholder logo makes the example firm, and so the reader's firm, look like a placeholder. | A designed kit for each example firm, so the system is shown at its best. |

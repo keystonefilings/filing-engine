@@ -1921,3 +1921,600 @@ under the firm's nameplate, with the spot drawn in Press Black only.
 lamp spot in Press Black, H1 "You're not signed in to this filing desk", and the copy's two lines
 with "log in here" as a link.
 
+### 10.11 The firm's filing desk (`cofile.app/p/<firm>`)
+
+Register 2: the firm's brand leads. The test of the whole system is that a firm owner logs in, sees
+their own name across the top, and feels they're in their own office.
+
+**The chrome.**
+
+```
+┌──────────────────────────────────────────────────────────────────────────────────────────┐
+│ [firm logo]  Harbor & Pine CPA                              ana@… (gray)   Log out       │  80px
+│ ═════════════════════════════════════════════════════════════════════════════════════════ │  firm thick-thin rule
+│ Filings   New filing   Ready to pay ①   Client links   Signatures   Setup   Billing      │  section tabs, 48px
+│                                                                             with CoFile■ │
+└──────────────────────────────────────────────────────────────────────────────────────────┘
+```
+
+- **Nameplate,** left-aligned: the logo at 4,000px² (3.4), then the firm's name in its own font
+  or Publico Headline Medium 22px. The thick-thin rule in `--firm` runs the full width under it.
+- **Section tabs** under the rule, like a newspaper's section bar: "Filings", "New filing", "Ready to
+  pay", "Client links", "Signatures", "Setup", "Billing", in National 2 Medium 16px, 24px apart; the
+  current one gets a 3px `--firm-ink` underline. "Ready to pay" carries a count when filings are
+  waiting: a 20px `--firm-ink` disc with a white numeral.
+- **Right:** the user's email in Caption Gray (a link to change the password where the code allows)
+  and "Log out" as a text button. The imprint "with CoFile■" right-aligned under the tabs.
+- **Footer:** "Questions? Email …" when the firm has a support email, in Small style.
+- **Page head pattern:** H1 in Headline 2 (the firm's font, if any), with the page's main action as a
+  button at the right of the same line ("New filing").
+- **Phone:** the nameplate and a menu button in a 64px bar; the rule; the tabs become a sideways
+  scrolling row under it (sticky, 48px), the current tab scrolled into view.
+
+**Filings (the overview).**
+
+- H1 "Filings" and the "New filing" button (`--firm-ink`).
+- **Notices** above the table, as notice strips (section 11): "Real filings need an active
+  subscription; rehearsals are free. Subscribe"; "1 approved filing is ready to pay and needs your
+  card's security code. Pay and file"; "1 filing needs someone to act."
+- **The table** (section 11): "Filing" (the business name in National 2 Medium 17px as a link, the
+  "Test" badge after it for rehearsals), "Type", "Status" (chip), "Started" (date, tabular, Caption
+  Gray). Rows 60px, Hairlines, hover in `--firm-wash`. A filing waiting for the firm's approval gets
+  the 3px `--firm` bar on its left edge, as on the home page's desk.
+- **Empty:** the clear-desk spot (Press Black only), "Your desk is clear. Start a filing (it can be a
+  free rehearsal), or send a client a link with your logo on it.", and the two buttons "New filing"
+  and "Send a client a link".
+
+**Setup: "Set up your account".** A contents page with three numbered steps and the optional fourth:
+
+```
+Set up your account
+Three short steps, plus registered agents if you want them. You can change any of them later.
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ 1   Your firm      Name, kind of firm and who to contact.                 [ Set up your firm ]
+ ─────────────────────────────────────────────────────────────────────────────────────────
+ 2   Branding       Your logo and color on the pages your clients see.    [ Set up branding ]
+ ─────────────────────────────────────────────────────────────────────────────────────────
+ 3   Payment        Which card pays state fees: one card for everything,  [ Set up payment ]
+                    or one per filing type, with a backup.
+ ─────────────────────────────────────────────────────────────────────────────────────────
+     Registered agents (optional)  Save the agent you use in each state, …  [ Add agents ]
+```
+
+Numerals in Publico Headline Bold 48px; done steps get a filled `--firm-ink` square behind the
+numeral (white numeral). When all three are done: "You're set up", "You can change any of these at
+any time.", and "Start a filing" as the primary button.
+
+**Branding ("Step 2 of 3" · "Branding").** The page that makes a firm proud before it has filed
+anything.
+
+- **Left (columns 1 to 5): the fields.** "Logo": a 160px drop zone with a 1.5px dashed Field Line
+  border, showing the uploaded logo twice, on paper and on the firm color, with the size we'll use;
+  "A PNG, JPEG or WebP picture. A wide logo on a clear background looks best. Big pictures are shrunk
+  for you."; "Remove logo"; "Or a link to your logo" / "Use a link instead". "Main color" and "Second
+  color": a 44px swatch, the hex field ("Use a hex code like #1f4fd1."), and the ready colors as 32px
+  swatches. "Font": choose from Google Fonts or upload a file (under 600 KB), with a live preview line.
+- **Right (columns 6 to 12, sticky): the proofs of the brand.** Three live previews of the firm's
+  pages, scaled to 60%, switched by tabs: the proof's top, the client's form, and an email. They
+  update as the firm types. If we deepened the main color for buttons (3.5), the color field shows
+  both swatches side by side, the color as given and the one used for buttons, so nothing happens
+  behind the firm's back (labels `[copy needed]`). A light/dark toggle shows the dark-mode version.
+- Phone: the previews become a single preview card above the fields that updates as you go.
+
+**Your firm (Step 1 of 3), Payment (Step 3 of 3), Registered agents, Password:** forms in one
+480px column with section heads in Headline 4, following section 11. Payment explains "Ready to pay"
+with a link, in Small style.
+
+**New filing: "Which state is the business in?"**
+
+- H1 "New filing"; the question in Lede style; the small note with its link to What we file.
+- "Or send us the details and we fill in the form for you to check:" and the email, text, WhatsApp
+  and Slack lines in UI style, each address in GT America Mono.
+- **Three state cards** in a row (stacked on phones): 220px tall, Sheet White, hairlined, the state
+  name in Headline 3 (36px), the count line in UI style ("4 filing types, plus the federal EIN").
+  Hover: a 3px `--firm` rule appears along the top edge (120ms). No maps and no state symbols.
+
+**"New Jersey: what are you filing?"** The H1 in Headline 2, the line under it, then filing-type
+cards in two columns: the title in Headline 4, the "Live" or "Rehearsal" badge, the summary in UI
+style, the fee note in Small style with tabular figures. Below, the card "Your pages for clients"
+with each page's address in GT America Mono 15px and the widget code in a code block (section 11).
+
+**The new filing form** (`/new/<kind>`): "← Other filings" as a back link; the choice of "Send them a
+link", "Start from a client you filed for before", "New client" or "Fill in" as four segmented
+options (section 11); then the intake form (10.13) for the firm's own staff, with its submit button
+"Create the proof" and the note "Next you get the proof to approve. Nothing is filed until you do."
+
+**Filing detail.** The filing's own front page.
+
+```
+← Filings
+NEW JERSEY LLC FORMATION                                       ◐ Waiting for approval   [Rehearsal]
+Two Sisters Bakery LLC                                         (Headline 1, the firm's font)
+┌ Your proof is ready ─────────────────────────────────────┐   ┌ right rail ─────────────────┐
+│ ▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀ 4px firm rule                             │   │ Documents                   │
+│ Check every detail and fee exactly as they'll go to the   │   │ ▭ (document rows)           │
+│ state, then approve it or ask for changes. Nothing is     │   │ EIN: 00-0000000 (mono 28px) │
+│ filed until you approve.                                  │   │ Open the record             │
+│ [ Open the proof and approve it ]                         │   │ Save to Google Docs         │
+│ We also emailed the link to …                             │   └─────────────────────────────┘
+└───────────────────────────────────────────────────────────┘
+Progress on the state site
+ ● screen 1 ── ● screen 2 ── ● screen 3 ── ○ …        (a strip of the captured screens, the contact sheet)
+```
+
+- The kicker is the filing type; the H1 is the business name, large, in the firm's font. The client
+  is the story.
+- **"Your proof is ready"** is the first thing on the page whenever the firm needs to approve: a
+  Sheet White card with a 4px `--firm` top rule, the heading in Headline 3, the copy's sentence in
+  UI style, "Open the proof and approve it" as a large `--firm-ink` button, and the emailed-to line
+  in Small style.
+- **"Progress on the state site"**: the captured screens as a contact sheet (the same component as
+  picture 7), with each frame's step and time, so the firm can see exactly what CoFile did.
+- **"Documents"**: rows with a document glyph (a plain page outline, no seals), the name, the date,
+  and a download link. **"EIN:"** set in GT America Mono 28px in a hairlined box: the number a new
+  business will quote for the rest of its life deserves to be set big. When the filing is complete,
+  the record closes with the end mark.
+- "Pay and file", "Open the record", "Save to Google Docs" (with its note "A copy of this record in
+  your Google account. People's Social Security numbers and ITINs are left out.") as secondary
+  actions in the right rail. The signature note in Small style.
+- Phone: one column; the proof card first, then documents and EIN, then progress, then actions.
+
+**Client links.** H1 "Client links". The card "Send a client a link": "Filing" (select), "Who it's for
+(shown to you and the client)", "Make link"; once made, the link in a GT America Mono field with
+"Copy link" and "Email it from your mail app". Then "Links you sent" as a table: "For", "Filing",
+"Made", "Status" (chips: "Waiting for the client" amber, "Turned off" gray outline, and "Used: open
+the filing" as a link), "Turn off" as a text button.
+
+**Requests from a text or email** ("Filing request"). "Your message" shown as the same message
+bubble as the home page (for an email, the same bubble squared off, with the sender and subject in
+Caption style above it). Then "This looks like a request for: …", "Open the filled-in form" (primary),
+and "Not this filing? Choose another" with "Choose the filing". The other states ("Already sent as a
+filing. Open the filing", the 30-day deletion note, "We couldn't find answers in your message for
+this form.", "Reading emails automatically isn't switched on for this site yet.", "We couldn't tell
+which filing this is.") as notice strips.
+
+**Signatures.** H1 "Signatures"; "Saved signatures" with its paragraph; a table "Signer", "Saved",
+"Last used", "Remove" (no signature images shown); "No saved signatures yet." with the capped-pen
+spot; "Add a signature" opens the signature pad (section 11).
+
+**Ready to pay.** H1 "Ready to pay" and its paragraph. One card per saved card: the card's name and
+last four digits as the product gives them, the approved filings waiting on it as a small fee table
+(tabular, the total with the double rule), one security-code field (GT America Mono 24px, 4 boxes
+wide, `inputmode="numeric"`), and "Pay and file". Empty: "Nothing is waiting for a card right now."
+with the face-down card spot.
+
+**Billing.** H1 "Billing". The plan, set as one column of the rate card (10.4) with "your plan"
+marked by the 4px `--firm` rule `[copy needed]` if a label is wanted; the plan picker as the four
+rate-card columns; saved cards; the notices ("Your plan is changing. …", "Billing couldn't be loaded.
+Try again shortly."). Invoices as a table with tabular figures and double-ruled totals.
+
+### 10.12 The proof (the page the firm approves)
+
+The most important page in the product, and the press check. It's reached from the filing desk
+("Open the proof and approve it") and by email, and it carries the firm's nameplate, so the firm
+sees its filing under its own name.
+
+```
+                          [ Harbor & Pine CPA logo ]
+═══════════════════════════════════════════════════════════════════════  firm thick-thin
+                                                           with CoFile■
+┌ Rehearsal: nothing will be filed or paid, even if you approve. ──────┐  (rehearsals only)
+NJ LLC formation: TWO SISTERS BAKERY LLC                                  (H1)
+Filing reference …. Please decide by December 3, 2026, 5:00 PM Eastern.
+After that, this link stops working and you'll need a new one.
+┌ statement ───────────────────────────────────────────────────────────┐
+│ By approving, you confirm every detail below is correct and           │
+│ authorize its submission exactly as shown, and payment of the fees    │
+│ shown, up to the total shown ($103.50). Government fees generally     │
+│ can't be refunded once paid, even if the filing is rejected. …        │
+│ Government sites don't save drafts, so once you approve, the whole    │
+│ filing is sent in one go. Please check everything now.                │
+└───────────────────────────────────────────────────────────────────────┘
+The state's review page                       (H2) + its paragraph
+[ the picture of the state's own review page, framed; tap to enlarge ]
+Filing details                                (H2) [+ SSN note]
+  label ........................ VALUE IN MONO
+State fees                                    (H2) + "Nothing is charged on this page. …"
+  Formation filing fee                                        $100.00
+  NJ portal fee, by card                                        $3.50
+  ───────────────────────────────────────────────────────────────────
+  Total                                                       $103.50
+                                                              ═══════
+  Maximum you authorize      $…… (if the state asks for more, we stop before paying)
+One-time code sent to you      [ □ □ □ □ □ □ ]                 (when required)
+What should change? (Needed only if you ask for changes)
+[ textarea ]
+[      Approve, and authorize submission and payment      ]   60px, --firm-ink
+[                    Request changes                      ]   outline
+Questions: …
+```
+
+- **Width** 720px, centered; phone full width with 20px margins. Coated White page; the content is
+  not a card, it *is* the page.
+- **Nameplate** as in 3.4, centered, with the imprint under the rule at the right.
+- **Rehearsal note:** a notice strip with a 4px Press Black left rule on Newsprint, the sentence in
+  National 2 Bold 17px. Unmissable but calm.
+- **H1** in Headline 2 (48px desktop, 30px phone) in the firm's font; the deadline line under it in
+  UI style.
+- **The statement** (the approval consent, verbatim) in a box with a 1px Press Black border and
+  24px padding, in Publico Text 18px/29px, not small type: this is what the firm is agreeing to, and
+  it should be read.
+- **The state's review page:** the H2, its paragraph, and the image in a hairlined frame at full
+  column width, captioned with its alt text. On phones, tap opens it full screen with pinch-zoom.
+- **Filing details:** H2, the SSN note when present (Small style), and the table: labels in National
+  2 15px Caption Gray (40%), values in GT America Mono 17px, nested groups indented 16px with their
+  group label as a row head in National 2 Medium. Masked SSNs ("***-**-1234") in mono as they are.
+- **State fees:** National 2 Narrow 18px, amounts right-aligned on the decimal, the total in Bold
+  with the double rule, "Maximum you authorize" as a final row in UI style.
+- **Approving:** the one-time code field (six boxes, GT America Mono 28px), the change textarea
+  (labelled as the copy gives it), then **"Approve, and authorize submission and payment"** as a
+  60px `--firm-ink` button, full width; its label is long, so it wraps to two centered lines on
+  phones and the button grows. "Request changes" as a full-width outline button below, with 16px
+  between them so neither can be hit by mistake.
+- **No sticky approve button.** The copy asks the firm to "check everything now"; a button that
+  follows you down the page invites approving without reading. Instead, a 2px `--firm` reading
+  progress rule along the top of the viewport.
+- **After deciding** (the decision page): the same nameplate, the heading in Headline 2, the
+  paragraphs in UI style, the questions line. Nothing else. A finished page should look finished.
+
+### 10.13 The client's pages: filing pages, client links and the intake form
+
+These are the only pages a firm's client sees (with the emails), so they're where "Your logo and
+color on every page your client sees" is kept.
+
+**The page for each filing a firm offers** (`cofile.app/bestaccounting/llc-filing-new-york`):
+
+```
+                         [ Best Accounting logo ]
+══════════════════════════════════════════════════════════════════  firm thick-thin
+                                                       with CoFile■
+┌ This page is in rehearsal for now. You can fill it in, but nothing will be filed … ┐
+New York LLC formation                                    (H1, firm font, Headline 2)
+(summary) After you send this, Best Accounting checks every detail and fee and
+approves exactly what will be filed. Nothing is filed or paid until they do.
+(fee note, Small)
+──────────────────────────────────────────────────────────────────
+ 1  (first group of the form)                             Headline 4, numeral in --firm-ink
+    Label *
+    [_______________________________________]  56px
+ 2  …
+[              Send to Best Accounting               ]   60px, --firm-ink
+Next, Best Accounting checks it and approves the filing. Nothing is filed until they do.
+By sending, you agree to CoFile's Terms of Service; your details are handled under its Privacy Policy.
+Questions about this form? Email Best Accounting at …
+──────────────────────────────────────────────────────────────────
+Terms · Privacy                                         with CoFile■
+```
+
+- 720px column, centered; the nameplate as in 3.4.
+- The rehearsal notice as a notice strip (Newsprint, 4px Press Black left rule), never in red.
+- The H1 is the filing type, in the firm's font; the summary in Lede style (20px).
+- **"Thank you."** after sending: the nameplate, "Thank you." in Headline 2, and the copy's next-step
+  line. Nothing else.
+
+**Client link pages** (`/i/<token>`, "Your filing"): the same template, under the firm's nameplate.
+"This link has expired or isn't valid" / "Ask whoever sent it for a new one.", "This link can't be
+used" and "This filing is no longer offered" use the same layout with the torn-ticket spot in Press
+Black.
+
+**The intake form** (used here, on client links, and by the firm's staff):
+
+- Fields grouped into numbered sections ("chapters"): the group's legend in Headline 4, its numeral
+  in `--firm-ink` Publico Headline Bold.
+- "Fields marked * are required." at the top in Small style. The asterisk is Press Black, not red.
+- Labels above fields; help text under the label; 56px fields; values typed in National 2 18px (the
+  proof shows them in mono, as filed).
+- "Same as" / "Same person as" as 28px checkboxes that collapse the repeated fields with a 200ms
+  height change.
+- Repeating groups (members, officers) as hairlined cards with "Remove" as a text button and an
+  outline add button.
+- "More options" as a disclosure row.
+- **Authorizations**: each statement as a 28px checkbox with the statement in UI style beside it,
+  under the copy's explanation ("The state form asks for these. …").
+- The signature pad when needed (section 11), with "Only the signer named above may draw it." under
+  it.
+- Errors: "Please fix these and submit again." as a notice strip at the top listing each field as an
+  anchor link; each field's message under it in Correction Red with a 2px red border.
+- Submit: "Send to {firm}" for the client, "Create the proof" for staff; full width on phones.
+
+### 10.14 Platforms: the dashboard, API docs, white-label page and widget
+
+**The dashboard** (`/dashboard`). CoFile's register (1), tuned for density: these readers live in
+it all day.
+
+- **Chrome:** a left rail, 248px, Newsprint, the wordmark at the top (16px cap height), then the
+  sections "Overview", "Filings", "Ready to pay", "Firms", "API keys", "Webhooks", "Setup", "Team",
+  "Billing", "Sign-ups", "Docs" in National 2 Medium 16px, 44px rows; the current one in Press Black
+  with a 3px Press Black bar at its left, the rest in Caption Gray. "Change password" and "Log out"
+  at the foot. On phones the rail becomes a top bar with a menu sheet.
+- **Overview:** H1 "Overview"; notices; then a row of three "by the numbers" figures ("Filings",
+  "Webhook deliveries", "API keys" with "Manage keys"): the count in Publico Headline Bold 56px with
+  tabular figures, the label in Caption style above it. Then the three charts **"By status"**,
+  **"By state"** and **"By month"** as small multiples in the newspaper chart style: horizontal bars
+  for status and state, columns for months; National 2 Narrow labels set directly on the bars (no
+  legends); a baseline and no gridlines; Press Black bars with the single highlight in Gold Leaf
+  (the "waiting for approval" bar; the current month). "None yet." when empty.
+- **Firms, Filings, API keys, Webhooks, Sign-ups, Team:** tables (section 11). Keys and endpoint
+  URLs in GT America Mono; revoked keys get the "Revoked" outline chip; webhook deliveries show HTTP
+  status as chips (2xx Live Green, 4xx and 5xx Correction Red). Sign-ups: "Waiting for approval" with
+  "Approve" (primary small) and "Turn down" (text button), then "Decided" and "Enterprise requests".
+- **Setup:** one long settings page with a sticky in-page contents list at the right ("Payment
+  methods", "State portal logins", "Who's named on your filings", "Your registered agent in each
+  state", "Defaults per portal"); each part a section with Headline 4 and its explanation in UI style.
+  Portal logins as a table ("Portal", "Pays by", "Login", "Disconnect", "Not needed"). No lock icons.
+
+**API docs** (`/docs`). A technical book, set as carefully as the Terms.
+
+- **Three columns from 1280px:** a 260px contents rail ("Overview", "Guides" with its eight guides,
+  "Reference", "Endpoints", "OpenAPI (JSON)", and "Dashboard"), the prose column at 680px, and a
+  440px sticky code column on the right. Under 1280px the code drops into the prose column; on
+  phones the contents become a "Contents" disclosure at the top `[copy needed]` if it needs a label.
+- **Prose** in Publico Text 18px/30px; headings in Publico Headline; inline code in GT America Mono
+  15.5px on Newsprint with 3px padding.
+- **Code blocks** on Press Black (in both themes), GT America Mono 15px/24px, three colors only:
+  Night Ink for keys and punctuation, Night Gold for strings and literals, Night Caption for
+  comments. A "copy" control as a small outline button in the block's top right (label `[copy
+  needed]` if it isn't already in the docs).
+- **Endpoints:** a method chip (GET, POST, PUT, DELETE in GT America Mono Medium 13px capitals,
+  outlined in Press Black; DELETE in Correction Red) and the path in GT America Mono 20px.
+- **Quick start** as a numbered list with the Publico Headline Bold numerals of How it works.
+- **`"dryRun": true`** gets the graphics desk's gold underline wherever the docs introduce it: it's
+  the platforms' free rehearsal.
+- The end mark closes each guide.
+
+**The white-label hosted page** (`/e/<tenant>/<firm>/<service>`). Register 3: the platform's (or its
+firm's) nameplate, exactly as 10.13, with **no CoFile anywhere**: the imprint slot under the rule is
+left empty, and the footer carries the platform's own links. The system is the same; only the names
+change.
+
+**The embed widget** (`/embed/...`). It lives inside someone else's website, so it brings no
+nameplate (the host page is the nameplate) and no page background (transparent by default, or
+Coated White, or Night Paper, chosen by the firm in its widget code). It takes the firm's color and
+font. Compact spacing: 48px fields, 16px gaps, 16px padding. The rehearsal notice and the form as in
+10.13. At the foot, one line: "Filed with CoFile" in the imprint style. Width 320 to 720px; it sizes
+its own height to fit. It honors the host page's `prefers-color-scheme` when set to "auto".
+
+### 10.15 Emails
+
+Emails are pages that arrive. They follow the same nameplate system, in a 600px table layout that
+survives every mail client.
+
+**Two templates:**
+
+| Template | Header | Used for |
+|---|---|---|
+| **The firm's** | The firm's nameplate, centered: logo (6,000px² target, max 200 × 56px) or the firm's name in Georgia 24px; the thick-thin rule as two table rows in `--firm` (3px, 2px gap, 1px); "with CoFile" right-aligned under it in 12px Caption Gray | Everything about a filing: the proof is ready, documents back, the EIN, card security code, changes requested, more information needed, rejected, client link emails, invitations to a firm's desk |
+| **CoFile's** | The wordmark, left, 16px cap height, as an image with "CoFile" alt text; a 1px Press Black rule | Account emails: "Confirm your email for CoFile", "Reset your password", "Your partner account is open", "Your CoFile account is ready" |
+
+**The body, in both:** Coated White background inside a Newsprint canvas; the subject restated as
+the headline in Georgia 26px/32px Press Black; the body in 17px/26px "Helvetica Neue", Arial; values
+(business names, references, EINs) in Menlo, Consolas, monospace; one button (a bulletproof button,
+with VML for Outlook): 48px tall, 4px radius, `--firm-ink` with white text on the firm's template,
+Gold Leaf with Press Black text and a Burnished Gold border on CoFile's. Its label is the email's own
+("Log in", "Choose a name", "Review the filing", or the default "Open"). The footer: the firm's
+contact line ("Questions? …"), then the legal line in 12px Caption Gray.
+
+**The ones that matter most:**
+
+- **"Your proof is ready to approve: …"** (to the firm). The rehearsal line first, when it applies,
+  as a Newsprint strip with a 4px Press Black left rule ("Rehearsal: nothing will be filed or paid,
+  even if you approve."). The body paragraph. When the state's review page is attached ("State
+  review page.png"), a 520px thumbnail of it inline, hairlined, with the attachment's sentence under
+  it as a caption. Then the button.
+- **"Completed: …" (documents back).** The headline; the body; then "Documents: …" set as a list of
+  rows, each with a plain document glyph, the document's name and "attached"; then the button to the
+  filing page. The email ends with the end mark in the firm's template too, small and gray: the
+  only place the mark appears on a firm's surface, as part of the imprint.
+- **EIN issued.** The "Completed" email for an EIN, with the EIN itself set in the "by the numbers"
+  box: Menlo 28px in a 1px Press Black frame, centered, and the IRS letter listed as an attached
+  document. Any EIN-specific headline or line `[copy needed]`.
+- **The client link email** ("Please fill in the details for your … here"): the firm's nameplate,
+  the body, and the link as the button, sent from the firm's own mail app, so in practice it often
+  arrives as plain text. The plain-text version is designed too: the firm's name on the first line,
+  a blank line, the body, the link on its own line.
+- **Account emails** on CoFile's template, short, one button each.
+
+**Dark mode in mail:** `prefers-color-scheme` styles swap to Night Paper and Night Ink; the firm's
+logo sits on a Coated White logo plate (3.4) so a dark logo never vanishes; buttons keep their
+colors.
+
+**Plain-text versions** of every email, set with care: the firm's name (or "CoFile") on the first
+line, the headline, a blank line, the body, the link on its own line, the footer.
+
+---
+
+## 11. Components
+
+One component library serves all three registers. Every component takes two color sets: CoFile's
+(Press Black, Gold Leaf) and the firm's (`--firm`, `--firm-ink`, `--firm-wash`). Nothing in a
+component is hard-coded to gold.
+
+### 11.1 Buttons
+
+| | Large | Medium | Small |
+|---|---|---|---|
+| Height | 56px | 48px | 40px (desktop only; 44px hit area) |
+| Padding | 0 28px | 0 22px | 0 16px |
+| Label | National 2 Medium 18px | National 2 Medium 17px | National 2 Medium 16px |
+
+- **Corners:** 4px. Paper has square corners; a button is the one thing you press, so it's softened
+  just enough to look pressable.
+- **Primary, CoFile's:** Gold Leaf fill, Press Black label, 1px Burnished Gold border. Hover
+  `#BF8E2A` (label still 6.0:1). Pressed: 1px down, `#B3842A`. Used for "Run a free rehearsal",
+  "Create account" and other CoFile actions; never more than one on a screen.
+- **Primary, the firm's:** `--firm-ink` fill, white label, no border. Hover: 6% darker. Used for
+  "Approve, and authorize submission and payment", "New filing", "Send to {firm}", "Create the
+  proof", "Pay and file".
+- **Outline:** transparent, 1.5px Press Black border (or Night Ink on dark), Press Black label;
+  hover fills Newsprint. "See pricing", "Request changes", "Questions".
+- **Text button:** Press Black label, underline on hover. "Log in", "Log out".
+- **Destructive:** a text button in Correction Red ("Remove", "Turn off", "Revoke", "Disconnect",
+  "Turn down"), always followed by a confirmation.
+- **Loading:** the label changes as the copy says ("Sending…", "Saving…", "Creating…", "Signing
+  in…", "Confirming…"), and a 2px rule grows under it. The button keeps its width.
+- **Disabled:** Newsprint fill, Caption Gray label, Field Line border, and a reason nearby in text.
+- **Focus (everything focusable):** a 3px outline, offset 2px, in Press Black on CoFile's pages and
+  `--firm-ink` on a firm's (with a 2px white gap so it shows on a firm-colored button). Never
+  removed.
+- **Phone:** full width; two buttons stack, primary first.
+- **Arrow links** ("For firms", "How it works", "See all plans"): a text link followed by a drawn
+  arrow, a 1.5px line 20px long with a 6px head, which moves 4px right on hover (120ms).
+
+### 11.2 Fields
+
+- **Label** above, National 2 Medium 17px Press Black, 8px gap. "(optional)" in Caption Gray after
+  the label; "*" in Press Black for required. No placeholder text standing in for a label, ever.
+- **Help text** between the label and the field, National 2 15px Caption Gray, so it's read before
+  typing.
+- **Text field:** 56px tall, Sheet White, 1.5px Field Line border, 4px corners, 16px padding,
+  National 2 18px. Focus: a 2px border in Press Black (or `--firm-ink`) plus a 3px ring of the same
+  color at 25%.
+- **Error:** a 2px Correction Red border, and under the field a 16px red disc with a white "!" and
+  the message in National 2 Medium 15px Correction Red. The error summary at the top of the form
+  links to each field.
+- **Select:** as a text field, with a drawn 12px chevron.
+- **Textarea:** at least 120px tall, grows vertically.
+- **Code boxes** (one-time code, card security code): one input drawn as separate 56 × 64px boxes,
+  GT America Mono 28px, paste fills them all.
+- **Checkbox:** 24px box (44px hit area), 2px Press Black border, 2px corners; checked: filled Press
+  Black (or `--firm-ink`) with a white tick. **Radio:** 24px circle, checked with a 12px dot.
+- **Segmented options** ("Send them a link", "Start from a client you filed for before", "New
+  client", "Fill in"): outline buttons joined in a row (stacked on phones); the selected one gets a
+  2px `--firm-ink` border and `--firm-wash` fill.
+- **Choice cards** (states, filing types): Sheet White, hairlined, the whole card clickable, a 3px
+  top rule in `--firm` on hover and when selected.
+- **File drop:** 160px, 1.5px dashed Field Line, the file's preview inside once chosen.
+- **Color field:** a 44px swatch, the hex in GT America Mono, the ready colors as 32px swatches; a
+  checkmark-free selected state (a 2px Press Black ring with 2px gap).
+- **Font picker:** a search field and a list where each font's name is shown in that font, 20px,
+  with the preview line.
+- **Signature pad:** a 3:1 Sheet White panel, 1.5px Field Line border; a 1.5px Press Black baseline
+  at 72% of the height with a drawn "×" at its left end (the old sign-here mark); the pen in Press
+  Black with pressure-varied width (2 to 3.5px); its accessible label is the copy's "Signature pad:
+  the signer draws their signature here with a mouse, finger or stylus."; a clear control `[copy
+  needed]` if none exists; the statement checkbox under it.
+
+### 11.3 Chips and badges
+
+28px tall, 0 10px padding, 2px corners (labels, not pills), National 2 Medium 14px, a 10px mark
+before the label. **Shape carries the meaning; color confirms it.**
+
+| Meaning | Mark | Colors | Examples |
+|---|---|---|---|
+| Done | filled circle | Live Green on Live wash | "Live", "Filed", "Filed, IRS letter saved", "Approved", "Accepted by the state", "Completed", "Matches the proof" |
+| Waiting on a person | half-filled circle | Burnished Gold on Amber wash | "Proof ready to approve", "Ready to approve", "Waiting for approval", "Needs information", "Needs correcting", "Changes requested", "Name unavailable", "Waiting for the client" |
+| Under way | ring with a center dot | Press Black, 1px outline, no fill | "Submitted", "Received", "Queued", "Filing now", "Final check", "Submitted to the state", "Getting the state's review page", "Being checked", "For your team to check" |
+| Stopped | circle with a bar | Correction Red on red wash | "Rejected by the state", "Failed", "Stopped", "Paused: state site changed", "On hold" |
+| Off | dashed ring | Caption Gray, dashed outline | "Turned off", "Revoked", "Planned" |
+
+**Coverage chips** use the same system: "Live" (done), "Rehearsed to the payment screen" (a circle
+half-filled in Gold Leaf: the one gold chip, on CoFile's pages only), "Screens recorded, rehearsal
+next" and "Offered, not yet rehearsed" (ring), "Planned" (dashed ring).
+
+**Badges** ("Rehearsal", "Test"): an outline label with a 1.5px *dashed* Press Black border and no
+mark, National 2 Medium 13px. Dashed means "not for real yet", everywhere.
+
+### 11.4 Cards and plates
+
+- **Card:** Sheet White, 1px Hairline border, square corners, 24px padding (32px from 1200px), no
+  shadow. The head in Headline 4. Cards hold things; they don't decorate.
+- **Plate** (a picture of a page): Sheet White, hairline edge, the paper shadow (7.4). Only inside
+  pictures.
+- **The proof**: 10.12 (the page) and 9.4 (the picture).
+- **The record**: the timeline component (11.9) plus document cards: 230 × 290px sheets, a kicker,
+  the document's name in Headline 4, its value in GT America Mono, and gray text bars; never a
+  facsimile.
+- **Desk rows**: 60 to 64px, the business name over the filing type, the chip at the right, the
+  `--firm` bar for rows waiting on the firm.
+
+### 11.5 Price cards
+
+The rate-card column (10.4): a 2px Press Black rule on top; the plan name in Headline 3; the price
+in the Figure style with its raised dollar sign and "a month" / "a filing" in National 2 18px on the
+baseline; the annual line in Small style; a Hairline; the items with square bullets; a Hairline;
+the promise line in National 2 Italic. Column rules between cards. The highlighted plan: a 4px Gold
+Leaf rule on top and a Newsprint fill. On the firm's Billing page, the current plan takes a 4px
+`--firm` rule instead.
+
+### 11.6 Tables
+
+- **Head:** National 2 Medium 15px Press Black; a 2px Press Black rule above, a 1px rule below.
+- **Rows:** 56px minimum (48px in the dense dashboard), National 2 17px, Hairlines between, no zebra
+  stripes.
+- **Numbers:** tabular lining figures, right-aligned on the decimal; totals with a single rule above
+  and a double rule below.
+- **Links in tables:** the row's main item (business name, firm, key name) as a link in National 2
+  Medium; the whole row is not a link.
+- **Hover:** Newsprint on CoFile's pages, `--firm-wash` on a firm's.
+- **Phones:** tables of records become stacked blocks (each row a block, its column names as small
+  labels); tables of numbers scroll sideways inside their frame, with the first column sticky and a
+  fade on the right edge to show there's more.
+
+### 11.7 Navigation
+
+- **Public header** and its phone sheet: 9.0.
+- **Filing desk:** nameplate and section tabs, 10.11.
+- **Dashboard rail** and **docs rail:** 10.14.
+- **Back links** ("← Filings", "← Other filings", "All states"): National 2 Medium 16px with a drawn
+  left arrow.
+- **In-page contents** (Terms, Privacy, Setup on the dashboard): a sticky list, the current item
+  with a 2px rule at its left.
+- **Skip link** to the main content, visible on focus `[copy needed]` if it doesn't exist.
+
+### 11.8 Notices
+
+A full-width strip, square corners, 16px × 20px padding, National 2 17px, a 4px rule on the left:
+
+| Kind | Rule | Background | Examples |
+|---|---|---|---|
+| Information and rehearsal | Press Black | Newsprint | "This page is in rehearsal for now. …", "Rehearsal: nothing will be filed or paid, even if you approve." |
+| Needs action | Burnished Gold | Amber wash | "1 filing needs someone to act.", "… ready to pay and needs your card's security code. Pay and file" |
+| Error | Correction Red | red wash | "Please fix these and submit again.", "Billing couldn't be loaded. Try again shortly." |
+| Done | Live Green | Live wash | "Saved to Google Docs." |
+
+No icons. The link at the end of the sentence, underlined.
+
+### 11.9 The editorial components
+
+- **Nameplate** (3.4): props for logo, name, font, color, alignment (centered or left) and size
+  (client 7,200px², phone 5,000px², desk 4,000px², email 6,000px²); the thick-thin rule; the band
+  variant for white logos; the logo plate in dark mode.
+- **Imprint** (3.3) and **end mark** (3.2). On a firm's pages the end mark is drawn in Caption Gray
+  as part of the imprint, or in Press Black where it closes a completed record.
+- **Oxford rule:** 4px + 3px gap + 1px, Press Black.
+- **Kicker:** National 2 Medium 14px capitals +8%, followed by a 48px rule.
+- **Message bubble** (9.3): incoming (Newsprint, squared lower-left corner) and, for emails, a
+  squared version with a sender line.
+- **Leader lines and callouts** (7.5).
+- **The loupe** (9.2).
+- **Contact sheet** (9.7): frames, edge numbers, the box-score log; reused on the filing detail.
+- **Stage track** (10.3): five stops, the filled one colored by stage.
+- **Timeline** (9.5): dots and lines, labels below, the end mark after the last stage when done.
+- **Figure:** the price figure with the raised dollar sign; and the "by the numbers" box (a 1px Press
+  Black frame around a big mono or headline figure) for EINs and dashboard counts.
+- **Byline portrait:** a square photograph (56px or 72px) with a name line under or beside it.
+- **Pull quote:** Publico Headline Medium Italic 28px, a 2px Press Black rule above, no quotation
+  marks added.
+
+### 11.10 Code
+
+- **Blocks:** Press Black in both themes, 20px padding, GT America Mono 15px/24px, three colors
+  (Night Ink, Night Gold, Night Caption), horizontal scroll inside the block on phones, a copy
+  control at the top right.
+- **Inline:** GT America Mono at 0.9em on Newsprint (Night Surface on dark), 3px × 5px padding.
+
+### 11.11 Accordion
+
+The Questions rows (10.6): 72px minimum, the question in Headline 4, the drawn "+" / "−", Hairlines,
+220ms open. Keyboard: Enter and Space toggle; the summary is the button.
+
+### 11.12 Empty, loading, success
+
+- **Empty:** a spot illustration (7.7) at 120px, the copy's sentence in UI style, and the copy's
+  actions as buttons. Centered in the content area, 96px padding.
+- **Loading:** skeleton bars in flat Newsprint (Night Surface on dark), the shapes of the real
+  content, no shimmer.
+- **Success:** a Done notice strip, or the page simply moving on. No confetti, no toasts sliding in
+  from corners.
+
+---

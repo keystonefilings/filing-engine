@@ -488,7 +488,7 @@ work. Ratio about 1.25 at the small end, opening up at the display end.
 
 | Token | Use | Face / weight | Desktop size / line | Phone size / line | Tracking |
 |---|---|---|---|---|---|
-| `display-xl` | Hero headline | Vitrina Sans Display Bold | 76 / 78 | 44 / 47 | −1.5% |
+| `display-xl` | Hero headline | Vitrina Sans Display Bold | 72 / 74 | 40 / 43 | −1.5% |
 | `display-l` | Close poster headline | Vitrina Sans Display Black | 88 / 88 | 48 / 50 | −1.5% |
 | `price` | Numerals on the price board and price cards | Vitrina Sans Display Black, tabular | 72 / 72 | 52 / 54 | −2% |
 | `h2` | Section headlines | Vitrina Sans Display Bold | 54 / 58 | 34 / 38 | −1% |
@@ -579,8 +579,9 @@ A 4 px base, used as these steps only: **4, 8, 12, 16, 24, 32, 48, 64, 96, 128, 
   **picture-led split**: a narrow text column (4 or 5 columns) beside a picture that takes 7 or 8
   columns and often runs off the page edge. Splits alternate sides (picture right, left, right…)
   so the eye walks down the street, window to window. Three moments break the pattern on purpose:
-  Coverage (the picture runs full width under the text), Rehearsals (a full-bleed dark stage with
-  the text set on it) and the Close (a full-bleed poster).
+  Coverage (the picture runs full width under the text), Rehearsals (a full-bleed dark stage,
+  the text and the log beneath the photograph), Pricing (the board spans the full grid) and the
+  Close (a full-bleed poster).
 - **Text columns are short and stay short.** With 20 to 60 words per section, the text column is
   vertically centered on its picture on desktop, never top-aligned with a void under it.
 - **Phone:** one column, always copy first, then the object, at full width minus margins. The
@@ -1007,12 +1008,12 @@ tapered, not a CSS border). "Log in" as a quiet button and "Run a free rehearsal
 - Note: "Built and run by filing professionals. When a filing needs a person, one of them takes
   over."
 
-**The picture: "Say yes".** On the right, a tall **marigold arch** (Cempasúchil with screen-print
-texture, 520 × 680 on desktop, running 48 px off the right edge of the grid). Standing in it,
+**The picture: "Say yes".** On the right (columns 7 to 12), a tall **marigold arch** (Cempasúchil
+with screen-print texture, 480 × 660 on desktop, running 48 px off the right edge of the grid). Standing in it,
 cut out with her paper edge, **the firm owner (H1)**, phone to her ear, laughing a little, her
 head and shoulders in the arch's upper right. In front of the arch, overlapping its lower-left
 and stepping out toward the headline, sits **Harbor & Pine CPA's filing desk** as a pinned object
-(white sheet, 6 px Tinta print shadow, 560 px wide). She has just said yes on the phone; the work
+(white sheet, 6 px Tinta print shadow, 540 px wide, its left edge 24 px into column 7). She has just said yes on the phone; the work
 is already on her desk, under her firm's name.
 
 **The desk object** (real HTML, the firm's colors, not ours):
@@ -1041,7 +1042,7 @@ is already on her desk, under her firm's name.
 ```
 
 - **Status chips** use the product's semantic set (§11.6), not the firm's color: "Proof ready to
-  approve" is the *needs you* chip (Cempasúchil tint, Tinta text, a small arrow glyph);
+  approve" is the *needs you* chip (Flamboyán tint, Flamboyán deep text, a small arrow glyph);
   "Filed" and "Filed, IRS letter saved" are *done* chips (Caribe tint, Caribe deep text, filled
   dot); "Submitted" is a *moving* chip (neutral tint, open dot).
 - The first row sits on `--firm-tint` (pale pine): it's the one waiting for the firm, and it's
@@ -1051,16 +1052,16 @@ is already on her desk, under her firm's name.
 
 **Type and buttons.** The kicker sits in a pill: Adelle Sans Semibold 17 px, Tinta on Caribe tint
 `#CDEBE6`, 36 px tall, 16 px side padding, the Doorway glyph at 14 px leading it. The headline is
-`display-xl` (Vitrina Sans Display Bold 76/78, Tinta), balanced in three lines on desktop ("Your
-client needs an LLC. / Say yes, under / your own name."), four or five on phone. The sub is
-`lede`, max 30 em. Buttons 40 px below: primary 60 px tall; "See pricing" a 2 px Tinta-outlined
+`display-xl` (Vitrina Sans Display Bold 72/74, Tinta), four balanced lines on desktop, five on
+phone at 40/43. It's long for a hero and that's fine: it's a poster line, and it's the promise.
+The sub is `lede`, max 30 em. Buttons 40 px below: primary 60 px tall; "See pricing" a 2 px Tinta-outlined
 button of the same height. The note sits 32 px below in `small` Muted, max 40 em. **If** the real
 CoFile team agrees to be photographed (H2), three 44 px round portraits sit in a slightly
 overlapping row in front of the note, with a 2 px Masa ring each; otherwise the note stands
 alone. No logos of "as seen in", no trust badges.
 
 ```
-DESKTOP (1240 grid; text cols 1–5, picture cols 6–12 + bleed)
+DESKTOP (1240 grid; text cols 1–6, picture cols 7–12 + bleed)
 ┌──────────────────────────────────────────────────────────────────────────────────────┐
 │                                        │                    ▄▄▄▄▄▄▄▄▄▄▄▄▄            │
 │ (⌂ For CPA, payroll, fractional CFO    │                ▄▀▀    ☺ ✆      ▀▀▄   arch   │
@@ -1275,6 +1276,7 @@ approved a proof before" is on How it works; here the picture says it without a 
 │███████████████████████████████████████████████│
 │                                  with CoFile  │
 │ Two Sisters Bakery LLC     ( → Ready to approve )│ ← Vitrina Bold 24; the needs-you chip
+│                                               │   (Flamboyán tint, arrow glyph)
 │ ① ────────────────────────────────────────────│
 │ Business name     TWO SISTERS BAKERY LLC      │ ← Adelle Mono, marigold-tint highlighter on
 │ Members           Ana Ortiz, Lucia Ortiz      │   the name and address (the stand-in's <mark>s)
@@ -2076,8 +2078,8 @@ it's for (shown to you and the client)" field, "Make link" primary. Once made, t
 a **ticket**: a white card with a perforated left edge (a dotted line 12 px in), the URL in Adelle
 Mono, "Copy link" (primary) and "Email it from your mail app" (outlined), and the paper-airplane
 illustration in the firm's color. **"Links you sent"** as a table ("For", "Filing", "Made",
-"Status") with status chips: "Waiting for the client" (needs-them, Cempasúchil tint), "Used: open
-the filing" (a link), "Turned off" and "Expired" (neutral). "Turn off" as a small quiet button.
+"Status") with status chips: "Waiting for the client" (the *moving* chip, with a small clock glyph), "Used:
+open the filing" (a link), "Turned off" and "Expired" (neutral, open dot). "Turn off" as a small quiet button.
 
 ### 10.17 Requests from a text or email (`/p/<firm>/from-email/<id>`)
 
@@ -2255,7 +2257,7 @@ line.
 | **"Your proof is ready to approve: {filing}"** | Firm | The Door band (firm color, logo, name), "with CoFile" under it. The rehearsal line, when there is one, as a Cempasúchil-tint bar with the curtain glyph. The body ("Your proof is ready. Open the link to see every detail and every fee, exactly as they'll go to the state, then approve it or ask for changes. …") in 17/27. The button **"Open your proof"** in `--firm-action`, full width on phone. When the state's review page is attached ("State review page.png"), a small framed thumbnail of it with the attachment's paragraph under it. |
 | **"Completed: {filing}"** (documents back) | Firm | The Door. "This filing is complete (state reference …)." as the lead in 20/30 Semibold. Then **the papers**: the envelope illustration in the firm's color (a static PNG at 2×, 240 px wide), and the documents listed as rows with a paper icon each ("Documents: …"; "They're attached."). The link to the filing page as the button. |
 | **EIN issued** | Firm | The product shows "EIN issued" as a status; there's no email copy for it yet `[copy needed]`. The template is ready: the Door, the EIN itself in Adelle Mono 28 Semibold in a Neutral-tint box, the IRS letter as an attachment row with the plain-letter icon, the filing link as the button. |
-| "More information needed: …", "Changes requested: …", "Rejected by the state: …", "Card security code needed: …" and the other filing notices | Firm | Same template. The notice line in a notice bar of the right tone (needs-you Cempasúchil tint; error with glyph). "Enter security code" and the other buttons in `--firm-action`. |
+| "More information needed: …", "Changes requested: …", "Rejected by the state: …", "Card security code needed: …" and the other filing notices | Firm | Same template. The notice line in a notice bar of the right tone (needs-you in Flamboyán tint; error with its glyph). "Enter security code" and the other buttons in `--firm-action`. |
 | **"You're invited to {firm}'s filing portal"** | Firm | The Door, the invitation text, the button. |
 | **"Confirm your email for CoFile"** | CoFile | Masa, the lockup at top (24 px cap height), a small arch crop (E1) at 200 px, the body, the Flamboyán button with its print shadow drawn as a 4 px Tinta bottom border. |
 | **"Your CoFile account is ready"**, **"Your partner account is open"** | CoFile | Same, with the door-ajar illustration instead of a photograph. |
@@ -2263,3 +2265,346 @@ line.
 
 **The client's link email** that a firm sends "from your mail app" is the firm's own email, in
 their mail program: we don't design it, and the link it carries opens a firm-branded page.
+
+---
+
+## 11. Components
+
+Every component exists in two skins from one source: **CoFile** (Masa, Flamboyán actions) and
+**Firm** (Papel, `--firm-*` tokens). The shapes, sizes and states are identical; only tokens
+change. That sameness is what lets any firm's brand look designed rather than pasted in.
+
+### 11.1 Buttons
+
+| Kind | Fill / label | Shape | Use |
+|---|---|---|---|
+| **Primary (CoFile)** | Flamboyán `#C8341A` / Masa (5.0:1), Adelle Sans Semibold 18 | 56 px tall (60 hero, 64 close, 48 compact, 44 phone header), 12 px radius, 28 px side padding, **4 px print shadow** (solid Tinta, offset 4 px right and down) | "Run a free rehearsal", "Create account" |
+| **Primary (Firm)** | `--firm-action` / white (≥ 4.5:1 by construction) | same, shadow in `--firm-action-deep` | "New filing", "Send to {firm}", "Approve, and authorize submission and payment", "Open your proof" |
+| **Inverse** | Masa / Tinta (15.8:1), Tinta shadow | same | on Flamboyán or Tinta sections |
+| **Outlined** | transparent / Tinta, 2 px Tinta border (Masa border and label on red) | same, no shadow | "See pricing", "Log in", "Request changes", "Questions" |
+| **Quiet text** | none / Flamboyán deep, underlined | 44 px tall target | "Remove", "Turn off", "Not this filing? Choose another" |
+| **Arrow link** | none / Flamboyán deep Semibold 19, underlined, brush arrow after | 44 px target | "For firms", "How it works", "See all plans", "See which are live today" |
+
+**States:** hover deepens the fill 6% L; press moves the button 2 px right and down and the
+shadow shrinks to 2 px (`dur-quick`); **focus** is a 3 px ring with 2 px offset: Cempasúchil
+`#F5B323` on light paper (with a 1 px Tinta inner line so it shows on marigold fields too), Masa
+on Flamboyán, Cempasúchil bright on Tinta and Noche; **pending** swaps the label to the
+product's own words ("Sending…", "Creating…", "Saving…") with three small brush dots that fade in
+turn; **disabled** is Neutral tint with Muted label and no shadow, always with the reason nearby
+in words. Labels never truncate: on phone they wrap to two lines and the button grows.
+
+### 11.2 Fields and forms
+
+- **Text field:** 56 px tall, white `#FFFFFF`, 2 px Field edge `#8C7B65`, 10 px radius, 16 px
+  side padding, Adelle Sans 18 Tinta. **Label** above (Adelle Sans Semibold 17, 8 px gap),
+  **hint** under the label (16 Muted), never placeholder-as-label. "(optional)" in Muted after the
+  label; required fields carry a Flamboyán-deep "*" and the copy's "Fields marked * are
+  required." sits at the form's top.
+- **Focus:** border turns Tinta, plus the 3 px Cempasúchil ring. **Error:** border Flamboyán deep
+  2 px, a 16 px error glyph (a small diamond with a line) and the message under the field in 16
+  Flamboyán deep; the error summary at the top of the form links to each.
+- **Select:** same box, a brush-drawn chevron at the right (20 px). **Textarea:** 4 rows minimum,
+  resizable vertically.
+- **Checkbox and radio:** 28 px, 2 px Field edge, 6 px radius (radio round); checked: Tinta fill
+  with a Masa mark (on firm pages `--firm-action` fill with white). The label is the target too
+  (44 px row).
+- **Check chips** (states you file in, "Same as"): 44 px pills, 2 px Field edge; selected fills
+  Caribe tint (Firm: `--firm-tint`) with a 2 px Tinta edge.
+- **Segmented control** (Monthly / annual; one card / a card per type): 48 px, the selected
+  segment white with the print shadow, the rest on Neutral tint.
+- **File drop** (logo, fonts): 160 px tall, 2 px dashed Field edge, an illustration and the
+  hint inside, the whole zone a button.
+- **Code and number inputs** (one-time code, card security code): Adelle Mono 28 to 32,
+  letter-spaced 0.2 em, `inputmode="numeric"`, `autocomplete="one-time-code"` where it applies.
+- **Spacing:** 24 px between fields, 48 px between groups; group titles in `h4` (or the firm
+  font on firm pages) with a 4 px brush rule under them.
+- **Phone:** fields full width; nothing side by side except city/state/ZIP (which stack below
+  400 px).
+
+### 11.3 Cards, sheets and pinned objects
+
+- **Card:** white on Masa or Papel, 1 px Line or Rule edge, 14 px radius, 32 px padding (24 on
+  phone). No blurred shadows anywhere in the system.
+- **Pinned object** (marketing pictures only): the same card with the **6 px print shadow**.
+- **Choice card:** a card that is a radio or link: 2 px Field edge; hover lifts 2 px and shows a
+  4 px print shadow; selected: `--firm-tint` or Caribe tint fill with a 2 px action-color edge.
+- **Card-shaped rows** (saved cards, documents, links): 72 px rows with an icon at left, the
+  name in `body-strong`, details in `small` Muted, actions at the right.
+- **The ticket** (a new client link): a card with a perforated left edge (dotted line 12 px in,
+  and two 12 px half-circle notches top and bottom), the link inside in Adelle Mono.
+
+### 11.4 The proof, as a component
+
+Two forms, one design:
+
+- **The page** (§10.12): the Door, a white sheet in a 720 px column, the sections in the order
+  the product renders, the decision at the end.
+- **The marketing miniature** (home §9.4, How it works): the same sheet at 480 px with the four
+  printer's markers ①②③④ on its left edge, a marigold-tint highlighter on key values, the "picture
+  frame" around the state's review page, the payment slip tucked under it, and its caption
+  "Sample proof · test details · not a real business".
+
+Shared rules: values always in Adelle Mono; labels in Adelle Sans Semibold Muted; totals in
+`value-total` with a 2 px Tinta rule above; the state's own review page always in a neutral frame
+(never redrawn in the state's look, never given our colors); the firm's name always at the top in
+its Door; one primary button, at the end.
+
+### 11.5 Notices and the beta notice
+
+- **Notice bar:** full width of its column, 16 px 20 px padding, 10 px radius, a 4 px left rule,
+  a 20 px glyph, text in `body` Tinta, an optional action as an arrow link at the end.
+
+| Tone | Fill | Rule and glyph | Examples from the product |
+|---|---|---|---|
+| Info | Neutral tint | Tinta, a small "i" in a circle | "We're filling in the state's form up to its review page. …" |
+| Needs you | Flamboyán tint `#FBE3DA` | Flamboyán deep, an arrow | "1 filing needs someone to act.", ready to pay |
+| Rehearsal / beta | Cempasúchil tint `#FCE7B0` | Tinta, the curtain | "Rehearsal: nothing will be filed or paid, even if you approve.", "This page is in rehearsal for now. …" |
+| Done | Caribe tint `#CDEBE6` | Caribe deep, a filled dot | "Saved to Google Docs. Open the record" |
+| Error | Flamboyán tint with a Flamboyán deep 2 px border | Flamboyán deep, the diamond | the filing's last error, "Please fix these and submit again." |
+
+- **Beta notice:** §9.0. On a firm's white-label pages it uses the product's own wording ("This
+  service is in beta. …") and names neither us nor our address, as it already does; visually it's
+  the Rehearsal tone with no CoFile color beyond that.
+
+### 11.6 Chips, status marks and the stage meter
+
+**Chip:** 32 px tall, 16 px radius, 12 px side padding, Adelle Sans Semibold 15, a 12 px glyph
+before the label. The glyph always carries the meaning alongside color.
+
+| Chip | Fill / text | Glyph | Used for |
+|---|---|---|---|
+| **Done** | Caribe tint / Caribe deep (5.9:1) | filled dot | "Filed", "Completed", "Approved", "Accepted by the state", "EIN issued", "Live" |
+| **Needs you** | Flamboyán tint / Flamboyán deep (6.2:1) | arrow | "Proof ready to approve", "Ready to approve", "Waiting for approval", "Needs information", "Changes requested" |
+| **Moving** | Neutral tint / Tinta | open dot (or a small clock for waiting on someone else) | "Submitted", "Queued", "Filing now", "Waiting for the client", "Being checked" |
+| **Rehearsal** | Cempasúchil tint / Tinta (13.7:1) | curtain | "Rehearsal", "Test", "Rehearsed to the payment screen" |
+| **Error** | Flamboyán deep / white (7.6:1) | diamond | "Rejected by the state", "Failed", "Needs correcting" |
+| **Neutral** | white, 1.5 px Field edge / Tinta | open dot | "Turned off", "Expired", "Planned", "Offered, not yet rehearsed", "Screens recorded, rehearsal next" |
+
+On firm pages these keep CoFile's semantic colors; a red-hued or teal-hued firm triggers the
+outline rules in §4.5 so its own color never reads as a status.
+
+**Status marks** (the home page's state tiles): the three 14 px shapes of §9.6.
+
+**Stage meter** (What we file): five 8 px dots, 4 px apart, before the chip: Planned ●○○○○,
+Offered ●●○○○, Screens recorded ●●●○○, Rehearsed ●●●●○, Live ●●●●● (all five in Caribe). Done
+dots in Tinta, open dots as 1.5 px rings. The meter is `aria-hidden`; the chip's words carry the
+meaning.
+
+### 11.7 Tables
+
+- Header row: Arena, 48 px, Adelle Sans Semibold 15 Muted, sticky under the site header.
+- Body rows: 56 px (64 on the filing desk), 1 px Line or Rule between, no zebra stripes (rules
+  read more calmly than stripes), hover Neutral tint, the first cell's text a link where the row
+  opens something.
+- Numbers right-aligned and tabular; dates in `small` Muted.
+- Rows that need someone: `--firm-tint` with a 4 px action-color bar at the left (§10.11).
+- **Phone:** every table becomes a list of cards: the first column as the card title, the rest
+  as label/value pairs (labels in `micro` Muted), chips at full size.
+- **The coverage table** (What we file): §10.3, with the awning swatch in the "Where" cell and
+  the stage meter in "Where it stands".
+
+### 11.8 Price cards and the price board
+
+- **The price board** (home §9.8, the Pricing page head): a Tinta board with the painted
+  texture, a 3 px Cempasúchil pinstripe 16 px in from the edge with hand-turned corners, Masa
+  words, prices in the `price` style in Cempasúchil bright `#FFC447` (10.6:1 on Tinta). Painted
+  2 px column rules in Masa at 30%. Live text always; the texture is a background image only.
+- **Price card** (Pricing page, Billing): white card, 14 px radius, 1 px Line edge, 32 px
+  padding, minimum 280 px wide.
+  - Plan name: Vitrina Sans Bold 26.
+  - Price: the `price` style in Tinta (72 px desktop, 52 phone) with " a filing" / " a month"
+    in Adelle Sans 20 beside it, on one baseline.
+  - The annual line ("or $2,500 a year (2 months free)") in `small` Muted.
+  - Items with small icons, 16 px between.
+  - The last line, "A filing professional takes over when a filing needs one", after a short
+    brush rule, with the person-at-a-desk icon.
+  - **The middle card (Growth)**: 16 px taller, an 8 px Cempasúchil band across its top, the
+    6 px print shadow. No words added.
+  - On Billing, the current plan's card has a 2 px Tinta edge and its button reads as the
+    product has it.
+
+### 11.9 Navigation, tabs and disclosures
+
+- **Site header and footer:** §6.5, §9.0, §9.10.
+- **Filing desk tabs:** §10.11. **Dashboard sidebar:** §10.21. **Docs nav:** §10.22.
+- **Back links** ("← Filings", "All states"): Adelle Sans Semibold 17, a brush-drawn left arrow,
+  44 px target.
+- **Disclosure** (Questions, "Progress on the state site", "More options", widget code): a row
+  with the summary in `h4` (Vitrina Bold 22 on the Questions page), a brush plus that rotates into
+  a minus (`dur-base`), 72 px (Questions) or 56 px (product) tall; open content gets a 4 px brush
+  rule at its left in Caribe (Firm: the secondary color) and 24 px padding. Native `<details>`
+  underneath, so it works without scripts.
+- **Anchor arrival:** the target section gets 96 px of scroll margin and, for a disclosure,
+  opens.
+
+### 11.10 Icons
+
+A set of about 40 brush-line icons on a 24 px grid, 2.5 px stroke, round ends, slightly
+irregular, drawn by the illustrator (§7.5), in two plates where a color helps: door, link,
+page, button-with-hand, building, phone, envelope, letter, chat bubble, bookmark (saved answer),
+pen, pen nib, signature line, receipt, calendar, newspaper, framed picture, returning arrow,
+three-dot thread, curtain, clock, card, stack of cards, masked digits, two doors, key ring, two
+linked boxes, blank sign, small window, hash, person at a desk, plus/minus, chevrons, arrows, copy,
+info, diamond (error), filled and open dots, half-filled dot. **Not in the set:** locks,
+shields, vaults, seals, stamps, ribbons, rosettes, checkmark badges, eagles, government buildings.
+
+### 11.11 Code blocks
+
+Tinta background, Masa text, Adelle Mono 15/24, 20 px padding, 10 px radius, a copy icon button
+(40 px) at the top right that shows a brief done state. Token colors per §10.22. Long lines
+scroll inside the block (never the page); on phone the block bleeds to the screen edges.
+
+### 11.12 The Door and the signature
+
+The **Door** (§3.4) is one component with three sizes: 96 px (the proof, client pages,
+shopfronts), 72 px (the filing desk, phone client pages), 40 to 64 px (marketing miniatures and
+emails). The **signature** (§3.3) is one component with two forms ("with CoFile" and the widget's
+"Filed with CoFile") and two link behaviors (linked on the firm's own pages, plain on the client's).
+
+---
+
+## 12. Craft notes
+
+**Dark mode.** The public site, the dashboard and the docs follow the system setting, with the
+night-street palette of §4.4. Photographs and cut-outs keep their color; cut-outs gain a 2 px
+Masa keyline. The price board and the closing poster don't change (a board is a board, a poster
+is a poster). **Firm pages in dark mode:** the Door band stays the firm's color (it's their
+sign); the page becomes Noche; `--firm-action` is recomputed against Noche, stepping OKLCH
+lightness *up* until Noche text on it reaches 4.5:1, so a pine-green firm gets a lighter pine
+button with a dark label. Emails declare Papel and survive forced inversion because logos sit on
+plates.
+
+**Phones.** The firm's client is on a phone, so client pages are designed phone-first and
+desktop second. Targets are 48 px minimum, primary actions full width at the bottom of their
+content, nothing important behind hover, no horizontal scroll at 320 px. Pictures keep their
+arches at 4:5 and keep the product objects readable at full width rather than shrinking them.
+
+**Older eyes.** Body 19 px desktop, 18 phone; nothing meaningful under 14 px. Body text at
+≥ 7:1 (Tinta on Masa is 15.8:1). Weights never below 400. Links underlined. No text on
+photographs. Line length 60 to 70 characters. Pages reflow at 400% zoom without losing content.
+Motion can be turned off by the system setting and nothing is lost. We test with eight firm
+owners over 55 and four clients over 60, on their own devices.
+
+**Spanish text length.** Every container is drawn for +30%: buttons wrap rather than truncate;
+nav links move into the menu earlier (at 1100 px instead of 960) when the page is Spanish;
+headlines have a long-text step (−12% size) applied when they exceed four lines on phone; table
+columns are fluid; chips wrap their labels to two lines at 32 px → 44 px. `lang` is set on every
+element whose language differs; Spanish body text hyphenates. The signature would need its own
+words in Spanish `[copy needed]`; its layout already allows a word up to 12 characters before
+"CoFile". All product pictures are HTML, so they translate with the page; photographs contain no
+words. Both languages get the same weight, size and color when they appear together: neither
+is the subtitle.
+
+---
+
+## 13. Production
+
+### 13.1 Tools
+
+- **Design:** Figma, with variables for every token (CoFile and Firm skins as two modes, dark as
+  a third), and a component library matching §11. The Firm skin is tested against a board of 40
+  real-world-style firm colors and logo conditions (transparent, boxed, none, very wide, very
+  tall) before anything ships.
+- **Tokens:** one JSON source → CSS custom properties (Style Dictionary or equivalent). The §4.5
+  algorithm as a small, tested TypeScript module using an OKLCH color library, run when a firm
+  saves its colors and in the Branding preview, with unit tests for the edge cases.
+- **Illustration:** drawn by hand, inked digitally, delivered as SVG with `ink` and `color`
+  groups, optimized, plus 2× PNGs for email.
+- **Photography:** Capture One for tethering and grading, Photoshop for cut-outs (hand-drawn paper
+  edges as masks, not automatic), AVIF and WebP at 640, 1280, 1920 and 2400 px widths with
+  `srcset` and art-directed crops (`<picture>`) for 4:5 phone versions.
+- **Film:** edited and graded in DaVinci Resolve; AV1 and H.264 with a poster AVIF.
+- **Motion:** CSS transitions, the Web Animations API and CSS scroll-driven animations; SVG
+  stroke drawing for the Thread and the pinstripe. No animation runtime library is needed.
+- **Type:** the foundry delivers Vitrina Sans as variable WOFF2, subset to Latin Extended-A, with
+  `font-display: swap` and size-adjusted fallbacks so the layout doesn't jump.
+- **Testing:** automated contrast and accessibility checks in CI, manual screen reader passes
+  (VoiceOver on iPhone and Mac, NVDA on Windows), the older-user sessions of §12, and a Spanish
+  layout pass with machine-length placeholder text (never shipped).
+
+### 13.2 What to commission
+
+| Who (kind of artist or studio) | What | Weeks |
+|---|---|---|
+| A type foundry with Latin American designers on staff | Vitrina Sans (Medium, Bold, Black, Display cut), the wordmark refinement | 16 |
+| A lettering artist who is a working sign painter | The "with CoFile" signature; the gilded names on the doors | 4 |
+| A documentary portrait photographer with a bilingual crew | H1, R1, C1, HW1 to HW3, F1 to F4, S1, S2, CF1 to CF4, T1, T2 | 6 (incl. casting) |
+| A still-life photographer | PR1, W1, PB1 | 2 |
+| A set builder and a scenic painter | The two-door set; the blank price board | 2 |
+| A cinematographer and an editor | "Name on the door" film and stills (D1, D2) | 3 |
+| A screen-print poster illustrator | The 45 illustrations, the 40 icons, the example logos | 8 |
+| A screen-print studio | Ink textures and edges, scanned | 1 |
+| A retoucher | Cut-outs with paper edges, grading consistency | ongoing |
+| An accessibility consultant with older-adult research experience | Reviews at three points, the user sessions | 3 spread |
+
+### 13.3 Asset list
+
+- **Identity:** Doorway mark (SVG, 16 px hand-drawn favicon, 32, 180, 512 PNG), wordmark,
+  lockup (horizontal, one-color, inverse), the signature ("with CoFile", "Filed with CoFile") as
+  SVG.
+- **Example brands:** Harbor & Pine CPA monogram and Northgate Payroll mark (SVG, two colors).
+- **Photographs:** 30 selects graded and cut out as needed, each in 16:9, 5:4, 4:5 and 1:1
+  crops where used.
+- **Film:** one 12-second site cut (two aspect ratios), one 30-second cut, one poster still.
+- **Illustrations:** the 45 pieces of §7.5 as two-plate SVG.
+- **Icons:** the 40 of §11.10.
+- **Textures:** 4 color fields × 3 densities, 5 edges, the painted board.
+- **HTML pictures:** `DeskPicture`, `TwoDoorsPicture`, `TextToDraftPicture`, `ProofPicture`,
+  `HomecomingPicture`, `BlockPicture`, `StagePicture`, `PriceBoard`, `ClosePoster` (replacing
+  today's stand-ins and adding the two new ones), each with its reduced-motion end state and its
+  example caption.
+
+### 13.4 Order to build
+
+1. **Weeks 1 to 3:** tokens (both skins, dark), interim type (Tablet Gothic, Adelle Sans and
+   Mono), buttons, fields, chips, notices, cards. The §4.5 color module with tests.
+2. **Weeks 3 to 6:** **the firm's pages first**: the Door and signature, the proof, the client
+   form and client link pages, the filing desk. They're the product's promise ("your name on
+   the door") and every marketing picture is built from them.
+3. **Weeks 4 to 8:** the home page with its nine pictures built in HTML, using sketch-quality
+   illustrations and casting snapshots as placeholders. Ship it behind a flag for review.
+4. **Weeks 6 to 10:** photography, the door set and film, illustration finals, textures. Swap in.
+5. **Weeks 9 to 11:** motion for all home moments, reduced-motion states, the older-user
+   sessions, fixes.
+6. **Weeks 10 to 13:** the seven pages behind the home page, sign-up and account pages, legal,
+   404 and errors.
+7. **Weeks 12 to 14:** emails (both families), the dashboard, the docs.
+8. **Week 16 onward:** Vitrina Sans arrives; swap it in, re-check every headline's line breaks,
+   then the wordmark refinement.
+
+---
+
+## 14. What I'd strip from today's visuals, and why
+
+Visuals only; the words stay.
+
+1. **The manila folder-tab mark with a check cut into it.** It says "paperwork" and "approved"
+   at once: a stamp of approval on a file. That's the one idea the brand must not be built on,
+   and it makes CoFile the subject, when the firm should be. Replaced by the Doorway, a door with
+   an empty window for the firm's name.
+2. **The paper-and-ink look** (cream `#F7F3EA`, Source Serif 4, IBM Plex Sans and Mono, the
+   bureau green `#1F6B4F`). It reads like a government form or a law office's letterhead: correct,
+   cold, a little anxious. Our readers fill in enough forms; the site should feel like their
+   street, not their filing cabinet.
+3. **The same green tick before every list item**, on every section. When every point gets the
+   same tick, none of them is seen. Replaced by object icons that say what each line is about.
+4. **Monospace everywhere it appears.** Today mono is used for values, notes, captions and the
+   rehearsal log alike. In Vitrina it's kept for exactly one job: values as they go to the state.
+5. **The numbered callout bubbles and gray stand-in boxes.** Honest placeholders, but they make
+   every picture look like a diagram. Replaced by real pictures: people, places, the product as a
+   real object on a real table.
+6. **Identical bands with identical padding**, section after section. The page had no rhythm, so
+   nothing felt more important than anything else. Replaced by picture-led splits that alternate
+   sides, two dark scenes, one red poster.
+7. **The proof's thin 4 px top border in the firm's color, and the firm name as plain bold text**
+   (in today's `render.ts`). A firm's brand deserves more than a hairline. Replaced by the Door.
+8. **"with CoFile" floated to the far right in light gray at a small size.** It looked like an
+   afterthought, or like something hidden. Replaced by a deliberate signature, small but never
+   tiny, always in the same place.
+9. **CoFile's name at the left of the filing desk's bar for partner firms**, with the firm off to
+   the right. Visually, the firm's Door comes first on its own desk.
+10. **Fake buttons in the pictures styled exactly like real ones** with nothing to say they're
+   pictures. In Vitrina, pictures are pinned objects with print shadows and example captions: you
+   can tell a picture of a button from a button.
+
+*Rosa Delgado, Los Angeles and San Juan.*

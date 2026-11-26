@@ -101,7 +101,7 @@ $103.50 in state fees.
 6. **Pricing:** $45 a filing.
 7. **Close:** the visitor's own name on the door.
 
-The Run (9.3) is the structural idea of the home page: three short text blocks beside one picture that
+The Run (9.3 to 9.5) is the structural idea of the home page: three short text blocks beside one picture that
 tells the whole middle of the story. It's the closest thing to sitting next to a firm owner and showing
 her the product, which is how this product actually gets sold.
 
@@ -1611,7 +1611,7 @@ three steps directly below are the picture, and the H1's three sentences become 
 the lede ("You've approved a proof before: business cards, letterhead, an invitation at the printer. …") ·
 six list items.
 
-- **Picture:** the complete proof as the firm gets it (10.9) in a browser window at 1:1, 640 px wide,
+- **Picture:** the complete proof as the firm gets it (10.12) in a browser window at 1:1, 640 px wide,
   scrolling inside its frame, opening with M10 (Harbor & Pine's letterhead proof with crop marks becomes the
   filing proof). Photo P8 (hands turning over a letterhead proof at a print counter) sits as a 200 × 260
   inset at the stage's top-left corner, radius 12: the visual footnote to "You've approved a proof before".
@@ -1674,7 +1674,7 @@ picture, **the brand studio**: the full version of the home page's door demo.
   the previews is Setup's own "Preview of a client's page". A logo upload is left out on purpose: the
   monogram tile (logo bay rule 6) shows that a firm looks finished even before it adds a logo.
 - **Previews:** four live components at 0.7 scale: the desk overview (browser), the client page (phone), the
-  proof (browser), and the proof-ready email (an email card, 10.15). All four re-brand on every keystroke and
+  proof (browser), and the proof-ready email (an email card, 10.16). All four re-brand on every keystroke and
   click (M12). The client page's small-type lockup is counter-scaled to 13 px.
 - **The fifth list item** ("CoFile is built and run by filing professionals. When a filing needs a person,
   one of them takes over.") carries a P10 portrait row if it exists, otherwise the person glyph tile.
@@ -2192,3 +2192,459 @@ one template, designed phone-first because that's where the bakery owner opens i
 **The embed widget** (`/embed/…`): the same form with no header, no page background (transparent, so it sits
 on the firm's own site), the firm's font and colors, auto height, and "Filed with CoFile" in Fine at the
 bottom. The firm's own website is the front of house here; the widget borrows its surroundings.
+
+---
+
+### 10.15 Platforms: the dashboard, the API docs, the white-label page and the widget
+
+This is backstage, and it's allowed to look like it: CoFile's own register, denser, Ink and white, with the
+yellow kept for the one action per screen. The one Front of House touch: every firm a platform serves appears
+with its own logo and color chip wherever it's listed, so even the platform's view is a view of firms.
+
+**The dashboard** (`/dashboard`):
+
+```
+┌────────────────┬─────────────────────────────────────────────────────────────────────────┐
+│ (◯•) CoFile    │ Overview                                                     [email] ⎋  │
+│                ├─────────────────────────────────────────────────────────────────────────┤
+│ Overview       │ ┌─────────────┐ ┌─────────────────────┐ ┌─────────────┐                 │
+│ Filings        │ │ Filings     │ │ Webhook deliveries  │ │ API keys    │                 │
+│ Ready to pay   │ │ ▬▬▬         │ │ ▬▬▬▬                │ │ ▬           │  Condensed 48 px│
+│ Firms          │ └─────────────┘ └─────────────────────┘ └─────────────┘  (live values)  │
+│ API keys       │ By status        By state           By month                            │
+│ Webhooks       │ ▇▇▇▇▇ ▇▇▇ ▇      ▇▇▇▇ ▇▇▇ ▇▇ ▇      ▁▃▅▇▆▇                              │
+│ Setup          │                                                                         │
+│ Team           │                                                                         │
+│ Billing        │                                                                         │
+│ Docs           │                                                                         │
+└────────────────┴─────────────────────────────────────────────────────────────────────────┘
+```
+
+- A 240 px left sidebar on Gallery with the lockup at the top and the real nav labels ("Overview", "Filings",
+  "Ready to pay", "Firms", "API keys", "Webhooks", "Setup", "Team", "Billing" or "Sign-ups", "Docs") at 15 px
+  Medium, the current one in Ink on a white pill. Phone: a top bar with a menu sheet.
+- **Stat tiles:** white, `Rule` border, radius 12, the title in 15 px Graphite and the number in Condensed
+  Medium 48 px tabular, showing the account's live values. The site never shows these numbers in marketing.
+- **Charts** ("By status", "By state", "By month"): horizontal bars in Ink at 60% for neutral categories, with
+  status bars in their tone colors (Done, Your turn, Problem, In motion); month columns in Ink with the current
+  month in yellow. Values labeled directly, no legends, no gridline clutter: 1 px `Rule` baseline only.
+- **Firms:** the list of the platform's firms, each row led by the firm's logo in a 32 px mini logo bay (or its
+  monogram tile) and a 12 px dot in its main color, then "Filing desk" and "Approvers" columns. "Not set up" as
+  an In motion chip.
+- **Filings, Ready to pay, Webhooks, API keys, Team, Billing, Setup, Sign-ups:** tables at 15/22 with 52 px
+  rows, IDs and keys in Mono 14 px with a copy button, "Revoke", "Approve", "Turn down" and "Decline" as small
+  secondary buttons (the destructive ones in Problem red text, outlined). New keys are shown once in a Night
+  Raised code block with a yellow "copy" focus.
+- **Dark mode:** fully supported here (4.5).
+
+**The API docs** (`/docs`):
+
+- Three columns on wide screens: the docs nav (240 px: "Overview", the "Guides" heading with its eight guides,
+  the "Reference" heading with "Endpoints" and "OpenAPI (JSON)"), the content at a 720 px measure, and a sticky
+  code column (Night Raised, 440 px) on reference pages. Below 1280 px the code drops inline under each section.
+- H1 "CoFile API" in Display at 56 px; body 17/28. Section headings 26 px Medium with anchor links on hover.
+- Code: GT America Mono 15/24 on Night Raised `#181B22`, radius 12, 20 px padding, a language tab and a "Copy"
+  button. Syntax colors chosen for 4.5:1 or better on Night Raised: keys `#EDEEF0`, strings `#F2C46B`, numbers
+  `#8FD3B6`, comments `#8F96A3`, punctuation `#A7ADB8`. `"dryRun": true` is never highlighted differently:
+  it's ordinary, and that's the point.
+- The quick start as a numbered list with 32 px numerals in Graphite and each step's code directly under it.
+- Guide cards on the docs home: white, `Rule` border, radius 16, the title in 19 px Medium and the summary in
+  15 px Graphite.
+- HTTP methods as small Mono chips in one neutral style (Ink outline), never traffic-light colors.
+- The "White-label firm portal" guide opens with the logo bay diagram (3.5), so a platform's developers see
+  how their firms' brands will sit.
+
+**The white-label hosted page** (`/e/<account>/<firm>/<service>`) uses the client page template (10.14) with
+the platform's (or its firm's) brand in the logo bay, and the platform's name and support contact on the
+proof, as the white-label setup provides.
+
+**The embed widget** is the client page template without its header (10.14), sized to its container, in the
+platform's or firm's font and colors, with "Filed with CoFile" at the bottom.
+
+---
+
+### 10.16 Emails
+
+Every email is a 600 px, table-built, single-column message that works in every client (VML buttons for
+Outlook, real text throughout, no text in images). Two families:
+
+| Family | Emails (subjects as the code sends them) | Header | Button |
+|---|---|---|---|
+| **The firm's emails** (to the firm about its filings, and to its clients) | "Your proof is ready to approve: …" (button "Open your proof"); "Completed: …" (documents attached); "Card security code needed: …" ("Enter security code"); "More information needed: …"; "Changes requested: …"; "Rejected by the state: …"; "Choose a name: …"; "You're invited to …'s filing portal"; the EIN-issued email (its words are `[copy needed]`: the code emits `filing.ein_filed` but no email text exists yet) | The firm's logo bay on white, 6 px firm rule | The firm's button shade, white text |
+| **CoFile's account emails** (to the firm owner about their CoFile account) | "Confirm your email for CoFile" ("Confirm my email"); "Your partner account is open" ("Log in"); "Your CoFile account is ready"; "Reset your password" | The CoFile lockup at 28 px on white | Sign-here Yellow, Ink text |
+
+```
+ The proof is ready (to the firm)            Documents back (to the firm)
+┌──────────────────────────────────────┐    ┌──────────────────────────────────────┐
+│▀▀▀▀▀▀▀▀▀▀▀▀ firm color ▀▀▀▀▀▀▀▀▀▀▀▀▀▀│    │▀▀▀▀▀▀▀▀▀▀▀▀ firm color ▀▀▀▀▀▀▀▀▀▀▀▀▀▀│
+│ [LOGO] Harbor & Pine CPA             │    │ [LOGO] Harbor & Pine CPA             │
+│                                      │    │                                      │
+│ Your proof is ready to approve:      │    │ Completed: Two Sisters Bakery LLC    │
+│ Two Sisters Bakery LLC               │    │                                      │
+│                                      │    │ This filing is complete (state       │
+│ Your proof is ready. Open the link   │    │ reference …).                        │
+│ to see every detail and every fee,   │    │ ┌────────┐ ┌────────┐                │
+│ exactly as they'll go to the state…  │    │ │ ▬▬▬▬▬  │ │ ▬▬▬▬▬  │  document cards│
+│                                      │    │ │ ▬▬▬    │ │ ▬▬▬▬   │  with their    │
+│ [ Open your proof ]                  │    │ └────────┘ └────────┘  real labels   │
+│ 📎 State review page.png             │    │ Documents: …. They're attached.      │
+│ ──────────────────────────────────── │    │ [ Open ]                             │
+│ (◯•) with CoFile                     │    │ (◯•) with CoFile                     │
+└──────────────────────────────────────┘    └──────────────────────────────────────┘
+```
+
+- **Type:** the firm's font where the firm chose a Google preset (loaded with a `<link>`, falling back to
+  Helvetica and Arial); CoFile's emails in GT America with the same fallback. The subject's second half (the
+  filing title) is repeated as the email's first line in 24/30 Medium; the body in 17/26; the button 48 px tall,
+  radius 10, 24 px side padding, never full-bleed.
+- **The proof-ready email** shows the attachment "State review page.png" as a chip under the button when it's
+  attached, and the rehearsal line ("Rehearsal: nothing will be filed or paid, even if you approve.") as a
+  Rehearsal Tint band above the body when it applies.
+- **The documents-back email** shows each attached document as a small document card (7.4) with its real
+  label, so the email itself looks like the papers arriving. P9 can head this email for firms on a desktop
+  client, cropped to 600 × 200; it's dropped below 480 px.
+- **The EIN-issued email**, once its copy exists, puts the EIN in a large tabular tile (32 px Medium) above
+  the button.
+- **Footer:** the small-type lockup as a 2× PNG with alt text "with CoFile", the firm's support email where it
+  has one, and for account emails the legal line in Fine.
+- **Dark-mode clients:** logos sit on a white rounded plate (8 px padding, radius 8) so a dark logo never
+  disappears; the body keeps its own white background where the client allows it.
+- **Plain-text versions** mirror the content with the link on its own line.
+
+---
+
+## 11. Components
+
+One library serves the marketing site, the firm's pages and the dashboard. Every component takes the firm's
+tokens (`--firm-main`, `--firm-button`, `--firm-link`, `--firm-tint-6`, `--firm-tint-12`, `--firm-font`) when
+it's rendered inside a firm's page or a picture of one, and CoFile's tokens otherwise. The marketing pictures
+are built from these same components.
+
+### 11.1 Buttons
+
+| Kind | Look | Where |
+|---|---|---|
+| **Primary (CoFile)** | Sign-here Yellow fill, Ink text, a 3 px Yellow Edge bottom edge (inset shadow), no border | "Run a free rehearsal", "Create account", "Log in", "Send", account emails. One per screen. |
+| **Primary (firm)** | The firm's button shade, white text, a 3 px bottom edge 12% darker | Every primary action on firm pages: "New filing", "Create the proof", "Approve, and authorize submission and payment", "Send to <firm>", "Pay and file", "Open the proof and approve it" |
+| **Secondary** | White fill, 1.5 px Field Edge border, Ink text | "Request changes", "Go to the home page", "Log in again", "Turn off" |
+| **Secondary on Night** | Transparent, 1.5 px `#6B7280` border, `#EDEEF0` text | "Questions", "See pricing" in close bands |
+| **Text link** | 19 px (marketing) or 17 px (product) Medium Ink, 2 px underline offset 4 px, a 16 px right arrow | "See pricing", "For firms", "How it works", "See which are live today", "See all plans", "Security" |
+| **Destructive** | Secondary with Problem red text and border | "Revoke", "Remove", "Decline", "Turn down" |
+
+- **Sizes:** Large 56 px tall, 19 px text, 28 px side padding; Medium 48 px, 17 px, 22 px; Small 40 px, 15 px,
+  16 px. Radius 10 on all. Minimum tap target 48 px even for Small (padding extends the hit area).
+- **States:** hover lifts 1 px (yellow and firm buttons deepen their bottom edge); press sinks 2 px and the
+  edge disappears; focus adds the 3 px outline with 2 px offset (Ink around yellow buttons, the firm's button
+  shade around firm buttons); disabled at 40% opacity with no lift; busy shows the code's own busy label
+  ("Signing in…", "Sending…", "Saving…", "Creating…") with a 16 px indeterminate ring in the text color.
+- Long labels ("Approve, and authorize submission and payment") wrap to two balanced lines on phones rather
+  than shrinking.
+
+### 11.2 Fields
+
+- **Text, email, phone, number, date:** 56 px tall (Large) on public and client pages, 48 px in the desk and
+  dashboard; 1.5 px Field Edge border, radius 10, white fill, 17 px text (19 px on Large), 16 px side padding.
+  Label above in 16 px Medium Ink with 8 px gap; help below in 15 px Graphite. Required marks ("*") in the
+  firm's link shade on firm pages and Ink on CoFile pages, with "Fields marked * are required." at the top of
+  each form.
+- **Focus:** the border turns Ink (CoFile) or the firm's button shade (firm), plus a 3 px outline at 30%
+  opacity of the same color.
+- **Error:** the border in Problem red, a 16 px alert glyph and the message in 15 px Problem red under the
+  field, and the field's label stays Ink. The form's summary box at the top lists the issues and takes focus
+  on submit.
+- **Filled for you:** a field filled from saved answers carries a 3 px left edge in the firm's color and a 6%
+  firm tint; one filled from a forwarded message carries a 3 px yellow left edge. No extra words: the edge is
+  the label, and it matches The Run.
+- **Select:** the same box with a 20 px chevron; the native menu on phones.
+- **Choice cards** (radio and checkbox groups with real choices, such as payment mode, registered agent,
+  effective date): white cards, 1.5 px `Rule` border, radius 12, 16 px padding, the control at the left; the
+  selected card gets a 2 px border in the button shade and a 6% tint.
+- **Checkbox and radio:** 22 px, 1.5 px Field Edge, radius 6 (checkbox) or round; checked fills with Ink or the
+  firm's button shade with a white check or dot.
+- **Authorization statements:** checkbox cards with the statement at 17/26 Body, never truncated.
+- **Textarea:** at least 3 rows, the counter ("… / 300") in 15 px Graphite at the bottom right.
+- **File upload:** a dashed 1.5 px Field Edge drop zone, 120 px tall, the upload glyph and the existing help
+  text; once uploaded, the file shows as a chip with its name and a remove button.
+- **Color field** (Setup): the native color well (48 × 40) beside a hex field, then the eight ready colors as
+  28 px dots; the derived button shade, when there is one, as a second swatch (4.4).
+- **Code input** (security code, one-time code): four or six 56 px boxes, 24 px tabular Medium, auto-advance,
+  paste-aware, `inputmode="numeric"`.
+- **Signature pad:** 10.13.
+
+### 11.3 Cards and stages
+
+- **Card:** white, radius 16, 1 px `Rule` border, 32 px padding (20 on phones), no shadow.
+- **Hero card** (one per page at most: "Your proof is ready", the setup step in progress): a 2 px border in the
+  firm's color, no shadow.
+- **Stage:** the Gallery panel behind a picture: radius 24 on its free corners, square where it bleeds off the
+  viewport, 48 px padding; the picture on it carries the stage shadow.
+- **Reference card** (security, state notes): white, `Rule` border, radius 16, a 20 px glyph or none, H3 and
+  Body.
+
+### 11.4 The proof
+
+The full page is specified in 10.12. As a component it has two sizes: **full** (the real page, 760 px) and
+**compact** (pictures on the site, 560 px: header, title and chip, details, fees, review page schematic, the
+approve button, the optional stub). Both share the letterhead, the section numerals, the definition-list rows,
+the fee table aligned on the decimal and the approve button in the firm's button shade. The compact proof is
+labeled "Sample proof · test details · not a real business" wherever it appears.
+
+### 11.5 Chips and tags
+
+- **Status chip:** 28 px tall, 12 px side padding, radius 999, 14 px Medium, the tone's text on its tint (4.2).
+  It wraps onto two lines rather than truncating ("Rehearsed to the payment screen" on phones).
+- **Rehearsal chip:** Rehearsal Tint, a 1 px `#E8B82A` border, Ink text. Used for "Rehearsal", the "Beta" chip
+  and the desk's "Test" badge.
+- **Stage chip with meter** (What we file): the status chip plus a four-segment meter at its left (10.3).
+- **Source tags** ("from the text", "already filled"): no box, 14 px Ink led by an 8 px dot in yellow or the
+  firm's color.
+- **Mono chip:** Night Raised fill (or Gallery on white), Mono 15 px, radius 6, for `"dryRun": true` and
+  `/file`.
+
+### 11.6 Coverage marks and the stage meter
+
+The four coverage marks are in 4.2; the meter in 10.3. Both always sit beside their words. Live is always green
+and full; rehearsed is always yellow; nothing uses red, because nothing in coverage is a problem.
+
+### 11.7 Prices
+
+- **Price display** ("$45"): Condensed Medium 144/128, tabular, Ink, with the 4 px yellow rule under it (9.8).
+- **Price strip:** a white card with four equal cells divided by 1 px `Rule` lines, 28 px padding per cell; the
+  top line in H3 or Price style, the second in 17 px Graphite. Phone: 2 × 2.
+- **Plan card:** 10.4. Plan name in H3; price in Price style (56 px Condensed) with its unit in 19 px Graphite on
+  the same baseline; the annual line in Small; a `Rule`; items as rows with 6 px Ink dots; the last row with the
+  person tile. The emphasized plan: 2 px Ink border, 16 px taller, raised 8 px, stage shadow.
+- Prices never animate, never strike through, never carry a "save" badge beyond the copy's own "(2 months
+  free)".
+
+### 11.8 Tables
+
+- Header row 15 px Medium Graphite on white with a 1 px Ink bottom rule, sticky on scroll under the site or desk
+  header.
+- Body rows 60 px (marketing) or 56 px (desk), 17 px Ink, `Rule` hairlines, no zebra stripes, no vertical
+  rules. Numbers and dates right-aligned and tabular.
+- Row hover: 6% tint (Gallery on CoFile pages, the firm's tint on firm pages). Clickable rows carry a chevron at
+  the right.
+- Phone: tables with three or more columns become stacked cards (the first column as the card title, the others
+  as label/value lines), never a sideways-scrolling table.
+
+### 11.9 Navigation
+
+- **Site header:** 9.0. **Phone menu sheet:** full height, white, 64 px rows, the yellow button pinned at the
+  bottom.
+- **Sticky bottom bar** (phones): 64 px plus safe area, white, `Rule` top line, one full-width button.
+- **Desk header and tabs:** 10.13. **Dashboard sidebar:** 10.15. **Docs nav:** 10.15.
+- **Back links** ("← Filings", "← Other filings", "All states"): 15 px Medium with the arrow, above the H1.
+- **The Run's progress rail:** three 10 px dots, 24 px apart, vertically at the pinned picture's left edge; the
+  current one in Ink, the others outlined; each a button with the section's headline as its accessible name.
+
+### 11.10 Icon rows (lists)
+
+A 36 px tile (radius 10, white on Gallery bands, Gallery on white bands, a 1 px `Rule` border) holding a 20 px
+Ink glyph, 16 px gap, then the text at 19/28 (marketing) or 17/26 (product). Rows 16 px apart. They replace
+every tick on the site.
+
+### 11.11 Accordions
+
+10.6: 72 px rows, `Rule` hairlines, 20 px Medium questions, a 20 px chevron, 260 ms open. The whole row is the
+button; focus outlines the row.
+
+### 11.12 Notices
+
+A white panel, radius 12, 16 × 20 px padding, a 4 px left edge and a 6% tint in the tone's color, a 20 px glyph
+and the sentence at 17/26 Ink with its link underlined:
+
+| Tone | Edge and tint | Examples |
+|---|---|---|
+| Your turn | `#A04A06` | "1 approved filing is ready to pay and needs your card's security code. Pay and file" |
+| Rehearsal | `#E8B82A` on Rehearsal Tint | "This page is in rehearsal for now. …", "Rehearsal: <filing> isn't live yet, …" |
+| Problem | `#B3261E` | "Please fix these and submit again." |
+| Done | `#157A4A` | "Saved to Google Docs. Open the record" |
+| Neutral | the firm's color (firm pages) or Graphite | next-step notes, "Filled in from your message …" |
+
+### 11.13 Toasts
+
+On the desk: 360 px, bottom-right (top on phones), white, radius 12, stage shadow, the status chip and one line,
+4 s, dismissible, never covering the primary button. In the marketing pictures they appear as illustrated
+toasts (9.1, 10.1).
+
+### 11.14 Logo bay and the small-type lockup
+
+3.5 and 3.4. Built once, used on every firm surface and in every picture of one.
+
+### 11.15 Document card
+
+7.4: 170 × 220 px at full size (8.5 × 11 proportion), white, stage shadow, grey text bars, the label block
+beneath (issuer in Fine, title in 15 px Medium, reference in 14 px tabular). In the product, the real document's
+label under a generic sheet with a PDF glyph and a download button.
+
+### 11.16 Stage track
+
+A 2 px line with 14 px stage dots: reached stages solid Ink, the current stage in the firm's color with a
+6 px ring of its 12% tint, stages ahead outlined in Field Edge; labels in 15 px Medium under each dot; on phones
+it turns vertical with labels to the right.
+
+### 11.17 Link and code copy fields
+
+Mono 15 px on Gallery, radius 10, 48 px tall, the text truncated in the middle (start and end of the link kept),
+and a "Copy" or "Copy link" button that morphs to a check for 1.2 s.
+
+### 11.18 Device frames
+
+7.2. Generic phone and browser, our own drawing; never a real manufacturer's silhouette.
+
+### 11.19 Example labels
+
+Fine (13/18), Graphite (`#8F96A3` on Night), at the lower-left of a picture, 12 to 16 px below it, never inside
+the picture and never smaller than 13 px.
+
+### 11.20 Code blocks
+
+10.15: Mono 15/24 on Night Raised, radius 12, 20 px padding, a language tab, a "Copy" button, syntax colors at
+4.5:1 or better.
+
+### 11.21 Empty states
+
+A live mini preview of what the empty thing will look like in the firm's own brand (a client page with its logo,
+a desk row), never a sad illustration, with the copy's sentence and its buttons.
+
+---
+
+## 12. Craft notes
+
+- **Dark mode.** CoFile's own surfaces (the marketing site, the dashboard, the docs, the filing desk's frame)
+  follow the system setting with the tokens in 4.5. Pictures of firm pages, the proof, the pages a firm's
+  clients see and all emails stay light: they're the firm's paper. The two Night bands look the same in both
+  modes; in dark mode the white bands become Night and the Gallery bands Night Raised, so the page keeps its
+  rhythm. The firm's button shade is lifted for dark desks (4.4.6).
+- **Phones.** Every page is designed phone-first where the reader is on a phone (the pages a firm's clients
+  see) and desktop-first where they decide (the home page, Pricing, the desk), but nothing is cut on phones:
+  pictures stack after their words, The Run unpins into three pictures, tables become cards, the yellow button
+  lives in a sticky bottom bar, and every tap target is at least 48 px.
+- **Older eyes.** Body at 18 px (17 px on phones), nothing a reader needs below 15 px, body text at 7:1 or
+  better, no light-grey text, no text over photographs, no thin weights, 60 to 70 characters a line, real
+  underlines on links, visible focus everywhere, and layouts that reflow cleanly at 200% zoom. Motion is short,
+  plays once and respects reduced motion.
+- **Spanish.** Plan for 25 to 30% longer strings. Buttons size to their label and wrap to two balanced lines
+  rather than shrink; the yellow button's minimum width is its label. Headlines are set by hand per language,
+  so the full-stop breaks ("Your client needs an LLC. / Say yes, …") are re-set for Spanish, and the hero H1 is
+  allowed a third line. Chips wrap. The header collapses to the menu earlier (below 1320 px) because the five
+  nav labels grow. Door plates balance long names onto two lines. Prices and numbers don't change length.
+  Pictures read their text from the same strings as the page, so they translate with it.
+
+---
+
+## 13. Production
+
+### 13.1 Tools
+
+- **Design:** Figma, with variables for both token sets: CoFile's, and a "firm" collection with modes for each
+  example firm (Harbor & Pine, Northgate Payroll) and for the hard cases (a light logo, a boxed JPEG logo, no
+  logo, a pale main color that needs a derived shade, a long two-line name).
+- **Tokens to code:** exported with Style Dictionary into CSS custom properties; the firm-color algorithm
+  (button shade, link shade, tints, dark lift) implemented once in a small shared module used by the app, the
+  proof renderer and the email builder, with unit tests on contrast results.
+- **Components:** React in the existing Next.js app, documented in Storybook, every story rendered in CoFile's
+  theme, both example firms and the hard cases, light and dark; Playwright visual regression across all themes.
+- **Motion:** DOM pictures animated in code (Motion for React, plus CSS scroll-driven animations with an
+  IntersectionObserver fallback for The Run); the mark's animations (orbit, ring draw, the 404 roll) in Rive
+  with SVG fallbacks.
+- **3D:** react-three-fiber for the live plates, loaded only when the Firms section is within 1.5 viewports and
+  WebGL is available; Blender with a production renderer for the stills and the PSD fallbacks.
+- **Photography:** shot tethered, graded in Capture One to one shared look, delivered as layered files with
+  screen tracking marks.
+- **Email:** built in MJML, tested across clients and dark modes with an email testing service.
+
+### 13.2 Performance budgets
+
+- Largest paint under 2.0 s on a mid-range phone on 4G. The hero picture is HTML, so the largest paint is the
+  H1, not an image.
+- Home page JavaScript under 180 KB compressed before the WebGL chunk; the plates' chunk (about 150 KB plus the
+  1.2 MB model) loads on idle and never blocks the page.
+- Photographs as AVIF with WebP fallback and art-directed crops per breakpoint (`<picture>`), each under 220 KB.
+- Fonts: GT America Regular and Medium subset to Latin plus Latin Extended for Spanish, preloaded; Condensed and
+  Mono loaded where used.
+
+### 13.3 Asset list
+
+| Asset | Formats | Notes |
+|---|---|---|
+| Wordmark (Display and Small masters) | SVG, PDF, PNG @1× to @3× | Ink, white, one-color |
+| Hand-off mark (regular and small masters) | SVG, PDF, PNG; favicon SVG with dark variant; app icons | 3.1, 3.3 |
+| Small-type lockup "with CoFile" | Outlined SVG (gray, white-on-band), PNG @2× for email | 3.4 |
+| Example firm logos: Harbor & Pine CPA, Northgate Payroll | SVG | 7.2 |
+| Brass plate | glTF + KTX2 textures; still renders (P1, P2, studio) at 3200 px; layered PSDs; glint pass | 7.5 |
+| Photographs P1 to P10 | Layered TIFF masters; web crops per breakpoint | 7.3 (P10 only with the real team) |
+| State-screen schematics (New Jersey LLC, every screen) | SVG and components | 7.4 |
+| Document cards | Components plus SVG | 7.4 |
+| Icon set (44 glyphs) | SVG, 24 px grid | 7.6 |
+| Device frames (phone, browser) | Components plus SVG | 7.2 |
+| Motion files | Rive (.riv) with SVG fallbacks; motion specs per moment M1 to M12 | 8 |
+| Open Graph images, one per public page | PNG 1200 × 630 | Each shows that page's picture in its final frame with the page's H1 |
+| Email templates (firm family and CoFile family) | MJML source, compiled HTML, plain text | 10.16 |
+| Figma library and Storybook | | Tokens, components, all themes |
+
+### 13.4 What to commission
+
+- **A type foundry license and a lettering artist** for GT America (web, app, email, desktop) and the
+  hand-finished CoFile wordmark.
+- **An identity designer** for the Hand-off mark, its small-size master, the lockups, and the two example-firm
+  logos.
+- **A product-visualization 3D studio** that ships real-time WebGL as well as stills, for the brass plates.
+- **A documentary and editorial photographer, with a producer and a casting lead** for P1 to P9 (two shoot
+  days), and a separate half-day for P10 only if the real team agrees.
+- **A UI illustration studio** for the state-screen schematics, the document cards and the device frames.
+- **An icon designer** for the 44-glyph set.
+- **A creative technologist or interactive studio** for The Run, the editable door and the brand studio: the
+  three pieces where the demo is the pitch.
+- **An email developer** for both template families.
+- **An accessibility audit firm** for a full audit before launch, including screen-reader passes through every
+  picture.
+
+### 13.5 Order to build in
+
+1. Tokens, type and the firm-color algorithm, with tests.
+2. The logo bay, the small-type lockup and the core components (buttons, fields, chips, cards, notices,
+   tables).
+3. The proof and the pages a firm's clients see (forms, client link pages, the widget): real users see these
+   first, and the marketing pictures are built from them.
+4. The filing desk pages, including Branding setup with its live previews (the brand studio).
+5. The home page with every picture as a live component in its final frame, no motion yet. Ship it.
+6. The Run's pinning and motion M1 to M7, then M8 and M9.
+7. The Two doors picture with still plates and editing, then the WebGL plates.
+8. The seven pages behind the home page, with M10 to M12.
+9. Photography, as the shoots are delivered, slotted into designed placeholders.
+10. Emails.
+11. The platform dashboard and the API docs.
+12. Dark mode, Spanish, the accessibility audit and a performance pass across everything.
+
+---
+
+## 14. What I'd strip from today's visuals, and why
+
+- **The manila folder-tab mark with a check cut into it.** A folder says paperwork, the thing our buyer wants
+  off her desk, and the check builds the brand on "approved, verified". The Hand-off says round trip and ease.
+- **The cream "paper and ink" palette and the manila.** It reads archival and legal, like a records office. A
+  clean white and neutral frame lets every firm's color look like the point.
+- **The green as CoFile's own color.** Green is a firm color: Harbor & Pine's, and half the CPA firms in
+  America. CoFile shouldn't compete with its customers' brands; yellow never does.
+- **Source Serif with IBM Plex Sans and Plex Mono.** Serif headlines plus monospace values read like a law
+  office crossed with a terminal. Business data in Mono makes a filing look technical, which is the opposite of
+  "nobody retypes it".
+- **The green tick before every list item.** It turns every section into a compliance checklist. Icon rows
+  describe the thing itself (a link, a page, a button, a document).
+- **The highlighter marks on proof values.** Yellow highlighting says "something here needs checking". On a
+  proof the firm is about to approve, every value is equally the firm's to read.
+- **The numbered callout boxes on the proof picture.** They make a picture look like an instruction diagram.
+  Quiet margin numerals do the same job.
+- **"Matches the proof" given the same weight as the approve button.** It's reassurance; it becomes a small
+  stub under the proof, still and last.
+- **The same two-column band for every section.** Nine sections that look the same read as one long section,
+  and nothing earns the next scroll. The zigzag, The Run, the full-width tiles, the Night stage and the price
+  set large give each section its own shape.
+- **The stand-in pictures as small bordered boxes of text.** They were the right brief; they're replaced by
+  real-size, real-product pictures.
+- **The CoFile-branded top bar on partner filing desks**, with the firm's logo as a "cobrand" on the right. It
+  puts us in the firm's place. The firm's logo bay leads; we're in small type at the edge.
+- **"with CoFile" as loose grey text wherever it lands.** It becomes one designed lockup, one per page, in a
+  fixed place, at a size that's small on purpose.
