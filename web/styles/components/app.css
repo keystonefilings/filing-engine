@@ -67,8 +67,9 @@
 .shell2-content .notice.ok { background: var(--done-tint); box-shadow: inset 2px 0 0 var(--done); }
 .shell2-content .notice.warn { background: var(--ochre-tint); box-shadow: inset 2px 0 0 var(--ochre); }
 .shell2-content .notice.bad { background: var(--madder-tint); box-shadow: inset 2px 0 0 var(--madder); }
-.shell2-content :is(.notice.ok, .notice.warn, .notice.bad) { color: #1D2130; }
-.shell2-content :is(.notice.ok, .notice.warn, .notice.bad) a:not(.btn) { color: #1D2130; }
+/* The tints are light on the light desk and deep on the dark one, so the text follows the register */
+.shell2-content :is(.notice.ok, .notice.warn, .notice.bad) { color: var(--text); }
+.shell2-content :is(.notice.ok, .notice.warn, .notice.bad) a:not(.btn) { color: var(--link); }
 
 /* Tables: the dashboard's (10C.1): Medium heads in Graphite over a Rule Strong line, Rule hairlines, rows that wash */
 .shell2-content .table-wrap { overflow-x: auto; background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-sheet); }
