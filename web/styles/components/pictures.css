@@ -64,6 +64,14 @@
 .pdh-acct img { flex: none; }
 .pdh-acct span { overflow: hidden; text-overflow: ellipsis; }
 .pdh-rule { height: 1px; background: #1D2130; }
+/* Phones: the lockup's small master at 24 px and the account label at 15/20, so both fit one row (9.1) */
+@media (max-width: 599px) {
+  .pdh .lockup2 { --lockup-h: 24px; }
+  .pdh .lockup2 .lockup2-d { display: none; }
+  .pdh .lockup2 .lockup2-s { display: block; }
+  .pdh-acct { gap: 6px; font-size: 0.9375rem; line-height: 1.25rem; }
+  .pdh-acct img { width: 20px; height: 20px; }
+}
 /* Inside a white sheet the lockup is the light export, at night too: the sheet is paper (4.6) */
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) .reg-cofile .sheet .ident-dark { display: none !important; }
@@ -82,8 +90,9 @@
 .pdesk-top .btn2 { --h: 48px; flex: none; }
 .pdesk-ledger { width: 100%; border-collapse: collapse; table-layout: fixed; font-family: var(--font-sans); color: #1D2130; }
 .pdesk-ledger thead th { height: 44px; padding: 0 16px 12px; vertical-align: bottom; text-align: left; font: 500 0.875rem/1.125rem var(--font-sans); color: #555867; border-bottom: 1px solid #1D2130; }
-.pdesk.is-hero .pdesk-ledger thead th:nth-child(1) { width: 36%; }
-.pdesk.is-hero .pdesk-ledger thead th:nth-child(2) { width: 30%; }
+.pdesk.is-hero .pdesk-ledger thead th:nth-child(1) { width: 33%; }
+.pdesk.is-hero .pdesk-ledger thead th:nth-child(2) { width: 31%; }
+.pdesk.is-hero .pdesk-status .chip2 { white-space: nowrap; }
 .pdesk.is-full .pdesk-ledger thead th:nth-child(1) { width: 27%; }
 .pdesk.is-full .pdesk-ledger thead th:nth-child(2) { width: 28%; }
 .pdesk.is-full .pdesk-ledger thead th:nth-child(3) { width: 19%; }
@@ -387,6 +396,16 @@
 .pslab-screen { height: 100%; padding: 56px 16px 16px; background: #FBFAF6; border-radius: 34px; }
 .pslab .pbubble { box-shadow: none; padding: 16px; }
 .pslab .pbubble-line { display: inline; }
+.pslab .ptext-label { color: #555867; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .pslab { box-shadow: 0 0 0 1px #3A3F52; } }
+:root[data-theme="dark"] .pslab { box-shadow: 0 0 0 1px #3A3F52; }
+@media (max-width: 599px) {
+  .pdraft .pdh { padding-inline: 20px; gap: 10px; }
+  .pdraft .pdh-acct { font-size: 0.9375rem; line-height: 1.25rem; gap: 6px; }
+  .pdraft .pdh-acct img { width: 20px; height: 20px; }
+  .pdraft-title, .pdraft-chip, .pdraft-hr { margin-inline: 20px; }
+  .pdraft-rows > div { padding-inline: 20px; }
+}
 .mk-pic.is-bleed-left .pslab-wrap { justify-content: flex-end; }
 .mk-pic.is-bleed-left .pic-slab .pic-cap { padding-left: min(120px, var(--site-pad)); }
 @media (max-width: 1279px) { .mk-pic.is-bleed-left .pic-slab .pic-cap { padding-left: 0; } }
@@ -511,7 +530,7 @@
 .prec-stages li.is-1 { align-items: center; }
 .prec-stages li.is-2 { align-items: flex-end; }
 .prec-dot { position: relative; z-index: 1; width: 12px; height: 12px; border-radius: 50%; background: #2E6B57; box-shadow: 0 0 0 1.5px #fff; }
-.prec-stages li::before { content: ""; position: absolute; z-index: 0; width: 12px; height: 12px; border-radius: 50%; background: #fff; box-shadow: inset 0 0 0 1.5px #8A8578; }
+.prec-stages li::before { content: ""; position: absolute; z-index: 0; top: 0; width: 12px; height: 12px; border-radius: 50%; background: #fff; box-shadow: inset 0 0 0 1.5px #8A8578; }
 .prec-stages li.is-0::before { left: 0; } .prec-stages li.is-1::before { left: calc(50% - 6px); } .prec-stages li.is-2::before { right: 0; }
 .prec-seg { position: absolute; top: 5px; height: 2px; background: #2E6B57; }
 .is-1 > .prec-seg { left: 6px; width: calc(50% - 6px); }
@@ -836,14 +855,17 @@
   .pstudio-swatch { width: 48px; height: 48px; }
   .pstudio-previews { grid-template-columns: 1fr; }
   .pstudio-large { height: 440px; }
-  .pstudio-large .cpp { width: 100%; }
-  .pstudio-large .cpp-sheet { width: 100%; }
+  .pstudio :is(.pstudio-large, .pstudio-thumb) :is(.cpp, .pv-wash) { width: 100%; }
+  .pstudio :is(.pstudio-large, .pstudio-thumb) :is(.cpp-sheet, .pv-sheet) { width: 100%; }
+  .pstudio-large > div { width: 100%; }
   .pstudio-thumbs { grid-template-columns: 1fr; gap: 24px; }
-  .pstudio-thumb > span { height: 440px; }
+  .pstudio-thumb > span:first-child { height: auto; max-height: 440px; }
+  .pstudio-thumb > span:first-child > * { width: 100%; }
   .pstudio-thumb { cursor: default; }
 }
 /* L12 The saved agent: C8 and a detail plate of the draft over its lower left */
 .pagent { position: relative; }
+@media (max-width: 1279px) { .pic-agent { max-width: 608px; } }
 .pagent-photo { margin-left: 104px; }
 .pagent-photo img { aspect-ratio: 4 / 5; object-fit: cover; object-position: 30% 50%; }
 .pagent-plate { position: absolute; z-index: 1; left: 0; bottom: 64px; width: 400px; }

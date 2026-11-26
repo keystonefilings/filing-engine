@@ -69,7 +69,8 @@ export function DoorsStage({ parked, names, children }: { parked?: boolean; name
         if (parked && geo) { setX(geo.xc); requestAnimationFrame(() => { setSpring("glide"); setX(restX(geo)); }); }
         // Phones: 1.2 s after the first firm has played, the strip slides itself once to the second.
         const strip = ref.current?.querySelector<HTMLElement>(".pdoors-strip");
-        if (strip && window.matchMedia("(max-width: 599px)").matches && !touched.current && !reducedMotion()) {
+        // (For firms rests on the left card: its strip never slides itself.)
+        if (strip && !parked && window.matchMedia("(max-width: 599px)").matches && !touched.current && !reducedMotion()) {
           window.setTimeout(() => { if (!touched.current) strip.scrollTo({ left: strip.scrollWidth, behavior: "smooth" }); }, 1200);
         }
       }
