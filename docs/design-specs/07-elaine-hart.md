@@ -594,15 +594,17 @@ releases. Each image gets a caption from the copy or a **[copy needed]** slot.
 |---|---|---|---|
 | P1 | An office door with gold-leaf sign lettering for the example firm, "Harbor & Pine CPA", hand-painted by a sign painter | Firms ("Your name on the door. Ours in small print.") | Real sign-painted glass, shot straight on at eye level. The literal door. Caption: "Harbor & Pine CPA · example firm". |
 | P2 | A phone in a hand at a bakery counter, the screen showing the firm-branded proof | The proof section, mobile only (as a second image under the list) | The screen is composited from the real proof component, never staged by hand. |
-| P3 | A desk with the state's returned documents and an EIN letter (specimen, test details), a pen, a coffee ring | After ("The papers come back to you.") | Documents are printed from real rehearsal outputs with test details and a visible "specimen" marking printed in the margin. |
+| P3 | A desk with the state's returned documents and an EIN letter (specimen, test details), a pen, a coffee ring | After ("The papers come back to you.") | Documents are printed from real rehearsal outputs with test details, and the site's own words "test details" printed in the margin, so the picture never passes for a real business's papers. |
 
 ### 7.7 Icons
 
-A set of 28 icons on a 24 px grid with 2 px padding, 1.5 px stroke, square caps, drawn by the
+A set of 34 icons on a 24 px grid with 2 px padding, 1.5 px stroke, square caps, drawn by the
 graphics studio: vault, key, lock, link, single-use link, signature, separate accounts (two boxes),
-document, certificate, EIN letter, email, text message, chat, forward, card, security code, clock,
-calendar, state building (generic, columnless, never a capitol dome), check, hold, stop, rehearsal
-(hatched square), live (filled circle), search, filter, copy, download, external link. Icons never
+document, certificate, EIN letter, file (for `/openapi.json`, `/llms.txt`, `/docs.md`), email, text
+message, chat, forward, card, security code, clock, calendar, state building (generic, columnless,
+never a capitol dome), examiner (a person at a desk, no face), check, hold, stop, rehearsal (hatched
+square), live (filled circle), search, filter, magnifier, copy, download, external link, chevron,
+close. Icons never
 appear without a text label, except copy, download and close in tables (which get `aria-label`s).
 
 ---
@@ -646,11 +648,12 @@ if typeset: the label appears, the dot leader runs out (`t-draw`), then the resu
 "Pay Now ........ held, on purpose", waits an extra 400 ms, then the amber hatch slides in from
 the left edge of the line (`t-weight`). The thirteen-screen filmstrip below fills in lockstep.
 
-**The register moment (checks and the real proof).** Two thin layers, the proof's values and the
-state's review page, are drawn 6 px right and 4 px down of each other, like two printing plates out
-of register, then slide into exact register with `t-register`. When they meet, the shared values
-flash `blue-tint` for 220 ms. On the home page this illustrates "Review page: matched the proof"; in
-a filing's timeline it plays once when that event is recorded.
+**The register moment (the rehearsal log and the filing record).** Two thin layers, the proof's
+values and the state's review page, are drawn 6 px right and 4 px down of each other, like two
+printing plates out of register, then slide into exact register with `t-register`. When they meet,
+the shared values flash `blue-tint` for 220 ms. On the home page it plays in a 48 × 32 px two-layer
+thumbnail at the end of the log's "Review page ........ matched the proof" line, as that line sets;
+in a filing's timeline it plays once, on the stage where the review page matched.
 
 **The approval stamp (the proof).** When the client presses "Approve, and authorize submission and
 payment", the button shows a pending state at once (`t-instant`), then, when the server confirms,
@@ -2110,7 +2113,7 @@ make room:
 
 Wordmark (positive, reversed, one-color; SVG and PDF); the Full Stop mark (three colorways);
 favicons (16, 32, 48 SVG and ICO, 180 Apple touch, 192 and 512 maskable); Open Graph template;
-"with CoFile" lockups (light, dark; 11 to 14 px); the end mark; 28 icons; graphics G1 to G8 as
+"with CoFile" lockups (light, dark; 11 to 14 px); the end mark; 34 icons; graphics G1 to G8 as
 components; photographs P1 to P3 with captions; email header and footer frames for both frames;
 the rehearsal hatch as an SVG pattern and a CSS gradient; the 24 torture-set themes.
 
@@ -2121,7 +2124,7 @@ the rehearsal hatch as an SVG pattern and a CSS gradient; the 24 torture-set the
 | Record type family | An independent type foundry with news-family experience | Display (2 optical sizes), Text, Sans with Condensed and Agate, Mono; Latin Ext-A; 9 months, stopgaps meanwhile |
 | Wordmark and mark | The same foundry's lettering lead | Drawn from Record Display; delivered with construction sheets |
 | Explainer graphics G1 to G8 | A newsroom-trained information-graphics studio | Design and data-bound components, 6 weeks |
-| Icons | The same studio | 28 icons on the house grid |
+| Icons | The same studio | 34 icons on the house grid |
 | Photography P1 to P3 | A documentary photographer; a traditional sign painter for P1's door | 3 days on location |
 | Spanish | A legal translation house; a Spanish-first reader panel | All client-facing copy and emails; counsel review of consents |
 | Accessibility | An accessibility consultancy with assistive-technology users on staff | Audit before launch and after each phase; older-reader sessions |

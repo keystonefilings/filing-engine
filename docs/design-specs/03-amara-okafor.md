@@ -322,7 +322,7 @@ Root is 16 px. **Product body text is 17 px, never smaller for anything someone 
 | lg | 1024–1439 | 12 | 48 | 24 |
 | xl | ≥ 1440 | 12 | auto (content 1280) | 32 |
 
-Container widths: marketing 1280, product 1120, forms and reading 720, **the proof 680**, docs prose 760 with a 240 sidebar and a 280 code rail at xl. Margins honor `env(safe-area-inset-*)`.
+Container widths: marketing 1280, product 1120, forms and reading 720, **the proof 680**, docs prose 760 with a 240 sidebar and a 380 code rail at ≥ 1280. Margins honor `env(safe-area-inset-*)`.
 
 **Spacing scale (px):** 2, 4, 8, 12, 16, 24, 32, 48, 64, 96, 128, 192 (tokens `s-0`…`s-11`). Marketing sections run on 128 vertical padding at lg (96 md, 64 xs). Product pages use 32 between blocks and 16 inside cards.
 

@@ -136,6 +136,26 @@ Every engine event, who it goes to (from `src/comms/render.ts`), and where its b
 
 ---
 
+## 2C. The six hard problems, and where this spec answers them
+
+| Brief's hard problem | The answer in one line | Where |
+|---|---|---|
+| 1. Co-branding at scale | Firms control a few slots; an OKLCH algorithm fixes contrast, sizes logos optically and keeps the firm's font out of the facts; status colors never belong to a brand | 4.6, 5.1, 11 |
+| 2. Trust for an irreversible act | The proof is one sheet read top to bottom, one button at the end after the fees, a drawn gate, the consent at full size, and branded error pages | 9.4, 10.4 |
+| 3. Honest beta | Rehearsal gets its own tone, pattern and place on the line (the held gate); the coverage ladder's Live column can't be misread when it's empty | 4.3, 7.4, 10.1 Coverage |
+| 4. Two readers on one site | The firm story runs in paper and ink; the enterprise band inverts to signal a new reader; docs get a workbench look with the same tokens; the Turn Line is both a picture for the CPA and a state machine for the developer | 2, 10.1 Enterprise, 10.7 |
+| 5. Forms that ask for as little as possible | Saved answers, "Same as", "Start from a client you filed for before", folded optional sections, drafts from a forwarded message with provenance marks, and a form map that shows what's left | 9.2, 10.3 New filing form |
+| 6. Accessibility and plain reading | Atkinson Hyperlegible for every fact, 17 px client base, AAA body contrast, words with every color, Spanish-ready layouts, forced colors and print | 5, 12 |
+
+**Form economy, in practice.** The engine already does the hard part (firm defaults, locks, past clients, message reading). The design's job is to make the saved work visible so staff trust it and don't re-type it:
+
+- A field filled from the firm's saved answers shows its value with a small "from Setup" source tag in Meta **[new label]**, and editing it on this filing never changes Setup.
+- Sections whose every field is already filled from Setup collapse to a one-line summary (for example the registered agent's name and city) with "Change" **[new label]**, so a typical NJ LLC form shows the business's own facts first: name, members, address.
+- "Same as" and "Same person as" appear only when there's something earlier to copy, as `IntakeForm` already decides.
+- The form map (10.3) counts only required fields that are still empty, so staff can see the form getting shorter.
+
+---
+
 ## 3. Brand identity
 
 ### 3.1 The mark: the Gate
@@ -756,6 +776,7 @@ All account pages share one **desk-door layout**: on `md`+, a 520 px card on the
 | `/signup/sent` | "Check your email", with an envelope icon carrying a small baton. The "send the link again" link is a secondary button. |
 | `/login` | "Welcome back" and "Firms go to their filing desk, platforms to their dashboard." Then "Continue with Google" as a full-width secondary button with Google's own mark (following their guidelines), a 1 px divider, and the email form. Google errors appear as a `stop` or `act` notice above it. "Enterprise developers can also log in with an API key" sits as a quiet link. |
 | `/forgot-password`, `/reset-password` | One field and one button each. |
+| `/dashboard/login` | The developers' door: the same card layout in the workbench look (10.7), with the API key field in Record and a link back to "Log in" for email accounts. |
 | `/verify-email` | "Confirm your email" and "One click and your email is confirmed." The confirm button is large and primary; the resend form is folded beneath. |
 | `/invite-expired`, `/join/<token>` | The expired page uses the `paused` tone icon, not an error tone. Join shows the inviting firm's logo plate (it's the firm inviting), then the password form. |
 | `/terms`, `/privacy` | Long-form reading layout: a 680 px column, a sticky contents list on the left at `lg`, headings in Hand 700, body 18/30, a version and date line in Record at the top. Print stylesheet included. |
@@ -819,7 +840,9 @@ The desk is co-branded: the firm's logo and color on the rail and buttons, CoFil
 
 The preview renders the real components with the computed theme, never a mock. The logo field gains an optional second upload for dark backgrounds **[new label]** (11.3). Sample names in the preview are the firm's own; no invented client data appears. The checks list shows ratios, plus the before and after swatch whenever the algorithm adjusted the color **[new labels for the check names and messages]**. The locked help texts stay under each field. One of them ("Button text is white, so choose a dark color.") stops being true under automatic contrast; see Copy notes.
 
-**Setup: Details, Agents, Payments.** Single-column forms in cards, with paired fields. Payments shows the two locked radio cards ("One card for every filing", "A card for each type of filing, with one main card for the rest"), then the card selects in a two-column row. Saved cards are shown as card tiles (brand mark, "ending 4242", purpose) inside a Basis Theory-hosted add-card frame, styled to match the field spec.
+**Setup: Registered agents.** "Registered agents" with the locked lede ("Save the agent you use in each state once…"). One card per state the firm files in (New York, New Jersey, Florida), each with the state name as its heading and a choice between the firm's own agent (name, street address and email fields, with the state's address rule in the help text) and, where the state is set up for it, the locked option "Ours: Registered Agents, Inc., through CoFile ($59 a year per business, billed to your firm)". That price is shown only here, inside the desk, as decided. A saved agent shows as a summary line with "Change". Clients never see the price: their forms show the agent as the firm's service.
+
+**Setup: Details and Payments.** Single-column forms in cards, with paired fields. Payments shows the two locked radio cards ("One card for every filing", "A card for each type of filing, with one main card for the rest"), then the card selects in a two-column row. Saved cards are shown as card tiles (brand mark, "ending 4242", purpose) inside a Basis Theory-hosted add-card frame, styled to match the field spec.
 
 **New filing.** Step 1, "Which state is the business in?", shows three 160 px state tiles ("New York", "New Jersey", "Florida") with their locked count lines ("3 filing types, plus the federal EIN"), plus the locked rehearsal sentence and the "Or send us the details…" channels as a quiet card with channel icons. Step 2, "{State}: what are you filing?", shows filing-type tiles: title, a Live (`done`) or Rehearsal (`held`, with the Gate) chip, summary, fee note in Record. "Your pages for clients" sits below as a folded card with each permanent URL in Record, a copy button and the widget snippet in a code block.
 
@@ -950,6 +973,10 @@ Design decisions:
 
 **Approval outcomes.** The decision page uses the same frame: "Approval recorded" with the locked paragraph (rehearsal or live version) and the Turn Line with the baton handed on. The change-request confirmation ("Thank you. Your change request is recorded…"), the code mismatch ("That code didn't match…") and the link errors ("This link to the proof has expired…", "…isn't valid…", "A decision was already recorded with this link…", "We couldn't record your decision because this link has expired or was already used…") all render in the branded frame. Today they're bare `<p>` tags; see pushback. Expired and already-decided use `paused`; the code mismatch uses `act`.
 
+**Engine-served staff pages.** Two pages the engine serves from staff email links, in the account's frame (CoFile ink for partner firms' staff today, the enterprise's brand for an enterprise):
+- **"Choose an available name"** (from "Choose a name: …"). The requested name and why it's unavailable at the top; the generated alternatives as 56 px radio cards in Record (the name exactly as it would be filed); "Use the selected name" as primary; "Generate more options" as secondary; a custom-name field with "Check and use this name"; and "Abort filing" as a destructive button, set apart at the bottom behind the confirm dialog (9.14). The Turn Line shows the baton at You, stopped before the approval gate.
+- **"Review before submission"** (from "Review before submit: …"). The captured state screen at full width, exactly like the proof's state page, then "Approve and submit" (primary) and "Reject / abort" (destructive, confirm dialog). The fee gate is drawn between the screenshot and the buttons. "(No screenshot was captured.)" shows as a `paused` notice in place of the image.
+
 ### 10.5 Enterprise dashboard (`/dashboard`)
 
 CoFile-branded (ink), with the app-shell rail and a denser scale (tables at 14/20, 40 px rows), because operations leads and developers want density.
@@ -963,6 +990,7 @@ CoFile-branded (ink), with the app-shell rail and a denser scale (tables at 14/2
 | Webhooks | Endpoints table plus a per-endpoint **delivery log**: event type in Record, response code chip (2xx `done`, 4xx/5xx `stop`, pending `progress`), retry count, timestamp. A new signing secret is shown once, with the locked "Copy each new signing secret now; it won't be shown again." |
 | Setup | Long settings page with a sticky section index on the left: "Payment methods", "State portal logins", "Who's named on your filings", "Your registered agent in each state", "Defaults per portal". The portal logins table shows each portal (NY DOS, NYS-100, NJ, IRS, FL) with "Pays by" and a login status chip ("Connected {date} by {name}" as `done`, "Not needed" as plain Meta). |
 | Ready to pay | Same pay tickets as the desk, with "({firm}'s card)" owner tags. |
+| Payment routing (in Setup) | The routing form as a small diagram: each filing type on the left, a connector to the card that pays it, the backup card below, so "which card pays for what" is visible at a glance rather than read from a list of selects. The selects stay as the accessible control; the diagram is a live summary of them. |
 | Billing, Team, Password | Standard card and table layouts with locked copy. |
 | Sign-ups and enterprise requests (platform tenant) | Two **review queues**: "Waiting for approval" with approve and decline buttons per row, and a side panel showing everything the applicant entered; "Decided" folded; "Enterprise requests" with the inquiry details. |
 | Drift reviews (proposed, platform staff) | A new internal surface: for each paused filing, side-by-side "approved snapshot" vs "today's screen" with differences outlined in `--paused`, and accept / correct / reject actions. It maps onto the engine's existing `/v1/drift-reviews`. Labels to come from the copy owner. |
@@ -1291,4 +1319,6 @@ I didn't change any of these in the design; they're for the copy owner.
 12. **The "From email" page has no name in the navigation.** Its heading varies correctly by channel ("Request by email", "Request by text message", "Request by Slack", "Request by WhatsApp"), but it lives at a route called from-email and the desk never names it. If requests become a desk section (the turn board shows them in the You group), it will need a nav label.
 13. **Client error pages for the proof** ("This link to the proof has expired. Ask whoever sent it for a new one.") say "whoever sent it". On a branded frame the firm's name is known. Consider "Ask {firm} for a new one."
 14. **The beta notice on firm pages** ("This service is in beta…") says "Filing types go live one at a time", which is about CoFile's catalog, not the firm's service. A client may not know what a "filing type" is. Worth testing with clients.
+16. **"Abort" on staff pages.** "Abort filing" and "Reject / abort" use an engineering word that the rest of the product avoids ("Stopped" is the status name). Consider aligning. Also, the email subject says "Review before submit" and the page says "Review before submission".
+17. **"from Setup" and "Change"** on prefilled form sections are new labels the form economy needs (2C).
 15. **"Rehearsal" for clients.** The client-facing rehearsal band ("This page is in rehearsal for now…") is clear. The proof's band ("Rehearsal: nothing will be filed or paid, even if you approve.") is clear too. Keep both, but test the translated term with Spanish-first readers: the word chosen for "rehearsal" has to carry "a full run that stops before filing", not "a test that might count".
