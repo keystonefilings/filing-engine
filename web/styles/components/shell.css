@@ -31,6 +31,8 @@
 .lockup2 .nameplate2 { flex: none; display: block; }
 .lockup2-word { white-space: nowrap; font-family: var(--font-display); font-weight: 600; font-size: calc(var(--lockup-h) / 1.15 / 0.683); line-height: 1; letter-spacing: 0.01em; transform: translateY(-0.04em); }
 .lockup2-i { position: relative; display: inline-block; }
+/* A deployment's own platform name in place of the lockup: Founders Grotesk Medium 20/24, no plate (10C.1) */
+.shell2-platform { font: 500 1.25rem/1.5rem var(--font-sans-display); color: var(--text); white-space: nowrap; }
 .lockup2-dot { position: absolute; left: 50%; top: 0.12em; width: 0.13em; height: 0.13em; background: var(--brass-line); transform: translateX(-50%) rotate(45deg); }
 @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .reg-cofile .lockup2 .nameplate2 { color: var(--brass); } :root:not([data-theme="light"]) .reg-cofile .lockup2-dot { background: var(--brass); } }
 :root[data-theme="dark"] .reg-cofile .lockup2 .nameplate2 { color: var(--brass); }
