@@ -180,7 +180,7 @@ describe("nothing of CoFile on an email to a firm's client (decision 12)", () =>
     }
     // The firm's copy of the same email is CoFile's letter.
     const firmCopy = renderEmail(to(runs[3]!.sent, "jordan@harborpine.test"), { webBaseUrl: "https://web.test" });
-    expect(firmCopy.html).toContain("https://web.test/cofile/identity/cofile-lockup-stacked-email@2x.png");
+    expect(firmCopy.html).toContain("https://web.test/cofile/identity/cofile-lockup-stacked-email-white@2x.png");
     expect(firmCopy.html).toContain("https://web.test/cofile/vignettes/v03-returned-envelope-email@2x.png");
     expect(firmCopy.text).toMatch(/^CoFile\n\nHarbor & Pine CPA\nCompleted:\n/);
     expect(firmCopy.text.endsWith("CoFile · the filing desk behind your firm")).toBe(true);
