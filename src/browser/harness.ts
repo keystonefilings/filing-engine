@@ -8,7 +8,7 @@ export interface SteelConfig {
   apiKey?: string | null;
   apiUrl?: string;
   connectUrl?: string;
-  /** Saved Steel sign-ins by profile key ("nygov", "ny:<tenant>"); see tools/steel-login.ts. */
+  /** Saved Steel sign-ins by profile key ("nygov:<tenant>", "ny:<tenant>"); see tools/steel-login.ts. */
   profiles?: Record<string, string>;
   /** Hard cap on one run's Steel session (default 15 minutes, the most Keystone's Steel plan allows). */
   timeoutMs?: number;

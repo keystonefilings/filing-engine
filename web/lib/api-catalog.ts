@@ -41,7 +41,7 @@ export const ENDPOINTS: Endpoint[] = [
   {
     id: "create-filing", method: "POST", path: "/v1/filings", group: "Filings", auth: "api_key",
     summary: "Create a filing",
-    description: "Validates the request, fills blanks from the firm's onboarding answers, checks completeness and fees, and sends the client an approval link. Nothing reaches a state site until the client approves. Sending the same idempotencyKey again returns the original filing with status 200.",
+    description: "Validates the request, fills blanks from the firm's onboarding answers, checks completeness and fees, and sends the client an approval link. Nothing is submitted or paid until the client approves; a preview run may first fill in the state site to capture its review page. Sending the same idempotencyKey again returns the original filing with status 200.",
     body: "FilingRequest", bodyExample: EXAMPLE_FILING,
     responses: [
       { status: 201, description: "Created. `approvalLink` is set when the filing is waiting for the client's approval.", example: { filing: FILING_OUT, approvalLink: "https://api.example.com/approve/…", issues: [] } },
@@ -49,13 +49,18 @@ export const ENDPOINTS: Endpoint[] = [
       { status: 401, description: "Missing or invalid API key." },
       { status: 403, description: "tenantId in the body is not your tenant." },
       { status: 422, description: "Validation failed. `issues` lists each problem with its path.", example: { error: "validation failed", issues: [{ path: "formation.county", message: "county is required in NY", severity: "error" }] } },
+      { status: 402, description: "A live filing needs an active subscription (rehearsals don't need one).", example: { error: "a subscription is needed for live filings (dry runs don't need one)", billing: { plan: "enterprise", status: "none" } } },
     ],
   },
   {
     id: "list-filings", method: "GET", path: "/v1/filings", group: "Filings", auth: "api_key",
     summary: "List filings, newest first",
-    query: [{ name: "clientCompanyId", description: "Only this client company's filings." }, { name: "status", description: "Comma-separated statuses, e.g. `awaiting_approval,awaiting_information`." }],
-    responses: [{ status: 200, description: "Your filings.", example: { filings: [FILING_OUT] } }],
+    query: [
+      { name: "clientCompanyId", description: "Only this client company's filings." }, { name: "status", description: "Comma-separated statuses, e.g. `awaiting_approval,awaiting_information`." },
+      { name: "limit", description: "Page size, 1 to 200. Without it, every filing comes back in one list." },
+      { name: "before", description: "The `nextBefore` of the previous page, for the next one." },
+    ],
+    responses: [{ status: 200, description: "Your filings, and `nextBefore` (null on the last page) when `limit` is given.", example: { filings: [FILING_OUT], nextBefore: "2026-11-25T20:41:00.000Z|f_122" } }],
   },
   {
     id: "get-filing", method: "GET", path: "/v1/filings/{id}", group: "Filings", auth: "api_key",
@@ -71,6 +76,54 @@ export const ENDPOINTS: Endpoint[] = [
       { status: 200, description: "`complete: false` with what is still `missing`, or `complete: true` with the filing and its approval link.", example: { complete: false, missing: [{ path: "formation.registeredAgent", label: "registered agent" }] } },
       { status: 409, description: "The filing is not waiting for information." },
       { status: 422, description: "The merged request is invalid." },
+    ],
+  },
+  {
+    id: "cancel-filing", method: "POST", path: "/v1/filings/{id}/cancel", group: "Filings", auth: "api_key",
+    summary: "Cancel a filing",
+    description: "Before anything has started at the state: any status up to `queued`, and `failed`. The approval link stops working and `filing.aborted` is sent. A running or submitted filing can't be cancelled.",
+    body: "{ reason? }", bodyExample: { reason: "The client changed their mind" },
+    responses: [{ status: 200, description: "The filing, now `aborted`.", example: { filing: { id: "f_123", status: "aborted" } } }, { status: 409, description: "The filing has started at the state, or is already finished." }],
+  },
+  {
+    id: "record-approval", method: "POST", path: "/v1/filings/{id}/approval", group: "Filings", auth: "api_key",
+    summary: "Record the client's approval",
+    description: "When you collect the client's approval in your own app instead of sending them the approval link. The same single decision as the link: it applies to the exact data and fees waiting for approval. Show the approver the same consent as the approval page: approving authorizes submitting the filing exactly as shown and paying the fees shown, up to the fee cap (or the total when there is none), and government fees generally can't be refunded once paid. You vouch for who approved (`approvedBy`); send `code` if the firm requires a one-time code.",
+    body: "{ decision, approvedBy, comment?, code? }", bodyExample: { decision: "approve", approvedBy: "Sam Rivera, in our client portal" },
+    responses: [{ status: 200, description: "The filing, now approved and queued.", example: { filing: { id: "f_123", status: "queued" } } }, { status: 409, description: "No approval is waiting, or it was already decided." }],
+  },
+  {
+    id: "webhook-test", method: "POST", path: "/v1/webhooks/test", group: "Webhooks", auth: "api_key",
+    summary: "Send a test delivery",
+    description: "Sends a `webhook.test` event to each of your endpoints, signed like any other delivery, so you can check your receiver.",
+    responses: [{ status: 202, description: "Sent; each endpoint's result.", example: { eventId: "e_1", deliveries: [{ url: "https://hooks.example.com/cofile", status: "delivered", attempts: 1, lastStatusCode: 200 }] } }, { status: 409, description: "No endpoints are set up." }],
+  },
+  {
+    id: "webhook-deliveries", method: "GET", path: "/v1/webhooks/deliveries", group: "Webhooks", auth: "api_key",
+    summary: "Recent deliveries",
+    description: "Your most recent webhook deliveries, newest first, with their status and the last answer from your endpoint.",
+    query: [{ name: "limit", description: "1 to 200, default 50." }],
+    responses: [{ status: 200, description: "Deliveries.", example: { deliveries: [{ id: "d_1", url: "https://hooks.example.com/cofile", eventType: "filing.completed", filingId: "f_123", status: "delivered", attempts: 1, lastStatusCode: 200 }] } }],
+  },
+  {
+    id: "preview", method: "POST", path: "/v1/filings/{id}/preview", group: "Filings", auth: "api_key",
+    summary: "Take the state's review page again",
+    description: "Where the client approves the state's own review page, a preview run takes it before the approval link is sent. If a preview failed, was blocked, or its site-change review is done, this starts a new one; the approval link follows when it ends.",
+    responses: [
+      { status: 202, description: "The filing, now `previewing`.", example: { filing: { id: "f_123", status: "previewing" } } },
+      { status: 409, description: "The filing is not failed, blocked or waiting for a site-change review." },
+    ],
+  },
+  {
+    id: "record-outcome", method: "POST", path: "/v1/filings/{id}/outcome", group: "Filings", auth: "api_key",
+    summary: "Record the state's answer",
+    description: "For a `submitted` filing whose state answers later (New York's receipt email, a Florida examiner's review). `accepted` attaches up to five documents (PDF, PNG or JPEG, base64, 10 MB each), then sends `filing.accepted` and `filing.completed`; the completion email carries the documents. `rejected` sends `filing.rejected` with the reason.",
+    body: "{ outcome, reference?, reason?, documents? }",
+    bodyExample: { outcome: "accepted", reference: "DOS-2026-1188", documents: [{ label: "Filing receipt", kind: "filing_receipt", contentType: "application/pdf", data: "JVBERi0xLjQK..." }] },
+    responses: [
+      { status: 200, description: "The filing, now `completed` or `rejected`.", example: { filing: { id: "f_123", status: "completed" } } },
+      { status: 409, description: "The filing is not `submitted`." },
+      { status: 422, description: "The body is invalid, or a document is empty or over 10 MB." },
     ],
   },
   {
@@ -124,21 +177,47 @@ export const ENDPOINTS: Endpoint[] = [
     responses: [{ status: 200, description: "Removed." }, { status: 404, description: "Not found, or not yours." }],
   },
   {
+    id: "post-client-company-document", method: "POST", path: "/v1/client-companies/{id}/documents", group: "Client companies", auth: "api_key",
+    summary: "Upload a supporting document",
+    description: "A PDF a filing needs alongside the state's form, base64 in `data` (10 MB and 50 pages at most, without a password). `kind` is `certificate_of_existence` (the home state's certificate for a NY Application for Authority, dated within 6 months) or `tax_commission_consent` (the NYS Tax Commission's consent, when the corporation already did business in New York). Put the returned id in `paperUpload.applicationForAuthority.certificateOfExistenceDocumentId` or `taxConsentDocumentId`; the documents go in after the signed form, in the one PDF sent to the state.",
+    bodyExample: { kind: "certificate_of_existence", data: "data:application/pdf;base64,JVBERi0xLjcK…", fileName: "delaware-good-standing.pdf" },
+    responses: [{ status: 201, description: "Kept, with the document's id.", example: { document: { id: "9b2e…", kind: "certificate_of_existence", label: "Certificate of Existence from the home state (delaware-good-standing.pdf)", pages: 1, bytes: 48213, createdAt: "2026-11-26T15:00:00Z" } } }, { status: 404, description: "Not found, or not yours." }, { status: 422, description: "Not a readable PDF, password-protected, or too large." }],
+  },
+  {
     id: "account", method: "GET", path: "/v1/account", group: "Account", auth: "api_key",
     summary: "Who this key belongs to",
     responses: [{ status: 200, description: "Your tenant.", example: { tenantId: "your-tenant", name: "Your Filing Co", configured: true, branding: { displayName: "Your Filing Co" }, webhookEndpointCount: 1 } }],
   },
   {
+    id: "card-codes", method: "GET", path: "/v1/account/card-codes", group: "Account", auth: "api_key",
+    summary: "Filings waiting for a saved card's security code",
+    description: "A saved card's security code can't be stored, so filings that pay the state with a saved card wait for it (status `blocked`, `awaitingCardCode` set). Grouped by card; each group names the path that takes the code.",
+    responses: [{ status: 200, description: "Waiting filings by card.", example: { waiting: [{ methodId: "card1", card: "Company Visa", last4: "4242", owner: {}, codePath: "/v1/account/payment-methods/card1/code", filings: [{ id: "f_123", title: "NJ formation: Blue Harbor LLC", since: "2026-11-25T15:02:11Z" }] }] } }],
+  },
+  {
+    id: "card-code", method: "POST", path: "/v1/account/payment-methods/{methodId}/code", group: "Account", auth: "api_key",
+    summary: "Give a saved card's security code",
+    description: "Type the code into a Basis Theory field in your own page (never send the code itself here) and create a token of type `token` with data `{ cvc }` and `expires_at` within the hour. Send that token's id. Every filing waiting for this card goes back in the queue at once, and the code is used for an hour at most. A firm's own card takes the same body at `/v1/client-companies/{id}/payment-methods/{methodId}/code`.",
+    body: "{ tokenId, expiresAt? }", bodyExample: { tokenId: "3f8c5a2e-1b7d-4c9e-8a6f-2d4b9e1c7a50", expiresAt: "2026-11-25T16:00:00Z" },
+    responses: [{ status: 200, description: "Kept; the waiting filings are queued.", example: { expiresAt: "2026-11-25T16:00:00.000Z", queued: ["f_123"] } }, { status: 404, description: "No such card for state fees." }, { status: 409, description: "The card isn't held in the card vault." }, { status: 422, description: "Not a token id." }],
+  },
+  {
+    id: "billing", method: "GET", path: "/v1/account/billing", group: "Account", auth: "api_key",
+    summary: "Your subscription",
+    description: "Plan, price and status of the subscription that pays for live filings. `price` comes from the plan in Stripe and is null until one is set. With billing required, creating a live filing without a subscription in good standing (active, trialing or past_due) returns 402; rehearsals are always free. Subscribe and manage billing in the dashboard.",
+    responses: [{ status: 200, description: "The subscription.", example: { billed: true, plan: "enterprise", status: "active", canFileLive: true, required: true, configured: true, price: null, currentPeriodEnd: "2026-12-25T00:00:00.000Z", cancelAtPeriodEnd: false } }],
+  },
+  {
     id: "list-keys", method: "GET", path: "/v1/api-keys", group: "API keys", auth: "api_key",
     summary: "List API keys (never the keys themselves)",
-    responses: [{ status: 200, description: "Keys with name, prefix, created, last used and revoked times.", example: { keys: [{ id: "…", name: "website", prefix: "kfe_AbCdEfGh", createdAt: "2026-11-24T15:00:00Z" }] } }],
+    responses: [{ status: 200, description: "Keys with name, prefix, created, last used and revoked times.", example: { keys: [{ id: "…", name: "website", prefix: "cofile_AbCdEfGh", createdAt: "2026-11-24T15:00:00Z" }] } }],
   },
   {
     id: "create-key", method: "POST", path: "/v1/api-keys", group: "API keys", auth: "api_key",
     summary: "Create an API key",
     description: "The key is returned once, in `key`. Store it now; only its prefix is kept readable. Up to 20 live keys.",
     body: "{ name }", bodyExample: { name: "website" },
-    responses: [{ status: 201, description: "Created.", example: { key: "kfe_…", apiKey: { id: "…", name: "website", prefix: "kfe_AbCdEfGh" } } }, { status: 409, description: "Already 20 live keys." }],
+    responses: [{ status: 201, description: "Created.", example: { key: "cofile_…", apiKey: { id: "…", name: "website", prefix: "cofile_AbCdEfGh" } } }, { status: 409, description: "Already 20 live keys." }],
   },
   {
     id: "revoke-key", method: "DELETE", path: "/v1/api-keys/{id}", group: "API keys", auth: "api_key",
@@ -149,14 +228,14 @@ export const ENDPOINTS: Endpoint[] = [
     id: "list-webhooks", method: "GET", path: "/v1/webhook-endpoints", group: "Webhooks", auth: "api_key",
     summary: "List webhook endpoints",
     description: "Secrets are never returned; `secretHint` shows the last four characters.",
-    responses: [{ status: 200, description: "Endpoints.", example: { endpoints: [{ url: "https://hooks.example.com/keystone", events: ["filing.completed"], secretHint: "…9f2a" }] } }],
+    responses: [{ status: 200, description: "Endpoints.", example: { endpoints: [{ url: "https://hooks.example.com/cofile", events: ["filing.completed"], secretHint: "…9f2a" }] } }],
   },
   {
     id: "put-webhooks", method: "PUT", path: "/v1/webhook-endpoints", group: "Webhooks", auth: "api_key",
     summary: "Replace your webhook endpoints",
     description: "Sends the whole list (up to 10). An endpoint that keeps its URL keeps its secret. A new endpoint without a `secret` gets one generated, returned once in `generatedSecrets`. URLs must be public https.",
-    body: "{ endpoints: [{ url, secret?, events? }] }", bodyExample: { endpoints: [{ url: "https://hooks.example.com/keystone", events: ["filing.awaiting_approval", "filing.completed", "filing.failed"] }] },
-    responses: [{ status: 200, description: "Saved.", example: { endpoints: [{ url: "https://hooks.example.com/keystone", secretHint: "…9f2a" }], generatedSecrets: [{ url: "https://hooks.example.com/keystone", secret: "whsec_…" }] } }, { status: 409, description: "Your tenant isn't set up yet; ask the platform team." }, { status: 422, description: "A URL is not public https, or is listed twice." }],
+    body: "{ endpoints: [{ url, secret?, events? }] }", bodyExample: { endpoints: [{ url: "https://hooks.example.com/cofile", events: ["filing.awaiting_approval", "filing.completed", "filing.failed"] }] },
+    responses: [{ status: 200, description: "Saved.", example: { endpoints: [{ url: "https://hooks.example.com/cofile", secretHint: "…9f2a" }], generatedSecrets: [{ url: "https://hooks.example.com/cofile", secret: "whsec_…" }] } }, { status: 409, description: "Your tenant isn't set up yet; ask us." }, { status: 422, description: "A URL is not public https, or is listed twice." }],
   },
   {
     id: "list-events", method: "GET", path: "/v1/events", group: "Webhooks", auth: "none",
@@ -201,13 +280,14 @@ export const FILING_STATUSES: { status: string; meaning: string }[] = [
   { status: "created", meaning: "Received." },
   { status: "invalid", meaning: "Validation failed; see lastError and the filing.invalid event." },
   { status: "awaiting_information", meaning: "Something is missing; supply it with POST /v1/filings/{id}/information." },
+  { status: "previewing", meaning: "A preview run is capturing the state's review page for the client to approve; the approval link follows." },
   { status: "awaiting_approval", meaning: "Waiting for the client to approve on the approval page." },
   { status: "changes_requested", meaning: "The client asked for changes. Create a corrected filing with a new idempotency key." },
   { status: "approved", meaning: "Approved; a run is queued." },
-  { status: "blocked", meaning: "Held by a policy, fee cap or site problem." },
+  { status: "blocked", meaning: "Held by a policy, fee cap or site problem, or approved and waiting for a saved card's security code (awaitingCardCode is set)." },
   { status: "queued", meaning: "Waiting for a worker." },
   { status: "running", meaning: "The state site is being filled in." },
-  { status: "awaiting_drift_review", meaning: "The state site changed; the platform team is checking the map." },
+  { status: "awaiting_drift_review", meaning: "The state site changed; CoFile is checking the change before the run continues." },
   { status: "awaiting_name_resolution", meaning: "The name was taken; alternatives are being offered." },
   { status: "awaiting_review_gate", meaning: "Stopped before submit for a staff check." },
   { status: "ein_filed", meaning: "The EIN was issued (EIN filings, or formation with EIN in the run)." },
@@ -216,12 +296,12 @@ export const FILING_STATUSES: { status: string; meaning: string }[] = [
   { status: "rejected", meaning: "The state rejected it." },
   { status: "completed", meaning: "Done; documents are in artifacts." },
   { status: "failed", meaning: "The run failed; see lastError." },
-  { status: "aborted", meaning: "Stopped by staff." },
+  { status: "aborted", meaning: "Cancelled with POST /v1/filings/{id}/cancel, or stopped by staff." },
   { status: "needs_reconciliation", meaning: "Unclear whether the state received it; staff are checking before anything is retried." },
 ];
 
 /** OpenAPI 3.1 document built from ENDPOINTS. Schemas are summarized; the guides carry the field detail. */
-export function openApiDocument(serverUrl: string): Record<string, unknown> {
+export function openApiDocument(serverUrl: string, extra: { filingRequestSchema?: unknown; events?: [string, string][] } = {}): Record<string, unknown> {
   const paths: Record<string, Record<string, unknown>> = {};
   for (const e of ENDPOINTS) {
     const params = [...e.path.matchAll(/\{(\w+)\}/g)].map((m) => ({ name: m[1], in: "path", required: true, schema: { type: "string" } }));
@@ -232,14 +312,45 @@ export function openApiDocument(serverUrl: string): Record<string, unknown> {
       security: e.auth === "api_key" ? [{ apiKey: [] }] : [],
       responses: Object.fromEntries(e.responses.map((r) => [String(r.status), { description: r.description, ...(r.example !== undefined ? { content: { "application/json": { example: r.example } } } : {}) }])),
     };
-    if (e.body) op.requestBody = { required: true, description: e.body, content: { "application/json": { schema: { type: "object" }, example: e.bodyExample } } };
+    const bodySchema = e.id === "create-filing" && extra.filingRequestSchema ? { $ref: "#/components/schemas/FilingRequest" } : { type: "object" };
+    if (e.body) op.requestBody = { required: true, description: e.body, content: { "application/json": { schema: bodySchema, example: e.bodyExample } } };
     (paths[e.path] ??= {})[e.method.toLowerCase()] = op;
   }
   return {
     openapi: "3.1.0",
     info: { title: "Filing engine API", version: "1", description: "Automated state business filings: LLC formation, EINs, certificates and payroll registration, each approved by the client before it is filed." },
     servers: [{ url: serverUrl }],
-    components: { securitySchemes: { apiKey: { type: "apiKey", in: "header", name: "x-api-key" } } },
+    components: {
+      securitySchemes: { apiKey: { type: "apiKey", in: "header", name: "x-api-key" } },
+      schemas: {
+        ...(extra.filingRequestSchema ? { FilingRequest: extra.filingRequestSchema } : {}),
+        WebhookEvent: {
+          type: "object", required: ["id", "type", "tenantId", "filingId", "occurredAt", "data"],
+          properties: {
+            id: { type: "string", description: "Unique per event; deliveries of one event share it." },
+            type: { type: "string", description: "The event name, e.g. filing.completed." },
+            tenantId: { type: "string" }, filingId: { type: "string" }, runId: { type: "string" },
+            occurredAt: { type: "string", format: "date-time" },
+            data: { type: "object", description: "What the event carries (see each event)." },
+          },
+        },
+      },
+    },
     paths,
+    // Every event we POST to your endpoints, signed (x-cofile-signature: t=<unix>,v1=<hex HMAC-SHA256 of "t.body">).
+    ...(extra.events?.length ? {
+      webhooks: Object.fromEntries(extra.events.map(([name, when]) => [name, {
+        post: {
+          summary: name, description: when,
+          parameters: [
+            { name: "x-cofile-event", in: "header", required: true, schema: { type: "string", const: name } },
+            { name: "x-cofile-delivery", in: "header", required: true, schema: { type: "string" }, description: "Unique per delivery attempt series; use it to ignore repeats." },
+            { name: "x-cofile-signature", in: "header", required: true, schema: { type: "string" }, description: "t=<unix seconds>,v1=<hex HMAC-SHA256 of `${t}.${rawBody}` with your endpoint secret>" },
+          ],
+          requestBody: { required: true, content: { "application/json": { schema: { $ref: "#/components/schemas/WebhookEvent" } } } },
+          responses: { "200": { description: "Any 2xx within a few seconds; anything else is retried after 1m, 5m, 30m, 2h and 12h." } },
+        },
+      }])),
+    } : {}),
   };
 }

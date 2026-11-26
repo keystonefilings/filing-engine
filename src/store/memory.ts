@@ -1,7 +1,7 @@
 import { randomUUID } from "node:crypto";
 import {
   ClientCompanyOwnershipError,
-  type ApiKeyRecord, type InquiryRecord, type UserRecord, type SignatureRecord, type ApprovalRecord, type DriftHaltRecord, type FilingRecord, type MessageRecord, type NameResolutionRecord, type ReviewGateRecord, type RunRecord, type Store, type SubmitIntentRecord, type WebhookDeliveryRecord,
+  type ApiKeyRecord, type InquiryRecord, type IntakeLinkRecord, type BillingAccountRecord, type AgentServiceRecord, type InboundMessageRecord, type UserRecord, type SignatureRecord, type ApprovalRecord, type DriftHaltRecord, type FilingRecord, type MessageRecord, type NameResolutionRecord, type ReviewGateRecord, type RunRecord, type Store, type SubmitIntentRecord, type WebhookDeliveryRecord,
 } from "./types.js";
 import type { ClientCompanySettings, TenantSettings } from "../settings/schema.js";
 import type { PageSnapshot } from "../resolver/types.js";
@@ -34,6 +34,8 @@ export class MemoryStore implements Store {
   apiKeys = new Map<string, ApiKeyRecord>();
   users = new Map<string, UserRecord>();
   inquiries = new Map<string, InquiryRecord>();
+  intakeLinks = new Map<string, IntakeLinkRecord>();
+  vaultSecrets = new Map<string, string>();
   signatures = new Map<string, SignatureRecord>();
   /** Clock for lease expiry; injectable for tests. */
   now: () => number = () => Date.now();
@@ -122,13 +124,52 @@ export class MemoryStore implements Store {
     this.users.set(u.id, u); return u;
   }
   async getUser(id: string) { return this.users.get(id) ?? null; }
+  async findUserByPhone(phone: string) { for (const u of this.users.values()) if (u.phone === phone && u.phoneVerifiedAt) return u; return null; }
   async findUserByEmail(email: string) { for (const u of this.users.values()) if (u.email === email) return u; return null; }
   async listUsers(tenantId: string) { return [...this.users.values()].filter((u) => u.tenantId === tenantId); }
   async updateUser(id: string, patch: Partial<UserRecord>) {
     const u = this.users.get(id); if (!u) throw new Error("user not found");
     const next = { ...u, ...patch, id: u.id, email: u.email }; this.users.set(id, next); return next;
   }
+  async getVaultSecret(key: string) { return this.vaultSecrets.get(key) ?? null; }
+  async putVaultSecret(key: string, _tenantId: string, sealed: string) { this.vaultSecrets.set(key, sealed); }
+  async deleteVaultSecret(key: string) { this.vaultSecrets.delete(key); }
+  inbound = new Map<string, InboundMessageRecord>();
+  async createInbound(m: InboundMessageRecord) { this.inbound.set(m.id, m); return m; }
+  async getInbound(id: string) { return this.inbound.get(id) ?? null; }
+  async findInboundByProvider(providerId: string) { return [...this.inbound.values()].find((m) => m.providerId === providerId) ?? null; }
+  async updateInbound(id: string, patch: Partial<InboundMessageRecord>) {
+    const m = this.inbound.get(id); if (!m) throw new Error("message not found");
+    const next = { ...m, ...patch, id: m.id }; this.inbound.set(id, next); return next;
+  }
+  async listInboundToPurge(cutoff: string) { return [...this.inbound.values()].filter((m) => m.receivedAt < cutoff && !m.purgedAt); }
+  billingAccounts = new Map<string, BillingAccountRecord>();
+  agentServices = new Map<string, AgentServiceRecord>();
+  async createAgentService(a: AgentServiceRecord) { this.agentServices.set(a.id, a); return a; }
+  async getAgentService(id: string) { return this.agentServices.get(id) ?? null; }
+  async findAgentServiceByFiling(filingId: string) { return [...this.agentServices.values()].find((a) => a.filingId === filingId) ?? null; }
+  async listAgentServices(clientCompanyId: string) { return [...this.agentServices.values()].filter((a) => a.clientCompanyId === clientCompanyId).sort((a, b) => b.startedAt.localeCompare(a.startedAt)); }
+  async listDueAgentServices(cutoff: string) { return [...this.agentServices.values()].filter((a) => a.status === "active" && a.nextChargeAt <= cutoff); }
+  async updateAgentService(id: string, patch: Partial<AgentServiceRecord>) {
+    const a = this.agentServices.get(id); if (!a) throw new Error("agent service not found");
+    const next = { ...a, ...patch, id: a.id }; this.agentServices.set(id, next); return next;
+  }
+  async getBillingAccount(id: string) { return this.billingAccounts.get(id) ?? null; }
+  async getBillingAccountByCustomer(customerId: string) { return [...this.billingAccounts.values()].find((b) => b.customerId === customerId) ?? null; }
+  async putBillingAccount(b: BillingAccountRecord) { this.billingAccounts.set(b.id, b); return b; }
+  async createIntakeLink(l: IntakeLinkRecord) { if (this.intakeLinks.has(l.id)) throw new Error("link exists"); this.intakeLinks.set(l.id, l); return l; }
+  async getIntakeLink(id: string) { return this.intakeLinks.get(id) ?? null; }
+  async listIntakeLinks(clientCompanyId: string) { return [...this.intakeLinks.values()].filter((l) => l.clientCompanyId === clientCompanyId).sort((a, b) => b.createdAt.localeCompare(a.createdAt)); }
+  async updateIntakeLink(id: string, patch: Partial<IntakeLinkRecord>) {
+    const l = this.intakeLinks.get(id); if (!l) throw new Error("link not found");
+    const next = { ...l, ...patch, id: l.id }; this.intakeLinks.set(id, next); return next;
+  }
   async createInquiry(i: InquiryRecord) { this.inquiries.set(i.id, i); return i; }
+  async getInquiry(id: string) { return this.inquiries.get(id) ?? null; }
+  async updateInquiry(id: string, patch: Partial<InquiryRecord>) {
+    const i = this.inquiries.get(id); if (!i) throw new Error("inquiry not found");
+    const next = { ...i, ...patch, id: i.id }; this.inquiries.set(id, next); return next;
+  }
   async listInquiries() { return [...this.inquiries.values()].sort((a, b) => b.createdAt.localeCompare(a.createdAt)); }
 
   async acquireRunLease(filingId: string, workerId: string, ttlMs: number) {
@@ -173,6 +214,9 @@ export class MemoryStore implements Store {
   }
   async listDeliveries(filingId?: string) {
     return [...this.deliveries.values()].filter((d) => !filingId || d.event.filingId === filingId);
+  }
+  async listTenantDeliveries(tenantId: string, limit: number) {
+    return [...this.deliveries.values()].filter((d) => d.event.tenantId === tenantId).sort((a, b) => b.event.occurredAt.localeCompare(a.event.occurredAt)).slice(0, limit);
   }
 
   async createMessage(m: MessageRecord) { this.messages.set(m.id, m); return m; }

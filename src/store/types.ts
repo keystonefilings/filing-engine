@@ -13,6 +13,14 @@ export interface FilingRecord {
   idempotencyKey: string;
   status: FilingStatus;
   request: FilingRequest;
+  /** V35: a hash of the request as submitted, to refuse an idempotency key reused for another request. */
+  requestFingerprint?: string;
+  /** V27: what the completeness check still needs while the filing is awaiting_information. */
+  missingInformation?: { path: string; label: string }[];
+  /** V18: approved and ready to pay, waiting for the card owner to give the card's security code. */
+  awaitingCardCode?: { methodId: string; label: string; last4?: string; owner: { tenantId: string; clientCompanyId?: string }; since: string };
+  /** When the SSNs in request were replaced by their masked form (store/sensitive.ts). */
+  sensitivePurgedAt?: string;
   payloadHash: string;
   createdAt: string;
   updatedAt: string;
@@ -34,6 +42,8 @@ export interface ApprovalRecord {
   filingId: string;
   tenantId: string;
   payloadHash: string;
+  /** Decision 7: the state's review page the client approved (a hash of its text, never the text). */
+  review?: { screenKey: string; site: string; fingerprint: string; artifactId?: string; capturedAt: string };
   settingsSnapshot: SettingsSnapshot;
   shownPayload: unknown; // masked payload as rendered
   fees: { label: string; amountUsd: number }[];
@@ -45,6 +55,8 @@ export interface ApprovalRecord {
   createdAt: string;
   expiresAt: string;
   decidedAt?: string;
+  /** The approval consent the approver agreed to (approvals/render.ts APPROVAL_CONSENT_VERSION). */
+  consentVersion?: string;
   decidedVia?: { ip?: string; userAgent?: string; recipient?: string };
   comment?: string;
 }
@@ -164,7 +176,7 @@ export interface MessageRecord {
   filingId: string;
   tenantId: string;
   eventType: string;
-  audience: "client" | "admin";
+  audience: "client" | "admin" | "card_owner";
   channel: string;
   address: string;
   subject: string;
@@ -241,11 +253,122 @@ export interface UserRecord {
   signup?: PartnerSignupDetails;
   decidedAt?: string;
   decidedBy?: string;
+  /** Partner sign-ups confirm their email before they can sign in: the latest link (hash only). */
+  emailVerification?: { tokenHash: string; expiresAt: string; sentAt: string };
+  emailVerifiedAt?: string;
+  /** Session keys signed out one by one (sign-out on one device); pruned once they expire. */
+  revokedSessions?: { jti: string; exp: number }[];
+  /** The Terms of Service and Privacy Policy version this person agreed to at sign-up, and when. */
+  termsAccepted?: { version: string; at: string };
+  /** V42-V43: a mobile number (E.164) for filing requests by text or WhatsApp, once confirmed by a code. */
+  phone?: string;
+  phoneVerifiedAt?: string;
+  /** A number waiting for its code: only a hash of the code. */
+  phonePending?: { phone: string; codeHash: string; expiresAt: string; tries: number };
+  /** The latest password-reset link: only a hash of its secret. Marked used rather than removed. */
+  passwordReset?: { tokenHash: string; expiresAt: string; sessionGen: number; requestedAt: string; usedAt?: string };
+}
+
+/**
+ * V33: who pays the platform and where their Stripe subscription stands. Kept apart from settings,
+ * which approvals are bound to: a renewal must never void an approval.
+ */
+export interface BillingAccountRecord {
+  /** "tenant:<tenantId>" (an enterprise subscriber) or "firm:<clientCompanyId>" (a partner firm). */
+  id: string;
+  tenantId: string;
+  clientCompanyId?: string;
+  plan: "enterprise" | "partner";
+  customerId?: string;
+  subscriptionId?: string;
+  /** Stripe's subscription status; "none" before the first checkout. */
+  status: "none" | "incomplete" | "incomplete_expired" | "trialing" | "active" | "past_due" | "canceled" | "unpaid" | "paused";
+  priceId?: string;
+  /** The current period's start: partner plans count their filings by month from it. */
+  currentPeriodStart?: string;
+  /** When the current price (plan) began: last month's unused filings roll over only from a month on this plan. */
+  planSince?: string;
+  currentPeriodEnd?: string;
+  /** Partner pricing (Nov 26): each live filing counted, and what it was charged (last three months). */
+  usage?: { filingId: string; at: string; kind: "filing" | "ein_only" | "record"; units: number; chargedUsd: number; plan: string; invoiceItemId?: string; note?: string }[];
+  cancelAtPeriodEnd?: boolean;
+  lastPaymentFailedAt?: string;
+  /** The Stripe event last applied (seconds), so an older event that arrives late changes nothing. */
+  lastEventAt?: number;
+  updatedAt: string;
+}
+
+/**
+ * V40: a filing request a firm emailed in. Nothing is filed from it: the sender gets a link to a form
+ * filled in from the email, checks it and sends it like any other. The text and what was read from
+ * it are sealed in the database and removed after the retention period, like SSNs.
+ */
+export interface InboundMessageRecord {
+  id: string;
+  tenantId: string;
+  clientCompanyId: string;
+  userId: string;
+  channel: "email" | "slack" | "sms" | "whatsapp";
+  /** The provider's id for the message (Resend's email_id, Twilio's MessageSid, Slack's trigger): a retried webhook finds it again. */
+  providerId: string;
+  from: string;
+  subject: string;
+  text?: string;
+  receivedAt: string;
+  /** What the web app read from the text: the filing it asks for and form answers per filing kind. */
+  extracted?: { kind: string | null; byKind: Record<string, Record<string, string>>; note?: string; at: string };
+  filingId?: string;
+  purgedAt?: string;
+}
+
+/**
+ * Decision 9 (Nov 26): our registered agent service (Registered Agents, Inc., resold), for one business
+ * a partner firm formed with it. Charged to the firm each year (the first year when the filing is
+ * submitted) until the firm cancels; the provider order is placed by API when configured, else by
+ * our staff, who are emailed.
+ */
+export interface AgentServiceRecord {
+  id: string;
+  tenantId: string;
+  clientCompanyId: string;
+  filingId: string;
+  entityName: string;
+  state: string;
+  provider: string;
+  /** The provider's order reference, when ordered through its API. */
+  providerRef?: string;
+  /** api: ordered through the provider's API; staff: our team places the order by hand. */
+  orderedVia: "api" | "staff";
+  annualUsd: number;
+  status: "active" | "cancelled";
+  startedAt: string;
+  /** When the next year is charged. */
+  nextChargeAt: string;
+  yearsCharged: number;
+  lastChargedAt?: string;
+  cancelledAt?: string;
+  cancelledBy?: string;
+}
+
+/** V26: a link a firm sends one client to fill in one filing (the link itself is a sealed token in the web app). */
+export interface IntakeLinkRecord {
+  id: string;
+  tenantId: string;
+  clientCompanyId: string;
+  /** The service (web filing kind id). */
+  kind: string;
+  label?: string;
+  createdAt: string;
+  createdBy?: string;
+  expiresAt?: string;
+  revokedAt?: string;
+  usedAt?: string;
+  filingId?: string;
 }
 
 export interface PartnerSignupDetails {
   companyName: string;
-  companyType: "cpa" | "payroll" | "cfo" | "other";
+  companyType: "cpa" | "payroll" | "cfo" | "title" | "other";
   phone?: string;
   website?: string;
   states?: string[];
@@ -264,7 +387,11 @@ export interface InquiryRecord {
   volume?: string;
   message?: string;
   createdAt: string;
-  status: "new" | "contacted" | "closed";
+  status: "new" | "contacted" | "closed" | "approved" | "declined";
+  /** V32: the staff decision, and the subscriber an approval created. */
+  decidedAt?: string;
+  decidedBy?: string;
+  tenantId?: string;
 }
 
 export interface WebhookDeliveryRecord {
@@ -344,9 +471,37 @@ export interface Store {
   createUser(u: UserRecord): Promise<UserRecord>;
   getUser(id: string): Promise<UserRecord | null>;
   findUserByEmail(email: string): Promise<UserRecord | null>;
+  /** The user who confirmed this mobile number (E.164). */
+  findUserByPhone(phone: string): Promise<UserRecord | null>;
   listUsers(tenantId: string): Promise<UserRecord[]>;
   updateUser(id: string, patch: Partial<UserRecord>): Promise<UserRecord>;
+  /** V29: sealed portal logins (settings/db-vault.ts); the store never sees them unsealed. */
+  getVaultSecret(key: string): Promise<string | null>;
+  putVaultSecret(key: string, tenantId: string, sealed: string): Promise<void>;
+  deleteVaultSecret(key: string): Promise<void>;
+  createInbound(m: InboundMessageRecord): Promise<InboundMessageRecord>;
+  getInbound(id: string): Promise<InboundMessageRecord | null>;
+  findInboundByProvider(providerId: string): Promise<InboundMessageRecord | null>;
+  updateInbound(id: string, patch: Partial<InboundMessageRecord>): Promise<InboundMessageRecord>;
+  /** Messages received before the cutoff that still hold their text. */
+  listInboundToPurge(cutoff: string): Promise<InboundMessageRecord[]>;
+  createAgentService(a: AgentServiceRecord): Promise<AgentServiceRecord>;
+  getAgentService(id: string): Promise<AgentServiceRecord | null>;
+  findAgentServiceByFiling(filingId: string): Promise<AgentServiceRecord | null>;
+  listAgentServices(clientCompanyId: string): Promise<AgentServiceRecord[]>;
+  /** Active services whose next year is due by the cutoff. */
+  listDueAgentServices(cutoff: string): Promise<AgentServiceRecord[]>;
+  updateAgentService(id: string, patch: Partial<AgentServiceRecord>): Promise<AgentServiceRecord>;
+  getBillingAccount(id: string): Promise<BillingAccountRecord | null>;
+  getBillingAccountByCustomer(customerId: string): Promise<BillingAccountRecord | null>;
+  putBillingAccount(b: BillingAccountRecord): Promise<BillingAccountRecord>;
+  createIntakeLink(l: IntakeLinkRecord): Promise<IntakeLinkRecord>;
+  getIntakeLink(id: string): Promise<IntakeLinkRecord | null>;
+  listIntakeLinks(clientCompanyId: string): Promise<IntakeLinkRecord[]>;
+  updateIntakeLink(id: string, patch: Partial<IntakeLinkRecord>): Promise<IntakeLinkRecord>;
   createInquiry(i: InquiryRecord): Promise<InquiryRecord>;
+  getInquiry(id: string): Promise<InquiryRecord | null>;
+  updateInquiry(id: string, patch: Partial<InquiryRecord>): Promise<InquiryRecord>;
   listInquiries(): Promise<InquiryRecord[]>;
   // run leases: the worker running a filing holds and renews one; recovery skips live leases
   /** Takes the filing's lease unless another unexpired one holds it. Returns the lease token, or null. */
@@ -361,6 +516,8 @@ export interface Store {
   updateDelivery(id: string, patch: Partial<WebhookDeliveryRecord>): Promise<WebhookDeliveryRecord>;
   listDueDeliveries(now: string): Promise<WebhookDeliveryRecord[]>;
   listDeliveries(filingId?: string): Promise<WebhookDeliveryRecord[]>;
+  /** V35: a subscriber's most recent deliveries, newest first. */
+  listTenantDeliveries(tenantId: string, limit: number): Promise<WebhookDeliveryRecord[]>;
   // comms (outbound messages)
   createMessage(m: MessageRecord): Promise<MessageRecord>;
   listMessages(filingId?: string): Promise<MessageRecord[]>;

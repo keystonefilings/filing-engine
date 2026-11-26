@@ -1,0 +1,22 @@
+<!doctype html><html><head><meta charset="utf-8"><title>NY Business Express - My Dashboard</title><script src="_opa.js"></script></head>
+<body>
+<header><a href="#">My Dashboard</a> <a href="#">Logout</a></header>
+<div id="busy" style="display:none"></div>
+<h1>Select the business you are applying for</h1>
+<p>BUSINESS Employer Registration for Unemployment Insurance, Withholding, and Wage Reporting (NYS 100)</p>
+<form id="pick"><fieldset><legend>Select the business you are applying for</legend><div id="opts"></div></fieldset>
+<button type="button" id="back">Go Back</button> <button type="button" id="start">Start Application</button></form>
+<script>
+  // ?profile=existing: the account already holds this business's Business Profile (an earlier run saved it).
+  const existing = new URLSearchParams(location.search).get("profile") === "existing";
+  NYS.reset(existing ? "existing" : null);
+  const profiles = [["Hudson Ledger Group LLC, Limited Liability Company, XX-XXX4321", "other"]];
+  if (existing) profiles.push(["Blue Harbor Consulting LLC, Limited Liability Company, XX-XXX6789", "mine"]);
+  document.getElementById("opts").innerHTML = [...profiles, ["My business is not listed", "new"]]
+    .map(([l, v]) => `<label><input type="radio" name="business" value="${v}"> ${l}</label><br>`).join("");
+  document.getElementById("start").addEventListener("click", () => {
+    const picked = document.querySelector('input[name="business"]:checked');
+    if (picked) NYS.start(picked.value);
+  });
+</script>
+</body></html>

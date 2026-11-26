@@ -1,0 +1,12 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><script src="_mo.js"></script><title>Registered agent (replica)</title></head><body><script>MO.header()</script>
+<h1>Registered agent</h1>
+<p>The registered agent's address must be in Missouri.</p>
+<div id="err" role="alert" hidden></div>
+<p><label for="ra-name">Registered Agent Name</label> <input id="ra-name" type="text"></p>
+<p><label for="ra-a1">Address</label> <input id="ra-a1" type="text"></p>
+<p><label for="ra-a2">Address 2</label> <input id="ra-a2" type="text"></p>
+<p><label for="ra-city">City</label> <input id="ra-city" type="text"></p>
+<script>document.write('<p><label for="ra-state">State</label> <select id="ra-state">' + MO.states + '</select></p>');</script>
+<p><label for="ra-zip">Zip</label> <input id="ra-zip" type="text"></p>
+<p><button type="button" onclick="MO.next(['ra-name', 'ra-a1', 'ra-city', 'ra-state', 'ra-zip'], 'organizers.html')">Next</button></p>
+</body></html>

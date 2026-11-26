@@ -11,7 +11,7 @@ the filing for the adapters; the engine has no first-class field for them yet.
 
 Articles of Organization for a domestic LLC, filed online with the NY Department of State. Walkthrough: [ny-dos-corporations.md](./ny-dos-corporations.md). Engine type `formation`, state `NY`.
 
-Fees: State filing fee $200. Optional: plain copy $5, certified copy $10, certificate of existence $25.
+Fees: State filing fee $200, paid only after the filing is approved. Optional: plain copy $5, certified copy $10, certificate of existence (the Department of State's certificate that the LLC exists on its records) $25.
 
 | Section | Field | Request path | Required | Walkthrough |
 |---|---|---|---|---|
@@ -36,7 +36,7 @@ Fees: State filing fee $200. Optional: plain copy $5, certified copy $10, certif
 | Service of process | Mailing address: state | `formation.serviceOfProcess.person.address.state` | when shown | Screen D2, SOP address |
 | Service of process | Mailing address: ZIP code | `formation.serviceOfProcess.person.address.zip` | when shown | Screen D2, SOP address |
 | Service of process | Service company name, as registered with DOS | `formation.serviceOfProcess.serviceCompany` | when shown | Screen D2, Select Service Company |
-| Service of process | Email for service-of-process notices | `formation.serviceOfProcess.noticeEmail` | yes | Screen D2, SOP email statement |
+| Service of process | Email for service-of-process notices (optional) | `formation.serviceOfProcess.noticeEmail` |  | Screen D2, SOP email statement |
 | Registered agent (optional) | Agent name | `formation.registeredAgent.name` | with its group | Screen D2, RA Name |
 | Registered agent (optional) | Agent address: street address | `formation.registeredAgent.address.street1` | with its group | Screen D2, RA address |
 | Registered agent (optional) | Agent address: suite, unit or floor | `formation.registeredAgent.address.street2` |  | Screen D2, RA address |
@@ -60,11 +60,11 @@ Fees: State filing fee $200. Optional: plain copy $5, certified copy $10, certif
 | Principal business address (optional) | city | `formation.mainBusinessAddress.city` | with its group | used for the EIN application |
 | Principal business address (optional) | state | `formation.mainBusinessAddress.state` | with its group | used for the EIN application |
 | Principal business address (optional) | ZIP code | `formation.mainBusinessAddress.zip` | with its group | used for the EIN application |
-| Copies and payment details | Certified copy ($10) | `formation.additionalCertificates.certifiedCopy` |  | Screen F, Additional Services |
-| Copies and payment details | Certificate of existence ($25) | `formation.additionalCertificates.certificateOfStanding` |  | Screen F, Additional Services |
-| Copies and payment details | Plain copy ($5) | `intake.portal.plainCopy` |  | Screen F, Additional Services |
-| Copies and payment details | Your reference number (optional) | `intake.portal.customerReference` |  | Screen F, Customer Reference Number |
-| Copies and payment details | Copy receipts to this email (optional) | `intake.portal.ccEmail` |  | Screen F, Cc E-mail Address |
+| Copies and receipts | Certified copy ($10) | `formation.additionalCertificates.certifiedCopy` |  | Screen F, Additional Services |
+| Copies and receipts | Certificate of existence ($25) | `formation.additionalCertificates.certificateOfStanding` |  | Screen F, Additional Services |
+| Copies and receipts | Plain copy ($5) | `formation.additionalCertificates.plainCopy` |  | Screen F, Additional Services |
+| Copies and receipts | Your reference number (optional) | `intake.portal.customerReference` |  | Screen F, Customer Reference Number |
+| Copies and receipts | Copy receipts to this email (optional) | `intake.portal.ccEmail` |  | Screen F, Cc E-mail Address |
 | Filing contact | First name | `contact.firstName` | yes | Screen F, E-mail Address |
 | Filing contact | Last name | `contact.lastName` | yes | Screen F, E-mail Address |
 | Filing contact | Email | `contact.email` | yes | Screen F, E-mail Address |
@@ -73,18 +73,81 @@ Fees: State filing fee $200. Optional: plain copy $5, certified copy $10, certif
 Authorizations the client grants (and confirms again on the approval page):
 
 - **ny-signature** (Screen D2, Signature (STOP)): I authorize the filing company to type the organizer's name as the organizer's signature on these Articles of Organization and to certify that the statements in them are true and correct.
-- **ny-payment** (Screen F, Payment Authorization (STOP)): I authorize the filing company to authorize payment of the state fee shown on the approval page. The Department of State does not refund fees.
+- **ny-payment** (Screen F, Payment Authorization (STOP)): I authorize the filing company to pay the state fee shown on the proof. The Department of State does not refund fees.
 
 Not covered yet:
 
-- NY business corporations (Screen D1: shares, incorporator, preemptive rights) need engine support first; the engine forms LLCs only in NY.
-- Dissolution, name-change amendment, certificate of change, copies, certificates of status and E-Submission (Screens G to L) are mapped but have no engine adapter yet.
+- The page after File Document (the filing receipt) is not mapped, so the filing runs as a dry run.
+
+## New York corporation formation (`ny-corp`)
+
+Certificate of Incorporation for a domestic business corporation, filed online with the NY Department of State. Walkthrough: [ny-dos-corporations.md](./ny-dos-corporations.md). Engine type `formation`, state `NY`.
+
+Fees: State filing fee $125, plus New York's tax on shares: 5 cents for each share without par value, or 1/20 of 1% of the shares' total par value, and at least $10 (200 shares without par value: $10, so $135 in all). The state's page works it out, and the filing stops before payment if it differs. Optional: plain copy $5, certified copy $10, certificate of existence $25.
+
+| Section | Field | Request path | Required | Walkthrough |
+|---|---|---|---|---|
+| Name | Corporation name, without the ending | `formation.name.baseName` | yes | Screen C |
+| Name | Ending | `formation.name.designator` | yes | Screen C, entity indicator check (BCL s.301) |
+| Name | English translation of the name (if not in English) | `formation.name.englishTranslation` |  | Screen D1, Corporation Name |
+| Certificate | County where the corporation's office will be | `formation.county` | yes | Screen D1, County |
+| Certificate | Number of shares the corporation may issue | `formation.stockShares` | yes | Screen D1, Shares |
+| Certificate | Share value | `intake.portal.nyShareValue` |  | Screen D1, Share Value |
+| Certificate | Par value of each share (US dollars) | `formation.stockParValueUsd` | when shown | Screen D1, Share Value (par amount) |
+| Certificate | Effective date | `formation.effectiveDate` | yes | Screen D1, Effective Date |
+| Certificate | Effective on | `formation.effectiveDateValue` | when shown | Screen D1, Effective Date |
+| Service of process | Send legal papers to | `formation.serviceOfProcess.mode` | yes | Screen D1, SOP Select One |
+| Service of process | Name | `formation.serviceOfProcess.person.name` | when shown | Screen D1, SOP Name |
+| Service of process | Mailing address: street address | `formation.serviceOfProcess.person.address.street1` | when shown | Screen D1, SOP address |
+| Service of process | Mailing address: suite, unit or floor | `formation.serviceOfProcess.person.address.street2` |  | Screen D1, SOP address |
+| Service of process | Mailing address: city | `formation.serviceOfProcess.person.address.city` | when shown | Screen D1, SOP address |
+| Service of process | Mailing address: state | `formation.serviceOfProcess.person.address.state` | when shown | Screen D1, SOP address |
+| Service of process | Mailing address: ZIP code | `formation.serviceOfProcess.person.address.zip` | when shown | Screen D1, SOP address |
+| Service of process | Service company name, as registered with DOS | `formation.serviceOfProcess.serviceCompany` | when shown | Screen D1, Select Service Company |
+| Service of process | Email for service-of-process notices (optional) | `formation.serviceOfProcess.noticeEmail` |  | Screen D1, SOP email statement |
+| Incorporator | Incorporator's full name | `formation.incorporator.name` | yes | Screen D1, Incorporator / Signature |
+| Incorporator | Incorporator address: street address | `formation.incorporator.address.street1` | yes | Screen D1, Incorporator |
+| Incorporator | Incorporator address: suite, unit or floor | `formation.incorporator.address.street2` |  | Screen D1, Incorporator |
+| Incorporator | Incorporator address: city | `formation.incorporator.address.city` | yes | Screen D1, Incorporator |
+| Incorporator | Incorporator address: state | `formation.incorporator.address.state` | yes | Screen D1, Incorporator |
+| Incorporator | Incorporator address: ZIP code | `formation.incorporator.address.zip` | yes | Screen D1, Incorporator |
+| Filer | Filer name | `formation.filer.name` | with its group | Screen D1, Filer |
+| Filer | Filer address: street address | `formation.filer.address.street1` | with its group | Screen D1, Filer |
+| Filer | Filer address: suite, unit or floor | `formation.filer.address.street2` |  | Screen D1, Filer |
+| Filer | Filer address: city | `formation.filer.address.city` | with its group | Screen D1, Filer |
+| Filer | Filer address: state | `formation.filer.address.state` | with its group | Screen D1, Filer |
+| Filer | Filer address: ZIP code | `formation.filer.address.zip` | with its group | Screen D1, Filer |
+| Principal business address (optional) | street address | `formation.mainBusinessAddress.street1` | with its group | used for the EIN application |
+| Principal business address (optional) | suite, unit or floor | `formation.mainBusinessAddress.street2` |  | used for the EIN application |
+| Principal business address (optional) | city | `formation.mainBusinessAddress.city` | with its group | used for the EIN application |
+| Principal business address (optional) | state | `formation.mainBusinessAddress.state` | with its group | used for the EIN application |
+| Principal business address (optional) | ZIP code | `formation.mainBusinessAddress.zip` | with its group | used for the EIN application |
+| Copies and receipts | Certified copy ($10) | `formation.additionalCertificates.certifiedCopy` |  | Screen F, Additional Services |
+| Copies and receipts | Certificate of existence ($25) | `formation.additionalCertificates.certificateOfStanding` |  | Screen F, Additional Services |
+| Copies and receipts | Plain copy ($5) | `formation.additionalCertificates.plainCopy` |  | Screen F, Additional Services |
+| Copies and receipts | Your reference number (optional) | `intake.portal.customerReference` |  | Screen F, Customer Reference Number |
+| Copies and receipts | Copy receipts to this email (optional) | `intake.portal.ccEmail` |  | Screen F, Cc E-mail Address |
+| Filing contact | First name | `contact.firstName` | yes | Screen F, E-mail Address |
+| Filing contact | Last name | `contact.lastName` | yes | Screen F, E-mail Address |
+| Filing contact | Email | `contact.email` | yes | Screen F, E-mail Address |
+| Filing contact | Phone | `contact.phone` | yes | Screen F, E-mail Address |
+
+Authorizations the client grants (and confirms again on the approval page):
+
+- **ny-corp-signature** (Screen D1, Signature of Incorporator (STOP)): I am the incorporator named above. I authorize the filing company to type my name as the incorporator's signature on this Certificate of Incorporation, and I certify that the statements in it are true and correct.
+- **ny-payment** (Screen F, Payment Authorization (STOP)): I authorize the filing company to pay the state fee shown on the proof. The Department of State does not refund fees.
+
+Not covered yet:
+
+- The tax on shares is quoted from the statute (Tax Law s.180: 5 cents a share without par value, 1/20 of 1% of total par value, at least $10), which the live checkout charges. A different amount on the page stops the filing before payment.
+- The par amount field's exact label, format and limit were not captured on the walk.
+- The optional registered agent, duration date, director-liability and preemptive-rights statements on the form aren't entered by the engine yet, so the form doesn't ask for them.
 
 ## New Jersey LLC formation (`nj-llc`)
 
 Certificate of Formation for a domestic LLC, filed online through NJ Business Formation. Walkthrough: [nj-business-formation.md](./nj-business-formation.md). Engine type `formation`, state `NJ`.
 
-Fees: State filing fee $100 (published schedule). The online checkout amount is checked at payment.
+Fees: $103.50 by card: the state filing fee of $100 plus New Jersey's $3.50 portal fee ($1 by eCheck). Optional: certificate of standing $52, certified copy $27 by card ($50 and $25 plus a $2 portal fee each). The proof shows the exact total, and it's checked again at payment.
 
 | Section | Field | Request path | Required | Walkthrough |
 |---|---|---|---|---|
@@ -129,20 +192,77 @@ Fees: State filing fee $100 (published schedule). The online checkout amount is 
 
 Authorizations the client grants (and confirms again on the approval page):
 
-- **nj-ra-attestation** (Screen 7, Attestation checkbox (STOP)): I attest that the registered agent information is correct for this business and that the agent named is aware of and has accepted the responsibility of acting as its registered agent, and I authorize the filing company to tick that attestation for me.
+- **nj-ra-attestation** (Screen 7, Attestation checkbox (STOP)): I attest that the registered agent information is correct for this business and that the agent named is aware of and has accepted the responsibility of acting as its registered agent, and I authorize the filing company to check that box for me.
 - **nj-signature** (Screen 10, Signatures (STOP)): I authorize the filing company to enter the signers' names as their signatures on the Certificate of Formation.
-- **nj-payment** (Screen 13, Payment): I authorize the filing company to pay the state fee shown on the approval page.
+- **nj-payment** (Screen 13, Payment): I authorize the filing company to pay the state fee shown on the proof.
 
 Not covered yet:
 
-- NJ for-profit corporations (DP: shares, directors, incorporators) need engine support first.
 - The Signatures, Contact Information, Review and Payment screens were not reached in the walkthrough; their exact fields are unconfirmed.
+
+## New Jersey corporation formation (`nj-corp`)
+
+Certificate of Incorporation for a domestic for-profit corporation (DP), filed online through NJ Business Formation. Walkthrough: [nj-business-formation.md](./nj-business-formation.md). Engine type `formation`, state `NJ`.
+
+Fees: State filing fee $100, plus New Jersey's portal fee ($3.50 by card for an LLC; the corporation checkout's own figure hasn't been seen yet). The proof shows the exact total, and it's checked again at payment.
+
+| Section | Field | Request path | Required | Walkthrough |
+|---|---|---|---|---|
+| Name | Corporation name, without the ending | `formation.name.baseName` | yes | Screen 1, Business Name |
+| Name | Ending | `formation.name.designator` | yes | Screen 2, Business Designator (DP) |
+| Business data | Total number of shares | `formation.stockShares` | yes | Screen 3, Stock (Total Number of Shares) |
+| Business data | NAICS code (optional) | `formation.naicsCode` |  | Screen 3, NAICS Code |
+| Business data | Duration (leave blank for perpetual) | `formation.duration` |  | Screen 3, Duration |
+| Business data | Effective date | `formation.effectiveDate` | yes | Screen 3, Effective Date |
+| Business data | Effective on | `formation.effectiveDateValue` | when shown | Screen 3, Effective Date |
+| Business data | Business purpose (optional) | `formation.purpose` |  | Screen 4, Business Purpose |
+| Business data | Main business address (optional): street address | `formation.mainBusinessAddress.street1` | with its group | Screen 5, Main Business Address |
+| Business data | Main business address (optional): suite, unit or floor | `formation.mainBusinessAddress.street2` |  | Screen 5, Main Business Address |
+| Business data | Main business address (optional): city | `formation.mainBusinessAddress.city` | with its group | Screen 5, Main Business Address |
+| Business data | Main business address (optional): state | `formation.mainBusinessAddress.state` | with its group | Screen 5, Main Business Address |
+| Business data | Main business address (optional): ZIP code | `formation.mainBusinessAddress.zip` | with its group | Screen 5, Main Business Address |
+| Registered agent | Registered agent | `formation.registeredAgentChoice` | yes | Screen 6 |
+| Registered agent | Agent name | `formation.registeredAgent.name` | when shown | Screen 7, RA Name |
+| Registered agent | Agent email (optional) | `formation.registeredAgent.email` |  | Screen 7, RA Email |
+| Registered agent | Agent office: street address | `formation.registeredAgent.address.street1` | when shown | Screen 7, Office Address |
+| Registered agent | Agent office: suite, unit or floor | `formation.registeredAgent.address.street2` |  | Screen 7, Office Address |
+| Registered agent | Agent office: city | `formation.registeredAgent.address.city` | when shown | Screen 7, Office Address |
+| Registered agent | Agent office: state | `formation.registeredAgent.address.state` | when shown | Screen 7, Office Address |
+| Registered agent | Agent office: ZIP code | `formation.registeredAgent.address.zip` | when shown | Screen 7, Office Address |
+| Board of directors | Name | `formation.directors[].name` | yes | Screen 8b, Add New Director |
+| Board of directors | Address: street address | `formation.directors[].address.street1` | yes | Screen 8b, Add New Director |
+| Board of directors | Address: suite, unit or floor | `formation.directors[].address.street2` |  | Screen 8b, Add New Director |
+| Board of directors | Address: city | `formation.directors[].address.city` | yes | Screen 8b, Add New Director |
+| Board of directors | Address: state | `formation.directors[].address.state` | yes | Screen 8b, Add New Director |
+| Board of directors | Address: ZIP code | `formation.directors[].address.zip` | yes | Screen 8b, Add New Director |
+| Incorporators | Full name | `formation.incorporators[].name` | yes | Screen 8b, Add New Incorporators |
+| Incorporators | Address: street address | `formation.incorporators[].address.street1` | yes | Screen 8b, Add New Incorporators |
+| Incorporators | Address: suite, unit or floor | `formation.incorporators[].address.street2` |  | Screen 8b, Add New Incorporators |
+| Incorporators | Address: city | `formation.incorporators[].address.city` | yes | Screen 8b, Add New Incorporators |
+| Incorporators | Address: state | `formation.incorporators[].address.state` | yes | Screen 8b, Add New Incorporators |
+| Incorporators | Address: ZIP code | `formation.incorporators[].address.zip` | yes | Screen 8b, Add New Incorporators |
+| Filing contact | First name | `contact.firstName` | yes | Screen 13: Payment, Contact Information (LLC walk 2026-11-17) |
+| Filing contact | Last name | `contact.lastName` | yes | Screen 13: Payment, Contact Information (LLC walk 2026-11-17) |
+| Filing contact | Email | `contact.email` | yes | Screen 13: Payment, Contact Information (LLC walk 2026-11-17) |
+| Filing contact | Phone | `contact.phone` | yes | Screen 13: Payment, Contact Information (LLC walk 2026-11-17) |
+
+Authorizations the client grants (and confirms again on the approval page):
+
+- **nj-ra-attestation** (Screen 7, Attestation checkbox (STOP)): I attest that the registered agent information is correct for this business and that the agent named is aware of and has accepted the responsibility of acting as its registered agent, and I authorize the filing company to check that box for me.
+- **nj-corp-signature** (Screen 10, Signatures (STOP)): I am an incorporator named above, and each other incorporator named above has authorized me to give this authorization for them. I authorize the filing company to enter each incorporator's name as a signer and check their Signature Box on the Certificate of Incorporation, which the portal says indicates acceptance of the certificate and the intent to formally execute the filing.
+- **nj-payment** (Screen 13, Payment): I authorize the filing company to pay the state fee shown on the proof.
+
+Not covered yet:
+
+- Signatures, Review and Payment were reached for an LLC only; a corporation's signer title list wasn't seen. Each incorporator signs, with the only title the list offers; the filing stops if it offers several.
+- A certificate of standing or certified copy can't be ordered with a corporation yet: their prices at its checkout haven't been seen.
+- Other provisions and the registered agent number aren't entered by the engine yet, so the form doesn't ask for them.
 
 ## Florida LLC formation (`fl-llc`)
 
 Articles of Organization for a Florida LLC, filed on Sunbiz. Walkthrough: [fl-sunbiz.md](./fl-sunbiz.md). Engine type `formation`, state `FL`.
 
-Fees: State fees $125 (filing $100 + registered agent $25). Optional: certificate of status $5, certified copy $30.
+Fees: State fees $125 (filing $100 + registered agent designation $25). Optional: certificate of status $5, certified copy $30.
 
 | Section | Field | Request path | Required | Walkthrough |
 |---|---|---|---|---|
@@ -174,8 +294,6 @@ Fees: State fees $125 (filing $100 + registered agent $25). Optional: certificat
 | Registered agent | Agent address: state | `formation.registeredAgent.address.state` | when shown | RA Address, Suite, City, Zip |
 | Registered agent | Agent address: ZIP code | `formation.registeredAgent.address.zip` | when shown | RA Address, Suite, City, Zip |
 | Registered agent | Person who accepts for the agent (types the agent signature) | `intake.portal.flAgentSignerName` | when shown | Registered Agent Signature (STOP) |
-| Correspondence | Correspondence name | `intake.portal.flCorrespondenceName` | yes | Correspondence Name |
-| Correspondence | Correspondence email | `intake.portal.flCorrespondenceEmail` | yes | Correspondence E-mail / Re-enter |
 | Purpose and managers | Purpose (optional; required for a professional LLC) | `formation.purpose` |  | Purpose |
 | Purpose and managers | Title | `formation.authorizedPersons[].title` | yes | Manager / member blocks 1 to 6 |
 | Purpose and managers | Person's name (Last, First Initial) | `formation.authorizedPersons[].name` |  | Manager / member blocks 1 to 6 |
@@ -196,9 +314,9 @@ Fees: State fees $125 (filing $100 + registered agent $25). Optional: certificat
 Authorizations the client grants (and confirms again on the approval page):
 
 - **fl-disclaimer** (Entry screen, disclaimer checkbox (STOP)): I authorize the filing company to accept the Sunbiz filing disclaimer for this filing.
-- **fl-ra-signature** (Registered Agent Signature (STOP)): The person named to accept for the registered agent authorizes the filing company to type their name as the agent's signature accepting the appointment. (Typing another person's name without authority is forgery under s.831.06 F.S.)
-- **fl-llc-signature** (Electronic Signature (STOP)): The authorized representative named above authorizes the filing company to type their name as the electronic signature, affirming the facts are true (false information is a third-degree felony under s.817.155 F.S.) and acknowledging the annual report duty.
-- **fl-payment** (Tyler Payment Services hand-off): I understand a submitted Florida filing can't be changed, cancelled or refunded, everything in it becomes public record, and I authorize payment of the fee shown on the approval page.
+- **fl-ra-signature** (Registered Agent Signature (STOP)): I am the person named above to accept for the registered agent. I authorize the filing company to type my name as the agent's signature accepting the appointment. (Typing another person's name without authority is forgery under s.831.06 F.S.)
+- **fl-llc-signature** (Electronic Signature (STOP)): I am the authorized representative named above. I authorize the filing company to type my name as the electronic signature, I affirm the facts are true (false information is a third-degree felony under s.817.155 F.S.), and I acknowledge the annual report duty.
+- **fl-payment** (Tyler Payment Services hand-off): I understand a submitted Florida filing can't be changed, cancelled or refunded, everything in it becomes public record, and I authorize payment of the fee shown on the proof.
 
 Not covered yet:
 
@@ -208,7 +326,7 @@ Not covered yet:
 
 Articles of Incorporation for a Florida for-profit corporation, filed on Sunbiz. Walkthrough: [fl-sunbiz.md](./fl-sunbiz.md). Engine type `formation`, state `FL`.
 
-Fees: State fees $70 (filing $35 + registered agent $35). Optional: certificate of status $8.75, certified copy $8.75.
+Fees: State fees $70 (filing $35 + registered agent designation $35). Optional: certificate of status $8.75, certified copy $8.75.
 
 | Section | Field | Request path | Required | Walkthrough |
 |---|---|---|---|---|
@@ -240,8 +358,6 @@ Fees: State fees $70 (filing $35 + registered agent $35). Optional: certificate 
 | Registered agent | Agent address: state | `formation.registeredAgent.address.state` | when shown | RA Address, Suite, City, Zip |
 | Registered agent | Agent address: ZIP code | `formation.registeredAgent.address.zip` | when shown | RA Address, Suite, City, Zip |
 | Registered agent | Person who accepts for the agent (types the agent signature) | `intake.portal.flAgentSignerName` | when shown | Registered Agent Signature (STOP) |
-| Correspondence | Correspondence name | `intake.portal.flCorrespondenceName` | yes | Correspondence Name |
-| Correspondence | Correspondence email | `intake.portal.flCorrespondenceEmail` | yes | Correspondence E-mail / Re-enter |
 | Shares, purpose and incorporator | Number of authorized shares | `formation.stockShares` | yes | Corporate Stock Shares |
 | Shares, purpose and incorporator | Purpose is "any and all lawful business" | `intake.portal.flAnyLawfulBusiness` |  | Any and all lawful business checkbox |
 | Shares, purpose and incorporator | Specific purpose | `formation.purpose` | when shown | Purpose |
@@ -269,9 +385,9 @@ Fees: State fees $70 (filing $35 + registered agent $35). Optional: certificate 
 Authorizations the client grants (and confirms again on the approval page):
 
 - **fl-disclaimer** (Entry screen, disclaimer checkbox (STOP)): I authorize the filing company to accept the Sunbiz filing disclaimer for this filing.
-- **fl-ra-signature** (Registered Agent Signature (STOP)): The person named to accept for the registered agent authorizes the filing company to type their name as the agent's signature accepting the appointment. (Typing another person's name without authority is forgery under s.831.06 F.S.)
-- **fl-corp-signature** (Electronic Signature of Incorporator (STOP)): The incorporator named above authorizes the filing company to type their name as the incorporator's electronic signature, affirming the facts are true (s.817.155 F.S.).
-- **fl-payment** (Tyler Payment Services hand-off): I understand a submitted Florida filing can't be changed, cancelled or refunded, everything in it becomes public record, and I authorize payment of the fee shown on the approval page.
+- **fl-ra-signature** (Registered Agent Signature (STOP)): I am the person named above to accept for the registered agent. I authorize the filing company to type my name as the agent's signature accepting the appointment. (Typing another person's name without authority is forgery under s.831.06 F.S.)
+- **fl-corp-signature** (Electronic Signature of Incorporator (STOP)): I am the incorporator named above. I authorize the filing company to type my name as the incorporator's electronic signature, and I affirm the facts are true (s.817.155 F.S.).
+- **fl-payment** (Tyler Payment Services hand-off): I understand a submitted Florida filing can't be changed, cancelled or refunded, everything in it becomes public record, and I authorize payment of the fee shown on the proof.
 
 Not covered yet:
 
@@ -282,7 +398,7 @@ Not covered yet:
 
 Certificate of Limited Partnership (or LLLP) for Florida, filed on Sunbiz. Walkthrough: [fl-sunbiz.md](./fl-sunbiz.md). Engine type `formation`, state `FL`.
 
-Fees: State fees $1,000 (filing $965 + registered agent $35). Optional: certificate of status $8.75, certified copy $52.50.
+Fees: State fees $1,000 (filing $965 + registered agent designation $35). Optional: certificate of status $8.75, certified copy $52.50.
 
 | Section | Field | Request path | Required | Walkthrough |
 |---|---|---|---|---|
@@ -314,8 +430,6 @@ Fees: State fees $1,000 (filing $965 + registered agent $35). Optional: certific
 | Registered agent | Agent address: state | `formation.registeredAgent.address.state` | when shown | RA Address, Suite, City, Zip |
 | Registered agent | Agent address: ZIP code | `formation.registeredAgent.address.zip` | when shown | RA Address, Suite, City, Zip |
 | Registered agent | Person who accepts for the agent (types the agent signature) | `intake.portal.flAgentSignerName` | when shown | Registered Agent Signature (STOP) |
-| Correspondence | Correspondence name | `intake.portal.flCorrespondenceName` | yes | Correspondence Name |
-| Correspondence | Correspondence email | `intake.portal.flCorrespondenceEmail` | yes | Correspondence E-mail / Re-enter |
 | Partnership | Elect limited liability limited partnership (LLLP) status | `formation.isLLLP` |  | Limited liability limited partnership checkbox |
 | Partnership | Person's name (Last, First Initial) | `formation.generalPartners[].name` |  | General Partner blocks 1 to 6 |
 | Partnership | Or: entity serving as general partner | `formation.generalPartners[].entityName` |  | General Partner blocks 1 to 6 |
@@ -336,9 +450,9 @@ Fees: State fees $1,000 (filing $965 + registered agent $35). Optional: certific
 Authorizations the client grants (and confirms again on the approval page):
 
 - **fl-disclaimer** (Entry screen, disclaimer checkbox (STOP)): I authorize the filing company to accept the Sunbiz filing disclaimer for this filing.
-- **fl-ra-signature** (Registered Agent Signature (STOP)): The person named to accept for the registered agent authorizes the filing company to type their name as the agent's signature accepting the appointment. (Typing another person's name without authority is forgery under s.831.06 F.S.)
-- **fl-gp-signatures** (GP Signature per block (STOP)): Each general partner named above authorizes the filing company to type their name as their signature, affirming the facts are true (s.817.155 F.S.).
-- **fl-payment** (Tyler Payment Services hand-off): I understand a submitted Florida filing can't be changed, cancelled or refunded, everything in it becomes public record, and I authorize payment of the fee shown on the approval page.
+- **fl-ra-signature** (Registered Agent Signature (STOP)): I am the person named above to accept for the registered agent. I authorize the filing company to type my name as the agent's signature accepting the appointment. (Typing another person's name without authority is forgery under s.831.06 F.S.)
+- **fl-gp-signatures** (GP Signature per block (STOP)): I am a general partner named above, and each other general partner named above has authorized me to give this authorization for them. I authorize the filing company to type each general partner's name as their signature, and I affirm the facts are true (s.817.155 F.S.).
+- **fl-payment** (Tyler Payment Services hand-off): I understand a submitted Florida filing can't be changed, cancelled or refunded, everything in it becomes public record, and I authorize payment of the fee shown on the proof.
 
 Not covered yet:
 
@@ -346,18 +460,17 @@ Not covered yet:
 
 ## EIN for an existing LLC (`irs-ein`)
 
-Federal Employer Identification Number from the IRS EIN Assistant. Free. Walkthrough: [irs-ein-online.md](./irs-ein-online.md). Engine type `ein_only`, state `NY`.
+Employer Identification Number (EIN) from the IRS, applied for online. The IRS charges no fee. Walkthrough: [irs-ein-online.md](./irs-ein-online.md). Engine type `ein_only`, state `NY`.
 
-Fees: No fee. The IRS issues one EIN per responsible party per day, and the online service has set hours.
+Fees: No IRS fee. The IRS issues one EIN per responsible party per day, and the online service has set hours.
 
 | Section | Field | Request path | Required | Walkthrough |
 |---|---|---|---|---|
-| The LLC | State where the articles were filed | `state` | yes | Screen 5, State where articles are filed |
+| The LLC | State where the LLC was formed | `ein.formationState` | yes | Screen 5, State where articles are filed |
 | The LLC | Legal name, without the ending | `formation.name.baseName` | yes | Screen 5, Legal name |
 | The LLC | Ending | `formation.name.designator` | yes | Screen 5, Legal name |
 | The LLC | Trade name / DBA, if different (optional) | `ein.tradeName` |  | Screen 5, Trade name |
 | The LLC | Number of members | `ein.memberCount` | yes | Screen 2, How many members |
-| The LLC | State where the business is physically located | `ein.physicalState` | yes | Screen 2, physical state |
 | The LLC | County where the LLC is located | `ein.county` | yes | Screen 5, County |
 | The LLC | LLC start date (month and year) | `ein.startDate` | yes | Screen 5, LLC Start Date |
 | The LLC | Last month of the accounting year | `ein.closingMonth` |  | engine (closing month) |
@@ -371,8 +484,6 @@ Fees: No fee. The IRS issues one EIN per responsible party per day, and the onli
 | Responsible party | Physical location of the LLC: city | `ein.responsibleParty.address.city` | yes | Screen 4, Addresses |
 | Responsible party | Physical location of the LLC: state | `ein.responsibleParty.address.state` | yes | Screen 4, Addresses |
 | Responsible party | Physical location of the LLC: ZIP code | `ein.responsibleParty.address.zip` | yes | Screen 4, Addresses |
-| Responsible party | Who submits the application | `ein.applicantRole` | yes | Screen 3, Your role |
-| Responsible party | I have signed, or will sign, the third-party designee authorization | `intake.portal.ss4AuthorizationSigned` | when shown | Rules: third-party designee |
 | Responsible party | Mail should go to a different address | `intake.portal.mailElsewhere` |  | Screen 4, different mailing address |
 | Responsible party | Mailing address: street address | `ein.mailingAddress.street1` | when shown | Screen 4, mailing address (branch not walked) |
 | Responsible party | Mailing address: suite, unit or floor | `ein.mailingAddress.street2` |  | Screen 4, mailing address (branch not walked) |
@@ -399,7 +510,7 @@ Fees: No fee. The IRS issues one EIN per responsible party per day, and the onli
 
 Authorizations the client grants (and confirms again on the approval page):
 
-- **irs-designee** (Rules: third-party designee): As the responsible party, I authorize the filing company to apply for this EIN on the LLC's behalf with the details above.
+- **irs-owner-application** (Screen 3, Your role: one of the owners): I am the responsible party named above and one of the LLC's owners or members, or its managing member. I authorize the filing company to complete and submit this EIN application for me, as one of the owners, with the details above.
 
 Not covered yet:
 
@@ -410,7 +521,7 @@ Not covered yet:
 
 Unemployment insurance, withholding and wage reporting registration, through NY Business Express. Walkthrough: [ny-nys100-unemployment.md](./ny-nys100-unemployment.md). Engine type `payroll_registration`, state `NY`.
 
-Fees: No state fee. Average processing time shown: 15 days.
+Fees: No state fee. NY Business Express lists an average processing time of 15 days.
 
 | Section | Field | Request path | Required | Walkthrough |
 |---|---|---|---|---|
@@ -446,13 +557,20 @@ Fees: No state fee. Average processing time shown: 15 days.
 | Members and owners | Email | `payroll.owners[].email` |  | P11, Add A Member |
 | Members and owners | Ownership % | `payroll.owners[].percentOwnership` | yes | P11, Add A Member |
 | Members and owners | Profit distribution %, if different | `payroll.owners[].profitDistributionPercent` |  | P11, Add A Member |
-| Members and owners | Residential address: street address | `payroll.owners[].address.street1` | yes | P11, Add A Member |
+| Members and owners | Residential address: street address | `payroll.owners[].address.street1` | when shown | P11, Add A Member |
 | Members and owners | Residential address: suite, unit or floor | `payroll.owners[].address.street2` |  | P11, Add A Member |
-| Members and owners | Residential address: city | `payroll.owners[].address.city` | yes | P11, Add A Member |
-| Members and owners | Residential address: state | `payroll.owners[].address.state` | yes | P11, Add A Member |
-| Members and owners | Residential address: ZIP code | `payroll.owners[].address.zip` | yes | P11, Add A Member |
+| Members and owners | Residential address: city | `payroll.owners[].address.city` | when shown | P11, Add A Member |
+| Members and owners | Residential address: state | `payroll.owners[].address.state` | when shown | P11, Add A Member |
+| Members and owners | Residential address: ZIP code | `payroll.owners[].address.zip` | when shown | P11, Add A Member |
+| Members and owners | County of the residential address | `payroll.owners[].county` | when shown | P11, County (New York addresses) |
+| Members and owners | Residential address outside the US: street address | `payroll.owners[].foreignAddress.street1` | when shown | P11, non-US address |
+| Members and owners | Residential address outside the US: suite, unit or floor | `payroll.owners[].foreignAddress.street2` |  | P11, non-US address |
+| Members and owners | Residential address outside the US: city | `payroll.owners[].foreignAddress.city` | when shown | P11, non-US address |
+| Members and owners | Residential address outside the US: state or province | `payroll.owners[].foreignAddress.region` |  | P11, State/Province |
+| Members and owners | Residential address outside the US: postal code | `payroll.owners[].foreignAddress.postalCode` | when shown | P11, Postal Code |
+| Members and owners | Residential address outside the US: country | `payroll.owners[].foreignAddress.country` | when shown | P11, Country |
 | Liability | Existing NY employer registration number (7 digits; leave blank if new) | `payroll.stateAnswers.employerRegistrationNumber` |  | A2, Employer Registration Number |
-| Liability | Paid, or expect to pay, $300 or more in a calendar quarter? | `payroll.payingWages` | yes | A3 |
+| Liability | Paid, or expect to pay, $300 or more in wages in a calendar quarter? | `payroll.payingWages` | yes | A3 |
 | Liability | Date the business began in New York | `payroll.dateFirstOperations` | yes | A3, date you began business in NYS |
 | Liability | First quarter with $300 or more in wages | `payroll.uiLiabilityQuarter` | yes | A3, first calendar quarter |
 | Liability | Year of that quarter | `payroll.uiLiabilityYear` | yes | A3, Year |
@@ -470,6 +588,7 @@ Fees: No state fee. Average processing time shown: 15 days.
 | Liability | Acquired employer's address: city | `payroll.stateAnswers.acquiredAddress.city` | when shown | A4 |
 | Liability | Acquired employer's address: state | `payroll.stateAnswers.acquiredAddress.state` | when shown | A4 |
 | Liability | Acquired employer's address: ZIP code | `payroll.stateAnswers.acquiredAddress.zip` | when shown | A4 |
+| Liability | Acquired employer's county | `payroll.stateAnswers.acquiredCounty` | when shown | A4, County |
 | Liability | Acquired employer's registration number | `payroll.stateAnswers.acquiredRegistrationNumber` |  | A4 |
 | Liability | Acquired employer's FEIN | `payroll.stateAnswers.acquiredFein` |  | A4 |
 | Liability | Has your legal entity changed? | `payroll.stateAnswers.legalEntityChanged` | yes | A5, Change of Legal Entity |
@@ -482,14 +601,14 @@ Fees: No state fee. Average processing time shown: 15 days.
 | Where the state writes | Books and records address (US only): city | `payroll.booksRecordsAddress.city` | when shown | A8 |
 | Where the state writes | Books and records address (US only): state | `payroll.booksRecordsAddress.state` | when shown | A8 |
 | Where the state writes | Books and records address (US only): ZIP code | `payroll.booksRecordsAddress.zip` | when shown | A8 |
-| Where the state writes | Phone at the books and records location | `payroll.stateAnswers.booksPhone` | yes | A8, Phone Number |
+| Where the state writes | Phone at the books and records location | `payroll.stateAnswers.booksPhone` | when shown | A8, Phone Number |
 | Where the state writes | Send the Notice of Potential Charges (LO400) to the business address | `intake.portal.chargesSameAsBusiness` |  | A9, Notice of Potential Charges |
 | Where the state writes | Address for the Notice of Potential Charges: street address | `payroll.stateAnswers.chargesAddress.street1` | when shown | A9 |
 | Where the state writes | Address for the Notice of Potential Charges: suite, unit or floor | `payroll.stateAnswers.chargesAddress.street2` |  | A9 |
 | Where the state writes | Address for the Notice of Potential Charges: city | `payroll.stateAnswers.chargesAddress.city` | when shown | A9 |
 | Where the state writes | Address for the Notice of Potential Charges: state | `payroll.stateAnswers.chargesAddress.state` | when shown | A9 |
 | Where the state writes | Address for the Notice of Potential Charges: ZIP code | `payroll.stateAnswers.chargesAddress.zip` | when shown | A9 |
-| Where the state writes | Phone for the Notice of Potential Charges | `payroll.stateAnswers.chargesPhone` | yes | A9, Phone Number |
+| Where the state writes | Phone for the Notice of Potential Charges | `payroll.stateAnswers.chargesPhone` | when shown | A9, Phone Number |
 | Where the state writes | Send all unemployment insurance mail to an agent (C/O)? | `payroll.stateAnswers.mailToAgent` | yes | A10, Agent - C/O |
 | Where the state writes | Agent ATTN (C/O) | `payroll.stateAnswers.agentAttn` | when shown | A10 |
 | Where the state writes | Agent address: street address | `payroll.stateAnswers.agentAddress.street1` | when shown | A10 |
@@ -504,7 +623,13 @@ Fees: No state fee. Average processing time shown: 15 days.
 | Physical locations in New York | Address: ZIP code | `payroll.workLocations[].address.zip` | yes | A12, Physical Locations Details |
 | Physical locations in New York | Employees at this location | `payroll.workLocations[].employees` | yes | A12, Physical Locations Details |
 | Physical locations in New York | Principal activity | `payroll.workLocations[].activity` | yes | A12, Physical Locations Details |
-| Physical locations in New York | Details: type of establishment, main product or service, and its % of revenue (or products, raw materials and % of sales for manufacturing) | `payroll.stateAnswers.workLocations[].activityDetail` | yes | A12, Physical Locations Details |
+| Physical locations in New York | Type of establishment | `payroll.workLocations[].activityDetails.establishmentType` | when shown | A12, Type of Establishment |
+| Physical locations in New York | Principal product sold or service rendered | `payroll.workLocations[].activityDetails.productOrService` | when shown | A12, Principal Product Sold or Service Rendered |
+| Physical locations in New York | Percent of total revenue | `payroll.workLocations[].activityDetails.percentOfRevenue` | when shown | A12, Percent of Total Revenue |
+| Physical locations in New York | Principal products produced | `payroll.workLocations[].activityDetails.productsProduced` | when shown | A12, Principal Products Produced |
+| Physical locations in New York | Principal raw material used | `payroll.workLocations[].activityDetails.rawMaterials` | when shown | A12, Principal Raw Material Used |
+| Physical locations in New York | Percent of total sales value | `payroll.workLocations[].activityDetails.percentOfSalesValue` | when shown | A12, Percent of Total Sales Value |
+| Physical locations in New York | Details of the activity | `payroll.workLocations[].activityDetails.otherDetails` | when shown | A12, If other, furnish details |
 | Submitter | Submitter full name | `payroll.signer.name` | yes | A13, First / M.I. / Last Name |
 | Submitter | Official position | `payroll.signer.title` | yes | A13, Official Position |
 | Submitter | Submitter email | `payroll.signer.email` | yes | A13, Email |
@@ -517,13 +642,13 @@ Fees: No state fee. Average processing time shown: 15 days.
 
 Authorizations the client grants (and confirms again on the approval page):
 
-- **nys100-attest** (A13, I attest to the above (STOP)): The submitter named above affirms that the answers are true to the best of their knowledge and belief, and authorizes the filing company to tick "I attest to the above" and submit the registration for them.
+- **nys100-attest** (A13, I attest to the above (STOP)): I am the submitter named above. I affirm that the answers are true to the best of my knowledge and belief, and I authorize the filing company to check "I attest to the above" and submit the registration for me.
 
 Not covered yet:
 
-- Ready to Submit (the final screen) is not mapped yet.
+- Ready to Submit (the final screen) is not mapped yet, so the engine fills up to Submitter Information and stops there.
 - Corporation, sole-proprietor and partnership owner screens were not walked; only the LLC member path is confirmed.
-- The engine's NY payroll adapter does not yet enter the answers kept in payroll.stateAnswers.
+- Not walked, so the engine stops before typing anything: a business member, a mailing address apart from the physical address, more than one physical location, a secondary NAICS code.
 
 ## New Jersey business and employer registration (NJ-REG) (`nj-reg`)
 
@@ -634,13 +759,13 @@ Authorizations the client grants (and confirms again on the approval page):
 
 - **njreg-employment** (Screen 11, employment attestation (STOP)): I confirm the Yes/No employment answers above accurately reflect the business's employment activities, and I understand NJ payroll tax filings are required for any "Yes".
 - **njreg-tax** (Screen 11, taxable activities attestation (STOP)): I confirm the Yes/No answers above accurately reflect the business activities subject to New Jersey taxes.
-- **njreg-perjury** (Screen 11, perjury declaration and typed name (STOP)): The authorized representative named above declares under penalty of perjury that the information is true, correct and complete, and authorizes the filing company to tick the declaration and type their name as the signature.
+- **njreg-perjury** (Screen 11, perjury declaration and typed name (STOP)): I am the authorized representative named above. I declare under penalty of perjury that the information is true, correct and complete, and I authorize the filing company to check the declaration box and type my name as the signature.
 
 Not covered yet:
 
 - Only the business-entity registration option is covered; sole proprietorships and partnerships (option 2) and options 3 to 7 are not.
 - The confirmation screen after Complete Registration is not mapped.
-- The engine's NJ payroll adapter does not yet enter the answers kept in payroll.stateAnswers.
+- Not walked, so the engine stops before typing anything: a seasonal business, an acquired predecessor, an S corporation or QSSS election, cigarette and tobacco sales.
 
 ## New York Application for Authority (foreign corporation) (`ny-authority`)
 
@@ -663,6 +788,8 @@ Fees: State filing fee $225. Faster handling and copies cost extra.
 | Service of process | Address: state | `paperUpload.applicationForAuthority.processRecipient.address.state` | yes | DOS-1335-f FIFTH |
 | Service of process | Address: ZIP code | `paperUpload.applicationForAuthority.processRecipient.address.zip` | yes | DOS-1335-f FIFTH |
 | Business already done in New York | Has the corporation done business in New York before this application? | `paperUpload.applicationForAuthority.priorActivity` | yes | DOS-1335-f SIXTH |
+| Documents from the corporation | Certificate of Existence from the home state (PDF) | `paperUpload.applicationForAuthority.certificateOfExistenceDocumentId` | yes | DOS-1335-f instructions (Certificate of Existence) |
+| Documents from the corporation | NYS Tax Commission's consent (PDF) | `paperUpload.applicationForAuthority.taxConsentDocumentId` | when shown | DOS-1335-f SIXTH |
 | Signature | Signer's name | `paperUpload.applicationForAuthority.signer.name` | yes | DOS-1335-f Name of Signer |
 | Signature | Signer's title | `paperUpload.applicationForAuthority.signer.title` | yes | DOS-1335-f Title of Signer |
 | Signature | Signature | `paperUpload.signatureId` | yes | DOS-1335-f (Signature) |
@@ -683,17 +810,17 @@ Fees: State filing fee $225. Faster handling and copies cost extra.
 
 Authorizations the client grants (and confirms again on the approval page):
 
-- **ny-esub-signature** (Form signature line (STOP)): The signer named above authorizes the filing company to place their saved signature on this New York form, only once this filing is approved, and confirms what the form states is true.
-- **ny-esub-payment** (Screen L4: Payment Authorization (STOP)): I authorize the filing company to submit this form to the NY Department of State and pay the fees shown on the approval page.
+- **ny-esub-signature** (Form signature line (STOP)): I am the signer named above. I authorize the filing company to place my saved signature on this New York form, only once this filing is approved, and I confirm what the form states is true.
+- **ny-esub-payment** (Screen L4: Payment Authorization (STOP)): I authorize the filing company to submit this form to the NY Department of State and pay the fees shown on the proof.
 
 Not covered yet:
 
-- The Certificate of Existence from the home state is not collected here yet; the engine uploads only the form.
+- E-Submission's upload size limit hasn't been seen; the documents go in the same PDF after the form (10 MB at most each).
 - E-Submission's route for this form and its payment page are mapped from a recording; the engine runs it as a dry run only.
 
 ## New York Certificate of Assumed Name (DBA) (`ny-assumed-name`)
 
-Registers a name the business trades under other than its real name (form DOS-1338-f, GBL §130), uploaded through E-Submission. Walkthrough: [ny-dos-corporations.md](./ny-dos-corporations.md). Engine type `paper_upload`, state `NY`.
+Registers a name a corporation, LLC or limited partnership trades under other than its real name (form DOS-1338-f, GBL §130), uploaded through E-Submission. Sole proprietors and general partnerships file with their county clerk instead. Walkthrough: [ny-dos-corporations.md](./ny-dos-corporations.md). Engine type `paper_upload`, state `NY`.
 
 Fees: $25 for an LLC or LP. A corporation pays $25 plus $100 for each New York City county and $25 for each other county.
 
@@ -739,10 +866,168 @@ Fees: $25 for an LLC or LP. A corporation pays $25 plus $100 for each New York C
 
 Authorizations the client grants (and confirms again on the approval page):
 
-- **ny-esub-signature** (Form signature line (STOP)): The signer named above authorizes the filing company to place their saved signature on this New York form, only once this filing is approved, and confirms what the form states is true.
-- **ny-esub-payment** (Screen L4: Payment Authorization (STOP)): I authorize the filing company to submit this form to the NY Department of State and pay the fees shown on the approval page.
+- **ny-esub-signature** (Form signature line (STOP)): I am the signer named above. I authorize the filing company to place my saved signature on this New York form, only once this filing is approved, and I confirm what the form states is true.
+- **ny-esub-payment** (Screen L4: Payment Authorization (STOP)): I authorize the filing company to submit this form to the NY Department of State and pay the fees shown on the proof.
 
 Not covered yet:
 
 - E-Submission's entity search results and payment page are mapped from a recording; the engine runs it as a dry run only.
 - Some counties also require the certificate to be published or filed with the county clerk; that is not handled.
+
+## New York LLC dissolution (`ny-llc-dissolution`)
+
+Articles of Dissolution for a domestic LLC (Certificate of Dissolution-Cancellation, LLC Law §705), filed online with the NY Department of State. Walkthrough: [ny-dos-corporations.md](./ny-dos-corporations.md). Engine type `dissolution`, state `NY`.
+
+Fees: State filing fee $60.
+
+| Section | Field | Request path | Required | Walkthrough |
+|---|---|---|---|---|
+| The entity | NY DOS ID | `dissolution.entity.dosId` | yes | Screen G1: DOS ID and Entity Name Search, DOS ID |
+| The entity | Name, exactly as on the state's records | `dissolution.entity.name` | yes | Screen G1: DOS ID and Entity Name Search, Entity Name |
+| Reason for dissolution | The LLC is dissolving because of | `dissolution.reason` | yes | Screen G2, Reason for Dissolution |
+| Signer | Signer's full name | `dissolution.signer.name` | yes | Screen G2: Attestation and Signature, Signature |
+| Signer | Signing as | `dissolution.signer.capacity` | yes | Screen G2: Attestation and Signature, Capacity of Signer |
+| Filing contact | First name | `contact.firstName` | yes | engine contact (DOS sends receipts to the service company's distribution email) |
+| Filing contact | Last name | `contact.lastName` | yes | engine contact (DOS sends receipts to the service company's distribution email) |
+| Filing contact | Email | `contact.email` | yes | engine contact (DOS sends receipts to the service company's distribution email) |
+| Filing contact | Phone | `contact.phone` | yes | engine contact (DOS sends receipts to the service company's distribution email) |
+
+Authorizations the client grants (and confirms again on the approval page):
+
+- **ny-dissolution-signature** (Screen G2, Attestation and Signature (STOP)): The signer named above authorizes the filing company to check the certification box and type their name as their signature on these articles of dissolution: that they have read the statements, are authorized to sign, and that the statements are true and correct to the best of their knowledge and belief.
+- **ny-dissolution-payment** (Screen G4, Payment Authorization (STOP)): I authorize the filing company to authorize the total fee shown on the proof to be charged to the Department of State draw-down account this filing is paid from. The Department of State does not refund fees.
+
+Not covered yet:
+
+- The page after Submit (the filing receipt) is not mapped, so the filing runs as a dry run.
+- No copy is ordered: where the flow offers a plain copy was not visible in the walkthrough, only its $5 fee line. If the state adds one, the filing stops before payment.
+
+## New York LLC name change (`ny-llc-name-change`)
+
+Certificate of Amendment (name change only) for a domestic LLC (LLC Law §211), filed online with the NY Department of State. Walkthrough: [ny-dos-corporations.md](./ny-dos-corporations.md). Engine type `amendment`, state `NY`.
+
+Fees: State filing fee $60.
+
+| Section | Field | Request path | Required | Walkthrough |
+|---|---|---|---|---|
+| The entity | NY DOS ID | `amendment.entity.dosId` | yes | Screen H1: DOS ID and Entity Name Search, DOS ID |
+| The entity | Name, exactly as on the state's records | `amendment.entity.name` | yes | Screen H1: DOS ID and Entity Name Search, Entity Name |
+| New name | New name, without the ending | `amendment.newName.baseName` | yes | Screen H2, Entity Name (Check Name) |
+| New name | Ending | `amendment.newName.designator` | yes | Screen H2, Entity Name |
+| Signer | Signer's full name | `amendment.signer.name` | yes | Screen H3: Attestation and Signature, Signature |
+| Signer | Signing as | `amendment.signer.capacity` | yes | Screen H3: Attestation and Signature, Capacity of Signer |
+| Filing contact | First name | `contact.firstName` | yes | engine contact (DOS sends receipts to the service company's distribution email) |
+| Filing contact | Last name | `contact.lastName` | yes | engine contact (DOS sends receipts to the service company's distribution email) |
+| Filing contact | Email | `contact.email` | yes | engine contact (DOS sends receipts to the service company's distribution email) |
+| Filing contact | Phone | `contact.phone` | yes | engine contact (DOS sends receipts to the service company's distribution email) |
+
+Authorizations the client grants (and confirms again on the approval page):
+
+- **ny-amendment-signature** (Screen H3, Attestation and Signature (STOP)): The signer named above authorizes the filing company to check the certification box and type their name as their signature on this certificate of amendment: that they have read the statements, are authorized to sign, and that the statements are true and correct to the best of their knowledge and belief.
+- **ny-amendment-payment** (Screen H5, Payment Authorization (STOP)): I authorize the filing company to authorize the total fee shown on the proof to be charged to the Department of State draw-down account this filing is paid from.
+
+Not covered yet:
+
+- The page after Submit (the filing receipt) is not mapped, so the filing runs as a dry run.
+- No copy is ordered: where the flow offers a plain copy was not visible in the walkthrough, only its $5 fee line. If the state adds one, the filing stops before payment.
+- Only a domestic LLC's flow was walked; a corporation's name change isn't offered yet.
+
+## New York LLC certificate of change (`ny-llc-change`)
+
+Certificate of Change by the entity for a domestic LLC (LLC Law §211-A): county, service of process address or email, registered agent's name or address. Filed online with the NY Department of State. Walkthrough: [ny-dos-corporations.md](./ny-dos-corporations.md). Engine type `certificate_of_change`, state `NY`.
+
+Fees: State filing fee $30.
+
+| Section | Field | Request path | Required | Walkthrough |
+|---|---|---|---|---|
+| The entity | NY DOS ID | `certificateOfChange.entity.dosId` | yes | Screen I1: DOS ID and Entity Name Search, DOS ID |
+| The entity | Name, exactly as on the state's records | `certificateOfChange.entity.name` | yes | Screen I1: DOS ID and Entity Name Search, Entity Name |
+| What changes | The county where the LLC's office is | `intake.portal.nyChangeCounty` |  | Screen I2, Entity County Location (Edit) |
+| What changes | New county | `certificateOfChange.county` | when shown | Screen I3, County Change |
+| What changes | Who receives legal papers (service of process) and where | `intake.portal.nyChangeSop` |  | Screen I2, Service of Process Recipient and Mailing Address (Edit) |
+| What changes | Name | `certificateOfChange.serviceOfProcess.name` | when shown | Screen I3, Service of Process Name and Address Change |
+| What changes | Mailing address: street address | `certificateOfChange.serviceOfProcess.address.street1` | when shown | Screen I3, Service of Process Name and Address Change |
+| What changes | Mailing address: suite, unit or floor | `certificateOfChange.serviceOfProcess.address.street2` |  | Screen I3, Service of Process Name and Address Change |
+| What changes | Mailing address: city | `certificateOfChange.serviceOfProcess.address.city` | when shown | Screen I3, Service of Process Name and Address Change |
+| What changes | Mailing address: state | `certificateOfChange.serviceOfProcess.address.state` | when shown | Screen I3, Service of Process Name and Address Change |
+| What changes | Mailing address: ZIP code | `certificateOfChange.serviceOfProcess.address.zip` | when shown | Screen I3, Service of Process Name and Address Change |
+| What changes | The email for service-of-process notices | `intake.portal.nyChangeSopEmail` |  | Screen I2, Service of Process Email Address (Add/Edit) |
+| What changes | New email address | `certificateOfChange.serviceOfProcessEmail` | when shown | Screen I3, Service of Process Email Address Change |
+| What changes | The registered agent's name | `intake.portal.nyChangeAgentName` |  | Screen I2, Name of Registered Agent (Edit) |
+| What changes | New registered agent name | `certificateOfChange.registeredAgentName` | when shown | Screen I3, Change Registered Agent Name |
+| What changes | The registered agent's address | `intake.portal.nyChangeAgentAddress` |  | Screen I2, Registered Agent Address (Edit) |
+| What changes | New agent address: street address | `certificateOfChange.registeredAgentAddress.street1` | when shown | Screen I3, Change Registered Agent Address (State is NY) |
+| What changes | New agent address: suite, unit or floor | `certificateOfChange.registeredAgentAddress.street2` |  | Screen I3, Change Registered Agent Address (State is NY) |
+| What changes | New agent address: city | `certificateOfChange.registeredAgentAddress.city` | when shown | Screen I3, Change Registered Agent Address (State is NY) |
+| What changes | New agent address: state | `certificateOfChange.registeredAgentAddress.state` | when shown | Screen I3, Change Registered Agent Address (State is NY) |
+| What changes | New agent address: ZIP code | `certificateOfChange.registeredAgentAddress.zip` | when shown | Screen I3, Change Registered Agent Address (State is NY) |
+| Signer | Signer's full name | `certificateOfChange.signer.name` | yes | Screen I3: Attestation and Signature, Signature |
+| Signer | Signing as | `certificateOfChange.signer.capacity` | yes | Screen I3: Attestation and Signature, Capacity of Signer |
+| Filing contact | First name | `contact.firstName` | yes | engine contact (DOS sends receipts to the service company's distribution email) |
+| Filing contact | Last name | `contact.lastName` | yes | engine contact (DOS sends receipts to the service company's distribution email) |
+| Filing contact | Email | `contact.email` | yes | engine contact (DOS sends receipts to the service company's distribution email) |
+| Filing contact | Phone | `contact.phone` | yes | engine contact (DOS sends receipts to the service company's distribution email) |
+
+Authorizations the client grants (and confirms again on the approval page):
+
+- **ny-change-signature** (Screen I3, Attestation and Signature (STOP)): The signer named above authorizes the filing company to check the certification box and type their name as their signature on this certificate of change: that they have read the statements, are authorized to sign, and that the statements are true and correct to the best of their knowledge and belief.
+- **ny-change-payment** (Screen I5, Payment Authorization (STOP)): I authorize the filing company to authorize the total fee shown on the proof to be charged to the Department of State draw-down account this filing is paid from.
+
+Not covered yet:
+
+- The page after Submit (the filing receipt) is not mapped, so the filing runs as a dry run.
+- No copy is ordered: where the flow offers a plain copy was not visible in the walkthrough, only its $5 fee line. If the state adds one, the filing stops before payment.
+- Designating a first registered agent and revoking one are on the state's list but their sections weren't in the walkthrough, so they aren't offered.
+
+## New York copies of filed documents (`ny-copies`)
+
+Plain copies of documents on an entity's filing history, ordered online from the NY Department of State. Walkthrough: [ny-dos-corporations.md](./ny-dos-corporations.md). Engine type `copy_request`, state `NY`.
+
+Fees: $5 per document (plain copy).
+
+| Section | Field | Request path | Required | Walkthrough |
+|---|---|---|---|---|
+| The entity | NY DOS ID | `copyRequest.entity.dosId` | yes | Screen J1: Search Entity, DOS ID |
+| The entity | Name, as on the state's records (optional) | `copyRequest.entity.name` |  | Screen J1: Search Entity, Entity Name |
+| Documents | Filing number | `copyRequest.documents[].filingNumber` |  | Screen J2, Filing Number |
+| Documents | Or: description (e.g. Articles of Organization) | `copyRequest.documents[].description` |  | Screen J2, Description |
+| Documents | Filing date (optional) | `copyRequest.documents[].filingDate` |  | Screen J2, Filing Date |
+| Filing contact | First name | `contact.firstName` | yes | engine contact (DOS sends the copies to the service company's distribution email) |
+| Filing contact | Last name | `contact.lastName` | yes | engine contact (DOS sends the copies to the service company's distribution email) |
+| Filing contact | Email | `contact.email` | yes | engine contact (DOS sends the copies to the service company's distribution email) |
+| Filing contact | Phone | `contact.phone` | yes | engine contact (DOS sends the copies to the service company's distribution email) |
+
+Authorizations the client grants (and confirms again on the approval page):
+
+- **ny-copies-payment** (Screen J4, Payment Authorization (STOP)): I authorize the filing company to authorize the copy fees shown on the proof to be charged to the Department of State draw-down account this filing is paid from.
+
+Not covered yet:
+
+- Certified copies aren't offered: where the copy type is chosen wasn't visible in the walkthrough.
+- If the state's search lists several entities to pick from, how one is picked isn't mapped; the filing stops there.
+- The page after Submit is not mapped, so the request runs as a dry run.
+
+## New York certificate of status (`ny-status`)
+
+Certificate of Status (short form, or long form with every document filed), ordered online from the NY Department of State. Walkthrough: [ny-dos-corporations.md](./ny-dos-corporations.md). Engine type `standing_certificate`, state `NY`.
+
+Fees: $25 for either form.
+
+| Section | Field | Request path | Required | Walkthrough |
+|---|---|---|---|---|
+| The entity | NY DOS ID | `standing.dosId` | yes | Screen K, DOS ID |
+| The entity | Name, as on the state's records | `standing.entityName` | yes | Screen K, Entity Name |
+| Certificate | Which certificate | `standing.form` | yes | Screen K, Short Form / Long Form |
+| Filing contact | First name | `contact.firstName` | yes | engine contact (DOS sends the certificate to the service company's distribution email) |
+| Filing contact | Last name | `contact.lastName` | yes | engine contact (DOS sends the certificate to the service company's distribution email) |
+| Filing contact | Email | `contact.email` | yes | engine contact (DOS sends the certificate to the service company's distribution email) |
+| Filing contact | Phone | `contact.phone` | yes | engine contact (DOS sends the certificate to the service company's distribution email) |
+
+Authorizations the client grants (and confirms again on the approval page):
+
+- **ny-status-payment** (Screen K, Payment Authorization (STOP)): I authorize the filing company to authorize the fee shown on the proof to be charged to the Department of State draw-down account this filing is paid from.
+
+Not covered yet:
+
+- If the state's search lists several entities to pick from, how one is picked isn't mapped; the filing stops there.
+- The page after Submit is not mapped, so the request runs as a dry run.

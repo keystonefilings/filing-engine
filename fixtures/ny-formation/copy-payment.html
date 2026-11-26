@@ -1,0 +1,4 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><script src="_records.js"></script><title>Copy Request: Payment (replica)</title></head><body><script>NYR.chrome()</script>
+<p>Service Description: Copy Request</p>
+<script>document.write('<p>' + NYR.entity().name + ', DOS ID ' + NYR.get("dosid", "") + ', ' + NYR.get("copies", 0) + ' document(s)</p>'); NYR.payment([["Plain Copy Fee", 5 * NYR.get("copies", 0)]], "drawdown account", { totalLabel: "Total Fee" });</script>
+</body></html>

@@ -28,7 +28,8 @@ describe("Notifier", () => {
   it("sends the approval link to the client", async () => {
     const msgs = await notifier().notify(ev("filing.awaiting_approval", { approvalLink: "http://api.test/approve/tok", recipients: [{ channel: "email", address: "client@x.test", name: "Client" }] }), filing());
     expect(msgs).toHaveLength(1);
-    expect(msgs[0]).toMatchObject({ audience: "client", address: "client@x.test", link: "http://api.test/approve/tok", status: "sent" });
+    // No provider is set up in this test, so the message is recorded as not sent, never as sent.
+    expect(msgs[0]).toMatchObject({ audience: "client", address: "client@x.test", link: "http://api.test/approve/tok", status: "skipped", error: "not sent: no email provider is set up" });
   });
 
   it("routes name options to the filing-company admin, never the client", async () => {

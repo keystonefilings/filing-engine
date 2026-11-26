@@ -40,11 +40,13 @@ describe("validation", () => {
     );
     expect(issues.some((i) => i.severity === "warning" && i.message.includes("bank"))).toBe(true);
   });
-  it("in-run EIN requires responsible party and SS-4 authorization", () => {
+  it("in-run EIN requires a responsible party; only the designee route needs the SS-4 authorization", () => {
     const req = FilingRequest.parse(njFormationRequest({ ein: { mode: "in_run", closingMonth: 12 } as never }));
     const paths = validateFiling(req).map((i) => i.path);
     expect(paths).toContain("ein.responsibleParty");
-    expect(paths).toContain("ein.ss4AuthorizationArtifactId");
+    expect(paths).not.toContain("ein.ss4AuthorizationArtifactId"); // decision 6: an owner applies
+    const designee = FilingRequest.parse(njFormationRequest({ ein: { mode: "in_run", closingMonth: 12, applicantRole: "third_party_designee" } as never }));
+    expect(validateFiling(designee).map((i) => i.path)).toContain("ein.ss4AuthorizationArtifactId");
   });
 });
 

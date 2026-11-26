@@ -9,7 +9,7 @@ import { ADDRESS_PARTS, addressBlocks, planSections, type Block } from "@/lib/in
 import { SignaturePad } from "./SignaturePad";
 
 export type IntakeResult =
-  | { ok: true; redirectTo?: string; message?: string }
+  | { ok: true; redirectTo?: string; message?: string; title?: string }
   | { ok: false; error?: string; issues: { path: string; message: string }[] };
 
 interface Props {
@@ -23,11 +23,23 @@ interface Props {
   signatures?: { id: string; signerName: string; createdAt: string }[];
   /** The consent a signer accepts when saving a new signature (from the engine). */
   consentText?: string;
+  /** Answers filled in from the start (form path -> value), e.g. the firm's own contact details. */
+  prefill?: Record<string, string>;
+  /** Who "the filing company" in the authorizations is, e.g. "Best Accounting, filing through CoFile". */
+  filerName?: string;
+  /** On a client's own page (a public firm page or a client link), the firm's name; unset on the firm's portal. */
+  forClient?: string;
 }
 
-function initialState(kind: FilingKind): { values: Raw; groups: Record<string, number[]>; next: number } {
+/**
+ * Starting values. A prefill names repeated items by position ("formation.members.1.name"); items
+ * get form ids from one counter shared by every group, so positions are mapped to ids here, and a
+ * group gets as many items as the prefill has.
+ */
+function initialState(kind: FilingKind, prefill: Record<string, string> = {}): { values: Raw; groups: Record<string, number[]>; next: number; prefill: Record<string, string> } {
   const values: Raw = {};
   const groups: Record<string, number[]> = {};
+  const mapped: Record<string, string> = { ...prefill };
   let next = 0;
   const defaults = (fields: (Field | Note)[], prefix: string) => {
     for (const f of fields) if (f.kind === "field" && f.defaultValue !== undefined) values[f.path ? `${prefix}.${f.path}` : prefix] = f.defaultValue;
@@ -35,17 +47,28 @@ function initialState(kind: FilingKind): { values: Raw; groups: Record<string, n
   for (const s of kind.sections) for (const it of s.items) {
     if (it.kind === "field" && it.defaultValue !== undefined) values[it.path] = it.defaultValue;
     if (it.kind === "group") {
-      const n = Math.max(it.min, it.min === 0 ? 0 : 1);
+      const re = new RegExp(`^${it.path.replace(/\./g, "\\.")}\\.(\\d+)(\\..*)?$`);
+      const positions = [...new Set(Object.keys(prefill).map((k) => re.exec(k)?.[1]).filter((x): x is string => x !== undefined).map(Number))].sort((a, b) => a - b).slice(0, it.max);
+      const n = Math.max(it.min, it.min === 0 ? 0 : 1, positions.length);
       groups[it.path] = Array.from({ length: n }, () => next++);
       for (const i of groups[it.path]) defaults(it.fields, `${it.path}.${i}`);
+      for (const k of Object.keys(prefill)) {
+        const m = re.exec(k);
+        if (!m) continue;
+        delete mapped[k];
+        const at = positions.indexOf(Number(m[1]));
+        if (at >= 0) mapped[`${it.path}.${groups[it.path][at]}${m[2] ?? ""}`] = prefill[k]!;
+      }
     }
   }
-  return { values, groups, next };
+  for (const [k, v] of Object.entries(mapped)) if (v) values[k] = v;
+  return { values, groups, next, prefill: mapped };
 }
 
-export function IntakeForm({ kind, nonce, action, submitLabel = "Submit for approval", footnote, signatures = [], consentText }: Props) {
+export function IntakeForm({ kind, nonce, action, submitLabel = "Send the proof to my client", footnote, signatures = [], consentText, prefill, filerName, forClient }: Props) {
   const router = useRouter();
-  const init = useMemo(() => initialState(kind), [kind]);
+  const init = useMemo(() => initialState(kind, prefill), [kind, prefill]);
+  const startValues = init.prefill;
   const [values, setValues] = useState<Raw>(init.values);
   const [groups, setGroups] = useState(init.groups);
   const [counter, setCounter] = useState(init.next);
@@ -79,6 +102,40 @@ export function IntakeForm({ kind, nonce, action, submitLabel = "Submit for appr
       <div className="same-as" key={`same-${to}`}>
         <span className="small muted">Same as</span>
         {earlier.map((a) => <button key={a.prefix} type="button" className="btn small" onClick={() => copyAddress(a.prefix, to)}>{a.label}</button>)}
+      </div>
+    );
+  };
+
+  /**
+   * V24: a person (a name with an address next to it: organizer, service of process, responsible
+   * party) can be someone already entered, a member included: their name and address are copied.
+   */
+  const personPrefixes = useMemo(() => new Set(addresses.map((a) => a.prefix.replace(/\.address$/, ""))), [addresses]);
+  const copyPerson = (from: string, to: string) => {
+    const form = formRef.current;
+    if (!form) return;
+    const next: Raw = {};
+    for (const part of ["name", ...ADDRESS_PARTS.map((p) => `address.${p}`)]) {
+      const src = (form.elements.namedItem(`${from}.${part}`) as HTMLInputElement | null)?.value ?? values[`${from}.${part}`];
+      const dst = form.elements.namedItem(`${to}.${part}`) as HTMLInputElement | HTMLSelectElement | null;
+      if (src === undefined || !dst) continue;
+      dst.value = src;
+      next[`${to}.${part}`] = src;
+    }
+    setValues((p) => ({ ...p, ...next }));
+  };
+  const samePerson = (namePath: string) => {
+    const to = namePath.replace(/\.name$/, "");
+    const people = Object.entries(values)
+      .filter(([k, v]) => k.endsWith(".name") && k !== namePath && typeof v === "string" && v.trim() && !/^the (llc|corporation)$/i.test(v.trim()))
+      .map(([k, v]) => ({ prefix: k.replace(/\.name$/, ""), name: String(v).trim() }))
+      .filter((p) => !p.prefix.startsWith("contact") && !p.prefix.startsWith("formation.name"));
+    const unique = people.filter((p, i) => people.findIndex((o) => o.name === p.name) === i).slice(0, 6);
+    if (!unique.length) return null;
+    return (
+      <div className="same-as" key={`same-person-${to}`}>
+        <span className="small muted">Same person as</span>
+        {unique.map((p) => <button key={p.prefix} type="button" className="btn small" onClick={() => copyPerson(p.prefix, to)}>{p.name}</button>)}
       </div>
     );
   };
@@ -120,25 +177,25 @@ export function IntakeForm({ kind, nonce, action, submitLabel = "Submit for appr
   const removeItem = (g: Group, id: number) => setGroups((p) => ({ ...p, [g.path]: (p[g.path] ?? []).filter((x) => x !== id) }));
 
   if (result?.ok && !result.redirectTo) {
-    return <div className="notice ok"><strong>Thank you.</strong> {result.message}</div>;
+    return <div className="notice ok"><strong>{result.title ?? "Thank you."}</strong> {result.message}</div>;
   }
 
   const renderField = (f: Field, name: string, shown: boolean) => {
     const id = `f-${name.replace(/[^a-zA-Z0-9]/g, "-")}`;
     const value = values[name] ?? "";
     const issue = fieldIssues.get(name);
-    const common = { id, name, disabled: !shown, "aria-invalid": issue ? true : undefined, "aria-describedby": f.help || issue ? `${id}-help` : undefined };
+    const common = { id, name, disabled: !shown, "aria-required": f.required === true ? true : undefined, "aria-invalid": issue ? true : undefined, "aria-describedby": f.help || issue ? `${id}-help` : undefined };
     const label = <>{f.label}{f.required === true ? <span className="req" aria-hidden>*</span> : null}</>;
     let control: React.ReactNode;
     switch (f.type) {
       case "textarea":
-        control = <textarea {...common} defaultValue={f.defaultValue} maxLength={f.maxLength} />;
+        control = <textarea {...common} defaultValue={startValues[name] ?? f.defaultValue} maxLength={f.maxLength} />;
         break;
       case "select":
       case "usState": {
         const options = f.type === "usState" ? US_STATES.map((s) => ({ value: s, label: s })) : f.options ?? [];
         control = (
-          <select {...common} defaultValue={f.defaultValue ?? ""}>
+          <select {...common} defaultValue={startValues[name] ?? f.defaultValue ?? ""}>
             {f.defaultValue === undefined || f.type === "usState" ? <option value="">Choose…</option> : null}
             {options.map((o) => <option key={o.value} value={o.value}>{o.label || "(none)"}</option>)}
           </select>
@@ -149,12 +206,12 @@ export function IntakeForm({ kind, nonce, action, submitLabel = "Submit for appr
       case "yesno": {
         const options = f.type === "yesno" ? [{ value: "yes", label: "Yes" }, { value: "no", label: "No" }] : f.options ?? [];
         return (
-          <div className="field" key={name} hidden={!shown} role="radiogroup" aria-labelledby={`${id}-label`}>
+          <div className="field" key={name} hidden={!shown} role="radiogroup" aria-required={f.required === true ? true : undefined} aria-labelledby={`${id}-label`}>
             <span className="label" id={`${id}-label`}>{label}</span>
             <div className={`choices${f.type === "yesno" ? " inline" : ""}`}>
               {options.map((o) => (
                 <label key={o.value} className="choice">
-                  <input type="radio" name={name} value={o.value} disabled={!shown} defaultChecked={f.defaultValue === o.value} />
+                  <input type="radio" name={name} value={o.value} disabled={!shown} defaultChecked={(startValues[name] ?? f.defaultValue) === o.value} />
                   <span>{o.label}</span>
                 </label>
               ))}
@@ -176,11 +233,11 @@ export function IntakeForm({ kind, nonce, action, submitLabel = "Submit for appr
             </select>
             <p className="help" id={`${id}-help`}>
               {issue ? <span style={{ color: "var(--bad)" }}>{issue}. </span> : null}
-              It goes on the state form only after this filing is approved, never on a preview. It must be the signer named above.
+              It goes on the state form only after this filing is approved, never on a preview. {forClient ? "Only the signer named above may draw it." : "Only the signer named above may draw it; if they aren't with you, send them a client link so they sign it themselves."}
             </p>
             {choice === NEW_SIGNATURE.choice && shown ? (
               <div style={{ marginTop: 10 }}>
-                <SignaturePad name={NEW_SIGNATURE.image} label={signer ? `${signer}, sign here` : "Signer, sign here"} />
+                <SignaturePad name={NEW_SIGNATURE.image} label={signer ? `Signature pad: ${signer} draws their signature here with a mouse, finger or stylus.` : "Signature pad: the signer draws their signature here with a mouse, finger or stylus."} />
                 <label className="choice consent" style={{ marginTop: 10 }}>
                   <input type="checkbox" name={NEW_SIGNATURE.consent} />
                   <span>{consentText ?? "I adopt this image as my signature for this company's New York filings, used only on approved filings."}</span>
@@ -190,10 +247,21 @@ export function IntakeForm({ kind, nonce, action, submitLabel = "Submit for appr
           </div>
         );
       }
+      case "pdf":
+        return (
+          <div className="field" key={name} hidden={!shown}>
+            <label htmlFor={id}>{label}</label>
+            <input {...common} aria-describedby={`${id}-help`} type="file" accept="application/pdf,.pdf" />
+            <p className="help" id={`${id}-help`}>
+              {issue ? <span style={{ color: "var(--bad)" }}>{issue}. </span> : null}
+              {f.help ? `${f.help} ` : ""}A PDF of 10 MB or less, without a password.
+            </p>
+          </div>
+        );
       case "checkbox":
         return (
           <div className="field" key={name} hidden={!shown}>
-            <label className="choice"><input type="checkbox" {...common} defaultChecked={f.defaultValue === "on"} /><span>{label}</span></label>
+            <label className="choice"><input type="checkbox" {...common} defaultChecked={(startValues[name] ?? f.defaultValue) === "on"} /><span>{label}</span></label>
             {f.help || issue ? <p className="help" id={`${id}-help`}>{issue ? <span style={{ color: "var(--bad)" }}>{issue}. </span> : null}{f.help}</p> : null}
           </div>
         );
@@ -201,7 +269,7 @@ export function IntakeForm({ kind, nonce, action, submitLabel = "Submit for appr
         const type = f.type === "email" ? "email" : f.type === "tel" ? "tel" : f.type === "number" ? "number" : f.type === "date" ? "date" : f.type === "month" ? "month" : "text";
         const numeric = f.type === "zip" || f.type === "ssn" || f.type === "fein";
         control = (
-          <input {...common} type={type} defaultValue={f.defaultValue} maxLength={f.maxLength} min={f.min} max={f.max} step={f.integer ? 1 : undefined} placeholder={f.placeholder}
+          <input {...common} type={type} defaultValue={startValues[name] ?? f.defaultValue} maxLength={f.maxLength} min={f.min} max={f.max} step={f.integer ? 1 : undefined} placeholder={f.placeholder}
             inputMode={numeric ? "numeric" : undefined} autoComplete={f.type === "ssn" || f.type === "fein" ? "off" : undefined}
             spellCheck={f.type === "ssn" ? false : undefined} />
         );
@@ -250,10 +318,15 @@ export function IntakeForm({ kind, nonce, action, submitLabel = "Submit for appr
   const renderItem = (it: Item, k: number) => {
     if (it.kind === "note") return <p key={k} className="notice" hidden={!vis.holds(it.showIf)}>{it.text}</p>;
     if (it.kind === "group") return renderGroup(it);
-    const field = renderField(it, it.path, vis.top.has(it.path));
-    if (it.path.endsWith(".street1") && vis.top.has(it.path)) {
-      const copy = sameAs(it.path);
-      if (copy) return <div key={it.path}>{copy}{field}</div>;
+    const shown = vis.top.has(it.path);
+    const field = renderField(it, it.path, shown);
+    const personName = it.path.endsWith(".name") && personPrefixes.has(it.path.replace(/\.name$/, ""));
+    const street = it.path.endsWith(".street1");
+    // Always the same wrapper, with or without the "Same as" buttons: if the wrapper came and went
+    // as names were typed elsewhere, React would remount the input and drop what was typed in it.
+    if (personName || street) {
+      const copy = shown ? (personName ? samePerson(it.path) : sameAs(it.path)) : null;
+      return <div key={it.path} hidden={!shown}>{copy}{field}</div>;
     }
     return field;
   };
@@ -280,6 +353,7 @@ export function IntakeForm({ kind, nonce, action, submitLabel = "Submit for appr
           {result.issues.length ? <ul className="issues">{result.issues.slice(0, 20).map((i, n) => <li key={n}>{i.message}</li>)}</ul> : null}
         </div>
       ) : null}
+      <p className="help" style={{ marginTop: 0 }}>Fields marked * are required.</p>
       {plan.map(({ section: s, folded, main, more }) => {
         // A folded section opens by itself when it already holds an answer or a problem.
         const touched = s.items.some((it) => Object.keys(values).some((k) => "path" in it && it.path && k.startsWith(it.path) && values[k] && values[k] !== (it.kind === "field" ? it.defaultValue : undefined)))
@@ -314,7 +388,9 @@ export function IntakeForm({ kind, nonce, action, submitLabel = "Submit for appr
       })}
       <fieldset>
         <legend>Authorizations</legend>
-        <p className="help" style={{ marginTop: 0 }}>The state form asks for these. Each one is shown again on the approval page before anything is filed.</p>
+        <p className="help" style={{ marginTop: 0 }}>{forClient
+          ? <>The state form asks for these. Check a box only if the statement is true for you; if a statement names someone else, ask {forClient} before you send this.</>
+          : <>The state form asks for these. Each statement is made by the person who checks its box, so a statement that begins &quot;I am&quot; should be checked by the person named; if that&apos;s your client, send them a client link instead.</>}{filerName ? <> Here, &quot;the filing company&quot; means {filerName}.</> : null} Each one is shown again on the proof before anything is filed.</p>
         {kind.authorizations.map((a) => (
           <label key={a.id} className="auth">
             <input type="checkbox" name={`${AUTH_PREFIX}${a.id}`} />
@@ -327,6 +403,7 @@ export function IntakeForm({ kind, nonce, action, submitLabel = "Submit for appr
         <button className="btn primary" type="submit" disabled={pending}>{pending ? "Sending…" : submitLabel}</button>
         {kind.feeNote ? <span className="small muted">{kind.feeNote}</span> : null}
       </div>
+      {kind.feeAside ? <p className="small muted">{kind.feeAside}</p> : null}
     </form>
   );
 }

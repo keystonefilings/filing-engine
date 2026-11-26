@@ -45,7 +45,7 @@ make sure it ends in `?sslmode=require`. The engine creates its tables on first 
 
 ## 3. Set the secrets
 
-All six are required: the API and the worker refuse to start, listing everything missing, until
+All seven are required: the API and the worker refuse to start, listing everything missing, until
 they are set. `--stage` holds them for the first deploy.
 
 Two values you paste. `read -s` asks without showing the value or saving it in shell history:
@@ -66,7 +66,15 @@ Two values only the machines need, generated in place and never shown:
 fly secrets set --stage --app keystone-filing-engine APPROVAL_SIGNING_SECRET="$(openssl rand -hex 32)" WORKER_WAKE_TOKEN="$(openssl rand -hex 32)"
 ```
 
-Two keys people use: the caller key (keystonefilings.com calls the engine with it) and the
+`DATA_ENCRYPTION_KEY` seals Social Security numbers in the database. Without it they can't be read
+back, so it goes into a file only you can read, then into the password manager (delete the file
+after). Never change it once filings exist: rows sealed with one key can't be opened with another.
+
+```bash
+(umask 077 && openssl rand -hex 32 > ~/fe-data-key) && fly secrets set --stage --app keystone-filing-engine DATA_ENCRYPTION_KEY="$(cat ~/fe-data-key)"
+```
+
+Two keys people use: the caller key (cofile.app calls the engine with it) and the
 platform staff key (tenant settings and drift reviews). Each is generated into a file only you
 can read:
 
@@ -80,7 +88,7 @@ fly secrets set --stage --app keystone-filing-engine API_KEYS="$(cat ~/fe-api-ke
 
 The text after the staff key's colon is the name recorded on drift-review decisions; use who
 holds the key. Keep both files until step 6, then move the keys to a password manager (and the
-caller key to wherever keystonefilings.com keeps its secrets) and delete the files.
+caller key to wherever the cofile.app web app keeps its secrets) and delete the files.
 
 **On Windows PowerShell 5.1** (no `openssl`; flyctl as `.\flyctl` in its folder), one block
 generates and stages the four generated secrets, saving the caller and staff keys in the home
@@ -90,12 +98,152 @@ folder encrypted with Windows DPAPI (readable only by the same Windows account o
 & {
   $rng = [Security.Cryptography.RandomNumberGenerator]::Create()
   function New-Hex { $b = New-Object byte[] 32; $rng.GetBytes($b); -join ($b | ForEach-Object { $_.ToString('x2') }) }
-  $api = New-Hex; $staff = New-Hex
+  $api = New-Hex; $staff = New-Hex; $data = New-Hex
   ConvertTo-SecureString $api -AsPlainText -Force | ConvertFrom-SecureString | Set-Content "$HOME\fe-api-key.dpapi"
   ConvertTo-SecureString $staff -AsPlainText -Force | ConvertFrom-SecureString | Set-Content "$HOME\fe-staff-key.dpapi"
-  .\flyctl secrets set --stage --app keystone-filing-engine "API_KEYS=$($api):keystone" "STAFF_API_KEYS=$($staff):ops@keystone" "APPROVAL_SIGNING_SECRET=$(New-Hex)" "WORKER_WAKE_TOKEN=$(New-Hex)"
-  if ($LASTEXITCODE -eq 0) { 'Done: 4 secrets staged. Keys saved encrypted in your home folder.' } else { 'flyctl failed: run this block again.' }
+  ConvertTo-SecureString $data -AsPlainText -Force | ConvertFrom-SecureString | Set-Content "$HOME\fe-data-key.dpapi"
+  .\flyctl secrets set --stage --app keystone-filing-engine "API_KEYS=$($api):keystone" "STAFF_API_KEYS=$($staff):ops@keystone" "APPROVAL_SIGNING_SECRET=$(New-Hex)" "WORKER_WAKE_TOKEN=$(New-Hex)" "DATA_ENCRYPTION_KEY=$($data)"
+  if ($LASTEXITCODE -eq 0) { 'Done: 5 secrets staged. Keys saved encrypted in your home folder.' } else { 'flyctl failed: run this block again.' }
 }
+```
+
+**Email (Resend).** Not required to start, but without it nothing is emailed: approval links,
+password resets and notices are only recorded on each filing. In Resend, add the sending
+domain (`cofile.app`), add the DNS records it shows (SPF and DKIM) and wait
+until it says Verified. Then create an API key with sending access only, and:
+
+```bash
+read -s RESEND_API_KEY && fly secrets set --stage --app keystone-filing-engine RESEND_API_KEY="$RESEND_API_KEY"
+```
+
+```bash
+fly secrets set --stage --app keystone-filing-engine EMAIL_FROM="CoFile <filings@cofile.app>" WEB_BASE_URL="https://cofile.app"
+```
+
+`EMAIL_FROM` must be an address on the verified domain, and `WEB_BASE_URL` is where the web
+front end runs: password-reset and log-in links in emails point there.
+
+**Sign in with Google.** Set up on Nov 26 in Google Cloud project `cofile-515904` (the cofile
+workspace): OAuth client "CoFile Web" (Web application), client ID
+`259652348504-111v1dcj7b0fmri3ur4agippdtacokql.apps.googleusercontent.com`. Registered redirect URIs:
+`https://cofile.app/api/auth/callback/google` and `http://localhost:3000/api/auth/callback/google`
+(the site's `PORTAL_PUBLIC_URL` plus `/api/auth/callback/google`); authorized origins
+`https://cofile.app` and `http://localhost:3000`. Sign-in asks only for `openid` and `email`.
+`GOOGLE_CLIENT_ID` and `GOOGLE_CLIENT_SECRET` are set in the Vercel project (Production); the engine
+gets the same client ID from `fly.toml`, to check that Google's ID token was issued to it.
+
+**Save to Google Docs (portal only).** A partner firm's filing page has "Save to Google Docs": it
+asks Google for the `https://www.googleapis.com/auth/documents` scope through the same callback,
+writes the filing's record into a new Doc in the person's Google account, and keeps no Google
+token. It isn't offered to enterprise accounts. The Docs scope is a sensitive scope: publishing
+the consent screen beyond test users needs Google's verification of it (privacy policy link,
+how the scope is used, a short demo video).
+
+While the consent screen is in Testing, only its test users can sign in with Google; add people
+under Google Auth Platform, Audience, or publish the app. It signs in existing accounts only (a
+Google-verified email that matches one); new firms still sign up with the form.
+
+**Filing by email (Resend receiving).** Not required to start. A firm's user writes to one
+address with what to file; we email back a link to the form filled in from the email (read by
+Claude in the web app, which needs `ANTHROPIC_API_KEY` there). Nothing is filed from an email. In
+Resend: add a receiving domain (for example `in.cofile.app`) and the MX record it shows; add a
+webhook to `https://api.cofile.app/v1/inbound/email/resend` for the event `email.received` and copy
+its signing secret. The same `RESEND_API_KEY` reads each message's text.
+
+```bash
+read -s RESEND_INBOUND_WEBHOOK_SECRET && fly secrets set --stage --app keystone-filing-engine RESEND_INBOUND_WEBHOOK_SECRET="$RESEND_INBOUND_WEBHOOK_SECRET" INBOUND_EMAIL_ADDRESS=file@in.cofile.app
+```
+
+Only an active firm user's own address is answered, and the answer goes to that address; anyone
+else gets no reply. The email's text is sealed like SSNs and deleted after 30 days.
+
+**Requests from Slack.** Not required to start. At api.slack.com/apps create an app (from
+scratch). Under Slash Commands add `/file` with the request URL
+`https://api.cofile.app/v1/slack/command` and the hint "the filing you need, with the details". Under
+OAuth & Permissions add the redirect URL `https://api.cofile.app/v1/slack/oauth/callback` and the bot
+scopes `commands`, `users:read` and `users:read.email`. Under Manage Distribution turn on public
+distribution so firms can add it to their own Slack. Then:
+
+```bash
+read -s SLACK_CLIENT_SECRET && read -s SLACK_SIGNING_SECRET && fly secrets set --stage --app keystone-filing-engine SLACK_CLIENT_ID=xxxx.xxxx SLACK_CLIENT_SECRET="$SLACK_CLIENT_SECRET" SLACK_SIGNING_SECRET="$SLACK_SIGNING_SECRET"
+```
+
+A firm adds it from the "add CoFile to your Slack" link on its New filing page. A person's Slack
+email must match their CoFile account; the answer is private to them.
+
+**Requests by text and WhatsApp (Twilio).** Not required to start, and both take days to weeks
+of registration. In Twilio: buy a US number and complete A2P 10DLC brand and campaign registration
+for it (texting); add a WhatsApp sender (Twilio walks you through Meta's business verification).
+Set the messaging webhook of both to `https://api.cofile.app/v1/inbound/twilio` (POST). Then:
+
+```bash
+read -s TWILIO_AUTH_TOKEN && fly secrets set --stage --app keystone-filing-engine TWILIO_ACCOUNT_SID=ACxxxx TWILIO_AUTH_TOKEN="$TWILIO_AUTH_TOKEN" TWILIO_SMS_FROM=+1xxxxxxxxxx TWILIO_WHATSAPP_FROM=+1xxxxxxxxxx
+```
+
+`PUBLIC_BASE_URL` must be exactly the URL Twilio calls (it's part of Twilio's signature). People add
+their mobile number under their account and confirm it with a code we text them; messages from
+other numbers get no answer.
+
+**Our registered agent service (Registered Agents, Inc.).** Partner firms can name their own
+agent or use ours, which we resell; the firm is charged `REGISTERED_AGENT_ANNUAL_USD` (default $59)
+per business per year on its Stripe invoices, from the year the filing is submitted until it
+cancels in Billing. Set it up in the platform tenant's settings (`PUT /v1/tenants/<platform>` with
+the staff key): `registeredAgentProvisioning.defaultProvisioning: "third_party"` and
+`thirdParty: { provider: "registered_agents_inc", agents: { NJ: { name, address }, FL: { ... } } }`
+with Registered Agents, Inc.'s agent name and office address in each state you offer. Partner
+forms offer ours only in those states. Until their API is connected, every new business and every
+cancellation emails `OPS_EMAIL` to place it in their portal by hand. When they share their API
+documentation (ask your wholesale contact), add its order endpoint as `thirdParty.http` and the key
+as `thirdParty.apiCredentialKey`: the engine then orders through the API and stops emailing.
+
+**Partner pricing (Nov 26).** Partner firms choose pay as you go or a plan on their Billing page.
+The figures are in `config/partner-pricing.json`: pay as you go $45 a filing (a formation's EIN
+included), $25 a standalone EIN, $15 a copy or certificate; Starter $250 a month for 6 filings
+(extras $40), Growth $500 for 15 ($33), Unlimited $1,000 (fair use 60, then $15; priority human
+help); yearly plans cost ten months; unused filings carry over one month; a standalone EIN counts
+as half a filing and a record as a third; rehearsals never count. In Stripe, create one product per
+plan with its prices: Pay as you go at $0 a month, and each plan monthly and yearly. Then name them:
+
+```bash
+fly secrets set --app keystone-filing-engine STRIPE_PARTNER_PRICES="payg=price_...,starter=price_...,starter_annual=price_...,growth=price_...,growth_annual=price_...,unlimited=price_...,unlimited_annual=price_..."
+```
+
+Each live filing is counted when it reaches the state; pay-as-you-go charges and extras past a
+plan go on the firm's next Stripe invoice. Switching plans changes the subscription in place, with
+Stripe's proration. In Stripe's customer portal settings, leave plan switching off (the Billing
+page does it) and keep cancellation on.
+
+**Subscriptions (Stripe).** Not required to start. In Stripe:
+
+1. Products: create a product per plan (Enterprise, Partner), each with a recurring price. Copy
+   each price id (`price_...`).
+2. Developers, API keys: create a restricted key with write access to Customers, Checkout
+   Sessions and Customer portal, and read access to Prices.
+3. Developers, Webhooks: add the endpoint `https://api.cofile.app/v1/billing/stripe-webhook` with the
+   events `checkout.session.completed`, `customer.subscription.created`,
+   `customer.subscription.updated`, `customer.subscription.deleted`, `customer.subscription.paused`,
+   `customer.subscription.resumed`, `invoice.payment_failed` and `invoice.paid`. Copy its signing
+   secret (`whsec_...`).
+4. Settings, Billing, Customer portal: turn it on (card updates, invoices, cancelling).
+
+```bash
+read -s STRIPE_SECRET_KEY && read -s STRIPE_WEBHOOK_SECRET && fly secrets set --stage --app keystone-filing-engine STRIPE_SECRET_KEY="$STRIPE_SECRET_KEY" STRIPE_WEBHOOK_SECRET="$STRIPE_WEBHOOK_SECRET"
+```
+
+```bash
+fly secrets set --stage --app keystone-filing-engine STRIPE_PRICE_ENTERPRISE=price_xxx STRIPE_PRICE_PARTNER=price_yyy BILLING_REQUIRED=true
+```
+
+With `BILLING_REQUIRED=true` a live filing needs the payer's subscription to be active, in a
+trial, or being retried by Stripe; practice filings are always free. The platform's own filings,
+and the firms an enterprise subscriber files for, are not billed separately.
+
+**Saved cards (Basis Theory).** Not required to start. Create a Public application (permission
+`token:create`) for the web app's `BASIS_THEORY_PUBLIC_KEY`, and a Private application
+(permission `token:read`) for the worker:
+
+```bash
+read -s BASIS_THEORY_API_KEY && fly secrets set --stage --app keystone-filing-engine BASIS_THEORY_API_KEY="$BASIS_THEORY_API_KEY"
 ```
 
 To copy a saved key to the clipboard for a password manager without showing it (then clear the
@@ -136,11 +284,11 @@ still run, at the worker's next 10-minute check.
 Only the staff key creates a tenant; the caller key then adds client companies:
 
 ```bash
-curl -fsS -X PUT https://keystone-filing-engine.fly.dev/v1/tenants/keystone -H "x-api-key: $(cat ~/fe-staff-key)" -H "content-type: application/json" -d '{"name":"Keystone Filings"}'
+curl -fsS -X PUT https://keystone-filing-engine.fly.dev/v1/tenants/keystone -H "x-api-key: $(cat ~/fe-staff-key)" -H "content-type: application/json" -d '{"name":"CoFile"}'
 ```
 
 ```bash
-curl -fsS -X PUT https://keystone-filing-engine.fly.dev/v1/client-companies/keystone-direct -H "x-api-key: $(cat ~/fe-api-key)" -H "content-type: application/json" -d '{"name":"Keystone direct clients","einMode":"in_run"}'
+curl -fsS -X PUT https://keystone-filing-engine.fly.dev/v1/client-companies/keystone-direct -H "x-api-key: $(cat ~/fe-api-key)" -H "content-type: application/json" -d '{"name":"CoFile direct clients","einMode":"in_run"}'
 ```
 
 The full settings (organizer, filer, registered agents, webhook endpoints, admin channels) go
@@ -159,14 +307,14 @@ Every line should say `ok` except Missouri, whose bot check does not clear on St
 Missouri by hand). Then save each logged-in account (docs/fixed-ip-machine.md, "Saved sign-ins"):
 
 ```bash
-fly ssh console --app keystone-filing-engine --select --pty -C "node --import tsx tools/steel-login.ts nygov https://my.ny.gov/"
+fly ssh console --app keystone-filing-engine --select --pty -C "node --import tsx tools/steel-login.ts nygov:keystone https://my.ny.gov/"
 ```
 
 Open the link it prints, sign in, press Enter, and repeat for `ny:keystone` and `nj:keystone`.
 Then set every printed entry at once:
 
 ```bash
-fly secrets set --app keystone-filing-engine STEEL_PROFILES="nygov=<profile id>,ny:keystone=<profile id>,nj:keystone=<profile id>"
+fly secrets set --app keystone-filing-engine STEEL_PROFILES="nygov:keystone=<profile id>,ny:keystone=<profile id>,nj:keystone=<profile id>"
 ```
 
 ## 8. First dry run
@@ -179,19 +327,35 @@ and stops before "Submit EIN Request".
 Use a real client's details, with their consent. The IRS assistant receives each page as the
 interview advances; only the final submission is skipped. Never use made-up identities.
 
-## 9. When the web address is decided
+## 9. Web addresses and DNS (decided Nov 26)
+
+The engine (this Fly app) is `https://api.cofile.app`: the API, the client approval pages and every
+webhook (Stripe, Resend, Slack, Twilio). The site (the web app on Vercel) is `https://cofile.app`.
 
 ```bash
-fly certs add filings.keystonefilings.com --app keystone-filing-engine
+fly certs add api.cofile.app --app keystone-filing-engine
 ```
 
-Add the DNS record that command shows, then:
+`fly.toml` sets `PUBLIC_BASE_URL=https://api.cofile.app` and `WEB_BASE_URL=https://cofile.app`,
+so add the `api` DNS record below before the first deploy, or emailed links won't open.
 
-```bash
-fly secrets set --app keystone-filing-engine PUBLIC_BASE_URL=https://filings.keystonefilings.com
-```
+In the web app's environment on Vercel: `ENGINE_PUBLIC_URL=https://api.cofile.app` (shown in the
+partner API docs and the OpenAPI file), `PORTAL_PUBLIC_URL=https://cofile.app`, and
+`ENGINE_API_URL=https://api.cofile.app` (where the site's server calls the engine). The engine
+refuses to start in production while either of its addresses is still a localhost one.
 
-Links sent from then on use the new address.
+DNS records to add at the registrar for `cofile.app`:
+
+| Record | Name | Value | For |
+|---|---|---|---|
+| CNAME | `api` | `keystone-filing-engine.fly.dev` (or the A and AAAA records `fly certs add` prints) | the engine; Fly issues its certificate once this resolves |
+| A (and CNAME `www`) | `@` / `www` | what Vercel shows when you add `cofile.app` to the project | the site |
+| MX | `@` | your mailbox provider's (for example Google Workspace) | the `hello@cofile.app` mailbox; without it, mail to it bounces |
+| TXT and MX | as Resend shows (DKIM `resend._domainkey`, SPF and MX on `send`) | from Resend | sending from `filings@cofile.app` |
+| TXT | `_dmarc` | `v=DMARC1; p=none; rua=mailto:hello@cofile.app` to start | email deliverability (tighten to `quarantine` once reports look clean) |
+| MX | `in` | what Resend shows for a receiving domain | filing requests emailed to `file@in.cofile.app` (V40) |
+
+Links sent from then on use the new addresses. Approval links already sent keep their old address.
 
 ## Running it
 

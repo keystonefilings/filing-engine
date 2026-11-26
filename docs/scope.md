@@ -59,7 +59,10 @@ changes a form, the platform reviews the drift once for every subscriber.
 | White-label firm portal for CPAs / title / payroll companies (web/p) | | yes (draft); filings are dry runs unless PORTAL_LIVE_FILINGS=true |
 | NY PDF upload filings (DOS-1335-f, DOS-1338-f) with saved signatures | yes (dry run) | uses it |
 
-## Open naming question
+## Name
 
-Webhook headers are named `X-Keystone-*`. If the platform is sold under another name,
-rename them before the first outside subscriber integrates.
+The site is **CoFile** (cofile.app) since Nov 25, 2026; "Keystone Filings" is no longer shown
+anywhere. Webhook headers are `X-CoFile-Event`, `X-CoFile-Delivery` and `X-CoFile-Signature`
+(renamed from `X-Keystone-*` before any outside integration). Internal ids keep the old name on
+purpose: the platform tenant `keystone`, the Fly app `keystone-filing-engine`, vault and Steel
+profile keys, and the web app's key-derivation label (changing it would sign everyone out).

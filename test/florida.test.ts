@@ -117,3 +117,101 @@ describe("Florida profit corporation and limited partnership", () => {
     expect(corp.reduce((s, l) => s + l.amountUsd, 0)).toBe(70 + 8.75 + 52.5);
   });
 });
+
+describe("Florida professional entities (decision 18)", () => {
+  const FL_ADDR3 = { street1: "200 S Orange Ave", city: "Orlando", state: "FL", zip: "32801" };
+  const corp = (designator: string, extra: Record<string, unknown> = {}) => FilingRequest.parse(flFiling({
+    formation: {
+      entityType: "LLC", floridaEntityType: "profit_corporation", name: { baseName: "Rivera Dental", designator },
+      mainBusinessAddress: FL_ADDR3, registeredAgent: { name: "Tessa Agentsson", address: FL_ADDR3 },
+      stockShares: 100, incorporator: { name: "Sam Rivera", address: FL_ADDR3 }, ...extra,
+    },
+  }));
+  const llc = (designator: string, extra: Record<string, unknown> = {}) => {
+    const base = flFiling() as { formation: Record<string, unknown> };
+    return FilingRequest.parse({ ...base, formation: { ...base.formation, name: { baseName: "Fields Accounting", designator }, ...extra } });
+  };
+  const errorsAt = (req: FilingRequest, path: string) => validateFiling(req).filter((i) => i.severity === "error" && i.path === path);
+
+  it("accepts PLLC, P.L.L.C. and Chartered for an LLC, and needs its professional purpose", () => {
+    for (const d of ["PLLC", "P.L.L.C.", "Professional Limited Liability Company", "Chartered"]) {
+      expect(errorsAt(llc(d), "formation.name")).toEqual([]);
+      expect(errorsAt(llc(d), "formation.purpose")[0]?.message).toMatch(/professional LLC .* must state its professional purpose/);
+      expect(hasErrors(validateFiling(llc(d, { purpose: "The practice of public accounting" })))).toBe(false);
+    }
+    expect(errorsAt(llc("LLC"), "formation.purpose")).toEqual([]); // an ordinary LLC needn't
+    expect(errorsAt(llc("Partners"), "formation.name")).toHaveLength(1);
+  });
+
+  it("accepts P.A., Professional Association and Chartered for a corporation, and needs its professional purpose", () => {
+    for (const d of ["P.A.", "Professional Association", "Chartered"]) {
+      expect(errorsAt(corp(d), "formation.name")).toEqual([]);
+      expect(errorsAt(corp(d), "formation.purpose")[0]?.message).toMatch(/professional association .* must state its professional purpose/);
+      expect(hasErrors(validateFiling(corp(d, { purpose: "The practice of dentistry" })))).toBe(false);
+    }
+    for (const d of ["Inc.", "Inc", "Corp.", "Corporation", "Incorporated", "Company", "Co."]) expect(hasErrors(validateFiling(corp(d)))).toBe(false);
+    expect(errorsAt(corp("Group"), "formation.name")).toHaveLength(1);
+  });
+});
+
+describe("Florida: the EIN waits for the state's acceptance (Yakov, Nov 26)", () => {
+  const ein = {
+    mode: "in_run", applicantRole: "owner",
+    responsibleParty: { name: "Dana Fields", ssn: "123-45-6789", title: "Member", address: FL_ADDR, phone: "3055550100" },
+    reason: "new_business", physicalState: "FL", county: "Miami-Dade",
+    regulated: { highwayVehicle: false, wagering: false, form720: false, alcoholTobaccoFirearms: false },
+    employees: { expected: false }, businessActivity: { category: "Real Estate", detail: "Manage real estate for others" },
+    noticeDelivery: "digital",
+  };
+
+  it("files the formation first and starts the EIN application, under the same approval, once the state accepts", async () => {
+    const store = await seededStore();
+    const w = wire(store);
+    // Even asked for "in the same run", a Florida formation's EIN waits for acceptance.
+    const created = await w.service.createFiling(flFiling({ dryRun: true, ein }));
+    expect(created.issues.filter((i) => i.severity === "error")).toEqual([]);
+    expect(created.filing.request.ein?.mode).toBe("after_acceptance");
+    expect(created.filing.status).toBe("awaiting_approval");
+
+    const approval = (await store.getApproval(created.filing.currentApprovalId!))!;
+    await w.service.onApprovalDecision(approval.token, "approve", {});
+    // The run files the formation (here: mark it submitted, as the Sunbiz run leaves it), then the examiner accepts.
+    await store.updateFiling(created.filing.id, { status: "submitted" });
+    expect(await w.service.startEinAfterAcceptance((await store.getFiling(created.filing.id))!)).toBeNull(); // not before it's accepted
+    const before = await w.queue.size();
+    await w.service.recordOutcome(created.filing.id, { outcome: "accepted", by: "staff", reference: "L26000012345" });
+
+    const child = await store.findFilingByIdempotency("keystone", `${created.filing.request.idempotencyKey}:ein-after-acceptance`);
+    expect(child).not.toBeNull();
+    expect(child!.request.type).toBe("ein_only");
+    expect(child!.request.ein?.mode).toBe("in_run");
+    expect(child!.request.ein?.formationState).toBe("FL");
+    expect((child!.request.intake as { einForFilingId?: string }).einForFilingId).toBe(created.filing.id);
+    expect(child!.status).toBe("queued");
+    expect(await w.queue.size()).toBe(before + 1);
+    const carried = (await store.getApproval(child!.currentApprovalId!))!;
+    expect(carried.status).toBe("approved");
+    expect(carried.comment).toContain(`approval ${approval.id}`);
+    expect(w.approvals.verifyForRun(child!, carried, (await store.getTenant("keystone"))!, (await store.getClientCompany("acme-cpa"))!).ok).toBe(true);
+    // Recording it again starts no second application.
+    expect(await w.service.startEinAfterAcceptance((await store.getFiling(created.filing.id))!)).toBeNull();
+  });
+
+  it("tells the client on the approval page that approving covers the EIN application after acceptance", async () => {
+    const { renderReviewPage } = await import("../src/approvals/render.js");
+    const html = renderReviewPage({ filingId: "f1", filingTitle: "Florida LLC", payload: {}, fees: [], expiresAt: "2026-12-03T22:00:00Z", einInRun: false, einAfterAcceptance: true, postUrl: "/x", requireCode: false } as never);
+    expect(html).toContain("Once the state accepts this formation, we'll apply for its EIN");
+  });
+
+  it("never carries an approval to EIN details the client didn't approve", async () => {
+    const store = await seededStore();
+    const w = wire(store);
+    const created = await w.service.createFiling(flFiling({ dryRun: true, ein }));
+    const approval = (await store.getApproval(created.filing.currentApprovalId!))!;
+    await w.service.onApprovalDecision(approval.token, "approve", {});
+    const parent = (await store.getFiling(created.filing.id))!;
+    const decided = (await store.getApproval(approval.id))!;
+    const other = { ...parent, id: "other", request: { ...parent.request, type: "ein_only", ein: { ...parent.request.ein!, responsibleParty: { ...parent.request.ein!.responsibleParty!, name: "Someone Else" } } } } as never;
+    await expect(w.approvals.carryForward(other, decided, parent, (await store.getTenant("keystone"))!, (await store.getClientCompany("acme-cpa"))!, [])).rejects.toThrow(/differ/);
+  });
+});

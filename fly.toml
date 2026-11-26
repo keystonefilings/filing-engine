@@ -28,8 +28,7 @@ kill_timeout = 300               # seconds: the worker finishes the filing in pr
 #   WORKER_WAKE_TOKEN        random, shared by the API and the worker
 #   STEEL_API_KEY            this app's own Steel key
 # Set by `fly storage create`: BUCKET_NAME, AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY,
-# AWS_ENDPOINT_URL_S3, AWS_REGION. Added later: STEEL_PROFILES (saved sign-ins) and
-# PUBLIC_BASE_URL (the approval-link address, not decided yet).
+# AWS_ENDPOINT_URL_S3, AWS_REGION. Added later: STEEL_PROFILES (saved sign-ins).
 
 [env]
   NODE_ENV = "production"
@@ -42,8 +41,13 @@ kill_timeout = 300               # seconds: the worker finishes the filing in pr
   # worker over Fly's private network as soon as a filing is queued.
   WORKER_IDLE_POLL_MS = "600000"
   WORKER_WAKE_URL = "http://worker.process.keystone-filing-engine.internal:8081/wake"
-  # PUBLIC_BASE_URL (the address in approval links) is not decided yet: set it as a secret or
-  # here once it is, e.g. https://filings.keystonefilings.com (docs/deploy-fly.md, step 9).
+  # Decision 14 (Nov 26): the engine's own address (approval links, webhooks) and the site's.
+  # Add the api.cofile.app DNS record first (docs/deploy-fly.md, step 9), or emailed links won't open.
+  PUBLIC_BASE_URL = "https://api.cofile.app"
+  # V37: the Google OAuth client ("CoFile Web", project cofile-515904). Not a secret: the engine checks
+  # that a Google ID token was issued to it. The client secret lives only in the web app (Vercel).
+  GOOGLE_CLIENT_ID = "259652348504-111v1dcj7b0fmri3ur4agippdtacokql.apps.googleusercontent.com"
+  WEB_BASE_URL = "https://cofile.app"
 
 [processes]
   # node itself, not npx, so the stop signal reaches the program directly

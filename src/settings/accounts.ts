@@ -11,6 +11,10 @@ export interface NjAccount {
   credentialKey: string | null;
   profileKey: string | null;
   storedMethod: "stored_card" | "stored_echeck" | undefined;
+  /** The NJ account's saved method is chosen for this filing type, but no NJ login is connected. */
+  portalPaymentWithoutLogin: boolean;
+  /** The per-type setting has the NJ account's saved method pay: no card saved with us is used. */
+  paidByPortalAccount: boolean;
   /** Fee-table key for the method the adapters will pick. */
   feeMethod: string;
   /** Option label in NJ's Select Payment Type dropdown. */
@@ -18,17 +22,26 @@ export interface NjAccount {
   owner: "client" | "tenant" | "none";
 }
 
-export function njAccount(tenant: TenantSettings, client: ClientCompanySettings): NjAccount {
+export function njAccount(tenant: TenantSettings, client: ClientCompanySettings, filingKind?: string): NjAccount {
   // Onboarding G1: only a firm that chose "its own account" pays through its own NJ login.
   const useClient = effectivePolicies(tenant, client).stateFees === "own_account";
   const credentialKey = useClient
     ? (client.njAccountCredentialKey ? firmVaultKey(tenant, client, client.njAccountCredentialKey) : null)
     : (tenant.njAccountCredentialKey ? tenantVaultKey(tenant, tenant.njAccountCredentialKey) : null);
-  const storedMethod = useClient ? client.njStoredPaymentMethod : tenant.njStoredPaymentMethod;
+  // Yakov (Nov 26): per filing type, the NJ account's own saved method pays instead of a card saved
+  // with us. Without that setting, the older account-wide one applies to every NJ filing.
+  const portal = (useClient ? client.payments : tenant.payments)?.routing.statePortal?.NJ;
+  const legacy = useClient ? client.njStoredPaymentMethod : tenant.njStoredPaymentMethod;
+  const wanted = portal ? (filingKind && (portal.kinds as string[]).includes(filingKind) ? portal.method : undefined) : undefined;
+  // The per-type setting needs the NJ login (the saved method lives in that account); the older
+  // account-wide setting keeps its behaviour.
+  const storedMethod = portal ? (wanted && credentialKey ? wanted : undefined) : legacy;
   return {
     credentialKey,
     profileKey: credentialKey ? (useClient ? `nj:${client.clientCompanyId}` : `nj:${tenant.tenantId}`) : null,
     storedMethod,
+    portalPaymentWithoutLogin: !!wanted && !credentialKey,
+    paidByPortalAccount: !!portal && !!storedMethod,
     feeMethod: storedMethod ?? "credit_card",
     paymentTypeLabel: storedMethod === "stored_echeck" ? "E-Check" : "Credit Card",
     owner: !credentialKey ? "none" : useClient ? "client" : "tenant",

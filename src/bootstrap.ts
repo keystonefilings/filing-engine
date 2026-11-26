@@ -15,7 +15,8 @@ import { NameResolutionService, DEFAULT_NAME_RESOLUTION_CONFIG } from "./name-re
 import { ReviewGateService } from "./review-gate/service.js";
 import { RegisteredAgentService } from "./registered-agents/service.js";
 import { Notifier } from "./comms/notifier.js";
-import { LogChannelSender } from "./comms/senders.js";
+import { LogChannelSender, type ChannelSender } from "./comms/senders.js";
+import { ResendEmailSender } from "./comms/resend.js";
 import { StaticNameGenerator, AnthropicNameGenerator, type NameCandidateGenerator } from "./name-resolution/generator.js";
 import type { NameCheckerRegistry } from "./name-resolution/checker.js";
 
@@ -27,7 +28,8 @@ export async function bootstrap(opts: { withExecutor: boolean; workerId?: string
     // Shared database: the cloud tier and the fixed-IP worker meet in Postgres (store + queue).
     const { PostgresStore } = await import("./store/postgres.js");
     const { PgQueue } = await import("./orchestrator/pg-queue.js");
-    const pgStore = await PostgresStore.connect(config.databaseUrl);
+    const { FieldCipher: Cipher } = await import("./store/sensitive.js");
+    const pgStore = await PostgresStore.connect(config.databaseUrl, { cipher: Cipher.fromSpec(config.dataEncryptionKey) });
     store = pgStore;
     queue = new PgQueue(pgStore.connectionPool);
   }
@@ -43,7 +45,12 @@ export async function bootstrap(opts: { withExecutor: boolean; workerId?: string
     store, signingSecret: config.approvalSigningSecret, publicBaseUrl: config.publicBaseUrl, defaultTtlHours: config.approvalTtlHours,
   });
   const webhooks = new WebhookDispatcher(store);
-  const vault = new EnvVault();
+  // V29: logins connected in the dashboard (sealed in the database) first, then environment variables.
+  const { FieldCipher } = await import("./store/sensitive.js");
+  const cipher = FieldCipher.fromSpec(config.dataEncryptionKey);
+  const { DbVault, ChainVault } = await import("./settings/db-vault.js");
+  const secrets = cipher ? new DbVault(store, cipher) : null;
+  const vault = secrets ? new ChainVault([secrets, new EnvVault()]) : new EnvVault();
   const drift = new DriftReviewService(store);
   // The only language model in a filing: name alternatives when a chosen name is taken.
   const generator: NameCandidateGenerator = config.anthropicApiKey
@@ -59,14 +66,48 @@ export async function bootstrap(opts: { withExecutor: boolean; workerId?: string
   const reviewGate = new ReviewGateService({ store, signingSecret: config.approvalSigningSecret, publicBaseUrl: config.publicBaseUrl, ttlHours: config.approvalTtlHours });
   // Registered-agent resolution: client's own agent, the filing company's per-state agent, or a third-party provider.
   const registeredAgents = new RegisteredAgentService({ vault });
-  // Outbound communication: real channel senders (email/Slack/SMS) plug in per tenant with
-  // their own vault credentials; until then every message is recorded via the log sender.
-  const notifier = new Notifier({ store, senders: {}, defaultSender: new LogChannelSender("email"), publicBaseUrl: config.publicBaseUrl });
+  // Outbound communication. Email goes through Resend when RESEND_API_KEY is set; Slack, WhatsApp
+  // and SMS senders are not built yet, so those messages (and email without a key) are recorded only.
+  const email: ChannelSender = config.email.resendApiKey
+    ? new ResendEmailSender({ apiKey: config.email.resendApiKey, from: config.email.from, replyTo: config.email.replyTo, apiUrl: `${config.email.resendApiBase}/emails` })
+    : new LogChannelSender("email", { print: !config.production });
+  if (config.production && !config.email.resendApiKey) {
+    console.warn("RESEND_API_KEY is not set: approval links, password resets and notices are recorded, not emailed");
+  }
+  const notifier = new Notifier({ store, senders: { email }, defaultSender: new LogChannelSender("email"), publicBaseUrl: config.publicBaseUrl, artifacts, webBaseUrl: config.webBaseUrl, supportEmail: config.supportEmail });
   const harness = new BrowserHarness({ chromiumPath: config.chromiumPath, proxyServer: config.browserProxy, siteProxies: config.siteProxies, steel: config.steel, profileDir: config.browserProfileDir });
-  const executor = opts.withExecutor ? new RunExecutor({ store, artifacts, harness, drift, vault, reviewGate, registeredAgents }) : undefined;
+  const { BasisTheoryCardVault } = await import("./payments/card-vault.js");
+  const { CardCodes } = await import("./payments/card-codes.js");
+  const cardVault = config.basisTheoryApiKey ? new BasisTheoryCardVault({ apiKey: config.basisTheoryApiKey }) : undefined;
+  const cardCodes = new CardCodes(store);
+  const { InboundEmailService } = await import("./inbound/email.js");
+  const inbound = new InboundEmailService({
+    store, webhookSecret: config.email.inboundWebhookSecret, resendApiKey: config.email.resendApiKey ?? undefined,
+    address: config.email.inboundAddress, apiBase: config.email.resendApiBase, email, webBaseUrl: config.webBaseUrl, platformName: config.platformName,
+  });
+  const { BillingService } = await import("./billing/service.js");
+  const { parsePriceMap } = await import("./billing/pricing.js");
+  const { StripeClient } = await import("./billing/stripe.js");
+  const stripe = config.stripe.secretKey ? new StripeClient({ secretKey: config.stripe.secretKey, apiUrl: config.stripe.apiUrl }) : undefined;
+  const { AgentServices } = await import("./registered-agents/agent-services.js");
+  const agentServices = new AgentServices({
+    store, platformTenantId: config.platformTenantId, providerName: config.registeredAgent.providerName,
+    annualUsd: config.registeredAgent.annualUsd, stripe, email, opsEmail: config.opsEmail,
+  });
+  const billing = new BillingService({
+    store, stripe,
+    webhookSecret: config.stripe.webhookSecret, prices: config.stripe.prices, required: config.stripe.required,
+    partnerPrices: parsePriceMap(config.stripe.partnerPrices),
+    trialDays: config.stripe.trialDays, platformTenantId: config.platformTenantId, webBaseUrl: config.webBaseUrl,
+  });
+  const executor = opts.withExecutor ? new RunExecutor({ store, artifacts, harness, drift, vault, reviewGate, registeredAgents, cardVault, cardCodes }) : undefined;
   const limiter = new ConcurrencyLimiter({
     "site:IRS": config.siteConcurrency.IRS, "site:NY": config.siteConcurrency.NY, "site:NJ": config.siteConcurrency.NJ,
   });
-  const service = new FilingService({ store, approvals, webhooks, queue, vault, drift, nameResolution, reviewGate, registeredAgents, notifier, executor, limiter, dryRunDefault: config.dryRunDefault, workerId: opts.workerId });
-  return { store, artifacts, approvals, webhooks, queue, vault, drift, nameResolution, reviewGate, registeredAgents, notifier, harness, executor, service };
+  const service = new FilingService({ store, approvals, webhooks, queue, vault, drift, nameResolution, reviewGate, registeredAgents, notifier, executor, cardCodes, billing, agentServices, limiter, artifacts, dryRunDefault: config.dryRunDefault, workerId: opts.workerId });
+  const { TwilioChannel } = await import("./inbound/twilio.js");
+  const { SlackChannel } = await import("./inbound/slack.js");
+  const twilio = config.twilio.accountSid ? new TwilioChannel({ store, ...config.twilio, webhookUrl: `${config.publicBaseUrl}/v1/inbound/twilio`, webBaseUrl: config.webBaseUrl }) : undefined;
+  const slack = config.slack.clientId ? new SlackChannel({ store, ...config.slack, cipher, publicBaseUrl: config.publicBaseUrl, webBaseUrl: config.webBaseUrl, stateSecret: config.approvalSigningSecret }) : undefined;
+  return { store, artifacts, approvals, webhooks, queue, vault, secrets, drift, nameResolution, reviewGate, registeredAgents, notifier, email, harness, executor, service, billing, inbound, twilio, slack, agentServices };
 }

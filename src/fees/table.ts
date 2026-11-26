@@ -15,11 +15,47 @@ export function resetFeeTableCache(): void { cached = null; }
 
 export class FeeUnknownError extends Error {}
 
+export interface FeeOptions {
+  paymentMethod?: string;
+  certificateOfStanding?: boolean;
+  certifiedCopy?: boolean;
+  plainCopy?: boolean;
+  entityType?: string;
+  floridaEntityType?: string;
+  nyEntityType?: string;
+  /** NJ formation: an LLC (default) or a for-profit corporation (DP). */
+  njEntityType?: string;
+  /** NY business corporation share answers, from which its Tax on Shares is quoted. */
+  stockShares?: number;
+  stockParValueUsd?: number;
+  /** NY copy request: how many documents are copied. */
+  documentCount?: number;
+}
+
+/**
+ * NY business corporation's Tax on Shares, quoted from the share answers by the rule in the fee
+ * table (NY.formation.entityFees.business_corporation.taxOnShares): Tax Law s.180, 5 cents a share
+ * without par value or 1/20 of 1% of total par value, at least $10 (decision 16). The DOS page
+ * computes its own figure; the approval carries this quote and the payment page's fee check stops
+ * the run when the page shows a different amount.
+ */
+export function nyTaxOnShares(shares: number, parUsd: number | undefined, table: FeeTable = loadFeeTable()): number {
+  const rule = ((table.NY?.formation as Record<string, any> | undefined)?.entityFees?.business_corporation?.taxOnShares) as
+    { parValueRate?: number; noParPerShareUsd?: number; minimumUsd?: number } | undefined;
+  if (!rule || typeof rule.parValueRate !== "number" || typeof rule.noParPerShareUsd !== "number") {
+    throw new FeeUnknownError("NY Tax on Shares has no rule in the fee table");
+  }
+  const raw = parUsd ? shares * parUsd * rule.parValueRate : shares * rule.noParPerShareUsd;
+  const tax = Math.round(raw * 100) / 100;
+  // The minimum applies to any shares at all, however small their par value.
+  return raw > 0 ? Math.max(tax, rule.minimumUsd ?? 0) : 0;
+}
+
 /** Expected charges for a filing, or FeeUnknownError when the table has no entry yet. */
 export function expectedFees(
   state: "NY" | "NJ" | "MO" | "FL",
   type: string,
-  opts: { paymentMethod?: string; certificateOfStanding?: boolean; certifiedCopy?: boolean; plainCopy?: boolean; entityType?: string; floridaEntityType?: string; nyEntityType?: string } = {},
+  opts: FeeOptions = {},
   table: FeeTable = loadFeeTable(),
 ): FeeLine[] {
   const entry = table[state]?.[type] as Record<string, any> | null | undefined;
@@ -45,8 +81,31 @@ export function expectedFees(
   if (state === "NY" && type === "formation" && opts.nyEntityType && opts.nyEntityType !== "llc" && !nyEntity) {
     throw new FeeUnknownError(`NY formation price for ${opts.nyEntityType} has not been verified yet`);
   }
-  if (nyEntity) lines.push({ label: nyEntity.label, amountUsd: nyEntity.statutory });
+  // NJ formation: a for-profit corporation's Certificate of Incorporation is priced under
+  // entityFees; its formation add-ons have not been seen at the checkout, so they are not priced.
+  const njEntity = state === "NJ" && type === "formation" && opts.njEntityType && opts.njEntityType !== "llc"
+    ? (entry.entityFees as Record<string, any> | undefined)?.[opts.njEntityType]
+    : undefined;
+  if (state === "NJ" && type === "formation" && opts.njEntityType && opts.njEntityType !== "llc") {
+    if (!njEntity) throw new FeeUnknownError(`NJ formation price for ${opts.njEntityType} has not been verified yet`);
+    if (opts.certificateOfStanding || opts.certifiedCopy) {
+      throw new FeeUnknownError(`NJ ${opts.njEntityType.replace(/_/g, " ")}: the price of a certificate of standing or certified copy at formation has not been seen`);
+    }
+  }
+  if (nyEntity) {
+    lines.push({ label: nyEntity.label, amountUsd: nyEntity.statutory });
+    if (opts.nyEntityType === "business_corporation" && opts.stockShares) {
+      const tax = nyTaxOnShares(opts.stockShares, opts.stockParValueUsd, table);
+      if (tax > 0) lines.push({ label: "Tax on Shares (quoted from the share answers; the state's page computes it)", amountUsd: tax });
+    }
+  } else if (njEntity) lines.push({ label: njEntity.label, amountUsd: njEntity.statutory });
   else if (entry.statutory) lines.push({ label: entry.statutory.label, amountUsd: entry.statutory.amountUsd });
+  if (entry.perDocument) {
+    // Priced per document selected (NY copy requests: $5 per plain copy).
+    const n = opts.documentCount;
+    if (!n || n < 1) throw new FeeUnknownError(`${state}/${type} is priced per document; the request must list the documents`);
+    lines.push({ label: `${entry.perDocument.label} (${n} x $${entry.perDocument.amountUsd})`, amountUsd: Math.round(n * entry.perDocument.amountUsd * 100) / 100 });
+  }
   if (entry.byEntityType) {
     // Price depends on the entity's type (NJ standing certificate: LLC $50, corporation $25).
     if (!opts.entityType) throw new FeeUnknownError(`${state}/${type} is priced by entity type; the request must give it`);

@@ -81,7 +81,7 @@ export function SignaturePad({ name, disabled, label = "Sign here" }: { name: st
         style={{ touchAction: "none", opacity: disabled ? 0.5 : 1 }} />
       <div className="row small">
         <span className="muted">{inked ? "Signed above." : label}</span>
-        <button type="button" className="btn small" onClick={clear} disabled={disabled || !inked}>Clear</button>
+        <button type="button" className="btn small" onClick={clear} disabled={disabled || !inked}>Clear signature</button>
       </div>
       <input type="hidden" name={name} value={value} disabled={disabled} />
     </div>

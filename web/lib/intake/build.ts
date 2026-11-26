@@ -149,6 +149,7 @@ function coerce(f: Field, value: string, path: string, issues: BuildIssue[]): un
   if (f.options && v && !f.options.some((o) => o.value === v)) return bad("pick one of the listed choices");
   if (f.minWords && v && v.split(/\s+/).length < f.minWords) return bad("enter a first and last name");
   switch (f.type) {
+    case "select": return v ? (f.integer ? Number(v) : v) : undefined; // a list of numbers (NJ-REG fiscal month) sends a number
     case "checkbox": return v === "on" || v === "true" ? true : undefined;
     case "yesno": return v === "yes" ? true : v === "no" ? false : undefined;
     case "number": {
@@ -249,7 +250,7 @@ export function buildRequest(kind: FilingKind, raw: Raw, ctx: BuildContext): Bui
     const value = raw[v.name];
     const required = v.field.required === true || (v.field.required === "withSiblings" && siblingFilled(v, vis, raw));
     if (required && isEmpty(v.field, value)) {
-      issues.push({ path: v.name, message: v.field.type === "checkbox" ? `${v.field.label}: please tick this` : `${v.field.label}: required` });
+      issues.push({ path: v.name, message: v.field.type === "checkbox" ? `${v.field.label}: please check this box` : `${v.field.label}: required` });
       continue;
     }
     if (value === undefined) continue;
@@ -265,16 +266,17 @@ export function buildRequest(kind: FilingKind, raw: Raw, ctx: BuildContext): Bui
     else granted.push({ id: a.id, text: a.text, ref: a.ref, grantedAt: new Date().toISOString(), grantedBy: ctx.submittedBy });
   }
 
-  if (raw.state && kind.type === "ein_only") request.state = raw.state; // the IRS form picks the formation state
   deepMerge(request, structuredClone(kind.constants));
   postProcess(kind, request, raw);
+  floridaProfessionalPurpose(kind, raw, issues);
 
   const out = deleteEmpty(request) as Record<string, unknown>;
   out.tenantId = ctx.tenantId;
   out.clientCompanyId = ctx.clientCompanyId;
   out.idempotencyKey = ctx.idempotencyKey;
   out.type = kind.type;
-  out.state = kind.type === "ein_only" ? (out.state ?? kind.state) : kind.state;
+  // Decision 15: an EIN-only filing is for the state where the LLC was formed, any state.
+  out.state = kind.type === "ein_only" ? (((out.ein as Record<string, unknown> | undefined)?.formationState as string | undefined) ?? kind.state) : kind.state;
   if (ctx.dryRun !== undefined) out.dryRun = ctx.dryRun;
   const intake = (out.intake ?? {}) as Record<string, unknown>;
   const portal = (intake.portal ?? {}) as Record<string, unknown>;
@@ -283,10 +285,35 @@ export function buildRequest(kind: FilingKind, raw: Raw, ctx: BuildContext): Bui
   return { request: out, issues };
 }
 
+/** Decision 18: a Florida PLLC or professional association must state its professional purpose. */
+const FL_PROFESSIONAL_ENDINGS: Record<string, string[]> = { "fl-llc": ["PLLC", "P.L.L.C.", "Professional Limited Liability Company", "Chartered"], "fl-corp": ["P.A.", "Professional Association", "Chartered"] };
+function floridaProfessionalPurpose(kind: FilingKind, raw: Raw, issues: BuildIssue[]): void {
+  const endings = FL_PROFESSIONAL_ENDINGS[kind.id];
+  const ending = String(raw["formation.name.designator"] ?? "");
+  if (!endings || !endings.includes(ending)) return;
+  if (kind.id === "fl-corp" && raw["intake.portal.flAnyLawfulBusiness"] === "on") {
+    issues.push({ path: "intake.portal.flAnyLawfulBusiness", message: `A name ending in ${ending} is a professional association: untick "any and all lawful business" and state its professional purpose` });
+  } else if (!String(raw["formation.purpose"] ?? "").trim() && !issues.some((i) => i.path === "formation.purpose")) {
+    issues.push({ path: "formation.purpose", message: `A name ending in ${ending} is a professional ${kind.id === "fl-llc" ? "LLC" : "association"}: state its professional purpose` });
+  }
+}
+
 /** Per-kind tidy-up the declarative form can't express. */
 function postProcess(kind: FilingKind, r: Record<string, unknown>, raw: Raw): void {
   const formation = r.formation as Record<string, unknown> | undefined;
   if (formation && formation.registeredAgentChoice === "filing_company") delete formation.registeredAgent;
+  // V24: "same as the business" covers the phone too (NYS-100 A8, A9), not only the address.
+  const answers = (r.payroll as { stateAnswers?: Record<string, unknown> } | undefined)?.stateAnswers;
+  if (answers?.businessPhone) {
+    if (raw["intake.portal.booksSameAsBusiness"] === "on" && !answers.booksPhone) answers.booksPhone = answers.businessPhone;
+    if (raw["intake.portal.chargesSameAsBusiness"] === "on" && !answers.chargesPhone) answers.chargesPhone = answers.businessPhone;
+  }
+  // V24: the service-of-process notice email defaults to the contact's, so nobody types it twice.
+  const sop = formation?.serviceOfProcess as Record<string, unknown> | undefined;
+  const contactEmail = (r.contact as { email?: string } | undefined)?.email;
+  if (sop && !sop.noticeEmail && contactEmail) sop.noticeEmail = contactEmail;
+  // V22: "our saved agent" is the firm's own agent, which the engine takes from the firm's settings.
+  if (formation && formation.registeredAgentChoice === "firm_saved") { formation.registeredAgentChoice = "client_provided"; delete formation.registeredAgent; }
 
   if (kind.state === "FL" && formation && formation.registeredAgentChoice === "client_provided") {
     const kindOfAgent = raw["intake.portal.flAgentKind"];
@@ -297,11 +324,16 @@ function postProcess(kind: FilingKind, r: Record<string, unknown>, raw: Raw): vo
   }
 
   if (kind.type === "ein_only") {
-    setPath(r, "ein.formationState", (r.state as string | undefined) ?? kind.state);
+    if (!(r.ein as Record<string, unknown> | undefined)?.formationState) setPath(r, "ein.formationState", kind.state);
+    // V24: the physical state is the state of the physical address the form already asks for.
+    const physical = ((r.ein as Record<string, unknown> | undefined)?.responsibleParty as { address?: { state?: string } } | undefined)?.address?.state;
+    if (physical && !(r.ein as Record<string, unknown>).physicalState) setPath(r, "ein.physicalState", physical);
   }
 
   const payroll = r.payroll as Record<string, unknown> | undefined;
   if (payroll && raw["intake.portal.booksSameAsBusiness"] === "on" && payroll.businessAddress) payroll.booksRecordsAddress = payroll.businessAddress;
+  // NYS-100 P11: a member who is not a US resident has no US address, so no New York county either.
+  for (const o of (payroll?.owners as Record<string, unknown>[] | undefined) ?? []) if (o && o.usResident === false) delete o.county;
 
   const assumed = (r.paperUpload as { assumedName?: Record<string, unknown> } | undefined)?.assumedName;
   if (assumed && raw["intake.portal.nyAllCounties"] === "all") assumed.counties = "all";

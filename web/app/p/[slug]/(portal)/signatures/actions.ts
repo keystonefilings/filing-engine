@@ -14,7 +14,7 @@ export async function addSignature(slug: string, _prev: SigResult, fd: FormData)
   const image = String(fd.get("image") ?? "");
   if (signerName.length < 2) return { ok: false, message: "Enter the signer's full name." };
   if (!image) return { ok: false, message: "Draw the signature in the box." };
-  if (fd.get("consent") !== "on") return { ok: false, message: "The signer has to tick the box to adopt the signature." };
+  if (fd.get("consent") !== "on") return { ok: false, message: "The signer has to check the box to adopt the signature." };
   try {
     const { consentText } = await listSignatures(session.apiKey, session.clientCompanyId);
     await saveSignature(session.apiKey, { clientCompanyId: session.clientCompanyId, signerName, signerEmail, image, consentText, capturedBy: `firm_portal:${session.email}` });

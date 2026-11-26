@@ -1,6 +1,6 @@
 import { randomUUID } from "node:crypto";
-import { wantsPlainCopy } from "../domain/portal-intake.js";
-import { FilingRequest, type FilingRequest as FilingRequestT } from "../domain/filing.js";
+import { feeOptionsFor } from "../fees/request-fees.js";
+import { FilingRequest, FilingState, type FilingRequest as FilingRequestT } from "../domain/filing.js";
 import { hasErrors, validateFiling, type ValidationIssue } from "../domain/validation.js";
 import { checkCompleteness, type CompletenessConfig } from "../domain/completeness.js";
 import { assertTransition, type FilingStatus } from "../domain/states.js";
@@ -23,11 +23,21 @@ import type { ResolvedRegisteredAgent } from "../registered-agents/types.js";
 import type { Notifier } from "../comms/notifier.js";
 import { ConcurrencyLimiter } from "./locks.js";
 import { LeaseLost } from "../browser/guard.js";
-import { njAccount, moAccount, flAccount } from "../settings/accounts.js";
 import { applyPolicies } from "../settings/policies.js";
 import type { ClientCompanySettings, TenantSettings } from "../settings/schema.js";
+import type { ArtifactStore } from "../artifacts/store.js";
+import { documentIssues } from "../documents/supporting.js";
+import type { CapturedReview } from "./run.js";
+import type { SiteAdapter } from "../adapters/types.js";
+import { createHash } from "node:crypto";
+import { cardRefsForFiling } from "../payments/card-vault.js";
+import { CODE_MIN_LEFT_MS, cardOwnerFor, sameOwner, type CardCodes, type CardOwner } from "../payments/card-codes.js";
+import type { PaymentMethodRef } from "../settings/payments.js";
+import type { BillingService } from "../billing/service.js";
 
 export interface FilingServiceDeps {
+  /** Which adapter files a request (tests inject their own); default: the adapter registry. */
+  adapterFor?: (req: FilingRequestT) => SiteAdapter | null;
   store: Store;
   approvals: ApprovalService;
   webhooks: WebhookDispatcher;
@@ -39,8 +49,16 @@ export interface FilingServiceDeps {
   registeredAgents?: RegisteredAgentService; // resolve/procure the registered agent
   notifier?: Notifier; // outbound communication layer (reports back / asks)
   executor?: RunExecutor; // absent on the API tier
+  /** V18: the security codes card owners give for stored cards (payments/card-codes.ts). */
+  cardCodes?: CardCodes;
+  /** Decision 9: our registered agent service, started when a filing that used it is submitted. */
+  agentServices?: Pick<import("../registered-agents/agent-services.js").AgentServices, "start">;
+  /** V33: a live filing needs the payer's subscription in good standing (when billing is required). */
+  billing?: Pick<BillingService, "assertCanFileLive"> & Partial<Pick<BillingService, "recordLiveFiling">>;
   balances?: BalanceProvider;
   limiter?: ConcurrencyLimiter;
+  /** Where uploaded supporting documents are kept, to check a filing names only its own company's (decision 19). */
+  artifacts?: ArtifactStore;
   dryRunDefault: boolean;
   /** Clock for pre-flight checks (IRS hours); injectable for tests. */
   now?: () => Date;
@@ -64,6 +82,33 @@ export class FilingService {
     this.limiter = d.limiter ?? new ConcurrencyLimiter({});
   }
 
+  /**
+   * The state's answer to a submitted filing, when it comes later (the NY receipt email, a Florida
+   * examiner's review, a rejection). Accepted: documents attached here go on the filing, then
+   * filing.accepted and filing.completed (whose email carries them). Rejected: filing.rejected.
+   */
+  async recordOutcome(filingId: string, input: { outcome: "accepted" | "rejected"; reference?: string; reason?: string; by: string; documents?: { label: string; kind: string; contentType: string; body: Buffer }[] }, artifacts?: ArtifactStore): Promise<FilingRecord> {
+    const f = await this.d.store.getFiling(filingId);
+    if (!f) throw new OutcomeError(404, "filing not found");
+    if (f.status !== "submitted") throw new OutcomeError(409, `the filing is ${f.status}; only a submitted filing takes the state's answer`);
+    if (input.outcome === "rejected") {
+      const rejected = await this.transition(f, "rejected", { lastError: input.reason ?? "rejected by the state" });
+      await this.emit("filing.rejected", rejected, { reason: input.reason, reference: input.reference, recordedBy: input.by });
+      return rejected;
+    }
+    let withDocs = f;
+    for (const d of input.documents ?? []) {
+      if (!artifacts) throw new OutcomeError(500, "documents can't be stored here");
+      const meta = await artifacts.put({ filingId: f.id, kind: d.kind as never, label: d.label, contentType: d.contentType }, d.body);
+      withDocs = await this.d.store.updateFiling(f.id, { artifacts: [...withDocs.artifacts, { id: meta.id, kind: d.kind, label: d.label }] });
+    }
+    const accepted = await this.transition(withDocs, "accepted");
+    await this.emit("filing.accepted", accepted, { reference: input.reference, recordedBy: input.by });
+    const done = await this.transition(accepted, "completed");
+    await this.emit("filing.completed", done, { artifacts: done.artifacts, ein: done.ein, reference: input.reference });
+    return (await this.startEinAfterAcceptance(done)) ?? done;
+  }
+
   private async emit(type: EventType, filing: FilingRecord, data: Record<string, unknown> = {}, runId?: string) {
     const tenant = await this.d.store.getTenant(filing.tenantId);
     const event = await this.d.webhooks.emit(type, { tenantId: filing.tenantId, filingId: filing.id, runId }, data, tenant?.webhookEndpoints ?? []);
@@ -80,16 +125,12 @@ export class FilingService {
     if (req.type === "ein_only") return [{ label: "EIN application", amountUsd: 0 }];
     if (req.type === "payroll_registration") return [{ label: `${req.state} payroll / employer registration (no fee)`, amountUsd: 0 }];
     if (req.type === "paper_upload") return paperUploadFees(req);
-    return expectedFees(req.state, req.type, {
-      // The method the NJ adapters will pick on the account the run signs in with.
-      paymentMethod: req.state === "NJ" ? njAccount(tenant, client).feeMethod : req.state === "MO" ? moAccount(tenant, client).feeMethod : req.state === "FL" ? flAccount(tenant, client).feeMethod : undefined,
-      certificateOfStanding: req.formation?.additionalCertificates.certificateOfStanding,
-      certifiedCopy: req.formation?.additionalCertificates.certifiedCopy,
-      plainCopy: wantsPlainCopy(req),
-      entityType: req.standing?.entityType,
-      floridaEntityType: req.formation?.floridaEntityType,
-      nyEntityType: req.formation?.nyEntityType,
-    });
+    return expectedFees(FilingState.parse(req.state), req.type, feeOptionsFor(req, tenant, client));
+  }
+
+  /** A practice filing (dry run): it goes through the government site and stops before submitting. */
+  isPractice(req: Pick<FilingRequestT, "dryRun">): boolean {
+    return req.dryRun ?? this.d.dryRunDefault;
   }
 
   /** POST /v1/filings: validate, store, create the approval, emit awaiting_approval. Idempotent per tenant+key. */
@@ -99,6 +140,10 @@ export class FilingService {
     const client = typeof r0.clientCompanyId === "string" ? await this.d.store.getClientCompany(r0.clientCompanyId) : null;
     if (typeof r0.tenantId === "string" && typeof r0.idempotencyKey === "string") {
       const existing = await this.d.store.findFilingByIdempotency(r0.tenantId, r0.idempotencyKey);
+      // V35: the same key with a different request is a mistake to report, not the old filing to return.
+      if (existing?.requestFingerprint && existing.requestFingerprint !== requestFingerprint(r0)) {
+        throw new IdempotencyConflict(existing.id);
+      }
       if (existing) {
         const a = existing.currentApprovalId ? await this.d.store.getApproval(existing.currentApprovalId) : null;
         return { filing: existing, approvalLink: a && a.status === "pending" ? this.d.approvals.linkFor(a) : undefined, issues: [], existing: true };
@@ -118,13 +163,16 @@ export class FilingService {
     }
     const req = parsed.data;
     if (req.ein && !req.ein.mode) req.ein.mode = client.einMode; // decision 1
+    einAfterFloridaAcceptance(req);
+    // V33: practice filings are always free; a live one needs the subscription (SubscriptionRequired).
+    if (!(req.dryRun ?? this.d.dryRunDefault)) await this.d.billing?.assertCanFileLive(tenant, client);
 
-    const issues = [...applied.issues, ...validateFiling(req)];
+    const issues = [...applied.issues, ...validateFiling(req), ...await documentIssues(this.d.artifacts, req)];
     const now = new Date().toISOString();
     const filing: FilingRecord = {
       id: randomUUID(), tenantId: req.tenantId, clientCompanyId: req.clientCompanyId, idempotencyKey: req.idempotencyKey,
       status: "created", request: req, payloadHash: this.d.approvals.payloadHash(req), createdAt: now, updatedAt: now, artifacts: [],
-      appliedPolicies: applied.provenance,
+      appliedPolicies: applied.provenance, requestFingerprint: requestFingerprint(r0),
     };
     await this.d.store.createFiling(filing);
     if (hasErrors(issues)) {
@@ -135,7 +183,7 @@ export class FilingService {
     // Pre-flight completeness: verify the filing has every piece of info it needs before it proceeds.
     const completeness = checkCompleteness(req, this.completenessConfig(tenant, client));
     if (!completeness.complete) {
-      const f = await this.transition(filing, "awaiting_information", { lastError: `missing: ${completeness.missing.map((m) => m.label).join(", ")}` });
+      const f = await this.transition(filing, "awaiting_information", { lastError: `missing: ${completeness.missing.map((m) => m.label).join(", ")}`, missingInformation: completeness.missing });
       await this.emit("filing.information_required", f, { missing: completeness.missing });
       return { filing: f, issues, existing: false };
     }
@@ -174,18 +222,92 @@ export class FilingService {
         await this.emit("filing.invalid", fi, { issues: invalid });
         return { filing: fi, issues: invalid, existing: false };
       }
-      await this.d.store.updateFiling(filing.id, { registeredAgentResolution: raResolution });
+      filing = await this.d.store.updateFiling(filing.id, { registeredAgentResolution: raResolution });
     }
     await this.emit("filing.validated", filing, { warnings: issues });
-    const approval = await this.d.approvals.create(filing, tenant, client, fees);
+    // Decision 7: where the portal's review screen is mapped, the client approves the state's own
+    // review page, taken by a preview run first; the approval link follows when the preview ends.
+    if (this.wantsPreview(filing.request, tenant)) {
+      const f = await this.startPreview(filing);
+      return { filing: f, issues, existing: false };
+    }
+    const r = await this.requestApproval(filing, tenant, client, fees);
+    return { filing: r.filing, approvalLink: r.link, issues, existing: false };
+  }
+
+  private adapterOf(req: FilingRequestT): SiteAdapter | null {
+    return this.d.adapterFor ? this.d.adapterFor(req) : adapterFor(req);
+  }
+
+  /** Decision 7 applies to live filings whose portal has a mapped review screen. */
+  private wantsPreview(req: FilingRequestT, tenant: TenantSettings): boolean {
+    if ((tenant.approvalPreview ?? "review_page") !== "review_page" || (req.dryRun ?? this.d.dryRunDefault)) return false;
+    return !!this.adapterOf(req)?.steps.some((s) => s.reviewScreen);
+  }
+
+  /** Queues the preview run (a dry run of a filing in "previewing"; see runLeased). */
+  private async startPreview(filing: FilingRecord, reason?: string): Promise<FilingRecord> {
+    const f = await this.transition(filing, "previewing");
+    await this.emit("filing.previewing", f, reason ? { reason } : {});
+    await this.d.queue.enqueue({ kind: "run_filing", filingId: f.id, tenantId: f.tenantId, dryRun: true });
+    return f;
+  }
+
+  /** Preview again (staff or the subscriber): after a preview failed, was blocked or its drift review is done. */
+  async requestPreview(filingId: string): Promise<FilingRecord> {
+    const filing = await this.d.store.getFiling(filingId);
+    if (!filing) throw new OutcomeError(404, "filing not found");
+    if (!["failed", "blocked", "awaiting_drift_review"].includes(filing.status)) throw new OutcomeError(409, `the filing is ${filing.status}; a preview starts from failed, blocked or awaiting_drift_review`);
+    return this.startPreview(filing, "preview requested again");
+  }
+
+  /**
+   * V35: cancel a filing before anything has started at the state. A running or submitted filing
+   * can't be cancelled (the portal may already have it); its pending approval stops working.
+   */
+  async cancelFiling(filingId: string, by: string, reason?: string): Promise<FilingRecord> {
+    const f = await this.d.store.getFiling(filingId);
+    if (!f) throw new OutcomeError(404, "filing not found");
+    const CANCELLABLE = new Set(["created", "invalid", "awaiting_information", "previewing", "awaiting_approval", "changes_requested", "approved", "blocked", "queued", "failed", "awaiting_drift_review", "awaiting_name_resolution", "awaiting_review_gate"]);
+    if (!CANCELLABLE.has(f.status)) throw new OutcomeError(409, `the filing is ${f.status} and can't be cancelled`);
+    if (f.currentApprovalId) {
+      const a = await this.d.store.getApproval(f.currentApprovalId);
+      if (a?.status === "pending") await this.d.store.updateApproval(a.id, { status: "superseded" });
+    }
+    const done = await this.transition(f, "aborted", { lastError: `cancelled by ${by}${reason ? `: ${reason}` : ""}` });
+    await this.emit("filing.aborted", done, { cancelledBy: by, reason });
+    return done;
+  }
+
+  /**
+   * V35: a subscriber that collects its client's approval in its own app records it here. It is the
+   * same decision as the link (single use, bound to the payload); the caller vouches for the person.
+   */
+  async decideByApi(filingId: string, decision: "approve" | "request_changes", via: { by: string; comment?: string; code?: string }) {
+    const f = await this.d.store.getFiling(filingId);
+    if (!f) throw new OutcomeError(404, "filing not found");
+    const a = f.currentApprovalId ? await this.d.store.getApproval(f.currentApprovalId) : null;
+    if (!a || a.status !== "pending" || f.status !== "awaiting_approval") throw new OutcomeError(409, `the filing is ${f.status}; there is no approval waiting`);
+    return this.onApprovalDecision(a.token, decision, { userAgent: `api:${via.by}`, comment: via.comment, code: via.code });
+  }
+
+  /** Creates the approval (with the captured review page, if any) and sends the link. */
+  private async requestApproval(filing: FilingRecord, tenant: TenantSettings, client: ClientCompanySettings, fees: FeeLine[], extra: { review?: CapturedReview; reason?: string } = {}): Promise<{ filing: FilingRecord; link: string }> {
+    const req = filing.request;
+    const approval = await this.d.approvals.create(filing, tenant, client, fees, extra.review);
     const f = await this.transition(filing, "awaiting_approval", { currentApprovalId: approval.id });
     const link = this.d.approvals.linkFor(approval);
+    const ra = filing.registeredAgentResolution;
     await this.emit("filing.awaiting_approval", f, {
       approvalLink: link, expiresAt: approval.expiresAt, recipients: approval.recipients, fees, feeCapUsd: approval.feeCapUsd,
       einInRun: !!req.ein && req.ein.mode === "in_run",
-      registeredAgent: raResolution ? { source: raResolution.source, provider: raResolution.provider, costUsd: raResolution.costUsd, pending: raResolution.pendingProcurement ?? false } : undefined,
+      einAfterAcceptance: !!req.ein && req.ein.mode === "after_acceptance",
+      dryRun: this.isPractice(req),
+      registeredAgent: ra ? { source: ra.source, provider: ra.provider, costUsd: ra.costUsd, pending: ra.pendingProcurement ?? false } : undefined,
+      ...(extra.review ? { reviewPage: true, reviewShotArtifactId: extra.review.artifactId } : {}),
+      ...(extra.reason ? { reason: extra.reason } : {}),
     });
-    return { filing: f, approvalLink: link, issues, existing: false };
+    return { filing: f, link };
   }
 
   /** Supply missing info for a filing in awaiting_information; re-check and proceed to approval when complete. */
@@ -204,7 +326,8 @@ export class FilingService {
     }
     const req = parsed.data;
     if (req.ein && !req.ein.mode) req.ein.mode = client.einMode;
-    const issues = [...applied.issues, ...validateFiling(req)];
+    einAfterFloridaAcceptance(req);
+    const issues = [...applied.issues, ...validateFiling(req), ...await documentIssues(this.d.artifacts, req)];
     const updated = await this.d.store.updateFiling(filing.id, { request: req, payloadHash: this.d.approvals.payloadHash(req), appliedPolicies: applied.provenance });
     if (hasErrors(issues)) {
       const f = await this.transition(updated, "invalid", { lastError: issues.filter((i) => i.severity === "error").map((i) => `${i.path}: ${i.message}`).join("; ") });
@@ -213,11 +336,63 @@ export class FilingService {
     }
     const completeness = checkCompleteness(req, this.completenessConfig(tenant, client));
     if (!completeness.complete) {
-      await this.emit("filing.information_required", updated, { missing: completeness.missing });
+      const still = await this.d.store.updateFiling(updated.id, { missingInformation: completeness.missing, lastError: `missing: ${completeness.missing.map((m) => m.label).join(", ")}` });
+      await this.emit("filing.information_required", still, { missing: completeness.missing });
       return { ok: true as const, complete: false as const, missing: completeness.missing };
     }
-    const result = await this.finalizeFiling(updated, tenant, client, issues);
+    const result = await this.finalizeFiling(await this.d.store.updateFiling(updated.id, { missingInformation: [], lastError: undefined }), tenant, client, issues);
     return { ok: true as const, complete: true as const, filing: result.filing, approvalLink: result.approvalLink };
+  }
+
+  /**
+   * A formation whose EIN waits for the state's acceptance (always in Florida): once accepted, the
+   * EIN application starts as its own filing, with the EIN details the client approved with the
+   * formation. The client isn't asked again; the approval is carried from the formation's.
+   */
+  async startEinAfterAcceptance(parent: FilingRecord): Promise<FilingRecord | null> {
+    const req = parent.request;
+    if (req.type !== "formation" || !req.ein || req.ein.mode !== "after_acceptance") return null;
+    if (parent.status !== "accepted" && parent.status !== "completed") return null; // only once the state has accepted it
+    const idempotencyKey = `${req.idempotencyKey.slice(0, 100)}:ein-after-acceptance`;
+    if (await this.d.store.findFilingByIdempotency(parent.tenantId, idempotencyKey)) return null;
+    const tenant = await this.d.store.getTenant(parent.tenantId);
+    const client = await this.d.store.getClientCompany(parent.clientCompanyId);
+    const parentApproval = parent.currentApprovalId ? await this.d.store.getApproval(parent.currentApprovalId) : null;
+    if (!tenant || !client) return null;
+    const today = (this.d.now?.() ?? new Date()).toISOString().slice(0, 10);
+    const parsed = FilingRequest.safeParse({
+      tenantId: parent.tenantId, clientCompanyId: parent.clientCompanyId, idempotencyKey, type: "ein_only", state: req.state,
+      formation: req.formation, contact: req.contact, approvalRecipients: req.approvalRecipients, dryRun: req.dryRun,
+      ein: { ...req.ein, mode: "in_run", formationState: req.ein.formationState ?? req.state, startDate: req.ein.startDate ?? today },
+      intake: { ...(req.intake ?? {}), einForFilingId: parent.id },
+    });
+    const now = new Date().toISOString();
+    const base = { tenantId: parent.tenantId, clientCompanyId: parent.clientCompanyId, idempotencyKey, createdAt: now, updatedAt: now, artifacts: [] };
+    if (!parsed.success) {
+      const message = parsed.error.issues.map((i) => `${i.path.join(".")}: ${i.message}`).join("; ");
+      const bad: FilingRecord = { ...base, id: randomUUID(), status: "invalid", request: req as never, payloadHash: "", lastError: `EIN after acceptance: ${message}` };
+      await this.d.store.createFiling(bad);
+      await this.emit("filing.invalid", bad, { issues: [{ path: "ein", message, severity: "error" }], einForFilingId: parent.id });
+      return bad;
+    }
+    const child = parsed.data;
+    const issues = validateFiling(child);
+    const filing: FilingRecord = { ...base, id: randomUUID(), status: "created", request: child, payloadHash: this.d.approvals.payloadHash(child) };
+    await this.d.store.createFiling(filing);
+    if (hasErrors(issues) || !parentApproval || parentApproval.status !== "approved") {
+      const why = !parentApproval || parentApproval.status !== "approved" ? "the formation's approval isn't on file" : issues.filter((i) => i.severity === "error").map((i) => `${i.path}: ${i.message}`).join("; ");
+      const f = await this.transition(filing, "invalid", { lastError: `EIN after acceptance: ${why}` });
+      await this.emit("filing.invalid", f, { issues, einForFilingId: parent.id });
+      return f;
+    }
+    const fees = this.feesFor(child, tenant, client);
+    const carried = await this.d.approvals.carryForward(filing, parentApproval, parent, tenant, client, fees);
+    // Through awaiting_approval without a link or an email: the approval is already decided.
+    const waiting = await this.transition((await this.d.store.getFiling(filing.id))!, "awaiting_approval", { currentApprovalId: carried.id });
+    const approved = await this.transition(waiting, "approved");
+    await this.emit("filing.approved", approved, { approvalId: approved.currentApprovalId, carriedFrom: { filingId: parent.id, approvalId: parentApproval.id }, reason: "EIN after the state accepted the formation" });
+    await this.enqueueRun(approved.id);
+    return approved;
   }
 
   /** Link decision (decision 2). Approve -> queued for a run; request changes -> back to the caller. */
@@ -235,6 +410,69 @@ export class FilingService {
       await this.emit("filing.changes_requested", f, { comment: via.comment });
     }
     return result;
+  }
+
+  /** The card that pays this filing when its owner hasn't given its security code for the hour. */
+  private async cardCodeNeeded(filing: FilingRecord, tenant: TenantSettings, client: ClientCompanySettings, fees: FeeLine[]): Promise<{ owner: CardOwner; card: PaymentMethodRef } | null> {
+    const codes = this.d.cardCodes;
+    // Only a worker that can read stored cards pays with one.
+    if (!codes || !this.d.executor?.readsStoredCards || fees.reduce((s, f) => s + f.amountUsd, 0) <= 0) return null;
+    const card = cardRefsForFiling(filing, tenant, client).find((r) => r.provider === "basis_theory");
+    if (!card) return null;
+    const owner = cardOwnerFor(tenant, client);
+    return (await codes.fresh(owner, card.id, CODE_MIN_LEFT_MS)) ? null : { owner, card };
+  }
+
+  private async waitForCardCode(filing: FilingRecord, tenant: TenantSettings, client: ClientCompanySettings, need: { owner: CardOwner; card: PaymentMethodRef }) {
+    const { owner, card } = need;
+    const already = (await this.d.store.listFilingsByStatus(["blocked"], [filing.tenantId]))
+      .some((f) => f.id !== filing.id && f.awaitingCardCode?.methodId === card.id && sameOwner(f.awaitingCardCode.owner, owner));
+    const named = `${card.label}${card.last4 ? ` ending ${card.last4}` : ""}`;
+    const f = await this.transition(filing, "blocked", {
+      lastError: `waiting for the security code of ${named}`,
+      awaitingCardCode: { methodId: card.id, label: card.label, last4: card.last4, owner, since: new Date().toISOString() },
+    });
+    // One email per card while filings wait on it; the dashboard lists every waiting filing.
+    const recipients = already ? [] : await this.cardOwnerRecipients(owner, tenant, client);
+    const slug = owner.clientCompanyId && client.portal?.slug && client.partner ? client.portal.slug : undefined;
+    await this.emit("filing.card_code_needed", f, {
+      methodId: card.id, card: named, owner: owner.clientCompanyId ? "firm" : "subscriber", recipients,
+      webPath: slug ? `/p/${encodeURIComponent(slug)}/pay` : "/dashboard/pay",
+    });
+  }
+
+  /** Who can type a card's code: the firm's own users (and its contact), else the subscriber's staff. */
+  private async cardOwnerRecipients(owner: CardOwner, tenant: TenantSettings, client: ClientCompanySettings) {
+    const users = (await this.d.store.listUsers(owner.tenantId)).filter((u) => u.status === "active");
+    const firmUsers = owner.clientCompanyId ? users.filter((u) => u.clientCompanyId === owner.clientCompanyId) : [];
+    let list = firmUsers.map((u) => ({ channel: "email", address: u.email, name: u.name }));
+    if (owner.clientCompanyId && client.partner?.contactEmail) list.push({ channel: "email", address: client.partner.contactEmail, name: client.partner.contactName ?? "" });
+    if (!list.length) list = users.filter((u) => u.kind === "enterprise").map((u) => ({ channel: "email", address: u.email, name: u.name }));
+    if (!list.length) list = tenant.adminChannels.map((c) => ({ channel: c.channel, address: c.address, name: c.name ?? "" }));
+    return list.filter((r, i) => list.findIndex((o) => o.address.toLowerCase() === r.address.toLowerCase()) === i);
+  }
+
+  /**
+   * V18: the card's owner gave its security code (a Basis Theory token id that expires within the
+   * hour). Every filing waiting for that card goes back in the queue at once.
+   */
+  async supplyCardCode(owner: CardOwner, methodId: string, tokenId: string, expiresAt?: string, by?: string): Promise<{ expiresAt: string; queued: string[] }> {
+    if (!this.d.cardCodes) throw new Error("no card code store");
+    const exp = await this.d.cardCodes.put(owner, methodId, tokenId, expiresAt, by);
+    const waiting = await this.filingsAwaitingCardCode(owner, methodId);
+    const queued: string[] = [];
+    for (const f of waiting) {
+      await this.d.store.updateFiling(f.id, { awaitingCardCode: undefined, lastError: undefined });
+      await this.enqueueRun(f.id);
+      queued.push(f.id);
+    }
+    return { expiresAt: exp, queued };
+  }
+
+  /** Filings approved and waiting for a card's code; with no owner, every one in the tenant. */
+  async filingsAwaitingCardCode(owner: CardOwner, methodId?: string, opts: { anyOwner?: boolean } = {}): Promise<FilingRecord[]> {
+    return (await this.d.store.listFilingsByStatus(["blocked"], [owner.tenantId]))
+      .filter((f) => f.awaitingCardCode && (opts.anyOwner || sameOwner(f.awaitingCardCode.owner, owner)) && (!methodId || f.awaitingCardCode.methodId === methodId));
   }
 
   async enqueueRun(filingId: string): Promise<void> {
@@ -307,8 +545,10 @@ export class FilingService {
     if (!tenant || !client) return;
     const approval = filing.currentApprovalId ? await store.getApproval(filing.currentApprovalId) : null;
     const dryRun = dryRequested;
-    const adapter = adapterFor(filing.request);
+    const adapter = this.adapterOf(filing.request);
     const priorStatus = filing.status;
+    // A dry run of a filing in "previewing" is the decision-7 preview: it captures the review page.
+    const preview = dryRun && filing.status === "previewing";
 
     const pf = await preflight({
       filing, approval, tenant, client, adapter, einAdapter: irsEinAdapter, approvals: this.d.approvals, vault: this.d.vault,
@@ -318,6 +558,12 @@ export class FilingService {
       const f = filing.status === "queued" || filing.status === "approved" ? await this.transition(filing, "blocked", { lastError: pf.blockers.join("; ") }) : await store.updateFiling(filing.id, { lastError: pf.blockers.join("; ") });
       await this.emit("filing.blocked", f, { blockers: pf.blockers, warnings: pf.warnings, dryRun });
       return;
+    }
+
+    // V18: a checkout that takes a stored card needs its security code, given by the card's owner.
+    if (!dryRun && adapter.paysWithCard) {
+      const need = await this.cardCodeNeeded(filing, tenant, client, approval?.fees ?? []);
+      if (need) { await this.waitForCardCode(filing, tenant, client, need); return; }
     }
 
     const releaseSite = await this.limiter.acquire(`site:${adapter.site}`);
@@ -330,18 +576,28 @@ export class FilingService {
       const outcome = await executor.execute({
         filing: running, approval, tenant, client, adapter, einAdapter: irsEinAdapter, dryRun, expectedFees: approval?.fees ?? fees,
         reviewGateApproved: !!running.reviewGate, assertLease,
+        previewCapture: preview,
+        approvedReview: !dryRun && approval?.review ? { screenKey: approval.review.screenKey, fingerprint: approval.review.fingerprint } : undefined,
       });
       const latest = (await store.getFiling(filing.id))!;
       switch (outcome.kind) {
         case "submitted": {
           const f = await this.transition(latest, "submitted", { currentRunId: outcome.run.id, ein: outcome.ein ?? latest.ein });
+          await this.d.agentServices?.start(f, tenant, client).catch((e: Error) => console.error("agent service start failed", f.id, e.message));
+          await this.d.billing?.recordLiveFiling?.(f, tenant, client).catch((e: Error) => console.error("filing usage not recorded", f.id, e.message));
           if (outcome.ein) await this.emit("filing.ein_filed", f, { ein: outcome.ein }, outcome.run.id);
           await this.emit("filing.submitted", f, { site: adapter.site, artifacts: f.artifacts }, outcome.run.id);
           // NJ returns documents at once and the IRS assigns the EIN on the spot; NY waits for the
           // receipt email (inbox module, build order 3).
           if (adapter.site === "NJ" || adapter.site === "IRS") {
-            const done = await this.transition(await this.transition(f, "accepted"), "completed");
+            const accepted = await this.transition(f, "accepted");
+            await this.emit("filing.accepted", accepted, { site: adapter.site, ein: accepted.ein }, outcome.run.id);
+            const done = await this.transition(accepted, "completed");
             await this.emit("filing.completed", done, { artifacts: done.artifacts, ein: done.ein }, outcome.run.id);
+            await this.startEinAfterAcceptance(done);
+            // An EIN applied for after a formation was accepted goes back on that formation too.
+            const parentId = (done.request.intake as { einForFilingId?: string } | undefined)?.einForFilingId;
+            if (done.request.type === "ein_only" && done.ein && parentId) await store.updateFiling(parentId, { ein: done.ein });
           }
           break;
         }
@@ -352,6 +608,20 @@ export class FilingService {
             dryRun: true, stoppedBefore: outcome.stoppedBefore, steps: outcome.run.steps.length,
             ...(outcome.einPlaceholder ? { einPlaceholder: true } : { ein: outcome.ein }),
           }, outcome.run.id);
+          if (preview) {
+            // The preview's end is the approval's start: with the review page when it was reached,
+            // or with the data alone when the run stopped before it.
+            await this.requestApproval(f, tenant, client, fees, outcome.review
+              ? { review: outcome.review }
+              : { reason: "the state's review page could not be captured; approve the data shown" });
+          }
+          break;
+        }
+        case "review_mismatch": {
+          // Nothing was paid or submitted. The client approves the page the state shows now.
+          const blocked = await this.transition(latest, "blocked", { currentRunId: outcome.run.id, lastError: "the state's review page changed since it was approved; a new preview and approval are on the way" });
+          await this.emit("filing.blocked", blocked, { blockers: [blocked.lastError!], screenKey: outcome.screenKey }, outcome.run.id);
+          await this.startPreview(blocked, "the state's review page changed since approval");
           break;
         }
         case "drift_halt": {
@@ -363,7 +633,7 @@ export class FilingService {
           // A dry run previews only; name resolution runs for real runs.
           if (!dryRun && this.d.nameResolution && (tenant.nameResolution?.enabled ?? true) && latest.request.formation) {
             const rec = await this.d.nameResolution.open({
-              filing: latest, site: outcome.site, state: latest.request.state,
+              filing: latest, site: outcome.site, state: FilingState.parse(latest.request.state),
               requested: { baseName: outcome.requestedName.baseName, designator: outcome.requestedName.designator },
               purpose: outcome.purpose, runId: outcome.run.id,
             });
@@ -421,6 +691,14 @@ export class FilingService {
     }
     await this.emit("filing.drift_resolved", filing, { haltId, status: halt.status, requiresClientReapproval: halt.requiresClientReapproval });
     if (filing.status !== "awaiting_drift_review") return halt; // dry run or already moved on
+    const tenantNow = await this.d.store.getTenant(filing.tenantId);
+    const approvalNow = filing.currentApprovalId ? await this.d.store.getApproval(filing.currentApprovalId) : null;
+    // Halted during a preview (nothing approved yet), or the client must approve again where the
+    // review page is what they approve: take a new preview first.
+    if (tenantNow && this.wantsPreview(filing.request, tenantNow) && (approvalNow?.status !== "approved" || halt.requiresClientReapproval)) {
+      await this.startPreview(filing, halt.requiresClientReapproval ? "form changed: new required field" : "site change reviewed");
+      return halt;
+    }
     if (halt.requiresClientReapproval) {
       const tenant = (await this.d.store.getTenant(filing.tenantId))!;
       const client = (await this.d.store.getClientCompany(filing.clientCompanyId))!;
@@ -454,9 +732,21 @@ export class FilingService {
       const req = JSON.parse(JSON.stringify(filing.request)) as typeof filing.request;
       if (req.formation) { req.formation.name.baseName = rec.chosen.baseName; req.formation.name.designator = rec.chosen.designator; }
       const updated = await this.d.store.updateFiling(filing.id, { request: req, payloadHash: this.d.approvals.payloadHash(req) });
+      const prior = filing.currentApprovalId ? await this.d.store.getApproval(filing.currentApprovalId) : null;
+      if (prior?.status !== "approved") {
+        // Halted during the decision-7 preview: the client hasn't approved anything yet, so an admin
+        // can't approve for them. The new name goes through a new preview and the client's approval.
+        const reloaded = (await this.d.store.getFiling(filing.id))!;
+        if (reloaded.status === "awaiting_name_resolution") {
+          await this.emit("filing.name_resolved", reloaded, { resolutionId: rec.id, chosenName: rec.chosen.name, by: rec.decidedBy });
+          if (this.wantsPreview(reloaded.request, tenant)) await this.startPreview(reloaded, `name changed to ${rec.chosen.name}`);
+          else await this.requestApproval(reloaded, tenant, client, this.feesFor(req, tenant, client), { reason: `name changed to ${rec.chosen.name}` });
+        }
+        return result;
+      }
       let fees: FeeLine[];
       try { fees = this.feesFor(req, tenant, client); }
-      catch { const prior = filing.currentApprovalId ? await this.d.store.getApproval(filing.currentApprovalId) : null; fees = prior?.fees ?? []; }
+      catch { fees = prior?.fees ?? []; }
       await this.d.approvals.adminReauthorize(updated, tenant, client, fees, rec.decidedBy ?? "admin");
       const reloaded = (await this.d.store.getFiling(filing.id))!;
       if (reloaded.status === "awaiting_name_resolution") {
@@ -564,4 +854,30 @@ function deepMerge(base: Record<string, unknown>, patch: Record<string, unknown>
       : v;
   }
   return out;
+}
+
+export class IdempotencyConflict extends Error {
+  constructor(readonly filingId: string) { super("this idempotency key was already used for a different request"); }
+}
+
+/** A stable hash of a submitted request (key order ignored), to tell a retry from a different request. */
+export function requestFingerprint(raw: Record<string, unknown>): string {
+  const stable = (v: unknown): unknown => Array.isArray(v) ? v.map(stable)
+    : v && typeof v === "object" ? Object.fromEntries(Object.keys(v as object).sort().map((k) => [k, stable((v as Record<string, unknown>)[k])])) : v;
+  const { idempotencyKey: _k, ...rest } = raw;
+  return createHash("sha256").update(JSON.stringify(stable(rest))).digest("hex");
+}
+
+export class OutcomeError extends Error {
+  constructor(readonly status: number, message: string) { super(message); }
+}
+
+/**
+ * A formation's EIN: the LLC is formed in the filing's own state, and in Florida the EIN is
+ * applied for only once the state accepts the formation (Yakov, Nov 26), unlike NY and NJ.
+ */
+function einAfterFloridaAcceptance(req: FilingRequestT): void {
+  if (req.type !== "formation" || !req.ein) return;
+  if (!req.ein.formationState) req.ein.formationState = req.state;
+  if (req.state === "FL" && req.ein.mode === "in_run") req.ein.mode = "after_acceptance";
 }

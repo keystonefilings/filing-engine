@@ -3,10 +3,13 @@ import { tmpdir } from "node:os";
 import path from "node:path";
 import type { PaperUploadDetails } from "../../domain/filing.js";
 import { fillNyForm, formSignerName } from "../../pdf-forms/ny-dos.js";
+import { appendDocuments, documentRefs } from "../../documents/supporting.js";
 import { tenantVaultKey } from "../../settings/accounts.js";
 import type { ScreenIntents } from "../../resolver/types.js";
 import type { ScreenStep, SiteAdapter, StepContext } from "../types.js";
 import { NY_ESUBMISSION_SCREENS } from "../ny-formation/intents.js";
+import { copyCc } from "../copies.js";
+import { drawdownPaymentStep, recordPaymentScreen } from "../ny-dos/common.js";
 
 /**
  * NY DOS E-Submission (docs/portal-maps/ny-dos-corporations.md, Screen L): the engine fills the
@@ -49,14 +52,8 @@ const ENTITY_SELECTION: ScreenIntents = {
     { key: "entityName", labels: ["Entity Name"], kinds: ["text"], required: false },
   ],
 };
-const PAYMENT: ScreenIntents = {
-  screenKey: "ny.esub.payment",
-  title: "Payment",
-  intents: [
-    { key: "drawdownAccount", labels: ["Drawdown Account"], kinds: ["select"], required: true },
-    { key: "paymentAuthorization", labels: ["Payment Authorization"], kinds: ["checkbox"], required: true, note: "STOP: ticked only inside the approved submit" },
-  ],
-};
+/** Screen L4 is the same draw-down payment page as the record filings' ("Payment (as H)"). */
+const PAYMENT: ScreenIntents = recordPaymentScreen("ny.esub.payment", "Payment");
 
 /** The generated PDF for this run, kept for the artifacts after submit. */
 const generated = new Map<string, { name: string; body: Buffer }>();
@@ -124,7 +121,15 @@ const filingInformation: ScreenStep = {
     const sig = ctx.dryRun ? null : await ctx.signatureForForm(u.signatureId, formSignerName(u));
     // A real run never uploads an unsigned form: DOS rejects it and the fee is still charged.
     if (sig && !sig.ok) throw new Error(`the form can't be signed: ${sig.reason}`);
-    const pdf = Buffer.from(await fillNyForm(u, { dryRun: ctx.dryRun, signaturePng: sig?.ok ? sig.png : null }));
+    const form = await fillNyForm(u, { dryRun: ctx.dryRun, signaturePng: sig?.ok ? sig.png : null });
+    // Decision 19: the Certificate of Existence (and the Tax Commission consent) go in after the form, as one PDF.
+    const docs: Buffer[] = [];
+    for (const ref of documentRefs({ paperUpload: u })) {
+      const d = await ctx.supportingDocument(ref.id, ref.kind);
+      if (!d.ok) throw new Error(`the form can't be uploaded without it: ${d.reason}`);
+      docs.push(d.body);
+    }
+    const pdf = Buffer.from(await appendDocuments(form, docs));
     const name = `${u.form === "ny_application_for_authority" ? "DOS-1335" : "DOS-1338"}-${ctx.filing.id.slice(0, 8)}${ctx.dryRun ? "-dry-run" : ""}.pdf`;
     generated.set(ctx.filing.id, { name, body: pdf });
     const dir = path.join(tmpdir(), "keystone-forms");
@@ -138,12 +143,15 @@ const filingInformation: ScreenStep = {
     }
     const contact = ctx.filing.request.contact;
     if (contact?.email) await ctx.set("email", contact.email);
+    // V28: CC the firm's copy address, as on the online filing screen (adapters/copies.ts).
+    const cc = copyCc(ctx);
+    if (cc && cc.toLowerCase() !== contact?.email?.toLowerCase()) await ctx.set("ccEmail", cc);
     await ctx.set("customerReference", ctx.filing.request.idempotencyKey.slice(0, 30));
     const levels = { routine: "ROUTINE", "24_hour": "24 HOUR", same_day: "SAME DAY", "2_hour": "2 HOUR" } as const;
     await ctx.set("levelOfService", levels[u.levelOfService]);
     if (u.plainCopy) await ctx.set("plainCopy", true);
     if (u.certifiedCopy) await ctx.set("certifiedCopy", true);
-    await ctx.note(`uploaded ${name}${ctx.dryRun ? " (dry run, unsigned)" : " (signed)"}`);
+    await ctx.note(`uploaded ${name}${ctx.dryRun ? " (dry run, unsigned)" : " (signed)"}${docs.length ? ` with ${docs.length} supporting document${docs.length > 1 ? "s" : ""} after the form` : ""}`);
   },
   async advance(ctx) {
     await ctx.actAndSettle(() => ctx.clickButton(/continue/i));
@@ -152,24 +160,9 @@ const filingInformation: ScreenStep = {
   },
 };
 
-const payment: ScreenStep = {
-  screen: PAYMENT,
-  paymentScreen: true,
-  submitScreen: true,
-  async fill(ctx) {
-    const acct = ctx.field("drawdownAccount");
-    const opts = (acct?.options ?? []).filter((o) => o.value && !/select one/i.test(o.label));
-    if (opts.length !== 1) throw new Error(`expected exactly one draw-down account, found ${opts.length}; pick one in the tenant settings first`);
-    await ctx.set("drawdownAccount", opts[0]!.label);
-  },
-  async advance(ctx) {
-    // Payment Authorization is part of the approved submit: a dry run stops before it is ticked.
-    await ctx.submit("ny.esub.submit", async () => {
-      await ctx.set("paymentAuthorization", true);
-      await ctx.clickButton(/^submit$/i);
-    });
-  },
-};
+// The account in force (or the only one listed), the balance against the approved total, then
+// Payment Authorization and Submit inside the submit guard: a dry run stops before it is ticked.
+const payment: ScreenStep = drawdownPaymentStep(PAYMENT);
 
 export const nyESubmissionAdapter: SiteAdapter = {
   site: "NY",

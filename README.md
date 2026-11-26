@@ -1,4 +1,4 @@
-# Keystone filing engine
+# CoFile filing engine
 
 API + webhook service whose worker drives government filing sites live. See `docs/plan-review.md` for the plan, decisions and walk checklists, and `docs/filing-auto-fill-mapping.md` for the field map from the Nov 14 walk.
 
@@ -40,12 +40,12 @@ npm test && npm run typecheck && npx next build
 ```
 
 ## Deployment and walks
-- `docs/deploy-fly.md`: Keystone's deployment on Fly.io with a Neon database, Fly object storage and every browser on Steel.
+- `docs/deploy-fly.md`: the deployment on Fly.io with a Neon database, Fly object storage and every browser on Steel.
 - `docs/fixed-ip-machine.md`: which portals serve which network, Steel setup and saved sign-ins, and other layouts (a single machine with docker compose); `npm run probe-sites` checks the routes.
 - `docs/walks/HOW-TO-RUN-THE-WALKS.md`: `npm run walk -- <name> --url <start>` records a person-driven walk and blocks Pay/Submit.
 - `docs/walks/CHATGPT-WALK-INSTRUCTIONS.md`: hand this to an assistant helping on a person's computer; it ends with a fixed report format.
 - `docs/walks/2026-11-17.md`: what the Nov 17 walks found.
-- `docs/scope.md`: the two products (Scope 1 platform for filing service companies; Scope 2 Keystone's front end for CPAs, title and payroll companies) and the four levels.
+- `docs/scope.md`: the two products (Scope 1 platform for filing service companies; Scope 2 CoFile's front end for CPAs, title and payroll companies) and the four levels.
 - `docs/onboarding/service-company.md`: what a filing service company answers when it subscribes (its accounts, people, channels, defaults and locks for its customers).
 - `site/landing.html`: the platform landing page (published as a private Claude page; editable design in the Figma file "Filing Engine — Landing page"). It is page content only: the publisher adds the html/head/body wrapper.
 - `docs/onboarding/customer-firm.md`: what each customer firm answers; becomes `policies` on its record and fills each filing.

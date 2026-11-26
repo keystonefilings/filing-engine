@@ -1,0 +1,12 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><script src="_records.js"></script><title>Certificate of Amendment: Filing Information (replica)</title>
+<script>function next() { if (!NYR.attested()) return; location.href = "amendment-preview.html"; }</script></head><body><script>NYR.chrome()</script>
+<h1>Certificate of Amendment (name change only)</h1>
+<div id="err" role="alert" hidden></div>
+<script>NYR.entityInfo()</script>
+<h3>Amendment</h3>
+<p>The name of the limited liability company is hereby amended to read as follows:</p>
+<script>document.write('<p><label for="new-name">*New Name of the Company</label> <input id="new-name" type="text" readonly value="' + NYR.get("newname", "") + '"></p>');</script>
+<script>NYR.attestation("Certificate of Amendment"); NYR.filer();</script>
+<h3>Fees</h3><script>NYR.fees([["Domestic LLC Fee", 60]])</script>
+<p><button type="button" onclick="history.back()">&lt; Go Back</button> <button type="button">Reset</button> <button type="button" onclick="next()">Continue &gt;</button></p>
+</body></html>

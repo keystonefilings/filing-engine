@@ -1,0 +1,26 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><script src="_records.js"></script><title>Certificate of Change: Change Selection (replica)</title>
+<script>
+var TYPES = [["county", "Entity County Location (Edit)"], ["sop", "Service of Process Recipient and Mailing Address (Edit)"], ["sopEmail", "Service of Process Email Address (Add/Edit)"],
+  ["raAdd", "Designate Registered Agent (Add)"], ["raAddress", "Registered Agent Address (Edit)"], ["raName", "Name of Registered Agent (Edit)"], ["raRevoke", "Revocation of Registered Agent (Delete)"]];
+function next() {
+  var picked = TYPES.filter(function (t) { return document.getElementById("ct-" + t[0]).checked; }).map(function (t) { return t[0]; });
+  if (!picked.length) { document.getElementById("err").hidden = false; return; }
+  NYR.set("changes", picked);
+  location.href = "change-form.html";
+}
+</script></head><body><script>NYR.chrome()</script>
+<h1>Certificate of Change: By Entity</h1>
+<h2>Change Selection</h2>
+<p>A certificate of change may change the entity's county, its service of process recipient, address and email, and its registered agent.</p>
+<div id="err" role="alert" hidden>Select at least one change type.</div>
+<h3>Select at least one change type (check all that apply)</h3>
+<script>
+// Options grey out depending on whether a registered agent is on file.
+var hasAgent = NYR.entity().agentOnFile;
+TYPES.forEach(function (t) {
+  var off = t[0] === "raAdd" ? hasAgent : (t[0] === "raAddress" || t[0] === "raName" || t[0] === "raRevoke") ? !hasAgent : false;
+  document.write('<p><label><input type="checkbox" id="ct-' + t[0] + '"' + (off ? " disabled" : "") + "> " + t[1] + "</label></p>");
+});
+</script>
+<p><button type="button" onclick="history.back()">&lt; Go Back</button> <button type="button">Reset</button> <button type="button" onclick="next()">NEXT &gt;</button></p>
+</body></html>

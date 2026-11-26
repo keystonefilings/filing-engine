@@ -6,7 +6,7 @@ import { createCipheriv, createDecipheriv, createHash, randomBytes } from "node:
  * so a cookie can never be replayed as an invite link or the other way round.
  */
 
-export type Purpose = "session" | "staff-invite" | "client-intake";
+export type Purpose = "session" | "staff-invite" | "client-intake" | "google-oauth";
 
 const MIN_SECRET = 32;
 

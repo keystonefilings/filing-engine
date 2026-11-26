@@ -1,11 +1,15 @@
 /** The platform's own name, shown on the docs and the dashboard (firm portals show the firm's brand). */
 export function platformName(): string {
-  return process.env.PLATFORM_NAME?.trim() || "Keystone Filings";
+  return process.env.PLATFORM_NAME?.trim() || "CoFile";
 }
 
-/** The engine's public URL as callers use it, for the docs and the OpenAPI servers entry. */
+/**
+ * The engine's public URL as callers use it, for the docs and the OpenAPI servers entry. Never
+ * ENGINE_API_URL: that is the server-side address. Decision 14 (Nov 26): the engine is its own
+ * deployment at api.cofile.app; the site is https://cofile.app.
+ */
 export function publicApiUrl(): string {
-  return (process.env.ENGINE_PUBLIC_URL ?? process.env.ENGINE_API_URL ?? "https://api.example.com").replace(/\/+$/, "");
+  return (process.env.ENGINE_PUBLIC_URL?.trim() || "https://api.cofile.app").replace(/\/+$/, "");
 }
 
 /** Only #rgb / #rrggbb colors reach the page's CSS. */
@@ -43,3 +47,11 @@ export function partnerApprovalRequired(): boolean {
 export function isPlatformTenant(tenantId: string): boolean {
   return tenantId === (process.env.PLATFORM_TENANT_ID?.trim() || "keystone");
 }
+
+/** Where people reach us (decided Nov 26). One setting for the site, its emails and the legal pages. */
+export function supportEmail(): string {
+  return process.env.SUPPORT_EMAIL?.trim() || "hello@cofile.app";
+}
+
+/** The version of the Terms and Privacy Policy a sign-up agrees to (the effective date). */
+export const TERMS_VERSION = "2026-11-26";

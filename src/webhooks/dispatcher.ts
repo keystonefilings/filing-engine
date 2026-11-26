@@ -11,7 +11,7 @@ export function signPayload(secret: string, timestamp: string, body: string): st
   return createHmac("sha256", secret).update(`${timestamp}.${body}`).digest("hex");
 }
 
-/** For consumers: verify `X-Keystone-Signature: t=<unix>,v1=<hex>` against the raw body. */
+/** For consumers: verify `X-CoFile-Signature: t=<unix>,v1=<hex>` against the raw body. */
 export function verifySignature(secret: string, header: string, body: string, toleranceSec = 300, now = Date.now()): boolean {
   const m = /t=(\d+),v1=([0-9a-f]+)/.exec(header);
   if (!m) return false;
@@ -75,9 +75,9 @@ export class WebhookDispatcher {
     const ts = String(Math.floor(this.now().getTime() / 1000));
     const headers: Record<string, string> = {
       "content-type": "application/json",
-      "x-keystone-event": d.event.type,
-      "x-keystone-delivery": d.id,
-      "x-keystone-signature": `t=${ts},v1=${signPayload(secret, ts, body)}`,
+      "x-cofile-event": d.event.type,
+      "x-cofile-delivery": d.id,
+      "x-cofile-signature": `t=${ts},v1=${signPayload(secret, ts, body)}`,
     };
     let status = 0, error: string | undefined;
     try {

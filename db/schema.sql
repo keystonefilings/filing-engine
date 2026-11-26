@@ -163,6 +163,56 @@ create table if not exists users (
 );
 create index if not exists users_tenant_idx on users (tenant_id);
 
+-- Portal logins (V29): sealed with AES-256-GCM (DATA_ENCRYPTION_KEY) before they reach this table.
+create table if not exists vault_secrets (
+  key text primary key,
+  tenant_id text not null,
+  sealed text not null,
+  updated_at timestamptz not null default now()
+);
+
+-- V40: filing requests firms email in (text sealed under DATA_ENCRYPTION_KEY, purged with SSNs).
+create table if not exists inbound_messages (
+  id uuid primary key,
+  tenant_id text not null,
+  client_company_id text not null,
+  provider_id text not null unique,
+  received_at timestamptz not null,
+  doc jsonb not null
+);
+
+-- Decision 9: our registered agent service per business, charged to the partner firm each year.
+create table if not exists agent_services (
+  id uuid primary key,
+  tenant_id text not null,
+  client_company_id text not null,
+  filing_id text not null unique,
+  status text not null,
+  next_charge_at timestamptz not null,
+  doc jsonb not null
+);
+create index if not exists agent_services_due_idx on agent_services (status, next_charge_at);
+create index if not exists agent_services_firm_idx on agent_services (client_company_id);
+
+-- V33: each paying account's Stripe subscription (apart from settings, which approvals are bound to).
+create table if not exists billing_accounts (
+  id text primary key,
+  tenant_id text not null,
+  customer_id text unique,
+  updated_at timestamptz not null default now(),
+  doc jsonb not null
+);
+
+-- Client links (V26): one link, one client, one filing; listed and revocable by the firm.
+create table if not exists intake_links (
+  id text primary key,
+  tenant_id text not null,
+  client_company_id text not null,
+  created_at timestamptz not null default now(),
+  doc jsonb not null
+);
+create index if not exists intake_links_company_idx on intake_links (client_company_id, created_at desc);
+
 -- Enterprise contact-form requests from the landing page.
 create table if not exists inquiries (
   id uuid primary key,

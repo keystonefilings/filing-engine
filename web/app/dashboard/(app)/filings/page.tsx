@@ -28,7 +28,7 @@ export default async function AllFilings({ searchParams }: { searchParams: Promi
                 <td>{filingTitle(f)}{f.request.dryRun ? <span className="badge" style={{ marginLeft: 6 }}>Test</span> : null}<div className="small muted"><code>{f.id}</code></div></td>
                 <td className="small">{names.get(f.clientCompanyId) ?? f.clientCompanyId}</td>
                 <td className="small">{f.request.state} {f.request.type.replace(/_/g, " ")}</td>
-                <td><StatusBadge status={f.status} /></td>
+                <td><StatusBadge status={f.status} />{f.awaitingCardCode ? <div className="small"><a href="/dashboard/pay">Ready to pay: needs the card&apos;s code</a></div> : null}</td>
                 <td className="small muted">{new Date(f.createdAt).toLocaleDateString()}</td>
               </tr>
             ))}

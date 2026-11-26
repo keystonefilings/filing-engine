@@ -2,6 +2,7 @@ import { z } from "zod";
 import { Address, ApprovalRecipient, Contact, EinMode, Person } from "../domain/filing.js";
 import { FirmPolicyAnswers } from "./policies.js";
 import { PaymentSettings } from "./payments.js";
+import { FONT_CHOICES } from "./fonts.js";
 
 /**
  * Tenant = a filing service company subscribing to the platform (Scope 1). Keystone is one
@@ -83,6 +84,8 @@ export const TenantSettings = z.object({
   defaultApprovers: z.array(ApprovalRecipient).default([]),
   /** Vault key for the ny.gov service-company login (username/password/totp). Company-wide. */
   nyGovCredentialKey: z.string().default("NYGOV"),
+  /** V29: the NY.gov business account for NYS-100, if it isn't the same login as NY DOS's. */
+  nyPayrollCredentialKey: z.string().optional(),
   /** The service company's own Missouri SOS online-filing login (vault key, scoped to this tenant). */
   moAccountCredentialKey: z.string().optional(),
   /** Payment method chosen at the Missouri checkout: credit_card or echeck. */
@@ -116,6 +119,12 @@ export const TenantSettings = z.object({
    * to approve before submission. Off in production (the run goes straight through).
    */
   betaReviewGate: z.boolean().default(false),
+  /** V31: where the state's copies should also go (the CC field where a portal has one). */
+  copyEmail: z.string().email().optional(),
+  /** Decision 7. review_page: before approval a dry run takes the state's own review page, the
+   *  client approves that screenshot, and the live run must reproduce it before paying. payload:
+   *  the client approves the data alone (also the fallback where no review screen is mapped). */
+  approvalPreview: z.enum(["review_page", "payload"]).default("review_page"),
   /** Name-unavailability flow: generate alternatives, admin picks an available one. */
   nameResolution: z.object({
     enabled: z.boolean().default(true),
@@ -159,6 +168,8 @@ export const ClientCompanySettings = z.object({
   clientCompanyId: z.string().min(1),
   tenantId: z.string().min(1),
   name: z.string().min(1),
+  /** V31: where the state's copies should also go for this firm's filings (the CC field where a portal has one). */
+  copyEmail: z.string().email().optional(),
   /** Default filing state for this client ("state selector", requirement 7). */
   defaultState: z.enum(["NY", "NJ", "MO", "FL"]).optional(),
   /** Decision 1: per-client-company EIN timing. */
@@ -176,6 +187,8 @@ export const ClientCompanySettings = z.object({
   njStoredPaymentMethod: z.enum(["stored_card", "stored_echeck"]).optional(),
   /** This firm's own NY drawdown account; used only when answer G1 is "own_account". */
   nyDrawdownAccountRef: z.string().optional(),
+  /** V22: the firm's own registered agent per state, used when a filing names none. */
+  registeredAgentsByState: z.object({ NY: Person.optional(), NJ: Person.optional(), FL: Person.optional(), MO: Person.optional() }).optional(),
   registeredAgent: Person.optional(),
   /** This firm's default registered-agent choice for its filings: none, bring its own, or let the filing company provide it. */
   registeredAgentChoice: z.enum(["none", "client_provided", "filing_company"]).optional(),
@@ -218,9 +231,14 @@ export const ClientCompanySettings = z.object({
   portal: z.object({
     slug: z.string().regex(/^[a-z0-9](?:[a-z0-9-]{0,46}[a-z0-9])?$/, "lowercase letters, digits and dashes"),
     displayName: z.string().min(1).max(80).optional(),
+    /** V39: public pages and the website widget for this firm (partner firms always have them). */
+    publicPages: z.boolean().optional(),
     logoUrl: z.string().url().startsWith("https://").optional(),
     /** A logo the firm uploaded (artifact kind brand_logo, served at /v1/brand-logos/:id). Shown ahead of logoUrl. */
     logoArtifactId: z.string().uuid().optional(),
+    /** V21: a preset font, or "custom" for the uploaded fontArtifactId. */
+    font: z.enum(FONT_CHOICES).optional(),
+    fontArtifactId: z.string().uuid().optional(),
     primaryColor: z.string().regex(/^#[0-9a-fA-F]{6}$/, "a hex color like #1f4b99").optional(),
     /** Second brand color: links and highlights. Absent = the main color. */
     secondaryColor: z.string().regex(/^#[0-9a-fA-F]{6}$/, "a hex color like #1f4b99").optional(),
@@ -230,11 +248,13 @@ export const ClientCompanySettings = z.object({
   }).optional(),
   /** A partner firm that signed up on the landing page: what it told us, and the setup guide's progress. */
   partner: z.object({
-    companyType: z.enum(["cpa", "payroll", "cfo", "other"]).optional(),
+    companyType: z.enum(["cpa", "payroll", "cfo", "title", "other"]).optional(),
     contactName: z.string().max(120).optional(),
     contactEmail: z.string().email().optional(),
     phone: z.string().max(40).optional(),
     website: z.string().url().startsWith("https://").optional(),
+    /** The states it said it files in at sign-up: the default services it offers (V25). */
+    states: z.array(z.enum(["NY", "NJ", "FL", "MO"])).optional(),
     /** Setup guide steps the firm has finished. */
     setupDone: z.array(z.enum(["details", "branding", "payments"])).default([]),
   }).optional(),

@@ -7,12 +7,16 @@ export interface DeploySettings {
   role: "api" | "worker";
   production: boolean;
   databaseUrl: string | null;
+  dataEncryptionKey?: string | null;
   /** Fly sets FLY_APP_NAME on every machine. */
   onFly: boolean;
   artifactBucket: string | null;
   workerWakeUrl: string | null;
   workerPort: number | null;
   workerWakeToken: string | null;
+  /** The engine's and the site's public addresses (PUBLIC_BASE_URL, WEB_BASE_URL). */
+  publicBaseUrl?: string;
+  webBaseUrl?: string;
 }
 
 /** Production settings that would lose data or stall filings without an error later. */
@@ -20,11 +24,25 @@ export function deployProblems(s: DeploySettings): string[] {
   if (!s.production) return [];
   const p: string[] = [];
   if (!s.databaseUrl) p.push("DATABASE_URL is not set: filings would be kept in memory and lost on every restart");
+  if (s.databaseUrl && !s.dataEncryptionKey) p.push("DATA_ENCRYPTION_KEY is not set: Social Security numbers would be stored unencrypted (openssl rand -hex 32)");
   if (s.onFly && !s.artifactBucket) {
     p.push("no object storage for documents and screenshots (ARTIFACT_BUCKET or BUCKET_NAME): on Fly the API cannot read the worker's disk and every deploy wipes it; run fly storage create");
   }
+  const local = (u?: string) => !!u && /^https?:\/\/(localhost|127\.0\.0\.1)(:|\/|$)/.test(u);
+  if (local(s.publicBaseUrl)) p.push("PUBLIC_BASE_URL is a localhost address: approval links and webhooks would point nowhere (production: https://api.cofile.app)");
+  if (local(s.webBaseUrl)) p.push("WEB_BASE_URL is a localhost address: links in emails would point nowhere (production: https://cofile.app)");
   if (s.role === "api" && s.workerWakeUrl && !s.workerWakeToken) p.push("WORKER_WAKE_URL is set but WORKER_WAKE_TOKEN is not: the worker would refuse every wake");
   if (s.role === "worker" && s.workerPort && !s.workerWakeToken) p.push("WORKER_PORT is set but WORKER_WAKE_TOKEN is not: /wake would stay closed");
+  return p;
+}
+
+/** V33: billing switched on without what it needs would refuse every live filing. */
+export function billingProblems(s: { secretKey: string | null; webhookSecret?: string; prices: { enterprise?: string; partner?: string }; required: boolean }): string[] {
+  const p: string[] = [];
+  if (!s.required) return p;
+  if (!s.secretKey) p.push("BILLING_REQUIRED is on but STRIPE_SECRET_KEY is not set: nobody could subscribe, so every live filing would be refused");
+  if (!s.webhookSecret) p.push("BILLING_REQUIRED is on but STRIPE_WEBHOOK_SECRET is not set: payments would never be recorded");
+  if (!s.prices.enterprise && !s.prices.partner) p.push("BILLING_REQUIRED is on but no price is set (STRIPE_PRICE_ENTERPRISE, STRIPE_PRICE_PARTNER)");
   return p;
 }
 
@@ -37,9 +55,11 @@ export function startupProblems(role: "api" | "worker", env: NodeJS.ProcessEnv =
     }
   }
   p.push(...deployProblems({
-    role, production: config.production, databaseUrl: config.databaseUrl, onFly: !!env.FLY_APP_NAME,
+    role, production: config.production, databaseUrl: config.databaseUrl, dataEncryptionKey: config.dataEncryptionKey, onFly: !!env.FLY_APP_NAME,
     artifactBucket: config.artifactBucket, workerWakeUrl: config.workerWakeUrl, workerPort: config.workerPort, workerWakeToken: config.workerWakeToken,
+    publicBaseUrl: config.publicBaseUrl, webBaseUrl: config.webBaseUrl,
   }));
+  p.push(...billingProblems(config.stripe));
   if (role === "worker" || config.workerEnabled) {
     p.push(...browserSetupProblems({
       sites: Object.values(ADAPTERS).map((a) => a.site), browserProxy: config.browserProxy, siteProxies: config.siteProxies,

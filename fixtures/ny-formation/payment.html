@@ -1,8 +1,15 @@
 <!doctype html><html lang="en"><head><meta charset="utf-8"><script src="_reflect.js"></script><title>Payment Information (replica)</title>
 <script>
 function corp() { return /(^|\s)(CORPORATION|CORP\.?|INCORPORATED|INC\.?|LIMITED|LTD\.?)$/.test(sessionStorage.getItem('ny-name') || ''); }
+function taxOnShares() {
+  // The replica charges Tax Law s.180: 5 cents a share without par value, 1/20 of 1% of total par value, at least $10.
+  var s = JSON.parse(sessionStorage.getItem('ny-shares') || '{"shares":0,"par":0}');
+  if (!corp() || !(s.shares > 0)) return 0;
+  var raw = s.par ? s.shares * s.par * 0.0005 : s.shares * 0.05;
+  return Math.max(Math.round(raw * 100) / 100, 10);
+}
 function fees() {
-  var rows = [[corp() ? 'Certificate Filing Fee' : 'Certificate Filing Fee', corp() ? 125 : 200], ['Tax on Shares', 0]];
+  var rows = [[corp() ? 'Certificate Filing Fee' : 'Certificate Filing Fee', corp() ? 125 : 200], ['Tax on Shares', taxOnShares()]];
   [['plain','Plain Copy',5],['certified','Certified Copy',10],['existence','Certificate of Existence',25]].forEach(function (x) { if (document.getElementById(x[0]).checked) rows.push([x[1], x[2]]); });
   var total = rows.reduce(function (s, r) { return s + r[1]; }, 0);
   document.getElementById('fees').innerHTML = rows.map(function (r) { return '<tr><td>' + r[0] + '</td><td>$' + r[1].toFixed(2) + '</td></tr>'; }).join('') + '<tr><td>TOTAL FEE</td><td>$' + total.toFixed(2) + '</td></tr>';

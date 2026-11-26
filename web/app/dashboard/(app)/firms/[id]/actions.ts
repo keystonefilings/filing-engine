@@ -2,7 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { engine, EngineError, type ClientCompany } from "@/lib/engine";
-import { requireTenant, staffInviteLink } from "@/lib/session";
+import { requireTenant } from "@/lib/session";
 import { FILING_KINDS } from "@/lib/intake/forms";
 import { applyLogo } from "@/lib/logo-upload";
 
@@ -34,6 +34,8 @@ export async function savePortal(id: string, _prev: PortalResult, fd: FormData):
     logoArtifactId: link || removing ? undefined : old?.logoArtifactId,
     primaryColor: hex("primaryColor"), secondaryColor: hex("secondaryColor"), supportEmail: str("supportEmail"),
     ...(kinds.length && kinds.length < FILING_KINDS.length ? { filingKinds: kinds } : {}),
+    // V39: public pages and the website widget, so this firm's clients can file from the firm's own site.
+    publicPages: fd.get("publicPages") === "on",
   } : undefined;
   const { clientCompanyId: _id, tenantId: _t, ...rest } = c;
   let slug: string | undefined;
@@ -44,22 +46,31 @@ export async function savePortal(id: string, _prev: PortalResult, fd: FormData):
       const issues = Array.isArray(e.body && (e.body as { error?: unknown }).error) ? ((e.body as { error: { path: (string | number)[]; message: string }[] }).error).map((i) => `${i.path.join(".")}: ${i.message}`).join("; ") : e.message;
       return { ok: false, message: issues };
     }
-    return { ok: false, message: "The portal couldn't be saved." };
+    return { ok: false, message: "The filing desk couldn't be saved." };
   }
   if (on && uploading) {
     const problem = await applyLogo(s.apiKey, id, fd);
     if (problem) { revalidatePath(`/dashboard/firms/${id}`); return { ok: false, message: `The rest was saved. ${problem}` }; }
   }
   revalidatePath(`/dashboard/firms/${id}`);
-  return { ok: true, message: portal ? `Saved. The portal is at /p/${slug ?? old?.slug}.` : "Saved. This firm has no portal now." };
+  return { ok: true, message: portal ? `Saved. The filing desk is at /p/${slug ?? old?.slug}.` : "Saved. This firm has no filing deskal now." };
 }
 
-/** A sign-in link for one person at the firm. It opens that firm's portal only. */
+/**
+ * V36: an account for one person at the firm, limited to that firm's portal. They're emailed a
+ * link to set their own password (7 days); the link is shown here too in case email isn't set up.
+ */
 export async function inviteStaff(id: string, _prev: InviteResult, fd: FormData): Promise<InviteResult> {
   const s = await requireTenant();
   const c = await company(s.apiKey, id);
   if (!c.portal?.slug) return { ok: false, message: "Set up the firm's portal first." };
   const email = String(fd.get("email") ?? "").trim().toLowerCase();
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return { ok: false, message: "Enter the person's email address." };
-  return { ok: true, email, link: staffInviteLink({ apiKey: s.apiKey, tenantId: s.tenantId, clientCompanyId: c.clientCompanyId, slug: c.portal.slug, email }) };
+  try {
+    const r = await engine<{ link: string }>(s.apiKey, `/v1/client-companies/${encodeURIComponent(c.clientCompanyId)}/staff`, { method: "POST", body: { email } });
+    return { ok: true, email, link: r.link };
+  } catch (e) {
+    if (e instanceof EngineError && e.status === 409) return { ok: false, message: (e.body as { error?: string } | null)?.error === "that email already has an account" ? "That email already has an account." : "Set up the firm's portal first." };
+    return { ok: false, message: "The invitation couldn't be made just now. Try again in a minute." };
+  }
 }

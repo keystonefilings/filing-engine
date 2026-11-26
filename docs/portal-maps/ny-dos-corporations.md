@@ -85,6 +85,7 @@ Legend: `*` = required. FINAL = the button that files and charges. STOP = attest
 - Additional Services checkboxes: Plain Copy ($5.00), Certified Copy ($10.00), Certificate of Existence ($25.00).
 - Fee Information:
   - BCL: Certificate Filing Fee $125.00 + Tax on Shares (computed; $0.00 shown for 200 no-par shares) + extras. Seen total $165.00 with all three extras.
+  - Correction (Nov 26, decision 16): the owner confirmed on the live checkout that New York charges the tax on shares under Tax Law s.180 (5 cents a no-par share, 1/20 of 1% of total par value, at least $10). The $0.00 above is not the amount charged; the fee table quotes s.180.
   - LLC: Certificate Filing Fee $200.00, Tax on Shares $0.00, Plain $5, Certified $10, Existence $25. Seen TOTAL FEE $240.00.
 - E-mail Address: "Please provide an e-mail address to send the filing receipts and related documents": Distribution E-mail Address (read-only, from the service-company profile), Cc E-mail Address.
 - Payment: *Select One: Credit Card / Drawdown Account. Drawdown select ("--Select One--" / "<company> - F##"), Account Balance shown. Note: card payments redirect to the processor and come back.

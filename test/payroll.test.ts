@@ -77,8 +77,13 @@ describe("payroll_registration routing + fees + masking", () => {
     expect(adapterFor(njPayroll())).toBe(njPayrollAdapter);
     expect(nyPayrollAdapter.complete).toBe(false);
     expect(njPayrollAdapter.complete).toBe(false);
-    // NY payroll uses the company-wide NY login; NJ-REG needs none.
-    expect(nyPayrollAdapter.profileKey({ filing: {} as never, client: {} as never, tenant: { nyGovCredentialKey: "NYGOV" } as never })).toBe("nygov");
+    // NY payroll uses the subscriber's own NY.gov login, scoped to it; NJ-REG needs none.
+    const of = (tenantId: string) => ({ filing: {} as never, client: {} as never, tenant: { tenantId, nyGovCredentialKey: "NYGOV" } as never });
+    expect(nyPayrollAdapter.profileKey(of("keystone"))).toBe("nygov:keystone");
+    expect(nyPayrollAdapter.credentialKey(of("keystone"))).toBe("keystone/NYGOV");
+    // Two subscribers never share a sign-in or a credential.
+    expect(nyPayrollAdapter.profileKey(of("acme-filings"))).not.toBe(nyPayrollAdapter.profileKey(of("keystone")));
+    expect(nyPayrollAdapter.credentialKey(of("acme-filings"))).toBe("acme-filings/NYGOV");
     expect(njPayrollAdapter.credentialKey({ filing: {} as never, client: {} as never, tenant: {} as never })).toBeNull();
   });
 

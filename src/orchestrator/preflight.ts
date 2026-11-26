@@ -6,7 +6,9 @@ import { IRS_HOURS } from "../adapters/irs-ein/intents.js";
 import type { ApprovalService } from "../approvals/service.js";
 import { expectedFees, FeeUnknownError } from "../fees/table.js";
 import { paperUploadFees } from "../fees/paper-upload.js";
-import { njAccount, moAccount, flAccount, nyDrawdownAccount } from "../settings/accounts.js";
+import { flAccount, nyDrawdownAccount } from "../settings/accounts.js";
+import { feeOptionsFor } from "../fees/request-fees.js";
+import { FilingState } from "../domain/filing.js";
 
 export interface PreflightResult { ok: boolean; blockers: string[]; warnings: string[] }
 
@@ -75,13 +77,7 @@ export async function preflight(input: {
   try {
     if (req.type === "paper_upload") paperUploadFees(req);
     else if (req.type !== "ein_only" && req.type !== "payroll_registration") {
-      expectedFees(req.state, req.type, {
-        paymentMethod: req.state === "NJ" ? njAccount(tenant, client).feeMethod : req.state === "MO" ? moAccount(tenant, client).feeMethod : req.state === "FL" ? flAccount(tenant, client).feeMethod : undefined,
-        certificateOfStanding: req.formation?.additionalCertificates.certificateOfStanding,
-        certifiedCopy: req.formation?.additionalCertificates.certifiedCopy,
-        entityType: req.standing?.entityType,
-        floridaEntityType: req.formation?.floridaEntityType,
-      });
+      expectedFees(FilingState.parse(req.state), req.type, feeOptionsFor(req, tenant, client));
     }
   } catch (e) {
     if (e instanceof FeeUnknownError) (dryRun ? w : b).push(e.message);

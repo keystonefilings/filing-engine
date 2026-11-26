@@ -1,3 +1,4 @@
+import { filerNameFor } from "../settings/filer.js";
 import { createHash, randomBytes, randomUUID } from "node:crypto";
 import { isIP } from "node:net";
 import type { FastifyInstance, FastifyReply, FastifyRequest } from "fastify";
@@ -11,7 +12,13 @@ import type { ApiKeyRecord, Store } from "../store/types.js";
  * locks) stay behind the staff key on PUT /v1/tenants/:id.
  */
 
-export const API_KEY_PREFIX = "kfe_";
+/** New keys start with this (decision 17, Nov 26). */
+export const API_KEY_PREFIX = "cofile_";
+/** Keys issued before Nov 26 start with kfe_; they keep working until revoked. */
+export const LEGACY_API_KEY_PREFIXES = ["kfe_"];
+const ACCEPTED_PREFIXES = [API_KEY_PREFIX, ...LEGACY_API_KEY_PREFIXES];
+/** Characters of a key kept readable after it is shown once: the prefix and 8 more. */
+const SHOWN_LENGTH = API_KEY_PREFIX.length + 8;
 
 export function hashApiKey(key: string): string {
   return createHash("sha256").update(key).digest("hex");
@@ -19,12 +26,12 @@ export function hashApiKey(key: string): string {
 
 export function newApiKey(): { key: string; prefix: string; hash: string } {
   const key = `${API_KEY_PREFIX}${randomBytes(32).toString("base64url")}`;
-  return { key, prefix: key.slice(0, 12), hash: hashApiKey(key) };
+  return { key, prefix: key.slice(0, SHOWN_LENGTH), hash: hashApiKey(key) };
 }
 
-/** Self-issued keys, looked up by hash. Only keys with the self-service prefix are looked up. */
+/** Self-issued keys, looked up by hash. Only keys with a self-service prefix (cofile_, or the older kfe_) are looked up. */
 export async function tenantFromStoredKey(store: Store, presented: string): Promise<{ tenantId: string; keyId: string } | null> {
-  if (!presented.startsWith(API_KEY_PREFIX) || presented.length > 200) return null;
+  if (!ACCEPTED_PREFIXES.some((p) => presented.startsWith(p)) || presented.length > 200) return null;
   const rec = await store.findApiKeyByHash(hashApiKey(presented));
   if (!rec || rec.revokedAt) return null;
   return { tenantId: rec.tenantId, keyId: rec.id };
@@ -69,6 +76,10 @@ export interface SelfServiceDeps {
   /** The tenant for a request (environment or stored key), or null. */
   tenantOf: (req: FastifyRequest) => Promise<string | null>;
   now?: () => Date;
+  /** The site's name, for "filing through CoFile". */
+  platformName?: string;
+  /** Decision 9: our registered agent offer for a firm, if any. */
+  agentOffer?: (tenant: import("../settings/schema.js").TenantSettings, client: import("../settings/schema.js").ClientCompanySettings) => import("../registered-agents/agent-services.js").AgentOffer | null;
 }
 
 export function registerSelfService(app: FastifyInstance, deps: SelfServiceDeps): void {
@@ -86,7 +97,7 @@ export function registerSelfService(app: FastifyInstance, deps: SelfServiceDeps)
     const t = await deps.store.getTenant(tenantId);
     return {
       tenantId,
-      name: t?.name ?? tenantId,
+      name: t?.branding?.displayName ?? t?.name ?? tenantId,
       configured: !!t,
       branding: t?.branding ?? {},
       webhookEndpointCount: t?.webhookEndpoints.length ?? 0,
@@ -197,6 +208,7 @@ export function registerSelfService(app: FastifyInstance, deps: SelfServiceDeps)
     if (!tenantId) return reply;
     const c = await deps.store.getClientCompany((req.params as { id: string }).id);
     if (!c || c.tenantId !== tenantId) return reply.code(404).send({ error: "not found" });
-    return { clientCompany: c };
+    const tenant = await deps.store.getTenant(c.tenantId);
+    return { clientCompany: c, filerName: filerNameFor(c, tenant, deps.platformName ?? "CoFile"), ourAgent: tenant && deps.agentOffer ? deps.agentOffer(tenant, c) : null };
   });
 }

@@ -21,7 +21,8 @@ export function portalText(req: Pick<FilingRequest, "intake">, key: string): str
   return typeof v === "string" && v.trim() ? v.trim() : undefined;
 }
 
-/** NY Payment Information "Plain Copy": the engine's own field, or the front end's portal answer. */
+/** NY "Plain Copy": the engine's own field (formation, or a dissolution, amendment or change), or the front end's portal answer. */
 export function wantsPlainCopy(req: FilingRequest): boolean {
-  return !!req.formation?.additionalCertificates.plainCopy || portalFlag(req, "plainCopy");
+  return !!req.formation?.additionalCertificates.plainCopy || !!req.dissolution?.plainCopy || !!req.amendment?.plainCopy
+    || !!req.certificateOfChange?.plainCopy || portalFlag(req, "plainCopy");
 }

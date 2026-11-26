@@ -4,6 +4,7 @@ import type { ArtifactStore } from "../artifacts/store.js";
 import { ClientCompanySettings } from "../settings/schema.js";
 import type { Store } from "../store/types.js";
 import { portalSlugFor, type Auth } from "../users/routes.js";
+import { fontType, MAX_FONT_BYTES } from "../settings/fonts.js";
 
 /** Largest logo we keep, in bytes. The front end shrinks big pictures before sending. */
 export const MAX_LOGO_BYTES = 512 * 1024;
@@ -76,6 +77,34 @@ export function registerBrandLogos(app: FastifyInstance, deps: Deps): void {
     const next = ClientCompanySettings.parse({ ...c, portal: { ...c.portal, logoArtifactId: undefined, logoUrl: undefined } });
     await deps.store.putClientCompany(next);
     return { clientCompany: next };
+  });
+
+  // V21: a firm's own font file, shown on its client pages.
+  app.put("/v1/client-companies/:id/font", async (req, reply) => {
+    const own = await ownCompany(req);
+    if (own.status !== 200) return reply.code(own.status).send({ error: own.status === 401 ? "invalid api key" : "not found" });
+    const parsed = z.object({ data: z.string().min(1).max(Math.ceil((MAX_FONT_BYTES * 4) / 3) + 100) }).safeParse(req.body);
+    if (!parsed.success) return reply.code(422).send({ error: "validation failed", issues: [{ path: "font", message: "send the font file as base64, 600 KB or smaller" }] });
+    const bytes = Buffer.from(parsed.data.data.replace(/^data:[^,]*,/, ""), "base64");
+    if (bytes.length > MAX_FONT_BYTES) return reply.code(422).send({ error: "validation failed", issues: [{ path: "font", message: "the font file must be 600 KB or smaller" }] });
+    const ft = fontType(bytes);
+    if (!ft) return reply.code(422).send({ error: "validation failed", issues: [{ path: "font", message: "the font must be a WOFF2, WOFF, TTF or OTF file" }] });
+    const c = own.company;
+    const meta = await deps.artifacts.put({ filingId: `brand-${c.clientCompanyId}`, kind: "brand_font", label: "Font", contentType: ft.type }, bytes);
+    const next = ClientCompanySettings.parse({ ...c, portal: { ...c.portal, slug: await portalSlugFor(deps.store, c.tenantId, c), font: "custom", fontArtifactId: meta.id } });
+    await deps.store.putClientCompany(next);
+    return { clientCompany: next, fontArtifactId: meta.id };
+  });
+
+  app.get("/v1/brand-fonts/:id", async (req, reply) => {
+    const a = await deps.artifacts.get((req.params as { id: string }).id);
+    if (!a || a.meta.kind !== "brand_font" || !fontType(a.body)) return reply.code(404).send({ error: "not found" });
+    return reply
+      .header("content-type", a.meta.contentType)
+      .header("cache-control", "public, max-age=31536000, immutable")
+      .header("x-content-type-options", "nosniff")
+      .header("access-control-allow-origin", "*")
+      .send(a.body);
   });
 
   app.get("/v1/brand-logos/:id", async (req, reply) => {

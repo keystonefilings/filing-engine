@@ -1,0 +1,20 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><script src="_records.js"></script><title>Articles of Dissolution (replica)</title>
+<script>function next() {
+  if (!document.querySelector('input[name="reason"]:checked')) { document.getElementById("err").textContent = "1 error has occurred: Reason for Dissolution is required"; document.getElementById("err").hidden = false; return; }
+  if (!NYR.attested()) return;
+  NYR.set("signer", NYR.val("sig"));
+  location.href = "dissolution-preview.html";
+}</script></head><body><script>NYR.chrome()</script>
+<h1>Articles of Dissolution</h1>
+<div id="err" role="alert" hidden></div>
+<script>NYR.entityInfo()</script>
+<h3>Reason for Dissolution</h3>
+<fieldset><legend>*Reason for Dissolution</legend>
+<label><input type="radio" name="reason" value="1"> The vote or written consent of a majority in interest of the members</label><br>
+<label><input type="radio" name="reason" value="2"> There are no members of the limited liability company</label><br>
+<label><input type="radio" name="reason" value="3"> Pursuant to the dissolution date set forth in the articles of organization or operating agreement</label><br>
+<label><input type="radio" name="reason" value="4"> The entry of a decree of judicial dissolution</label></fieldset>
+<script>NYR.attestation("articles of dissolution"); NYR.filer();</script>
+<h3>Fees and Services</h3><script>NYR.fees([["Domestic LLC Fee", 60]])</script>
+<p><button type="button" onclick="history.back()">&lt; Go Back</button> <button type="button">Reset</button> <button type="button" onclick="next()">Continue &gt;</button></p>
+</body></html>

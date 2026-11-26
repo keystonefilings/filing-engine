@@ -3,6 +3,8 @@ import { buildServer } from "./api/server.js";
 import { config } from "./config.js";
 import { parseApiKeys, parseStaffKeys } from "./api/keys.js";
 import { exitOnStartupProblems } from "./startup-check.js";
+import { purgeSensitive } from "./store/sensitive.js";
+import { GoogleIdTokens } from "./users/google.js";
 
 /**
  * Cloud tier: API + approval pages + webhook delivery. With WORKER_ENABLED=true the
@@ -19,12 +21,22 @@ const app = buildServer({
   staffKeys: parseStaffKeys(process.env.STAFF_API_KEYS, config.production),
   // Dashboard session keys are signed with the approval-link secret (domain-separated).
   sessionSecret: config.approvalSigningSecret,
-  platformTenantId: process.env.PLATFORM_TENANT_ID || "keystone",
+  platformTenantId: config.platformTenantId, billing: sys.billing, inbound: sys.inbound, twilio: sys.twilio, slack: sys.slack, supportEmail: config.supportEmail, agentServices: sys.agentServices,
+  google: config.googleClientId ? new GoogleIdTokens({ clientId: config.googleClientId }) : undefined,
   // Partner sign-ups wait for approval unless this is set to "automatic".
   partnerSignupMode: process.env.PARTNER_SIGNUP_MODE === "automatic" ? "automatic" : "approval",
+  email: sys.email, webBaseUrl: config.webBaseUrl, platformName: config.platformName, webhooks: sys.webhooks, secrets: sys.secrets ?? undefined,
 });
 
 setInterval(() => void sys.webhooks.processDue(), 15_000).unref();
+// SSNs of filings finished SENSITIVE_RETENTION_DAYS ago are replaced by their masked form.
+const purge = () => void purgeSensitive(sys.store, { retentionDays: config.sensitiveRetentionDays })
+  .then((ids) => { if (ids.length) console.log(`purged SSNs from ${ids.length} finished filing(s)`); })
+  .catch((e) => console.warn(`SSN purge failed: ${(e as Error).message.split("\n")[0]}`));
+purge();
+setInterval(purge, 3_600_000).unref();
+// Decision 9: each registered agent service's due year goes on the firm's next Stripe invoice.
+setInterval(() => void sys.agentServices.chargeDue().catch((e: Error) => console.error("agent service charges failed", e.message)), 3_600_000).unref();
 if (config.workerEnabled) {
   // Same lease-aware recovery as the worker tier, on start and then periodically.
   const recover = async () => {

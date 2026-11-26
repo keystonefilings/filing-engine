@@ -4,11 +4,12 @@ import path from "node:path";
 import { randomUUID } from "node:crypto";
 import {
   ClientCompanyOwnershipError,
-  type ApiKeyRecord, type InquiryRecord, type UserRecord, type SignatureRecord, type ApprovalRecord, type DriftHaltRecord, type FilingRecord, type MessageRecord, type NameResolutionRecord, type ReviewGateRecord, type RunRecord, type Store, type SubmitIntentRecord, type WebhookDeliveryRecord,
+  type ApiKeyRecord, type InquiryRecord, type IntakeLinkRecord, type BillingAccountRecord, type AgentServiceRecord, type InboundMessageRecord, type UserRecord, type SignatureRecord, type ApprovalRecord, type DriftHaltRecord, type FilingRecord, type MessageRecord, type NameResolutionRecord, type ReviewGateRecord, type RunRecord, type Store, type SubmitIntentRecord, type WebhookDeliveryRecord,
 } from "./types.js";
 import type { ClientCompanySettings, TenantSettings } from "../settings/schema.js";
 import type { PageSnapshot } from "../resolver/types.js";
 import type { FilingStatus } from "../domain/states.js";
+import { FieldCipher, openFiling, sealFiling } from "./sensitive.js";
 
 /**
  * Applies the schema in one transaction under a transaction-scoped lock, so an API and a worker
@@ -33,16 +34,17 @@ async function applySchema(pool: pg.Pool, schema: string): Promise<void> {
 
 /** JSONB-document Postgres store. Schema: db/schema.sql (applied on connect). */
 export class PostgresStore implements Store {
-  private constructor(private readonly pool: pg.Pool) {}
+  /** cipher: SSNs in filings are sealed in the database (store/sensitive.ts); null keeps them plain (development). */
+  private constructor(private readonly pool: pg.Pool, private readonly cipher: FieldCipher | null = null) {}
 
-  static async connect(url: string): Promise<PostgresStore> {
+  static async connect(url: string, opts: { cipher?: FieldCipher | null } = {}): Promise<PostgresStore> {
     const pool = new pg.Pool({ connectionString: url, max: Number(process.env.PG_POOL_MAX) || 5, idleTimeoutMillis: 10_000 });
     // A hosted Postgres (Neon) closes idle connections when it scales to zero or its pooler
     // recycles them. Without a listener that error would crash the process; the pool simply
     // opens a new connection on the next query.
     pool.on("error", (e) => console.warn(`postgres: idle connection closed (${e.message.split("\n")[0]})`));
     await applySchema(pool, readFileSync(path.resolve("db/schema.sql"), "utf8"));
-    return new PostgresStore(pool);
+    return new PostgresStore(pool, opts.cipher ?? null);
   }
 
   async close(): Promise<void> { await this.pool.end(); }
@@ -59,34 +61,37 @@ export class PostgresStore implements Store {
     return r.rows.map((row) => row.doc as T);
   }
 
+  // Filings: SSNs are sealed on the way in and opened on the way out (store/sensitive.ts).
   async createFiling(f: FilingRecord) {
     await this.pool.query(
       `insert into filings (id, tenant_id, client_company_id, idempotency_key, status, payload_hash, doc) values ($1,$2,$3,$4,$5,$6,$7)`,
-      [f.id, f.tenantId, f.clientCompanyId, f.idempotencyKey, f.status, f.payloadHash, f],
+      [f.id, f.tenantId, f.clientCompanyId, f.idempotencyKey, f.status, f.payloadHash, sealFiling(f, this.cipher)],
     );
     return f;
   }
-  async getFiling(id: string) { return this.doc<FilingRecord>(`select doc from filings where id=$1`, [id]); }
+  async getFiling(id: string) { return openFiling(await this.doc<FilingRecord>(`select doc from filings where id=$1`, [id]), this.cipher); }
   async findFilingByIdempotency(tenantId: string, key: string) {
-    return this.doc<FilingRecord>(`select doc from filings where tenant_id=$1 and idempotency_key=$2`, [tenantId, key]);
+    return openFiling(await this.doc<FilingRecord>(`select doc from filings where tenant_id=$1 and idempotency_key=$2`, [tenantId, key]), this.cipher);
   }
   async updateFiling(id: string, patch: Partial<FilingRecord>) {
     const cur = await this.getFiling(id);
     if (!cur) throw new Error(`filing ${id} not found`);
     const next = { ...cur, ...patch, id, updatedAt: new Date().toISOString() };
-    await this.pool.query(`update filings set status=$2, doc=$3, updated_at=now() where id=$1`, [id, next.status, next]);
+    await this.pool.query(`update filings set status=$2, doc=$3, updated_at=now() where id=$1`, [id, next.status, sealFiling(next, this.cipher)]);
     return next;
   }
   async listFilings(tenantId?: string) {
-    return tenantId
-      ? this.docs<FilingRecord>(`select doc from filings where tenant_id=$1 order by created_at desc`, [tenantId])
-      : this.docs<FilingRecord>(`select doc from filings order by created_at desc`, []);
+    const rows = tenantId
+      ? await this.docs<FilingRecord>(`select doc from filings where tenant_id=$1 order by created_at desc`, [tenantId])
+      : await this.docs<FilingRecord>(`select doc from filings order by created_at desc`, []);
+    return rows.map((f) => openFiling(f, this.cipher));
   }
   async listFilingsByStatus(statuses: FilingStatus[], tenants?: string[]) {
-    return this.docs<FilingRecord>(
+    const rows = await this.docs<FilingRecord>(
       `select doc from filings where status = any($1::text[]) and ($2::text[] is null or tenant_id = any($2::text[])) order by created_at`,
       [statuses, tenants?.length ? tenants : null],
     );
+    return rows.map((f) => openFiling(f, this.cipher));
   }
 
   async createApproval(a: ApprovalRecord) {
@@ -228,6 +233,7 @@ export class PostgresStore implements Store {
     return u;
   }
   async getUser(id: string) { return this.doc<UserRecord>(`select doc from users where id=$1`, [id]); }
+  async findUserByPhone(phone: string) { return this.doc<UserRecord>(`select doc from users where doc->>'phone' = $1 and doc ? 'phoneVerifiedAt' limit 1`, [phone]); }
   async findUserByEmail(email: string) { return this.doc<UserRecord>(`select doc from users where email=$1`, [email]); }
   async listUsers(tenantId: string) { return this.docs<UserRecord>(`select doc from users where tenant_id=$1 order by created_at`, [tenantId]); }
   async updateUser(id: string, patch: Partial<UserRecord>) {
@@ -235,6 +241,83 @@ export class PostgresStore implements Store {
     const r = await this.pool.query(`update users set doc = doc || $2::jsonb, tenant_id = coalesce($3, tenant_id) where id=$1 returning doc`, [id, JSON.stringify(rest), rest.tenantId ?? null]);
     if (!r.rows[0]) throw new Error("user not found");
     return r.rows[0].doc as UserRecord;
+  }
+  async getVaultSecret(key: string) {
+    const r = await this.pool.query(`select sealed from vault_secrets where key=$1`, [key]);
+    return (r.rows[0]?.sealed as string | undefined) ?? null;
+  }
+  async putVaultSecret(key: string, tenantId: string, sealed: string) {
+    await this.pool.query(`insert into vault_secrets (key, tenant_id, sealed) values ($1,$2,$3) on conflict (key) do update set sealed = excluded.sealed, updated_at = now()`, [key, tenantId, sealed]);
+  }
+  async deleteVaultSecret(key: string) { await this.pool.query(`delete from vault_secrets where key=$1`, [key]); }
+  // V40: the text and what was read from it are one sealed value when a key is set.
+  private sealInbound(m: InboundMessageRecord): unknown {
+    if (!this.cipher) return m;
+    const { text, extracted, ...rest } = m;
+    return { ...rest, sealed: this.cipher.seal(JSON.stringify({ text, extracted })) };
+  }
+  private openInbound(doc: (InboundMessageRecord & { sealed?: string }) | null): InboundMessageRecord | null {
+    if (!doc) return null;
+    if (!doc.sealed || !this.cipher) return doc;
+    const { sealed, ...rest } = doc;
+    return { ...rest, ...(JSON.parse(this.cipher.open(sealed)) as Pick<InboundMessageRecord, "text" | "extracted">) };
+  }
+  async createInbound(m: InboundMessageRecord) {
+    await this.pool.query(`insert into inbound_messages (id, tenant_id, client_company_id, provider_id, received_at, doc) values ($1,$2,$3,$4,$5,$6)`, [m.id, m.tenantId, m.clientCompanyId, m.providerId, m.receivedAt, this.sealInbound(m)]);
+    return m;
+  }
+  async getInbound(id: string) { return this.openInbound(await this.doc(`select doc from inbound_messages where id=$1`, [id])); }
+  async findInboundByProvider(providerId: string) { return this.openInbound(await this.doc(`select doc from inbound_messages where provider_id=$1`, [providerId])); }
+  async updateInbound(id: string, patch: Partial<InboundMessageRecord>) {
+    const cur = await this.getInbound(id);
+    if (!cur) throw new Error("message not found");
+    const next = { ...cur, ...patch, id };
+    await this.pool.query(`update inbound_messages set doc=$2 where id=$1`, [id, this.sealInbound(next)]);
+    return next;
+  }
+  async listInboundToPurge(cutoff: string) {
+    const rows = await this.docs<InboundMessageRecord & { sealed?: string }>(`select doc from inbound_messages where received_at < $1 and not (doc ? 'purgedAt') limit 500`, [cutoff]);
+    return rows.map((d) => this.openInbound(d)!);
+  }
+  async createAgentService(a: AgentServiceRecord) {
+    await this.pool.query(`insert into agent_services (id, tenant_id, client_company_id, filing_id, status, next_charge_at, doc) values ($1,$2,$3,$4,$5,$6,$7)`, [a.id, a.tenantId, a.clientCompanyId, a.filingId, a.status, a.nextChargeAt, a]);
+    return a;
+  }
+  async getAgentService(id: string) { return this.doc<AgentServiceRecord>(`select doc from agent_services where id=$1`, [id]); }
+  async findAgentServiceByFiling(filingId: string) { return this.doc<AgentServiceRecord>(`select doc from agent_services where filing_id=$1`, [filingId]); }
+  async listAgentServices(clientCompanyId: string) { return this.docs<AgentServiceRecord>(`select doc from agent_services where client_company_id=$1 order by doc->>'startedAt' desc`, [clientCompanyId]); }
+  async listDueAgentServices(cutoff: string) { return this.docs<AgentServiceRecord>(`select doc from agent_services where status='active' and next_charge_at <= $1 limit 500`, [cutoff]); }
+  async updateAgentService(id: string, patch: Partial<AgentServiceRecord>) {
+    const cur = await this.getAgentService(id);
+    if (!cur) throw new Error("agent service not found");
+    const next = { ...cur, ...patch, id };
+    await this.pool.query(`update agent_services set status=$2, next_charge_at=$3, doc=$4 where id=$1`, [id, next.status, next.nextChargeAt, next]);
+    return next;
+  }
+  async getBillingAccount(id: string) { return this.doc<BillingAccountRecord>(`select doc from billing_accounts where id=$1`, [id]); }
+  async getBillingAccountByCustomer(customerId: string) { return this.doc<BillingAccountRecord>(`select doc from billing_accounts where customer_id=$1`, [customerId]); }
+  async putBillingAccount(b: BillingAccountRecord) {
+    await this.pool.query(`insert into billing_accounts (id, tenant_id, customer_id, doc) values ($1,$2,$3,$4) on conflict (id) do update set customer_id = excluded.customer_id, doc = excluded.doc, updated_at = now()`, [b.id, b.tenantId, b.customerId ?? null, b]);
+    return b;
+  }
+  async createIntakeLink(l: IntakeLinkRecord) {
+    await this.pool.query(`insert into intake_links (id, tenant_id, client_company_id, doc) values ($1,$2,$3,$4)`, [l.id, l.tenantId, l.clientCompanyId, l]);
+    return l;
+  }
+  async getIntakeLink(id: string) { return this.doc<IntakeLinkRecord>(`select doc from intake_links where id=$1`, [id]); }
+  async listIntakeLinks(clientCompanyId: string) { return this.docs<IntakeLinkRecord>(`select doc from intake_links where client_company_id=$1 order by created_at desc limit 200`, [clientCompanyId]); }
+  async updateIntakeLink(id: string, patch: Partial<IntakeLinkRecord>) {
+    const { id: _i, ...rest } = patch;
+    const r = await this.pool.query(`update intake_links set doc = doc || $2::jsonb where id=$1 returning doc`, [id, JSON.stringify(rest)]);
+    if (!r.rows[0]) throw new Error("link not found");
+    return r.rows[0].doc as IntakeLinkRecord;
+  }
+  async getInquiry(id: string) { return this.doc<InquiryRecord>(`select doc from inquiries where id=$1`, [id]); }
+  async updateInquiry(id: string, patch: Partial<InquiryRecord>) {
+    const { id: _i, ...rest } = patch;
+    const r = await this.pool.query(`update inquiries set doc = doc || $2::jsonb where id=$1 returning doc`, [id, JSON.stringify(rest)]);
+    if (!r.rows[0]) throw new Error("inquiry not found");
+    return r.rows[0].doc as InquiryRecord;
   }
   async createInquiry(i: InquiryRecord) {
     await this.pool.query(`insert into inquiries (id, doc) values ($1,$2)`, [i.id, i]);
@@ -319,6 +402,9 @@ export class PostgresStore implements Store {
   }
   async listDueDeliveries(now: string) {
     return this.docs<WebhookDeliveryRecord>(`select doc from webhook_deliveries where status='pending' and next_attempt_at <= $1`, [now]);
+  }
+  async listTenantDeliveries(tenantId: string, limit: number) {
+    return this.docs<WebhookDeliveryRecord>(`select doc from webhook_deliveries where doc->'event'->>'tenantId' = $1 order by doc->'event'->>'occurredAt' desc limit $2`, [tenantId, limit]);
   }
   async listDeliveries(filingId?: string) {
     return filingId

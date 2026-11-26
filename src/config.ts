@@ -35,6 +35,14 @@ export const config = {
   approvalSigningSecret: collect(() => signingSecretFrom(process.env.APPROVAL_SIGNING_SECRET, production), ""),
   approvalTtlHours: envInt("APPROVAL_TTL_HOURS", 168),
   databaseUrl: process.env.DATABASE_URL || null,
+  /** Seals SSNs in the database (store/sensitive.ts): 64 hex characters. Required in production. */
+  dataEncryptionKey: collect(() => {
+    const v = process.env.DATA_ENCRYPTION_KEY || null;
+    if (v && !/^[0-9a-fA-F]{64}$/.test(v)) throw new Error("DATA_ENCRYPTION_KEY must be 64 hex characters (openssl rand -hex 32)");
+    return v;
+  }, null),
+  /** Days after a filing is completed or aborted before its SSNs are replaced by the masked form. */
+  sensitiveRetentionDays: envInt("SENSITIVE_RETENTION_DAYS", 30),
   artifactDir: path.resolve(env("ARTIFACT_DIR", "./var/artifacts")),
   /** Object storage for artifacts, shared by an API and a worker on different machines (Fly.io).
    *  Fly Tigris (fly storage create) sets BUCKET_NAME and the AWS_* variables; unset = ARTIFACT_DIR. */
@@ -66,7 +74,7 @@ export const config = {
     apiKey: process.env.STEEL_API_KEY || null,
     apiUrl: process.env.STEEL_API_URL || undefined,
     connectUrl: process.env.STEEL_CONNECT_URL || undefined,
-    /** Saved sign-ins by profile key, e.g. "nygov=<profile id>" (npm run steel-login). */
+    /** Saved sign-ins by profile key, e.g. "nygov:keystone=<profile id>" (npm run steel-login). */
     profiles: parseSteelProfiles(process.env.STEEL_PROFILES),
     /** Hard cap per run; Keystone's Steel plan allows at most 15 minutes. */
     timeoutMs: envInt("STEEL_SESSION_TIMEOUT_MS", 15 * 60_000),
@@ -75,6 +83,66 @@ export const config = {
   /** "steel-only": this image ships no local browser (Dockerfile target "steel"); every site must route to Steel. */
   browsersSteelOnly: process.env.BROWSERS === "steel-only",
   dryRunDefault: env("DRY_RUN_DEFAULT", "true") === "true",
+  /** Where people reach us (decided Nov 26): named in our own account emails and staff notices. */
+  supportEmail: env("SUPPORT_EMAIL", "hello@cofile.app"),
+  /** Where staff are told to place or cancel registered agent orders by hand (decision 9). */
+  opsEmail: env("OPS_EMAIL", env("SUPPORT_EMAIL", "hello@cofile.app")),
+  /** Decision 9: our registered agent service for partner firms, resold, charged yearly per business. */
+  registeredAgent: {
+    providerName: env("REGISTERED_AGENT_PROVIDER_NAME", "Registered Agents, Inc."),
+    annualUsd: Number(env("REGISTERED_AGENT_ANNUAL_USD", "59")),
+  },
+  /** The platform's own tenant: partner firms that sign up on the landing page join it. */
+  platformTenantId: env("PLATFORM_TENANT_ID", "keystone"),
+  /** The site's name, shown to clients on approval pages (partner firms are "with CoFile"). */
+  platformName: env("PLATFORM_NAME", "CoFile"),
+  /** The web front end (web/): links in account emails (password reset) point here. */
+  webBaseUrl: env("WEB_BASE_URL", "http://localhost:3000").replace(/\/+$/, ""),
+  /** V33: subscriptions through Stripe Billing (billing/). Prices are made in Stripe and named here. */
+  stripe: {
+    /** A restricted key: write on Customers, Checkout Sessions and Customer portal; read on Prices. */
+    secretKey: process.env.STRIPE_SECRET_KEY || null,
+    /** Only for stripe-mock or a local stand-in; unset in production. */
+    apiUrl: process.env.STRIPE_API_URL || undefined,
+    webhookSecret: process.env.STRIPE_WEBHOOK_SECRET || undefined,
+    prices: { enterprise: process.env.STRIPE_PRICE_ENTERPRISE || undefined, partner: process.env.STRIPE_PRICE_PARTNER || undefined },
+    /** Partner pricing (Nov 26): "payg=price_..,starter=price_..,starter_annual=price_..,growth=..,unlimited=.." (config/partner-pricing.json). */
+    partnerPrices: process.env.STRIPE_PARTNER_PRICES || undefined,
+    trialDays: process.env.STRIPE_TRIAL_DAYS ? Number(process.env.STRIPE_TRIAL_DAYS) : undefined,
+    /** On: a live filing needs a subscription in good standing. Off until prices are set. */
+    required: env("BILLING_REQUIRED", "false") === "true",
+  },
+  /** V42-V43: texts and WhatsApp through Twilio (one account; the webhook is <PUBLIC_BASE_URL>/v1/inbound/twilio). */
+  twilio: {
+    accountSid: process.env.TWILIO_ACCOUNT_SID || undefined,
+    authToken: process.env.TWILIO_AUTH_TOKEN || undefined,
+    smsFrom: process.env.TWILIO_SMS_FROM || undefined,
+    whatsappFrom: process.env.TWILIO_WHATSAPP_FROM || undefined,
+    apiBase: process.env.TWILIO_API_URL || undefined,
+  },
+  /** V41: the Slack app (command /file at <PUBLIC_BASE_URL>/v1/slack/command). */
+  slack: {
+    clientId: process.env.SLACK_CLIENT_ID || undefined,
+    clientSecret: process.env.SLACK_CLIENT_SECRET || undefined,
+    signingSecret: process.env.SLACK_SIGNING_SECRET || undefined,
+    apiBase: process.env.SLACK_API_URL || undefined,
+  },
+  /** V37: the Google OAuth client id ("Sign in with Google"); the same id goes in the web app. */
+  googleClientId: process.env.GOOGLE_CLIENT_ID || null,
+  /** V18: Basis Theory private key (token:read) the worker uses to read a card at the payment screen. */
+  basisTheoryApiKey: process.env.BASIS_THEORY_API_KEY || null,
+  /** Email through Resend (comms/resend.ts). No key: every message is recorded, none is sent. */
+  email: {
+    resendApiKey: process.env.RESEND_API_KEY || null,
+    /** Only for a local stand-in; unset in production. */
+    resendApiBase: (process.env.RESEND_API_URL || "https://api.resend.com").replace(/\/+$/, ""),
+    /** A sender on a domain verified in Resend. */
+    from: env("EMAIL_FROM", "CoFile <filings@cofile.app>"),
+    replyTo: process.env.EMAIL_REPLY_TO || undefined,
+    /** V40: where firms email filing requests (a Resend receiving address), and its webhook's signing secret. */
+    inboundAddress: process.env.INBOUND_EMAIL_ADDRESS || undefined,
+    inboundWebhookSecret: process.env.RESEND_INBOUND_WEBHOOK_SECRET || undefined,
+  },
   /** Name-resolution AI generator (the only LLM in a filing). No key -> deterministic static generator. */
   anthropicApiKey: process.env.ANTHROPIC_API_KEY || null,
   nameGeneratorModel: env("NAME_GENERATOR_MODEL", "claude-haiku-5-5"),

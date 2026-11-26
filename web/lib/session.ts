@@ -12,8 +12,8 @@ import { seal, unseal } from "./seal";
  */
 
 /** signedInWith "password": the apiKey is a short-lived session key the engine issued at email sign-in. */
-export interface TenantSession { kind: "tenant"; apiKey: string; tenantId: string; name: string; signedInWith?: "api_key" | "password"; email?: string }
-export interface FirmSession { kind: "firm"; apiKey: string; tenantId: string; clientCompanyId: string; slug: string; email: string; signedInWith?: "invite" | "password"; expiresAt?: string }
+export interface TenantSession { kind: "tenant"; apiKey: string; tenantId: string; name: string; signedInWith?: "api_key" | "password" | "google"; email?: string }
+export interface FirmSession { kind: "firm"; apiKey: string; tenantId: string; clientCompanyId: string; slug: string; email: string; signedInWith?: "invite" | "password" | "google"; expiresAt?: string }
 export type Session = TenantSession | FirmSession;
 
 const COOKIE = "kfe_session";
@@ -69,8 +69,15 @@ export function intakeKey(i: ClientIntake): string {
 
 export const INVITE_TTL = { staff: 7 * 24 * 3600, client: 30 * 24 * 3600 } as const;
 
+/**
+ * This site's own address, for links it sends (client intake, staff invites) and the Google
+ * redirect. PORTAL_PUBLIC_URL sets it; without it a production deployment uses https://cofile.app
+ * (decision 14), never localhost, which would send people nowhere.
+ */
 export function publicUrl(): string {
-  return (process.env.PORTAL_PUBLIC_URL ?? "http://localhost:3000").replace(/\/+$/, "");
+  const set = process.env.PORTAL_PUBLIC_URL?.trim();
+  const fallback = process.env.VERCEL_ENV === "production" || process.env.NODE_ENV === "production" ? "https://cofile.app" : "http://localhost:3000";
+  return (set || fallback).replace(/\/+$/, "");
 }
 
 export function staffInviteLink(i: StaffInvite): string {
@@ -88,4 +95,9 @@ export function readStaffInvite(token: string): StaffInvite | null {
 
 export function readClientIntake(token: string): ClientIntake | null {
   return unseal<ClientIntake & Record<string, unknown>>("client-intake", token);
+}
+
+/** A person signed in with their own account (password or Google): the key is an engine session. */
+export function personalSession(s: { signedInWith?: string } | null | undefined): boolean {
+  return s?.signedInWith === "password" || s?.signedInWith === "google";
 }

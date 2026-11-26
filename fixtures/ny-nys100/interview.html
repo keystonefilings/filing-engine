@@ -1,0 +1,18 @@
+<!doctype html><html><head><meta charset="utf-8"><title>NY Business Express - NYS 100</title>
+<style>.modal,#addr-modal{position:fixed;inset:5%;background:#fff;border:1px solid #444;overflow:auto;padding:1em}#addr-modal{z-index:20}.modal{z-index:10}#busy{position:fixed;top:0;left:0;right:0;background:#ffd;padding:4px;z-index:30}.err,.banner{color:#a00;display:block}</style>
+<script src="_opa.js"></script></head>
+<body>
+<nav aria-label="Application steps"><ul><li>Business Profile</li><li>Entity Type</li><li>Business Identification</li><li>Business Addresses</li><li>Contact Information</li><li>Owner/Business Principal</li><li>Application</li><li>Business Liability</li><li>Submitter Information</li><li>Ready to Submit</li></ul></nav>
+<div id="busy" style="display:none"></div>
+<main id="screen"></main>
+<div id="addr-modal" role="dialog" aria-label="Address Verification" style="display:none">
+  <h2>Address Verification</h2>
+  <fieldset><legend>Address Confirmation</legend>
+    <p>Use the validated address returned by the system</p>
+    <label><input type="radio" name="addr-choice" value="usps"> <span id="usps-text"></span></label>
+    <label><input type="radio" name="addr-choice" value="mine"> Use the address I provided</label>
+  </fieldset>
+  <button type="button" id="use-selected">USE SELECTED ADDRESS</button>
+</div>
+<script>NYS.render()</script>
+</body></html>

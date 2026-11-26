@@ -58,8 +58,12 @@ export const ResponsibleParty = z.object({
 /** IRS EIN interview answers, from the live owner-route walk (docs/walks/ny-irs-2026-11-18.md). */
 export const EinRequest = z.object({
   mode: EinMode,
-  /** Who submits the interview: an owner/member, or Keystone as the authorized third-party designee. */
-  applicantRole: z.enum(["owner", "third_party_designee"]).default("third_party_designee"),
+  /**
+   * Who the IRS interview says is applying. Decision 6 (Nov 26): one of the owners, on the owner's
+   * authorization. The third-party designee route stays available to API callers and still needs
+   * the signed Form SS-4 authorization (ss4AuthorizationArtifactId).
+   */
+  applicantRole: z.enum(["owner", "third_party_designee"]).default("owner"),
   responsibleParty: ResponsibleParty.optional(),
   memberCount: z.number().int().positive().optional(),
   reason: z.enum(["new_business", "hired_employees", "banking", "changed_organization", "purchased_business"]).default("new_business"),
@@ -111,6 +115,12 @@ export const FilingType = z.enum([
   "amendment",
   "paper_upload",
   "payroll_registration",
+  /** NY: Articles of Dissolution of a domestic LLC (DOS online, Screen G). */
+  "dissolution",
+  /** NY: Certificate of Change by the entity (DOS online, Screen I). */
+  "certificate_of_change",
+  /** NY: copies of documents on an entity's filing history (DOS online, Screen J). */
+  "copy_request",
 ]);
 export type FilingType = z.infer<typeof FilingType>;
 
@@ -161,8 +171,17 @@ export const FormationDetails = z.object({
   /** NY formation on the DOS On-Line Filing System: LLC Articles of Organization (default) or a
    *  business corporation's Certificate of Incorporation (BCL s.402). */
   nyEntityType: z.enum(["llc", "business_corporation"]).default("llc"),
-  /** NY business corporation: par value per share in USD; omit for shares without par value. */
+  /** NY business corporation: par value per share in USD ("Share Value: Par Value"); omit for shares
+   *  without par value. The page computes the Tax On Shares from it (fees/table.ts nyTaxOnShares). */
   stockParValueUsd: z.number().positive().optional(),
+  /** NJ formation on NJ Business Formation: an LLC's Certificate of Formation (default) or a domestic
+   *  for-profit corporation's (DP) Certificate of Incorporation (docs/portal-maps/nj-business-formation.md). */
+  njEntityType: z.enum(["llc", "for_profit_corporation"]).default("llc"),
+  /** NJ for-profit corporation: the board of directors, 1 to 10, each with a street address. */
+  directors: z.array(Person).max(10).default([]),
+  /** NJ for-profit corporation: the incorporators, 1 to 10, each with an address. They sign the
+   *  certificate (N.J.S.A. 14A:2-7) unless `signers` names others. */
+  incorporators: z.array(Person).max(10).default([]),
   /** FL formation entity type (Sunbiz): LLC (default), profit corporation, or limited partnership. */
   floridaEntityType: z.enum(["llc", "profit_corporation", "limited_partnership"]).default("llc"),
   /** FL profit corporation and NY business corporation: number of authorized shares (required). */
@@ -202,6 +221,8 @@ export const StandingCertificateDetails = z.object({
   form: z.enum(["short", "long_filing_history", "long_officers"]).default("short"),
   /** NJ only: decides the price (LLC/FLC $50, corporations/LP $25); checked against the record's Type column. MO good standing is a flat $10. */
   entityType: NjEntityType.optional(),
+  /** NY only: the entity's DOS ID, which the Certificate of Status search goes by (Screen K). */
+  dosId: z.string().regex(/^\d{1,10}$/, "DOS ID: digits only").optional(),
 });
 
 export const Contact = z.object({
@@ -214,9 +235,21 @@ export const Contact = z.object({
 /**
  * Payroll / employer registration (NY NYS-100, NJ NJ-REG). One registration covers
  * Unemployment Insurance + withholding + wage reporting. No filing fee in either state.
- * Field maps: docs/walks/nys-100-payroll-2026-11-19.md, docs/walks/nj-reg-payroll-2026-11-19.md.
+ * Screen maps from the walks: docs/portal-maps/ny-nys100-unemployment.md, docs/portal-maps/nj-reg.md.
+ * The long state-specific tail the intake forms collect lives in stateAnswers (web/lib/intake/forms.ts).
  * SSNs on the owners/officers are sensitive (masked, never stored as reusable defaults).
  */
+/** A residential address outside the US (NYS-100: a member who is not a US resident must give one). */
+export const ForeignAddress = z.object({
+  street1: z.string().min(1),
+  street2: z.string().optional(),
+  city: z.string().min(1),
+  /** State, province or region, as the country uses them. */
+  region: z.string().optional(),
+  postalCode: z.string().min(1),
+  country: z.string().min(2),
+});
+
 export const PayrollOwner = z.object({
   name: z.string().min(1),
   ssn: z.string().regex(/^\d{3}-?\d{2}-?\d{4}$/, "SSN must be 9 digits").describe("sensitive").optional(),
@@ -229,6 +262,24 @@ export const PayrollOwner = z.object({
   phone: z.string().min(7).optional(),
   email: z.string().email().optional(),
   profitDistributionPercent: z.number().min(0).max(100).optional(),
+  /** NYS-100 member screen: County* of a New York residential address (the portal lists the 62 NY counties). */
+  county: z.string().optional(),
+  /** NYS-100 member screen: the residential address of a member who is not a US resident (a US address is refused). */
+  foreignAddress: ForeignAddress.optional(),
+});
+
+/**
+ * NYS-100 A12 Physical Locations Details: what the portal reveals after the principal activity.
+ * Service activities ask the first three, Manufacturing the next three, Other the last.
+ */
+export const LocationActivityDetails = z.object({
+  establishmentType: z.string().optional(),
+  productOrService: z.string().optional(),
+  percentOfRevenue: z.number().min(0).max(100).optional(),
+  productsProduced: z.string().optional(),
+  rawMaterials: z.string().optional(),
+  percentOfSalesValue: z.number().min(0).max(100).optional(),
+  otherDetails: z.string().optional(),
 });
 
 export const PayrollRegistrationDetails = z.object({
@@ -273,6 +324,7 @@ export const PayrollRegistrationDetails = z.object({
     address: Address,
     employees: z.number().int().nonnegative().optional(),
     activity: z.string().optional(),
+    activityDetails: LocationActivityDetails.optional(),
   })).max(20).default([]),
   /** Falls back to the request-level contact when absent. */
   contact: Contact.optional(),
@@ -313,6 +365,13 @@ export const NyApplicationForAuthority = z.object({
   processRecipient: z.object({ name: z.string().min(1), address: Address }),
   /** SIXTH: no NY activity yet, or the NYS Tax Commission consent is attached. */
   priorActivity: z.enum(["none_in_new_york", "tax_consent_attached"]),
+  /**
+   * Decision 19: the home state's Certificate of Existence (dated within 6 months), and the NYS Tax
+   * Commission's consent when priorActivity is tax_consent_attached. Each is a PDF uploaded with
+   * POST /v1/client-companies/:id/documents; the run adds their pages after the signed form.
+   */
+  certificateOfExistenceDocumentId: z.string().min(1).optional(),
+  taxConsentDocumentId: z.string().min(1).optional(),
   signer: z.object({ name: z.string().min(1), title: z.string().min(1) }),
   filer: FormFiler,
 });
@@ -352,16 +411,100 @@ export const PaperUploadDetails = z.object({
 });
 export type PaperUploadDetails = z.infer<typeof PaperUploadDetails>;
 
+/**
+ * Filings about an entity already on the NY DOS records, on the On-Line Filing System
+ * (docs/portal-maps/ny-dos-corporations.md, Screens G to K). Each flow starts by finding the
+ * entity; dissolution, amendment and change need the DOS ID and the name to match exactly.
+ * Only a domestic LLC's flows were walked.
+ */
+export const NyDosEntity = z.object({
+  dosId: z.string().regex(/^\d{1,10}$/, "DOS ID: digits only"),
+  /** Exactly as on the DOS records. */
+  name: z.string().min(1),
+});
+export type NyDosEntity = z.infer<typeof NyDosEntity>;
+
+/** Who signs (Attestation and Signature: typed name and Capacity of Signer). */
+export const NyRecordSigner = z.object({
+  name: z.string().min(1),
+  capacity: z.enum(["member", "manager", "authorized_person"]),
+});
+
+/** Screen G: Articles of Dissolution of a domestic LLC (Certificate of Dissolution-Cancellation, LLC Law s.705). */
+export const DissolutionDetails = z.object({
+  entity: NyDosEntity,
+  /** Reason for Dissolution, one of the four on the form. */
+  reason: z.enum(["member_vote", "no_members", "dissolution_date", "judicial_decree"]),
+  signer: NyRecordSigner,
+  /** A plain copy ($5); where the flow offers it was not visible in the recording. */
+  plainCopy: z.boolean().default(false),
+});
+export type DissolutionDetails = z.infer<typeof DissolutionDetails>;
+
+/** Screen H: Certificate of Amendment, name change only (LLC Law s.211), for a domestic LLC. */
+export const AmendmentDetails = z.object({
+  kind: z.literal("name_change").default("name_change"),
+  entity: NyDosEntity,
+  /** The new name: base name and LLC ending. */
+  newName: EntityName,
+  signer: NyRecordSigner,
+  plainCopy: z.boolean().default(false),
+});
+export type AmendmentDetails = z.infer<typeof AmendmentDetails>;
+
+/**
+ * Screen I: Certificate of Change by the entity (LLC Law s.211-A), for a domestic LLC. Each field
+ * given is one change ticked on the Change Selection page. Designating a registered agent and
+ * revoking one are on that page too, but their sections were not shown, so they are not offered.
+ */
+export const CertificateOfChangeDetails = z.object({
+  entity: NyDosEntity,
+  /** Entity County Location. */
+  county: NyCounty.optional(),
+  /** Service of Process Recipient and Mailing Address. */
+  serviceOfProcess: z.object({ name: z.string().min(1), address: Address }).optional(),
+  /** Service of Process Email Address. */
+  serviceOfProcessEmail: z.string().email().optional(),
+  /** Name of Registered Agent (an agent already on file). */
+  registeredAgentName: z.string().min(1).optional(),
+  /** Registered Agent Address (New York). */
+  registeredAgentAddress: Address.optional(),
+  signer: NyRecordSigner,
+  plainCopy: z.boolean().default(false),
+});
+export type CertificateOfChangeDetails = z.infer<typeof CertificateOfChangeDetails>;
+
+/** Screen J: plain copies of documents on an entity's Entity Filing History ($5 each). */
+export const CopyRequestDetails = z.object({
+  /** Searched by DOS ID; the name, when given, is checked against the record. */
+  entity: z.object({ dosId: NyDosEntity.shape.dosId, name: z.string().min(1).optional() }),
+  /** Each document by its Filing Number, or by its Description (and Filing Date when several share it). */
+  documents: z.array(z.object({
+    filingNumber: z.string().min(1).optional(),
+    description: z.string().min(1).optional(),
+    filingDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional(),
+  })).min(1).max(25),
+});
+export type CopyRequestDetails = z.infer<typeof CopyRequestDetails>;
+
 export const FilingRequest = z.object({
   tenantId: z.string().min(1),
   clientCompanyId: z.string().min(1),
   idempotencyKey: z.string().min(8),
   type: FilingType,
-  state: FilingState,
+  /**
+   * The state the filing is for: NY, NJ, MO or FL for state filings. Decision 15 (Nov 26): an
+   * EIN-only filing takes the state where the LLC was formed, any state; the IRS doesn't mind.
+   */
+  state: UsState,
   formation: FormationDetails.optional(),
   standing: StandingCertificateDetails.optional(),
   payroll: PayrollRegistrationDetails.optional(),
   paperUpload: PaperUploadDetails.optional(),
+  dissolution: DissolutionDetails.optional(),
+  amendment: AmendmentDetails.optional(),
+  certificateOfChange: CertificateOfChangeDetails.optional(),
+  copyRequest: CopyRequestDetails.optional(),
   ein: EinRequest.optional(),
   contact: Contact,
   /** The service company's intake answers for this entity (shape: settings/policies.ts FilingIntake). */
@@ -370,6 +513,10 @@ export const FilingRequest = z.object({
   dryRun: z.boolean().optional(),
   /** Caller-side maximum charge the client approves (fee cap, decision 5). */
   feeCapUsd: z.number().nonnegative().optional(),
+}).superRefine((r, ctx) => {
+  if (r.type !== "ein_only" && !FilingState.safeParse(r.state).success) {
+    ctx.addIssue({ code: "custom", path: ["state"], message: "state must be NY, NJ, MO or FL (an EIN-only filing takes any state)" });
+  }
 });
 export type FilingRequest = z.infer<typeof FilingRequest>;
 

@@ -1,3 +1,4 @@
+import { supportEmail } from "@/lib/brand";
 import { engine, type ApiKeyInfo } from "@/lib/engine";
 import { requireTenant } from "@/lib/session";
 import { NewKeyForm } from "@/components/NewKeyForm";
@@ -11,7 +12,7 @@ export default async function KeysPage() {
   return (
     <div className="stack narrow">
       <h1>API keys</h1>
-      <p className="muted">Keys you create here. A key set up for you by the platform isn&apos;t listed and can&apos;t be revoked here. See <a href="/docs/authentication">Authentication</a> for rotating keys.</p>
+      <p className="muted">Keys you create here. A key we set up for you isn&apos;t listed here. To revoke it, email {supportEmail()}. See <a href="/docs/authentication">Authentication</a> for rotating keys.</p>
       <NewKeyForm action={createKey} />
       <div className="card" style={{ padding: 0 }}>
         <table>

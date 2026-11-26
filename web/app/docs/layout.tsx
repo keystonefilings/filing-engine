@@ -3,7 +3,10 @@ import { TopBar } from "@/components/TopBar";
 import { platformName } from "@/lib/brand";
 import { GUIDES } from "./guides";
 
-export const metadata = { title: "API docs" };
+// Each docs page's title ends with the brand: "API reference · CoFile docs".
+export function generateMetadata() {
+  return { title: { default: "API docs", template: `%s · ${platformName()} docs` } };
+}
 
 export default function DocsLayout({ children }: { children: React.ReactNode }) {
   return (

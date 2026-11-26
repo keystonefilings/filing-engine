@@ -1,12 +1,15 @@
 :root {
-  --bg: #f7f7f5; --surface: #ffffff; --surface-2: #f0f0ec; --text: #1b1c1f; --muted: #5d6068; --border: #dcdcd6;
-  --accent: #1f4fd1; --accent-text: #ffffff; --ok: #17794a; --warn: #9a5b00; --bad: #b42318; --code-bg: #f1f1ed;
-  --radius: 10px; --shadow: 0 1px 2px rgba(0,0,0,.05);
-  font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  /* Paper and ink (Nov 26): green only for approved, live and the button that moves a filing forward
+     (a firm's own color replaces it on its pages), amber for a rehearsal's planned hold, red for a stop. */
+  --bg: #F7F3EA; --surface: #FFFDF8; --surface-2: #F3EAD2; --text: #1C2430; --muted: #4A5361; --border: #D8D0BF;
+  --accent: #1F6B4F; --accent-text: #ffffff; --ok: #1F6B4F; --warn: #8A5A00; --bad: #A8382B; --code-bg: #F3EAD2;
+  --radius: 8px; --shadow: 0 1px 2px rgba(28,36,48,.06);
+  --serif: "Source Serif 4", "Iowan Old Style", Georgia, serif;
+  font-family: "IBM Plex Sans", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
 }
 @media (prefers-color-scheme: dark) {
-  :root { --bg: #111214; --surface: #1a1b1f; --surface-2: #232429; --text: #ececee; --muted: #a0a3ab; --border: #2f3138;
-    --accent: #7b9cff; --accent-text: #0b1020; --ok: #4fc58a; --warn: #f0b552; --bad: #ff7a6e; --code-bg: #1f2025; }
+  :root { --bg: #14191F; --surface: #1B2129; --surface-2: #2B271E; --text: #EDE6D6; --muted: #B3AC9C; --border: #343A42;
+    --accent: #6CC29C; --accent-text: #10161C; --ok: #6CC29C; --warn: #E8B862; --bad: #E68A7C; --code-bg: #2B271E; }
 }
 * { box-sizing: border-box; }
 html, body { margin: 0; padding: 0; background: var(--bg); color: var(--text); }
@@ -14,17 +17,18 @@ body { line-height: 1.55; font-size: 15px; }
 a { color: var(--accent-2, var(--accent)); }
 /* A firm's own pages: its second color runs along the top. */
 .branded .topbar { border-top: 4px solid var(--accent-2, var(--accent)); }
-h1 { font-size: 1.7rem; line-height: 1.2; margin: 0 0 .5rem; }
-h2 { font-size: 1.2rem; margin: 2rem 0 .6rem; }
+.branded, .branded input, .branded select, .branded textarea, .branded button { font-family: var(--brand-font, inherit); }
+h1 { font-family: var(--serif); font-weight: 600; font-size: 1.85rem; line-height: 1.2; margin: 0 0 .5rem; letter-spacing: -.005em; }
+h2 { font-family: var(--serif); font-weight: 600; font-size: 1.3rem; margin: 2rem 0 .6rem; }
 h3 { font-size: 1rem; margin: 1.4rem 0 .4rem; }
 p { margin: .5rem 0 .9rem; }
-code, pre { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: .86em; }
+code, pre { font-family: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: .86em; }
 code { background: var(--code-bg); padding: .1em .35em; border-radius: 5px; }
 pre { background: var(--code-bg); padding: 14px 16px; border-radius: var(--radius); overflow-x: auto; border: 1px solid var(--border); line-height: 1.45; }
 pre code { background: none; padding: 0; }
 table { border-collapse: collapse; width: 100%; font-size: .92rem; }
 th, td { text-align: left; padding: 7px 10px; border-bottom: 1px solid var(--border); vertical-align: top; }
-th { color: var(--muted); font-weight: 600; font-size: .82rem; text-transform: uppercase; letter-spacing: .03em; }
+th { color: var(--muted); font-weight: 600; font-size: .82rem; }
 .table-wrap { overflow-x: auto; }
 
 .wrap { max-width: 1080px; margin: 0 auto; padding: 24px 16px 64px; }
@@ -130,3 +134,10 @@ details.more > summary { cursor: pointer; color: var(--accent); font-size: .92re
 .cobrand img { height: 22px; width: auto; }
 /* A button that reads as a link. */
 .linkish { background: none; border: 0; padding: 0; color: var(--accent-2, var(--accent)); text-decoration: underline; cursor: pointer; font: inherit; }
+.check { display: block; margin: 4px 0; font-weight: 400; } .check input { width: auto; margin-right: 6px; }
+.bt-field { border: 1px solid var(--border); border-radius: 8px; padding: 8px 10px; min-height: 40px; background: var(--surface, #fff); }
+
+/* Site-wide beta notice (components/BetaBanner.tsx). */
+.beta-banner { display: flex; gap: 10px; align-items: baseline; justify-content: center; flex-wrap: wrap; padding: 8px 16px; background: #FBEFD5; color: #1C2430; border-bottom: 1px solid #EBDDB8; font: 500 .85rem/1.4 "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", sans-serif; text-align: center; }
+.beta-banner strong { color: #8A5A00; font-weight: 600; }
+.beta-banner a { color: inherit; text-decoration: underline; }

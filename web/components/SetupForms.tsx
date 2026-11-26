@@ -1,10 +1,12 @@
 "use client";
 
-import { useActionState, useState } from "react";
+import { useKeptForm } from "./useKeptForm";
+import { useEffect, useState } from "react";
 import type { SetupState } from "@/app/p/[slug]/(portal)/setup/actions";
 import type { PaymentMethodRef, PaymentRouting } from "@/lib/engine";
 import { textOn } from "@/lib/brand";
 import { ColorField, LogoField } from "./BrandFields";
+import { FONT_PRESETS } from "@/lib/fonts";
 
 type Action = (prev: SetupState, fd: FormData) => Promise<SetupState>;
 
@@ -17,18 +19,20 @@ function Top({ s }: { s: SetupState }) {
   return s?.error ? <p className="notice bad" role="alert">{s.error}</p> : null;
 }
 
-export interface DetailsValues { name: string; companyType?: string; contactName?: string; contactEmail?: string; phone?: string; website?: string }
+export interface DetailsValues { name: string; companyType?: string; contactName?: string; contactEmail?: string; phone?: string; website?: string; copyEmail?: string; services?: { id: string; title: string; state: string; offered: boolean }[] }
+
+const STATE_NAMES: Record<string, string> = { NY: "New York", NJ: "New Jersey", FL: "Florida", MO: "Missouri" };
 
 export function DetailsForm({ action, v }: { action: Action; v: DetailsValues }) {
-  const [s, run, pending] = useActionState(action, null);
+  const { state: s, pending, formProps } = useKeptForm(action, null);
   return (
-    <form action={run} className="card">
+    <form {...formProps} className="card">
       <Top s={s} />
       <div className="field"><label htmlFor="d-name">Firm name</label><input id="d-name" name="name" type="text" defaultValue={v.name} required /><Issue s={s} k="name" /></div>
       <div className="field"><label htmlFor="d-type">Kind of firm</label>
         <select id="d-type" name="companyType" defaultValue={v.companyType ?? "other"}>
           <option value="cpa">CPA or accounting firm</option><option value="payroll">Payroll company</option>
-          <option value="cfo">Fractional CFO firm</option><option value="other">Something else</option>
+          <option value="cfo">Fractional CFO firm</option><option value="title">Title company</option><option value="other">Something else</option>
         </select></div>
       <div className="field-row n2">
         <div className="field"><label htmlFor="d-cn">Main contact</label><input id="d-cn" name="contactName" type="text" defaultValue={v.contactName} /></div>
@@ -38,34 +42,98 @@ export function DetailsForm({ action, v }: { action: Action; v: DetailsValues })
         <div className="field"><label htmlFor="d-ce">Contact email</label><input id="d-ce" name="contactEmail" type="email" defaultValue={v.contactEmail} /><Issue s={s} k="contactEmail" /></div>
         <div className="field"><label htmlFor="d-web">Website</label><input id="d-web" name="website" type="url" defaultValue={v.website} placeholder="https://" /><Issue s={s} k="website" /></div>
       </div>
+      <div className="field">
+        <label htmlFor="d-copy">Email for the state&apos;s copies (optional)</label>
+        <input id="d-copy" name="copyEmail" type="email" defaultValue={v.copyEmail} />
+        <p className="help">When we file using our own New York account, the state emails the filed documents to us and sends a copy to this address. Leave it empty to use your contact email.</p>
+        <Issue s={s} k="copyEmail" />
+      </div>
+      {v.services?.length ? (
+        <fieldset className="field">
+          <legend>Services you offer your clients</legend>
+          <input type="hidden" name="servicesShown" value="1" />
+          <p className="help">Only these show on your filing desk and your filing pages for clients. You can change them any time.</p>
+          {Array.from(new Set(v.services.map((k) => k.state))).map((st) => (
+            <div key={st} style={{ marginTop: 8 }}>
+              <strong className="small">{st === "US" ? "Federal" : STATE_NAMES[st] ?? st}</strong>
+              {v.services!.filter((k) => k.state === st).map((k) => (
+                <label key={k.id} className="check"><input type="checkbox" name="services" value={k.id} defaultChecked={k.offered} /> {k.title}</label>
+              ))}
+            </div>
+          ))}
+          <Issue s={s} k="services" />
+        </fieldset>
+      ) : null}
       <button className="btn primary" type="submit" disabled={pending}>{pending ? "Saving…" : "Save and continue"}</button>
     </form>
   );
 }
 
-export interface BrandValues { displayName?: string; logoSrc?: string; logoUrl?: string; primaryColor?: string; secondaryColor?: string; supportEmail?: string }
+export interface BrandValues { slug?: string; siteUrl?: string; font?: string; hasCustomFont?: boolean; displayName?: string; logoSrc?: string; logoUrl?: string; primaryColor?: string; secondaryColor?: string; supportEmail?: string }
 
 export function BrandingForm({ action, v, platform }: { action: Action; v: BrandValues; platform: string }) {
-  const [s, run, pending] = useActionState(action, null);
+  const { state: s, pending, formProps } = useKeptForm(action, null);
   const [name, setName] = useState(v.displayName ?? "");
   const [logo, setLogo] = useState<string | undefined>(v.logoSrc);
   const [color, setColor] = useState(v.primaryColor ?? "#1f4fd1");
   const [color2, setColor2] = useState(v.secondaryColor ?? v.primaryColor ?? "#0f766e");
+  const [font, setFont] = useState(v.font ?? "system");
+  const [fontData, setFontData] = useState("");
+  const [fontError, setFontError] = useState("");
+  // The preview shows the chosen font: a preset from Google Fonts, or the file just picked.
+  useEffect(() => {
+    const p = FONT_PRESETS[font];
+    if (p?.family && !document.querySelector(`link[data-font="${font}"]`)) {
+      const l = document.createElement("link");
+      l.rel = "stylesheet"; l.dataset.font = font;
+      l.href = `https://fonts.googleapis.com/css2?family=${encodeURIComponent(p.family).replace(/%20/g, "+")}:wght@400;600&display=swap`;
+      document.head.appendChild(l);
+    }
+    if (font === "custom" && fontData) void new FontFace("FirmFontPreview", `url(${fontData})`).load().then((f) => document.fonts.add(f)).catch(() => setFontError("That file isn't a font we can use."));
+  }, [font, fontData]);
+  const previewStack = font === "custom" ? (fontData ? `"FirmFontPreview", system-ui` : v.hasCustomFont ? `"FirmFont", system-ui` : "system-ui") : FONT_PRESETS[font]?.stack ?? "system-ui";
+  const pickFont = (file: File | undefined) => {
+    setFontError("");
+    if (!file) return;
+    if (file.size > 600 * 1024) { setFontError("The font file must be 600 KB or smaller."); return; }
+    const r = new FileReader();
+    r.onload = () => { setFontData(String(r.result)); setFont("custom"); };
+    r.readAsDataURL(file);
+  };
   return (
     <div className="stack">
-      <form action={run} className="card">
+      <form {...formProps} className="card">
         <Top s={s} />
+        <div className="field">
+          <label htmlFor="b-slug">Your web address</label>
+          <div className="row" style={{ gap: 4, flexWrap: "nowrap" }}><span className="small muted" style={{ whiteSpace: "nowrap" }}>{(v.siteUrl ?? "").replace(/^https?:\/\//, "")}/</span><input id="b-slug" name="slug" type="text" defaultValue={v.slug} pattern="[a-z0-9](?:[a-z0-9-]{0,38}[a-z0-9])?" maxLength={40} aria-describedby="b-slug-help" /></div>
+          <p className="help" id="b-slug-help">Your pages for clients live here, one per service. Lowercase letters, digits and dashes. Changing it changes those links.</p>
+          <Issue s={s} k="slug" />
+        </div>
         <div className="field"><label htmlFor="b-name">Name your clients see</label><input id="b-name" name="displayName" type="text" value={name} onChange={(e) => setName(e.target.value)} maxLength={80} /></div>
         <LogoField current={v.logoSrc} currentLink={v.logoUrl} onPreview={setLogo} />
         <Issue s={s} k="logoUrl" /><Issue s={s} k="data" />
         <div className="field-row n2">
-          <ColorField id="b-color" name="primaryColor" label="Main color" value={color} onChange={setColor} help="Buttons and the top of the page." />
-          <ColorField id="b-color2" name="secondaryColor" label="Second color" value={color2} onChange={setColor2} help="Links and highlights." />
+          <ColorField id="b-color" name="primaryColor" label="Main color" value={color} onChange={setColor} help="Buttons and the top of the page. Button text is white, so choose a dark color." />
+          <ColorField id="b-color2" name="secondaryColor" label="Second color" value={color2} onChange={setColor2} help="Links and highlights. Choose a color that's easy to read on white." />
+        </div>
+        <div className="field">
+          <label htmlFor="b-font">Font</label>
+          <select id="b-font" name="font" value={font} onChange={(e) => setFont(e.target.value)}>
+            {Object.entries(FONT_PRESETS).map(([id, p]) => <option key={id} value={id}>{p.label}</option>)}
+            {v.hasCustomFont || fontData ? <option value="custom">Your own font (uploaded)</option> : null}
+          </select>
+          <label className="small" style={{ display: "block", marginTop: 8 }}>Or upload your own (WOFF2, WOFF, TTF or OTF, up to 600 KB)
+            <input type="file" accept=".woff2,.woff,.ttf,.otf,font/woff2,font/woff,font/ttf,font/otf" onChange={(e) => pickFont(e.target.files?.[0])} />
+          </label>
+          <input type="hidden" name="fontData" value={fontData} />
+          {fontError ? <span className="err">{fontError}</span> : null}
+          <Issue s={s} k="font" />
         </div>
         <div className="field"><label htmlFor="b-sup">Support email shown to clients</label><input id="b-sup" name="supportEmail" type="email" defaultValue={v.supportEmail} /><Issue s={s} k="supportEmail" /></div>
         <button className="btn primary" type="submit" disabled={pending}>{pending ? "Saving…" : "Save and continue"}</button>
       </form>
-      <BrandPreview name={name} logo={logo} color={color} color2={color2} platform={platform} />
+      <div style={{ fontFamily: previewStack }}><BrandPreview name={name} logo={logo} color={color} color2={color2} platform={platform} /></div>
     </div>
   );
 }
@@ -83,13 +151,13 @@ export function BrandPreview({ name, logo, color, color2, platform }: { name: st
         {platform ? <span className="small muted">with {platform}</span> : null}
       </div>
       <p className="small" style={{ marginBottom: 8 }}>Please fill in your LLC formation details. <a href="#" onClick={(e) => e.preventDefault()}>What you&apos;ll need</a></p>
-      <button type="button" className="btn primary small">Send</button>
+      <button type="button" className="btn primary small">Send for approval</button>
     </div>
   );
 }
 
 export function PaymentsForm({ action, methods, routing, kinds }: { action: Action; methods: PaymentMethodRef[]; routing?: PaymentRouting; kinds: { id: string; title: string }[] }) {
-  const [s, run, pending] = useActionState(action, null);
+  const { state: s, pending, formProps } = useKeptForm(action, null);
   const [mode, setMode] = useState<"single" | "per_filing">(routing?.mode ?? "single");
   const cards = methods.filter((m) => m.purpose === "state_fees");
   const none = cards.length === 0;
@@ -100,7 +168,7 @@ export function PaymentsForm({ action, methods, routing, kinds }: { action: Acti
     </select>
   );
   return (
-    <form action={run} className="card">
+    <form {...formProps} className="card">
       <Top s={s} />
       <fieldset>
         <legend>How state fees are paid</legend>
@@ -121,7 +189,7 @@ export function PaymentsForm({ action, methods, routing, kinds }: { action: Acti
           ))}
         </fieldset>
       ) : null}
-      {none ? <p className="notice">Adding a card isn&apos;t switched on yet. Cards will be held by a secure card vault, never by us, and you&apos;ll pick them here. Your choice above is saved now.</p> : null}
+      {none ? <p className="notice">No cards saved yet. Add a card, then choose which card pays for what. You can save how fees are paid now and pick cards later.</p> : null}
       <button className="btn primary" type="submit" disabled={pending}>{pending ? "Saving…" : "Save"}</button>
     </form>
   );

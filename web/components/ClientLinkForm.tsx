@@ -1,7 +1,6 @@
 "use client";
 
-import { useActionState } from "react";
-
+import { useKeptForm } from "./useKeptForm";
 type R = { ok: true; link: string; kindTitle: string; label?: string; days?: number; from?: string } | { ok: false; message: string } | null;
 
 function mailto(r: Extract<R, { ok: true }>): string {
@@ -11,10 +10,10 @@ function mailto(r: Extract<R, { ok: true }>): string {
 }
 
 export function ClientLinkForm({ action, kinds, defaultKind }: { action: (prev: R, fd: FormData) => Promise<R>; kinds: { id: string; title: string }[]; defaultKind?: string }) {
-  const [state, run, pending] = useActionState(action, null);
+  const { state, pending, formProps } = useKeptForm(action, null, { clearOnSuccess: true });
   return (
     <div className="stack">
-      <form action={run} className="card">
+      <form {...formProps} className="card">
         <div className="field"><label htmlFor="cl-kind">Filing</label>
           <select id="cl-kind" name="kind" required defaultValue={defaultKind ?? ""}><option value="" disabled>Choose…</option>{kinds.map((k) => <option key={k.id} value={k.id}>{k.title}</option>)}</select></div>
         <div className="field"><label htmlFor="cl-label">Who it&apos;s for (shown to you and the client)</label><input id="cl-label" name="label" type="text" maxLength={80} placeholder="e.g. Blue Harbor Bakery" /></div>

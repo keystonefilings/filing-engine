@@ -5,7 +5,7 @@ import type { ClientCompanySettings, TenantSettings } from "../settings/schema.j
 import { settingsMatchSnapshot, takeSettingsSnapshot } from "../settings/snapshot.js";
 import { canonicalHash } from "./hash.js";
 import { mintOneTimeCode, mintToken, verifyToken } from "./token.js";
-import { maskSensitive } from "./render.js";
+import { APPROVAL_CONSENT_VERSION, maskSensitive } from "./render.js";
 import type { FeeLine } from "../fees/table.js";
 
 export interface ApprovalDeps {
@@ -41,7 +41,7 @@ export class ApprovalService {
     return [{ channel: "email" as const, address: req.contact.email, name: `${req.contact.firstName} ${req.contact.lastName}` }];
   }
 
-  async create(filing: FilingRecord, tenant: TenantSettings, client: ClientCompanySettings, fees: FeeLine[]): Promise<ApprovalRecord> {
+  async create(filing: FilingRecord, tenant: TenantSettings, client: ClientCompanySettings, fees: FeeLine[], review?: ApprovalRecord["review"]): Promise<ApprovalRecord> {
     // Supersede any pending approval for this filing.
     if (filing.currentApprovalId) {
       const prev = await this.deps.store.getApproval(filing.currentApprovalId);
@@ -55,6 +55,7 @@ export class ApprovalService {
       filingId: filing.id,
       tenantId: filing.tenantId,
       payloadHash: this.payloadHash(filing.request),
+      ...(review ? { review } : {}),
       settingsSnapshot: takeSettingsSnapshot(tenant, client),
       shownPayload: maskSensitive(filing.request),
       fees,
@@ -82,6 +83,38 @@ export class ApprovalService {
    * the re-run's verifyForRun passes, with the admin — not the client — as the authority.
    * Fees are unchanged by a name change.
    */
+  /**
+   * An EIN application started after the state accepted its formation: the client approved its
+   * details with the formation (shown on that approval page, with the note that it follows
+   * acceptance). This records an approved approval bound to the EIN filing's own payload, citing
+   * the formation's approval as the authority. The EIN details must be the ones approved.
+   */
+  async carryForward(filing: FilingRecord, from: ApprovalRecord, parent: FilingRecord, tenant: TenantSettings, client: ClientCompanySettings, fees: FeeLine[]): Promise<ApprovalRecord> {
+    if (from.status !== "approved" || from.filingId !== parent.id) throw new Error("the formation's approval isn't an approved approval of that formation");
+    const strip = (e: unknown) => { const { mode: _m, formationState: _f, startDate: _s, ...rest } = (e ?? {}) as Record<string, unknown>; return JSON.stringify(rest); };
+    if (strip(filing.request.ein) !== strip(parent.request.ein)) throw new Error("the EIN details differ from the ones approved with the formation");
+    const id = randomUUID();
+    const now = this.now();
+    const approval: ApprovalRecord = {
+      id, filingId: filing.id, tenantId: filing.tenantId,
+      payloadHash: this.payloadHash(filing.request),
+      settingsSnapshot: takeSettingsSnapshot(tenant, client),
+      shownPayload: maskSensitive(filing.request),
+      fees, feeCapUsd: filing.request.feeCapUsd,
+      recipients: from.recipients,
+      token: mintToken(this.deps.signingSecret, id),
+      status: "approved",
+      createdAt: now.toISOString(),
+      expiresAt: new Date(now.getTime() + (client.approvalTtlHours ?? this.deps.defaultTtlHours) * 3_600_000).toISOString(),
+      decidedAt: now.toISOString(),
+      decidedVia: from.decidedVia,
+      comment: `carried from approval ${from.id} of formation ${parent.id}: the EIN is applied for after the state accepted it`,
+    };
+    await this.deps.store.createApproval(approval);
+    await this.deps.store.updateFiling(filing.id, { currentApprovalId: id });
+    return approval;
+  }
+
   async adminReauthorize(filing: FilingRecord, tenant: TenantSettings, client: ClientCompanySettings, fees: FeeLine[], by: string): Promise<ApprovalRecord> {
     if (filing.currentApprovalId) {
       const prev = await this.deps.store.getApproval(filing.currentApprovalId);
@@ -114,6 +147,8 @@ export class ApprovalService {
     if (!v) return { ok: false, reason: "invalid_token" };
     const approval = await this.deps.store.getApproval(v.approvalId);
     if (!approval || approval.token !== token) return { ok: false, reason: "not_found" };
+    // A link marked expired on an earlier visit still reads as expired, not as decided.
+    if (approval.status === "expired") return { ok: false, reason: "expired" };
     if (approval.status !== "pending") return { ok: false, reason: "already_decided" };
     if (approval.expiresAt <= this.now().toISOString()) {
       await this.deps.store.updateApproval(approval.id, { status: "expired" });
@@ -134,6 +169,7 @@ export class ApprovalService {
     const updated = await this.deps.store.updateApproval(a.id, {
       status: decision === "approve" ? "approved" : "changes_requested",
       decidedAt: this.now().toISOString(),
+      ...(decision === "approve" ? { consentVersion: APPROVAL_CONSENT_VERSION } : {}),
       decidedVia: { ip: via.ip, userAgent: via.userAgent, recipient: via.recipient },
       comment: via.comment,
     });

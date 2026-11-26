@@ -1,12 +1,13 @@
 import Fastify, { type FastifyInstance, type FastifyReply } from "fastify";
+import type { ChannelSender } from "../comms/senders.js";
 import { lookupKey } from "./keys.js";
 import { registerSelfService, tenantFromStoredKey } from "./self-service.js";
 import { registerSignatures } from "./signatures.js";
 import { z } from "zod";
 import type { FilingService } from "../orchestrator/service.js";
-import { ValidationFailed } from "../orchestrator/service.js";
+import { IdempotencyConflict, OutcomeError, ValidationFailed } from "../orchestrator/service.js";
 import type { ApprovalService } from "../approvals/service.js";
-import { renderReviewPage, maskSensitive } from "../approvals/render.js";
+import { renderReviewPage, renderDecisionPage, maskSensitive, type PageBrand } from "../approvals/render.js";
 import { ClientCompanyOwnershipError, type Store, type FilingRecord } from "../store/types.js";
 import type { ArtifactStore } from "../artifacts/store.js";
 import { TenantSettings, ClientCompanySettings } from "../settings/schema.js";
@@ -17,8 +18,21 @@ import { renderNameResolutionPage } from "../name-resolution/render.js";
 import { renderReviewGatePage } from "../review-gate/render.js";
 import { registerUsers, portalSlugFor, type Auth, type PartnerSignupMode } from "../users/routes.js";
 import { registerBrandLogos } from "./brand-logos.js";
+import { registerDocuments } from "./documents.js";
+import { registerIntakeLinks } from "./intake-links.js";
+import { registerPublicPages } from "./public-pages.js";
+import { registerCardCodes } from "./card-codes.js";
+import { registerAgentServices } from "../registered-agents/routes.js";
+import { registerBilling } from "../billing/routes.js";
+import { registerInbound } from "../inbound/routes.js";
+import type { InboundEmailService } from "../inbound/email.js";
+import type { BillingService } from "../billing/service.js";
+import { SubscriptionRequired } from "../billing/service.js";
 import { readSessionKey, SESSION_PREFIX } from "../users/session-token.js";
 import { partnerGuard } from "../users/partner-guard.js";
+import { FONT_PRESETS, googleFontHref, type FontPreset } from "../settings/fonts.js";
+import type { WebhookDispatcher } from "../webhooks/dispatcher.js";
+import { FilingRequest } from "../domain/filing.js";
 
 export interface ApiDeps {
   service: FilingService;
@@ -40,6 +54,29 @@ export interface ApiDeps {
   platformTenantId?: string;
   /** Whether partner sign-ups wait for approval (default) or are approved at once. */
   partnerSignupMode?: PartnerSignupMode;
+  /** Sends account emails (password reset). Absent: those emails are not sent. */
+  email?: ChannelSender;
+  /** The web front end, for links in account emails. */
+  webBaseUrl?: string;
+  /** V29: where connected portal logins are sealed. */
+  secrets?: import("../settings/db-vault.js").DbVault;
+  /** Sends webhook test deliveries (V35). */
+  webhooks?: WebhookDispatcher;
+  /** The site's name (CoFile): the platform tenant's approval pages and partner firms' "with …". */
+  platformName?: string;
+  /** V33: subscriptions through Stripe. Absent: no billing routes. */
+  billing?: BillingService;
+  /** V40: filing requests emailed in (Resend receiving). */
+  inbound?: InboundEmailService;
+  /** V41-V43: filing requests from Slack, and by text and WhatsApp through Twilio. */
+  slack?: import("../inbound/slack.js").SlackChannel;
+  twilio?: import("../inbound/twilio.js").TwilioChannel;
+  /** Decision 9: our registered agent service for partner firms. */
+  agentServices?: import("../registered-agents/agent-services.js").AgentServices;
+  /** Where people reach us (SUPPORT_EMAIL). */
+  supportEmail?: string;
+  /** V37: checks Google ID tokens for "Sign in with Google". */
+  google?: import("../users/google.js").GoogleIdTokens;
 }
 
 function filingTitle(f: FilingRecord | null): string {
@@ -47,6 +84,20 @@ function filingTitle(f: FilingRecord | null): string {
   const n = f.request.formation ? `: ${f.request.formation.name.baseName} ${f.request.formation.name.designator}` : "";
   return `${f.request.state} ${f.request.type.replace(/_/g, " ")}${n}`;
 }
+
+const OutcomeBody = z.object({
+  outcome: z.enum(["accepted", "rejected"]),
+  /** The state's reference: filing receipt or document number. */
+  reference: z.string().trim().max(120).optional(),
+  /** Why the state rejected it (shown to the client). */
+  reason: z.string().trim().max(1000).optional(),
+  documents: z.array(z.object({
+    label: z.string().trim().min(1).max(120),
+    kind: z.enum(["filing_receipt", "formation_document", "standing_certificate", "other"]).default("formation_document"),
+    contentType: z.enum(["application/pdf", "image/png", "image/jpeg"]),
+    data: z.string().max(14_000_000).describe("base64"),
+  })).max(5).optional(),
+}).refine((b) => b.outcome === "accepted" || !b.documents?.length, { message: "documents go with an accepted filing", path: ["documents"] });
 
 const DriftDecisionBody = z.discriminatedUnion("action", [
   // decidedBy comes from the authenticated staff key, never from the body.
@@ -76,8 +127,9 @@ export function buildServer(deps: ApiDeps): FastifyInstance {
       if (!c) return null;
       const u = await deps.store.getUser(c.sub);
       if (!u || u.status !== "active" || u.sessionGen !== c.gen || u.tenantId !== c.tenantId || u.kind !== c.kind) return null;
-      if (u.kind === "partner") return u.clientCompanyId && u.clientCompanyId === c.clientCompanyId ? { tenantId: u.tenantId, user: u, partnerOf: u.clientCompanyId } : null;
-      return { tenantId: u.tenantId, user: u };
+      if (c.jti && u.revokedSessions?.some((r) => r.jti === c.jti)) return null;
+      if (u.kind === "partner") return u.clientCompanyId && u.clientCompanyId === c.clientCompanyId ? { tenantId: u.tenantId, user: u, partnerOf: u.clientCompanyId, session: c } : null;
+      return { tenantId: u.tenantId, user: u, session: c };
     }
     const fromEnv = lookupKey(deps.apiKeys, key);
     if (fromEnv) return { tenantId: fromEnv };
@@ -115,6 +167,8 @@ export function buildServer(deps: ApiDeps): FastifyInstance {
       return reply.code(r.existing ? 200 : 201).send({ filing: publicFiling(r.filing), approvalLink: r.approvalLink, issues: r.issues });
     } catch (e) {
       if (e instanceof ValidationFailed) return reply.code(422).send({ error: "validation failed", issues: e.issues });
+      if (e instanceof IdempotencyConflict) return reply.code(409).send({ error: e.message, filingId: e.filingId });
+      if (e instanceof SubscriptionRequired) return reply.code(402).send({ error: e.message, billing: { plan: e.account.plan, status: e.status } });
       throw e;
     }
   });
@@ -126,7 +180,16 @@ export function buildServer(deps: ApiDeps): FastifyInstance {
     let filings = await deps.store.listFilings(tenantId);
     if (clientCompanyId) filings = filings.filter((f) => f.clientCompanyId === clientCompanyId);
     if (status) { const wanted = new Set(status.split(",")); filings = filings.filter((f) => wanted.has(f.status)); }
-    filings.sort((a, b) => b.createdAt.localeCompare(a.createdAt));
+    filings.sort((a, b) => b.createdAt.localeCompare(a.createdAt) || b.id.localeCompare(a.id));
+    // V35: pages, newest first. limit (1 to 200) and before (the nextBefore of the page before).
+    const q = req.query as { limit?: string; before?: string };
+    if (q.before) { const [at, id] = q.before.split("|"); filings = filings.filter((f) => f.createdAt < at! || (f.createdAt === at && !!id && f.id < id)); }
+    if (q.limit) {
+      const n = Math.min(200, Math.max(1, Number(q.limit) || 50));
+      const page = filings.slice(0, n);
+      const last = page[page.length - 1];
+      return { filings: page.map(publicFiling), nextBefore: filings.length > n && last ? `${last.createdAt}|${last.id}` : null };
+    }
     return { filings: filings.map(publicFiling) };
   });
 
@@ -158,6 +221,102 @@ export function buildServer(deps: ApiDeps): FastifyInstance {
     if (!r.ok) return reply.code(r.reason === "not_awaiting_information" ? 409 : r.reason === "not_found" ? 404 : 422).send({ error: r.reason, issues: (r as { issues?: unknown }).issues });
     if (!r.complete) return reply.code(200).send({ complete: false, missing: r.missing });
     return reply.code(200).send({ complete: true, filing: publicFiling(r.filing!), approvalLink: r.approvalLink });
+  });
+
+  // The state's answer to a submitted filing (NY receipt email, FL examiner, a rejection): platform
+  // staff, or the subscriber whose filing it is. Partner sessions can't (partner-guard has no rule).
+  app.post("/v1/filings/:id/outcome", async (req, reply) => {
+    const staff = staffOf(req);
+    const auth = staff ? null : await authOf(req);
+    if (!staff && !auth) return reply.code(401).send({ error: "invalid api key" });
+    const f = await deps.store.getFiling((req.params as { id: string }).id);
+    if (!f || (!staff && f.tenantId !== auth!.tenantId)) return reply.code(404).send({ error: "not found" });
+    const parsed = OutcomeBody.safeParse(req.body);
+    if (!parsed.success) return reply.code(422).send({ error: "validation failed", issues: parsed.error.issues.map((i) => ({ path: i.path.join("."), message: i.message })) });
+    const docs = (parsed.data.documents ?? []).map((d) => ({ label: d.label, kind: d.kind, contentType: d.contentType, body: Buffer.from(d.data, "base64") }));
+    if (docs.some((d) => d.body.length === 0 || d.body.length > 10 * 1024 * 1024)) return reply.code(422).send({ error: "each document must be 1 byte to 10 MB" });
+    try {
+      const done = await deps.service.recordOutcome(f.id, { ...parsed.data, documents: docs, by: staff ?? auth?.user?.email ?? "api key" }, deps.artifacts);
+      return { filing: publicFiling(done) };
+    } catch (e) {
+      if (e instanceof OutcomeError) return reply.code(e.status).send({ error: e.message });
+      throw e;
+    }
+  });
+
+  // Decision 7: take the state's review page again (after a preview failed, was blocked, or its drift review is done).
+  app.post("/v1/filings/:id/preview", async (req, reply) => {
+    const staff = staffOf(req);
+    const auth = staff ? null : await authOf(req);
+    if (!staff && !auth) return reply.code(401).send({ error: "invalid api key" });
+    const f = await deps.store.getFiling((req.params as { id: string }).id);
+    if (!f || (!staff && f.tenantId !== auth!.tenantId)) return reply.code(404).send({ error: "not found" });
+    try {
+      return reply.code(202).send({ filing: publicFiling(await deps.service.requestPreview(f.id)) });
+    } catch (e) {
+      if (e instanceof OutcomeError) return reply.code(e.status).send({ error: e.message });
+      throw e;
+    }
+  });
+
+  // V34: the filing request's JSON Schema, generated from the model the engine validates with (public: it's documentation).
+  let requestSchema: unknown;
+  app.get("/v1/schema/filing-request", async (_req, reply) => {
+    requestSchema ??= z.toJSONSchema(FilingRequest, { io: "input", unrepresentable: "any" });
+    return reply.header("cache-control", "public, max-age=3600").send(requestSchema);
+  });
+
+  // V35: cancel before anything has started at the state.
+  app.post("/v1/filings/:id/cancel", async (req, reply) => {
+    const auth = await authOf(req);
+    if (!auth) return reply.code(401).send({ error: "invalid api key" });
+    const f = await deps.store.getFiling((req.params as { id: string }).id);
+    if (!f || f.tenantId !== auth.tenantId) return reply.code(404).send({ error: "not found" });
+    const reason = typeof (req.body as { reason?: unknown } | undefined)?.reason === "string" ? String((req.body as { reason: string }).reason).slice(0, 500) : undefined;
+    try {
+      return { filing: publicFiling(await deps.service.cancelFiling(f.id, auth.user?.email ?? "api key", reason)) };
+    } catch (e) {
+      if (e instanceof OutcomeError) return reply.code(e.status).send({ error: e.message });
+      throw e;
+    }
+  });
+
+  // V35: the client's decision, collected in the subscriber's own app.
+  app.post("/v1/filings/:id/approval", async (req, reply) => {
+    const auth = await authOf(req);
+    if (!auth) return reply.code(401).send({ error: "invalid api key" });
+    if (auth.partnerOf) return reply.code(403).send({ error: "partners approve through the approval link" });
+    const f = await deps.store.getFiling((req.params as { id: string }).id);
+    if (!f || f.tenantId !== auth.tenantId) return reply.code(404).send({ error: "not found" });
+    const parsed = z.object({ decision: z.enum(["approve", "request_changes"]), approvedBy: z.string().trim().min(2).max(200), comment: z.string().max(2000).optional(), code: z.string().max(20).optional() }).safeParse(req.body);
+    if (!parsed.success) return reply.code(422).send({ error: "send decision and approvedBy (who approved)" });
+    try {
+      const r = await deps.service.decideByApi(f.id, parsed.data.decision, { by: parsed.data.approvedBy, comment: parsed.data.comment, code: parsed.data.code });
+      if (!r.ok) return reply.code(409).send({ error: r.reason });
+      return { filing: publicFiling((await deps.store.getFiling(f.id))!) };
+    } catch (e) {
+      if (e instanceof OutcomeError) return reply.code(e.status).send({ error: e.message });
+      throw e;
+    }
+  });
+
+  // V35: a test delivery to every endpoint, and the recent delivery log.
+  app.post("/v1/webhooks/test", async (req, reply) => {
+    const auth = await authOf(req);
+    if (!auth || auth.partnerOf) return reply.code(auth ? 403 : 401).send({ error: auth ? "not available to partner accounts" : "invalid api key" });
+    const tenant = await deps.store.getTenant(auth.tenantId);
+    if (!tenant?.webhookEndpoints.length) return reply.code(409).send({ error: "no webhook endpoints are set up" });
+    if (!deps.webhooks) return reply.code(501).send({ error: "webhook delivery isn't available on this server" });
+    const event = await deps.webhooks.emit("webhook.test", { tenantId: auth.tenantId, filingId: "00000000-0000-0000-0000-000000000000" }, { message: "a test delivery you asked for" }, tenant.webhookEndpoints);
+    await deps.webhooks.processDue();
+    return reply.code(202).send({ eventId: event.id, deliveries: (await deps.store.listDeliveries("00000000-0000-0000-0000-000000000000")).filter((d) => d.event.id === event.id).map(({ event: _e, ...d }) => d) });
+  });
+  app.get("/v1/webhooks/deliveries", async (req, reply) => {
+    const auth = await authOf(req);
+    if (!auth || auth.partnerOf) return reply.code(auth ? 403 : 401).send({ error: auth ? "not available to partner accounts" : "invalid api key" });
+    const limit = Math.min(200, Math.max(1, Number((req.query as { limit?: string }).limit) || 50));
+    const ds = await deps.store.listTenantDeliveries(auth.tenantId, limit);
+    return { deliveries: ds.map((d) => ({ id: d.id, url: d.url, eventType: d.event.type, filingId: d.event.filingId, occurredAt: d.event.occurredAt, status: d.status, attempts: d.attempts, lastStatusCode: d.lastStatusCode, lastError: d.lastError })) };
   });
 
   app.get("/v1/filings/:id/deliveries", async (req, reply) => {
@@ -224,27 +383,73 @@ export function buildServer(deps: ApiDeps): FastifyInstance {
   });
 
   registerBrandLogos(app, { store: deps.store, artifacts: deps.artifacts, authOf });
-  registerSelfService(app, { store: deps.store, tenantOf });
+  registerDocuments(app, { store: deps.store, artifacts: deps.artifacts, authOf });
+  registerSelfService(app, { store: deps.store, tenantOf, platformName: deps.platformName, agentOffer: deps.agentServices ? (t, c) => deps.agentServices!.offer(t, c) : undefined });
   registerSignatures(app, { store: deps.store, tenantOf });
+  registerIntakeLinks(app, { store: deps.store, authOf });
+  registerCardCodes(app, { store: deps.store, service: deps.service, authOf });
+  if (deps.agentServices) registerAgentServices(app, { store: deps.store, agentServices: deps.agentServices, authOf });
+  if (deps.billing) registerBilling(app, { store: deps.store, billing: deps.billing, authOf });
+  if (deps.inbound || deps.twilio || deps.slack) registerInbound(app, { store: deps.store, inbound: deps.inbound, twilio: deps.twilio, slack: deps.slack, publicBaseUrl: deps.publicBaseUrl, authOf });
+  registerPublicPages(app, { store: deps.store, service: deps.service, platformTenantId: deps.platformTenantId ?? "keystone", platformName: deps.platformName, agentOffer: deps.agentServices ? (t, c) => deps.agentServices!.offer(t, c) : undefined });
   registerUsers(app, {
     store: deps.store, authOf, staffOf, sessionSecret,
     platformTenantId: deps.platformTenantId ?? "keystone", partnerSignupMode: deps.partnerSignupMode ?? "approval",
+    email: deps.email, webBaseUrl: deps.webBaseUrl ?? "http://localhost:3000", secrets: deps.secrets, google: deps.google, supportEmail: deps.supportEmail,
   });
 
   // ---- Approval link (client-facing, decision 2) ----
+  // Decision 7: the review-page screenshot, for whoever holds a usable approval link.
+  app.get("/approve/:token/review.png", async (req, reply) => {
+    const found = await deps.approvals.lookup((req.params as { token: string }).token);
+    if (!found.ok || !found.approval.review?.artifactId) return reply.code(404).send({ error: "not found" });
+    const got = await deps.artifacts.get(found.approval.review.artifactId);
+    if (!got || got.meta.filingId !== found.approval.filingId) return reply.code(404).send({ error: "not found" });
+    return reply.header("cache-control", "private, no-store").type(got.meta.contentType).send(got.body);
+  });
+
+  // V20: the client sees the firm they work with. A firm with portal branding (a partner, or a
+  // firm a subscriber set up) brands the page; partners are co-branded with the platform. The
+  // page shown after the client decides carries the same look.
+  async function approvalBrand(tenantId: string, f: FilingRecord | null): Promise<PageBrand> {
+    const tenant = await deps.store.getTenant(tenantId);
+    const client = f ? await deps.store.getClientCompany(f.clientCompanyId) : null;
+    const portal = client?.portal;
+    const firmBrand = portal && (portal.displayName || portal.logoUrl || portal.logoArtifactId || client?.partner);
+    const firmLogo = portal?.logoArtifactId ? `${deps.publicBaseUrl}/v1/brand-logos/${portal.logoArtifactId}` : portal?.logoUrl?.startsWith("https://") ? portal.logoUrl : undefined;
+    return {
+      brandName: firmBrand ? (portal!.displayName ?? client!.name) : (tenantId === (deps.platformTenantId ?? "keystone") ? (deps.platformName ?? "CoFile") : (tenant?.branding.displayName ?? tenant?.name)),
+      supportEmail: (firmBrand ? portal!.supportEmail : undefined) ?? tenant?.branding.supportEmail,
+      logoUrl: firmBrand ? firmLogo : undefined, primaryColor: firmBrand ? portal!.primaryColor : undefined,
+      font: firmBrand && portal!.font && portal!.font !== "system"
+        ? portal!.font === "custom"
+          ? (portal!.fontArtifactId ? { stack: FONT_PRESETS.system.stack, fileUrl: `${deps.publicBaseUrl}/v1/brand-fonts/${portal!.fontArtifactId}` } : undefined)
+          : { stack: FONT_PRESETS[portal!.font as FontPreset]?.stack ?? FONT_PRESETS.system.stack, href: googleFontHref(portal!.font) ?? undefined }
+        : undefined,
+      poweredBy: client?.partner ? (deps.platformName ?? "CoFile") : undefined,
+    };
+  }
+
   app.get("/approve/:token", async (req, reply) => {
     const found = await deps.approvals.lookup((req.params as { token: string }).token);
-    if (!found.ok) return reply.code(410).type("text/html").send(`<p>This approval link is ${found.reason.replace("_", " ")}.</p>`);
+    if (!found.ok) {
+      const text = found.reason === "already_decided" ? "A decision was already recorded with this link, so there's nothing more to do here."
+        : found.reason === "expired" ? "This link to the proof has expired. Ask whoever sent it for a new one."
+        : "This link to the proof isn't valid. Ask whoever sent it for a new one.";
+      return reply.code(410).type("text/html").send(`<p>${text}</p>`);
+    }
     const a = found.approval;
     const f = await deps.store.getFiling(a.filingId);
-    const tenant = await deps.store.getTenant(a.tenantId);
     const html = renderReviewPage({
-      brandName: tenant?.branding.displayName ?? tenant?.name, supportEmail: tenant?.branding.supportEmail,
+      ...(await approvalBrand(a.tenantId, f)),
       filingId: a.filingId,
       filingTitle: f ? `${f.request.state} ${f.request.type.replace("_", " ")}${f.request.formation ? `: ${f.request.formation.name.baseName} ${f.request.formation.name.designator}` : ""}` : "Filing",
       payload: a.shownPayload, fees: a.fees, feeCapUsd: a.feeCapUsd, expiresAt: a.expiresAt,
       einInRun: !!f?.request.ein && f.request.ein.mode === "in_run",
+      einAfterAcceptance: !!f?.request.ein && f.request.ein.mode === "after_acceptance",
+      practice: !!f && deps.service.isPractice(f.request),
       postUrl: `${deps.publicBaseUrl}/approve/${a.token}`, requireCode: !!a.oneTimeCode,
+      reviewImageUrl: a.review?.artifactId ? `${deps.publicBaseUrl}/approve/${a.token}/review.png` : undefined,
     });
     return reply.type("text/html").send(html);
   });
@@ -255,10 +460,19 @@ export function buildServer(deps: ApiDeps): FastifyInstance {
     const r = await deps.service.onApprovalDecision((req.params as { token: string }).token, decision, {
       ip: req.ip, userAgent: String(req.headers["user-agent"] ?? ""), comment: body.comment, code: body.code,
     });
-    if (!r.ok) return reply.code(r.reason === "bad_code" ? 400 : 410).type("text/html").send(`<p>Could not record your decision: ${r.reason.replace("_", " ")}.</p>`);
-    return reply.type("text/html").send(decision === "approve"
-      ? "<p>Thank you. Your approval is recorded and the filing will be submitted exactly as shown.</p>"
-      : "<p>Thank you. Your change request is recorded; you will receive a new link once the filing is updated.</p>");
+    if (!r.ok) return reply.code(r.reason === "bad_code" ? 400 : 410).type("text/html").send(r.reason === "bad_code"
+      ? "<p>That code didn't match. Go back, check the latest one-time code we sent you and try again.</p>"
+      : "<p>We couldn't record your decision because this link has expired or was already used. Ask whoever sent it for a new link.</p>");
+    if (decision !== "approve") return reply.type("text/html").send("<p>Thank you. Your change request is recorded, and nothing will be filed from this link. If the filing is corrected, you'll get a new link to approve.</p>");
+    // A practice filing is never filed or paid; a live one still stops before paying if the state's page changed.
+    const f = await deps.store.getFiling(r.approval.filingId);
+    return reply.type("text/html").send(renderDecisionPage({
+      ...(await approvalBrand(r.approval.tenantId, f)),
+      heading: "Approval recorded",
+      paragraphs: [f && deps.service.isPractice(f.request)
+        ? "Thank you. Your approval is recorded. This is a rehearsal, so nothing will be filed or paid."
+        : "Thank you. Your approval is recorded. We'll submit the filing exactly as shown. If the state's page has changed by then, we stop before paying, and you may be asked to approve again. We'll email you when it's complete."],
+    }));
   });
 
   // ---- Drift reviews (platform staff, decision 6): the platform maintains the site adapters for all tenants ----

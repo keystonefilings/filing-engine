@@ -27,6 +27,12 @@
           "credit_card": 2.0,
           "echeck": 1.0
         }
+      },
+      "entityFees": {
+        "for_profit_corporation": {
+          "label": "Formation filing fee (for-profit corporation)",
+          "statutory": 100
+        }
       }
     },
     "standing_certificate": {
@@ -91,14 +97,54 @@
         "business_corporation": {
           "label": "Certificate of Incorporation filing fee",
           "statutory": 125,
-          "_taxOnShares": "Computed by the page from the share answers. Quoted $0 for shares without par value, as the page showed for 200 no-par shares (portal map 2026-11-24); a run stops at the fee check if the page shows otherwise. Par-value shares are refused until mapped."
+          "taxOnShares": {
+            "parValueRate": 0.0005,
+            "noParPerShareUsd": 0.05,
+            "minimumUsd": 10
+          }
         }
       }
     },
-    "amendment_name_change": {
+    "dissolution": {
       "statutory": {
-        "label": "Certificate of Amendment (name change) fee",
+        "label": "Articles of Dissolution (domestic LLC) fee",
         "amountUsd": 60
+      },
+      "plain_copy": {
+        "label": "Plain Copy",
+        "amountUsd": 5
+      }
+    },
+    "amendment": {
+      "statutory": {
+        "label": "Certificate of Amendment (name change, domestic LLC) fee",
+        "amountUsd": 60
+      },
+      "plain_copy": {
+        "label": "Plain Copy",
+        "amountUsd": 5
+      }
+    },
+    "certificate_of_change": {
+      "statutory": {
+        "label": "Certificate of Change (domestic LLC) fee",
+        "amountUsd": 30
+      },
+      "plain_copy": {
+        "label": "Plain Copy",
+        "amountUsd": 5
+      }
+    },
+    "copy_request": {
+      "perDocument": {
+        "label": "Plain copies",
+        "amountUsd": 5
+      }
+    },
+    "standing_certificate": {
+      "statutory": {
+        "label": "Certificate of Status",
+        "amountUsd": 25
       }
     },
     "copy": {

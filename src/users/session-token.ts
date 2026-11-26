@@ -19,6 +19,8 @@ export interface SessionClaims {
   exp: number;
   /** Bumped when the user's password changes or sessions are revoked. */
   gen: number;
+  /** This key's own id, so signing out ends this session alone (UserRecord.revokedSessions). */
+  jti?: string;
 }
 
 const mac = (secret: string, data: string) => createHmac("sha256", `session:${secret}`).update(data).digest("base64url");

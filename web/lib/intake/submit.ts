@@ -1,7 +1,8 @@
 import { randomBytes } from "node:crypto";
 import { engine, EngineError, type CreateFilingResult } from "../engine";
 import { saveSignature, listSignatures, sameSigner } from "../signatures";
-import { buildRequest, getPath, rawFromFormData, type BuildContext } from "./build";
+import { buildRequest, getPath, rawFromFormData, visibility, type BuildContext } from "./build";
+import { uploadDocument, MAX_DOCUMENT_BYTES } from "../documents";
 import type { FilingKind } from "./forms";
 import { NEW_SIGNATURE } from "./signature-field";
 
@@ -11,10 +12,19 @@ export type SubmitOutcome =
 
 export interface SubmitContext extends Omit<BuildContext, "idempotencyKey"> {
   apiKey: string;
+  /** V39: a public page or widget: post here with no key (the engine's /v1/public/firms/... route). */
+  publicPath?: string;
   /** A stable key per form (its nonce), so a double submit makes one filing. */
   idempotencySeed: string;
   /** Whether the form may use a signature saved earlier (firm staff), or must be signed fresh (a client link). */
   allowSavedSignature: boolean;
+}
+
+/** The kind's PDF fields (decision 19). Top-level fields only. */
+function pdfFields(kind: FilingKind) {
+  const out = [];
+  for (const s of kind.sections) for (const it of s.items) if (it.kind === "field" && it.type === "pdf") out.push(it);
+  return out;
 }
 
 /** The signature field of a kind, if it has one. */
@@ -39,7 +49,7 @@ export async function submitIntake(kind: FilingKind, fd: FormData, ctx: SubmitCo
     if (choice === NEW_SIGNATURE.choice) {
       const image = raw[NEW_SIGNATURE.image] ?? "";
       if (!image) issues.push({ path: sig.path, message: "Signature: please sign in the box" });
-      if (raw[NEW_SIGNATURE.consent] !== "on") issues.push({ path: sig.path, message: "Signature: please tick the box to adopt it" });
+      if (raw[NEW_SIGNATURE.consent] !== "on") issues.push({ path: sig.path, message: "Signature: please check the box to adopt it" });
       if (!signer) issues.push({ path: sig.signerPath, message: "Signer's name: required before signing" });
     } else if (choice && !ctx.allowSavedSignature) {
       issues.push({ path: sig.path, message: "Signature: please sign in the box" });
@@ -51,9 +61,22 @@ export async function submitIntake(kind: FilingKind, fd: FormData, ctx: SubmitCo
     }
   }
 
-  // Check the form before saving anything, so a form with mistakes saves no signature.
-  const idempotencyKey = `portal-${ctx.idempotencySeed}`.slice(0, 120);
-  const probe = buildRequest(kind, { ...raw, ...(sig && raw[sig.path] === NEW_SIGNATURE.choice ? { [sig.path]: "pending" } : {}) }, { ...ctx, idempotencyKey });
+  // PDFs: each shown field needs a PDF of 10 MB or less. They're uploaded once the form checks out.
+  const shown = visibility(kind, raw).top;
+  const files: { path: string; label: string; kind: NonNullable<ReturnType<typeof pdfFields>[number]["documentKind"]>; file: File }[] = [];
+  for (const pf of pdfFields(kind)) {
+    if (!shown.has(pf.path) || !pf.documentKind) continue;
+    const file = fd.get(pf.path);
+    if (!(file instanceof File) || file.size === 0) { if (pf.required) issues.push({ path: pf.path, message: `${pf.label}: choose the PDF` }); continue; }
+    if (file.size > MAX_DOCUMENT_BYTES) { issues.push({ path: pf.path, message: `${pf.label}: the PDF must be 10 MB or smaller` }); continue; }
+    if (ctx.publicPath) { issues.push({ path: pf.path, message: `${pf.label}: this form takes uploads only from the firm's own filing desk` }); continue; }
+    files.push({ path: pf.path, label: pf.label, kind: pf.documentKind, file });
+  }
+
+  // Check the form before saving anything, so a form with mistakes saves no signature and no upload.
+  const idempotencyKey = `${ctx.publicPath ? "public" : "portal"}-${ctx.idempotencySeed}`.slice(0, 120);
+  const pendingUploads = Object.fromEntries(files.map((f) => [f.path, "pending"]));
+  const probe = buildRequest(kind, { ...raw, ...pendingUploads, ...(sig && raw[sig.path] === NEW_SIGNATURE.choice ? { [sig.path]: "pending" } : {}) }, { ...ctx, idempotencyKey });
   issues.push(...probe.issues);
   if (issues.length) return { ok: false, issues };
 
@@ -70,15 +93,30 @@ export async function submitIntake(kind: FilingKind, fd: FormData, ctx: SubmitCo
     }
   }
 
+  for (const f of files) {
+    try {
+      const doc = await uploadDocument(ctx.apiKey, ctx.clientCompanyId, { kind: f.kind, bytes: Buffer.from(await f.file.arrayBuffer()), fileName: f.file.name });
+      raw[f.path] = doc.id;
+    } catch (e) {
+      const why = e instanceof EngineError ? ((e.body as { issues?: { message: string }[] })?.issues?.[0]?.message ?? e.message) : "it couldn't be uploaded";
+      return { ok: false, issues: [{ path: f.path, message: `${f.label}: ${why}` }] };
+    }
+  }
+
   const { request } = buildRequest(kind, raw, { ...ctx, idempotencyKey });
   try {
-    const result = await engine<CreateFilingResult>(ctx.apiKey, "/v1/filings", { method: "POST", body: request });
+    const result = ctx.publicPath
+      ? await engine<CreateFilingResult>(null, ctx.publicPath, { method: "POST", body: request })
+      : await engine<CreateFilingResult>(ctx.apiKey, "/v1/filings", { method: "POST", body: request });
     return { ok: true, result };
   } catch (e) {
     if (e instanceof EngineError && e.status === 422) {
       const body = e.body as { issues?: { path: string; message: string }[]; error?: unknown };
       const list = Array.isArray(body?.issues) ? body.issues : Array.isArray(body?.error) ? (body.error as { path: (string | number)[]; message: string }[]).map((i) => ({ path: (i.path ?? []).join("."), message: i.message })) : [];
       return { ok: false, error: "The filing engine found problems with these answers.", issues: list.map((i) => ({ path: i.path, message: i.message })) };
+    }
+    if (e instanceof EngineError && e.status === 402) {
+      return { ok: false, error: ctx.publicPath ? "This firm can't take filings online right now. Please contact them directly." : "Your subscription isn't active, so this can't be filed for real. Choose a plan under Billing, or send it as a rehearsal.", issues: [] };
     }
     return { ok: false, error: e instanceof EngineError ? e.message : "The filing could not be created. Please try again.", issues: [] };
   }

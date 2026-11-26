@@ -10,11 +10,11 @@ export default async function FirmsPage() {
   return (
     <div className="stack">
       <h1>Firms</h1>
-      <p className="muted">The CPA, payroll and other firms you file for. Give a firm its own branded portal, then invite its staff.</p>
+      <p className="muted">The CPA, payroll and other firms you file for. Give a firm its own branded filing desk, then invite its staff.</p>
       {clientCompanies.length === 0 ? <p className="notice">No firms yet. Add one with <code>PUT /v1/client-companies/&#123;id&#125;</code> (see the <a href="/docs/reference">API reference</a>).</p> : (
         <div className="card" style={{ padding: 0 }}>
           <table>
-            <thead><tr><th>Firm</th><th>Portal</th><th>Approvers</th></tr></thead>
+            <thead><tr><th>Firm</th><th>Filing desk</th><th>Approvers</th></tr></thead>
             <tbody>{clientCompanies.map((c) => (
               <tr key={c.clientCompanyId}>
                 <td><Link href={`/dashboard/firms/${encodeURIComponent(c.clientCompanyId)}`}>{c.name}</Link><div className="small muted">{c.clientCompanyId}</div></td>

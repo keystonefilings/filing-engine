@@ -70,7 +70,7 @@ export function describeRoute(route: Route): string {
   return route ? `via ${route.server}` : "direct";
 }
 
-/** STEEL_PROFILES="nygov=<profile id>,ny:keystone=<profile id>": saved Steel sign-ins by profile key. */
+/** STEEL_PROFILES="nygov:keystone=<profile id>,ny:keystone=<profile id>": saved Steel sign-ins by profile key. */
 export function parseSteelProfiles(spec: string | null | undefined): Record<string, string> {
   const out: Record<string, string> = {};
   for (const [i, entry] of (spec ?? "").split(",").map((s) => s.trim()).filter(Boolean).entries()) {

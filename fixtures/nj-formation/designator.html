@@ -6,6 +6,8 @@
 <form onsubmit="event.preventDefault(); NJ.set('designator', document.getElementById('BusinessNameDesignator').value); NJ.go('business-data.html')">
 <div class="form-group"><label for="BusinessNameDesignator">Business Designator *</label>
 <select id="BusinessNameDesignator" name="BusinessNameDesignator"><option value="">-- Select One --</option><option>LLC</option><option>L.L.C.</option><option>LTD LIABILITY CO</option><option>LTD LIABILITY CO.</option><option>LTD LIABILITY COMPANY</option><option>LIMITED LIABILITY CO</option><option>LIMITED LIABILITY CO.</option><option>LIMITED LIABILITY COMPANY</option></select></div>
+<script>/* A for-profit corporation (DP) gets its own list (portal map 2026-11-24, Screen 2). */
+if (NJ.get("type", "") === "DP") document.getElementById("BusinessNameDesignator").innerHTML = '<option value="">-- Select One --</option>' + ["CORPORATION","INCORPORATED","COMPANY","LTD","CO","CO.","CORP","CORP.","INC","INC."].map(function (d) { return "<option>" + d + "</option>"; }).join("");</script>
 <input type="submit" class="btn btn-success" value="Continue">
 </form><div id="timeoutModal" class="modal"><div class="modal-body"><h3>Session Timeout Warning</h3>
 <p>Your session will expire soon.</p><input type="button" class="btn btn-success timeoutPrevent" value="Continue"> <input type="button" class="btn" value="Exit"></div></div>

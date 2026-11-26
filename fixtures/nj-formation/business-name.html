@@ -2,7 +2,7 @@
 <body><h1>Business Formation</h1>
 <nav><a href="#">Help</a> <a href="#">Retrieve Documents</a> <a href="#">New User</a> <a href="#">Login</a></nav>
 <h2>Business Name</h2><p>Required Fields [ * ]</p>
-<form onsubmit="event.preventDefault(); NJ.set('name', document.getElementById('BusinessName').value); NJ.go('designator.html')">
+<form onsubmit="event.preventDefault(); NJ.set('type', document.getElementById('BusinessType').value); NJ.set('name', document.getElementById('BusinessName').value); NJ.go('designator.html')">
 <div class="form-group"><label for="BusinessType">What type of business would you like to form? *</label>
 <select id="BusinessType" name="BusinessType"><option value="">-- Select One --</option><option value="DP">NJ Domestic For-Profit Corporation (DP)</option><option value="LLC">NJ Domestic Limited Liability Company (LLC)</option><option value="FLC">NJ Foreign Limited Liability Company (FLC)</option></select></div>
 <div class="form-group"><label for="BusinessName">Business Name *</label><input id="BusinessName" name="BusinessName" type="text">

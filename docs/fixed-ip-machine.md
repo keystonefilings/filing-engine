@@ -113,7 +113,7 @@ its session when it finishes or fails.
 ```
 STEEL_API_KEY=...                  # this worker's own key, from the deployment's secret store
 SITE_PROXIES=IRS=steel,NY=steel
-STEEL_PROFILES=nygov=<profile id>  # saved sign-ins, from npm run steel-login (below)
+STEEL_PROFILES=nygov:keystone=<profile id>  # saved sign-ins, from npm run steel-login (below)
 ```
 
 Give each worker its own Steel key (not the SpedReports key), so either can be rotated alone.
@@ -124,7 +124,7 @@ in Steel's live view:
 
 | Profile | Account | Sign-in command |
 |---|---|---|
-| `nygov` | Keystone's company-wide ny.gov login (NY payroll) | `npm run steel-login -- nygov https://my.ny.gov/` |
+| `nygov:keystone` | Keystone's ny.gov business login (NY payroll, NYS-100); each subscriber has its own `nygov:<tenant>` | `npm run steel-login -- nygov:keystone https://my.ny.gov/` |
 | `ny:keystone` | Keystone's NY DOS filing account | `npm run steel-login -- ny:keystone https://filings.dos.ny.gov/ords/r/corpanc/efiling/1` |
 | `nj:keystone` | Keystone's NJ business account | `npm run steel-login -- nj:keystone https://my.nj.gov/aui/Login` |
 | `nj:<client id>` | a client's own NJ account, when the client files on it | same NJ command with the client's id |

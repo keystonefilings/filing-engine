@@ -1,16 +1,17 @@
 "use client";
 
-import { useActionState, useState } from "react";
+import { useKeptForm } from "./useKeptForm";
+import { useState } from "react";
 
 type R = { ok: true; generated: { url: string; secret: string }[] } | { ok: false; message: string; issues?: { path: string; message: string }[] } | null;
 interface Endpoint { url: string; events?: string[]; secretHint: string }
 
 export function WebhookForm({ action, endpoints, events }: { action: (prev: R, fd: FormData) => Promise<R>; endpoints: Endpoint[]; events: [string, string][] }) {
-  const [state, run, pending] = useActionState(action, null);
+  const { state, pending, formProps } = useKeptForm(action, null);
   const [count, setCount] = useState(endpoints.length ? endpoints.length : 1);
   const rows = Array.from({ length: count }, (_, i) => endpoints[i]);
   return (
-    <form action={run} className="stack">
+    <form {...formProps} className="stack">
       {state && !state.ok ? <div className="notice bad"><strong>{state.message}</strong>{state.issues?.length ? <ul>{state.issues.map((i, n) => <li key={n}>{i.message}</li>)}</ul> : null}</div> : null}
       {state && state.ok ? (
         <div className="notice ok">Saved.{state.generated.length ? " Copy each new signing secret now; it won't be shown again." : ""}
@@ -20,7 +21,7 @@ export function WebhookForm({ action, endpoints, events }: { action: (prev: R, f
       {rows.map((e, i) => (
         <fieldset key={i} className="card">
           <legend>{e ? "Endpoint" : "New endpoint"}</legend>
-          <div className="field"><label htmlFor={`ep-${i}`}>URL (https)</label><input id={`ep-${i}`} name={`ep.${i}.url`} type="url" defaultValue={e?.url} readOnly={!!e} placeholder="https://example.com/keystone/webhooks" /></div>
+          <div className="field"><label htmlFor={`ep-${i}`}>URL (https)</label><input id={`ep-${i}`} name={`ep.${i}.url`} type="url" defaultValue={e?.url} readOnly={!!e} placeholder="https://example.com/cofile/webhooks" /></div>
           {e ? <p className="small muted">Signing secret ends in <code>{e.secretHint}</code>. To change it, remove the endpoint and add it again.</p> : null}
           <label className="choice"><input type="checkbox" name={`ep.${i}.all`} defaultChecked={!e?.events?.length} /><span>Every event</span></label>
           <details><summary className="small">Or only these events</summary>

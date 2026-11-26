@@ -36,12 +36,15 @@ const ownCompany: Rule = async ({ req, firm }) => params(req).id === firm;
 const RULES: Record<string, Rule> = {
   "GET /v1/me": async () => true,
   "POST /v1/auth/sign-out-everywhere": async () => true,
+  "POST /v1/auth/change-password": async () => true,
+  "POST /v1/auth/sign-out": async () => true,
   "GET /v1/portals": async () => true,
   "GET /v1/events": async () => true,
   "POST /v1/filings": bodyFirm,
   "GET /v1/filings": forceQueryFirm,
   "GET /v1/filings/:id": ownFiling,
   "POST /v1/filings/:id/information": ownFiling,
+  "POST /v1/filings/:id/cancel": ownFiling,
   "GET /v1/filings/:id/messages": ownFiling,
   "GET /v1/artifacts/:id": async ({ req, firm, deps }) => {
     const a = await deps.artifacts.get(params(req).id ?? "");
@@ -52,13 +55,37 @@ const RULES: Record<string, Rule> = {
   "PUT /v1/client-companies/:id/profile": ownCompany,
   "PUT /v1/client-companies/:id/logo": ownCompany,
   "DELETE /v1/client-companies/:id/logo": ownCompany,
+  "PUT /v1/client-companies/:id/font": ownCompany,
+  "POST /v1/client-companies/:id/documents": ownCompany,
+  "POST /v1/client-companies/:id/payment-methods": ownCompany,
+  "DELETE /v1/client-companies/:id/payment-methods/:methodId": ownCompany,
+  "GET /v1/client-companies/:id/card-codes": ownCompany,
+  "GET /v1/client-companies/:id/billing": ownCompany,
+  "GET /v1/client-companies/:id/agent-services": ownCompany,
+  "POST /v1/client-companies/:id/agent-services/:serviceId/cancel": ownCompany,
+  "GET /v1/client-companies/:id/inbound": ownCompany,
+  "GET /v1/account/phone": async () => true,
+  "POST /v1/account/phone": async () => true,
+  "POST /v1/account/phone/confirm": async () => true,
+  "DELETE /v1/account/phone": async () => true,
+  "GET /v1/client-companies/:id/inbound/:messageId": ownCompany,
+  "PUT /v1/client-companies/:id/inbound/:messageId/extracted": ownCompany,
+  "POST /v1/client-companies/:id/inbound/:messageId/filed": ownCompany,
+  "POST /v1/client-companies/:id/billing/checkout": ownCompany,
+  "POST /v1/client-companies/:id/billing/portal": ownCompany,
+  "POST /v1/client-companies/:id/payment-methods/:methodId/code": ownCompany,
+  "POST /v1/client-companies/:id/intake-links": ownCompany,
+  "GET /v1/client-companies/:id/intake-links": ownCompany,
+  "GET /v1/client-companies/:id/intake-links/:linkId": ownCompany,
+  "POST /v1/client-companies/:id/intake-links/:linkId/revoke": ownCompany,
+  "POST /v1/client-companies/:id/intake-links/:linkId/used": ownCompany,
   "GET /v1/signatures": forceQueryFirm,
   "POST /v1/signatures": bodyFirm,
   "DELETE /v1/signatures/:id": async ({ req, firm, deps }) => (await deps.store.getSignature(params(req).id ?? ""))?.clientCompanyId === firm,
 };
 
 /** Routes anyone may call without a key; a partner session presented there changes nothing. */
-const PUBLIC = /^(GET|POST) (\/healthz|\/approve\/|\/admin\/|\/v1\/auth\/sign-in|\/v1\/signups\/|\/v1\/inquiries$|\/v1\/brand-logos\/)/;
+const PUBLIC = /^(GET|POST) (\/healthz|\/approve\/|\/admin\/|\/v1\/auth\/sign-in|\/v1\/auth\/google|\/v1\/auth\/password-reset|\/v1\/auth\/verify-email|\/v1\/signups\/|\/v1\/inquiries$|\/v1\/brand-logos\/|\/v1\/brand-fonts\/|\/v1\/schema\/|\/v1\/public\/)/;
 
 export function partnerGuard(deps: GuardDeps) {
   return async (req: FastifyRequest, reply: FastifyReply) => {

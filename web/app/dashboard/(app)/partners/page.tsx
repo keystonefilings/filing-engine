@@ -1,7 +1,7 @@
 import { engine, EngineError, type Inquiry, type PublicUser } from "@/lib/engine";
 import { requireTenant } from "@/lib/session";
 import { isPlatformTenant } from "@/lib/brand";
-import { decideSignup } from "./actions";
+import { decideInquiry, decideSignup } from "./actions";
 
 export const metadata = { title: "Sign-ups" };
 
@@ -19,7 +19,7 @@ export default async function PartnersPage() {
   return (
     <div className="stack">
       <h1>Sign-ups</h1>
-      <p className="muted">{mode === "automatic" ? "New partner accounts open straight away (PARTNER_SIGNUP_MODE=automatic)." : "New partner accounts wait here for approval. Approving opens their dashboard; nothing is emailed, so let them know yourself."}</p>
+      <p className="muted">{mode === "automatic" ? "New partner accounts open straight away, without a review." : "New partner accounts wait here for approval. Approving opens their dashboard; nothing is emailed, so let them know yourself."}</p>
 
       <h2>Waiting for approval</h2>
       {pending.length === 0 ? <p className="muted">None.</p> : (
@@ -61,14 +61,20 @@ export default async function PartnersPage() {
       {inquiries ? (
         <>
           <h2>Enterprise requests</h2>
-          <p className="muted">From the contact form on the landing page. Enterprise accounts are set up by staff after a conversation.</p>
+          <p className="muted">From the contact form on the landing page. Approving creates the account and emails the person a link to set their password (it works for 7 days).</p>
           {inquiries.length === 0 ? <p className="muted">None yet.</p> : (
             <div className="table-wrap card" style={{ padding: 0 }}>
               <table>
-                <thead><tr><th>Company</th><th>Contact</th><th>States, volume</th><th>Message</th><th>Sent</th></tr></thead>
+                <thead><tr><th>Company</th><th>Contact</th><th>States, volume</th><th>Message</th><th>Sent</th><th>Status</th></tr></thead>
                 <tbody>{inquiries.map((q) => (
                   <tr key={q.id}><td><strong>{q.company}</strong></td><td className="small">{q.name}<br />{q.email}{q.phone ? <><br />{q.phone}</> : null}</td>
-                    <td className="small">{q.states ?? ""}<br />{q.volume ?? ""}</td><td className="small">{q.message ?? ""}</td><td className="small muted">{new Date(q.createdAt).toLocaleDateString()}</td></tr>
+                    <td className="small">{q.states ?? ""}<br />{q.volume ?? ""}</td><td className="small">{q.message ?? ""}</td><td className="small muted">{new Date(q.createdAt).toLocaleDateString()}</td>
+                    <td className="small">{q.status === "approved" ? <span className="badge ok">Approved{q.tenantId ? ` (${q.tenantId})` : ""}</span> : q.status === "declined" ? <span className="badge">Declined</span> : (
+                      <div className="row" style={{ gap: 6 }}>
+                        <form action={decideInquiry.bind(null, q.id, "approve")}><button className="btn small primary" type="submit">Approve</button></form>
+                        <form action={decideInquiry.bind(null, q.id, "decline")}><button className="btn small" type="submit">Decline</button></form>
+                      </div>
+                    )}</td></tr>
                 ))}</tbody>
               </table>
             </div>

@@ -1,43 +1,65 @@
 import { cache } from "react";
-import { engine, type ClientCompany, type PortalBrand } from "./engine";
+import { engine, type ClientCompany, type PartnerProfile, type PortalBrand } from "./engine";
 import { requireFirm, type FirmSession } from "./session";
 import { FILING_KINDS, type FilingKind } from "./intake/forms";
 import { logoSrc, safeColor, textOn } from "./brand";
+import { redirect } from "next/navigation";
+import { sessionEnded } from "./engine";
+import { fontSpec, type BrandFontSpec } from "./fonts";
 
-export interface FirmBrand { name: string; logoUrl?: string; color: string; color2: string; supportEmail?: string }
+export interface FirmBrand { name: string; logoUrl?: string; color: string; color2: string; supportEmail?: string; font?: BrandFontSpec | null }
 
 export function brandOf(c: Pick<ClientCompany, "name" | "portal">): FirmBrand {
   const p: PortalBrand | undefined = c.portal;
   const color = safeColor(p?.primaryColor);
-  return { name: p?.displayName || c.name, logoUrl: logoSrc(p), color, color2: safeColor(p?.secondaryColor, color), supportEmail: p?.supportEmail };
+  return { name: p?.displayName || c.name, logoUrl: logoSrc(p), color, color2: safeColor(p?.secondaryColor, color), supportEmail: p?.supportEmail, font: fontSpec(p) };
 }
 
 /** The CSS variables a firm's pages use: main color (buttons), its text color, second color (links, highlights). */
-export function brandStyle(b: Pick<FirmBrand, "color" | "color2">): Record<string, string> {
-  return { "--accent": b.color, "--accent-text": textOn(b.color), "--accent-2": b.color2 };
+export function brandStyle(b: Pick<FirmBrand, "color" | "color2"> & { font?: BrandFontSpec | null }): Record<string, string> {
+  return { "--accent": b.color, "--accent-text": textOn(b.color), "--accent-2": b.color2, ...(b.font ? { "--brand-font": b.font.stack } : {}) };
 }
 
 /** Filings this firm's portal offers: all of them unless the firm's settings list some. */
-export function offeredKinds(c: Pick<ClientCompany, "portal">): FilingKind[] {
+export function offeredKinds(c: Pick<ClientCompany, "portal"> & { partner?: PartnerProfile }): FilingKind[] {
   const only = c.portal?.filingKinds;
-  return only && only.length ? FILING_KINDS.filter((k) => only.includes(k.id)) : FILING_KINDS;
+  if (only && only.length) return FILING_KINDS.filter((k) => only.includes(k.id));
+  // A partner that hasn't chosen yet offers what it files: its sign-up states, plus the federal EIN.
+  const states = c.partner?.states;
+  if (states?.length) return FILING_KINDS.filter((k) => k.type === "ein_only" || (states as string[]).includes(k.state));
+  return FILING_KINDS;
 }
 
 export const loadCompany = cache(async (apiKey: string, clientCompanyId: string): Promise<ClientCompany> => {
-  const r = await engine<{ clientCompany: ClientCompany }>(apiKey, `/v1/client-companies/${encodeURIComponent(clientCompanyId)}`);
-  return r.clientCompany;
+  const r = await engine<{ clientCompany: ClientCompany; filerName?: string; ourAgent?: ClientCompany["ourAgent"] }>(apiKey, `/v1/client-companies/${encodeURIComponent(clientCompanyId)}`);
+  return { ...r.clientCompany, filerName: r.filerName, ourAgent: r.ourAgent ?? null };
 });
 
 /** The signed-in firm for a portal page, its settings and brand. Redirects when not signed in to this portal. */
 export async function firmContext(slug: string): Promise<{ session: FirmSession; company: ClientCompany; brand: FirmBrand }> {
   const session = await requireFirm(slug);
-  const company = await loadCompany(session.apiKey, session.clientCompanyId);
+  let company: ClientCompany;
+  try {
+    company = await loadCompany(session.apiKey, session.clientCompanyId);
+  } catch (e) {
+    // The session ended at the engine (expired, signed out elsewhere, password changed).
+    if (sessionEnded(e)) redirect("/session-ended");
+    throw e;
+  }
   return { session, company, brand: brandOf(company) };
 }
 
-/** Whether filings created from the portal file for real. Off unless the deployment turns it on. */
-export function liveFilings(): boolean {
-  return process.env.PORTAL_LIVE_FILINGS === "true";
+/**
+ * Whether filings of this type created from the portal, client links and public pages file for real.
+ * Decision 8 (Nov 26): filing types switch live one by one, once each is verified on the government
+ * site: list them in PORTAL_LIVE_KINDS (comma-separated kind ids, e.g. "nj-llc,fl-llc").
+ * PORTAL_LIVE_FILINGS=true switches every type at once. Off unless the deployment turns it on. The
+ * engine still refuses a real filing without a subscription when billing is required.
+ */
+export function liveFilings(kindId?: string): boolean {
+  if (process.env.PORTAL_LIVE_FILINGS === "true") return true;
+  if (!kindId) return false;
+  return (process.env.PORTAL_LIVE_KINDS ?? "").split(",").map((k) => k.trim()).filter(Boolean).includes(kindId);
 }
 
 /** Filings for a state: that state's own, plus the federal EIN, which goes with a business in any state. */

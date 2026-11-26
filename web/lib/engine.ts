@@ -32,13 +32,22 @@ export async function engine<T = unknown>(apiKey: string | null, path: string, i
   return body as T;
 }
 
+/** The engine refused the key itself: the session expired, was signed out, or the password changed. */
+export function sessionEnded(e: unknown): boolean {
+  return e instanceof EngineError && e.status === 401 && (e.body as { error?: string } | null)?.error === "invalid api key";
+}
+
 // ---- Shapes the front end reads (a subset of the engine's records) ----
 
 export interface Account { tenantId: string; name: string; configured: boolean; branding: { displayName?: string; logoUrl?: string; supportEmail?: string }; webhookEndpointCount: number }
 
-export interface PortalBrand { slug: string; displayName?: string; logoUrl?: string; logoArtifactId?: string; primaryColor?: string; secondaryColor?: string; supportEmail?: string; filingKinds?: string[] }
+export interface PortalBrand { slug: string; publicPages?: boolean; displayName?: string; logoUrl?: string; logoArtifactId?: string; font?: string; fontArtifactId?: string; primaryColor?: string; secondaryColor?: string; supportEmail?: string; filingKinds?: string[] }
 
 export interface ClientCompany {
+  /** Who "the filing company" is in this firm's authorizations (the engine works it out). */
+  filerName?: string;
+  /** Decision 9: our registered agent service, where it's offered to this firm (partner firms). */
+  ourAgent?: { provider: string; annualUsd: number; states: string[] } | null;
   clientCompanyId: string;
   tenantId: string;
   name: string;
@@ -49,11 +58,16 @@ export interface ClientCompany {
   /** Set on firms that signed up themselves (partners of the platform). */
   partner?: PartnerProfile;
   payments?: PaymentSettings;
+  /** V22: the firm's saved registered agent per state. */
+  registeredAgentsByState?: Record<string, { name: string; email?: string; address?: { street1: string; street2?: string; city: string; state: string; zip: string } } | undefined>;
   [k: string]: unknown;
 }
 
 export interface Filing {
   id: string;
+  missingInformation?: { path: string; label: string }[];
+  /** V18: approved, waiting for the card's security code. */
+  awaitingCardCode?: { methodId: string; label: string; last4?: string };
   tenantId: string;
   clientCompanyId: string;
   status: string;
@@ -99,7 +113,7 @@ export function filingTitle(f: Filing): string {
 
 // ---- Accounts, sign-up and self-service setup ----
 
-export type CompanyType = "cpa" | "payroll" | "cfo" | "other";
+export type CompanyType = "cpa" | "payroll" | "cfo" | "title" | "other";
 
 export interface PublicUser {
   id: string; email: string; name: string; kind: "enterprise" | "partner"; tenantId: string; clientCompanyId?: string;
@@ -109,10 +123,12 @@ export interface PublicUser {
 
 export interface SignInResult { user: PublicUser; sessionKey: string; expiresAt: string }
 
-export interface Inquiry { id: string; createdAt: string; name: string; company: string; email: string; phone?: string; states?: string; volume?: string; message?: string }
+export interface Inquiry { id: string; createdAt: string; name: string; company: string; email: string; phone?: string; states?: string; volume?: string; message?: string; status?: string; tenantId?: string; decidedBy?: string }
 
 export interface PaymentMethodRef { id: string; label: string; provider: string; brand?: string; last4?: string; expMonth?: number; expYear?: number; purpose: "state_fees" | "subscription" }
-export interface PaymentRouting { mode: "single" | "per_filing"; defaultMethodId?: string; fallbackMethodId?: string; byFilingKind: Record<string, string>; subscriptionMethodId?: string }
+export interface StatePortalPayment { method: "stored_card" | "stored_echeck"; kinds: string[] }
+export interface PaymentRouting { mode: "single" | "per_filing"; defaultMethodId?: string; fallbackMethodId?: string; byFilingKind: Record<string, string>; subscriptionMethodId?: string; statePortal?: { NJ?: StatePortalPayment } }
+
 export interface PaymentSettings { methods: PaymentMethodRef[]; routing: PaymentRouting }
 
 export interface PortalDefaultField { id: string; label: string; type: "boolean" | "number" | "select"; options?: { value: string; label: string }[]; help?: string }
@@ -123,10 +139,15 @@ export interface AccountSetup {
   payments: PaymentSettings;
   portalLogins: Record<string, { connectedAt: string; connectedBy?: string }>;
   portalDefaults: Record<string, Record<string, string | number | boolean>>;
+  /** V30: who the subscriber names on its filings, and its own registered agent per state. */
+  filingDefaults?: { organizer?: NamedPerson; filer?: NamedPerson; signer?: NamedPerson; copyEmail?: string; registeredAgents: Record<string, { name: string; email?: string; address?: { street1: string; street2?: string; city: string; state: string; zip: string } } | undefined> };
   portals: PortalInfo[];
 }
 
+export interface NamedPerson { name: string; title?: string; address?: { street1: string; street2?: string; city: string; state: string; zip: string } }
+
 export interface PartnerProfile {
   companyType?: CompanyType; contactName?: string; contactEmail?: string; phone?: string; website?: string;
+  states?: string[];
   setupDone?: ("details" | "branding" | "payments")[];
 }

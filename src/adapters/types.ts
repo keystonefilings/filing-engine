@@ -1,3 +1,4 @@
+import type { SupportingDocumentKind } from "../documents/supporting.js";
 import type { Page } from "playwright";
 import type { FilingRecord } from "../store/types.js";
 import type { ClientCompanySettings, TenantSettings } from "../settings/schema.js";
@@ -15,6 +16,11 @@ export interface RunValues {
 
 /** What a step gets from the engine. Filling goes through `set` so every value is matched by label, never by selector. */
 export interface StepContext {
+  /**
+   * V18: the cards to try at a state's payment screen, in order (the filing's card, then the
+   * backup), read from the card vault only when called. Absent when no card vault is set up.
+   */
+  paymentCards?: () => Promise<{ label: string; last4?: string; number: string; expMonth: number; expYear: number; cvc?: string }[]>;
   page: Page;
   filing: FilingRecord;
   tenant: TenantSettings;
@@ -43,6 +49,8 @@ export interface StepContext {
    * filing its client approved, unchanged since (src/signatures/apply.ts); a dry run always gets no.
    */
   signatureForForm(signatureId: string | undefined, signerName: string): Promise<{ ok: true; png: Buffer } | { ok: false; reason: string }>;
+  /** A supporting document this filing's client company uploaded (documents/supporting.ts), or why it can't be used. */
+  supportingDocument(id: string, kind: SupportingDocumentKind): Promise<{ ok: true; body: Buffer } | { ok: false; reason: string }>;
   /** Expected fee lines for this filing (from the approved table). */
   expectedFees: FeeLine[];
   feeCapUsd?: number;
@@ -82,6 +90,11 @@ export interface SiteAdapter {
   key: string;
   /** False until the walk that maps the remaining screens is done; incomplete adapters only dry-run. */
   complete: boolean;
+  /**
+   * V18: the state's checkout takes a card typed per filing (NJ, FL). A live run then starts only
+   * once the card's owner has given the security code for the hour (payments/card-codes.ts).
+   */
+  paysWithCard?: boolean;
   entryUrl(ctx: Pick<StepContext, "filing" | "client" | "tenant">): string;
   /** Persistent profile key (ny.gov, client NJ account) or null for an ephemeral context. */
   profileKey(ctx: Pick<StepContext, "filing" | "client" | "tenant">): string | null;

@@ -1,263 +1,292 @@
 import Link from "next/link";
-import { Shell } from "@/components/landing/Shell";
-import { TraceScan } from "@/components/landing/TraceScan";
+import { Shell, FolderTab } from "@/components/landing/Shell";
 import { InquiryForm } from "@/components/AuthForms";
 import { sendInquiry } from "@/lib/accounts";
-import { platformName } from "@/lib/brand";
+import { platformName, supportEmail } from "@/lib/brand";
+import { liveFilings } from "@/lib/firm";
 
-// Adapted from the designed page in site/landing.html.
+// Round 2 of the persona review (Nov 26): the merged direction, approved by Yakov with the five
+// choices: "rehearsal", "the proof", "your filing desk", free rehearsals and the paper-and-ink look.
+
+export function generateMetadata() {
+  const name = platformName();
+  return {
+    // absolute: the layout's "%s · name" template doesn't apply to a page in the layout's own segment.
+    title: { absolute: `Your client approves the proof. Then ${name} files it.` },
+    description: `${name} fills in your clients' LLC and corporation formations, EINs and employer registrations on the official state and IRS websites, with your firm's name on every page your client sees. Nothing is filed until your client approves the proof.`,
+  };
+}
 
 function Tick() {
   return (
     <svg className="tick" viewBox="0 0 22 22" aria-hidden="true">
-      <circle cx="11" cy="11" r="10" fill="none" stroke="var(--ok)" strokeWidth="1.5" />
-      <path d="M6.5 11.5l3 3 6-6.5" fill="none" stroke="var(--ok)" strokeWidth="1.7" />
+      <path d="M5.5 11.5l3.5 3.5 7.5-8" fill="none" stroke="var(--ok)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
     </svg>
   );
 }
 
-const TRACE: [string, string, string | undefined, string, string?][] = [
-  ["00.0s", "Welcome", undefined, "read"],
-  ["02.1s", "Business name", "Type: NJ Domestic Limited Liability Company", "filled"],
-  ["04.0s", "Designator", "Name check: available", "passed"],
-  ["05.2s", "Business data · purpose · main address", undefined, "filled"],
-  ["10.4s", "Registered agent", "Office address, attestation", "filled"],
-  ["15.9s", "Members / managers", "1 member added", "filled"],
-  ["24.6s", "Signatures", "Signer added, signature box checked", "filled"],
-  ["26.0s", "Review", undefined, "matched"],
-  ["28.3s", "Payment", "Fee check: $100.00 + $3.50 matches the approval", "verified"],
-  ["28.9s", "Pay Now", undefined, "held", "halt"],
+/** Coverage: where each filing type stands. "Live" comes from the deployment's live switch, per type. */
+const STAGES = {
+  rehearsed: "Rehearsed to the payment screen",
+  recorded: "Screens recorded, rehearsal next",
+  offered: "Offered, not yet rehearsed",
+  planned: "Planned",
+} as const;
+const COVERAGE: { what: string; where: string; stage: keyof typeof STAGES; kind?: string }[] = [
+  { what: "LLC formation", where: "New Jersey", stage: "rehearsed", kind: "nj-llc" },
+  { what: "Standing certificate (through the API; not on the filing desk yet)", where: "New Jersey", stage: "rehearsed" },
+  { what: "LLC formation", where: "Florida", stage: "rehearsed", kind: "fl-llc" },
+  { what: "Profit corporation formation", where: "Florida", stage: "rehearsed", kind: "fl-corp" },
+  { what: "Limited partnership formation", where: "Florida", stage: "rehearsed", kind: "fl-lp" },
+  { what: "EIN, with the IRS letter saved", where: "IRS", stage: "recorded", kind: "irs-ein" },
+  { what: "Articles of Organization (LLC)", where: "New York", stage: "recorded", kind: "ny-llc" },
+  { what: "Certificate of Incorporation (business corporation)", where: "New York", stage: "recorded", kind: "ny-corp" },
+  { what: "Employer registration (NYS-100)", where: "New York", stage: "recorded", kind: "ny-nys100" },
+  { what: "Employer registration (NJ-REG)", where: "New Jersey", stage: "recorded", kind: "nj-reg" },
+  { what: "LLC name change, certificate of change and dissolution", where: "New York", stage: "recorded" },
+  { what: "Copies and certificate of status", where: "New York", stage: "recorded", kind: "ny-copies" },
+  { what: "Corporation formation (for-profit)", where: "New Jersey", stage: "offered", kind: "nj-corp" },
+  { what: "Application for Authority (foreign corporation)", where: "New York", stage: "offered", kind: "ny-authority" },
+  { what: "Certificate of Assumed Name (DBA)", where: "New York", stage: "offered", kind: "ny-assumed-name" },
+  { what: "Alternate name, charter amendments", where: "New Jersey", stage: "planned" },
 ];
 
-const COVERAGE: [string, string, "live" | "map" | "", string][] = [
-  ["LLC formation", "New Jersey", "live", "Verified on the live site"],
-  ["Standing certificate", "New Jersey", "live", "Verified on the live site"],
-  ["LLC formation", "Florida", "live", "Verified on the live site"],
-  ["Profit corporation formation", "Florida", "live", "Verified on the live site"],
-  ["Limited partnership formation", "Florida", "live", "Verified on the live site"],
-  ["EIN application, with confirmation letter", "IRS", "map", "Mapped from a live walk"],
-  ["Articles of Organization (LLC)", "New York", "map", "Mapped from a live walk"],
-  ["Certificate of Incorporation (business corporation)", "New York", "map", "Mapped from a live walk"],
-  ["Payroll registration (NYS-100)", "New York", "map", "Mapped from a live walk"],
-  ["Name-change amendment", "New York", "", "Planned"],
-  ["Alternate name, charter amendments", "New Jersey", "", "Planned"],
-  ["Paper filings by upload: certificate of status, assumed name, foreign qualification, dissolution", "New York", "", "Planned"],
+const LOG: [string, string, string?][] = [
+  ["Business name", "filled"],
+  ["Name check", "passed"],
+  ["Registered agent", "filled"],
+  ["Members and signatures", "filled"],
+  ["Review page", "matched the proof"],
+  ["Payment: $100.00 + $3.50 NJ portal fee", "matches the proof"],
+  ["Pay Now", "held, on purpose", "held"],
 ];
 
 export default function Home() {
   const name = platformName();
   return (
     <Shell nav>
-      <TraceScan />
       <main id="top">
-        <section className="hero band">
-          <div className="wrap">
-            <div className="hero-copy">
-              <span className="field-label">For CPA, payroll and CFO firms</span>
-              <h1>State filings, done on the government sites. Approved before they leave.</h1>
-              <p className="lede">{name} fills formation, EIN and payroll registration filings on the live state and IRS websites, under your brand. It reads every form fresh, checks every fee, and submits nothing until your client approves the exact data.</p>
-              <div className="hero-actions">
-                <Link className="btn btn-primary" href="/signup">Create a partner account</Link>
-                <a className="btn btn-quiet" href="#enterprise">Enterprise and API</a>
+        <section className="nx-hero band">
+          <div className="wrap nx-hero-grid">
+            <div>
+              <span className="nx-kicker">For CPA, payroll, fractional CFO and title firms</span>
+              <h1>Your client approves the proof. Then {name} files it.</h1>
+              <p className="nx-sub">{name} fills in your clients&apos; LLC and corporation formations, EINs and employer registrations on the official New York, New Jersey, Florida and IRS websites, with your firm&apos;s name and logo on every page your client sees. First, your client gets one page showing every detail, every fee and, where possible, the state&apos;s own review page, filled in.</p>
+              <div className="nx-ctas">
+                <Link className="btn btn-primary" href="/signup">Run a free rehearsal</Link>
+                <a className="btn btn-quiet" href="#proof">See what your client sees</a>
               </div>
-              <p className="hero-note">Starting with New York, New Jersey, Florida and the IRS.</p>
+              <p className="nx-note">In beta. A rehearsal fills in every screen of the state&apos;s real website and stops before the last button, so nothing is filed and nothing is paid. You&apos;ll set up your firm&apos;s filing desk first.</p>
             </div>
-
-            <figure className="trace" aria-label="Run trace from a dry run on the New Jersey portal" style={{ margin: 0 }}>
-              <div className="trace-head">
-                <span><strong>NJ · Domestic LLC formation</strong> · njportal.com</span>
-                <span className="pill pill-dry">Dry run</span>
+            <figure className="nx-proof" aria-label="A sample proof for an example business">
+              <div className="nx-proof-firm"><span>Harbor &amp; Pine CPA</span><small>example firm</small></div>
+              <div className="nx-proof-body">
+                <div className="nx-proof-head"><h2>Two Sisters Bakery LLC</h2><span className="nx-chip nx-reh">Rehearsal</span></div>
+                <p className="nx-small nx-muted">New Jersey LLC formation. Please approve by Dec 3, 5:00 PM Eastern.</p>
+                <div className="nx-num"><span className="nx-callout">1</span><table>
+                  <tbody>
+                    <tr><td>Business name</td><td className="mono"><mark>TWO SISTERS BAKERY LLC</mark></td></tr>
+                    <tr><td>Members</td><td className="mono">Ana Ortiz, Lucia Ortiz (50/50)</td></tr>
+                    <tr><td>Main business address</td><td className="mono"><mark>88 Grove St, Jersey City NJ 07302</mark></td></tr>
+                  </tbody>
+                </table></div>
+                <div className="nx-num"><span className="nx-callout">2</span><table className="nx-fees">
+                  <tbody>
+                    <tr><td>Formation filing fee</td><td>$100.00</td></tr>
+                    <tr><td>NJ portal fee, by card</td><td>$3.50</td></tr>
+                    <tr className="nx-total"><td>Total to the state</td><td>$103.50</td></tr>
+                  </tbody>
+                </table></div>
+                <div className="nx-num"><span className="nx-callout">3</span><div className="nx-statepage">
+                  <span className="mono nx-small nx-muted">New Jersey&apos;s own review page, filled in</span>
+                  <div><span>Business Name</span><span className="mono">TWO SISTERS BAKERY</span></div>
+                  <div><span>Designator</span><span className="mono">LLC</span></div>
+                </div></div>
+                <div className="nx-num nx-approve"><span className="nx-callout">4</span><span className="btn btn-primary nx-fake">Approve for filing</span><span className="nx-small nx-muted">Nothing is submitted or paid until you approve.</span></div>
               </div>
-              <ol>
-                {TRACE.map(([t, s, small, out, tone], i) => (
-                  <li key={t} className={i === 0 ? "scan" : undefined}>
-                    <span className="t">{t}</span>
-                    <span className="s">{s}{small ? <small>{small}</small> : null}</span>
-                    <span className={tone === "halt" ? "halt" : "ok"}>{out}</span>
-                  </li>
-                ))}
-              </ol>
-              <div className="trace-foot">
-                <span>13 live screens, test entry, nothing filed.</span>
-                <span className="stamp">Stopped before Pay Now</span>
-              </div>
+              <figcaption>Sample proof · test details · not a real business</figcaption>
             </figure>
           </div>
         </section>
 
-        <div className="principles band">
+        <section className="nx-sec band" id="process">
           <div className="wrap">
-            <div className="principle"><b>Approval first</b><span>Your client approves the exact data through a signed link before any run starts.</span></div>
-            <div className="principle"><b>Live forms, every run</b><span>Fields are matched by their labels on the page as it is today.</span></div>
-            <div className="principle"><b>Stops on change</b><span>A changed form halts the run before submission and proposes the fix.</span></div>
-            <div className="principle"><b>Your brand</b><span>Your logo and colors on the pages your clients see.</span></div>
-          </div>
-        </div>
-
-        <section className="block band" id="start">
-          <div className="wrap">
-            <div className="section-head">
-              <span className="field-label">Two ways in</span>
-              <h2>File for your clients yourself, or build it into your own product.</h2>
-            </div>
-            <div className="paths">
-              <article className="path">
-                <span className="field-label">Partner firms</span>
-                <h3>For CPA, payroll and CFO firms</h3>
-                <ul>
-                  <li>Create an account, then add your logo and colors.</li>
-                  <li>Choose how state fees are paid: one card for everything, or one per filing type, with a backup card.</li>
-                  <li>Pick a state and a filing, then fill it in yourself or send your client a link.</li>
-                  <li>Your client checks and approves exactly what will be filed.</li>
-                </ul>
-                <Link className="btn btn-primary" href="/signup">Create a partner account</Link>
-              </article>
-              <article className="path">
-                <span className="field-label">Enterprise</span>
-                <h3>For filing companies and platforms</h3>
-                <ul>
-                  <li>API keys, endpoints, webhooks and full docs.</li>
-                  <li>Your own state portal logins, connected securely.</li>
-                  <li>Separate payment methods for your subscription and for state fees.</li>
-                  <li>Defaults per portal and per filing type.</li>
-                </ul>
-                <a className="btn btn-quiet" href="#enterprise">Talk to us</a>
-              </article>
+            <h2>You start it. Your client approves it. {name} files it.</h2>
+            <p className="lede">Three steps, and your client is in charge of the middle one.</p>
+            <div className="nx-steps">
+              <div><strong>You start it.</strong><p>Fill in a short form yourself, send your client a link, or forward the email or text they sent you. Your saved answers fill in the rest: registered agent, organizer, signer, addresses.</p></div>
+              <div><strong>Your client approves it.</strong><p>They get the proof: one page with your firm&apos;s name at the top, showing every detail and every fee.</p></div>
+              <div><strong>{name} files it.</strong><p>It fills in the state&apos;s own website screen by screen, checks the fee again before paying, and brings back the state&apos;s documents. You hear about each stage.</p></div>
             </div>
           </div>
         </section>
 
-        <section className="block band alt" id="process">
-          <div className="wrap">
-            <div className="section-head">
-              <span className="field-label">How a filing runs</span>
-              <h2>One pass from intake to filed documents.</h2>
-              <p className="lede">State sites keep no drafts, so every filing is a single run from the first screen to the last. Everything is checked before it starts.</p>
+        <section className="nx-sec band" id="proof">
+          <div className="wrap nx-two">
+            <div>
+              <h2>Your client sees what the state will see, before the state does.</h2>
+              <p className="lede">You&apos;ve approved a proof before: business cards, letterhead, an invitation at the printer. Nothing went to press until you said so. The proof does the same for a filing. Your client gets a link to one page with your firm&apos;s name and logo at the top. Approving it locks in exactly what&apos;s on it. If anything has to change later, it comes back to them to approve again.</p>
             </div>
-            <div className="steps">
-              <div className="step"><h3>Intake</h3><p>You or your client fill in a short form. Your saved answers fill the rest: agent, organizer, signer, addresses.</p></div>
-              <div className="step"><h3>Approval</h3><p>The client receives a link with every value and the fees. Approving binds those exact values to the run.</p></div>
-              <div className="step"><h3>Pre-flight</h3><p>Site hours, logins, account balance and fee table are checked before a browser opens.</p></div>
-              <div className="step"><h3>Run</h3><p>The engine reads each screen live, fills it by label and keeps a screenshot and page copy of every step.</p></div>
-              <div className="step"><h3>EIN in the same pass</h3><p>After the name check passes, the EIN is filed and its letter saved, then entered into the state form.</p></div>
-              <div className="step"><h3>Filed</h3><p>Documents are stored, and each stage is reported back to you.</p></div>
+            <ul className="nx-list">
+              <li><Tick /><span>Every name, address and answer, in the order the state asks for them</span></li>
+              <li><Tick /><span>Every fee in dollars and cents, from a verified fee table</span></li>
+              <li><Tick /><span>Where the state&apos;s website allows it, a picture of the state&apos;s own review page, filled in</span></li>
+              <li><Tick /><span>Each statement your client is making, such as letting the filing company sign or pay</span></li>
+              <li><Tick /><span>One button. Until it&apos;s pressed, nothing is submitted and nothing is paid.</span></li>
+              <li><Tick /><span>For CPAs: it does for a business filing what the 8879 does for a return.</span></li>
+            </ul>
+          </div>
+        </section>
+
+        <section className="nx-sec band" id="firms">
+          <div className="wrap nx-two">
+            <div>
+              <h2>Your name on the door. Ours in small print.</h2>
+              <p className="lede">Your client needs an LLC. Who do they call? You. They always have. Until now, saying yes meant someone on staff typing the same agent address into a state website again, or sending the client to an online formation site and getting back a filing you never saw. {name} lets you say yes and keep your name on it.</p>
+            </div>
+            <ul className="nx-list">
+              <li><Tick /><span>Your filing desk carries your firm&apos;s name, logo and color.</span></li>
+              <li><Tick /><span>Send one client a link, keep a permanent filing page for each filing you offer, or put the filing button on your own website.</span></li>
+              <li><Tick /><span>Your client sees your firm on the form and on the proof. The only sign of us is a small &ldquo;with {name}&rdquo;.</span></li>
+              <li><Tick /><span>Name your own registered agent in each state, or use ours, provided through Registered Agents, Inc.</span></li>
+            </ul>
+          </div>
+        </section>
+
+        <section className="nx-sec band" id="requests">
+          <div className="wrap nx-two">
+            <div>
+              <h2>Clients don&apos;t fill in forms. They text you.</h2>
+              <p className="lede">That&apos;s how requests really arrive. Send it on as it is, by email, text, WhatsApp or Slack. {name}&apos;s AI reads the message and drafts the filing, and your saved answers fill in the rest. Someone at your firm checks the draft. Then it goes to your client as a proof, like any other filing. A message alone never reaches the state.</p>
+            </div>
+            <div className="nx-chat">
+              <div className="nx-bubble">Need an LLC for the bakery. It&apos;s me and my sister, 50/50, in Jersey City.<small>Ana Ortiz · text message · example</small></div>
+              <span className="nx-arrow mono">&#8627; read into a drafted New Jersey LLC formation for your team to check</span>
             </div>
           </div>
         </section>
 
-        <section className="block band" id="controls">
-          <div className="wrap">
-            <div className="section-head">
-              <span className="field-label">Controls</span>
-              <h2>Built for filings that cannot be taken back.</h2>
-              <p className="lede">A government submission is final. Every control below exists to stop a wrong filing before it happens, and to prove what happened after.</p>
+        <section className="nx-sec band" id="checks">
+          <div className="wrap nx-two">
+            <div>
+              <h2>Checked twice. Filed once.</h2>
+              <p className="lede">A state filing can&apos;t be taken back, so {name} would rather stop and ask than guess.</p>
             </div>
-            <div className="controls">
-              <article className="control">
-                <h3>Halts when a state changes a form</h3>
-                <p>Each screen is compared with its last approved structure: fields, required marks, options and prices. Any difference stops the run before submission, with the change and a proposed fix for review.</p>
-                <div className="exhibit" role="img" aria-label="Example of a detected form change">
-                  <div className="exhibit-head"><span>Example · NJ payment screen</span><span>Run halted</span></div>
-                  <div className="exhibit-body">
-                    <div className="row"><span>First Name *</span><span>unchanged</span></div>
-                    <div className="row"><span>Phone Number *</span><span>unchanged</span></div>
-                    <div className="row add"><span>+ Daytime Phone *</span><span>new, required</span></div>
-                    <div className="row"><span>Outcome</span><span>client re-approval</span></div>
-                  </div>
-                </div>
-              </article>
-              <article className="control">
-                <h3>Checks the price before paying</h3>
-                <p>Fees are quoted at approval from a verified fee table and read again on the payment screen. NJ charges $50 for an LLC standing certificate and $25 for a corporation&apos;s, so the engine also confirms the entity type on the state record.</p>
-                <div className="exhibit" role="img" aria-label="Example fee checks">
-                  <div className="exhibit-head"><span>NJ standing certificate · by card</span><span>Fee check</span></div>
-                  <div className="exhibit-body">
-                    <div className="row"><span>LLC record, approved $52.00</span><span className="ok">page $52.00 · match</span></div>
-                    <div className="row"><span>Corporation record, approved $27.00</span><span className="ok">page $27.00 · match</span></div>
-                    <div className="row"><span>LLC record requested as corporation</span><span className="halt">stopped</span></div>
-                  </div>
-                </div>
-              </article>
-              <article className="control">
-                <h3>Never submits twice</h3>
-                <p>A record is written before the final click. If a machine stops mid-run, that filing is flagged for reconciliation and never re-run on its own.</p>
-              </article>
-              <article className="control">
-                <h3>Shows where every value came from</h3>
-                <p>Each filled field records its source: the filing itself, the intake form, your saved answers or your defaults. Every screen of every run keeps a screenshot and a copy of the page.</p>
-              </article>
+            <ul className="nx-list">
+              <li><Tick /><span>The fee your client approves comes from a verified fee table. {name} reads it again on the state&apos;s payment screen. If the two differ, it stops before paying and tells you why.</span></li>
+              <li><Tick /><span>It reads the fine print. By card, New Jersey&apos;s standing certificate costs $52 for an LLC and $27 for a corporation, so {name} checks the business type on the state&apos;s record before it pays.</span></li>
+              <li><Tick /><span>If a state has changed its form since {name} last verified it, the filing stops before anything is submitted, and you see what changed.</span></li>
+              <li><Tick /><span>A filing is never sent twice on its own. If one is interrupted, a person checks what the state received first.</span></li>
+              <li><Tick /><span>How {name} handles Social Security numbers, cards and state logins: see <a href="#security">Security</a>.</span></li>
+            </ul>
+          </div>
+        </section>
+
+        <section className="nx-sec band" id="after">
+          <div className="wrap nx-two">
+            <div>
+              <h2>The papers come back to you.</h2>
+              <p className="lede">Some states answer at once. Others take their time: New York sends a receipt by email, and in Florida an examiner reviews the filing first. {name} saves what the state sends, passes it on to you and tells you where things stand at each stage.</p>
+            </div>
+            <ul className="nx-list">
+              <li><Tick /><span>The state&apos;s documents, saved to the filing and sent to you</span></li>
+              <li><Tick /><span>The EIN: {name} applies with the IRS once the name check passes in New York or New Jersey, or after the state accepts the formation (always in Florida, as the IRS advises), and keeps the IRS letter with the filing</span></li>
+              <li><Tick /><span>What was approved, what was filed and what the state sent back, in one place</span></li>
+            </ul>
+          </div>
+        </section>
+
+        <section className="nx-sec band" id="rehearsals">
+          <div className="wrap nx-two">
+            <div>
+              <h2>Rehearse on the real stage.</h2>
+              <p className="lede">{name} is in beta, and here&apos;s what that means. Any filing can run as a rehearsal: the whole filing, performed on the state&apos;s real website with no audience. {name} fills in every screen with your details and stops before the last button. Nothing is filed, nothing is paid, and rehearsals are free. Rehearsals are also how each filing type earns its way to live: we switch types on one at a time, each only after it has been verified on the state&apos;s website.</p>
+              <p className="lede">Try one on a filing you know by heart, and compare it screen by screen.</p>
+            </div>
+            <div>
+              <div className="nx-log" aria-label="Example rehearsal log">
+                <div><span>Rehearsal · New Jersey LLC formation</span><span className="nx-muted">test details</span></div>
+                {LOG.map(([what, result, tone]) => <div key={what}><span>{what}</span><span className={tone === "held" ? "nx-held" : undefined}>{result}</span></div>)}
+              </div>
+              <p className="nx-small nx-muted">13 screens of New Jersey&apos;s own LLC form, some grouped here, filled in with test details. Nothing was filed.</p>
             </div>
           </div>
         </section>
 
-        <section className="block band alt" id="companies">
-          <div className="wrap tenancy">
-            <div className="section-head" style={{ marginBottom: 0 }}>
-              <span className="field-label">For enterprise</span>
-              <h2>Your company, your accounts, your customers&apos; rules.</h2>
-              <p className="lede">Each enterprise account runs independently. Your customers sign up under your brand and answer the questions you choose to ask them.</p>
-              <ul className="checks" style={{ marginTop: 12 }}>
-                <li><Tick /><span><b>Your state logins.</b> Kept under your account only, never shared with another account.</span></li>
-                <li><Tick /><span><b>Your services on the forms.</b> Your registered agent service, organizer, signer and filer.</span></li>
-                <li><Tick /><span><b>Defaults and locks.</b> Set the answer for any customer question, or lock it for all of them.</span></li>
-                <li><Tick /><span><b>Your brand.</b> Approval pages carry your name and your support contact.</span></li>
-              </ul>
-            </div>
-            <dl className="levels" aria-label="Who decides what">
-              <div className="level"><dt>Your company</dt><dd><b>Accounts and services.</b> State logins, NY draw-down account, registered agent service, people who sign and file, defaults for your customers.</dd></div>
-              <div className="level"><dt>Your customer</dt><dd><b>Their rules.</b> Who is the registered agent, who organizes and signs, who approves.</dd></div>
-              <div className="level"><dt>The entity</dt><dd><b>The facts.</b> Name, owners, addresses and the responsible party, from your intake.</dd></div>
-              <div className="level"><dt>Each filing</dt><dd><b>Final say.</b> A value sent with a filing always overrides a default. A missing answer stops the filing and names the question.</dd></div>
-            </dl>
-          </div>
-        </section>
-
-        <section className="block band" id="coverage">
+        <section className="nx-sec band" id="coverage">
           <div className="wrap">
-            <div className="section-head">
-              <span className="field-label">Coverage</span>
-              <h2>Where the engine files today, and what is next.</h2>
-            </div>
+            <h2>New York, New Jersey, Florida and the IRS.</h2>
+            <p className="lede">Every filing type carries a plain label, so you always know which ones are live today.</p>
             <div className="table-wrap">
-              <table>
-                <thead><tr><th scope="col">Filing</th><th scope="col">Where</th><th scope="col">Status</th></tr></thead>
+              <table className="cov">
+                <thead><tr><th>Filing</th><th>Where</th><th>Where it stands</th></tr></thead>
                 <tbody>
-                  {COVERAGE.map(([f, w, tone, s]) => (
-                    <tr key={f + w}><td>{f}</td><td>{w}</td><td><span className={`status${tone ? ` ${tone}` : ""}`}>{s}</span></td></tr>
-                  ))}
+                  {COVERAGE.map((c) => {
+                    const live = c.kind ? liveFilings(c.kind) : false;
+                    return (
+                      <tr key={`${c.what}-${c.where}`}>
+                        <td>{c.what}</td><td>{c.where}</td>
+                        <td>{live ? <span className="nx-chip nx-live">Live</span> : <span className={`nx-chip ${c.stage === "rehearsed" ? "nx-reh" : "nx-plain"}`}>{STAGES[c.stage]}</span>}</td>
+                      </tr>
+                    );
+                  })}
                 </tbody>
               </table>
             </div>
-            <p className="table-note">Verified means the engine completed every screen on the live government site with a test entry and stopped before payment. Each filing type is switched to live submission only after its payment step has been mapped.</p>
+            <p className="nx-small nx-muted">Rehearsed to the payment screen: {name} completed every screen on the state&apos;s real website with test details and stopped before paying. Screens recorded: the website&apos;s screens are mapped, and a full rehearsal is next. While types are switching on, which ones are live can differ by account. <a href={`mailto:${supportEmail()}?subject=${encodeURIComponent("Which filing types are live for my account?")}`}>Write to {supportEmail()}</a> and we&apos;ll tell you each one by name.</p>
           </div>
         </section>
 
-        <section className="block band alt" id="security">
+        <section className="nx-sec band" id="catch">
           <div className="wrap">
-            <div className="section-head">
-              <span className="field-label">Security</span>
-              <h2>Sensitive data stays where it belongs.</h2>
-            </div>
+            <h2>Every filing service has a catch. Here&apos;s ours.</h2>
+            <p className="lede">We&apos;d rather tell you now than have you find out later.</p>
+            <ol className="nx-catch">
+              <li>We&apos;re in beta. Filing types go live one at a time, and until then they run as rehearsals.</li>
+              <li>Rehearsals are free. Live filing is paid per filing or by plan, and you see your plan and its price on your Billing page before you&apos;re charged.</li>
+              <li>State fees belong to the state. Your client sees them on the proof, they&apos;re paid with the card or account you chose, and states generally don&apos;t refund them. That&apos;s why we check them twice.</li>
+              <li>New York requires a new LLC to publish a notice of its formation within 120 days. That&apos;s a separate step with its own costs, and it isn&apos;t part of the filing.</li>
+              <li>We&apos;re not a law firm or a government agency, and we don&apos;t give legal or tax advice. You do the advising. We do the typing.</li>
+            </ol>
+          </div>
+        </section>
+
+        <section className="nx-sec band" id="security">
+          <div className="wrap">
+            <h2>Security</h2>
             <div className="sec">
-              <div><h3>Masked SSNs</h3><p>Social Security numbers are masked on approval pages, in API responses and in recorded screens.</p></div>
-              <div><h3>Cards and logins in a vault</h3><p>Card numbers and state logins are held by a vault, never in our database, and are read only when a run needs them.</p></div>
-              <div><h3>Single-use approval links</h3><p>Signed, expiring links, bound to the exact data shown. An optional one-time code adds a second check.</p></div>
+              <div><h3>Encrypted, masked SSNs</h3><p>Social Security numbers are encrypted, masked on proofs, in API responses, in logs and in recorded screens, used only for the filing they belong to, and deleted 30 days after that filing finishes.</p></div>
+              <div><h3>Cards in a vault, logins encrypted</h3><p>Saved cards are held by Basis Theory, a card vault, never in our database. When filings are ready to pay, we ask the card&apos;s owner for its security code and keep it for an hour at most. State logins are encrypted as soon as they arrive, kept apart from every other account and read only when a filing runs.</p></div>
+              <div><h3>Single-use links to the proof</h3><p>Signed, expiring links, bound to the exact details shown. An optional one-time code adds a second check.</p></div>
               <div><h3>Signatures only on approval</h3><p>A saved signature is applied only to a filing the client has approved.</p></div>
-              <div><h3>Dry-run mode</h3><p>New sites and new accounts can run every screen and stop before submission until they are switched live.</p></div>
               <div><h3>Separate accounts</h3><p>Logins, jobs, clients and documents are kept per account. One account never sees another&apos;s.</p></div>
             </div>
           </div>
         </section>
 
-        <section className="block band brief" id="enterprise">
-          <div className="wrap">
-            <div className="section-head" style={{ marginBottom: 0 }}>
-              <span className="field-label">Enterprise</span>
-              <h2>Talk to us about enterprise and the API.</h2>
-              <p className="lede">Tell us what you file and how many. We&apos;ll set up your account, your API keys and your state portal connections with you.</p>
-              <p className="lede">Filing for your own clients? <Link href="/signup" style={{ color: "inherit" }}>Create a partner account</Link> instead.</p>
+        <section className="nx-sec band" id="enterprise">
+          <div className="wrap nx-two">
+            <div>
+              <h2>Building a filing product? Put {name} underneath it.</h2>
+              <p className="lede">Filing companies, and platforms that sign up new businesses, can offer state filings inside their own product under their own brand. Tell us what you file and roughly how many, and we&apos;ll set up your account with you.</p>
+              <ul className="nx-list">
+                <li><Tick /><span>An API, with webhooks for each stage</span></li>
+                <li><Tick /><span>A white-label setup, with your name and support contact on the proof</span></li>
+                <li><Tick /><span>An embeddable widget for your own pages</span></li>
+                <li><Tick /><span>Your own state logins, registered agent, signers and defaults</span></li>
+                <li><Tick /><span>Start with <code>&quot;dryRun&quot;: true</code>: the run rehearses on the state&apos;s website and stops before the final submit. <Link href="/docs">Read the API docs</Link>.</span></li>
+              </ul>
             </div>
             <InquiryForm action={sendInquiry} />
+          </div>
+        </section>
+
+        <section className="nx-close band">
+          <div className="wrap">
+            <h2>Run one rehearsal. Then decide.</h2>
+            <p className="lede">Open your firm&apos;s filing desk, add your logo, and rehearse a real filing on the state&apos;s own website. It&apos;s free, and nothing is filed. You&apos;ll see exactly what your client would see, and you&apos;ll know whether we&apos;ve earned your name on the door.</p>
+            <div className="nx-ctas"><Link className="btn btn-primary" href="/signup">Run a free rehearsal</Link><span className="nx-small nx-muted">Questions first? <a href={`mailto:${supportEmail()}`}>{supportEmail()}</a></span></div>
+            <p className="nx-tagline"><FolderTab /> Approve the proof. Then it&apos;s filed.</p>
           </div>
         </section>
       </main>

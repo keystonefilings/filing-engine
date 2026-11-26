@@ -41,7 +41,7 @@ export const PORTALS: PortalInfo[] = [
   },
   { id: "ny-gov", state: "NY", name: "NY.gov business account (NYS-100 and payroll)", needsLogin: true, pays: "No state fee", defaults: [] },
   {
-    id: "nj-portal", state: "NJ", name: "NJ Division of Revenue business portal", needsLogin: true, pays: "Card typed into the state's payment page",
+    id: "nj-portal", state: "NJ", name: "NJ Division of Revenue business portal", needsLogin: true, pays: "Card typed into the state's payment page, or, per filing type, the payment method saved in your NJ account",
     defaults: [
       { id: "annualReportReminders", label: "Sign up for annual report reminders", type: "boolean" },
       { id: "corpWatchAlerts", label: "Sign up for CorpWatch alerts", type: "boolean" },
@@ -54,7 +54,6 @@ export const PORTALS: PortalInfo[] = [
       { id: "certificateOfStatus", label: "Order a certificate of status", type: "boolean" },
     ],
   },
-  { id: "mo-sos", state: "MO", name: "Missouri SOS online filing", needsLogin: true, pays: "Card or eCheck at checkout", defaults: [] },
   { id: "irs-ein", state: "US", name: "IRS EIN online application", needsLogin: false, pays: "No fee", defaults: [] },
 ];
 
