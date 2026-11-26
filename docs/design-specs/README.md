@@ -1,5 +1,9 @@
 # Ten visual designs for cofile.app (round two, Nov 26, 2026)
 
+> **Merged:** the ten are merged into one direction, Plate & Proof (Hal's spine), in
+> [`merged/`](merged/README.md), with the choices left to you in
+> [`merged/DECISIONS.md`](merged/DECISIONS.md).
+
 Ten fictional senior designers, each with a different age, background and craft, each wrote how
 they would design the CoFile website with every graphic tool at their disposal. They worked
 separately and never saw each other's work. Their brief is [`BRIEF.md`](BRIEF.md) (version 3):
