@@ -89,3 +89,31 @@
 .desk2-from > select { flex: 1 1 260px; }
 .desk2-from > .btn { min-height: 48px; }
 }
+
+/* Setup (10B.5): the steps as a ledger with the product's glyphs; the next step's button is the page's Brass */
+@layer components {
+.setup2 h1 { margin-bottom: 16px; }
+.setup2-lede { margin-bottom: 32px !important; }
+.setup2-rule { display: block; width: 160px; height: 2px; margin: -4px 0 20px; background: var(--brass-line); transform-origin: left; animation: setup2-draw var(--t-draw) var(--ease-sweep) both; }
+@keyframes setup2-draw { from { transform: scaleX(0); } }
+@media (prefers-reduced-motion: reduce) { .setup2-rule { animation: none; } }
+.setup2-steps { list-style: none; margin: 0 0 24px; padding: 0; background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-sheet); }
+.setup2-step { display: grid; grid-template-columns: 16px 1fr auto; align-items: center; gap: 16px 20px; min-height: 96px; padding: 20px 24px; }
+.setup2-step + .setup2-step { border-top: 1px solid var(--line); }
+.setup2-glyph { display: grid; place-items: center; width: 16px; height: 16px; align-self: start; margin-top: 4px; }
+.setup2-glyph svg { width: 14px; height: 14px; }
+.setup2-step.is-done .setup2-glyph { color: var(--done); }
+.setup2-step.is-next .setup2-glyph { color: var(--ochre); }
+.setup2-step.is-later .setup2-glyph { color: var(--line-strong); }
+.setup2-what { display: grid; gap: 4px; min-width: 0; }
+.setup2-what strong { font: 500 1.25rem/1.625rem var(--font-sans-display); color: var(--text); }
+.setup2-what strong .muted { font: 400 0.9375rem/1.4375rem var(--font-sans); }
+.setup2-what > span { font-size: 0.9375rem; line-height: 1.4375rem; color: var(--text-2); }
+.setup2-card { display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 16px 20px; padding: 24px; background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-sheet); }
+.setup2-start { margin-top: 32px; }
+@media (max-width: 599px) {
+  .setup2-step { grid-template-columns: 16px 1fr; padding: 20px; }
+  .setup2-step > .btn { grid-column: 2; justify-self: stretch; }
+  .setup2-card { grid-template-columns: 1fr; }
+}
+}
