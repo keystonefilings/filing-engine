@@ -66,6 +66,7 @@ Each lists the options the reviewers gave and my recommendation.
 - **Turnaround times (12):** none stated by us; where a state's own estimate is known it is shown (today only NY Business Express's 15-day average for NYS-100, already on that form).
 - **Partner sign-up review (13):** the neutral wording stays; it depends on the sign-up setting.
 - **Production addresses (14), delegated to me:** the engine is its own deployment at `https://api.cofile.app` (API, approval pages, webhooks); the site is `https://cofile.app`. The docs' API address defaults to api.cofile.app (ENGINE_PUBLIC_URL); the deploy guide lists every webhook there and the DNS records to add; a production engine refuses to start with localhost addresses.
+- **EIN-only formation states (15):** every state is listed on purpose; the IRS doesn't depend on where the LLC was formed. The EIN form asks for the formation state from all 50 states and DC, the filing records it as its state, and state filings still take only NY, NJ, MO and FL.
 - **Support address:** hello@cofile.app (corrected from .com).
 - **The rest:** to follow.
 

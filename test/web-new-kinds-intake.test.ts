@@ -28,7 +28,7 @@ function engineRequest(id: string, raw: Raw) {
   expect(checkCompleteness(req).missing).toEqual([]);
   return req;
 }
-const fees = (req: FilingRequest) => totalUsd(expectedFees(req.state, req.type, feeOptionsFor(req, tenant, client)));
+const fees = (req: FilingRequest) => totalUsd(expectedFees(req.state as "NY", req.type, feeOptionsFor(req, tenant, client)));
 
 const entity = (base: string): Raw => ({ [`${base}.dosId`]: "1234567", [`${base}.name`]: "Hudson Ledger LLC" });
 const signer = (base: string): Raw => ({ [`${base}.signer.name`]: "Dana Park", [`${base}.signer.capacity`]: "manager" });

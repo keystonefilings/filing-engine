@@ -695,7 +695,7 @@ const irsEin: FilingKind = {
       title: "The LLC",
       ref: "Screens 2 and 5: Legal Structure, Additional Details",
       items: [
-        f("state", "State where the LLC was formed", "select", { required: true, options: lv([["NY", "New York"], ["NJ", "New Jersey"], ["FL", "Florida"], ["MO", "Missouri"]]), help: "Form the LLC with the state first; the IRS says skipping that may delay the EIN.", ref: "Screen 5, State where articles are filed" }),
+        f("ein.formationState", "State where the LLC was formed", "usState", { required: true, help: "Form the LLC with the state first; the IRS says skipping that may delay the EIN.", ref: "Screen 5, State where articles are filed" }),
         f("formation.name.baseName", "Legal name, without the ending", "text", { required: true, help: "Must match the articles. Only - and & are allowed as special characters.", ref: "Screen 5, Legal name" }),
         f("formation.name.designator", "Ending", "select", { required: true, defaultValue: "LLC", options: opts("LLC", "L.L.C.", "Limited Liability Company"), ref: "Screen 5, Legal name" }),
         f("ein.tradeName", "Trade name / DBA, if different (optional)", "text", { ref: "Screen 5, Trade name" }),

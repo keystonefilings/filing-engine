@@ -83,7 +83,7 @@ test("Florida agent name is assembled and EIN start month becomes a date", () =>
   assert.equal((fl.request.formation as any).registeredAgent.name, "Ana Diaz");
   assert.equal((fl.request.formation as any).floridaEntityType, "llc");
 
-  const irs = buildRequest(filingKind("irs-ein")!, { state: "NJ", "ein.startDate": "2026-11" }, ctx);
+  const irs = buildRequest(filingKind("irs-ein")!, { "ein.formationState": "NJ", "ein.startDate": "2026-11" }, ctx);
   assert.equal((irs.request.ein as any).startDate, "2026-11-01");
   assert.equal((irs.request.ein as any).formationState, "NJ");
   assert.equal(irs.request.state, "NJ");
@@ -408,4 +408,10 @@ test("decision 9: partner forms offer our registered agent where it's set up, pr
   const { kind } = withFirmDefaults(nj, ent);
   const f = kind.sections.flatMap((s) => s.items).find((i) => i.kind === "field" && i.path === "formation.registeredAgentChoice") as { options: { value: string }[] };
   assert.ok(f.options.some((o) => o.value === "filing_company"));
+});
+
+test("decision 15: the EIN form lists every state, and the filing is for the state where the LLC was formed", () => {
+  const k = filingKind("irs-ein")!;
+  const f = k.sections.flatMap((s) => s.items).find((i) => i.kind === "field" && i.path === "ein.formationState") as { type: string } | undefined;
+  assert.equal(f?.type, "usState");
 });

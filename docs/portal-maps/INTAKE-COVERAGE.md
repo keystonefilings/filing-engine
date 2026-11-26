@@ -466,7 +466,7 @@ Fees: No IRS fee. The IRS issues one EIN per responsible party per day, and the 
 
 | Section | Field | Request path | Required | Walkthrough |
 |---|---|---|---|---|
-| The LLC | State where the LLC was formed | `state` | yes | Screen 5, State where articles are filed |
+| The LLC | State where the LLC was formed | `ein.formationState` | yes | Screen 5, State where articles are filed |
 | The LLC | Legal name, without the ending | `formation.name.baseName` | yes | Screen 5, Legal name |
 | The LLC | Ending | `formation.name.designator` | yes | Screen 5, Legal name |
 | The LLC | Trade name / DBA, if different (optional) | `ein.tradeName` |  | Screen 5, Trade name |

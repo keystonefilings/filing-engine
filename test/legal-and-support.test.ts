@@ -87,3 +87,15 @@ describe("saved-signature consent (decision 4)", () => {
     expect(r.json().consentText).toBe(SIGNATURE_CONSENT);
   });
 });
+
+describe("EIN-only filings take any formation state (decision 15)", () => {
+  it("accepts an LLC formed in Texas for an EIN, and still refuses a Texas state filing", async () => {
+    const { FilingRequest } = await import("../src/domain/filing.js");
+    const { einOnlyRequest } = await import("./helpers.js");
+    const ein = FilingRequest.safeParse({ ...einOnlyRequest(), state: "TX" });
+    expect(ein.success).toBe(true);
+    const formation = FilingRequest.safeParse({ ...njFormationRequest(), state: "TX" });
+    expect(formation.success).toBe(false);
+    expect(formation.error!.issues.some((i) => i.path.join(".") === "state")).toBe(true);
+  });
+});

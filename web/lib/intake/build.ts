@@ -266,7 +266,6 @@ export function buildRequest(kind: FilingKind, raw: Raw, ctx: BuildContext): Bui
     else granted.push({ id: a.id, text: a.text, ref: a.ref, grantedAt: new Date().toISOString(), grantedBy: ctx.submittedBy });
   }
 
-  if (raw.state && kind.type === "ein_only") request.state = raw.state; // the IRS form picks the formation state
   deepMerge(request, structuredClone(kind.constants));
   postProcess(kind, request, raw);
 
@@ -275,7 +274,8 @@ export function buildRequest(kind: FilingKind, raw: Raw, ctx: BuildContext): Bui
   out.clientCompanyId = ctx.clientCompanyId;
   out.idempotencyKey = ctx.idempotencyKey;
   out.type = kind.type;
-  out.state = kind.type === "ein_only" ? (out.state ?? kind.state) : kind.state;
+  // Decision 15: an EIN-only filing is for the state where the LLC was formed, any state.
+  out.state = kind.type === "ein_only" ? (((out.ein as Record<string, unknown> | undefined)?.formationState as string | undefined) ?? kind.state) : kind.state;
   if (ctx.dryRun !== undefined) out.dryRun = ctx.dryRun;
   const intake = (out.intake ?? {}) as Record<string, unknown>;
   const portal = (intake.portal ?? {}) as Record<string, unknown>;
@@ -310,7 +310,7 @@ function postProcess(kind: FilingKind, r: Record<string, unknown>, raw: Raw): vo
   }
 
   if (kind.type === "ein_only") {
-    setPath(r, "ein.formationState", (r.state as string | undefined) ?? kind.state);
+    if (!(r.ein as Record<string, unknown> | undefined)?.formationState) setPath(r, "ein.formationState", kind.state);
     // V24: the physical state is the state of the physical address the form already asks for.
     const physical = ((r.ein as Record<string, unknown> | undefined)?.responsibleParty as { address?: { state?: string } } | undefined)?.address?.state;
     if (physical && !(r.ein as Record<string, unknown>).physicalState) setPath(r, "ein.physicalState", physical);

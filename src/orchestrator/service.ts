@@ -1,6 +1,6 @@
 import { randomUUID } from "node:crypto";
 import { feeOptionsFor } from "../fees/request-fees.js";
-import { FilingRequest, type FilingRequest as FilingRequestT } from "../domain/filing.js";
+import { FilingRequest, FilingState, type FilingRequest as FilingRequestT } from "../domain/filing.js";
 import { hasErrors, validateFiling, type ValidationIssue } from "../domain/validation.js";
 import { checkCompleteness, type CompletenessConfig } from "../domain/completeness.js";
 import { assertTransition, type FilingStatus } from "../domain/states.js";
@@ -122,7 +122,7 @@ export class FilingService {
     if (req.type === "ein_only") return [{ label: "EIN application", amountUsd: 0 }];
     if (req.type === "payroll_registration") return [{ label: `${req.state} payroll / employer registration (no fee)`, amountUsd: 0 }];
     if (req.type === "paper_upload") return paperUploadFees(req);
-    return expectedFees(req.state, req.type, feeOptionsFor(req, tenant, client));
+    return expectedFees(FilingState.parse(req.state), req.type, feeOptionsFor(req, tenant, client));
   }
 
   /** A practice filing (dry run): it goes through the government site and stops before submitting. */
@@ -571,7 +571,7 @@ export class FilingService {
           // A dry run previews only; name resolution runs for real runs.
           if (!dryRun && this.d.nameResolution && (tenant.nameResolution?.enabled ?? true) && latest.request.formation) {
             const rec = await this.d.nameResolution.open({
-              filing: latest, site: outcome.site, state: latest.request.state,
+              filing: latest, site: outcome.site, state: FilingState.parse(latest.request.state),
               requested: { baseName: outcome.requestedName.baseName, designator: outcome.requestedName.designator },
               purpose: outcome.purpose, runId: outcome.run.id,
             });

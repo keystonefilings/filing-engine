@@ -485,7 +485,11 @@ export const FilingRequest = z.object({
   clientCompanyId: z.string().min(1),
   idempotencyKey: z.string().min(8),
   type: FilingType,
-  state: FilingState,
+  /**
+   * The state the filing is for: NY, NJ, MO or FL for state filings. Decision 15 (Nov 26): an
+   * EIN-only filing takes the state where the LLC was formed, any state; the IRS doesn't mind.
+   */
+  state: UsState,
   formation: FormationDetails.optional(),
   standing: StandingCertificateDetails.optional(),
   payroll: PayrollRegistrationDetails.optional(),
@@ -502,6 +506,10 @@ export const FilingRequest = z.object({
   dryRun: z.boolean().optional(),
   /** Caller-side maximum charge the client approves (fee cap, decision 5). */
   feeCapUsd: z.number().nonnegative().optional(),
+}).superRefine((r, ctx) => {
+  if (r.type !== "ein_only" && !FilingState.safeParse(r.state).success) {
+    ctx.addIssue({ code: "custom", path: ["state"], message: "state must be NY, NJ, MO or FL (an EIN-only filing takes any state)" });
+  }
 });
 export type FilingRequest = z.infer<typeof FilingRequest>;
 
