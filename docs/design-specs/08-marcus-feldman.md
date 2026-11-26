@@ -1013,7 +1013,7 @@ From the two colors, a build step (and the live preview) generates a ramp in OKL
 |---|---|---|
 | `--firm-accent` | Main color, exact | 4 px top rule, logo plate edge, selected nav |
 | `--firm-action` | Main color, lightness lowered in OKLCH (hue and chroma kept) until white text reaches 4.5 : 1 | Primary buttons |
-| `--firm-action-text` | White, or `--ink` if the firm's color is light enough to keep exact with ink text at 7 : 1 and the firm chose "keep my color" | Button labels |
+| `--firm-action-text` | White by default. If the firm's color is light and ink text on it reaches 7 : 1, the preview offers keeping the exact color with ink text instead [copy: C3] | Button labels |
 | `--firm-link` | Second color, adjusted to 4.5 : 1 on `--sheet` | Links on client pages |
 | `--firm-tint` | Main color at L 0.97, C 0.02 | Brand bar background option |
 | `--firm-ink` | Main hue at L 0.30, C 0.03 | The fallback action color (11.3) |
@@ -1285,11 +1285,11 @@ These are suggestions for the copy owner. None of them appear in the design abov
 
 - **C1.** The hero's sample proof button reads "Approve for filing", but the real proof's button reads "Approve, and authorize submission and payment". A CPA who knows the 8879 will notice. Consider making the sample match the real button.
 - **C2.** The desk's filings table badges rehearsals "Test", while the filing detail says "Rehearsal". One word would be clearer.
-- **C3.** With automatic contrast fixes, the branding help "Button text is white, so choose a dark color." is no longer true. The preview needs a short line explaining the adjusted swatch.
+- **C3.** With automatic contrast fixes, the branding help "Button text is white, so choose a dark color." is no longer true. The preview needs a short line explaining the adjusted swatch, and a label for the option to keep a light color exact with dark button text.
 - **C4.** The "More information needed" email has no button or next step. It needs a link label.
 - **C5.** Signed-in visitors on the coverage table could use a short pointer to per-account status in their desk.
 - **C6.** "This link has expired or isn't valid" has no way forward on the invitation page; a "Log in" link may help.
-- **C7.** Icon-only buttons need accessible names: the mobile menu, closing the full-screen review image, copy, open and download.
+- **C7.** Icon-only buttons need accessible names: the mobile menu, closing the full-screen review image, copy, open, download and the light/dark switch.
 - **C8.** A new API key needs a "copy" action label and a one-line "shown once" note.
 - **C9.** The co-brand appears as "with CoFile" on client pages and "Filed with CoFile" in the embed. Pick one.
 - **C10.** Spanish versions of client-facing pages, client emails, the proof and its consent texts, by a legal translator with counsel's review.

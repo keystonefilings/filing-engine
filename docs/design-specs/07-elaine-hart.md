@@ -70,7 +70,7 @@ pointing at it. A developer learns that blue in the docs is annotation and black
 | # | Principle | In practice |
 |---|---|---|
 | 1 | The specimen is the real thing | The sample proof on the home page uses the same component, order and type as the client's real proof. If they ever differ, the sample is wrong. |
-| 2 | Hierarchy, not boxes | Sections are separated by rules and space, not by bordered cards. A box is reserved for the proof sheet, the catch and form fields. |
+| 2 | Hierarchy, not boxes | Sections are separated by rules and space, not by bordered cards. A box is reserved for the proof sheet, data tables, the catch and form fields. |
 | 3 | Numbers are set to be checked | Tabular lining figures, decimal alignment, single rule above a total and double rule below the final total. |
 | 4 | Black is the record, blue is the note | Never put a filed value in blue. Never put an annotation in black. |
 | 5 | Signals are signals | Green, amber and red never appear in illustration, charts of non-status data or brand moments. |
@@ -95,7 +95,7 @@ retire it, and the manila color with it.
 Drawing notes for the lettering artist:
 
 - **Proportions.** Cap height 700 units, x-height 500 (a high x-height so it holds at 18 px in a
-  top bar). Overall width at 1,000-unit cap-to-baseline body: about 2,640 units.
+  top bar). Overall width on a 1,000-unit em: about 2,640 units.
 - **C.** Vertical stress, moderate contrast (thick 92, thin 34). Top terminal ends in a short,
   sharp beak serif angled 12 degrees down; the bottom terminal is a plain sheared cut, no serif.
   Aperture slightly closed (about 80 degrees of arc open).
@@ -126,15 +126,15 @@ For the favicon, app icon, email footer and small places where the wordmark won'
 ```
 
 A capital C, drawn as a ring with an opening at 3 o'clock, with a solid square sitting in the
-opening at the center line. It reads as "C." : CoFile, full stop. Approved, filed, done. The square
+opening at the center line. It reads as "C.": CoFile, full stop. Approved, filed, done. The square
 is the i-dot of the wordmark, scaled.
 
 | Colorway | C | Square | Ground |
 |---|---|---|---|
 | Primary | Ink #15171A | Editor's blue #1F45A8 | Paper #F6F5F1 or Sheet #FFFFFF |
-| Reversed | Sheet #FFFFFF | Blue tint #8FA8F0 | Ink #15171A |
+| Reversed | Sheet #FFFFFF | Editor's blue, dark value #8FA8F0 | Ink #15171A |
 | One color | Ink or white | same as C | any neutral |
-| App icon | Paper #F6F5F1 | Editor's blue #8FA8F0 | Ink #15171A, 22% corner radius (platform mask) |
+| App icon | Paper #F6F5F1 | Editor's blue, dark value #8FA8F0 | Ink #15171A, 22% corner radius (platform mask) |
 
 ### 3.4 Lockups, clear space, minimum sizes
 
@@ -230,7 +230,7 @@ rehearsal chip, the margin strip of a rehearsal proof and the held line of a reh
 | `blue` on `blue-tint` | 7.0 | 6.9 |
 | `go` on `sheet`; `go-on` on `go` | 6.6; 6.6 | 7.5; 8.0 |
 | `hold` on `sheet`; on `hold` tint | 6.4; 5.6 | 8.9; 8.1 |
-| `stop` on `sheet`; `stop-on` on `stop` | 6.6; 6.6 | 7.0; (≥7) |
+| `stop` on `sheet`; `stop-on` on `stop` | 6.6; 6.6 | 7.0; 7.8 |
 | `field-border` on `sheet` (non-text, needs 3:1) | 3.9 | 3.5 |
 
 Every text pair clears 4.5:1 and most clear AAA (7:1). `rule` is decorative and never the only way
@@ -352,14 +352,16 @@ Sizes are in px; mobile applies below 768 px. Fluid sizes interpolate between th
 | `fee-total` | Record Sans | 24 / 32 | 22 / 30 | 700, tabular lining |
 
 Client-facing pages (intake, proof, client emails) start one step up: body 18/28, values 18/28,
-because the reader may be older, on a phone, or reading in a second language.
+because the reader may be older, on a phone, or reading in a second language. Working pages (filing
+desk, dashboard) set their page `h1` smaller, at 44/50 on desktop and 30/36 on phones: a working
+page's title labels the page; it doesn't sell it.
 
 ### 5.4 Numerals and figures
 
 - Lining figures everywhere. Old-style figures make $103.50 look smaller than its neighbours, and a
   finance reader notices.
 - Tabular figures in every table, every fee, every count and every date column.
-- Dollar sign set with a thin space reduction (kern −20 units); cents always shown on fees
+- The dollar sign is kerned −20 units against the first figure; cents are always shown on fees
   ($100.00, not $100).
 - Totals ruled as an accountant would: a 1 px `rule-strong` above the total, and a double rule
   (1 px, 2 px gap, 1 px) below the final total. This is the single most important typographic
@@ -395,8 +397,9 @@ rhythm. Columns are fluid between breakpoints; the content area caps at 1224 px.
 | `lg` | 1024 to 1359 | 12 | 40 | 24 | Full editorial grid |
 | `xl` | 1360 and up | 12 (80 px each) | auto, min 48 | 24 | Content 1224 px, centered |
 
-Working pages (filing desk, dashboard) use the same grid with a fixed 240 px left rail at `lg` and
-up, and the 12 columns inside the remaining width. Reading pages (Terms, Privacy, guides) set text on
+The dashboard uses the same grid with a fixed 240 px left rail at `lg` and up, and the 12 columns
+inside the remaining width; the filing desk keeps a top tab row (10.5) and the full grid, because
+its seven tabs fit across and its readers are used to tabs, not rails. Reading pages (Terms, Privacy, guides) set text on
 columns 3 to 9 (7 columns, about 704 px, 64 characters at 19 px).
 
 Safe areas: horizontal margins are `max(margin, env(safe-area-inset-left/right))`; sticky bottom

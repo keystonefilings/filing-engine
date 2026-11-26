@@ -938,10 +938,10 @@ The developer is the second reader, and they are reading code. The two readers m
 DESKTOP: /docs/reference
 ┌──────────────┬──────────────────────────────────┬──────────────────────────┐
 │ Overview     │ POST  /v1/filings                │ curl -X POST \           │
-│ Guides       │ Create a filing…                 │   https://api.cofile.app │
+│ Guides       │ Create a filing                  │   https://api.cofile.app │
 │  Authentic…  │                                  │   /v1/filings \          │
 │  Filings and │ Request                          │   -H "Authorization: …"  │
-│  the lifecy… │  dryRun   boolean   ◌ rehearsal  │   -d '{ "dryRun": true,  │
+│  the lifecy… │  dryRun   boolean   ◌ Rehearsal  │   -d '{ "dryRun": true,  │
 │ Reference    │  state    "NY" | "NJ" | "MO" |   │         … }'             │
 │  Endpoints   │           "FL"                   │                   [Copy] │
 │ OpenAPI      │ Response 201                     │ { "filing": { "id": …,   │

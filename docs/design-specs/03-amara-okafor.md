@@ -703,7 +703,7 @@ Header row on `--sheet-2`, 13/16 Atkinson 700 `--ink-2`, sentence case (no all-c
 ╘══════════════════════════════════════════════════════════════════════════════════════════════╛
 ```
 
-On the blue field the primary button inverts: Stock fill, Register Blue text (6.6:1). The sample proof is a white sheet with Press Black type. It is the only white object in the hero, so the eye lands on it.
+On the blue field the primary button inverts: Stock fill, Register Blue text (6.6:1). The secondary button is a 1.5 px Stock outline with Stock text. The lede at 92% Stock (`#E6E3EF`, 5.8:1) and the beta note at 85% (`#D9D5EF`, 5.1:1) both stay above 4.5:1. The sample proof is a white sheet with Press Black type. It is the only white object in the hero, so the eye lands on it.
 
 **Hero, phone (375):** the kicker, the H1 at 48/45 (three lines), the lede, two full-width L buttons stacked, then the beta note. The sample proof follows as a flat sheet at full width, callouts on the left margin, with the acetate already registered. "See what your client sees" scrolls to `#proof` and plays the registration once there.
 
@@ -1135,7 +1135,7 @@ From the main color `M` and second color `S`, the theme package `@cofile/theme` 
 
 1. **Text on the action color.** If white text reaches 4.5:1, keep it. Otherwise, if the color is light (OKLCH L ≥ 0.75) and Press Black text reaches 7:1, switch the text to `#15131C` and keep the firm's exact color. Otherwise darken in OKLCH, keeping hue and chroma (clamped to the sRGB gamut), in steps of 0.005 L until white reaches 4.5:1.
 2. **Links.** `S` is darkened the same way until it reaches 4.5:1 on both `--sheet` and `--stock`.
-3. **Status protection.** If `M` falls in the Stop band (OKLCH hue 15°–40°, chroma > 0.12), the proof's approve button uses `--firm-ink` (`M` at L 0.30) and the firm's red stays on the top rule, the logo and the step numbers. A red "Approve" must never look like a red "Stop". If `M` sits in the Stage band (hue 60°–95°), rehearsal banners keep their dashed border, so a yellow brand never looks like a rehearsal.
+3. **Status protection.** If `M` falls in the Stop band (OKLCH hue 15°–40°, chroma > 0.12), the proof's approve button and step numbers use `--firm-ink` (`M` at L 0.30), and the firm's red stays on the top rule and the logo. A red "Approve" must never look like a red "Stop". If `M` sits in the Stage band (hue 60°–95°), rehearsal banners keep their dashed border, so a yellow brand never looks like a rehearsal.
 4. **Dark mode.** `--action` is lifted to L 0.76 to 0.80 with `#0F0E14` text, and checked again for 4.5:1.
 
 Worked examples (computed):
@@ -1192,7 +1192,7 @@ Status families, the consent panel, the proof's order, field sizes and type size
 
 **Accessibility (WCAG 2.2 AA everywhere, AAA on the proof).**
 
-- Proof body text is 7:1 or better (Press Black on white is 18.6:1). Targets are 44 × 44 px minimum, 48 typical, 56 for the approve button.
+- Proof body text is 7:1 or better (Press Black on white is 18.4:1). Targets are 44 × 44 px minimum, 48 typical, 56 for the approve button.
 - Reflow at 320 CSS px and 200% text zoom with nothing lost. The proof becomes one column with label-above-value rows.
 - Proof semantics: one `h1`, `h2` per step (the circled numbers are `aria-hidden`), the fee list is a real `<table>` with `th scope="row"`, the consent panel is the approve button's `aria-describedby`, and the review page image keeps its alt text ("Every value on it is also listed as text under Filing details").
 - Focus order follows reading order, there's a skip link on every page, and focus is never hidden by sticky bars (`scroll-padding-top` matches the sticky strip).

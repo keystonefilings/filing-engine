@@ -458,7 +458,7 @@ The product's real artifacts are more persuasive than any stock photo: the proof
 | **Specimen sheets** | The sample proof, a redrawn state review page, the rehearsal log, a state document and the EIN letter, as seen on the home page | Built as live HTML components, not pictures, so they're crisp, translatable and accessible. State pages are **simplified redraws** labelled as samples, never screenshots passed off as live | In-house, from the component library |
 | **Firm theme fans** | The same proof in three firm themes, fanned like paper swatches (section "Firms") | Rendered from the real theming engine with three sample palettes applied to the one example firm, "Harbor & Pine CPA" | In-house |
 | **Spot icons** | 48 icons: status shapes, the Gate, document types, security blocks, channels (email, text, WhatsApp, Slack) | 24 px grid, 1.75 px stroke, rounded joins, 2 px corner radius, no fills except the status dot and Gate | An icon studio that has drawn a public-sector or banking icon set |
-| **Portrait series (Phase 4, optional)** | Real firm staff at their own desks: a CPA, a payroll specialist, a title closer, with consent and named on the caption | Documentary, natural light, 35 mm, no posing at laptops. Used only on a future "Firms" story page, never on the proof or intake | A documentary photographer through an agency, with model releases |
+| **Portrait series (Phase 5, optional)** | Real firm staff at their own desks: a CPA, a payroll specialist, a title closer, with consent and named on the caption | Documentary, natural light, 35 mm, no posing at laptops. Used only on a future "Firms" story page, never on the proof or intake | A documentary photographer through an agency, with model releases |
 
 ### 7.3 Data visuals
 
@@ -1146,7 +1146,7 @@ Client pages (intake, the proof, decision and error pages, client emails) are de
 
 ### 12.3 Dark mode
 
-It follows `prefers-color-scheme`, with a manual override (light, dark, system) in the desk and dashboard menus, stored per user. CoFile's public pages offer the same toggle in the footer. Every token has a dark value (sections 4 and 11). State review images, logos with opaque backgrounds and signature images always sit on white plates, because they were made for white. The proof follows the device setting; in dark mode, fees and the approve button keep their computed contrast and the consent note keeps its ink rule (in `--ink`, now light).
+It follows `prefers-color-scheme`, with a manual override (light, dark, system) in the desk and dashboard menus, stored per user. CoFile's public pages offer the same toggle in the footer **[new labels for light, dark and system]**. Every token has a dark value (sections 4 and 11). State review images, logos with opaque backgrounds and signature images always sit on white plates, because they were made for white. The proof follows the device setting; in dark mode, fees and the approve button keep their computed contrast and the consent note keeps its ink rule (in `--ink`, now light).
 
 ### 12.4 Forced colors and high contrast
 
@@ -1164,7 +1164,6 @@ Firms print. A CPA's file still often has paper in it, and a record of what was 
 - **Terms and Privacy** print with their version and date.
 - Print uses ink on white only (no tints), 11 pt Hand and 10 pt Record, with page breaks avoided inside fee tables.
 
-
 ---
 
 ## 13. Production
@@ -1175,7 +1174,7 @@ Firms print. A CPA's file still often has paper in it, and a record of what was 
 |---|---|
 | Design files | Figma: one library "CoFile System" (tokens, components, the Turn Line variants), one "Firm Themes" file with the 24-firm stress set, page files per area |
 | Tokens | W3C Design Tokens (DTCG) JSON, built with Style Dictionary into CSS custom properties, TypeScript constants and an email-safe inline palette |
-| Theming engine | A pure TypeScript module (`theme/compute.ts`) using Culori for OKLCH, shared by `web/` and the engine (`src/approvals/render.ts`), so the proof and the desk compute identical colors |
+| Theming engine | A pure TypeScript package (`theme/compute.ts`) using Culori for OKLCH, published once and imported by both `web/` and the engine (`src/approvals/render.ts`, `src/comms/resend.ts`), so the proof, the desk and the emails compute identical colors |
 | Components | React components in `web/components/ui/`, documented in Storybook, with visual regression in Chromatic across light, dark and the 24 firm themes |
 | Turn Line | SVG components with a JSON event input; Rive for the three home page story animations, with static SVG fallbacks |
 | Emails | React Email templates rendered server-side, sent through Resend, tested in Litmus |
@@ -1190,7 +1189,7 @@ Firms print. A CPA's file still often has paper in it, and a record of what was 
 - Specimen components: sample proof, redrawn NJ review page, rehearsal log, document specimens, EIN letter specimen.
 - Three Rive animations (handoff, two readings match, held on purpose) with static fallbacks.
 - Empty-state line drawings (8), the 404 and error illustrations.
-- Email templates: 18 (14 filing events, 4 account).
+- Email templates: 21 (13 filing events sent today, 3 proposed: submitted, documents back and EIN issued, and 5 account emails).
 - The 24-firm stress set: real-world color, logo and font combinations, including white logos, JPEG letterheads, neon colors, script fonts and 60-character names.
 
 ### 13.3 What to commission
@@ -1204,7 +1203,7 @@ Firms print. A CPA's file still often has paper in it, and a record of what was 
 | Spanish localization | A legal-financial translation agency, with counsel review |
 | Accessibility audit | An accessibility consultancy with disabled and older-adult testers |
 | Research | 12 firm staff (CPA, payroll, CFO, title) and 12 clients (4 Spanish-first, 4 over 65), moderated, in two rounds |
-| Portrait series (Phase 4, optional) | A documentary photographer through an agency |
+| Portrait series (Phase 5, optional) | A documentary photographer through an agency |
 
 ### 13.4 Phases
 
@@ -1227,7 +1226,7 @@ Firms print. A CPA's file still often has paper in it, and a record of what was 
 | Filing desk | Turn board · Setup and brand check · New filing (state, type, form) · Filing detail (every status) · Client links · From email · Signatures · Ready to pay · Billing |
 | Client pages | Intake · The proof (live, rehearsal, with code, with EIN after acceptance) · Decision and error pages · Spanish layouts |
 | Enterprise | Dashboard pages · Drift reviews · Docs and reference · Widget |
-| Emails | All 18 templates, light and dark |
+| Emails | All 21 templates, light and dark, desktop and phone |
 
 Component names match code names (`TurnLine/Compact`, `StatusChip/held`, `ProofSheet/Fees`). Every status variant of the filing detail page is a separate frame, because a build team needs to see "Name unavailable" as clearly as "Completed".
 

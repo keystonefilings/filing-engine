@@ -393,6 +393,19 @@ Detection runs once, on idle, cached for the session. A visitor can always step 
 - Hovering or focusing a pane shows its address and screen name (from the recording, such as "Registered Agent") in 13 px mono after 400 ms.
 - Scenes never capture the pointer, never play sound unless switched on, never cover text, and never loop on their own.
 
+### 8.8 How the experience calms down, surface by surface
+
+The same visual language travels from the home page into the product, but each step closer to an irreversible act takes something away.
+
+| Surface | What carries over from the Stage | What's taken away |
+|---|---|---|
+| **Filing desk** | The ring glyphs, the run strip (the Run, reduced to ticks), the live run view (the panes, reduced to one flat image that changes only when the engine moves), Trace-blue focus | WebGL, the caret, camera moves, glyph flights, breathing, the dark Stage (the desk is Daylight unless the system is dark) |
+| **Enterprise dashboard** | The run board (many run strips at once), the delivery tail, mono numbers | Everything the desk loses, plus any transition longer than `t-medium` |
+| **Developer docs** | The event replay from the same recording, the Stage-colored code column | Camera and panes; the replay is a list that grows, not a scene |
+| **Intake and service pages** | The ring glyphs, mono-for-verbatim, the hold band | All motion except field feedback; CoFile's colors (the firm's skin replaces them) |
+| **The proof** | Mono-for-verbatim, the hold band, the section rail's four numbered dots (callouts ① to ④ from the home page) | All of it. No reveal, no parallax, no autoplay, no progress animation, no celebratory feedback after approving. The page holds still so the person can |
+| **Emails** | The hold row and the ring glyph as a static image | Everything else |
+
 ---
 
 ## 9. Components
