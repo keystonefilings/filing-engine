@@ -257,8 +257,9 @@ export function validateFiling(req: FilingRequest): ValidationIssue[] {
       else {
         if (a.jurisdiction.trim().toLowerCase() === "new york") err("paperUpload.applicationForAuthority.jurisdiction", "an Application for Authority is for a corporation formed outside New York");
         if (a.incorporationDate > new Date().toISOString().slice(0, 10)) err("paperUpload.applicationForAuthority.incorporationDate", "the incorporation date can't be in the future");
-        warn("paperUpload.applicationForAuthority", "attach a Certificate of Existence or Good Standing from the home jurisdiction, dated within the last 6 months");
-        if (a.priorActivity === "tax_consent_attached") warn("paperUpload.applicationForAuthority.priorActivity", "the NYS Tax Commission consent must be attached to the upload");
+        // Decision 19: both are uploaded PDFs, added after the signed form.
+        if (!a.certificateOfExistenceDocumentId) err("paperUpload.applicationForAuthority.certificateOfExistenceDocumentId", "upload the Certificate of Existence (or good standing) from the home state, dated within the last 6 months (POST /v1/client-companies/:id/documents)");
+        if (a.priorActivity === "tax_consent_attached" && !a.taxConsentDocumentId) err("paperUpload.applicationForAuthority.taxConsentDocumentId", "upload the NYS Tax Commission's consent (POST /v1/client-companies/:id/documents)");
       }
     } else if (u.form === "ny_assumed_name") {
       const n = u.assumedName;

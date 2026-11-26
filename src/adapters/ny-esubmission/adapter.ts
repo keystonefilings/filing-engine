@@ -3,6 +3,7 @@ import { tmpdir } from "node:os";
 import path from "node:path";
 import type { PaperUploadDetails } from "../../domain/filing.js";
 import { fillNyForm, formSignerName } from "../../pdf-forms/ny-dos.js";
+import { appendDocuments, documentRefs } from "../../documents/supporting.js";
 import { tenantVaultKey } from "../../settings/accounts.js";
 import type { ScreenIntents } from "../../resolver/types.js";
 import type { ScreenStep, SiteAdapter, StepContext } from "../types.js";
@@ -120,7 +121,15 @@ const filingInformation: ScreenStep = {
     const sig = ctx.dryRun ? null : await ctx.signatureForForm(u.signatureId, formSignerName(u));
     // A real run never uploads an unsigned form: DOS rejects it and the fee is still charged.
     if (sig && !sig.ok) throw new Error(`the form can't be signed: ${sig.reason}`);
-    const pdf = Buffer.from(await fillNyForm(u, { dryRun: ctx.dryRun, signaturePng: sig?.ok ? sig.png : null }));
+    const form = await fillNyForm(u, { dryRun: ctx.dryRun, signaturePng: sig?.ok ? sig.png : null });
+    // Decision 19: the Certificate of Existence (and the Tax Commission consent) go in after the form, as one PDF.
+    const docs: Buffer[] = [];
+    for (const ref of documentRefs({ paperUpload: u })) {
+      const d = await ctx.supportingDocument(ref.id, ref.kind);
+      if (!d.ok) throw new Error(`the form can't be uploaded without it: ${d.reason}`);
+      docs.push(d.body);
+    }
+    const pdf = Buffer.from(await appendDocuments(form, docs));
     const name = `${u.form === "ny_application_for_authority" ? "DOS-1335" : "DOS-1338"}-${ctx.filing.id.slice(0, 8)}${ctx.dryRun ? "-dry-run" : ""}.pdf`;
     generated.set(ctx.filing.id, { name, body: pdf });
     const dir = path.join(tmpdir(), "keystone-forms");
@@ -142,7 +151,7 @@ const filingInformation: ScreenStep = {
     await ctx.set("levelOfService", levels[u.levelOfService]);
     if (u.plainCopy) await ctx.set("plainCopy", true);
     if (u.certifiedCopy) await ctx.set("certifiedCopy", true);
-    await ctx.note(`uploaded ${name}${ctx.dryRun ? " (dry run, unsigned)" : " (signed)"}`);
+    await ctx.note(`uploaded ${name}${ctx.dryRun ? " (dry run, unsigned)" : " (signed)"}${docs.length ? ` with ${docs.length} supporting document${docs.length > 1 ? "s" : ""} after the form` : ""}`);
   },
   async advance(ctx) {
     await ctx.actAndSettle(() => ctx.clickButton(/continue/i));

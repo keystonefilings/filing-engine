@@ -54,14 +54,14 @@ export function njFormationRequest(overrides: Partial<FilingRequest> = {}): Fili
   } as FilingRequest;
 }
 
-export function wire(store: MemoryStore, extra: { executor?: ConstructorParameters<typeof FilingService>[0]["executor"]; fetchImpl?: ConstructorParameters<typeof WebhookDispatcher>[1]; now?: () => Date; billing?: ConstructorParameters<typeof FilingService>[0]["billing"] } = {}) {
+export function wire(store: MemoryStore, extra: { executor?: ConstructorParameters<typeof FilingService>[0]["executor"]; fetchImpl?: ConstructorParameters<typeof WebhookDispatcher>[1]; now?: () => Date; billing?: ConstructorParameters<typeof FilingService>[0]["billing"]; artifacts?: ConstructorParameters<typeof FilingService>[0]["artifacts"] } = {}) {
   const approvals = new ApprovalService({ store, signingSecret: SECRET, publicBaseUrl: "http://api.test", defaultTtlHours: 168 });
   const webhooks = new WebhookDispatcher(store, extra.fetchImpl ?? (async () => ({ status: 200 })));
   const queue = new InMemoryQueue();
   const vault = new InMemoryVault();
   vault.set("keystone/acme-cpa/NJ_ACME", { username: "acme", password: "pw" });
   const drift = new DriftReviewService(store);
-  const service = new FilingService({ store, approvals, webhooks, queue, vault, drift, executor: extra.executor, dryRunDefault: true, now: extra.now, billing: extra.billing });
+  const service = new FilingService({ store, approvals, webhooks, queue, vault, drift, executor: extra.executor, dryRunDefault: true, now: extra.now, billing: extra.billing, artifacts: extra.artifacts });
   return { approvals, webhooks, queue, vault, drift, service };
 }
 

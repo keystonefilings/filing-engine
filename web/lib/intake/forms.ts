@@ -18,7 +18,9 @@ export type FieldType =
   | "text" | "email" | "tel" | "textarea" | "select" | "radio" | "yesno" | "checkbox"
   | "date" | "month" | "number" | "ssn" | "fein" | "zip" | "usState"
   /** A saved signature's id: pick one, or draw a new one (saved with the signer's consent). */
-  | "signature";
+  | "signature"
+  /** A PDF the client uploads (decision 19); the engine keeps it and the filing carries its id. */
+  | "pdf";
 
 /** Shown when the value at `path` equals one of `equals` (a path starting with "." is a sibling in the same group item). */
 export interface Cond { path: string; equals: string | string[] }
@@ -48,6 +50,8 @@ export interface Field {
   transform?: "monthToDate";
   /** For a signature field: the path of the signer's name, which a saved signature must match. */
   signerPath?: string;
+  /** For a pdf field: what the document is, as the engine files it. */
+  documentKind?: "certificate_of_existence" | "tax_commission_consent";
 }
 
 export interface Group {
@@ -1148,8 +1152,16 @@ const nyAuthority: FilingKind = {
       title: "Business already done in New York",
       ref: "DOS-1335-f SIXTH",
       items: [
-        f(`${AU}.priorActivity`, "Has the corporation done business in New York before this application?", "radio", { required: true, options: lv([["none_in_new_york", "No, it hasn't done business in New York yet"], ["tax_consent_attached", "Yes, and the NYS Tax Commission's consent is attached"]]), ref: "DOS-1335-f SIXTH" }),
-        { kind: "note", text: "The state also needs a Certificate of Existence (good standing) from the home state, dated within the last 6 months. Send it to the filing company; it is uploaded with the form.", },
+        f(`${AU}.priorActivity`, "Has the corporation done business in New York before this application?", "radio", { required: true, options: lv([["none_in_new_york", "No, it hasn't done business in New York yet"], ["tax_consent_attached", "Yes, and I'll upload the NYS Tax Commission's consent below"]]), ref: "DOS-1335-f SIXTH" }),
+      ],
+    },
+    {
+      title: "Documents from the corporation",
+      help: "New York needs these with the form. Upload each as a PDF; they're added after the signed form in the one PDF sent to the state.",
+      ref: "DOS-1335-f instructions (attachments)",
+      items: [
+        f(`${AU}.certificateOfExistenceDocumentId`, "Certificate of Existence from the home state (PDF)", "pdf", { required: true, documentKind: "certificate_of_existence", help: "Also called a certificate of good standing or of status. It must be dated within the last 6 months; order it from the filing office of the state where the corporation was formed.", ref: "DOS-1335-f instructions (Certificate of Existence)" }),
+        f(`${AU}.taxConsentDocumentId`, "NYS Tax Commission's consent (PDF)", "pdf", { required: true, documentKind: "tax_commission_consent", showIf: { path: `${AU}.priorActivity`, equals: "tax_consent_attached" }, help: "The consent from the NYS Department of Taxation and Finance, needed because the corporation has already done business in New York.", ref: "DOS-1335-f SIXTH" }),
       ],
     },
     {
@@ -1167,7 +1179,7 @@ const nyAuthority: FilingKind = {
   ],
   authorizations: [esubSign, esubPay],
   gaps: [
-    "The Certificate of Existence from the home state is not collected here yet; the engine uploads only the form.",
+    "E-Submission's upload size limit hasn't been seen; the documents go in the same PDF after the form (10 MB at most each).",
     "E-Submission's route for this form and its payment page are mapped from a recording; the engine runs it as a dry run only.",
   ],
 };

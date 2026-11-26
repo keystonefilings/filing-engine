@@ -439,3 +439,22 @@ test("decision 18: the Florida forms offer professional endings and ask a profes
   assert.equal(corp("P.A.", "").length, 0);
   assert.equal(corp("Inc.", "on").length, 0);
 });
+
+test("decision 19: the Application for Authority asks for the Certificate of Existence, and the Tax Commission consent when it says so", () => {
+  const kind = filingKind("ny-authority")!;
+  const AU = "paperUpload.applicationForAuthority";
+  const field = (p: string) => allFields(kind).find((f) => f.path === p)!.field;
+  assert.equal(field(`${AU}.certificateOfExistenceDocumentId`).type, "pdf");
+  assert.equal(field(`${AU}.certificateOfExistenceDocumentId`).documentKind, "certificate_of_existence");
+  assert.equal(field(`${AU}.taxConsentDocumentId`).documentKind, "tax_commission_consent");
+  // No "send it to the filing company" without an upload step.
+  assert.ok(!JSON.stringify(kind).includes("Send it to the filing company"));
+  const issuesAt = (raw: Raw, p: string) => buildRequest(kind, raw, ctx).issues.filter((i) => i.path === p);
+  assert.equal(issuesAt({ [`${AU}.priorActivity`]: "none_in_new_york" }, `${AU}.certificateOfExistenceDocumentId`).length, 1);
+  assert.equal(issuesAt({ [`${AU}.priorActivity`]: "none_in_new_york" }, `${AU}.taxConsentDocumentId`).length, 0);
+  assert.equal(issuesAt({ [`${AU}.priorActivity`]: "tax_consent_attached" }, `${AU}.taxConsentDocumentId`).length, 1);
+  const built = buildRequest(kind, { [`${AU}.priorActivity`]: "tax_consent_attached", [`${AU}.certificateOfExistenceDocumentId`]: "doc-1", [`${AU}.taxConsentDocumentId`]: "doc-2" }, ctx);
+  const a = (built.request.paperUpload as any).applicationForAuthority;
+  assert.equal(a.certificateOfExistenceDocumentId, "doc-1");
+  assert.equal(a.taxConsentDocumentId, "doc-2");
+});

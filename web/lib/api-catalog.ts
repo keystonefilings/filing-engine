@@ -177,6 +177,13 @@ export const ENDPOINTS: Endpoint[] = [
     responses: [{ status: 200, description: "Removed." }, { status: 404, description: "Not found, or not yours." }],
   },
   {
+    id: "post-client-company-document", method: "POST", path: "/v1/client-companies/{id}/documents", group: "Client companies", auth: "api_key",
+    summary: "Upload a supporting document",
+    description: "A PDF a filing needs alongside the state's form, base64 in `data` (10 MB and 50 pages at most, without a password). `kind` is `certificate_of_existence` (the home state's certificate for a NY Application for Authority, dated within 6 months) or `tax_commission_consent` (the NYS Tax Commission's consent, when the corporation already did business in New York). Put the returned id in `paperUpload.applicationForAuthority.certificateOfExistenceDocumentId` or `taxConsentDocumentId`; the documents go in after the signed form, in the one PDF sent to the state.",
+    bodyExample: { kind: "certificate_of_existence", data: "data:application/pdf;base64,JVBERi0xLjcK…", fileName: "delaware-good-standing.pdf" },
+    responses: [{ status: 201, description: "Kept, with the document's id.", example: { document: { id: "9b2e…", kind: "certificate_of_existence", label: "Certificate of Existence from the home state (delaware-good-standing.pdf)", pages: 1, bytes: 48213, createdAt: "2026-11-26T15:00:00Z" } } }, { status: 404, description: "Not found, or not yours." }, { status: 422, description: "Not a readable PDF, password-protected, or too large." }],
+  },
+  {
     id: "account", method: "GET", path: "/v1/account", group: "Account", auth: "api_key",
     summary: "Who this key belongs to",
     responses: [{ status: 200, description: "Your tenant.", example: { tenantId: "your-tenant", name: "Your Filing Co", configured: true, branding: { displayName: "Your Filing Co" }, webhookEndpointCount: 1 } }],

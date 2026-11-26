@@ -1,7 +1,8 @@
 import { randomBytes } from "node:crypto";
 import { engine, EngineError, type CreateFilingResult } from "../engine";
 import { saveSignature, listSignatures, sameSigner } from "../signatures";
-import { buildRequest, getPath, rawFromFormData, type BuildContext } from "./build";
+import { buildRequest, getPath, rawFromFormData, visibility, type BuildContext } from "./build";
+import { uploadDocument, MAX_DOCUMENT_BYTES } from "../documents";
 import type { FilingKind } from "./forms";
 import { NEW_SIGNATURE } from "./signature-field";
 
@@ -17,6 +18,13 @@ export interface SubmitContext extends Omit<BuildContext, "idempotencyKey"> {
   idempotencySeed: string;
   /** Whether the form may use a signature saved earlier (firm staff), or must be signed fresh (a client link). */
   allowSavedSignature: boolean;
+}
+
+/** The kind's PDF fields (decision 19). Top-level fields only. */
+function pdfFields(kind: FilingKind) {
+  const out = [];
+  for (const s of kind.sections) for (const it of s.items) if (it.kind === "field" && it.type === "pdf") out.push(it);
+  return out;
 }
 
 /** The signature field of a kind, if it has one. */
@@ -53,9 +61,22 @@ export async function submitIntake(kind: FilingKind, fd: FormData, ctx: SubmitCo
     }
   }
 
-  // Check the form before saving anything, so a form with mistakes saves no signature.
+  // PDFs: each shown field needs a PDF of 10 MB or less. They're uploaded once the form checks out.
+  const shown = visibility(kind, raw).top;
+  const files: { path: string; label: string; kind: NonNullable<ReturnType<typeof pdfFields>[number]["documentKind"]>; file: File }[] = [];
+  for (const pf of pdfFields(kind)) {
+    if (!shown.has(pf.path) || !pf.documentKind) continue;
+    const file = fd.get(pf.path);
+    if (!(file instanceof File) || file.size === 0) { if (pf.required) issues.push({ path: pf.path, message: `${pf.label}: choose the PDF` }); continue; }
+    if (file.size > MAX_DOCUMENT_BYTES) { issues.push({ path: pf.path, message: `${pf.label}: the PDF must be 10 MB or smaller` }); continue; }
+    if (ctx.publicPath) { issues.push({ path: pf.path, message: `${pf.label}: this form takes uploads only from the firm's own portal` }); continue; }
+    files.push({ path: pf.path, label: pf.label, kind: pf.documentKind, file });
+  }
+
+  // Check the form before saving anything, so a form with mistakes saves no signature and no upload.
   const idempotencyKey = `${ctx.publicPath ? "public" : "portal"}-${ctx.idempotencySeed}`.slice(0, 120);
-  const probe = buildRequest(kind, { ...raw, ...(sig && raw[sig.path] === NEW_SIGNATURE.choice ? { [sig.path]: "pending" } : {}) }, { ...ctx, idempotencyKey });
+  const pendingUploads = Object.fromEntries(files.map((f) => [f.path, "pending"]));
+  const probe = buildRequest(kind, { ...raw, ...pendingUploads, ...(sig && raw[sig.path] === NEW_SIGNATURE.choice ? { [sig.path]: "pending" } : {}) }, { ...ctx, idempotencyKey });
   issues.push(...probe.issues);
   if (issues.length) return { ok: false, issues };
 
@@ -69,6 +90,16 @@ export async function submitIntake(kind: FilingKind, fd: FormData, ctx: SubmitCo
       raw[sig.path] = saved.id;
     } catch (e) {
       return { ok: false, error: e instanceof EngineError ? `The signature couldn't be saved: ${e.message}` : "The signature couldn't be saved.", issues: [] };
+    }
+  }
+
+  for (const f of files) {
+    try {
+      const doc = await uploadDocument(ctx.apiKey, ctx.clientCompanyId, { kind: f.kind, bytes: Buffer.from(await f.file.arrayBuffer()), fileName: f.file.name });
+      raw[f.path] = doc.id;
+    } catch (e) {
+      const why = e instanceof EngineError ? ((e.body as { issues?: { message: string }[] })?.issues?.[0]?.message ?? e.message) : "it couldn't be uploaded";
+      return { ok: false, issues: [{ path: f.path, message: `${f.label}: ${why}` }] };
     }
   }
 

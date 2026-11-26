@@ -245,6 +245,17 @@ export function IntakeForm({ kind, nonce, action, submitLabel = "Submit for appr
           </div>
         );
       }
+      case "pdf":
+        return (
+          <div className="field" key={name} hidden={!shown}>
+            <label htmlFor={id}>{label}</label>
+            <input {...common} aria-describedby={`${id}-help`} type="file" accept="application/pdf,.pdf" />
+            <p className="help" id={`${id}-help`}>
+              {issue ? <span style={{ color: "var(--bad)" }}>{issue}. </span> : null}
+              {f.help ? `${f.help} ` : ""}A PDF of 10 MB or less, without a password.
+            </p>
+          </div>
+        );
       case "checkbox":
         return (
           <div className="field" key={name} hidden={!shown}>

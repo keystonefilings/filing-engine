@@ -56,6 +56,7 @@ const RULES: Record<string, Rule> = {
   "PUT /v1/client-companies/:id/logo": ownCompany,
   "DELETE /v1/client-companies/:id/logo": ownCompany,
   "PUT /v1/client-companies/:id/font": ownCompany,
+  "POST /v1/client-companies/:id/documents": ownCompany,
   "POST /v1/client-companies/:id/payment-methods": ownCompany,
   "DELETE /v1/client-companies/:id/payment-methods/:methodId": ownCompany,
   "GET /v1/client-companies/:id/card-codes": ownCompany,

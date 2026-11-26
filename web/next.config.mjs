@@ -2,6 +2,8 @@
 const nextConfig = {
   poweredByHeader: false,
   reactStrictMode: true,
+  // Decision 19: intake forms carry PDF uploads (two of 10 MB at most), above the 1 MB default.
+  experimental: { serverActions: { bodySizeLimit: "21mb" } },
   async headers() {
     const common = [
       { key: "X-Content-Type-Options", value: "nosniff" },

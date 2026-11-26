@@ -4,7 +4,9 @@ import { randomUUID } from "node:crypto";
 
 export type ArtifactKind =
   | "screenshot" | "dom_snapshot" | "cp575" | "filing_receipt" | "formation_document"
-  | "standing_certificate" | "ss4_authorization" | "generated_pdf" | "trace" | "brand_logo" | "brand_font" | "other";
+  | "standing_certificate" | "ss4_authorization" | "generated_pdf" | "trace" | "brand_logo" | "brand_font"
+  /** Supporting documents a client uploads with a filing (documents/supporting.ts). */
+  | "certificate_of_existence" | "tax_commission_consent" | "other";
 
 export interface ArtifactMeta {
   id: string;

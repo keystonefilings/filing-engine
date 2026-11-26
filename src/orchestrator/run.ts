@@ -12,6 +12,7 @@ import { BotChallenge, DriftHalt, DryRunStop, FeeMismatch, ReviewGateHalt, Submi
 import { BrowserHarness, waitOutJsCheck } from "../browser/harness.js";
 import { StepRecorder } from "../browser/recorder.js";
 import type { ArtifactStore } from "../artifacts/store.js";
+import { loadSupportingDocument } from "../documents/supporting.js";
 import { buildProposal, DriftReviewService } from "../drift-review/service.js";
 import type { ReviewGateService } from "../review-gate/service.js";
 import type { RegisteredAgentService } from "../registered-agents/service.js";
@@ -470,6 +471,11 @@ export class RunExecutor {
       signatureForForm: async (signatureId, signerName) => {
         const d = await signatureForApprovedFiling({ store, filing: input.filing, approval: input.approval, dryRun: input.dryRun, signatureId, signerName });
         await recorder.record(page, screen.screenKey, d.ok ? `saved signature ${d.signatureId} applied to the form` : `form not signed: ${d.reason}`);
+        return d;
+      },
+      supportingDocument: async (id, kind) => {
+        const d = await loadSupportingDocument(this.deps.artifacts, input.filing.clientCompanyId, id, kind);
+        await recorder.record(page, screen.screenKey, d.ok ? `${kind.replace(/_/g, " ")} ${id} added after the form` : `supporting document not added: ${d.reason}`);
         return d;
       },
       clickButton: async (label) => {

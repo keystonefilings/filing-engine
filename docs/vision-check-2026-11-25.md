@@ -211,8 +211,11 @@ Rows refer to the status tables above.
 
 Built and tested; each switches on when its accounts and keys are set (steps in docs/deploy-fly.md):
 
-- **Resend:** verify `cofile.app` (SPF, DKIM) and set `RESEND_API_KEY` (V1). For filing by email,
-  a receiving domain (MX record), the webhook's signing secret and `INBOUND_EMAIL_ADDRESS` (V40).
+- **Resend:** `cofile.app` is verified (Nov 26, DNS in Vercel) and the key is saved in the Vercel
+  web project. The site itself never sends mail, though: the engine does (approval links, password
+  resets, notices), so set the same key on the engine too, `fly secrets set RESEND_API_KEY=...`
+  (docs/deploy-fly.md), or no email goes out (V1). For filing by email, a receiving domain (MX
+  record), the webhook's signing secret and `INBOUND_EMAIL_ADDRESS` (V40).
 - **Claude API key** in the web app (`ANTHROPIC_API_KEY`): reads requests sent by email, Slack,
   text and WhatsApp (V40-V43).
 - **Basis Theory:** a public key (web) and a private key (engine) for saved cards (V18).
@@ -220,19 +223,19 @@ Built and tested; each switches on when its accounts and keys are set (steps in 
 - **Google:** an OAuth client for "Continue with Google" (V37).
 - **Slack:** a Slack app with the `/file` command (V41).
 - **Twilio:** a number with A2P 10DLC registration, and a WhatsApp sender (Meta verification) (V42-V43).
-- **Copy decisions:** of the 19 questions from the copy review (docs/copy-review-2026-11-26.md),
-  these were decided and done on Nov 26: price wording, the filing company, the Terms and Privacy
-  pages, the support address (hello@cofile.app), the approval consent (now covering fee payment),
-  the saved-signature consent (limited and revocable), first-person declarations, the EIN owner
-  route, the coverage table, practice mode (plus a site-wide beta banner), the registered agent
-  (ours, resold from Registered Agents, Inc., $59 a year per business), turnaround times and the
-  sign-up review wording, and the production addresses (api.cofile.app and cofile.app; DNS records
-  in docs/deploy-fly.md section 9), EIN-only filings for an LLC formed in any state, and the fee figures (NY's tax on shares,
-  NJ's $103.50 LLC and $52/$27 standing certificate). Still
-  waiting for you:
-  the API key prefix, Florida professional entities and the Certificate of Existence upload. Have
-  counsel review the Terms and Privacy Policy (governing law, liability cap, legal entity name) and
-  the approval consent, saved-signature consent and declaration wording.
+- **Copy decisions:** all 19 questions from the copy review (docs/copy-review-2026-11-26.md) were
+  decided and done on Nov 26: price wording, the filing company, the Terms and Privacy pages, the
+  support address (hello@cofile.app), the approval consent (now covering fee payment), the
+  saved-signature consent (limited and revocable), first-person declarations, the EIN owner route,
+  the coverage table, practice mode (plus a site-wide beta banner), the registered agent (ours,
+  resold from Registered Agents, Inc., $59 a year per business), turnaround times, the sign-up
+  review wording, the production addresses (api.cofile.app and cofile.app; DNS records in
+  docs/deploy-fly.md section 9), EIN-only filings for an LLC formed in any state, the fee figures
+  (NY's tax on shares, NJ's $103.50 LLC and $52/$27 standing certificate), the API key prefix
+  (cofile_ for new keys, kfe_ still accepted), Florida professional entities (PLLC, P.A.,
+  Chartered) and the Application for Authority's PDF uploads. Still with you: have counsel review
+  the Terms and Privacy Policy (governing law, liability cap, legal entity name) and the approval
+  consent, saved-signature consent and declaration wording.
 - **Registered Agents, Inc.:** their API documentation and key (through your wholesale contact),
   and their agent name and office address for each state you offer (setup in docs/deploy-fly.md).
 - **Live walks with you:** NY drawdown deposit and post-submit pages, Sunbiz checkout, the IRS

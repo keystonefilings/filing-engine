@@ -49,9 +49,9 @@ export function platformTenant(): string {
   return process.env.PLATFORM_TENANT_ID?.trim() || "keystone";
 }
 
-/** Signed forms save a drawn signature with the firm's own key, so they stay on the firm's portal and client links. */
+/** Signed forms and forms with a PDF upload use the firm's own key, so they stay on the firm's portal and client links. */
 export function publicKind(kind: FilingKind | undefined): kind is FilingKind {
-  return !!kind && !kind.sections.some((s) => s.items.some((i) => i.kind === "field" && i.type === "signature"));
+  return !!kind && !kind.sections.some((s) => s.items.some((i) => i.kind === "field" && (i.type === "signature" || i.type === "pdf")));
 }
 
 /** A firm with public pages (a partner, or a subscriber's firm with them switched on), or null. No key involved. */

@@ -365,6 +365,13 @@ export const NyApplicationForAuthority = z.object({
   processRecipient: z.object({ name: z.string().min(1), address: Address }),
   /** SIXTH: no NY activity yet, or the NYS Tax Commission consent is attached. */
   priorActivity: z.enum(["none_in_new_york", "tax_consent_attached"]),
+  /**
+   * Decision 19: the home state's Certificate of Existence (dated within 6 months), and the NYS Tax
+   * Commission's consent when priorActivity is tax_consent_attached. Each is a PDF uploaded with
+   * POST /v1/client-companies/:id/documents; the run adds their pages after the signed form.
+   */
+  certificateOfExistenceDocumentId: z.string().min(1).optional(),
+  taxConsentDocumentId: z.string().min(1).optional(),
   signer: z.object({ name: z.string().min(1), title: z.string().min(1) }),
   filer: FormFiler,
 });

@@ -18,6 +18,7 @@ import { renderNameResolutionPage } from "../name-resolution/render.js";
 import { renderReviewGatePage } from "../review-gate/render.js";
 import { registerUsers, portalSlugFor, type Auth, type PartnerSignupMode } from "../users/routes.js";
 import { registerBrandLogos } from "./brand-logos.js";
+import { registerDocuments } from "./documents.js";
 import { registerIntakeLinks } from "./intake-links.js";
 import { registerPublicPages } from "./public-pages.js";
 import { registerCardCodes } from "./card-codes.js";
@@ -382,6 +383,7 @@ export function buildServer(deps: ApiDeps): FastifyInstance {
   });
 
   registerBrandLogos(app, { store: deps.store, artifacts: deps.artifacts, authOf });
+  registerDocuments(app, { store: deps.store, artifacts: deps.artifacts, authOf });
   registerSelfService(app, { store: deps.store, tenantOf, platformName: deps.platformName, agentOffer: deps.agentServices ? (t, c) => deps.agentServices!.offer(t, c) : undefined });
   registerSignatures(app, { store: deps.store, tenantOf });
   registerIntakeLinks(app, { store: deps.store, authOf });

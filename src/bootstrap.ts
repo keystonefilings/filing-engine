@@ -102,7 +102,7 @@ export async function bootstrap(opts: { withExecutor: boolean; workerId?: string
   const limiter = new ConcurrencyLimiter({
     "site:IRS": config.siteConcurrency.IRS, "site:NY": config.siteConcurrency.NY, "site:NJ": config.siteConcurrency.NJ,
   });
-  const service = new FilingService({ store, approvals, webhooks, queue, vault, drift, nameResolution, reviewGate, registeredAgents, notifier, executor, cardCodes, billing, agentServices, limiter, dryRunDefault: config.dryRunDefault, workerId: opts.workerId });
+  const service = new FilingService({ store, approvals, webhooks, queue, vault, drift, nameResolution, reviewGate, registeredAgents, notifier, executor, cardCodes, billing, agentServices, limiter, artifacts, dryRunDefault: config.dryRunDefault, workerId: opts.workerId });
   const { TwilioChannel } = await import("./inbound/twilio.js");
   const { SlackChannel } = await import("./inbound/slack.js");
   const twilio = config.twilio.accountSid ? new TwilioChannel({ store, ...config.twilio, webhookUrl: `${config.publicBaseUrl}/v1/inbound/twilio`, webBaseUrl: config.webBaseUrl }) : undefined;

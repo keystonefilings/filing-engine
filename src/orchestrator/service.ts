@@ -26,6 +26,7 @@ import { LeaseLost } from "../browser/guard.js";
 import { applyPolicies } from "../settings/policies.js";
 import type { ClientCompanySettings, TenantSettings } from "../settings/schema.js";
 import type { ArtifactStore } from "../artifacts/store.js";
+import { documentIssues } from "../documents/supporting.js";
 import type { CapturedReview } from "./run.js";
 import type { SiteAdapter } from "../adapters/types.js";
 import { createHash } from "node:crypto";
@@ -56,6 +57,8 @@ export interface FilingServiceDeps {
   billing?: Pick<BillingService, "assertCanFileLive">;
   balances?: BalanceProvider;
   limiter?: ConcurrencyLimiter;
+  /** Where uploaded supporting documents are kept, to check a filing names only its own company's (decision 19). */
+  artifacts?: ArtifactStore;
   dryRunDefault: boolean;
   /** Clock for pre-flight checks (IRS hours); injectable for tests. */
   now?: () => Date;
@@ -163,7 +166,7 @@ export class FilingService {
     // V33: practice filings are always free; a live one needs the subscription (SubscriptionRequired).
     if (!(req.dryRun ?? this.d.dryRunDefault)) await this.d.billing?.assertCanFileLive(tenant, client);
 
-    const issues = [...applied.issues, ...validateFiling(req)];
+    const issues = [...applied.issues, ...validateFiling(req), ...await documentIssues(this.d.artifacts, req)];
     const now = new Date().toISOString();
     const filing: FilingRecord = {
       id: randomUUID(), tenantId: req.tenantId, clientCompanyId: req.clientCompanyId, idempotencyKey: req.idempotencyKey,
@@ -321,7 +324,7 @@ export class FilingService {
     }
     const req = parsed.data;
     if (req.ein && !req.ein.mode) req.ein.mode = client.einMode;
-    const issues = [...applied.issues, ...validateFiling(req)];
+    const issues = [...applied.issues, ...validateFiling(req), ...await documentIssues(this.d.artifacts, req)];
     const updated = await this.d.store.updateFiling(filing.id, { request: req, payloadHash: this.d.approvals.payloadHash(req), appliedPolicies: applied.provenance });
     if (hasErrors(issues)) {
       const f = await this.transition(updated, "invalid", { lastError: issues.filter((i) => i.severity === "error").map((i) => `${i.path}: ${i.message}`).join("; ") });

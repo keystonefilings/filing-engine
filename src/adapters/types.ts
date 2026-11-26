@@ -1,3 +1,4 @@
+import type { SupportingDocumentKind } from "../documents/supporting.js";
 import type { Page } from "playwright";
 import type { FilingRecord } from "../store/types.js";
 import type { ClientCompanySettings, TenantSettings } from "../settings/schema.js";
@@ -48,6 +49,8 @@ export interface StepContext {
    * filing its client approved, unchanged since (src/signatures/apply.ts); a dry run always gets no.
    */
   signatureForForm(signatureId: string | undefined, signerName: string): Promise<{ ok: true; png: Buffer } | { ok: false; reason: string }>;
+  /** A supporting document this filing's client company uploaded (documents/supporting.ts), or why it can't be used. */
+  supportingDocument(id: string, kind: SupportingDocumentKind): Promise<{ ok: true; body: Buffer } | { ok: false; reason: string }>;
   /** Expected fee lines for this filing (from the approved table). */
   expectedFees: FeeLine[];
   feeCapUsd?: number;

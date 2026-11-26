@@ -788,6 +788,8 @@ Fees: State filing fee $225. Faster handling and copies cost extra.
 | Service of process | Address: state | `paperUpload.applicationForAuthority.processRecipient.address.state` | yes | DOS-1335-f FIFTH |
 | Service of process | Address: ZIP code | `paperUpload.applicationForAuthority.processRecipient.address.zip` | yes | DOS-1335-f FIFTH |
 | Business already done in New York | Has the corporation done business in New York before this application? | `paperUpload.applicationForAuthority.priorActivity` | yes | DOS-1335-f SIXTH |
+| Documents from the corporation | Certificate of Existence from the home state (PDF) | `paperUpload.applicationForAuthority.certificateOfExistenceDocumentId` | yes | DOS-1335-f instructions (Certificate of Existence) |
+| Documents from the corporation | NYS Tax Commission's consent (PDF) | `paperUpload.applicationForAuthority.taxConsentDocumentId` | when shown | DOS-1335-f SIXTH |
 | Signature | Signer's name | `paperUpload.applicationForAuthority.signer.name` | yes | DOS-1335-f Name of Signer |
 | Signature | Signer's title | `paperUpload.applicationForAuthority.signer.title` | yes | DOS-1335-f Title of Signer |
 | Signature | Signature | `paperUpload.signatureId` | yes | DOS-1335-f (Signature) |
@@ -813,7 +815,7 @@ Authorizations the client grants (and confirms again on the approval page):
 
 Not covered yet:
 
-- The Certificate of Existence from the home state is not collected here yet; the engine uploads only the form.
+- E-Submission's upload size limit hasn't been seen; the documents go in the same PDF after the form (10 MB at most each).
 - E-Submission's route for this form and its payment page are mapped from a recording; the engine runs it as a dry run only.
 
 ## New York Certificate of Assumed Name (DBA) (`ny-assumed-name`)

@@ -7,7 +7,7 @@ type Slot = { name: string; field: Field; group?: Group };
 export function slots(kind: FilingKind): Slot[] {
   const out: Slot[] = [];
   const add = (f: Field | Note, prefix: string, group?: Group) => {
-    if (f.kind !== "field" || f.type === "signature") return;
+    if (f.kind !== "field" || f.type === "signature" || f.type === "pdf") return;
     out.push({ name: f.path ? `${prefix}${f.path}` : prefix.replace(/\.$/, ""), field: f, group });
   };
   for (const s of kind.sections) for (const it of s.items) {
