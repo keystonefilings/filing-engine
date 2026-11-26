@@ -1,4 +1,6 @@
 import Fastify, { type FastifyInstance, type FastifyReply } from "fastify";
+import { registerEmailDomains } from "./email-domains.js";
+import type { ResendDomains } from "../comms/resend-domains.js";
 import type { ChannelSender } from "../comms/senders.js";
 import { lookupKey } from "./keys.js";
 import { registerSelfService, tenantFromStoredKey } from "./self-service.js";
@@ -57,6 +59,10 @@ export interface ApiDeps {
   partnerSignupMode?: PartnerSignupMode;
   /** Sends account emails (password reset). Absent: those emails are not sent. */
   email?: ChannelSender;
+  /** Decision 37: firms' own sending domains (Resend's domains API); absent without RESEND_API_KEY. */
+  emailDomains?: ResendDomains;
+  /** Our own sending domains, which a firm can't claim as its own. */
+  platformEmailDomains?: string[];
   /** The web front end, for links in account emails. */
   webBaseUrl?: string;
   /** V29: where connected portal logins are sealed. */
@@ -385,6 +391,7 @@ export function buildServer(deps: ApiDeps): FastifyInstance {
   });
 
   registerBrandLogos(app, { store: deps.store, artifacts: deps.artifacts, authOf });
+  registerEmailDomains(app, { store: deps.store, authOf, domains: deps.emailDomains, platformDomains: deps.platformEmailDomains ?? [] });
   registerDocuments(app, { store: deps.store, artifacts: deps.artifacts, authOf });
   registerSelfService(app, { store: deps.store, tenantOf, platformName: deps.platformName, agentOffer: deps.agentServices ? (t, c) => deps.agentServices!.offer(t, c) : undefined });
   registerSignatures(app, { store: deps.store, tenantOf });

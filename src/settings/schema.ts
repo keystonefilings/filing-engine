@@ -239,6 +239,17 @@ export const ClientCompanySettings = z.object({
     /** V21: a preset font, or "custom" for the uploaded fontArtifactId. */
     font: z.enum(FONT_CHOICES).optional(),
     fontArtifactId: z.string().uuid().optional(),
+    /**
+     * Decision 37: the firm's own email domain, so its clients' emails come from its own address once connected
+     * (src/comms/resend-domains.ts). Until status is "verified", they come from the platform's sending address under
+     * the firm's name.
+     */
+    emailDomain: z.object({
+      domain: z.string().min(3).max(253),
+      status: z.enum(["pending", "verified", "failed"]),
+      providerId: z.string().max(200).optional(),
+      checkedAt: z.string().optional(),
+    }).optional(),
     primaryColor: z.string().regex(/^#[0-9a-fA-F]{6}$/, "a hex color like #1f4b99").optional(),
     /** Second brand color: links and highlights. Absent = the main color. */
     secondaryColor: z.string().regex(/^#[0-9a-fA-F]{6}$/, "a hex color like #1f4b99").optional(),

@@ -224,3 +224,37 @@
 .desk2-fail-ref { margin-top: 24px !important; font-size: 0.9375rem; color: var(--text-2); }
 @media (max-width: 599px) { .desk2-fail { padding: 24px; margin-top: 16px; } }
 }
+
+/* The email-domain step (10B.5.1): the inbox row live at the head, the domain, the records with Copy, their states */
+@layer components {
+.setup2-card + .setup2-card { margin-top: 16px; }
+.setup2-domain { font: 400 0.9375rem/1.375rem var(--font-mono); background: none; padding: 0; color: var(--text); }
+.edom2-page h1 { margin-bottom: 16px; }
+.edom2-page > .muted { margin-bottom: 32px; max-width: 64ch; }
+.edom2 { display: grid; gap: 24px; }
+.edom2-inbox { display: flex; align-items: center; gap: 14px; padding: 16px 20px; background: #fff; color: #1D2130; border: 1px solid var(--line); border-radius: var(--r-sheet); color-scheme: light; }
+.edom2-dot { display: grid; place-items: center; width: 40px; height: 40px; border-radius: 50%; background: #F3F0E8; font: 500 1.0625rem/1 var(--font-sans); }
+.edom2-inbox strong { display: block; font: 500 1rem/1.375rem var(--font-sans); }
+.edom2-inbox code { display: block; padding: 0; background: none; font: 400 0.875rem/1.25rem var(--font-mono); color: #555867; }
+.edom2-form { display: grid; gap: 8px; }
+.edom2-form > label { margin: 0; }
+.edom2-field { display: flex; flex-wrap: wrap; gap: 12px; }
+.shell2-content .edom2-field input { flex: 1 1 260px; min-height: 52px; font: 400 1.125rem/1.5rem var(--font-mono); }
+.edom2-field .btn { min-height: 52px; }
+.edom2-change { margin: 0; }
+.edom2-records h2 { margin: 0 0 12px; font: 500 1.375rem/1.75rem var(--font-sans-display); }
+.edom2-table { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-sheet); overflow: hidden; }
+.edom2-row { display: grid; grid-template-columns: 64px minmax(0, 1fr) minmax(0, 1.6fr) 140px; gap: 12px; align-items: center; padding: 12px 16px; }
+.edom2-row + .edom2-row { border-top: 1px solid var(--line); }
+.edom2-row.is-head { min-height: 44px; padding-block: 0; font: 500 0.875rem/1.125rem var(--font-sans); color: var(--text-2); background: var(--page-2); }
+.edom2-type { font: 500 0.9375rem/1.25rem var(--font-mono); }
+.edom2-plate { display: flex; align-items: center; gap: 8px; min-width: 0; padding: 6px 6px 6px 10px; background: var(--page-2); border: 1px solid var(--line); border-radius: var(--r-sheet); }
+.edom2-plate code { flex: 1; min-width: 0; padding: 0; background: none; font: 400 0.875rem/1.25rem var(--font-mono); overflow-wrap: anywhere; }
+.edom2-plate .btn.small { flex: none; min-height: 32px; padding: 4px 10px; }
+.edom2-fold > summary { min-height: 44px; display: flex; align-items: center; cursor: pointer; font-weight: 500; }
+.edom2-off { margin: 0; }
+@media (max-width: 759px) {
+  .edom2-row { grid-template-columns: 1fr; gap: 8px; }
+  .edom2-row.is-head { display: none; }
+}
+}
