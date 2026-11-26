@@ -34,7 +34,8 @@ export function TwoDoors({ parked }: { parked?: boolean }) {
     <MotionFigure pic="L2" ms={4200} msPhone={2500} className={["pic-doors", parked && "is-parked"].filter(Boolean).join(" ")}
       ariaLabel="The same client page under two example firms" label={DOORS_LABEL}>
       <DoorsStage parked={parked} names={[FIRMS.hp.name, FIRMS.ng.name]}>
-        <div className="pdoors-strip">
+        {/* On phones the strip scrolls sideways, so it takes keyboard focus to scroll with the arrow keys (axe) */}
+        <div className="pdoors-strip" tabIndex={0} role="group" aria-label="The two example firms' pages, side by side">
           <Door firm="hp" other="ng" />
           <Door firm="ng" other="hp" />
         </div>

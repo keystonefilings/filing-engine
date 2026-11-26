@@ -365,9 +365,9 @@
 .pdraft-rows > div { position: relative; display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 4px 12px; min-height: 68px; padding: 11px 28px 7px; }
 .pdraft-rows > div + div { border-top: 1px solid #DDD7CB; }
 .pdraft-mark { position: absolute; inset: 0; background: #F6EBD0; box-shadow: inset 3px 0 0 #A87A1E; }
-.pdraft-rows :is(dt, dd, .pdraft-tag) { position: relative; z-index: 1; }
-.pdraft-rows dt { font: 400 0.9375rem/1.375rem var(--font-sans); color: #555867; }
-.pdraft-rows dd { grid-column: 1 / -1; margin: 0; min-height: 24px; font: 400 1rem/1.5rem var(--font-mono); color: #1D2130; }
+.pdraft-rows :is(.pdraft-k, .pdraft-v, .pdraft-tag) { position: relative; z-index: 1; }
+.pdraft-rows .pdraft-k { font: 400 0.9375rem/1.375rem var(--font-sans); color: #555867; }
+.pdraft-rows .pdraft-v { display: block; grid-column: 1 / -1; margin: 0; min-height: 24px; font: 400 1rem/1.5rem var(--font-mono); color: #1D2130; }
 .pdraft-tag { display: inline-flex; align-items: center; gap: 6px; justify-self: end; padding: 0 8px; font: 500 0.875rem/1.25rem var(--font-sans-display); border-radius: 2px; white-space: nowrap; }
 .pdraft-tag svg { width: 12px; height: 12px; }
 .pdraft-tag.is-text { color: #7A5714; background: #F6EBD0; }
@@ -877,4 +877,8 @@
   .pagent-photo { margin-left: 0; }
   .pagent-plate { position: relative; bottom: auto; width: 100%; margin-top: -40px; }
 }
+}
+
+@layer components {
+.pdoors-strip:focus-visible { outline: 2px solid var(--focus, #1D2130); outline-offset: 4px; }
 }

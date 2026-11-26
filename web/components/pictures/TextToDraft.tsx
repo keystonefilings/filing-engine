@@ -36,16 +36,17 @@ export function DraftSheet({ only }: { only?: "saved" }) {
           <span className="pdraft-hr" aria-hidden="true" />
         </>
       )}
-      <dl className="pdraft-rows">
+      {/* A picture of the desk's rows: plain spans, since a definition list may hold only its terms and values (axe) */}
+      <div className="pdraft-rows">
         {rows.map((r) => (
           <div key={r.label} className={`pdraft-row is-${r.from}`}>
             <span className="pdraft-mark m-fade" style={d(r.at)} aria-hidden="true" />
-            <dt>{r.label}</dt>
+            <span className="pdraft-k">{r.label}</span>
             <Tag from={r.from} at={r.at} />
-            <dd className={r.from === "text" ? "m-set" : undefined} style={r.from === "text" ? d(r.at) : undefined}>{r.value}</dd>
+            <span className={["pdraft-v", r.from === "text" && "m-set"].filter(Boolean).join(" ")} style={r.from === "text" ? d(r.at) : undefined}>{r.value}</span>
           </div>
         ))}
-      </dl>
+      </div>
     </div>
   );
 }
