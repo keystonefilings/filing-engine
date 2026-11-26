@@ -44,7 +44,7 @@ export default async function FilingsPage({ params }: { params: Promise<{ slug: 
                   <tr key={f.id}>
                     <td><Link href={`${base}/filings/${encodeURIComponent(f.id)}`}>{filingTitle(f)}</Link>{f.request.dryRun ? <span className="badge" style={{ marginLeft: 6 }}>Test</span> : null}</td>
                     <td className="small">
-                      {by ? <>{by.who}{by.client ? <span className="badge ok" style={{ marginLeft: 6 }}>Your client</span> : null}{by.detail ? <div className="muted">{by.detail}</div> : null}</> : <span className="muted">Your team</span>}
+                      {by ? <>{by.who}{by.client ? <span className="badge" style={{ marginLeft: 6 }}>Your client</span> : null}{by.detail ? <div className="muted">{by.detail}</div> : null}</> : <span className="muted">Your team</span>}
                     </td>
                     <td className="small">{k?.title ?? `${f.request.state} ${f.request.type.replace(/_/g, " ")}`}</td>
                     <td><StatusBadge status={f.status} /><StageTrack status={f.status} /></td>
