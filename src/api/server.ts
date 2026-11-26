@@ -1,7 +1,10 @@
 import Fastify, { type FastifyInstance, type FastifyReply } from "fastify";
 import { registerEmailDomains } from "./email-domains.js";
 import type { ResendDomains } from "../comms/resend-domains.js";
+import { readFile } from "node:fs/promises";
+import path from "node:path";
 import type { ChannelSender } from "../comms/senders.js";
+import { EMAIL_ASSETS } from "../comms/email.js";
 import { lookupKey } from "./keys.js";
 import { registerSelfService, tenantFromStoredKey } from "./self-service.js";
 import { registerSignatures } from "./signatures.js";
@@ -161,6 +164,17 @@ export function buildServer(deps: ApiDeps): FastifyInstance {
   app.addHook("preHandler", partnerGuard({ store: deps.store, artifacts: deps.artifacts, authOf }));
 
   app.get("/healthz", async () => ({ ok: true }));
+
+  // The email's own images (merged spec 10D): the Name Plate, the ghost light and the document card, cut by
+  // tools/render-email-assets.ts. Public, like a firm's logo: mail apps fetch them without a key.
+  const emailAssets = new Set<string>(Object.values(EMAIL_ASSETS));
+  app.get("/email-assets/:name", async (req, reply) => {
+    const name = (req.params as { name: string }).name;
+    if (!emailAssets.has(name)) return reply.code(404).send({ error: "not found" });
+    const body = await readFile(path.resolve(process.env.EMAIL_ASSETS_DIR ?? "assets/email", name)).catch(() => null);
+    if (!body) return reply.code(404).send({ error: "not found" });
+    return reply.header("content-type", "image/png").header("cache-control", "public, max-age=86400").header("x-content-type-options", "nosniff").send(body);
+  });
   app.get("/v1/events", async () => ({ events: EVENT_TYPES }));
 
   // ---- Filings (callers) ----

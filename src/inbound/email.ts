@@ -2,6 +2,7 @@ import { createHmac, timingSafeEqual } from "node:crypto";
 import type { Store } from "../store/types.js";
 import { RequestIntake } from "./requests.js";
 import type { ChannelSender } from "../comms/senders.js";
+import { proseLetter } from "../comms/letter.js";
 
 /**
  * V40: filing requests emailed in. A firm's user writes to the inbound address (file@in.cofile.app)
@@ -95,7 +96,7 @@ export class InboundEmailService {
       return { status: "not_a_firm_user" };
     }
     if (r.status !== "stored") return { status: r.status === "duplicate" ? "duplicate" : "unknown_sender" };
-    await this.reply(from, `Ready to check: ${String(d.subject ?? "").slice(0, 300) || "your filing request"}`, r.reply, r.link);
+    await this.reply(from, `Ready to check: ${String(d.subject ?? "").slice(0, 300) || "your filing request"}`, r.reply, r.link, r.firmName);
     return { status: "stored", id: r.id };
   }
 
@@ -110,7 +111,9 @@ export class InboundEmailService {
     return (m.text && m.text.trim()) ? m.text.trim() : m.html ? htmlToText(m.html) : "";
   }
 
-  private async reply(to: string, subject: string, body: string, link?: string): Promise<void> {
-    await this.o.email?.send({ address: to }, { subject, body, ...(link ? { link } : {}) }).catch(() => undefined);
+  /** On CoFile's letterhead: the person works on their firm's desk, in CoFile's look (merged spec 10D.12). */
+  private async reply(to: string, subject: string, body: string, link?: string, firmName?: string): Promise<void> {
+    const letter = proseLetter(subject, body, firmName ? { context: firmName } : {});
+    await this.o.email?.send({ address: to }, { subject, body, ...(link ? { link } : {}), letter }).catch(() => undefined);
   }
 }
