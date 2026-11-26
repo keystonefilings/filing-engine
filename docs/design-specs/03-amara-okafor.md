@@ -1450,7 +1450,7 @@ The same picture as home §9.3 ("The text becomes the filing"), at full size, wi
 
 - **Header band:** white, 76 px tall. The logo is optically sized and followed by the firm's name. On the right are the signed-in email (a link to the password page), a "Log out" secondary small button, and the credit.
 - **Tabs** (from the portal layout): "Filings · New filing · Ready to pay · Client links · Signatures", plus "Setup · Billing" for partner firms. They're `label` 16 px Atkinson 600 with 48 px targets. The current tab gets a 3 px underline in the firm's main color with House Ink text; the rest are House Ink 2.
-  - "Ready to pay" shows a count badge when cards are waiting: a 20 px firm-color pill with white tabular numerals.
+  - "Ready to pay" shows a count badge when cards are waiting: a 22 px firm-color pill with white tabular numerals.
   - On phones the tabs become a horizontal scroll strip with the current tab scrolled into view, and a 24 px fade at the right edge hints at more.
 - **Footer:** "Questions? Email …" (when the firm set a support email) at `small` in House Ink 2.
 
@@ -1833,10 +1833,10 @@ Every button label may wrap to two lines (for Spanish), and the button grows in 
 ### 11.4 Chips
 
 - **Status chip:** 30 px tall, padding 0 12 px, a full pill radius, the shape glyph (10 px) and then the label in Atkinson 600 at 15 px. Tone colors are in §4.4. Labels never truncate; the chip wraps to a second line if it must.
-- **Rehearsal / Beta / Test / "For your team to check":** the same size, white (or Marigold Wash on CoFile pages) with a 1.5 px dashed Ink border, label in Marquee credit caps at 13 px... **14 px minimum**, never smaller.
-- **Source tags** ("from the text", "already filled"): 24 px tall with a 6 px radius, Atkinson 600 at 13–14 px, a 12 px glyph, and a tinted fill (§9.3).
+- **Rehearsal / Beta / Test / "For your team to check":** the same size, white (or Marigold Wash on CoFile pages) with a 1.5 px dashed Ink border, label in Marquee credit caps at 14 px, never smaller.
+- **Source tags** ("from the text", "already filled"): 24 px tall with a 6 px radius, Atkinson 600 at 14 px, a 12 px glyph, and a tinted fill (§9.3).
 - **Coverage marks** ● ◐ ○: 20 px, with `aria-label` (§4.4).
-- **Count badge:** a 20 px firm-color pill with white tabular numerals at 13 px, min width 20 px.
+- **Count badge:** a 22 px firm-color pill with white tabular numerals at 14 px, min width 22 px.
 - **Place tag:** a 1.5 px Ink outline, 4 px radius, and credit caps (§10.3).
 - **Method chip** (docs): §10.12.
 

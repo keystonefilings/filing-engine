@@ -148,7 +148,8 @@ It's also exactly what CoFile does. "Then it's filed, and the papers come back t
   ours is where it sits and its color: on the baseline after a word, in Gold Leaf.
 - **Where it appears:** after the wordmark; in the imprint; on the home page's After picture, where
   it lands after "Filed" on the record's timeline; as the closing mark on every completed filing
-  record on the filing desk; and at the end of long-form pages (Terms, Privacy, each docs guide).
+  record on the filing desk (in Press Black there, since a firm's pages never carry our gold); and
+  at the end of long-form pages (Terms, Privacy, each docs guide).
   Never as a bullet or a decoration, and never more than once per screen.
 - **Favicon and app icon:** a Press Black tile; the wordmark's **C** in Coated White, centered
   optically (shifted 4% left); a Gold Leaf end mark on the C's baseline, to the right of the C's
@@ -1201,9 +1202,8 @@ the payment screen's printout were slipped under the proof. On it: "New Jersey p
 (National 2 15px), "$103.50" (GT America Mono 16px), and the chip "Matches the proof" (green,
 filled circle). It's set quietly, at the same weight as the rest: a fact, not a fanfare.
 
-**States.** Default as above. Hover on the button (desktop): the harbor blue deepens by 6% lightness
-(120ms); nothing else. The picture is not interactive: it's a sample, and the button does nothing,
-so it shows no pressed state and isn't focusable. Reduced motion: final state. Dark mode: the band
+**States.** Default as above. The picture is not interactive: it's a sample, and its button does
+nothing, so it has no hover or pressed state and isn't focusable. Reduced motion: final state. Dark mode: the band
 becomes Night Surface; the sheet stays paper, dimmed.
 
 **Motion:** M5 (8.2).
@@ -2099,7 +2099,7 @@ sees its filing under its own name.
 ═══════════════════════════════════════════════════════════════════════  firm thick-thin
                                                            with CoFile■
 ┌ Rehearsal: nothing will be filed or paid, even if you approve. ──────┐  (rehearsals only)
-NJ LLC formation: TWO SISTERS BAKERY LLC                                  (H1)
+(the filing's title, as the product gives it)                             (H1)
 Filing reference …. Please decide by December 3, 2026, 5:00 PM Eastern.
 After that, this link stops working and you'll need a new one.
 ┌ statement ───────────────────────────────────────────────────────────┐
@@ -2303,8 +2303,7 @@ contact line ("Questions? …"), then the legal line in 12px Caption Gray.
   it as a caption. Then the button.
 - **"Completed: …" (documents back).** The headline; the body; then "Documents: …" set as a list of
   rows, each with a plain document glyph, the document's name and "attached"; then the button to the
-  filing page. The email ends with the end mark in the firm's template too, small and gray: the
-  only place the mark appears on a firm's surface, as part of the imprint.
+  filing page.
 - **EIN issued.** The "Completed" email for an EIN, with the EIN itself set in the "by the numbers"
   box: Menlo 28px in a 1px Press Black frame, centered, and the IRS letter listed as an attached
   document. Any EIN-specific headline or line `[copy needed]`.
@@ -2666,7 +2665,7 @@ I've kept every word and its order. Everything I'm stripping is visual.
 - **Status chips told apart by color alone,** and rounded pills. They become square labels with a
   shape for each meaning.
 - **Buttons inside pictures that look clickable.** In the new pictures, sample buttons sit on paper
-  plates, aren't focusable and show no hover beyond the proof's, so nobody tries to press a picture.
+  plates, aren't focusable and show no hover, so nobody tries to press a picture.
 
 ---
 
