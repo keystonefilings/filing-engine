@@ -33,7 +33,7 @@ may change them:
 ## Stand-in words in the build (Nov 26), to replace or confirm
 
 The build needed words where the spec says `[copy needed]`. These stand in until the copy owner writes them; each is
-one string in the code.
+one string in the code. The owner chose to ship with them as they are for now (Nov 26).
 
 | Where | Stand-in | Spec |
 |---|---|---|

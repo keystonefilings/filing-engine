@@ -1,5 +1,7 @@
 # Font licenses: Miller (Type Network) and Founders Grotesk (Klim)
 
+> **Settled (owner, Nov 26).** The owner holds the licenses, and the build keeps both families.
+
 This file has three parts. There are two license requests, one for each foundry, and each is ready
 to send once the bracketed items are filled in. A short internal note follows them, and it is not
 for sending.

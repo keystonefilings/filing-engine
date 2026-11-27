@@ -1,5 +1,8 @@
 # Email rendering tests: a brief for a testing service
 
+> **On hold (owner, Nov 26).** No subscription for now: the emails are tested by sending real ones to real
+> Gmail, Outlook and Apple Mail inboxes and looking at them, with Resend sending. See `docs/email-testing.md`.
+
 Weeks are counted from the start of our build (week 1).
 
 ## Who we are

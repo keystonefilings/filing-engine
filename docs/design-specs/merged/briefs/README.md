@@ -12,7 +12,7 @@ No brief names a price, a budget, a date or a real person.
 
 | # | Brief | For | Needed by (weeks from the start) |
 |---|---|---|---|
-| 01 | [Font licenses](01-font-licenses.md) | Type Network (Miller), Klim (Founders Grotesk): two ready-to-send requests, and an internal note on the desktop files the owner supplied | Web licenses by week 8; never served live before |
+| 01 | [Font licenses](01-font-licenses.md) (the owner holds the licenses, Nov 26) | Type Network (Miller), Klim (Founders Grotesk): two ready-to-send requests, and an internal note on the desktop files the owner supplied | Web licenses by week 8; never served live before |
 | 02 | [Lettering artist](02-lettering-artist.md) | **On hold:** the owner supplied the drawn identity (Nov 26). The CoFile wordmark (two masters), the "Co" of the Name Plate, the favicon and app icons, lockups, a usage sheet | Wordmark first; the "Co" before the engraver cuts the mark plate |
 | 03 | [Hand engraver](03-hand-engraver.md) | **Optional:** the owner's package has 1:1 plate guides if real plates are ever cut (Nov 26). Harbor & Pine's brass plate, the blank plates, Northgate's steel plate, the 120 mm mark plate, test plates; on set for three shoot days | Before the shoot |
 | 04 | [Photographer and crew](04-photographer-and-crew.md) | **On hold:** the owner supplied the photography (Nov 26). Every photograph (C1 to C9 and C11) over six shoot days, with casting, locations, props, retouching. No portraits of CoFile's own team for now (C10 is deferred) | Shoot weeks 6 to 8, post to week 10 |
@@ -20,7 +20,7 @@ No brief names a price, a budget, a date or a real person.
 | 06 | [Steel-engraving illustrator](06-steel-engraving-illustrator.md) | **On hold:** the owner supplied the eleven vignettes (Nov 26). Eight one-ink vignettes (three optional more) for empty states, system pages and two emails | Before the pages behind the home page ship |
 | 07 | [Scanning studio](07-scanning-studio.md) | Cotton paper and card scanned into seamless tiles | With the craft landing |
 | 08 | [Letterpress shop](08-letterpress-shop.md) | **On hold:** the photographs and press proofs are supplied (Nov 26). Harbor & Pine's printed props (business cards, letterhead proof, envelope); the make-ready table as a location | Before the shoot |
-| 09 | [Email testing](09-email-testing.md) | A rendering-test subscription: all 21 emails in both letterheads, light and dark | Before the emails ship |
+| 09 | [Email testing](09-email-testing.md) (on hold: free test sends instead, Nov 26) | A rendering-test subscription: all 21 emails in both letterheads, light and dark | Before the emails ship |
 | 10 | [Cross-browser testing](10-cross-browser-testing.md) | Safari (macOS, iOS), Firefox, Chrome on Android, Edge: every page and state, and the newer CSS the design uses | Final pass |
 | 11 | [Accessibility consultancy](11-accessibility-consultancy.md) | An audit against WCAG 2.2 AA and the spec's own rules, with moderated sessions with older adults, in two rounds | Rounds at about weeks 5 and 13 |
 | 12 | [Firm-owner research](12-firm-owner-research.md) | Six to eight firm owners see their own client page and desk in their own brand before the build is final | Week 6 |

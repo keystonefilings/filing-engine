@@ -102,14 +102,14 @@ asset, with no layout work at that point.
 | The engraved vignettes (empty desk, returned envelope and the rest) | Placeholder line drawings in the right sizes | The illustrator (C.6) |
 | Miller and Founders Grotesk | Free stand-ins with matched metrics (A.3) | The licenses (C.1) |
 | Engraving with Miller letters | Built on the stand-in | Miller license plus the foundry's written OK for this use |
-| Emails tested in Outlook, Gmail and Apple Mail | Rendering checked in Chromium, built to email-safe rules | An email-testing service account (C.9) |
+| Emails tested in Outlook, Gmail and Apple Mail | Rendering checked in Chromium, built to email-safe rules | Real emails sent to Gmail, Outlook and Apple Mail inboxes and checked by eye (owner's decision, Nov 26; `docs/email-testing.md`) |
 | Safari, iPhone and Firefox checks | Chromium checks at every size | A cross-browser testing account or your own devices (C.10) |
 
 ## C. Outsource: people, physical things, licenses
 
 **Must buy or hire**
 
-1. **Font licenses** (purchases):
+1. **Font licenses** (purchases): held by the owner (Nov 26); the build keeps Miller and Founders Grotesk.
    - Miller Display and Miller Text from Type Network.
    - Founders Grotesk from Klim. Its web license is priced by pageviews, so it must cover the
      high-volume client pages and the widget. Decision 7 has the free alternative if the price is
@@ -126,8 +126,8 @@ asset, with no layout work at that point.
 7. **A scanning studio**: cotton paper and card scanned into seamless textures.
 8. **A letterpress shop**: on hold. The photographs are supplied, and the owner's package has the
    press-ready proofs if real prints are ever wanted (Nov 26).
-9. **An email-testing service** (subscription): real Outlook, Gmail and Apple Mail rendering. Claude
-   can run the tests once there's an account.
+9. **An email-testing service** (subscription): on hold. The owner chose free test sends to real
+   Gmail, Outlook and Apple Mail inboxes, with Resend sending (Nov 26; `docs/email-testing.md`).
 10. **Cross-browser and real-device testing** (subscription, or your own iPhone and Mac): Safari and
     Firefox, which this environment doesn't have.
 11. **An accessibility consultancy** with experience testing with older adults: an audit of the
