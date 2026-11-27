@@ -53,3 +53,42 @@ shared piece needs a change, prefer a local variant.
    the key: `LICENSED_FONTS_KEY=<key> node scripts/licensed-fonts.mjs unpack` (see `public/fonts/README.md`).
 5. Pages that need data need the engine: `PORT=<port> API_KEYS=<24+ char key>:acme STAFF_API_KEYS=<key>:ops@acme APPROVAL_SIGNING_SECRET=<32+ chars> npx tsx src/index.ts`
    from the repo root (in-memory store); seed with the API (`x-api-key` header).
+6. Run the automated checks below before you push; CI runs them on every change.
+
+## The automated checks
+
+CI's `site-checks` job (`.github/workflows/test.yml`) builds the site and runs four checks against the production
+build, with an in-memory engine beside it for the desk. Each runs locally with one command from `web/`, after
+`npm run build` (and `npm ci` at the repository root, for the desk's pages). They start `next start` on port 3303 (and
+the engine on 8093) themselves, or use what is already listening there; `CHECKS_BASE_URL` points them at another server.
+
+| Command | What it checks | Time |
+|---|---|---|
+| `npm run check:a11y` | axe-core, WCAG 2.2 A and AA, on every public page, the design gallery and the desk (Filings, New filing, a filing), at 390 and 1440, light and dark. A serious or critical finding fails (`tests/a11y.spec.ts`, with the rules of `scripts/a11y-check.cjs`) | about 45 s |
+| `npm run check:visual` | Full-length screenshots of every public page and the gallery, light at 320, 390, 834 and 1440 and dark at 390 and 1440, against the baselines in `tests/visual/linux`. Also fails a page that scrolls sideways (`tests/visual.spec.ts`) | about 40 s |
+| `npm run check:pseudo-locale` | The +35% pseudo-locale (merged spec 12.4): every text on every public page made 35% longer, at 390 and 1440; fails on sideways scroll, clipped text, text running out of its box, text over text, and button labels that no longer fit (`tests/pseudo-locale.spec.ts`) | about 15 s |
+| `npm run check:perf` | The performance budgets (merged spec 13.1): each route's script before idle (gzip, from the build), the photographs' sizes, and Lighthouse's mobile profile on the public pages for largest paint, layout shift and fonts (`tests/perf/budgets.mjs`; it installs its own Lighthouse into `tests/perf` the first time) | about 75 s |
+| `npm run check:site` | The first three in one run, as CI does | about 1.5 min |
+
+**The screenshots** are taken at half resolution (a 1440 page is a 720 px image) with the photographs masked to grey
+boxes, with reduced motion, other hosts refused and the fonts pinned (`tests/fonts.conf`: Liberation and DejaVu only),
+so one Ubuntu machine draws exactly what another does. They are made with the stand-in fonts, as in CI: a build with
+the licensed fonts is refused.
+
+**Updating the baselines** after a change that is meant to look different:
+
+- On Ubuntu 24.04 with `fonts-liberation`, `fonts-dejavu-core` and `fonts-dejavu-mono` (CI's machine): `npm run build`,
+  then `npm run check:visual:update`. It redraws only the pictures that changed and re-encodes them losslessly (about
+  half the bytes). Look at each changed PNG before you commit it.
+- Anywhere else (a Mac draws text differently): push, and let CI draw them. A failing `site-checks` run uploads the
+  redrawn pictures as the `visual-baselines` artifact: `gh run download <run id> -n visual-baselines -D web/tests/visual/linux`,
+  look at them, commit.
+
+On a failure the run's `site-checks-report` artifact holds Playwright's report with each difference, the pseudo-locale's
+full-page screenshot of what broke, and the performance report.
+
+**Known and held.** A finding that sits in a shared file and can't be fixed in the change at hand is listed rather than
+left failing: the desk's dark-mode contrast (a `test.fixme` in `tests/a11y.spec.ts`), `tests/pseudo-locale.known.ts`,
+and the budgets the tree is already over (`OVER_TODAY` in `tests/perf/budgets.mjs`, held at today's level so they
+can't get worse). Remove the entry, or lower the ceiling, with the fix.
+
