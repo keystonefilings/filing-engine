@@ -6,7 +6,7 @@
   "description": "Front end for the Keystone filing engine: API docs, the white-label CPA and payroll portal, and enterprise self-service. Deploys on Vercel (root directory: web).",
   "scripts": {
     "dev": "next dev -p 3000",
-    "build": "node scripts/licensed-fonts.mjs unpack && next build",
+    "build": "node scripts/licensed-fonts.mjs unpack && node scripts/card-fonts.mjs && next build",
     "start": "next start",
     "typecheck": "tsc --noEmit",
     "test": "node --test --experimental-strip-types lib/*.test.ts lib/design/*.test.ts",
@@ -33,6 +33,7 @@
     "@types/react": "19.1.17",
     "@types/react-dom": "19.1.9",
     "axe-core": "^4.10.2",
-    "typescript": "5.9.3"
+    "typescript": "5.9.3",
+    "wawoff2": "2.0.1"
   }
 }

@@ -92,3 +92,8 @@ left failing: the desk's dark-mode contrast (a `test.fixme` in `tests/a11y.spec.
 and the budgets the tree is already over (`OVER_TODAY` in `tests/perf/budgets.mjs`, held at today's level so they
 can't get worse). Remove the entry, or lower the ceiling, with the fix.
 
+**Link-preview cards.** Every public page has an `opengraph-image.tsx` beside it, drawn at build time by
+`lib/share-card.tsx` from the page's own kicker and h1 (`lib/share-cards.ts`; `npm test` checks they still match the
+pages). The licensed Miller and Founders Grotesk are used when the build has them (`scripts/card-fonts.mjs` decodes
+them from WOFF2 into `node_modules/.cache`, never committed or served), Liberation otherwise. Client pages (`/i/…`,
+`/<firm>/<service>`, `/e/…`, `/embed/…`) have their own neutral card with the firm's name only (`lib/client-card.tsx`).
