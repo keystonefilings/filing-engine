@@ -2,7 +2,7 @@ import { createHash, randomBytes, randomUUID, timingSafeEqual } from "node:crypt
 import type { FastifyInstance, FastifyReply, FastifyRequest } from "fastify";
 import { z } from "zod";
 import type { InquiryRecord, Store, UserRecord } from "../store/types.js";
-import { ClientCompanySettings, TenantSettings } from "../settings/schema.js";
+import { ClientCompanySettings, RoleCandidate, TenantSettings } from "../settings/schema.js";
 import { PaymentRouting, PaymentSettings } from "../settings/payments.js";
 import { dummyHash, hashPassword, passwordProblem, verifyPassword } from "./password.js";
 import { mintSessionKey, type SessionClaims } from "./session-token.js";
@@ -17,9 +17,10 @@ import type { GoogleIdTokens } from "./google.js";
 /**
  * Dashboard accounts.
  *  - Sign-in (public): email + password -> a signed session key the front end presents for the person.
- *  - Partner sign-up (public): a CPA, payroll or CFO firm signs up on the landing page. It joins the
- *    platform's own tenant (Scope 2). PARTNER_SIGNUP_MODE decides whether it waits for approval
- *    ("approval", the default) or is approved at once ("automatic").
+ *  - Partner sign-up (public): a CPA, payroll or CFO firm signs up on the landing page, with an email
+ *    and password or with Google. It joins the platform's own tenant (Scope 2). Decided Nov 27: the
+ *    account opens at once, signed in, with nothing to wait for (PARTNER_SIGNUP_MODE "automatic", the
+ *    default). "approval" keeps the older flow: confirm the email, then wait for the platform to approve.
  *  - Enterprise accounts are never self-serve: the landing page takes a contact request, and platform
  *    staff create the subscriber's first user after approving it.
  *  - Self-service settings a signed-in person may change: partner profile, branding, payment routing;
@@ -107,6 +108,13 @@ const PartnerSignupBody = z.object({
   /** The Terms and Privacy Policy version the person agreed to (the web form requires it). */
   termsVersion: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional(),
 });
+/** Sign up with Google: the firm's details with Google's ID token in place of an email and password. */
+const GooglePartnerSignupBody = PartnerSignupBody.omit({ email: true, password: true, name: true }).extend({
+  idToken: z.string().min(10).max(8000),
+  nonce: z.string().min(1).max(200),
+  /** The person's name as they typed it; Google's name claim otherwise. */
+  name: z.string().trim().min(2).max(120).optional(),
+});
 const InquiryBody = z.object({
   name: z.string().trim().min(2).max(120),
   company: z.string().trim().min(2).max(120),
@@ -119,6 +127,16 @@ const InquiryBody = z.object({
   website: z.string().max(0).optional(),
 });
 const NewUserBody = z.object({ email, name: z.string().trim().min(2).max(120), password: z.string().max(200) });
+/** Nov 27: a partner's per-state role settings, one state per entry (null clears the state). */
+const ROLE_STATES = z.enum(["NY", "NJ", "FL", "MO"]);
+const RoleAddressIn = z.object({ street1: z.string().trim().min(2).max(120), street2: z.string().trim().max(120).optional(), city: z.string().trim().min(2).max(80), state: ROLE_STATES, zip: z.string().regex(/^\d{5}(-\d{4})?$/) });
+const StateRoleSettingsIn = z.object({
+  firm: z.object({ name: z.string().trim().min(2).max(160), address: RoleAddressIn }).nullable().optional(),
+  signer: z.object({ name: z.string().trim().min(2).max(160), title: z.string().trim().max(80).optional() }).nullable().optional(),
+  roles: z.record(z.string().regex(/^[a-zA-Z]{1,40}$/), z.object({ offer: z.array(RoleCandidate).max(10).default([]), fixed: RoleCandidate.optional() })).optional(),
+});
+const StateRolesIn = z.partialRecord(ROLE_STATES, z.union([StateRoleSettingsIn, z.null()]))
+  .refine((m) => Object.entries(m).every(([st, v]) => !v?.firm || v.firm.address.state === st), { message: "the firm's address must be in that state" });
 const ProfileBody = z.object({
   name: z.string().trim().min(2).max(120).optional(),
   partner: z.object({
@@ -144,6 +162,10 @@ const ProfileBody = z.object({
   paymentRouting: PaymentRouting.optional(),
   /** V31: where the state's copies of this firm's filings also go (null clears; else its contact email). */
   copyEmail: z.string().trim().toLowerCase().email().nullable().optional(),
+  /** Decided Nov 27: the firm's forms start with ours (the platform's resold agent, $59 a year per business) or its own saved agents. */
+  registeredAgentChoice: z.enum(["client_provided", "filing_company"]).optional(),
+  /** Nov 27: per-state role settings (web/lib/state-roles.ts): the firm in each state, its signer there, and what each role offers or fixes. */
+  stateRoles: StateRolesIn.optional(),
   /** V22: the firm's registered agent per state (null removes one). */
   registeredAgents: z.partialRecord(z.enum(["NY", "NJ", "FL", "MO"]), z.union([z.object({
     name: z.string().trim().min(2).max(160),
@@ -153,7 +175,6 @@ const ProfileBody = z.object({
     .refine((m) => !m || Object.entries(m).every(([st, a]) => !a || a.address.state === st), { message: "each agent's address must be in its own state" }),
 });
 const DecisionBody = z.object({ action: z.enum(["approve", "reject"]) });
-
 /** Accounts made before email confirmation existed have no emailVerification and count as confirmed. */
 export const emailConfirmed = (u: UserRecord) => !u.emailVerification || !!u.emailVerifiedAt;
 
@@ -182,6 +203,22 @@ export async function portalSlugFor(store: Store, tenantId: string, c: { clientC
   let slug = base;
   for (let i = 2; taken.has(slug) || RESERVED_SLUGS.has(slug); i++) slug = `${base}-${i}`;
   return slug;
+}
+
+/** One state's settings replace that state's; a null clears it; the firm, signer and roles each keep their old value when not sent. */
+function mergeStateRoles(prev: ClientCompanySettings["stateRoles"], sent: z.infer<typeof StateRolesIn>): ClientCompanySettings["stateRoles"] {
+  const out = { ...(prev ?? {}) } as NonNullable<ClientCompanySettings["stateRoles"]>;
+  for (const [st, v] of Object.entries(sent) as [keyof typeof out, z.infer<typeof StateRoleSettingsIn> | null | undefined][]) {
+    if (v === undefined) continue;
+    if (v === null) { delete out[st]; continue; }
+    const was = out[st];
+    out[st] = {
+      firm: v.firm === undefined ? was?.firm : v.firm ?? undefined,
+      signer: v.signer === undefined ? was?.signer : v.signer ?? undefined,
+      roles: v.roles ?? was?.roles ?? {},
+    };
+  }
+  return out;
 }
 
 export function registerUsers(app: FastifyInstance, deps: UsersDeps): void {
@@ -265,7 +302,8 @@ export function registerUsers(app: FastifyInstance, deps: UsersDeps): void {
     const id = await deps.google.verify(body.idToken, body.nonce).catch(() => null);
     if (!id) return reply.code(401).send({ error: "Google didn't confirm this sign-in" });
     let u = await deps.store.findUserByEmail(id.email);
-    if (!u) return reply.code(404).send({ error: "no account uses this Google email", status: "no_account" });
+    // The front end offers to set up a filing desk for this Google account; the identity is checked again then.
+    if (!u) return reply.code(404).send({ error: "no account uses this Google email", status: "no_account", email: id.email, name: id.name });
     // Google has confirmed the address, which is what our confirmation email checks.
     if (!emailConfirmed(u)) u = await deps.store.updateUser(u.id, { emailVerifiedAt: now().toISOString() });
     if (u.status === "pending") return reply.code(403).send({ error: "your account is waiting for approval", status: "pending" });
@@ -375,6 +413,38 @@ export function registerUsers(app: FastifyInstance, deps: UsersDeps): void {
   });
 
   // ---- Partner sign-up ----
+  /**
+   * The partner user a sign-up makes, not yet stored. Email sign-ups in approval mode confirm their
+   * email first (a link is made here and sent by the caller); a Google sign-up's email is already
+   * confirmed by Google, and an automatic sign-up opens at once without the step.
+   */
+  const partnerUser = (d: Omit<z.infer<typeof PartnerSignupBody>, "password">, passwordHash: string, confirm: "link" | "confirmed" | "skip"): { user: UserRecord; secret?: string } => {
+    const at = now();
+    const secret = confirm === "link" ? randomBytes(32).toString("base64url") : undefined;
+    const user: UserRecord = {
+      id: randomUUID(), email: d.email, name: d.name, kind: "partner", tenantId: deps.platformTenantId, status: "pending",
+      passwordHash, sessionGen: 0, createdAt: at.toISOString(),
+      signup: { companyName: d.companyName, companyType: d.companyType, phone: d.phone, website: d.website, states: d.states, expectedVolume: d.expectedVolume },
+      ...(d.termsVersion ? { termsAccepted: { version: d.termsVersion, at: at.toISOString() } } : {}),
+      ...(secret ? { emailVerification: { tokenHash: sha256(secret).toString("hex"), expiresAt: new Date(at.getTime() + VERIFY_TTL_DAYS * 86_400_000).toISOString(), sentAt: at.toISOString() } } : {}),
+      ...(confirm === "confirmed" ? { emailVerifiedAt: at.toISOString() } : {}),
+    };
+    return { user, secret };
+  };
+
+  /**
+   * Automatic mode (the default since Nov 27): the firm is made and the person is signed in at once,
+   * with nothing to wait for. The welcome email goes out in the background.
+   */
+  const openAtOnce = async (reply: FastifyReply, u: UserRecord, signedUpWith: "password" | "google") => {
+    const opened = await approvePartner(u, "automatic");
+    sendOpened(opened, signedUpWith);
+    return reply.code(201).send({ status: "active", approvalRequired: false, user: publicUser(opened), ...issue(opened) });
+  };
+
+  /** A sign-up for an email that already has an account: a plain answer, so the person logs in instead. */
+  const alreadyHasAccount = (reply: FastifyReply) => reply.code(409).send({ error: "an account already uses this email; log in instead", status: "exists" });
+
   app.post("/v1/signups/partner", async (req, reply) => {
     const parsed = PartnerSignupBody.safeParse(req.body);
     if (!parsed.success) return reply.code(422).send({ error: "validation failed", issues: parsed.error.issues.map((i) => ({ path: i.path.join("."), message: i.message })) });
@@ -382,28 +452,72 @@ export function registerUsers(app: FastifyInstance, deps: UsersDeps): void {
     const pw = passwordProblem(d.password, d.email);
     if (pw) return reply.code(422).send({ error: "validation failed", issues: [{ path: "password", message: pw }] });
     if (!publicFormLimit.take("signup")) return reply.code(429).send({ error: "too many sign-ups right now; try again later" });
-    // Every sign-up confirms its email first. automatic: the account opens on confirmation;
-    // approval: it also waits for the platform to approve it.
-    const answer = { status: "verify_email", approvalRequired: deps.partnerSignupMode !== "automatic" };
+    const passwordHash = await hashPassword(d.password);
+    if (deps.partnerSignupMode === "automatic") {
+      if (await deps.store.findUserByEmail(d.email)) return alreadyHasAccount(reply);
+      const { user } = partnerUser(d, passwordHash, "skip");
+      try {
+        await deps.store.createUser(user);
+      } catch {
+        return alreadyHasAccount(reply);
+      }
+      return openAtOnce(reply, user, "password");
+    }
+    // Approval mode: every sign-up confirms its email first, then waits for the platform to approve it.
+    const answer = { status: "verify_email", approvalRequired: true };
     // Same answer as a new sign-up, so the form can't be used to find out who has an account.
     if (await deps.store.findUserByEmail(d.email)) return reply.code(202).send(answer);
-    const secret = randomBytes(32).toString("base64url");
-    const at = now();
-    const u: UserRecord = {
-      id: randomUUID(), email: d.email, name: d.name, kind: "partner", tenantId: deps.platformTenantId, status: "pending",
-      passwordHash: await hashPassword(d.password), sessionGen: 0, createdAt: at.toISOString(),
-      signup: { companyName: d.companyName, companyType: d.companyType, phone: d.phone, website: d.website, states: d.states, expectedVolume: d.expectedVolume },
-      ...(d.termsVersion ? { termsAccepted: { version: d.termsVersion, at: at.toISOString() } } : {}),
-      emailVerification: { tokenHash: sha256(secret).toString("hex"), expiresAt: new Date(at.getTime() + VERIFY_TTL_DAYS * 86_400_000).toISOString(), sentAt: at.toISOString() },
-    };
+    const { user, secret } = partnerUser(d, passwordHash, "link");
     try {
-      await deps.store.createUser(u);
+      await deps.store.createUser(user);
     } catch {
       return reply.code(202).send(answer);
     }
-    sendVerification(u, secret);
+    sendVerification(user, secret!);
     return reply.code(202).send(answer);
   });
+
+  /**
+   * Sign up with Google: the web app ran Google's sign-in and hands us the ID token (checked here, as
+   * at sign-in) with the firm's details. Google has confirmed the email, so there is no link to open.
+   * The account has no password of its own until the person chooses one ("Forgot your password").
+   */
+  app.post("/v1/signups/partner/google", async (req, reply) => {
+    if (!deps.google) return reply.code(404).send({ error: "Google sign-in isn't set up" });
+    const parsed = GooglePartnerSignupBody.safeParse(req.body);
+    if (!parsed.success) return reply.code(422).send({ error: "validation failed", issues: parsed.error.issues.map((i) => ({ path: i.path.join("."), message: i.message })) });
+    if (!signInLimit.take("all") || !publicFormLimit.take("signup")) return reply.code(429).send({ error: "too many sign-ups right now; try again later" });
+    const { idToken, nonce, ...rest } = parsed.data;
+    const id = await deps.google.verify(idToken, nonce).catch(() => null);
+    if (!id) return reply.code(401).send({ error: "Google didn't confirm this sign-in", status: "google_failed" });
+    if (await deps.store.findUserByEmail(id.email)) return alreadyHasAccount(reply);
+    const d = { ...rest, email: id.email, name: rest.name ?? id.name ?? id.email.split("@")[0]! };
+    const { user } = partnerUser(d, await hashPassword(randomBytes(24).toString("base64url")), "confirmed");
+    try {
+      await deps.store.createUser(user);
+    } catch {
+      return alreadyHasAccount(reply);
+    }
+    if (deps.partnerSignupMode === "automatic") return openAtOnce(reply, user, "google");
+    return reply.code(202).send({ status: "pending", approvalRequired: true });
+  });
+
+  /** The welcome once a filing desk is open: after approval, or at once in automatic mode. */
+  const sendOpened = (u: UserRecord, signedUpWith: "password" | "google" | "approved") => {
+    const firm = u.signup?.companyName ?? "your firm";
+    const how = signedUpWith === "google" ? "Log in with Google, with the same account you signed up with." : "Log in with the email and password you chose.";
+    const opened = {
+      subject: signedUpWith === "approved" ? "Your partner account is open" : "Your filing desk is open",
+      body: `${signedUpWith === "approved" ? `Your account for ${firm} is approved.` : `Your filing desk for ${firm} is ready.`} ${how} Then set up your filing desk in three short steps: your firm, your branding and how state fees are paid. You can try a practice filing right away.${deps.supportEmail ? `\n\nQuestions? Email ${deps.supportEmail}.` : ""}`,
+    };
+    sendAccountEmail({ address: u.email, name: u.name }, {
+      ...opened,
+      link: `${deps.webBaseUrl}/login`,
+      linkLabel: "Log in",
+      // A welcome: the blank Name Plate's place under the letterhead (decision 35), empty until it is engraved.
+      letter: proseLetter(opened.subject, opened.body, { vignette: "blank-plate" }),
+    }, signedUpWith === "approved" ? "approval" : "welcome");
+  };
 
   const sendVerification = (u: UserRecord, secret: string) => {
     const subject = "Confirm your email for CoFile";
@@ -492,17 +606,7 @@ export function registerUsers(app: FastifyInstance, deps: UsersDeps): void {
     }
     const approved = await approvePartner(u, by);
     // The sign-up page told them we'd email once the account opens.
-    const opened = {
-      subject: "Your partner account is open",
-      body: `Your account for ${u.signup!.companyName} is approved. Log in with the email and password you chose. Then set up your filing desk in three short steps: your firm, your branding and how state fees are paid. You can try a practice filing right away.${deps.supportEmail ? `\n\nQuestions? Email ${deps.supportEmail}.` : ""}`,
-    };
-    sendAccountEmail({ address: approved.email, name: approved.name }, {
-      ...opened,
-      link: `${deps.webBaseUrl}/login`,
-      linkLabel: "Log in",
-      // A welcome: the blank Name Plate's place under the letterhead (decision 35), empty until it is engraved.
-      letter: proseLetter(opened.subject, opened.body, { vignette: "blank-plate" }),
-    }, "approval");
+    sendOpened(approved, "approved");
     return { user: publicUser(approved) };
   });
 
@@ -664,6 +768,8 @@ export function registerUsers(app: FastifyInstance, deps: UsersDeps): void {
       ...(b.paymentRouting ? { payments: { methods: c.payments?.methods ?? [], routing: b.paymentRouting } } : {}),
       ...(b.copyEmail !== undefined ? { copyEmail: b.copyEmail ?? undefined } : {}),
       ...(b.registeredAgents ? { registeredAgentsByState: Object.fromEntries(Object.entries({ ...c.registeredAgentsByState, ...b.registeredAgents }).filter(([, v]) => v)) } : {}),
+      ...(b.registeredAgentChoice ? { registeredAgentChoice: b.registeredAgentChoice } : {}),
+      ...(b.stateRoles ? { stateRoles: mergeStateRoles(c.stateRoles, b.stateRoles) } : {}),
     };
     const checked = ClientCompanySettings.safeParse(next);
     if (!checked.success) return reply.code(422).send({ error: "validation failed", issues: checked.error.issues.map((i) => ({ path: i.path.join("."), message: i.message })) });

@@ -415,6 +415,17 @@ test("decision 9: partner forms offer our registered agent where it's set up, pr
   assert.equal(label(nj, false), "Ours: Registered Agents, Inc., through CoFile ($59 a year per business, billed to your firm)");
   assert.equal(label(nj, true), "Best Accounting's registered agent service (Registered Agents, Inc.)");
   assert.equal(label(fl, false), null); // not set up in Florida: not offered
+  // Nov 27: the firm's choice in Setup is the answer its forms start with; a saved agent is still offered.
+  const start = (company: object) => (withFirmDefaults(nj, company as never).kind.sections.flatMap((s) => s.items).find((i) => i.kind === "field" && i.path === "formation.registeredAgentChoice") as { defaultValue?: string; options: { value: string }[] });
+  assert.equal(start(firm).defaultValue, "client_provided");
+  assert.equal(start({ ...(firm as object), registeredAgentChoice: "filing_company" }).defaultValue, "filing_company");
+  const saved = { NJ: { name: "Garden State Agents", address: { street1: "1 Broad St", city: "Newark", state: "NJ", zip: "07102" } } };
+  assert.equal(start({ ...(firm as object), registeredAgentsByState: saved }).defaultValue, "firm_saved");
+  const both = start({ ...(firm as object), registeredAgentsByState: saved, registeredAgentChoice: "filing_company" });
+  assert.equal(both.defaultValue, "filing_company");
+  assert.ok(both.options.some((o) => o.value === "firm_saved"));
+  // Our agent isn't set up for Florida: the firm's choice changes nothing there.
+  assert.equal((withFirmDefaults(fl, { ...(firm as object), registeredAgentChoice: "filing_company" } as never).kind.sections.flatMap((s) => s.items).find((i) => i.kind === "field" && i.path === "formation.registeredAgentChoice") as { defaultValue?: string } | undefined)?.defaultValue ?? "client_provided", "client_provided");
   // A firm an enterprise set up keeps its own wording.
   const ent = { name: "Acme CPA", registeredAgentsByState: {} } as never;
   const { kind } = withFirmDefaults(nj, ent);

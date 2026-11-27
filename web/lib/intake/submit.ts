@@ -18,6 +18,8 @@ export interface SubmitContext extends Omit<BuildContext, "idempotencyKey"> {
   idempotencySeed: string;
   /** Whether the form may use a signature saved earlier (firm staff), or must be signed fresh (a client link). */
   allowSavedSignature: boolean;
+  /** Nov 27: turns the firm's per-state role answers into the engine's fields (lib/state-roles.ts); its issues stop the submit. */
+  resolve?: (request: Record<string, unknown>, raw: Record<string, string>) => { path: string; message: string }[];
 }
 
 /** The kind's PDF fields (decision 19). Top-level fields only. */
@@ -78,6 +80,7 @@ export async function submitIntake(kind: FilingKind, fd: FormData, ctx: SubmitCo
   const pendingUploads = Object.fromEntries(files.map((f) => [f.path, "pending"]));
   const probe = buildRequest(kind, { ...raw, ...pendingUploads, ...(sig && raw[sig.path] === NEW_SIGNATURE.choice ? { [sig.path]: "pending" } : {}) }, { ...ctx, idempotencyKey });
   issues.push(...probe.issues);
+  if (ctx.resolve && !issues.length) issues.push(...ctx.resolve(probe.request, raw));
   if (issues.length) return { ok: false, issues };
 
   if (sig && raw[sig.path] === NEW_SIGNATURE.choice) {
@@ -104,6 +107,7 @@ export async function submitIntake(kind: FilingKind, fd: FormData, ctx: SubmitCo
   }
 
   const { request } = buildRequest(kind, raw, { ...ctx, idempotencyKey });
+  ctx.resolve?.(request, raw);
   try {
     const result = ctx.publicPath
       ? await engine<CreateFilingResult>(null, ctx.publicPath, { method: "POST", body: request })

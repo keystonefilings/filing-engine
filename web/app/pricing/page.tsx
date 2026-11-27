@@ -106,7 +106,7 @@ export default function Pricing() {
           <div className="pg2-pic pr2-slip">
             <ul className="pg2-list is-rule t-body">
               <li><b>State fees</b> belong to the state. You see them on the proof to the cent, they&apos;re paid with the card or account you choose, and states generally don&apos;t refund them.</li>
-              <li><b>{name}&apos;s registered agent service,</b> if you use ours instead of your own.</li>
+              <li><b>{name}&apos;s registered agent service,</b> if you use ours instead of your own: {usd(PRICING.registeredAgentAnnualUsd)} a year per business, until you cancel it.</li>
               <li><b>New York&apos;s publication notice</b> for a new LLC, which has its own costs.</li>
               <li>You see your plan and its price on your Billing page before you&apos;re charged. Filings past your plan go on your next invoice.</li>
             </ul>

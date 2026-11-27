@@ -38,9 +38,13 @@ export function safeLogo(u: string | undefined): string | undefined {
   try { return new URL(u).protocol === "https:" ? u : undefined; } catch { return undefined; }
 }
 
-/** Mirrors the engine's PARTNER_SIGNUP_MODE so the sign-up page says what will happen. Approval unless set to "automatic". */
+/**
+ * Mirrors the engine's PARTNER_SIGNUP_MODE so the sign-up page says what will happen. Decided Nov 27: a partner
+ * firm's account opens at once, with no approval and no waiting (automatic, the default); "approval" keeps the
+ * older review flow. The engine's answer to each sign-up decides where the person goes; this only sets the words.
+ */
 export function partnerApprovalRequired(): boolean {
-  return process.env.PARTNER_SIGNUP_MODE !== "automatic";
+  return process.env.PARTNER_SIGNUP_MODE === "approval";
 }
 
 /** The platform's own tenant (mirrors the engine's PLATFORM_TENANT_ID): partners sign up under it. */

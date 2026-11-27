@@ -123,9 +123,24 @@ describe("partner sign-up with approval", () => {
     // Profile, brand and payment routing.
     const prof = await app.inject({ method: "PUT", url: `/v1/client-companies/${firm}/profile`, headers: as(key), payload: {
       partner: { phone: "212-555-0100", setupDone: ["details"] }, brand: { displayName: "Rivera CPA", primaryColor: "#123456" }, paymentRouting: { mode: "single" },
+      registeredAgentChoice: "filing_company", // Nov 27: the firm uses our registered agent
     } });
     expect(prof.statusCode).toBe(200);
     expect(prof.json().clientCompany.portal.primaryColor).toBe("#123456");
+    expect(prof.json().clientCompany.registeredAgentChoice).toBe("filing_company");
+    // Nov 27: per-state role settings. One state at a time; a wrong-state address is refused; null clears a state.
+    const ny = { firm: { name: "Rivera CPA", address: { street1: "1 Broadway", city: "New York", state: "NY", zip: "10004" } }, roles: { serviceOfProcess: { offer: ["partner"] }, filer: { offer: ["partner"], fixed: "partner" } } };
+    const roles = await app.inject({ method: "PUT", url: `/v1/client-companies/${firm}/profile`, headers: as(key), payload: { stateRoles: { NY: ny } } });
+    expect(roles.statusCode).toBe(200);
+    expect(roles.json().clientCompany.stateRoles.NY).toEqual(ny);
+    const nj = await app.inject({ method: "PUT", url: `/v1/client-companies/${firm}/profile`, headers: as(key), payload: { stateRoles: { NJ: { signer: { name: "Pat Rivera", title: "Authorized Representative" }, roles: { signer: { offer: ["partner"] }, registeredAgent: { offer: ["entity", "member"] } } } } } });
+    expect(Object.keys(nj.json().clientCompany.stateRoles).sort()).toEqual(["NJ", "NY"]);
+    expect(nj.json().clientCompany.stateRoles.NY.roles.filer.fixed).toBe("partner");
+    expect((await app.inject({ method: "PUT", url: `/v1/client-companies/${firm}/profile`, headers: as(key), payload: { stateRoles: { NJ: { firm: { name: "Rivera CPA", address: { street1: "1 Broadway", city: "New York", state: "NY", zip: "10004" } } } } } })).statusCode).toBe(422);
+    expect((await app.inject({ method: "PUT", url: `/v1/client-companies/${firm}/profile`, headers: as(key), payload: { stateRoles: { NY: { roles: { filer: { fixed: "someone" } } } } } })).statusCode).toBe(422);
+    const cleared = await app.inject({ method: "PUT", url: `/v1/client-companies/${firm}/profile`, headers: as(key), payload: { stateRoles: { NY: null } } });
+    expect(Object.keys(cleared.json().clientCompany.stateRoles)).toEqual(["NJ"]);
+    expect((await app.inject({ method: "PUT", url: `/v1/client-companies/${firm}/profile`, headers: as(key), payload: { registeredAgentChoice: "none" } })).statusCode).toBe(422);
     expect((await app.inject({ method: "PUT", url: `/v1/client-companies/${firm}/profile`, headers: as(key), payload: { paymentRouting: { defaultMethodId: "nope" } } })).statusCode).toBe(422);
     expect((await app.inject({ method: "PUT", url: "/v1/client-companies/acme-cpa/profile", headers: as(key), payload: { name: "Taken" } })).statusCode).toBe(404);
 
@@ -147,32 +162,40 @@ describe("partner sign-up with approval", () => {
     expect((await app.inject({ method: "POST", url: "/v1/signups/partner", payload: { email: "nope" } })).statusCode).toBe(422);
   });
 
-  it("opens as soon as the email is confirmed in automatic mode", async () => {
+  it("opens at once in automatic mode (Nov 27): the firm exists, the person is signed in, and a welcome goes out", async () => {
+    const sent = outbox.length;
     const r = await signup(auto, "dana@ledger.test", "Ledger Payroll");
-    expect(r.statusCode).toBe(202);
-    expect(r.json()).toEqual({ status: "verify_email", approvalRequired: false });
-    const before = await auto.inject({ method: "POST", url: "/v1/auth/sign-in", payload: { email: "dana@ledger.test", password: PW } });
-    expect(before.json().status).toBe("unverified");
-    expect((await confirmEmail(auto, "dana@ledger.test")).json()).toEqual({ ok: true, status: "active" });
-    const s = await auto.inject({ method: "POST", url: "/v1/auth/sign-in", payload: { email: "dana@ledger.test", password: PW } });
-    expect(s.statusCode).toBe(200);
+    expect(r.statusCode).toBe(201);
+    expect(r.json()).toMatchObject({ status: "active", approvalRequired: false, user: { status: "active", clientCompanyId: "firm-ledger-payroll", emailConfirmed: true } });
+    expect(r.json().sessionKey).toMatch(/^kfs_/);
+    expect((await auto.inject({ method: "GET", url: "/v1/me", headers: as(r.json().sessionKey) })).json().user.email).toBe("dana@ledger.test");
+    expect((await store.getClientCompany("firm-ledger-payroll"))?.portal?.slug).toBe("ledger-payroll");
+    // No confirmation link to open: a welcome instead, and the password works straight away.
+    const welcome = outbox.slice(sent).find((m) => m.address === "dana@ledger.test")!;
+    expect(welcome.msg.subject).toBe("Your filing desk is open");
+    expect(welcome.msg.link).toBe("http://web.test/login");
+    expect((await auto.inject({ method: "POST", url: "/v1/auth/sign-in", payload: { email: "dana@ledger.test", password: PW } })).statusCode).toBe(200);
+    // The same email again is told to log in instead.
+    const again = await signup(auto, "dana@ledger.test", "Ledger Payroll Two");
+    expect(again.statusCode).toBe(409);
+    expect(again.json().status).toBe("exists");
   });
 
   it("refuses a confirmation link that was altered, and sends a new one on request", async () => {
-    await signup(auto, "sam@numbers.test", "Numbers LLC");
+    await signup(app, "sam@numbers.test", "Numbers LLC");
     const link = [...outbox].reverse().find((m) => m.address === "sam@numbers.test")!.msg.link!;
     const token = new URL(link).searchParams.get("token")!;
-    const bad = await auto.inject({ method: "POST", url: "/v1/auth/verify-email", payload: { token: `${token.slice(0, -2)}xx` } });
+    const bad = await app.inject({ method: "POST", url: "/v1/auth/verify-email", payload: { token: `${token.slice(0, -2)}xx` } });
     expect(bad.statusCode).toBe(410);
     const sent = outbox.length;
-    expect((await auto.inject({ method: "POST", url: "/v1/auth/verify-email/resend", payload: { email: "sam@numbers.test" } })).statusCode).toBe(202);
+    expect((await app.inject({ method: "POST", url: "/v1/auth/verify-email/resend", payload: { email: "sam@numbers.test" } })).statusCode).toBe(202);
     expect(outbox.length).toBe(sent + 1);
     // The old link no longer works; the new one does.
-    expect((await auto.inject({ method: "POST", url: "/v1/auth/verify-email", payload: { token } })).statusCode).toBe(410);
-    expect((await confirmEmail(auto, "sam@numbers.test")).json().status).toBe("active");
+    expect((await app.inject({ method: "POST", url: "/v1/auth/verify-email", payload: { token } })).statusCode).toBe(410);
+    expect((await confirmEmail(app, "sam@numbers.test")).json().status).toBe("pending");
     // Nothing to resend once confirmed, and the same answer for unknown emails.
-    expect((await auto.inject({ method: "POST", url: "/v1/auth/verify-email/resend", payload: { email: "sam@numbers.test" } })).statusCode).toBe(202);
-    expect((await auto.inject({ method: "POST", url: "/v1/auth/verify-email/resend", payload: { email: "who@nowhere.test" } })).statusCode).toBe(202);
+    expect((await app.inject({ method: "POST", url: "/v1/auth/verify-email/resend", payload: { email: "sam@numbers.test" } })).statusCode).toBe(202);
+    expect((await app.inject({ method: "POST", url: "/v1/auth/verify-email/resend", payload: { email: "who@nowhere.test" } })).statusCode).toBe(202);
     expect(outbox.length).toBe(sent + 1);
   });
 

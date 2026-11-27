@@ -14,10 +14,26 @@ export const GOOGLE_COOKIE = "g_oauth";
 export const GOOGLE_CALLBACK_PATH = "/api/auth/callback/google";
 export const googleRedirectUri = () => `${publicUrl()}${GOOGLE_CALLBACK_PATH}`;
 
+/**
+ * Why the person went to Google: to log in, or to set up a firm's filing desk ("Continue with Google" on the
+ * sign-up page). Either way an existing account is signed in, and a Google account without one is offered the
+ * short set-up page; the purpose only decides which page a problem comes back to.
+ */
+export type GooglePurpose = "signin" | "signup";
+
+/**
+ * A Google identity with no account yet, waiting on /signup/google while the firm's details are typed. The ID
+ * token itself travels in the sealed cookie, so the engine checks Google's word again when the account is made.
+ */
+export const GOOGLE_SIGNUP_COOKIE = "g_signup";
+export const GOOGLE_SIGNUP_PATH = "/signup/google";
+export const GOOGLE_SIGNUP_TTL = 15 * 60;
+export interface GoogleSignup { idToken: string; nonce: string; email: string; name?: string; from: GooglePurpose }
+
 export function newGoogleRequest(): { state: string; nonce: string; verifier: string; url: string } {
   const state = randomBytes(18).toString("base64url"), nonce = randomBytes(18).toString("base64url"), verifier = randomBytes(48).toString("base64url");
   const q = new URLSearchParams({
-    client_id: process.env.GOOGLE_CLIENT_ID!, redirect_uri: googleRedirectUri(), response_type: "code", scope: "openid email",
+    client_id: process.env.GOOGLE_CLIENT_ID!, redirect_uri: googleRedirectUri(), response_type: "code", scope: "openid email profile",
     state, nonce, code_challenge: createHash("sha256").update(verifier).digest("base64url"), code_challenge_method: "S256", prompt: "select_account",
   });
   return { state, nonce, verifier, url: `https://accounts.google.com/o/oauth2/v2/auth?${q}` };

@@ -1,10 +1,13 @@
 "use server";
 
+import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { engine, EngineError, type Account, type ClientCompany, type SignInResult } from "./engine";
 import { readSession, writeSession } from "./session";
 import { finishSignIn } from "./sign-in";
 import { supportEmail, TERMS_VERSION } from "./brand";
+import { GOOGLE_SIGNUP_COOKIE, type GoogleSignup } from "./google";
+import { unseal } from "./seal";
 
 export type FormState = { error?: string; issues?: Record<string, string>; ok?: boolean; message?: string; link?: { href: string; label: string } } | null;
 
@@ -45,11 +48,10 @@ export async function signInWithEmail(_prev: FormState, fd: FormData): Promise<F
 const TYPES = new Set(["cpa", "payroll", "cfo", "title", "other"]);
 const STATES = new Set(["NY", "NJ", "FL"]);
 
-/** Partner sign-up: CPA, payroll and CFO firms. Depending on the platform's setting, the account waits for approval or opens at once. */
-export async function signUpPartner(_prev: FormState, fd: FormData): Promise<FormState> {
-  const body = {
-    companyName: text(fd, "companyName", 120), companyType: text(fd, "companyType", 20), name: text(fd, "name", 120),
-    email: text(fd, "email").toLowerCase(), password: String(fd.get("password") ?? ""),
+/** The firm's details as typed on either sign-up form, checked the same way. */
+function firmDetails(fd: FormData): { body: Record<string, unknown>; issues: Record<string, string> } {
+  const body: { companyName: string; companyType: string; phone?: string; website?: string; states: string[]; expectedVolume?: string; termsVersion: string } = {
+    companyName: text(fd, "companyName", 120), companyType: text(fd, "companyType", 20),
     phone: text(fd, "phone", 40) || undefined, website: text(fd, "website", 200) || undefined,
     states: fd.getAll("states").map(String).filter((s) => STATES.has(s)),
     expectedVolume: text(fd, "expectedVolume", 40) || undefined,
@@ -59,24 +61,70 @@ export async function signUpPartner(_prev: FormState, fd: FormData): Promise<For
   if (fd.get("terms") !== "on") issues.terms = "Agree to the Terms of Service and Privacy Policy to create an account.";
   if (body.companyName.length < 2) issues.companyName = "Enter your firm's name.";
   if (!TYPES.has(body.companyType)) issues.companyType = "Pick what kind of firm you are.";
+  if (body.website && !body.website.startsWith("https://")) body.website = `https://${body.website.replace(/^https?:\/\//, "")}`;
+  return { body, issues };
+}
+
+/** The engine's answer to a sign-up: the open account's session (automatic mode), or what it waits for. */
+type SignupAnswer = { status: "active" | "verify_email" | "pending"; approvalRequired: boolean } & Partial<SignInResult>;
+
+/**
+ * Partner sign-up with an email and password: CPA, payroll and CFO firms. Decided Nov 27: the account opens at
+ * once and the person lands on their filing desk, signed in. (A deployment set to "approval" instead sends
+ * them to confirm their email and wait.)
+ */
+export async function signUpPartner(_prev: FormState, fd: FormData): Promise<FormState> {
+  const { body: firm, issues } = firmDetails(fd);
+  const body = { ...firm, name: text(fd, "name", 120), email: text(fd, "email").toLowerCase(), password: String(fd.get("password") ?? "") };
   if (body.name.length < 2) issues.name = "Enter your name.";
   if (!EMAIL.test(body.email)) issues.email = "Enter your work email.";
   if (body.password !== String(fd.get("password2") ?? "")) issues.password2 = "The two passwords don't match.";
-  if (body.website && !body.website.startsWith("https://")) body.website = `https://${body.website.replace(/^https?:\/\//, "")}`;
   if (Object.keys(issues).length) return { error: "Check the highlighted fields.", issues };
-  let approvalRequired = true;
+  let r: SignupAnswer;
   try {
-    approvalRequired = (await engine<{ status: string; approvalRequired?: boolean }>(null, "/v1/signups/partner", { method: "POST", body })).approvalRequired !== false;
+    r = await engine<SignupAnswer>(null, "/v1/signups/partner", { method: "POST", body });
   } catch (e) {
     if (e instanceof EngineError && e.status === 422) {
       const found = issuesOf(e);
       return { error: found.password ? `Password: ${found.password}` : "Check the highlighted fields.", issues: found };
     }
+    if (e instanceof EngineError && e.status === 409) return { error: "That email already has an account.", issues: { email: "This email already has an account." }, link: { href: "/login", label: "Log in instead" } };
     if (e instanceof EngineError && e.status === 429) return { error: "Too many sign-ups from here. Try again later." };
     return { error: "We can't create your account right now. Try again in a minute." };
   }
-  // Every new account confirms its email first; some also wait for approval.
-  redirect(`/signup/sent${approvalRequired ? "" : "?open=1"}`);
+  if (r.sessionKey && r.user && r.expiresAt) return { error: await finishSignIn(r as SignInResult, "password") }; // redirects to the desk
+  // Approval mode: confirm the email first, then wait for the platform.
+  redirect(`/signup/sent${r.approvalRequired ? "" : "?open=1"}`);
+}
+
+/**
+ * Finishing a sign-up that began with "Continue with Google": the person's Google identity waits in the sealed
+ * cookie the callback set; only the firm's details are typed. The engine checks Google's token again before it
+ * makes the account, and the desk opens at once.
+ */
+export async function signUpPartnerWithGoogle(_prev: FormState, fd: FormData): Promise<FormState> {
+  const jar = await cookies();
+  const who = unseal<GoogleSignup & Record<string, unknown>>("google-signup", jar.get(GOOGLE_SIGNUP_COOKIE)?.value);
+  const startOver = { href: "/signup", label: "Start again" };
+  if (!who) return { error: "Your Google sign-in took too long, so we've let it go.", link: startOver };
+  const { body: firm, issues } = firmDetails(fd);
+  const body = { ...firm, idToken: who.idToken, nonce: who.nonce, name: text(fd, "name", 120) || undefined };
+  if (body.name && body.name.length < 2) issues.name = "Enter your name.";
+  if (Object.keys(issues).length) return { error: "Check the highlighted fields.", issues };
+  let r: SignupAnswer;
+  try {
+    r = await engine<SignupAnswer>(null, "/v1/signups/partner/google", { method: "POST", body });
+  } catch (e) {
+    if (e instanceof EngineError && e.status === 422) return { error: "Check the highlighted fields.", issues: issuesOf(e) };
+    if (e instanceof EngineError && e.status === 401) return { error: "Google no longer vouches for that sign-in.", link: startOver };
+    if (e instanceof EngineError && e.status === 409) return { error: `${who.email} already has an account.`, link: { href: "/login", label: "Log in instead" } };
+    if (e instanceof EngineError && e.status === 429) return { error: "Too many sign-ups from here. Try again later." };
+    if (e instanceof EngineError && e.status === 404) return { error: "Google sign-in isn't available here yet.", link: startOver };
+    return { error: "We can't create your account right now. Try again in a minute." };
+  }
+  jar.delete({ name: GOOGLE_SIGNUP_COOKIE, path: "/signup" });
+  if (r.sessionKey && r.user && r.expiresAt) return { error: await finishSignIn(r as SignInResult, "google") }; // redirects to the desk
+  redirect("/signup/sent?review=1");
 }
 
 /** Enterprise contact form on the landing page. Nothing is emailed from here: requests wait in the platform dashboard. */

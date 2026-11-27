@@ -44,6 +44,7 @@ function fakeStripe() {
     if (path === "/v1/customers") return Response.json({ id: "cus_123" });
     if (path === "/v1/checkout/sessions") return Response.json({ id: "cs_1", url: "https://checkout.stripe.com/c/pay/cs_1" });
     if (path === "/v1/billing_portal/sessions") return Response.json({ url: "https://billing.stripe.com/p/session/1" });
+    if (path.startsWith("/v1/subscriptions/") && init.method === "POST") return Response.json({ id: path.split("/").pop(), cancel_at_period_end: new URLSearchParams(init.body ?? "").get("cancel_at_period_end") === "true", current_period_end: 1_900_000_000 });
     if (path.startsWith("/v1/prices/")) return Response.json({ id: path.split("/").pop(), unit_amount: 9900, currency: "usd", recurring: { interval: "month", interval_count: 1 }, nickname: "Partner" });
     return Response.json({ error: { message: "no" } }, { status: 404 });
   }) as unknown as typeof fetch;
@@ -111,6 +112,17 @@ describe("subscribing", () => {
 
     const portal = await app.inject({ method: "POST", url: "/v1/client-companies/acme-cpa/billing/portal", headers: { "x-api-key": "k1" } });
     expect(portal.json().url).toBe("https://billing.stripe.com/p/session/1");
+
+    // Nov 27: the firm cancels its plan from its account (it runs to the period's end), then keeps it after all.
+    const cancelled = await app.inject({ method: "POST", url: "/v1/client-companies/acme-cpa/billing/cancel", headers: { "x-api-key": "k1" } });
+    expect(cancelled.statusCode).toBe(200);
+    expect(cancelled.json()).toMatchObject({ status: "active", cancelAtPeriodEnd: true, canFileLive: true, currentPeriodEnd: new Date(1_900_000_000 * 1000).toISOString() });
+    const call = stripe.calls.filter((x) => x.path === "/v1/subscriptions/sub_1" && x.method === "POST").at(-1)!;
+    expect(call.form.get("cancel_at_period_end")).toBe("true");
+    expect((await createLive()).statusCode).toBe(201); // paid through the period
+    const kept = await app.inject({ method: "POST", url: "/v1/client-companies/acme-cpa/billing/resume", headers: { "x-api-key": "k1" } });
+    expect(kept.json().cancelAtPeriodEnd).toBe(false);
+    expect((await store.getBillingAccount("firm:acme-cpa"))!.cancelAtPeriodEnd).toBe(false);
 
     // Payment failing keeps filing open while Stripe retries; cancellation closes it.
     await hook({ id: "evt_f", type: "invoice.payment_failed", created: now + 1, data: { object: { customer: "cus_123" } } });

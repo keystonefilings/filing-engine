@@ -43,6 +43,11 @@ export interface Account { tenantId: string; name: string; configured: boolean; 
 
 export interface PortalBrand { slug: string; publicPages?: boolean; displayName?: string; logoUrl?: string; logoArtifactId?: string; font?: string; fontArtifactId?: string; primaryColor?: string; secondaryColor?: string; supportEmail?: string; filingKinds?: string[] }
 
+export interface RoleAddress { street1: string; street2?: string; city: string; state: string; zip: string }
+export interface RolePerson { name: string; title?: string; email?: string; address?: RoleAddress }
+export type RoleCandidate = "partner" | "saved" | "ours" | "entity" | "member" | "client" | "other" | "service_company" | "filing_company" | "none";
+export interface StateRoleSettings { firm?: RolePerson; signer?: RolePerson; roles?: Record<string, { offer?: RoleCandidate[]; fixed?: RoleCandidate } | undefined> }
+
 export interface ClientCompany {
   /** Who "the filing company" is in this firm's authorizations (the engine works it out). */
   filerName?: string;
@@ -58,6 +63,10 @@ export interface ClientCompany {
   /** Set on firms that signed up themselves (partners of the platform). */
   partner?: PartnerProfile;
   payments?: PaymentSettings;
+  /** Decided Nov 27: which agent the firm's forms start with: ours (filing_company) or its own saved agents (client_provided). */
+  registeredAgentChoice?: "none" | "client_provided" | "filing_company";
+  /** Nov 27: per-state role settings (lib/state-roles.ts): the firm in each state, its signer there, and what each role offers or fixes. */
+  stateRoles?: Record<string, StateRoleSettings | undefined>;
   /** V22: the firm's saved registered agent per state. */
   registeredAgentsByState?: Record<string, { name: string; email?: string; address?: { street1: string; street2?: string; city: string; state: string; zip: string } } | undefined>;
   [k: string]: unknown;

@@ -64,11 +64,47 @@ describe("Sign in with Google", () => {
   });
 
   it("needs an account, confirms an unconfirmed email, and keeps disabled accounts out", async () => {
-    const none = await signIn(token({ email: "stranger@gmail.test" }));
+    const none = await signIn(token({ email: "Stranger@gmail.test", name: "Sam Stranger" }));
     expect(none.statusCode).toBe(404);
-    expect(none.json().status).toBe("no_account");
+    // The web app offers this person the sign-up page, with the email and name filled in.
+    expect(none.json()).toEqual({ error: "no account uses this Google email", status: "no_account", email: "stranger@gmail.test", name: "Sam Stranger" });
     expect((await signIn(token({ email: "new@acme.test" }))).statusCode).toBe(200);
     expect((await store.findUserByEmail("new@acme.test"))!.emailVerifiedAt).toBeTruthy();
     expect((await signIn(token({ email: "off@acme.test" }))).statusCode).toBe(403);
+  });
+});
+
+/** Nov 27: a firm signs up with Google; the account opens at once (automatic mode, the default). */
+describe("Sign up with Google", () => {
+  const firm = { companyName: "Stranger Payroll", companyType: "payroll", states: ["NJ"], termsVersion: "2026-11-26" };
+  const signUp = (idToken: string, body: object = firm, nonce = "n-1") => app.inject({ method: "POST", url: "/v1/signups/partner/google", payload: { idToken, nonce, ...body } });
+
+  it("opens the firm's desk, signed in, with Google's email already confirmed", async () => {
+    const r = await signUp(token({ email: "Sam@stranger.test", name: "Sam Stranger" }));
+    expect(r.statusCode).toBe(201);
+    expect(r.json()).toMatchObject({ status: "active", approvalRequired: false, user: { email: "sam@stranger.test", name: "Sam Stranger", kind: "partner", status: "active", clientCompanyId: "firm-stranger-payroll", emailConfirmed: true } });
+    const me = await app.inject({ method: "GET", url: "/v1/me", headers: { "x-api-key": r.json().sessionKey } });
+    expect(me.json().user.email).toBe("sam@stranger.test");
+    const u = (await store.findUserByEmail("sam@stranger.test"))!;
+    expect(u.termsAccepted?.version).toBe("2026-11-26");
+    expect(u.signup?.companyType).toBe("payroll");
+    expect(u.emailVerification).toBeUndefined();
+    expect((await store.getClientCompany("firm-stranger-payroll"))?.partner?.contactEmail).toBe("sam@stranger.test");
+    // From then on, Google signs them in.
+    expect((await signIn(token({ email: "sam@stranger.test" }))).statusCode).toBe(200);
+    // The same Google account again is told to log in instead; an email with an account too.
+    expect((await signUp(token({ email: "sam@stranger.test" }))).statusCode).toBe(409);
+    expect((await signUp(token({ email: "pat@acme.test" }))).statusCode).toBe(409);
+  });
+
+  it("takes the typed name over Google's, and refuses bad tokens and bad details", async () => {
+    const r = await signUp(token({ email: "lee@typed.test", name: "L" }), { ...firm, companyName: "Typed CPA", name: "Lee Typed" });
+    expect(r.statusCode).toBe(201);
+    expect(r.json().user.name).toBe("Lee Typed");
+    expect((await signUp(token({ email: "x@y.test" }), firm, "wrong-nonce")).statusCode).toBe(401);
+    expect((await signUp(token({ email: "x@y.test", email_verified: false }))).statusCode).toBe(401);
+    expect((await signUp(token({ email: "x@y.test" }), { companyName: "X" })).statusCode).toBe(422);
+    expect((await signUp(token({ email: "x@y.test" }), { ...firm, companyType: "bank" })).statusCode).toBe(422);
+    expect(await store.findUserByEmail("x@y.test")).toBeNull();
   });
 });

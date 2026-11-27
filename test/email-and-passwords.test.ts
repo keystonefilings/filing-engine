@@ -221,10 +221,9 @@ describe("change password (V2)", () => {
 
   it("is open to partner sessions too", async () => {
     const s = await post("/v1/signups/partner", { companyName: "Best Accounting", companyType: "cpa", name: "Pat Rivera", email: "pat@best-accounting.test", password: PW, states: ["NY"] });
-    expect(s.statusCode).toBe(202);
-    const link = outbox.linkFor("pat@best-accounting.test")!;
-    expect((await post("/v1/auth/verify-email", { token: new URL(link).searchParams.get("token") })).json().status).toBe("active");
-    const key = (await signIn("pat@best-accounting.test", PW)).json().sessionKey as string;
+    expect(s.statusCode).toBe(201); // automatic mode: open at once, with a session
+    expect(s.json().user.status).toBe("active");
+    const key = s.json().sessionKey as string;
     const r = await post("/v1/auth/change-password", { currentPassword: PW, newPassword: NEW_PW }, { "x-api-key": key });
     expect(r.statusCode).toBe(200);
   });

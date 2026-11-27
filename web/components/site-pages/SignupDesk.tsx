@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useMemo, useRef, useState, type CSSProperties } from "react";
-import { PartnerSignupForm } from "@/components/AuthForms";
+import { GoogleButton, PartnerSignupForm, Slip, type GoogleSignupIdentity, type SlipTone } from "@/components/AuthForms";
 import type { FormState } from "@/lib/accounts";
 import { readCarriedFirm, writeCarriedName } from "@/lib/firm-name-carry";
 import { firmVars, inkMatch } from "@/lib/design/ink";
@@ -30,9 +30,14 @@ function ClientHead({ name, color }: { name: string; color?: string }) {
  * name cut into it as it's typed, and the head of the firm's client pages set with it. A name carried from the home
  * page's Close arrives in "Firm name" as an ordinary entered value; typing writes it back to the same tab's storage.
  * The name reaches the server only as "Firm name" when the form is sent.
+ *
+ * Nov 27: "Continue with Google" sits above the form when Google sign-in is set up (`googleOn`). A sign-up that
+ * began with Google comes back here with `google` set: the heading says what's left (the firm), the email is
+ * Google's and there is no password. `notice` is why a Google sign-in came back to this page, if it did.
  */
-export function SignupDesk({ action, approvalRequired, platform }: {
+export function SignupDesk({ action, approvalRequired, platform, googleOn, google, notice }: {
   action: (prev: FormState, fd: FormData) => Promise<FormState>; approvalRequired: boolean; platform: string;
+  googleOn?: boolean; google?: GoogleSignupIdentity; notice?: { text: string; tone: SlipTone };
 }) {
   const [name, setName] = useState("");
   const [color, setColor] = useState<string | undefined>();
@@ -70,14 +75,18 @@ export function SignupDesk({ action, approvalRequired, platform }: {
       <div className="su2-col">
         <div className="acct2-card su2-card">
           <p className="t-kicker acct2-kicker">For firms</p>
-          <h1 className="t-display-m acct2-h1">Set up your firm&apos;s filing desk</h1>
-          <p className="t-lede acct2-lede">For firms that file for their clients. Confirm your email, put your name and logo on the door, and choose which card pays the state&apos;s fees. Your first filing can be a free rehearsal: nothing filed, nothing paid.</p>
+          <h1 className="t-display-m acct2-h1">{google ? "Finish setting up your filing desk" : "Set up your firm's filing desk"}</h1>
+          <p className="t-lede acct2-lede">{google
+            ? <>You&apos;re signed in with Google as {google.email}. Tell us about your firm and your filing desk opens right away. Then put your name and logo on the door, and choose which card pays the state&apos;s fees.</>
+            : <>For firms that file for their clients. Your filing desk opens the moment you sign up: put your name and logo on the door, and choose which card pays the state&apos;s fees. Your first filing can be a free rehearsal: nothing filed, nothing paid.</>}</p>
           <div className={["su2-inline", live && "is-live"].filter(Boolean).join(" ")}>
             <PlateName name={name} view="strip" rake={rake} />
             <div className="su2-inline-head"><ClientHead name={name} color={color} /></div>
           </div>
           <div className="acct2-body" onInput={onInput}>
-            <PartnerSignupForm action={action} approvalRequired={approvalRequired} />
+            {notice ? <Slip tone={notice.tone} role={notice.tone === "problem" ? "alert" : "status"}>{notice.text}</Slip> : null}
+            {googleOn && !google ? <><GoogleButton purpose="signup" /><hr className="acct2-rule" /></> : null}
+            <PartnerSignupForm action={action} approvalRequired={approvalRequired} google={google} />
           </div>
         </div>
         <p className="acct2-note su2-platforms">Building a filing product? <Link href="/platforms">See {platform} for platforms</Link>.</p>
