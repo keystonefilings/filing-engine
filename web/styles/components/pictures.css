@@ -849,19 +849,19 @@
 @media (prefers-reduced-motion: reduce) { .pstudio-swap { animation: none; } }
 @media (max-width: 1023px) {
   .pstudio-tray { grid-template-columns: 1fr; }
-  .pstudio-previews { grid-template-columns: 1fr 1fr; gap: 24px; }
+  .pstudio-previews { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 24px; }
   .pstudio-large { grid-column: 1 / -1; height: 560px; }
-  .pstudio-thumbs { grid-column: 1 / -1; grid-template-columns: 1fr 1fr; }
+  .pstudio-thumbs { grid-column: 1 / -1; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
 }
 @media (max-width: 599px) {
   .pstudio-tray { padding: 20px; }
   .pstudio-swatch { width: 48px; height: 48px; }
-  .pstudio-previews { grid-template-columns: 1fr; }
+  .pstudio-previews { grid-template-columns: minmax(0, 1fr); }
   .pstudio-large { height: 440px; }
   .pstudio :is(.pstudio-large, .pstudio-thumb) :is(.cpp, .pv-wash) { width: 100%; }
   .pstudio :is(.pstudio-large, .pstudio-thumb) :is(.cpp-sheet, .pv-sheet) { width: 100%; }
   .pstudio-large > div { width: 100%; }
-  .pstudio-thumbs { grid-template-columns: 1fr; gap: 24px; }
+  .pstudio-thumbs { grid-template-columns: minmax(0, 1fr); gap: 24px; }
   .pstudio-thumb > span:first-child { height: auto; max-height: 440px; }
   .pstudio-thumb > span:first-child > * { width: 100%; }
   .pstudio-thumb { cursor: default; }
