@@ -56,8 +56,8 @@
 .notice2.is-rehearsal { background: transparent; color: var(--text); position: relative; }
 .notice2.is-rehearsal > .dash { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; pointer-events: none; }
 .notice2.is-rehearsal > .dash rect { fill: none; stroke: currentColor; stroke-width: 1.5; stroke-dasharray: 4 3; vector-effect: non-scaling-stroke; }
-@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .reg-cofile :is(.notice2.is-turn, .notice2.is-attention, .notice2.is-problem, .notice2.is-done) { color: var(--ink); } }
-:root[data-theme="dark"] .reg-cofile :is(.notice2.is-turn, .notice2.is-attention, .notice2.is-problem, .notice2.is-done) { color: var(--ink); }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) :is(.reg-cofile, .shell2.reg-white) :is(.notice2.is-turn, .notice2.is-attention, .notice2.is-problem, .notice2.is-done) { color: var(--ink); } }
+:root[data-theme="dark"] :is(.reg-cofile, .shell2.reg-white) :is(.notice2.is-turn, .notice2.is-attention, .notice2.is-problem, .notice2.is-done) { color: var(--ink); }
 
 /* Tables (11.8): ruled, no zebra, the header in Graphite sentence case */
 .table2-wrap { overflow-x: auto; background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-sheet); }

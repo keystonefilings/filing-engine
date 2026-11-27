@@ -35,9 +35,6 @@ for (const colorScheme of ["light", "dark"] as const) {
           test(`${label}`, async ({ page, context, baseURL }) => {
             const filingId = process.env.CHECKS_DESK_FILING ?? "";
             test.skip(!filingId, `no engine at ${ENGINE_URL} (install the repository's dependencies: npm ci at the root)`);
-            // Known (Nov 27): in dark mode the desk keeps a white header and white cards under Night Ink text, so its nav,
-            // its notices and its proof card can't be read (axe: color-contrast, 1.2:1). Remove this line once it's fixed.
-            test.fixme(colorScheme === "dark", "the desk in dark mode: Night Ink text on white (color-contrast)");
             await context.addCookies([deskCookie(baseURL!)]);
             const target = `/p/${FIRM_SLUG}${path.replace(":id", filingId)}`;
             await page.goto(target, { waitUntil: "networkidle" });
