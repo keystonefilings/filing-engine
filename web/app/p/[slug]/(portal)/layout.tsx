@@ -31,8 +31,8 @@ export default async function PortalLayout({ children, params }: { children: Rea
       <BrandFont font={brand.font} />
       <AppShell
         home={base}
-        account={partner ? { name: brand.name, logoUrl: brand.logoUrl } : undefined}
-        white={partner ? undefined : { name: brand.name, logoUrl: brand.logoUrl, style: brandStyle(brand) }}
+        account={partner ? { name: brand.name, logoUrl: brand.logoUrl, logo: brand.logo } : undefined}
+        white={partner ? undefined : { name: brand.name, logoUrl: brand.logoUrl, logo: brand.logo, style: brandStyle(brand) }}
         user={user} links={links} footer={footer}
       >
         {children}
