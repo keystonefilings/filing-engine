@@ -68,6 +68,15 @@
   --cotton: #FBFAF6; --cotton-2: #F3F0E8; --field-bg: #fff; --field-ink: #1D2130;
   --filled: #F6EBD0; --filled-edge: #A87A1E; --chevron: initial;
 }
+/* A firm's sheet shown inside CoFile's look (a preview on the desk or dashboard, the gallery) keeps the light paper
+   above but its own register's inks: the firm's button text, links, focus, selection and rows. */
+.reg-cofile :is(.reg-firm, .reg-white) .sheet, .reg-cofile .sheet:is(.reg-firm, .reg-white) {
+  --page-2: var(--firm-wash); --link: var(--firm-ink); --link-line: var(--firm-ink); --focus: var(--firm-ink); --focus-gap: #fff;
+  --select: var(--firm-fill); --select-on: var(--firm-on); --select-fill: var(--firm-row); --select-line: var(--firm-select-line, var(--firm-fill));
+  --row: var(--firm-row); --halo: color-mix(in srgb, var(--firm-tint) 50%, transparent);
+  --bullet: var(--firm); --turn: var(--firm-ink); --turn-tint: #fff; --action-on: var(--firm-on);
+  --filled: var(--firm-row); --filled-edge: var(--firm);
+}
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) .sheet { box-shadow: var(--e-sheet-dark); }
 }

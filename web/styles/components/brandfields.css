@@ -23,7 +23,7 @@
 .logof2-help { margin: 0; max-width: 40ch; text-align: center; font-size: 0.9375rem; line-height: 1.4375rem; color: var(--text-2); }
 .logof2-half { display: grid; gap: 8px; margin: 0; align-content: start; }
 .logof2-half figcaption { font: 400 0.875rem/1.25rem var(--font-sans); color: var(--text-2); }
-.logof2-grid { display: grid; place-items: center; min-height: 104px; padding: 12px; background: repeating-conic-gradient(var(--page-2) 0 25%, #fff 0 50%) 0 0 / 16px 16px; border: 1px solid var(--line); }
+.logof2-grid { color-scheme: only light; display: grid; place-items: center; min-height: 104px; padding: 12px; background: repeating-conic-gradient(var(--page-2) 0 25%, #fff 0 50%) 0 0 / 16px 16px; border: 1px solid var(--line); }
 .logof2-grid img { display: block; max-width: 100%; max-height: 80px; }
 .logof2-sheet { display: flex; align-items: center; gap: 12px; min-height: 104px; padding: 12px 16px; background: #fff; color: #1D2130; border: 1px solid var(--line); color-scheme: light; }
 .logof2-sheet img { display: block; max-height: 40px; max-width: 60%; width: auto; object-fit: contain; }

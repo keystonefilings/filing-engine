@@ -41,8 +41,8 @@
 .acct2-logo img { display: block; height: 24px; width: auto; max-width: 160px; object-fit: contain; }
 .acct2-name { font: 500 1.0625rem/1.5rem var(--font-sans); color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
 /* On the dark desk the logo sits on a small white plate, the Name Plate's chamfered corners (10B.3.3) */
-@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .reg-cofile .acct2-logo { background: #fff; padding: 4px 6px; clip-path: polygon(4px 0, calc(100% - 4px) 0, 100% 4px, 100% calc(100% - 4px), calc(100% - 4px) 100%, 4px 100%, 0 calc(100% - 4px), 0 4px); } }
-:root[data-theme="dark"] .reg-cofile .acct2-logo { background: #fff; padding: 4px 6px; clip-path: polygon(4px 0, calc(100% - 4px) 0, 100% 4px, 100% calc(100% - 4px), calc(100% - 4px) 100%, 4px 100%, 0 calc(100% - 4px), 0 4px); }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .reg-cofile .acct2-logo { background: #fff; padding: 4px 6px; color-scheme: only light; clip-path: polygon(4px 0, calc(100% - 4px) 0, 100% 4px, 100% calc(100% - 4px), calc(100% - 4px) 100%, 4px 100%, 0 calc(100% - 4px), 0 4px); } }
+:root[data-theme="dark"] .reg-cofile .acct2-logo { background: #fff; padding: 4px 6px; color-scheme: only light; clip-path: polygon(4px 0, calc(100% - 4px) 0, 100% 4px, 100% calc(100% - 4px), calc(100% - 4px) 100%, 4px 100%, 0 calc(100% - 4px), 0 4px); }
 
 /* The navigation row: 52 px, sticky once the letterhead row has gone; current page underlined 2 px in Brass Line */
 .shell2-nav { position: sticky; top: 0; z-index: 20; background: var(--shell-bar); border-bottom: 1px solid var(--line); }
@@ -133,6 +133,7 @@ body:has(.shell2) > .beta-banner { display: none; }
 .shell2.is-white .shell2-head::after { content: ""; display: block; height: 6px; background: linear-gradient(var(--firm) 0 3px, transparent 3px 5px, var(--firm-2) 5px 6px); }
 .shell2-brand { display: inline-flex; align-items: center; min-width: 0; }
 .shell2-brand-logo { display: block; height: auto; max-height: 44px; min-height: 24px; max-width: 200px; object-fit: contain; }
+.shell2-brand-logo { box-sizing: content-box; padding: 4px 6px; margin: -4px -6px; background: #fff; color-scheme: only light; clip-path: polygon(4px 0, calc(100% - 4px) 0, 100% 4px, 100% calc(100% - 4px), calc(100% - 4px) 100%, 4px 100%, 0 calc(100% - 4px), 0 4px); }
 .shell2-brand-name { font: 600 1.375rem/1.75rem var(--font-firm, var(--font-sans-display)); color: #1D2130; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .shell2.is-white .shell2-link[aria-current="page"] .shell2-label::after { height: 3px; background: var(--firm-ink); }
 .shell2.is-white .shell2-sheet-links a[aria-current="page"]::before { background: var(--firm); }

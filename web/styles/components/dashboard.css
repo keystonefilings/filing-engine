@@ -183,8 +183,8 @@
 .dash2-mark.is-logo img { display: block; height: 32px; width: auto; max-width: 112px; object-fit: contain; }
 .dash2-mark.is-mono { width: 32px; font: 600 0.8125rem/1 var(--font-sans-display); letter-spacing: 0.02em; color: var(--page); background: var(--text); border-radius: 4px; corner-shape: bevel; }
 .dash2-mark.is-mono.is-firm { color: var(--firm-on); background: var(--firm-fill); }
-@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .reg-cofile .dash2-mark.is-logo { box-sizing: content-box; padding: 4px 6px; background: #fff; clip-path: polygon(4px 0, calc(100% - 4px) 0, 100% 4px, 100% calc(100% - 4px), calc(100% - 4px) 100%, 4px 100%, 0 calc(100% - 4px), 0 4px); } }
-:root[data-theme="dark"] .reg-cofile .dash2-mark.is-logo { box-sizing: content-box; padding: 4px 6px; background: #fff; clip-path: polygon(4px 0, calc(100% - 4px) 0, 100% 4px, 100% calc(100% - 4px), calc(100% - 4px) 100%, 4px 100%, 0 calc(100% - 4px), 0 4px); }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .reg-cofile .dash2-mark.is-logo { box-sizing: content-box; padding: 4px 6px; background: #fff; color-scheme: only light; clip-path: polygon(4px 0, calc(100% - 4px) 0, 100% 4px, 100% calc(100% - 4px), calc(100% - 4px) 100%, 4px 100%, 0 calc(100% - 4px), 0 4px); } }
+:root[data-theme="dark"] .reg-cofile .dash2-mark.is-logo { box-sizing: content-box; padding: 4px 6px; background: #fff; color-scheme: only light; clip-path: polygon(4px 0, calc(100% - 4px) 0, 100% 4px, 100% calc(100% - 4px), calc(100% - 4px) 100%, 4px 100%, 0 calc(100% - 4px), 0 4px); }
 
 /* ---- A firm (10C.8): the settings beside a live preview of its client page from 1024 px ---- */
 .dash2-firm-page { max-width: 720px; margin-inline: auto; }

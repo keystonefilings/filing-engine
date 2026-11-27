@@ -82,7 +82,7 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--focus);outline-offs
 .named{text-align:center;font:500 1.0625rem/1.5rem var(--font-sans-d);color:var(--ink);text-wrap:balance;padding-bottom:16px;border-bottom:1px solid var(--ink);margin-bottom:32px}
 .lh{display:grid;gap:16px;margin-bottom:32px}
 .lh-row{display:flex;justify-content:center;align-items:center;min-height:48px}
-.lh-logo{display:block;max-height:48px;max-width:240px;width:auto;object-fit:contain}
+.lh-logo{display:block;max-height:48px;max-width:240px;width:auto;object-fit:contain;box-sizing:content-box;padding:4px 6px;margin:-4px -6px;background:#fff;color-scheme:only light;clip-path:polygon(4px 0,calc(100% - 4px) 0,100% 4px,100% calc(100% - 4px),calc(100% - 4px) 100%,4px 100%,0 calc(100% - 4px),0 4px)}
 .lh-name{font:600 1.5rem/1.875rem var(--font-head);color:var(--ink)}
 .rule{display:grid;gap:2px}.rule::before{content:"";height:3px;background:var(--firm,var(--ink))}.rule::after{content:"";height:1px;background:var(--firm-2,var(--ink))}
 .rehearsal{position:relative;display:grid;grid-template-columns:16px 1fr;gap:12px;padding:16px 20px;margin-bottom:24px;font-weight:500}

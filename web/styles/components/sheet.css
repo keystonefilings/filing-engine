@@ -17,6 +17,10 @@
 .letterhead2 { display: grid; gap: 16px; }
 .letterhead2-row { display: flex; align-items: center; gap: 16px; min-height: 48px; }
 .letterhead2-logo { display: block; max-height: 48px; width: auto; max-width: 240px; object-fit: contain; }
+/* A firm's logo stays visible when a browser forces dark mode (owner's decision, Nov 26): it sits on a small white chip
+   with the Name Plate's cut corners, which forced darkening leaves alone (color-scheme: only light). On the white
+   sheet the chip can't be seen, and its negative margin keeps the logo exactly where it was. */
+.letterhead2-logo { box-sizing: content-box; padding: 4px 6px; margin: -4px -6px; background: #fff; color-scheme: only light; clip-path: polygon(4px 0, calc(100% - 4px) 0, 100% 4px, 100% calc(100% - 4px), calc(100% - 4px) 100%, 4px 100%, 0 calc(100% - 4px), 0 4px); }
 .letterhead2-name { font-family: var(--font-firm, var(--font-sans-display)); font-weight: 600; font-size: 1.5rem; line-height: 1.875rem; color: #1D2130; }
 @media (max-width: 599px) { .letterhead2-name { font-size: 1.25rem; line-height: 1.625rem; } .letterhead2-logo { max-height: 40px; } }
 .letterhead2.is-centred .letterhead2-row { justify-content: center; }
@@ -33,6 +37,8 @@
 /* The firm on a page in CoFile's look: its logo small, as content */
 .firmlogo2 { display: inline-flex; align-items: center; gap: 10px; font-weight: 500; }
 .firmlogo2 img { height: 24px; width: auto; max-width: 120px; object-fit: contain; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .reg-cofile .firmlogo2 img { box-sizing: content-box; padding: 4px 6px; background: #fff; color-scheme: only light; clip-path: polygon(4px 0, calc(100% - 4px) 0, 100% 4px, 100% calc(100% - 4px), calc(100% - 4px) 100%, 4px 100%, 0 calc(100% - 4px), 0 4px); } }
+:root[data-theme="dark"] .reg-cofile .firmlogo2 img { box-sizing: content-box; padding: 4px 6px; background: #fff; color-scheme: only light; clip-path: polygon(4px 0, calc(100% - 4px) 0, 100% 4px, 100% calc(100% - 4px), calc(100% - 4px) 100%, 4px 100%, 0 calc(100% - 4px), 0 4px); }
 .monogram2 { display: inline-grid; place-content: center; width: 24px; height: 24px; background: var(--ink); color: var(--cotton); font-size: 0.75rem; font-weight: 600; border-radius: 4px; corner-shape: bevel; }
 
 /* Notices (11.11): a quiet band with a glyph and words; never color alone */
