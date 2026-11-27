@@ -8,6 +8,7 @@ import { Notice, type NoticeTone } from "@/components/ui/Sheet";
 import { StageRule } from "@/components/desk/StageRule";
 import { sentBy } from "@/lib/sender";
 import "@/styles/components/desk.css";
+import "@/styles/components/desk-setup.css";
 import { nextStep, statusLabel } from "@/lib/status";
 import { filingKind } from "@/lib/intake/forms";
 import { missingInputs } from "@/lib/missing-fields";

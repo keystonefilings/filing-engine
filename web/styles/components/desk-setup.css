@@ -276,3 +276,79 @@
   .shell2-content .ds2-pwform .btn.primary { justify-self: stretch; }
 }
 }
+
+/* ---- A filing's record in print (12.6, 10B.13): a letter-size document, the firm's name at its head, the record's
+   details in order, the documents listed by name; no header, menu, buttons or page ground ---- */
+@layer components {
+@media print {
+  @page record { size: letter; margin: 0.75in; @bottom-center { content: counter(page) " / " counter(pages); font: 9pt/1 "Founders Grotesk", "Helvetica Neue", Arial, sans-serif; color: #555867; } }
+  .shell2:has(.filing2) {
+    page: record; display: block; min-height: 0; background: none; color: #1D2130; color-scheme: light;
+    /* Paper's own inks in either mode: nothing prints in Night */
+    --cotton: #fff; --cotton-2: #F3F0E8; --ink: #1D2130; --graphite: #555867; --rule: #DDD7CB; --rule-strong: #8A8578; --brass-line: #A87A1E;
+    --done: #2E6B57; --done-tint: #E4F0EA; --ochre: #855A0C; --ochre-tint: #F7EDD8; --madder: #9A2D2D; --madder-tint: #F8E6E3; --iron: #3F434F;
+    --page: #fff; --page-2: #F3F0E8; --surface: #fff; --text: #1D2130; --text-2: #555867; --line: #DDD7CB; --line-strong: #8A8578;
+    --link: #1D2130; --link-line: #A87A1E; --row: #fff; --shell-bar: #fff; --field-bg: #fff; --field-ink: #1D2130;
+    font-size: 10.5pt;
+  }
+  .shell2:has(.filing2) :is(.shell2-skip, .shell2-nav, .shell2-beta, .shell2-foot, .shell2-home, .shell2-divider, .shell2-spacer, .shell2-user, .shell2-menu, .shell2-sheet) { display: none !important; }
+  /* The named head: the firm's logo and name, over a hairline */
+  .shell2:has(.filing2) .shell2-head { position: static; background: none; border-bottom: 0.5pt solid #1D2130; }
+  .shell2:has(.filing2) .shell2-in { max-width: none; padding: 0; }
+  .shell2:has(.filing2) .shell2-head > .shell2-in { min-height: 0; padding: 0 0 8pt; }
+  .shell2:has(.filing2) .acct2-name { font: 500 11pt/14pt var(--font-sans); overflow: visible; white-space: normal; }
+  .shell2:has(.filing2) .acct2-logo { background: none; padding: 0; clip-path: none; }
+  .shell2:has(.filing2) .acct2-logo img { height: 20pt; }
+  .shell2:has(.filing2) .shell2-content { padding: 18pt 0 0; font: 400 10.5pt/15pt var(--font-sans); }
+
+  /* The record, top to bottom: no rail beside it, the papers after the details */
+  .shell2-content .filing2, .shell2-content .filing2.has-rail { display: block; max-width: none; }
+  .shell2-content .filing2-main { display: block; }
+  .shell2-content .filing2-main > * + * { margin-top: 12pt !important; }
+  .shell2-content .filing2-back, .shell2-content .filing2-google, .shell2-content .filing2-open, .shell2-content .filing2-proof p:has(.filing2-open) { display: none !important; }
+  .shell2-content .filing2-main h1 { margin: 0; font: 400 20pt/24pt var(--font-display); }
+  .shell2-content .filing2-chips { margin-top: 8pt !important; }
+  .shell2-content .filing2-meta { margin-top: 4pt !important; font-size: 9.5pt; line-height: 13pt; }
+  .shell2-content .filing2 h2 { margin: 0 0 6pt; font: 500 12pt/16pt var(--font-sans-display); }
+  .shell2-content .filing2 a { color: #1D2130; text-decoration: underline; text-decoration-color: #1D2130; text-decoration-thickness: 0.5pt; }
+
+  /* Status words with their glyphs, as ink outlines: a print keeps no fills, so nothing depends on one */
+  .shell2-content .filing2 .chip2 { background: none !important; color: #1D2130 !important; border: 0.5pt solid #1D2130; min-height: 0; padding: 2pt 6pt; font-size: 9pt; line-height: 12pt; }
+  .shell2-content .filing2 .chip2 > svg { width: 9pt; height: 9pt; margin-top: 1.5pt; }
+  .shell2-content .filing2 .chip2.is-rehearsal { border-style: dashed; }
+  .shell2-content .filing2 .chip2.is-rehearsal > .dash { display: none; }
+  .shell2-content .filing2 .chip2.is-done > svg { color: #2E6B57; } .shell2-content .filing2 .chip2.is-turn > svg, .shell2-content .filing2 .chip2.is-attention > svg { color: #855A0C; } .shell2-content .filing2 .chip2.is-problem > svg { color: #9A2D2D; }
+  .shell2-content .stagerule2 { print-color-adjust: exact; -webkit-print-color-adjust: exact; break-inside: avoid; }
+  .shell2-content .stagerule2-label { font-size: 8.5pt; line-height: 11pt; }
+
+  /* Slips as boxes drawn in a hairline, the rehearsal's dashed, each with its glyph */
+  .shell2-content .filing2 .notice2 { background: none !important; color: #1D2130 !important; box-shadow: none; border: 0.5pt solid #8A8578; padding: 8pt 10pt; font-size: 10pt; line-height: 14pt; break-inside: avoid; }
+  .shell2-content .filing2 .notice2.is-rehearsal { border: 0.5pt dashed #1D2130; }
+  .shell2-content .filing2 .notice2.is-rehearsal > .dash { display: none; }
+  .shell2-content .filing2-proof, .shell2-content .filing2-needed { padding: 12pt; border: 0.5pt solid #1D2130; box-shadow: none; break-inside: avoid; }
+  .shell2-content .filing2-proof p { margin: 0 0 6pt; }
+  .shell2-content .filing2-needed form, .shell2-content .filing2-needed .btn { display: none; }
+  .shell2-content .filing2-note, .shell2-content .filing2-sent { font-size: 9.5pt; }
+
+  /* Progress on the state site, opened, its steps in order */
+  .shell2-content .filing2-progress { border-top: 0.5pt solid #DDD7CB; padding-top: 6pt; }
+  .shell2-content .filing2-progress::details-content { content-visibility: visible; display: block; }
+  .shell2-content .filing2-progress > summary { min-height: 0; font-size: 11pt; }
+  .shell2-content .filing2-progress > summary::before { display: none; }
+  .shell2-content .filing2-progress li { padding: 2pt 0; font-size: 9.5pt; line-height: 13pt; break-inside: avoid; }
+  .shell2-content .filing2-progress li::before { top: 6pt; print-color-adjust: exact; -webkit-print-color-adjust: exact; }
+  .shell2-content .filing2-progress time { font-size: 9pt; }
+
+  /* The papers: listed by name, with their kind; the EIN in mono */
+  .shell2-content .filing2-rail { display: block; margin-top: 18pt; padding-top: 12pt; border-top: 0.5pt solid #DDD7CB; }
+  .shell2-content .filing2-rail > * + * { margin-top: 12pt; }
+  .shell2-content .filing2-docs { display: block; }
+  .shell2-content .filing2-docs li { display: flex; justify-content: space-between; gap: 12pt; padding: 4pt 0; border-bottom: 0.5pt solid #DDD7CB; break-inside: avoid; }
+  .shell2-content .filing2-docs a { display: block; }
+  .shell2-content .filing2-doc { display: none; }
+  .shell2-content .filing2-docs .filing2-doc-label { font: 500 10.5pt/14pt var(--font-sans); text-decoration: underline; text-decoration-color: #1D2130; text-decoration-thickness: 0.5pt; }
+  .shell2-content .filing2-doc-kind { font-size: 9.5pt; line-height: 14pt; }
+  .shell2-content .filing2-ein { padding: 8pt 10pt; border: 0.5pt solid #8A8578; font-size: 10pt; break-inside: avoid; }
+  .shell2-content .filing2-ein strong { font: 400 16pt/20pt var(--font-mono); }
+}
+}
