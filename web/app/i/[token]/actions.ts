@@ -14,7 +14,8 @@ export async function submitClientIntake(token: string, fd: FormData): Promise<I
   const key = intakeKey(link);
   const company = await loadCompany(key, link.clientCompanyId);
   const base = filingKind(link.kind);
-  const kind = base ? withFirmDefaults(base, company, { forClient: true }).kind : base;
+  const shaped = base ? withFirmDefaults(base, company, { forClient: true }) : undefined;
+  const kind = shaped?.kind;
   if (!kind || !offeredKinds(company).some((k) => k.id === kind.id)) return { ok: false, error: "This filing is no longer offered.", issues: [] };
   const record = await linkRecord(key, link.clientCompanyId, link.nonce).catch(() => null);
   if (record && record.state !== "open") return { ok: false, error: CLOSED_TEXT[record.state], issues: [] };
@@ -23,7 +24,7 @@ export async function submitClientIntake(token: string, fd: FormData): Promise<I
     apiKey: key, tenantId: link.tenantId, clientCompanyId: link.clientCompanyId,
     submittedBy: email ? `client:${email}` : "client", source: "client_link", dryRun: !liveFilings(kind.id),
     // One link, one filing: sending the form again returns the same filing.
-    allowSavedSignature: false, idempotencySeed: `${link.clientCompanyId}-${link.nonce}`,
+    allowSavedSignature: false, idempotencySeed: `${link.clientCompanyId}-${link.nonce}`, resolve: shaped?.resolve,
   });
   if (!r.ok) return r;
   if (record) await markLinkUsed(key, link.clientCompanyId, link.nonce, r.result.filing.id);

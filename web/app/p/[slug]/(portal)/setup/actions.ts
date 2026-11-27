@@ -8,6 +8,9 @@ import { FILING_KINDS } from "@/lib/intake/forms";
 import { applyLogo } from "@/lib/logo-upload";
 import { writeSession } from "@/lib/session";
 import type { AgentsState } from "@/components/AgentsForm";
+import type { RolesState } from "@/components/StateRolesForm";
+import { rolesForState, STATE_NAMES } from "@/lib/state-roles";
+import type { RoleCandidate, StateRoleSettings } from "@/lib/engine";
 
 export type SetupState = { error?: string; issues?: Record<string, string> } | null;
 type Step = "details" | "branding" | "payments";
@@ -107,6 +110,46 @@ export async function savePayments(slug: string, _prev: SetupState, fd: FormData
 }
 
 /** V22: saves the firm's registered agent per state (an empty name removes that state's agent). */
+const CANDIDATES = new Set<string>(["partner", "saved", "ours", "entity", "member", "client", "other", "service_company", "filing_company", "none"]);
+
+/**
+ * Nov 27: one state's role settings (lib/state-roles.ts). The firm's name and address in the state, who signs for
+ * it, and for each role what clients may choose and whether the firm fixed it. Offering or fixing "your firm"
+ * needs the firm's details in that state.
+ */
+export async function saveStateRoles(slug: string, state: string, _prev: RolesState, fd: FormData): Promise<RolesState> {
+  const { session } = await firmContext(slug);
+  const specs = rolesForState(state);
+  if (!specs.length) return { error: "No roles to set for this state." };
+  const issues: Record<string, string> = {};
+  const street1 = text(fd, "firm.street1", 120), city = text(fd, "firm.city", 80), zip = text(fd, "firm.zip", 10);
+  const firm: StateRoleSettings["firm"] | null = street1 || city || zip
+    ? { name: text(fd, "firm.name", 160) || "Your firm", address: { street1, ...(text(fd, "firm.street2", 120) ? { street2: text(fd, "firm.street2", 120) } : {}), city, state, zip } }
+    : null;
+  if (firm && (!street1 || !city || !/^\d{5}(-\d{4})?$/.test(zip))) issues.firm = `Fill in the street, city and ZIP of your firm's ${STATE_NAMES[state] ?? state} address, or leave them all empty.`;
+  const signerName = text(fd, "signer.name", 160);
+  const signer: StateRoleSettings["signer"] | null = signerName ? { name: signerName, title: text(fd, "signer.title", 80) || "Authorized Representative" } : null;
+  const roles: NonNullable<StateRoleSettings["roles"]> = {};
+  for (const spec of specs) {
+    const offer = fd.getAll(`roles.${spec.id}.offer`).map(String).filter((c) => CANDIDATES.has(c) && spec.optional.includes(c as RoleCandidate)) as RoleCandidate[];
+    const fixedRaw = text(fd, `roles.${spec.id}.fixed`, 20);
+    const fixed = fixedRaw && spec.decidable.includes(fixedRaw as RoleCandidate) ? (fixedRaw as RoleCandidate) : undefined;
+    const wantsPartner = offer.includes("partner") || fixed === "partner";
+    if (wantsPartner && spec.needs === "firm" && !firm) issues[`roles.${spec.id}`] = `To offer your firm here, fill in its ${STATE_NAMES[state] ?? state} address above.`;
+    if (wantsPartner && spec.needs === "signer" && !signer) issues[`roles.${spec.id}`] = "To offer your firm here, name who signs for it above.";
+    roles[spec.id] = { offer, ...(fixed ? { fixed } : {}) };
+  }
+  if (Object.keys(issues).length) return { error: "Check the highlighted fields.", issues };
+  try {
+    await engine(session.apiKey, `/v1/client-companies/${encodeURIComponent(session.clientCompanyId)}/profile`, { method: "PUT", body: { stateRoles: { [state]: { firm, signer, roles } } } });
+  } catch (e) {
+    if (e instanceof EngineError && e.status === 422) return { error: "Check the details: the address must be in this state." };
+    return { error: "That didn't save. Try again in a minute." };
+  }
+  revalidatePath(`/p/${encodeURIComponent(slug)}`, "layout");
+  return { ok: true, message: `Saved. New ${STATE_NAMES[state] ?? state} filings offer these answers.` };
+}
+
 /** Decided Nov 27: the firm chooses ours ($59 a year per business, billed to the firm) or its own saved agents as the answer its forms start with. */
 export async function saveAgentChoice(slug: string, _prev: AgentsState, fd: FormData): Promise<AgentsState> {
   const { session } = await firmContext(slug);

@@ -47,6 +47,10 @@ export default async function SetupPage({ params }: { params: Promise<{ slug: st
         <span className="setup2-what"><strong>Registered agents <span className="muted">(optional)</span></strong><span>Use ours ($59 a year per business, billed to your firm), or save the agent you use in each state so nobody types it again.</span></span>
         <Link className="btn small" href={`${base}/setup/agents`}>{company.registeredAgentChoice || Object.keys(company.registeredAgentsByState ?? {}).length ? "Change" : "Choose"}</Link>
       </div>
+      <div className="setup2-card">
+        <span className="setup2-what"><strong>Who&apos;s named on your filings <span className="muted">(optional)</span></strong><span>State by state: which answers your clients may choose for service of process, registered agent, organizer, filer and signer, and which you decide.</span></span>
+        <Link className="btn small" href={`${base}/setup/roles`}>{Object.keys(company.stateRoles ?? {}).length ? "Change" : "Choose"}</Link>
+      </div>
       {/* The email-domain card (decision 37, 10B.5.1): its words are stand-ins until the copy owner writes them */}
       <div className="setup2-card is-next-card">
         <span className="setup2-what">

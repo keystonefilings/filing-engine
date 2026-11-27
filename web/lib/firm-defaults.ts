@@ -1,6 +1,7 @@
 import type { ClientCompany } from "./engine";
 import type { FilingKind } from "./intake/forms";
 import { platformName } from "./brand.ts";
+import { applyStateRoles, type Resolver } from "./state-roles.ts";
 
 /**
  * V22: a firm's saved settings fill or skip questions on its forms (the partner's own filings,
@@ -52,7 +53,22 @@ function ourAgentChoice(kind: FilingKind, company: Partial<Pick<ClientCompany, "
   } as FilingKind;
 }
 
-export function withFirmDefaults(kind: FilingKind, company: Pick<ClientCompany, "registeredAgentsByState"> & Partial<Pick<ClientCompany, "name" | "portal" | "partner" | "ourAgent" | "registeredAgentChoice">>, opts: { forClient?: boolean } = {}): { kind: FilingKind; prefill: Record<string, string> } {
+type FirmForForms = Pick<ClientCompany, "registeredAgentsByState"> & Partial<Pick<ClientCompany, "name" | "portal" | "partner" | "ourAgent" | "registeredAgentChoice" | "stateRoles" | "filerName">>;
+
+/**
+ * A firm's saved settings shape its forms (V22, decision 9, and the per-state roles of Nov 27), and the
+ * resolver turns each role's answer into the engine's fields on submit (lib/state-roles.ts).
+ */
+export function withFirmDefaults(kind: FilingKind, company: FirmForForms, opts: { forClient?: boolean } = {}): { kind: FilingKind; prefill: Record<string, string>; resolve: Resolver } {
+  const base = withSavedSettings(kind, company, opts);
+  if (!company.partner) return { ...base, resolve: () => [] };
+  const roles = applyStateRoles(base.kind, { name: "", ...company }, !!opts.forClient);
+  // A role the firm's settings now ask about is no longer filled in behind the client's back.
+  const prefill = Object.fromEntries(Object.entries(base.prefill).filter(([k]) => !roles.applied.some((a) => k.startsWith(`${a.spec.base}.`))));
+  return { kind: roles.kind, prefill, resolve: roles.resolve };
+}
+
+function withSavedSettings(kind: FilingKind, company: FirmForForms, opts: { forClient?: boolean }): { kind: FilingKind; prefill: Record<string, string> } {
   kind = ourAgentChoice(kind, company, !!opts.forClient);
   // A client filling the firm's form never sees "copy receipts to this email": the state's copy
   // goes to the firm (adapters/copies.ts), not to whoever filled in the form.

@@ -128,6 +128,18 @@ describe("partner sign-up with approval", () => {
     expect(prof.statusCode).toBe(200);
     expect(prof.json().clientCompany.portal.primaryColor).toBe("#123456");
     expect(prof.json().clientCompany.registeredAgentChoice).toBe("filing_company");
+    // Nov 27: per-state role settings. One state at a time; a wrong-state address is refused; null clears a state.
+    const ny = { firm: { name: "Rivera CPA", address: { street1: "1 Broadway", city: "New York", state: "NY", zip: "10004" } }, roles: { serviceOfProcess: { offer: ["partner"] }, filer: { offer: ["partner"], fixed: "partner" } } };
+    const roles = await app.inject({ method: "PUT", url: `/v1/client-companies/${firm}/profile`, headers: as(key), payload: { stateRoles: { NY: ny } } });
+    expect(roles.statusCode).toBe(200);
+    expect(roles.json().clientCompany.stateRoles.NY).toEqual(ny);
+    const nj = await app.inject({ method: "PUT", url: `/v1/client-companies/${firm}/profile`, headers: as(key), payload: { stateRoles: { NJ: { signer: { name: "Pat Rivera", title: "Authorized Representative" }, roles: { signer: { offer: ["partner"] }, registeredAgent: { offer: ["entity", "member"] } } } } } });
+    expect(Object.keys(nj.json().clientCompany.stateRoles).sort()).toEqual(["NJ", "NY"]);
+    expect(nj.json().clientCompany.stateRoles.NY.roles.filer.fixed).toBe("partner");
+    expect((await app.inject({ method: "PUT", url: `/v1/client-companies/${firm}/profile`, headers: as(key), payload: { stateRoles: { NJ: { firm: { name: "Rivera CPA", address: { street1: "1 Broadway", city: "New York", state: "NY", zip: "10004" } } } } } })).statusCode).toBe(422);
+    expect((await app.inject({ method: "PUT", url: `/v1/client-companies/${firm}/profile`, headers: as(key), payload: { stateRoles: { NY: { roles: { filer: { fixed: "someone" } } } } } })).statusCode).toBe(422);
+    const cleared = await app.inject({ method: "PUT", url: `/v1/client-companies/${firm}/profile`, headers: as(key), payload: { stateRoles: { NY: null } } });
+    expect(Object.keys(cleared.json().clientCompany.stateRoles)).toEqual(["NJ"]);
     expect((await app.inject({ method: "PUT", url: `/v1/client-companies/${firm}/profile`, headers: as(key), payload: { registeredAgentChoice: "none" } })).statusCode).toBe(422);
     expect((await app.inject({ method: "PUT", url: `/v1/client-companies/${firm}/profile`, headers: as(key), payload: { paymentRouting: { defaultMethodId: "nope" } } })).statusCode).toBe(422);
     expect((await app.inject({ method: "PUT", url: "/v1/client-companies/acme-cpa/profile", headers: as(key), payload: { name: "Taken" } })).statusCode).toBe(404);

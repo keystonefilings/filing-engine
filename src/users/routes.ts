@@ -2,7 +2,7 @@ import { createHash, randomBytes, randomUUID, timingSafeEqual } from "node:crypt
 import type { FastifyInstance, FastifyReply, FastifyRequest } from "fastify";
 import { z } from "zod";
 import type { InquiryRecord, Store, UserRecord } from "../store/types.js";
-import { ClientCompanySettings, TenantSettings } from "../settings/schema.js";
+import { ClientCompanySettings, RoleCandidate, TenantSettings } from "../settings/schema.js";
 import { PaymentRouting, PaymentSettings } from "../settings/payments.js";
 import { dummyHash, hashPassword, passwordProblem, verifyPassword } from "./password.js";
 import { mintSessionKey, type SessionClaims } from "./session-token.js";
@@ -127,6 +127,16 @@ const InquiryBody = z.object({
   website: z.string().max(0).optional(),
 });
 const NewUserBody = z.object({ email, name: z.string().trim().min(2).max(120), password: z.string().max(200) });
+/** Nov 27: a partner's per-state role settings, one state per entry (null clears the state). */
+const ROLE_STATES = z.enum(["NY", "NJ", "FL", "MO"]);
+const RoleAddressIn = z.object({ street1: z.string().trim().min(2).max(120), street2: z.string().trim().max(120).optional(), city: z.string().trim().min(2).max(80), state: ROLE_STATES, zip: z.string().regex(/^\d{5}(-\d{4})?$/) });
+const StateRoleSettingsIn = z.object({
+  firm: z.object({ name: z.string().trim().min(2).max(160), address: RoleAddressIn }).nullable().optional(),
+  signer: z.object({ name: z.string().trim().min(2).max(160), title: z.string().trim().max(80).optional() }).nullable().optional(),
+  roles: z.record(z.string().regex(/^[a-zA-Z]{1,40}$/), z.object({ offer: z.array(RoleCandidate).max(10).default([]), fixed: RoleCandidate.optional() })).optional(),
+});
+const StateRolesIn = z.partialRecord(ROLE_STATES, z.union([StateRoleSettingsIn, z.null()]))
+  .refine((m) => Object.entries(m).every(([st, v]) => !v?.firm || v.firm.address.state === st), { message: "the firm's address must be in that state" });
 const ProfileBody = z.object({
   name: z.string().trim().min(2).max(120).optional(),
   partner: z.object({
@@ -154,6 +164,8 @@ const ProfileBody = z.object({
   copyEmail: z.string().trim().toLowerCase().email().nullable().optional(),
   /** Decided Nov 27: the firm's forms start with ours (the platform's resold agent, $59 a year per business) or its own saved agents. */
   registeredAgentChoice: z.enum(["client_provided", "filing_company"]).optional(),
+  /** Nov 27: per-state role settings (web/lib/state-roles.ts): the firm in each state, its signer there, and what each role offers or fixes. */
+  stateRoles: StateRolesIn.optional(),
   /** V22: the firm's registered agent per state (null removes one). */
   registeredAgents: z.partialRecord(z.enum(["NY", "NJ", "FL", "MO"]), z.union([z.object({
     name: z.string().trim().min(2).max(160),
@@ -163,7 +175,6 @@ const ProfileBody = z.object({
     .refine((m) => !m || Object.entries(m).every(([st, a]) => !a || a.address.state === st), { message: "each agent's address must be in its own state" }),
 });
 const DecisionBody = z.object({ action: z.enum(["approve", "reject"]) });
-
 /** Accounts made before email confirmation existed have no emailVerification and count as confirmed. */
 export const emailConfirmed = (u: UserRecord) => !u.emailVerification || !!u.emailVerifiedAt;
 
@@ -192,6 +203,22 @@ export async function portalSlugFor(store: Store, tenantId: string, c: { clientC
   let slug = base;
   for (let i = 2; taken.has(slug) || RESERVED_SLUGS.has(slug); i++) slug = `${base}-${i}`;
   return slug;
+}
+
+/** One state's settings replace that state's; a null clears it; the firm, signer and roles each keep their old value when not sent. */
+function mergeStateRoles(prev: ClientCompanySettings["stateRoles"], sent: z.infer<typeof StateRolesIn>): ClientCompanySettings["stateRoles"] {
+  const out = { ...(prev ?? {}) } as NonNullable<ClientCompanySettings["stateRoles"]>;
+  for (const [st, v] of Object.entries(sent) as [keyof typeof out, z.infer<typeof StateRoleSettingsIn> | null | undefined][]) {
+    if (v === undefined) continue;
+    if (v === null) { delete out[st]; continue; }
+    const was = out[st];
+    out[st] = {
+      firm: v.firm === undefined ? was?.firm : v.firm ?? undefined,
+      signer: v.signer === undefined ? was?.signer : v.signer ?? undefined,
+      roles: v.roles ?? was?.roles ?? {},
+    };
+  }
+  return out;
 }
 
 export function registerUsers(app: FastifyInstance, deps: UsersDeps): void {
@@ -742,6 +769,7 @@ export function registerUsers(app: FastifyInstance, deps: UsersDeps): void {
       ...(b.copyEmail !== undefined ? { copyEmail: b.copyEmail ?? undefined } : {}),
       ...(b.registeredAgents ? { registeredAgentsByState: Object.fromEntries(Object.entries({ ...c.registeredAgentsByState, ...b.registeredAgents }).filter(([, v]) => v)) } : {}),
       ...(b.registeredAgentChoice ? { registeredAgentChoice: b.registeredAgentChoice } : {}),
+      ...(b.stateRoles ? { stateRoles: mergeStateRoles(c.stateRoles, b.stateRoles) } : {}),
     };
     const checked = ClientCompanySettings.safeParse(next);
     if (!checked.success) return reply.code(422).send({ error: "validation failed", issues: checked.error.issues.map((i) => ({ path: i.path.join("."), message: i.message })) });

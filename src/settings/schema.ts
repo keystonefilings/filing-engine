@@ -164,6 +164,16 @@ export type TenantSettings = z.infer<typeof TenantSettings>;
  * Client company = a customer firm of the service company (CPA, title company, payroll
  * company). In Scope 2 these are Keystone's customers using Keystone's front end.
  */
+/** Who a role on a filing can be: the partner firm, its saved agent, our agent service, the new entity itself, one of its members, the client, someone typed in, a service company, the filing company, or nobody. */
+export const RoleCandidate = z.enum(["partner", "saved", "ours", "entity", "member", "client", "other", "service_company", "filing_company", "none"]);
+export type RoleCandidate = z.infer<typeof RoleCandidate>;
+export const StateRoleSettings = z.object({
+  firm: Person.optional(),
+  signer: Person.optional(),
+  roles: z.record(z.string().regex(/^[a-zA-Z]{1,40}$/), z.object({ offer: z.array(RoleCandidate).max(10).default([]), fixed: RoleCandidate.optional() })).default({}),
+});
+export type StateRoleSettings = z.infer<typeof StateRoleSettings>;
+
 export const ClientCompanySettings = z.object({
   clientCompanyId: z.string().min(1),
   tenantId: z.string().min(1),
@@ -187,6 +197,13 @@ export const ClientCompanySettings = z.object({
   njStoredPaymentMethod: z.enum(["stored_card", "stored_echeck"]).optional(),
   /** This firm's own NY drawdown account; used only when answer G1 is "own_account". */
   nyDrawdownAccountRef: z.string().optional(),
+  /**
+   * Nov 27: a partner firm's per-state role settings (web/lib/state-roles.ts holds each state's roles). For each
+   * state: the firm as it is named there (its name and an address in that state, used wherever a client picks the
+   * firm for a role), who signs for the firm there, and for each role which answers the firm's forms offer its
+   * clients (`offer`, besides the state's own answers) or fix for every filing (`fixed`).
+   */
+  stateRoles: z.partialRecord(z.enum(["NY", "NJ", "FL", "MO"]), StateRoleSettings).optional(),
   /** V22: the firm's own registered agent per state, used when a filing names none. */
   registeredAgentsByState: z.object({ NY: Person.optional(), NJ: Person.optional(), FL: Person.optional(), MO: Person.optional() }).optional(),
   registeredAgent: Person.optional(),
