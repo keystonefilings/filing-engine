@@ -152,4 +152,127 @@
 .ds2-answers li { position: relative; padding-left: 20px; font: 400 1rem/1.5rem var(--font-sans); color: var(--text); }
 .ds2-answers li::before { content: ""; position: absolute; left: 2px; top: 11px; width: 8px; height: 1.5px; background: var(--bullet); }
 .ds2-decide { display: grid; padding-left: 16px; border-left: 2px solid var(--line); }
+
+/* ---- Billing (10B.18): the plan and this month on seven of twelve columns, then the plans, then our agent service ---- */
+.shell2-content .ds2-bill > .ds2-notices { display: grid; gap: 16px; }
+.ds2-bill-top { display: grid; gap: 24px; max-width: 690px; }
+.shell2-content .ds2-bill .ds2-plan { max-width: none !important; display: grid; gap: 16px; }
+.shell2-content .ds2-bill .ds2-plan > * { margin: 0; }
+.shell2-content .ds2-bill .ds2-plan-head { flex-wrap: nowrap; align-items: center; gap: 12px 16px; }
+.shell2-content .ds2-bill .ds2-plan-head > strong { font: 500 1.375rem/1.75rem var(--font-sans-display); }
+.shell2-content .ds2-bill .ds2-plan-head .chip2 { flex: none; }
+.shell2-content .ds2 .ds2-price { display: flex; flex-wrap: wrap; align-items: baseline; gap: 0 6px; margin: 4px 0 0; font: 400 1.0625rem/1.625rem var(--font-sans); color: var(--text); }
+.shell2-content .ds2 .ds2-price + .ds2-renews { margin-top: -8px; }
+.ds2-fig { font: 400 2.25rem/2.625rem var(--font-display); font-variant-numeric: lining-nums tabular-nums; letter-spacing: -0.003em; color: var(--text); }
+.shell2-content .ds2-bill .ds2-plan-actions { gap: 12px; margin-top: 8px; }
+.shell2-content .ds2-bill .ds2-plan-actions form { margin: 0; }
+.shell2-content .ds2-bill .ds2-plan-actions:empty { display: none; }
+.shell2-content .ds2-bill .ds2-confirm { display: grid; gap: 16px; padding: 20px; background: var(--page-2); box-shadow: inset 3px 0 0 var(--line-strong); }
+.shell2-content .ds2-bill .ds2-confirm > *, .shell2-content .ds2-bill .ds2-confirm p { margin: 0; }
+.shell2-content .ds2-bill .ds2-confirm .row form { margin: 0; }
+.shell2-content .ds2 .ds2-help { margin-top: 8px; max-width: 64ch; }
+@media (max-width: 599px) {
+  .shell2-content .ds2-bill .ds2-plan-head { flex-direction: column; align-items: flex-start; gap: 8px; }
+  .shell2-content .ds2-bill .ds2-plan-head > .spacer { display: none; }
+  .ds2-fig { font-size: 1.75rem; line-height: 2.125rem; }
+  .shell2-content .ds2-bill :is(.ds2-plan-actions, .ds2-confirm .row) { flex-direction: column; align-items: stretch; }
+  .shell2-content .ds2-bill :is(.ds2-plan-actions, .ds2-confirm .row) .btn { width: 100%; min-height: 56px; }
+}
+
+/* This month: a 12 px meter, the plan's own filings in Plate Ink, any past them in Graphite, a tick where the plan's end */
+.ds2-month { display: grid; gap: 16px; }
+.ds2-month-head { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 4px 16px; }
+.ds2-dates { font: 400 0.9375rem/1.4375rem var(--font-sans); color: var(--text-2); font-variant-numeric: tabular-nums; }
+.ds2-meter { position: relative; height: 12px; margin: 4px 0; background: var(--page-2); box-shadow: inset 0 0 0 1px var(--line); }
+.ds2-meter > span { position: absolute; top: 0; bottom: 0; }
+.ds2-meter-own { left: 0; width: var(--own); background: var(--text); }
+.ds2-meter-carried { left: var(--own); width: var(--carried); background: var(--text-2); }
+.ds2-meter-tick { left: var(--tick); top: -4px !important; bottom: -4px !important; width: 1px; background: var(--text); }
+@media (forced-colors: active) { .ds2-meter { border: 1px solid CanvasText; } .ds2-meter-own, .ds2-meter-tick { background: CanvasText; } .ds2-meter-carried { background: GrayText; } }
+.shell2-content .ds2 .ds2-month-line { margin: 0; }
+
+/* The period: a two-part segmented control, 48 px, the selected part Plate Ink with Cotton words */
+.ds2-picker { display: grid; gap: 24px; }
+.ds2-picker > * { margin: 0; }
+.ds2-period { display: inline-flex; justify-self: start; border: 1px solid var(--text); border-radius: 4px; corner-shape: bevel; overflow: hidden; }
+.shell2-content .ds2 .ds2-seg { position: relative; display: inline-flex; align-items: center; justify-content: center; min-height: 46px; margin: 0; padding: 0 20px; font: 500 1rem/1.25rem var(--font-sans); color: var(--text); cursor: pointer; }
+.ds2-seg + .ds2-seg { border-left: 1px solid var(--text); }
+.ds2-seg input { position: absolute; inset: 0; width: 100%; height: 100%; margin: 0; opacity: 0; cursor: pointer; }
+.shell2-content .ds2 .ds2-seg:has(input:checked) { background: var(--text); color: var(--page); }
+.ds2-seg:has(input:focus-visible) { outline: 2px solid var(--focus); outline-offset: -5px; }
+.ds2-seg:has(input:checked:focus-visible) { outline-color: var(--page); }
+@media (hover: hover) { .shell2-content .ds2 .ds2-seg:not(:has(input:checked)):hover { background: var(--row); } }
+@media (forced-colors: active) { .ds2-seg:has(input:checked) { outline: 2px solid Highlight; outline-offset: -4px; } }
+@media (max-width: 599px) { .ds2-period { display: flex; justify-self: stretch; } .shell2-content .ds2 .ds2-seg { flex: 1 1 0; padding: 0 12px; text-align: center; } }
+
+/* The plans: four ruled cards, the current one marked by a 2 px Plate Ink rule along its top */
+.ds2-plans { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 24px; }
+@media (max-width: 1099px) { .ds2-plans { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 599px) { .ds2-plans { grid-template-columns: minmax(0, 1fr); gap: 16px; } }
+.ds2-plancard { display: flex; flex-direction: column; gap: 12px; min-width: 0; padding: 32px; background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-sheet); }
+.ds2-plancard.is-current { box-shadow: inset 0 2px 0 var(--text); border-top-color: var(--text); }
+.ds2-plancard > * { margin: 0 !important; }
+.ds2-plancard-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; min-height: 28px; }
+.shell2-content .ds2 .ds2-plancard h3 { margin: 0; font: 500 1.375rem/1.75rem var(--font-sans-display); color: var(--text); }
+.shell2-content .ds2 .ds2-plancard .chip2.is-quiet { color: var(--text); background: var(--page-2); }
+.shell2-content .ds2 .ds2-planprice { display: flex; flex-wrap: wrap; align-items: baseline; gap: 0 6px; min-height: 2.625rem; font: 400 1.0625rem/1.625rem var(--font-sans); color: var(--text); }
+.ds2-nofee { font: 500 1.375rem/2.625rem var(--font-sans-display); }
+.shell2-content .ds2 .ds2-blurb { font: 400 0.9375rem/1.4375rem var(--font-sans); color: var(--text); }
+.shell2-content .ds2 .ds2-detail { font: 400 0.9375rem/1.4375rem var(--font-sans); color: var(--text-2); }
+.ds2-plancard > .ds2-planbutton { margin-top: auto !important; padding-top: 12px; }
+.shell2-content .ds2 .ds2-planbutton .btn { width: 100%; }
+@media (max-width: 599px) { .ds2-plancard { padding: 24px 20px; } .ds2-plancard .ds2-fig { font-size: 1.75rem; } .shell2-content .ds2 .ds2-planbutton .btn { min-height: 56px; } }
+
+/* Our registered agent service: the offer line and the dashboard's ledger; on phones each business a block */
+.ds2-ra { display: grid; gap: 16px; }
+.ds2-ra > * { margin: 0; }
+.ds2-ledger { border: 1px solid var(--line); border-radius: var(--r-sheet); overflow: hidden; }
+.shell2-content .ds2-ledger table { width: 100%; border-collapse: collapse; font: 400 1rem/1.375rem var(--font-sans); }
+.shell2-content .ds2-ledger thead :is(th, td) { height: 44px; padding: 0 16px; font: 500 0.875rem/1.125rem var(--font-sans); color: var(--text-2); text-align: left; vertical-align: middle; background: var(--page-2); border-bottom: 1px solid var(--line); }
+.shell2-content .ds2-ledger tbody :is(th, td) { padding: 12px 16px; text-align: left; vertical-align: middle; font-weight: 400; border-bottom: 0; background: none; }
+.shell2-content .ds2-ledger tbody tr + tr > * { border-top: 1px solid var(--line); }
+.shell2-content .ds2-ledger tbody th { font-weight: 500; }
+.ds2-num { font-size: 0.9375rem; color: var(--text-2); font-variant-numeric: tabular-nums; }
+.shell2-content .ds2-ledger .ds2-ledger-action { width: 1%; white-space: nowrap; text-align: right; }
+.shell2-content .ds2-ledger .ds2-ledger-action form { margin: 0; }
+@media (max-width: 759px) {
+  .ds2-ledger { border: 0; overflow: visible; }
+  .ds2-ledger table, .ds2-ledger tbody, .ds2-ledger tr { display: block; }
+  .ds2-ledger thead { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
+  .shell2-content .ds2-ledger tbody tr { display: grid; grid-template-columns: auto 1fr; gap: 8px 16px; padding: 16px; border: 1px solid var(--line); border-radius: var(--r-sheet); }
+  .shell2-content .ds2-ledger tbody tr + tr { margin-top: 12px; }
+  .shell2-content .ds2-ledger tbody tr + tr > * { border-top: 0; }
+  .shell2-content .ds2-ledger tbody :is(th, td) { display: block; padding: 0; }
+  .shell2-content .ds2-ledger tbody th { grid-column: 1 / -1; font-size: 1.0625rem; }
+  .shell2-content .ds2-ledger td[data-label] { grid-column: 1 / -1; }
+  .ds2-ledger td[data-label]::before { content: attr(data-label); display: block; font: 500 0.875rem/1.125rem var(--font-sans); color: var(--text-2); }
+  .shell2-content .ds2-ledger .ds2-ledger-action { grid-column: 1 / -1; width: auto; text-align: left; }
+  .shell2-content .ds2-ledger .ds2-ledger-action:empty { display: none; }
+  .shell2-content .ds2-ledger .ds2-ledger-action .btn { width: 100%; min-height: 48px; }
+}
+
+/* ---- Password (10B.19): two white sheets, 480 px wide; "Change password" the page's Brass ---- */
+.shell2-content .ds2-pw :is(.ds2-pwform > .card, .ds2-phone > .card) { box-sizing: border-box; max-width: 480px !important; }
+.shell2-content .ds2-pwform > form.card { display: grid; gap: 20px; }
+.shell2-content .ds2-pwform > form.card > * { margin: 0; }
+.shell2-content .ds2-pw .field { display: grid; gap: 8px; margin: 0; }
+.shell2-content .ds2-pw label { margin: 0; font: 500 1rem/1.375rem var(--font-sans); }
+.shell2-content .ds2-pw :is(input[type=password], input[type=tel], input:not([type])) { width: 100%; min-height: 52px; padding: 0 16px; font-size: 1.125rem; }
+.shell2-content .ds2-pw .err { display: flex; align-items: center; gap: 8px; font: 500 0.9375rem/1.375rem var(--font-sans); color: var(--madder); }
+.shell2-content .ds2-pw .err::before { content: ""; flex: none; width: 12px; height: 4px; background: currentColor; }
+.shell2-content .ds2-pwform > form.card > .help { margin-top: -4px; }
+.shell2-content .ds2-pwform .btn.primary { justify-self: start; background: var(--action); color: var(--action-on); }
+@media (hover: hover) { .shell2-content .ds2-pwform .btn.primary:hover { background: var(--action-hover); } }
+.shell2-content .ds2-pwform .btn.primary[disabled] { opacity: .85; cursor: progress; }
+.shell2-content .ds2-phone > .card > strong { display: block; margin-bottom: 16px; font: 500 1.25rem/1.625rem var(--font-sans-display); }
+.shell2-content .ds2-phone > .card.stack > * + *, .shell2-content .ds2-phone form.stack > * + * { margin-top: 16px; }
+.shell2-content .ds2-phone > .card > p, .shell2-content .ds2-phone form > p { margin-bottom: 0; }
+.shell2-content .ds2-phone form > .help { margin-top: 12px; }
+.shell2-content .ds2-phone input[autocomplete="one-time-code"] { width: calc(6 * (0.6em + 0.3em) + 32px); max-width: 100%; min-height: 56px; padding: 0 16px; font: 400 1.5rem/2rem var(--font-mono); letter-spacing: 0.3em; }
+.shell2-content .ds2-phone .card > p strong { font-weight: 500; }
+@media (max-width: 599px) {
+  .shell2-content .ds2-pw :is(input[type=password], input[type=tel], input:not([type])) { min-height: 56px; }
+  .shell2-content .ds2-pw .btn { width: 100%; min-height: 56px; }
+  .shell2-content .ds2-pwform .btn.primary { justify-self: stretch; }
+}
 }
