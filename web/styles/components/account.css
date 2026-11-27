@@ -64,7 +64,11 @@
 .acct2-head-link.is-quiet { text-decoration: none; position: relative; }
 .acct2-head-link.is-quiet::after { content: ""; position: absolute; left: 0; right: 0; bottom: -6px; height: 1px; background: transparent; transition: background-color var(--t-quick) var(--ease-settle); }
 @media (hover: hover) { .acct2-head-link.is-quiet:hover::after { background: var(--text); } }
-@media (max-width: 639px) { .acct2-head-row { height: 64px; } }
+@media (max-width: 639px) {
+  .acct2-head-row { height: auto; min-height: 64px; }
+  /* A longer label (Spanish runs 20 to 30% longer: merged spec 12.4) wraps under itself instead of pushing the page sideways. */
+  .acct2-head-link { white-space: normal; text-align: right; }
+}
 
 .acct2-main { padding-block: 96px 128px; }
 @media (max-width: 1023px) { .acct2-main { padding-block: 72px 96px; } }

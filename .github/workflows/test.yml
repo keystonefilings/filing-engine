@@ -1,7 +1,8 @@
 # Runs on every pull request and every push to main, and before each deploy (fly-deploy.yml calls
 # it): the engine's typecheck and full test suite (including the tests that drive a real Chromium
-# against the local fixture sites), and the web app's typecheck, tests and build. Read-only: no
-# secrets, no deploy, nothing leaves the runner.
+# against the local fixture sites), the web app's typecheck, tests and build, and the site checks
+# (axe, screenshots, the pseudo-locale, the performance budgets). Read-only: no secrets, no deploy;
+# only the site checks' reports leave the runner, as artifacts of the run.
 name: Tests
 
 on:
@@ -56,3 +57,67 @@ jobs:
       - run: npm run typecheck
       - run: npm test
       - run: npm run build
+
+  # The site's automated checks against its production build (web/design/BUILDING.md, "The automated checks"): axe on
+  # every public page, the design gallery and the desk; the screenshots compared with the committed baselines; the +35%
+  # pseudo-locale; the performance budgets. Beside the jobs above, so it adds little to the wait. Pinned to Ubuntu 24.04
+  # because the screenshot baselines are made there (a new runner image would redraw every page).
+  site-checks:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    defaults:
+      run:
+        working-directory: web
+    env:
+      ENGINE_API_URL: http://127.0.0.1:8093
+      PORTAL_SESSION_SECRET: ci-build-only-not-a-real-secret-0123456789
+      NEXT_TELEMETRY_DISABLED: "1"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: |
+            package-lock.json
+            web/package-lock.json
+            web/tests/perf/package-lock.json
+      - name: Install the engine (it runs in memory beside the site, for the desk's pages)
+        working-directory: .
+        run: npm ci --omit=dev
+      - run: npm ci
+      - name: Install Chromium, and the two font packages the screenshots are drawn with (tests/fonts.conf)
+        run: |
+          npx playwright install --with-deps chromium
+          sudo apt-get install -y --no-install-recommends fonts-liberation fonts-dejavu-core fonts-dejavu-mono
+      - run: npm ci --prefix tests/perf --no-audit --no-fund
+      - id: build
+        run: npm run build
+      - name: Accessibility, screenshots and the pseudo-locale
+        id: site
+        run: npm run check:site
+      - name: Performance budgets
+        if: ${{ !cancelled() && steps.build.outcome == 'success' }}
+        run: npm run check:perf
+      # A screenshot that changed on purpose: this run's pictures, ready to commit as the new baselines
+      # (download the "visual-baselines" artifact into web/tests/visual/linux).
+      - name: Redraw the changed baselines
+        if: ${{ failure() && steps.site.outcome == 'failure' }}
+        continue-on-error: true
+        run: npx playwright test -c tests/playwright.config.ts --project=visual --update-snapshots=changed --retries=0 && node tests/visual/compress.mjs
+      - uses: actions/upload-artifact@v4
+        if: ${{ failure() && steps.site.outcome == 'failure' }}
+        with:
+          name: visual-baselines
+          path: web/tests/visual/linux
+          retention-days: 14
+      - uses: actions/upload-artifact@v4
+        if: ${{ !cancelled() && steps.build.outcome == 'success' }}
+        with:
+          name: site-checks-report
+          path: |
+            web/tests/report
+            web/tests/test-results
+            web/tests/perf/report.json
+          retention-days: 14
+          if-no-files-found: ignore

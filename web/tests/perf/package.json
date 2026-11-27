@@ -1,0 +1,10 @@
+{
+  "name": "cofile-perf-checks",
+  "private": true,
+  "description": "Lighthouse for the performance budgets (web/tests/perf/budgets.mjs), kept out of the site's own dependencies so the deployed build doesn't install it.",
+  "type": "module",
+  "dependencies": {
+    "chrome-launcher": "1.2.3",
+    "lighthouse": "13.6.0"
+  }
+}
