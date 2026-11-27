@@ -6,7 +6,7 @@ import type { Store } from "../store/types.js";
 import { portalSlugFor, type Auth } from "../users/routes.js";
 import { fontType, MAX_FONT_BYTES } from "../settings/fonts.js";
 import { needsPlate, platedLogoCached } from "../brand/logo-plate.js";
-import { analyzeLogo } from "../brand/logo-analysis.js";
+import { analyzeLogo, trimLogo } from "../brand/logo-analysis.js";
 
 /** Largest logo we keep, in bytes. The front end shrinks big pictures before sending. */
 export const MAX_LOGO_BYTES = 512 * 1024;
@@ -62,9 +62,12 @@ export function registerBrandLogos(app: FastifyInstance, deps: Deps): void {
     const type = logoType(bytes);
     if (!type) return reply.code(422).send({ error: "validation failed", issues: [{ path: "data", message: "the logo must be a PNG, JPEG or WebP picture" }] });
     const c = own.company;
-    const meta = await deps.artifacts.put({ filingId: `brand-${c.clientCompanyId}`, kind: "brand_logo", label: "Logo", contentType: type }, bytes);
+    // Processed at upload (3.5.1): its empty margin trimmed, as Branding does in the browser, for a logo sent by the API.
+    const trimmed = await trimLogo(bytes);
+    const logo = trimmed && trimmed.body.length <= MAX_LOGO_BYTES ? trimmed : { body: bytes, type };
+    const meta = await deps.artifacts.put({ filingId: `brand-${c.clientCompanyId}`, kind: "brand_logo", label: "Logo", contentType: logo.type }, logo.body);
     // Read at upload (3.5.1): its shape, its edge, and whether its marks are light, so every page shows it right.
-    const info = await analyzeLogo(bytes);
+    const info = await analyzeLogo(logo.body);
     const next = ClientCompanySettings.parse({
       ...c,
       portal: {

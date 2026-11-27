@@ -173,7 +173,7 @@ function letterheadFirm(f: FirmLetterhead, look: Look): string {
   const padY = seen ? LIGHT_PLATE_PAD_Y : PLATE_PAD;
   const shown = box ? (plated ? { width: box.width + 2 * PLATE_PAD, height: box.height + 2 * padY } : box) : null;
   const logo = f.logo
-    ? `<img src="${esc(f.logo.url)}"${shown ? ` width="${shown.width}" height="${shown.height}"` : ` height="40"`} alt="${showName ? "" : esc(f.name)}" style="display:block;margin:0 auto;border:0;outline:none;${shown ? `width:${shown.width}px;height:${shown.height}px;` : "height:40px;width:auto;max-width:260px;"}${type(SANS, 20, 26, 600, INK)}">`
+    ? `<img src="${esc(f.logo.url)}"${shown ? ` width="${shown.width}" height="${shown.height}"` : ` height="40"`} alt="${showName ? "" : esc(f.name)}" style="display:block;margin:0 auto;${f.logo.busy ? `border:1px solid ${RULE};` : "border:0;"}outline:none;${shown ? `width:${shown.width}px;height:${shown.height}px;` : "height:40px;width:auto;max-width:260px;"}${type(SANS, 20, 26, 600, INK)}">`
     : "";
   const alone = !f.logo;
   const name = showName

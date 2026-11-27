@@ -22,7 +22,7 @@ const ART = new FsArtifactStore("var/test-artifacts");
 
 /** A 700 × 100 wordmark: seven white letters (bars) on transparent, drawn for a dark website. */
 const lightLogo = () => sharp({ create: { width: 700, height: 100, channels: 4, background: { r: 0, g: 0, b: 0, alpha: 0 } } })
-  .composite(Array.from({ length: 7 }, (_, i) => ({ input: { create: { width: 60, height: 100, channels: 4 as const, background: { r: 255, g: 255, b: 255, alpha: 1 } } }, top: 0, left: i * 100 + 20 })))
+  .composite(Array.from({ length: 7 }, (_, i) => ({ input: { create: { width: 64, height: 100, channels: 4 as const, background: { r: 255, g: 255, b: 255, alpha: 1 } } }, top: 0, left: i * 106 })))
   .png().toBuffer();
 /** A Plate Ink square on transparent: an ordinary logo. */
 const darkLogo = () => sharp({ create: { width: 240, height: 240, channels: 4, background: { r: 0, g: 0, b: 0, alpha: 0 } } })
@@ -77,6 +77,14 @@ describe("the dark plate baked into a light logo for email", () => {
     expect(html).toContain(`width="${56 + 2 * PLATE_PAD}" height="${56 + 2 * LIGHT_PLATE_PAD_Y}"`);
     expect(html).toMatch(/x-name"[^>]*padding-top:12px/);
   });
+
+  it("draws a photograph's 1 px Rule hairline, and none round any other logo", () => {
+    const letter = { ...proseLetter("Hello", "Hello."), side: "firm" as const };
+    const photo = renderEmail({ subject: "s", body: "b", letter: { ...letter, firm: { name: "Lakeview Tax", logo: { url: "https://api.test/l.jpg", width: 480, height: 320, busy: true } } } }).html;
+    expect(photo).toMatch(/<img src="https:\/\/api.test\/l.jpg"[^>]*border:1px solid #DDD7CB;/);
+    const plain = renderEmail({ subject: "s", body: "b", letter: { ...letter, firm: { name: "Lakeview Tax", logo: { url: "https://api.test/l.png", width: 480, height: 320 } } } }).html;
+    expect(plain).toMatch(/<img src="https:\/\/api.test\/l.png"[^>]*border:0;/);
+  });
 });
 
 describe("the engine keeps the reading with the logo", () => {
@@ -123,6 +131,25 @@ describe("the engine keeps the reading with the logo", () => {
     const c = (await store.getClientCompany("older"))!;
     const again = await withLogoInfo({ store, artifacts: ART }, { ...c, portal: { ...c.portal!, logoArtifactId: fresh.id } });
     expect(again.portal?.logoInfo).toMatchObject({ artifactId: fresh.id, light: false });
+  });
+
+  it("trims a logo sent with an empty margin to its ink and 4% (3.5.1), and leaves a trimmed one as sent", async () => {
+    const padded = await sharp({ create: { width: 1000, height: 600, channels: 4, background: { r: 0, g: 0, b: 0, alpha: 0 } } })
+      .composite([{ input: { create: { width: 200, height: 60, channels: 4, background: { r: 15, g: 118, b: 110, alpha: 1 } } }, top: 270, left: 400 }]).png().toBuffer();
+    const up = await app.inject({ method: "PUT", url: "/v1/client-companies/kitefold/logo", headers: as, payload: { data: padded.toString("base64") } });
+    const stored = await ART.get(up.json().logoArtifactId as string);
+    expect(await sharp(stored!.body).metadata()).toMatchObject({ format: "png", width: 204, height: 64 });
+    expect((await store.getClientCompany("kitefold"))?.portal?.logoInfo).toMatchObject({ width: 204, height: 64, background: "transparent" });
+    // A JPEG on a white box keeps a little of its box, and stays a JPEG.
+    const jpeg = await whiteBox();
+    const j = await app.inject({ method: "PUT", url: "/v1/client-companies/kitefold/logo", headers: as, payload: { data: jpeg.toString("base64") } });
+    const jm = await sharp((await ART.get(j.json().logoArtifactId as string))!.body).metadata();
+    expect(jm.format).toBe("jpeg");
+    expect(jm.width).toBeLessThan(170);
+    // Already trimmed: stored exactly as sent.
+    const tight = await lightLogo();
+    const t = await app.inject({ method: "PUT", url: "/v1/client-companies/kitefold/logo", headers: as, payload: { data: tight.toString("base64") } });
+    expect((await ART.get(t.json().logoArtifactId as string))!.body.equals(tight)).toBe(true);
   });
 
   it("serves the dark plate at ?bg=, and nothing for a color that isn't one", async () => {

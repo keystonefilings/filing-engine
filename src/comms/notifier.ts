@@ -244,7 +244,9 @@ export class Notifier {
         // app forces dark mode (owner's decision, Nov 26).
         return { url: `${url}/plate`, ...size, plate: true };
       }
-      return size ? { url, ...size } : { url };
+      // A photograph or a busy picture is shown as uploaded inside a 1 px Rule hairline (3.5.1).
+      const busy = got ? (currentLogoInfo(portal) ?? await analyzeLogo(got.body))?.background === "busy" : false;
+      return size ? { url, ...size, ...(busy ? { busy } : {}) } : { url };
     }
     return portal?.logoUrl?.startsWith("https://") ? { url: portal.logoUrl } : undefined;
   }

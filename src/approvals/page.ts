@@ -88,6 +88,7 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--focus);outline-offs
 .lh-logo{display:block;max-height:48px;max-width:240px;width:auto;object-fit:contain;box-sizing:content-box;padding:4px 6px;margin:-4px -6px;background:#fff;color-scheme:only light;clip-path:polygon(4px 0,calc(100% - 4px) 0,100% 4px,100% calc(100% - 4px),calc(100% - 4px) 100%,4px 100%,0 calc(100% - 4px),0 4px)}
 .lh-row.is-stacked{flex-direction:column;gap:12px}
 .lh-logo.is-sized{width:var(--lw);height:var(--lh);max-width:none;max-height:none}
+.lh-logo.is-busy{padding:0;margin:0;clip-path:none;box-shadow:0 0 0 1px ${L.rule}}
 .lh-logo.is-plate{padding:8px 12px;margin:0;background:var(--plate);clip-path:polygon(6px 0,calc(100% - 6px) 0,100% 6px,100% calc(100% - 6px),calc(100% - 6px) 100%,6px 100%,0 calc(100% - 6px),0 6px)}
 .lh-name{font:600 1.5rem/1.875rem var(--font-head);color:var(--ink)}
 .rule{display:grid;gap:2px}.rule::before{content:"";height:3px;background:var(--firm,var(--ink))}.rule::after{content:"";height:1px;background:var(--firm-2,var(--ink))}
@@ -171,7 +172,7 @@ function letterheadRow(p: PageLook): string {
   const big = logoSize(info, "sheet"), small = logoSize(info, "phone");
   const named = !isWide(info.ratio) && !!p.brandName;
   const style = `--lw:${big.width}px;--lh:${big.height}px;--lw-s:${small.width}px;--lh-s:${small.height}px${plate ? `;--plate:${plate}` : ""}`;
-  const img = `<img class="lh-logo is-sized${plate ? " is-plate" : ""}" src="${esc(p.logoUrl)}" width="${Math.round(big.width)}" height="${Math.round(big.height)}" alt="${named ? "" : esc(p.brandName ?? "")}" style="${style}">`;
+  const img = `<img class="lh-logo is-sized${plate ? " is-plate" : info.background === "busy" ? " is-busy" : ""}" src="${esc(p.logoUrl)}" width="${Math.round(big.width)}" height="${Math.round(big.height)}" alt="${named ? "" : esc(p.brandName ?? "")}" style="${style}">`;
   return `<div class="lh-row${named ? " is-stacked" : ""}">${img}${named ? `<span class="lh-name">${esc(p.brandName)}</span>` : ""}</div>`;
 }
 
