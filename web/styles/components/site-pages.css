@@ -7,7 +7,7 @@
 .pg2-head, .pg2-band { --gut: 24px; }
 
 /* ── The title page (10A.0.2) ─────────────────────────────────────────────────────────────────────────────── */
-.pg2-head { position: relative; background: var(--page); padding-block: 96px 128px; }
+.pg2-head { position: relative; background: var(--page); padding-block: 58px 54px; }
 .pg2-head-in { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); column-gap: var(--gut); align-items: start; }
 .pg2-head-words { grid-column: 1 / span 8; min-width: 0; }
 .pg2-kicker { display: flex; align-items: baseline; gap: 12px; margin: 0 0 16px; }
@@ -17,12 +17,12 @@
 .pg2-line { display: block; }
 .pg2-barmark { display: none; }
 @media (max-width: 1023px) {
-  .pg2-head { padding-block: 72px 96px; }
+  .pg2-head { padding-block: 48px 44px; }
   .pg2-head-in { grid-template-columns: repeat(8, minmax(0, 1fr)); }
   .pg2-head-words { grid-column: 1 / -1; }
 }
 @media (max-width: 639px) {
-  .pg2-head { padding-block: 48px 64px; }
+  .pg2-head { padding-block: 32px 36px; }
   .pg2-head-in { grid-template-columns: minmax(0, 1fr); }
   .pg2-kicker { margin-bottom: 12px; }
   .pg2-lede { margin-top: 16px; }
@@ -31,16 +31,16 @@
 }
 
 /* ── Bands (10A.0.3) ──────────────────────────────────────────────────────────────────────────────────────── */
-.pg2-band { background: var(--page); padding-block: var(--above, 128px) var(--below, 160px); }
-.pg2-band.is-show { --above: 128px; --below: 160px; }
-.pg2-band.is-support { --above: 96px; --below: 112px; }
+.pg2-band { background: var(--page); padding-block: var(--above, 80px) var(--below, 96px); }
+.pg2-band.is-show { --above: 80px; --below: 96px; }
+.pg2-band.is-support { --above: 68px; --below: 76px; }
 .pg2-band.is-alt { background: var(--page-2); }
 @media (max-width: 1023px) {
-  .pg2-band.is-show { --above: 96px; --below: 128px; }
-  .pg2-band.is-support { --above: 72px; --below: 88px; }
+  .pg2-band.is-show { --above: 64px; --below: 76px; }
+  .pg2-band.is-support { --above: 44px; --below: 52px; }
 }
 @media (max-width: 639px) {
-  .pg2-band.is-show { --above: 64px; --below: 80px; }
+  .pg2-band.is-show { --above: 48px; --below: 56px; }
   .pg2-band.is-support { --above: 56px; --below: 64px; }
 }
 /* Bands on the same ground don't add up: the gap is the first band's space below. */
@@ -50,14 +50,14 @@
 /* The stage (What we file's "How a filing type goes live."): Night in either mode, Night Ink type. The theatre is
    always dark, so its inks are set here rather than read from the page's light or dark register. */
 .pg2-band.is-stage {
-  --above: 128px; --below: 160px;
+  --above: 80px; --below: 96px;
   background: var(--stage); color: var(--night-ink);
   --text: var(--night-ink); --text-2: #A9ABB5; --line: #323646; --line-strong: #6E7180;
   --link: var(--night-ink); --link-line: var(--brass); --focus: var(--night-ink); --focus-gap: var(--stage);
   color-scheme: dark;
 }
-@media (max-width: 1023px) { .pg2-band.is-stage { --above: 96px; --below: 128px; } }
-@media (max-width: 639px) { .pg2-band.is-stage { --above: 64px; --below: 80px; } }
+@media (max-width: 1023px) { .pg2-band.is-stage { --above: 64px; --below: 76px; } }
+@media (max-width: 639px) { .pg2-band.is-stage { --above: 48px; --below: 56px; } }
 
 /* Headings and ledes in bands */
 .pg2-h2 { color: var(--text); text-wrap: balance; }
@@ -88,7 +88,7 @@
 @media (max-width: 639px) { .pg2-list { gap: 14px; } }
 
 /* ── The page close (10A.0.4) ─────────────────────────────────────────────────────────────────────────────── */
-.pg2-close { background: var(--page-2); --above: 96px; --below: 128px; }
+.pg2-close { background: var(--page-2); --above: 64px; --below: 76px; }
 .pg2-close-h2 { max-width: calc((100% - 11 * 24px) / 12 * 8 + 7 * 24px); color: var(--text); text-wrap: balance; }
 .pg2-close-lede { margin-top: 24px; max-width: min(34em, calc((100% - 11 * 24px) / 12 * 7 + 6 * 24px)); color: var(--text); }
 .pg2-close-ctas { display: flex; flex-wrap: wrap; gap: 16px; margin-top: 48px; }

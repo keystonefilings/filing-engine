@@ -4,9 +4,8 @@ import "@/styles/components/button.css";
 import "@/styles/components/shell.css";
 import "@/styles/components/site.css";
 import { platformName, supportEmail } from "@/lib/brand";
-import { betaOn } from "@/lib/beta";
-import { Chip } from "@/components/ui/Chip";
 import { Lockup } from "@/components/shell/Lockup";
+import { PublicBetaNotice } from "./PublicBetaNotice";
 import { SiteHeader } from "./SiteHeader";
 import { ThemeSwitch } from "./ThemeSwitch";
 
@@ -33,14 +32,7 @@ export function SiteShell({ children }: { children: ReactNode }) {
   return (
     <div className="site2 reg-cofile">
       <a className="shell2-skip" href="#content">Skip to content</a>
-      {betaOn() ? (
-        <div className="site2-beta" role="note">
-          <div className="site2-in">
-            <Chip tone="rehearsal" compact>Beta</Chip>
-            <span>{name} is in beta. Any filing can run as a free rehearsal on the state&apos;s real website. It stops before the last button, so nothing is filed or paid. Filing types go live one at a time. Questions or problems? <a href={`mailto:${email}`}>{email}</a></span>
-          </div>
-        </div>
-      ) : null}
+      <PublicBetaNotice />
       <SiteHeader name={name} email={email} nav={SITE_NAV} lockup={<Lockup height={28} name={name} />} />
       <main id="content" className="site2-main" tabIndex={-1}>{children}</main>
       <footer className="site2-foot">

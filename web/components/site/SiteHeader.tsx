@@ -13,8 +13,8 @@ import { useEffect, useRef, useState, type ReactNode } from "react";
 export function SiteHeader({ name, email, nav, lockup }: { name: string; email: string; nav: { href: string; label: string }[]; lockup: ReactNode }) {
   const path = usePathname() ?? "/";
   const [compact, setCompact] = useState(false);
-  const [brassInView, setBrassInView] = useState(false);
-  const [seenBrass, setSeenBrass] = useState(false);
+  const [brassInView, setBrassInView] = useState(path === "/");
+  const [pastFirstBrass, setPastFirstBrass] = useState(false);
   const [typing, setTyping] = useState(false);
   const [open, setOpen] = useState(false);
   const sheetRef = useRef<HTMLDialogElement>(null);
@@ -30,13 +30,18 @@ export function SiteHeader({ name, email, nav, lockup }: { name: string; email: 
   // Watch the page's own Brass buttons: while one is on screen, the header's stays an outline and the bar stays away.
   useEffect(() => {
     const els = [...document.querySelectorAll<HTMLElement>("[data-brass-cta]")];
-    setSeenBrass(els.length > 0);
-    if (!els.length) return;
+    setPastFirstBrass(false);
+    if (!els.length) {
+      setBrassInView(false);
+      return;
+    }
     const visible = new Set<Element>();
     const io = new IntersectionObserver((entries) => {
       for (const e of entries) { if (e.isIntersecting) visible.add(e.target); else visible.delete(e.target); }
       setBrassInView(visible.size > 0);
-    }, { threshold: 0 });
+      const first = els.find((el) => el.getClientRects().length > 0);
+      setPastFirstBrass(!!first && first.getBoundingClientRect().bottom <= 64);
+    }, { rootMargin: "-64px 0px 0px", threshold: 0 });
     els.forEach((el) => io.observe(el));
     return () => io.disconnect();
   }, [path]);
@@ -64,7 +69,7 @@ export function SiteHeader({ name, email, nav, lockup }: { name: string; email: 
   const current = (href: string) => path === href || path.startsWith(`${href}/`);
   // On a page with no Brass button of its own, the header's is Brass from the start.
   const headerBrass = !brassInView;
-  const barShown = seenBrass && !brassInView && !typing && !open;
+  const barShown = pastFirstBrass && !brassInView && !typing && !open;
 
   return (
     <>

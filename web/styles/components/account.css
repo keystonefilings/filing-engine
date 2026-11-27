@@ -70,25 +70,25 @@
   .acct2-head-link { white-space: normal; text-align: right; }
 }
 
-.acct2-main { padding-block: 96px 128px; }
-@media (max-width: 1023px) { .acct2-main { padding-block: 72px 96px; } }
-@media (max-width: 639px) { .acct2-main { padding-block: 32px 64px; } }
+.acct2-main { padding-block: 54px 88px; }
+@media (max-width: 1023px) { .acct2-main { padding-block: 44px 72px; } }
+@media (max-width: 639px) { .acct2-main { padding-block: 24px 48px; } }
 
-.acct2-card { box-sizing: border-box; width: 100%; max-width: 480px; margin-inline: auto; padding: 32px; background: var(--surface); color: var(--text); border-radius: var(--r-sheet); box-shadow: var(--e-sheet); }
+.acct2-card { box-sizing: border-box; width: 100%; max-width: 480px; margin-inline: auto; padding: 32px; background: var(--surface); color: var(--text); border: 1px solid var(--line); border-radius: var(--r-sheet); box-shadow: var(--e-sheet); }
 @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .acct2-card { box-shadow: var(--e-sheet-dark); } }
 :root[data-theme="dark"] .acct2-card { box-shadow: var(--e-sheet-dark); }
 .acct2-kicker { display: flex; align-items: baseline; gap: 12px; margin: 0 0 16px; }
 .acct2-kicker::before { content: ""; flex: none; width: 24px; height: 1.5px; background: var(--brass-line); transform: translateY(-0.3em); }
 .acct2-h1 { color: var(--text); text-wrap: balance; }
 .acct2-lede { margin-top: 16px; color: var(--text); }
-.acct2-body { margin-top: 32px; display: grid; gap: 16px; }
+.acct2-body { margin-top: 24px; display: grid; gap: 16px; }
 .acct2-body > .acct2-note { margin-top: 0; }
 .acct2-card > .acct2-note { margin-top: 16px; }
 .acct2-card .acct2-lede + .acct2-note { margin-top: 24px; }
 @media (max-width: 639px) {
   .acct2-card { padding: 20px; }
   .acct2-kicker { margin-bottom: 12px; }
-  .acct2-body { margin-top: 24px; }
+  .acct2-body { margin-top: 18px; }
 }
 
 /* The single card, centred; a vignette 24 px above it, its left edge on the card's text edge (10A.8) */

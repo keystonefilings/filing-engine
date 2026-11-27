@@ -15,11 +15,6 @@
 
 /* ---- The beta slip, as on the site's own pages; the old banner above the page goes ---- */
 body:has(.docs2) > .beta-banner { display: none; }
-.docs2-beta { background: var(--page-2); border-bottom: 1px solid var(--line); }
-.docs2-beta .docs2-head-in { display: grid; grid-template-columns: auto 1fr; gap: 12px; align-items: baseline; min-height: 0; padding-block: 12px; font: 400 0.9375rem/1.4375rem var(--font-sans); color: var(--text-2); text-wrap: pretty; }
-.docs2-beta .chip2 { position: relative; top: -1px; }
-.docs2-beta a { color: var(--link); text-decoration: underline; text-decoration-color: var(--link-line); text-underline-offset: 3px; }
-@media (max-width: 599px) { .docs2-beta .docs2-head-in { grid-template-columns: minmax(0, 1fr); gap: 6px; justify-items: start; } }
 
 /* ---- The header: 64 px, Cotton, sticky; the lockup, then "API docs" and "Dashboard"; CoFile's 1 px rule ---- */
 .docs2-head { position: sticky; top: 0; z-index: 30; background: var(--page); border-bottom: 1px solid var(--text); }
@@ -175,11 +170,15 @@ body:has(.docs2) > .beta-banner { display: none; }
 /* ---- The reference: the index, each group and its endpoints ---- */
 .docs2-article.is-ref > :is(h1, p, nav) { max-width: 720px; }
 @media (min-width: 1280px) { .docs2-article.is-ref > :is(h1, p, nav), .docs2-group > h2 { max-width: min(720px, calc(100% - 400px - var(--rail-gap))); } }
-.docs2-index { margin: 24px 0 8px; padding: 24px; font: 400 0.9375rem/1.4375rem var(--font-sans); background: var(--page-2); border-radius: var(--r-sheet); }
-.docs2-index > div + div { margin-top: 8px; }
-.docs2-index strong { font-weight: 500; }
-.docs2-sep { color: var(--line-strong); }
-.docs2-article .docs2-index a { text-decoration-thickness: 1px; }
+.docs2-index { margin: 24px 0 8px; border: 1px solid var(--line); background: var(--page-2); border-radius: var(--r-sheet); }
+.docs2-index details + details { border-top: 1px solid var(--line); }
+.docs2-index summary { cursor: pointer; padding: 12px 16px; font: 500 1rem/1.4 var(--font-sans); }
+.docs2-index ul { list-style: none; margin: 0; padding: 0 16px 12px; }
+.docs2-index li + li { border-top: 1px solid var(--line); }
+.docs2-article .docs2-index a { display: grid; grid-template-columns: 4.25em minmax(0, 1fr); gap: 2px 8px; padding: 8px 0; text-decoration: none; }
+.docs2-index-method { font: 500 0.8125rem/1.4 var(--font-mono); color: var(--text-2); }
+.docs2-article .docs2-index code { padding: 0; background: none; overflow-wrap: anywhere; }
+.docs2-index-label { grid-column: 2; font: 400 0.875rem/1.4 var(--font-sans); text-decoration: underline 1px var(--link-line); text-underline-offset: 3px; }
 .docs2-endpoint { padding-top: 48px; margin-top: 48px; border-top: 1px solid var(--line); scroll-margin-top: 89px; }
 .docs2-group > h2 + .docs2-endpoint { margin-top: 24px; }
 .docs2-ep-text { min-width: 0; }

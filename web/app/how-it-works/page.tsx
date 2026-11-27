@@ -47,21 +47,18 @@ export default function HowItWorks() {
           <div className="site2-in">
             <ol className="st-steps-list">
               <li className="st-step">
-                <span className="st-num" aria-hidden="true">1</span>
+                <div className="st-step-head"><span className="st-num" aria-hidden="true">1</span><h2 className="st-lead t-display-s">Your client asks.</h2></div>
                 <Photo name="c05-phone-detail" mobile="c05-phone-detail-mobile" alt={ALT.ask} className="st-photo" />
-                <h2 className="st-lead t-display-s">Your client asks.</h2>
                 <p className="st-body t-body">They fill in a short form from your link, or text or email you, and you forward it; or you fill it in yourself. Your saved answers fill in the rest: registered agent, organizer, signer, addresses.</p>
               </li>
-              <li className="st-step sheet">
-                <span className="st-num" aria-hidden="true">2</span>
+              <li className="st-step is-approval">
+                <div className="st-step-head"><span className="st-num" aria-hidden="true">2</span><h2 className="st-lead t-display-s">You approve it.</h2></div>
                 <Photo name="c08-approval-mobile" mobile="c08-approval" alt={ALT.approve} className="st-photo is-approve" />
-                <h2 className="st-lead t-display-s">You approve it.</h2>
                 <p className="st-body t-body">You get the proof: one page with your firm&apos;s name at the top, showing every detail and every fee.</p>
               </li>
               <li className="st-step">
-                <span className="st-num" aria-hidden="true">3</span>
+                <div className="st-step-head"><span className="st-num" aria-hidden="true">3</span><h2 className="st-lead t-display-s">{name} files it.</h2></div>
                 <Photo name="c06-papers-returned" alt={ALT.files} className="st-photo is-files" />
-                <h2 className="st-lead t-display-s">{name} files it.</h2>
                 <p className="st-body t-body">It fills in the state&apos;s own website screen by screen, checks the fee again before paying, and brings back the state&apos;s documents. When a filing needs a person, one of the filing professionals who run {name} takes over. You hear about each stage.</p>
               </li>
             </ol>

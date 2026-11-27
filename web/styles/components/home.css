@@ -1,9 +1,8 @@
-/* The home page (merged spec 9.1 to 9.9): nine spreads on the 12-column grid, words in four columns, pictures in seven,
-   the picture's side swapping band by band; Coverage and Pricing break the zigzag; the Close is a photograph.
-   Below 1280 px each band stacks, words first. Reads semantic tokens; the page sits in .reg-cofile (SiteShell). */
+/* CoFile's home page. The hero pairs the promise with a sample filing desk.
+   The remaining spreads alternate their illustrations and stack on tablets. */
 @layer components {
 .hm { --g: 24px; }
-.hm-band { padding-block: 128px 160px; overflow-x: clip; }
+.hm-band { padding-block: 84px; overflow-x: clip; }
 .hm [id] { scroll-margin-top: 84px; }
 .hm-grid { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); column-gap: var(--g); align-items: center; }
 .hm-words { grid-column: 1 / 5; grid-row: 1; min-width: 0; }
@@ -16,23 +15,30 @@
 /* Shared word styles */
 .hm-lede { margin-top: 24px; max-width: 34em; }
 .hm-grey { color: var(--text-2) !important; }
-.hm-list { margin: 48px 0 0; padding: 0; list-style: none; color: var(--text); }
+.hm-list { margin: 28px 0 0; padding: 0; list-style: none; color: var(--text); }
 .hm-list li { position: relative; }
 .hm-list li + li { margin-top: 16px; }
 .hm-list li::before { content: ""; position: absolute; left: -19px; top: 0.62em; width: 7px; height: 7px; background: var(--brass-line); transform: rotate(45deg); }
 .hm-list-after { margin-top: 32px; }
 .hm-more { margin-top: 24px; }
 
-/* 9.1 The hero: the h1 across the full width, then the words beside CoFile's desk with the client's page in front */
-.hm-hero { padding-block: 64px 160px; overflow-x: clip; }
-.hm-h1 { margin-top: 16px; }
-.hm-h1 > span { display: block; }
-.hm-hero-grid { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); column-gap: var(--g); align-items: start; margin-top: 48px; }
-.hm-hero-words { grid-column: 1 / 5; min-width: 0; }
-.hm-hero-pic { grid-column: 6 / 13; margin-right: -40px; min-width: 0; }
-.hm-sub { max-width: 34em; }
-.hm-ctas { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 24px; margin-top: 48px; }
-.hm-note { margin-top: 32px; max-width: 24em; }
+/* The promise and the product sit on the same spread. */
+.hm-hero { padding-block: clamp(44px, 5.4vw, 82px) clamp(52px, 6vw, 94px); overflow-x: clip; }
+.hm-hero-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
+  gap: clamp(32px, 4vw, 64px);
+  align-items: center;
+}
+.hm-hero-words, .hm-hero-pic { min-width: 0; }
+.hm .hm-h1 { margin-top: 16px; font-size: clamp(2.875rem, 4vw, 4rem); line-height: 1.05; }
+.hm-h1 > span { display: block; text-wrap: pretty; }
+.hm-h1 > span + span { margin-top: 0.14em; }
+.hm-sub { margin-top: 22px; max-width: 33em; }
+.hm-ctas { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 24px; margin-top: 28px; }
+.hm-price-link { display: inline-flex; align-items: center; min-height: 44px; font-weight: 500; }
+.hm .hm-note { margin-top: 18px; max-width: 33em; font-size: 1rem; line-height: 1.45; color: var(--text-2); }
+#firms.hm-band { border-top: 1px solid var(--line); }
 
 /* 9.2 Firms: "Ours in small type." is literally small */
 .hm-door > span { display: block; }
@@ -53,7 +59,6 @@
 /* 9.7 Rehearsals: the house lights down, the one dark band; dark from its first frame */
 .hm-stage { background: var(--stage); }
 .hm-stage .hm-words :is(h2, p) { color: #ECE8DF; }
-.hm-colon > span { display: block; }
 
 /* 9.8 Pricing: "$45" set the size a price deserves, centred, the "$" hung out of the centring */
 .hm-pricing { text-align: center; }
@@ -71,11 +76,11 @@
 .hm-close-h > span { display: block; }
 .hm-close-lede { margin-top: 24px; }
 
-/* Laptops (1024–1279) and tablets: each band stacks, words first, the picture across the content width */
-@media (max-width: 1279px) {
-  .hm-grid, .hm-hero-grid { display: block; }
-  .hm-words, .hm-hero-words { max-width: 792px; }
-  .hm-pic, .hm-hero-pic { margin: 48px 0 0; }
+/* The spreads keep their two-column composition on laptop screens. */
+@media (max-width: 1023px) {
+  .hm-grid { display: block; }
+  .hm-words { max-width: 46rem; }
+  .hm-pic { margin: 32px 0 0; }
   .hm-pic.is-bleed-right, .hm-pic.is-bleed-left { margin-inline: 0; }
   .hm-pic.is-bleed-right { margin-right: calc(-1 * var(--site-pad)); }
   .hm-proof-pic { padding-left: 0; display: flex; justify-content: center; }
@@ -83,20 +88,22 @@
   .hm-door .t-display-l { text-wrap: wrap; }
 }
 @media (max-width: 1023px) {
-  .hm-band { padding-block: 96px 128px; }
-  .hm-hero { padding-block: 48px 128px; }
+  .hm-band { padding-block: 64px; }
 }
-/* Phones: one column, words first, nothing above the promise and the action */
+@media (max-width: 779px) {
+  .hm-hero-grid { grid-template-columns: minmax(0, 1fr); gap: 30px; }
+  .hm-hero-words { max-width: 37rem; }
+  .hm-hero-pic { width: 100%; max-width: 43rem; }
+}
+/* Phones: the promise and the example follow one another closely. */
 @media (max-width: 599px) {
-  .hm-band { padding-block: 64px 80px; }
-  .hm-hero { padding-block: 32px 80px; }
-  .hm-h1 { margin-top: 12px; }
-  .hm-hero-grid { margin-top: 16px; }
-  .hm-ctas { flex-direction: column; align-items: stretch; gap: 8px; margin-top: 32px; }
-  .hm-ctas .btn2 { width: 100%; }
-  .hm-ctas .mk-arrow { align-self: flex-start; min-height: 48px; }
-  .hm-note { margin-top: 24px; }
-  .hm-pic, .hm-hero-pic { margin-top: 40px; }
+  .hm-band { padding-block: 48px; }
+  .hm-hero { padding-block: 32px 40px; }
+  .hm .hm-h1 { margin-top: 12px; font-size: clamp(2.125rem, 9.35vw, 3rem); }
+  .hm-sub { margin-top: 16px; }
+  .hm-ctas { gap: 4px 18px; margin-top: 20px; }
+  .hm .hm-note { margin-top: 12px; }
+  .hm-pic { margin-top: 28px; }
   .hm-lede { margin-top: 16px; }
   .hm-list { margin-top: 32px; padding-left: 19px; }
   .hm-list li + li { margin-top: 14px; }

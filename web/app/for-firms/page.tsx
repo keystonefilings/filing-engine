@@ -32,6 +32,17 @@ export default function ForFirms() {
         </PageHead>
 
         {/* 10A.2.2 The desk, in CoFile's look, and under it the studio: the three pages the firm's clients see, live */}
+        <section className="pg2-band is-show" id="brand" aria-labelledby="ff-brand">
+          <div className="site2-in pg2-two st-two ff-doors">
+            <div className="pg2-words">
+              <h2 id="ff-brand" className="ff-door pg2-h2"><span className="t-display-m">Your name on the door.</span> <span className="ff-small t-small-type">Ours in small type.</span></h2>
+              <p className="t-lede pg2-band-lede">The same page carries each firm&apos;s own name, logo and color. Your clients never see another firm&apos;s, or a big {name} logo.</p>
+            </div>
+            <div className="pg2-pic ff-doors-pic"><TwoDoors parked /></div>
+          </div>
+        </section>
+
+        {/* 10A.2.4 The agent: the owner, her proof and her saved agent, in one picture */}
         <section className="pg2-band is-show" id="desk" aria-labelledby="ff-desk">
           <div className="site2-in">
             <div className="pg2-two st-two">
@@ -52,17 +63,6 @@ export default function ForFirms() {
         </section>
 
         {/* 10A.2.3 The doors: the home page's signature picture, resting with the handle parked on the left page */}
-        <section className="pg2-band is-show" id="brand" aria-labelledby="ff-brand">
-          <div className="site2-in pg2-two st-two ff-doors">
-            <div className="pg2-words">
-              <h2 id="ff-brand" className="ff-door pg2-h2"><span className="t-display-m">Your name on the door.</span> <span className="ff-small t-small-type">Ours in small type.</span></h2>
-              <p className="t-lede pg2-band-lede">The same page carries each firm&apos;s own name, logo and color. Your clients never see another firm&apos;s, or a big {name} logo.</p>
-            </div>
-            <div className="pg2-pic ff-doors-pic"><TwoDoors parked /></div>
-          </div>
-        </section>
-
-        {/* 10A.2.4 The agent: the owner, her proof and her saved agent, in one picture */}
         <section className="pg2-band is-show" id="agent" aria-labelledby="ff-agent">
           <div className="site2-in pg2-two st-two">
             <div className="pg2-words">

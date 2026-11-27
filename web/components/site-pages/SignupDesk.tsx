@@ -79,14 +79,14 @@ export function SignupDesk({ action, approvalRequired, platform, googleOn, googl
           <p className="t-lede acct2-lede">{google
             ? <>You&apos;re signed in with Google as {google.email}. Tell us about your firm and your filing desk opens right away. Then put your name and logo on the door, and choose which card pays the state&apos;s fees.</>
             : <>For firms that file for their clients. Your filing desk opens the moment you sign up: put your name and logo on the door, and choose which card pays the state&apos;s fees. Your first filing can be a free rehearsal: nothing filed, nothing paid.</>}</p>
-          <div className={["su2-inline", live && "is-live"].filter(Boolean).join(" ")}>
-            <PlateName name={name} view="strip" rake={rake} />
-            <div className="su2-inline-head"><ClientHead name={name} color={color} /></div>
-          </div>
           <div className="acct2-body" onInput={onInput}>
             {notice ? <Slip tone={notice.tone} role={notice.tone === "problem" ? "alert" : "status"}>{notice.text}</Slip> : null}
             {googleOn && !google ? <><GoogleButton purpose="signup" /><hr className="acct2-rule" /></> : null}
             <PartnerSignupForm action={action} approvalRequired={approvalRequired} google={google} />
+          </div>
+          <div className={["su2-inline", live && "is-live"].filter(Boolean).join(" ")}>
+            <PlateName name={name} view="strip" rake={rake} />
+            <div className="su2-inline-head"><ClientHead name={name} color={color} /></div>
           </div>
         </div>
         <p className="acct2-note su2-platforms">Building a filing product? <Link href="/platforms">See {platform} for platforms</Link>.</p>

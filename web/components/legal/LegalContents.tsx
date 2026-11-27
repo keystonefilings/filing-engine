@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useId, useRef, useState } from "react";
 
 /**
  * The contents of Terms and Privacy (merged spec 10A.15): the page's own headings as links. At 1280 px and wider it is
@@ -12,9 +12,13 @@ import { useEffect, useRef, useState } from "react";
 export function LegalContents({ items, numbered }: { items: { id: string; n?: string; title: string }[]; numbered: boolean }) {
   const [current, setCurrent] = useState<string | null>(null);
   const [tall, setTall] = useState(false);
+  const [expanded, setExpanded] = useState(false);
+  const [ready, setReady] = useState(false);
+  const contentsId = useId();
   const ref = useRef<HTMLElement>(null);
 
   useEffect(() => {
+    setReady(true);
     const wide = window.matchMedia("(min-width: 1280px)");
     const heads = items.map((i) => document.getElementById(i.id)).filter((h): h is HTMLElement => !!h);
     const update = () => {
@@ -39,10 +43,12 @@ export function LegalContents({ items, numbered }: { items: { id: string; n?: st
     };
   }, [items]);
 
-  const half = Math.ceil(items.length / 2);
   return (
-    <nav ref={ref} className={["legal2-contents", numbered && "is-numbered", tall && "is-static"].filter(Boolean).join(" ")} aria-label="Contents" style={{ ["--half" as string]: half }}>
-      <ol>
+    <nav ref={ref} className={["legal2-contents", numbered && "is-numbered", tall && "is-static", ready && "has-disclosure", expanded && "is-expanded"].filter(Boolean).join(" ")} aria-label="Contents">
+      <button type="button" className="legal2-toggle" aria-expanded={expanded} aria-controls={contentsId} onClick={() => setExpanded(!expanded)}>
+        Contents <span aria-hidden="true">{expanded ? "−" : "+"}</span>
+      </button>
+      <ol id={contentsId}>
         {items.map((i) => (
           <li key={i.id}>
             <a href={`#${i.id}`} aria-current={current === i.id ? "location" : undefined}

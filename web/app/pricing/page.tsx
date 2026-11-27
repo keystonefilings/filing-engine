@@ -45,6 +45,14 @@ export default function Pricing() {
 
       <section className="pg2-band is-show" id="plans">
         <div className="site2-in">
+          <nav className="pr2-quick" aria-label="Compare plans">
+            {plans.map((p) => (
+              <a key={p.id} href={`#plan-${p.id}`}>
+                <span>{p.name}</span>
+                <strong>{usd(p.monthlyUsd || pay.filing)} <small>{p.monthlyUsd ? "/ month" : "/ filing"}</small></strong>
+              </a>
+            ))}
+          </nav>
           <div className="pr2-card">
             {plans.map((p) => (
               <section key={p.id} className={`pr2-plan${p.id === "growth" ? " is-growth" : ""}`} aria-labelledby={`plan-${p.id}`}>
@@ -78,7 +86,7 @@ export default function Pricing() {
               </section>
             ))}
           </div>
-          <p className="t-small pr2-note">Prices in US dollars, for partner firms. Building a filing product for many businesses? <Link href="/platforms">Talk to us about platform pricing</Link>.</p>
+          <p className="t-small pr2-note">Prices in US dollars for partner firms. State fees are separate. <Link href="/platforms">Talk to us about platform pricing</Link>.</p>
         </div>
       </section>
 

@@ -1,9 +1,8 @@
 import Link from "next/link";
-import { platformName, publicApiUrl, supportEmail } from "@/lib/brand";
+import { platformName, publicApiUrl } from "@/lib/brand";
 import { ENDPOINTS } from "@/lib/api-catalog";
-import { betaOn } from "@/lib/beta";
 import { Lockup } from "@/components/shell/Lockup";
-import { Chip } from "@/components/ui/Chip";
+import { PublicBetaNotice } from "@/components/site/PublicBetaNotice";
 import { GUIDES } from "./guides";
 import { groupId, headingsOf } from "./anchors";
 import { DocsNav, type DocsLink, type Sections } from "./DocsNav";
@@ -21,7 +20,6 @@ export function generateMetadata() {
  */
 export default function DocsLayout({ children }: { children: React.ReactNode }) {
   const name = platformName();
-  const email = supportEmail();
   const api = publicApiUrl();
   const links: DocsLink[] = [
     { href: "/docs", label: "Overview" },
@@ -37,15 +35,7 @@ export default function DocsLayout({ children }: { children: React.ReactNode }) 
   return (
     <div className="reg-cofile docs2">
       <a className="shell2-skip" href="#docs-content">Skip to content</a>
-      {/* The site's own beta slip (CoFile's public pages), in place of the old banner above the page */}
-      {betaOn() ? (
-        <div className="docs2-beta" role="note">
-          <div className="docs2-head-in">
-            <Chip tone="rehearsal" compact>Beta</Chip>
-            <span>{name} is in beta. Any filing can run as a free rehearsal on the state&apos;s real website. It stops before the last button, so nothing is filed or paid. Filing types go live one at a time. Questions or problems? <a href={`mailto:${email}`}>{email}</a></span>
-          </div>
-        </div>
-      ) : null}
+      <PublicBetaNotice />
       <header className="docs2-head">
         <div className="docs2-head-in">
           <Link className="docs2-home" href="/">{name === "CoFile" ? <Lockup height={24} /> : <span className="shell2-platform">{name}</span>}</Link>
