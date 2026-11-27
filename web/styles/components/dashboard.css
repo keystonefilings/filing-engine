@@ -185,6 +185,10 @@
 .dash2-mark.is-mono.is-firm { color: var(--firm-on); background: var(--firm-fill); }
 @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .reg-cofile .dash2-mark.is-logo { box-sizing: content-box; padding: 4px 6px; background: #fff; color-scheme: only light; clip-path: polygon(4px 0, calc(100% - 4px) 0, 100% 4px, 100% calc(100% - 4px), calc(100% - 4px) 100%, 4px 100%, 0 calc(100% - 4px), 0 4px); } }
 :root[data-theme="dark"] .reg-cofile .dash2-mark.is-logo { box-sizing: content-box; padding: 4px 6px; background: #fff; color-scheme: only light; clip-path: polygon(4px 0, calc(100% - 4px) 0, 100% 4px, 100% calc(100% - 4px), calc(100% - 4px) 100%, 4px 100%, 0 calc(100% - 4px), 0 4px); }
+/* A logo of light marks: a Plate Ink plate on paper, straight on the page in dark mode, never the white plate (10B.2.3) */
+.dash2-mark.is-logo.is-light { box-sizing: content-box; padding: 4px 6px; background: #1D2130; color-scheme: only light; clip-path: polygon(4px 0, calc(100% - 4px) 0, 100% 4px, 100% calc(100% - 4px), calc(100% - 4px) 100%, 4px 100%, 0 calc(100% - 4px), 0 4px); }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .reg-cofile .dash2-mark.is-logo.is-light { padding: 0; background: none; clip-path: none; } }
+:root[data-theme="dark"] .reg-cofile .dash2-mark.is-logo.is-light { padding: 0; background: none; clip-path: none; }
 
 /* ---- A firm (10C.8): the settings beside a live preview of its client page from 1024 px ---- */
 .dash2-firm-page { max-width: 720px; margin-inline: auto; }

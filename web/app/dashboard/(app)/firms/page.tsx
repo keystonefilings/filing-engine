@@ -3,7 +3,8 @@ import type { CSSProperties } from "react";
 import { engine, type ClientCompany } from "@/lib/engine";
 import { requireTenant } from "@/lib/session";
 import { logoSrc } from "@/lib/brand";
-import { brandOf, brandStyle } from "@/lib/firm";
+import { brandOf, brandStyle, logoInfoOf } from "@/lib/firm";
+import { LogoImage } from "@/components/ui/LogoImage";
 import { Chip } from "@/components/ui/Chip";
 import { Notice } from "@/components/ui/Sheet";
 import { Vignette } from "@/components/Vignette";
@@ -14,12 +15,12 @@ const initials = (name: string) => name.split(/\s+/).filter((w) => /^[A-Za-z√Ä-√
 
 /**
  * The firm's own mark, to lead its row (10C.7): its logo in a 32 px bay, or its monogram tile in its main color (Plate
- * Ink when it has chosen none). In dark mode the logo sits on the white logo plate.
+ * Ink when it has chosen none). In dark mode the logo sits on the white logo plate; a logo of light marks sits on a
+ * Plate Ink plate instead, and in dark mode straight on the page (10B.2.3).
  */
 function FirmMark({ c }: { c: ClientCompany }) {
   const logo = logoSrc(c.portal);
-  // eslint-disable-next-line @next/next/no-img-element
-  if (logo) return <span className="dash2-mark is-logo"><img src={logo} alt="" /></span>;
+  if (logo) return <LogoImage src={logo} alt="" info={logoInfoOf(c.portal)} place="mark" wrap="dash2-mark is-logo" />;
   const style = c.portal?.primaryColor ? brandStyle(brandOf(c)) as CSSProperties : undefined;
   return <span className={["dash2-mark is-mono", style && "is-firm"].filter(Boolean).join(" ")} style={style} aria-hidden="true">{initials(c.name)}</span>;
 }

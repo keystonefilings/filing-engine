@@ -2,6 +2,7 @@
  * Server-side client for the filing engine API. Every call runs on the server (route handlers,
  * server components, server actions); API keys never reach the browser.
  */
+import type { LogoInfo } from "./design/logo.ts";
 
 export class EngineError extends Error {
   constructor(public readonly status: number, public readonly body: unknown, message: string) { super(message); }
@@ -41,7 +42,10 @@ export function sessionEnded(e: unknown): boolean {
 
 export interface Account { tenantId: string; name: string; configured: boolean; branding: { displayName?: string; logoUrl?: string; supportEmail?: string }; webhookEndpointCount: number }
 
-export interface PortalBrand { slug: string; publicPages?: boolean; displayName?: string; logoUrl?: string; logoArtifactId?: string; font?: string; fontArtifactId?: string; primaryColor?: string; secondaryColor?: string; supportEmail?: string; filingKinds?: string[] }
+/** The engine's reading of a firm's uploaded logo (src/brand/logo-analysis.ts; lib/design/logo.ts), of logoArtifactId only. */
+export type PortalLogoInfo = LogoInfo & { artifactId: string };
+
+export interface PortalBrand { slug: string; publicPages?: boolean; displayName?: string; logoUrl?: string; logoArtifactId?: string; logoInfo?: PortalLogoInfo; font?: string; fontArtifactId?: string; primaryColor?: string; secondaryColor?: string; supportEmail?: string; filingKinds?: string[] }
 
 export interface RoleAddress { street1: string; street2?: string; city: string; state: string; zip: string }
 export interface RolePerson { name: string; title?: string; email?: string; address?: RoleAddress }

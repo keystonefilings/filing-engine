@@ -4,16 +4,28 @@ import { requireFirm, type FirmSession } from "./session";
 import { FILING_KINDS, type FilingKind } from "./intake/forms";
 import { logoSrc, safeColor } from "./brand";
 import { firmVars, inkMatch } from "./design/ink";
+import { logoPlate, type LogoInfo } from "./design/logo";
 import { redirect } from "next/navigation";
 import { sessionEnded } from "./engine";
 import { fontSpec, type BrandFontSpec } from "./fonts";
 
-export interface FirmBrand { name: string; logoUrl?: string; color: string; color2: string; supportEmail?: string; font?: BrandFontSpec | null }
+export interface FirmBrand {
+  name: string; logoUrl?: string; color: string; color2: string; supportEmail?: string; font?: BrandFontSpec | null;
+  /** The engine's reading of the uploaded logo (lib/design/logo.ts): its size and shape, and whether its marks are light. */
+  logo?: LogoInfo;
+}
+
+/** The reading of the logo the pages show: the uploaded one's, when the engine has read that logo. */
+export function logoInfoOf(p: PortalBrand | undefined): LogoInfo | undefined {
+  const i = p?.logoInfo;
+  return i && p?.logoArtifactId && i.artifactId === p.logoArtifactId && logoSrc(p)?.startsWith("/logo/") ? i : undefined;
+}
 
 export function brandOf(c: Pick<ClientCompany, "name" | "portal">): FirmBrand {
   const p: PortalBrand | undefined = c.portal;
   const color = safeColor(p?.primaryColor);
-  return { name: p?.displayName || c.name, logoUrl: logoSrc(p), color, color2: safeColor(p?.secondaryColor, color), supportEmail: p?.supportEmail, font: fontSpec(p) };
+  const logo = logoInfoOf(p);
+  return { name: p?.displayName || c.name, logoUrl: logoSrc(p), color, color2: safeColor(p?.secondaryColor, color), supportEmail: p?.supportEmail, font: fontSpec(p), ...(logo ? { logo } : {}) };
 }
 
 /**
@@ -21,10 +33,13 @@ export function brandOf(c: Pick<ClientCompany, "name" | "portal">): FirmBrand {
  * rebuilt pages, and the older --accent names for pages not yet rebuilt. The button fill and its text always
  * reach 4.5:1 whatever color the firm picks; links use the firm's color deepened where needed.
  */
-export function brandStyle(b: Pick<FirmBrand, "color" | "color2"> & { font?: BrandFontSpec | null }): Record<string, string> {
+export function brandStyle(b: Pick<FirmBrand, "color" | "color2"> & { font?: BrandFontSpec | null; logo?: LogoInfo }): Record<string, string> {
   const ink = inkMatch(b.color, b.color2);
+  // A logo of light marks sits on its plate: the fill where it reads at 3:1, else Plate Ink (10B.2.3).
+  const plate = logoPlate(b.logo, ink.fill);
   return {
     ...firmVars(ink),
+    ...(plate ? { "--logo-plate": plate } : {}),
     "--accent": ink.fill, "--accent-text": ink.on, "--accent-2": ink.ink,
     ...(b.font ? { "--brand-font": b.font.stack, "--font-firm": b.font.stack } : {}),
   };

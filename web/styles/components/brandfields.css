@@ -27,6 +27,8 @@
 .logof2-grid img { display: block; max-width: 100%; max-height: 80px; }
 .logof2-sheet { display: flex; align-items: center; gap: 12px; min-height: 104px; padding: 12px 16px; background: #fff; color: #1D2130; border: 1px solid var(--line); color-scheme: light; }
 .logof2-sheet img { display: block; max-height: 40px; max-width: 60%; width: auto; object-fit: contain; }
+/* Light marks on their plate, as the pages show them (10B.2.3); Plate Ink here, the firm's fill in the previews where it reads */
+.logof2-sheet .logof2-logo.is-plate { box-sizing: content-box; padding: 6px 10px; background: var(--logo-plate, #1D2130); clip-path: polygon(6px 0, calc(100% - 6px) 0, 100% 6px, 100% calc(100% - 6px), calc(100% - 6px) 100%, 6px 100%, 0 calc(100% - 6px), 0 6px); }
 .logof2-name { font: 600 1rem/1.25rem var(--font-firm, var(--font-sans-display)); min-width: 0; overflow-wrap: break-word; }
 .logof2-file { display: block; }
 .logof2-bay.has-logo .logof2-file { grid-column: 1 / -1; }
