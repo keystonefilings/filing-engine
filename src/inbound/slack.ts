@@ -96,7 +96,7 @@ export class SlackChannel {
   async command(p: Record<string, string>): Promise<{ response_type: "ephemeral"; text: string }> {
     const say = (text: string) => ({ response_type: "ephemeral" as const, text });
     const text = String(p.text ?? "").trim();
-    if (!text || text === "help") return say(`Type ${p.command || "/file"} and the filing you need, with the details you have. For example: ${p.command || "/file"} New York LLC for Blue Harbor Consulting, organizer Sam Rivera, 22 River Rd, Brooklyn NY 11201. We fill in the form for you to check and send; nothing is filed until you do and your client approves.`);
+    if (!text || text === "help") return say(`Type ${p.command || "/file"} and the filing you need, with the details you have. For example: ${p.command || "/file"} New York LLC for Blue Harbor Consulting, organizer Sam Rivera, 22 River Rd, Brooklyn NY 11201. We fill in the form for you to check and send; nothing is filed until you do and the proof is approved.`);
     const inst = p.team_id ? await this.install(p.team_id) : null;
     if (!inst) return say("CoFile isn't added to this Slack workspace yet. Ask an admin to add it, then try again.");
     const email = await this.emailOf(inst.botToken, p.user_id ?? "");

@@ -2,7 +2,8 @@ import { cache } from "react";
 import { engine, type ClientCompany, type PartnerProfile, type PortalBrand } from "./engine";
 import { requireFirm, type FirmSession } from "./session";
 import { FILING_KINDS, type FilingKind } from "./intake/forms";
-import { logoSrc, safeColor, textOn } from "./brand";
+import { logoSrc, safeColor } from "./brand";
+import { firmVars, inkMatch } from "./design/ink";
 import { redirect } from "next/navigation";
 import { sessionEnded } from "./engine";
 import { fontSpec, type BrandFontSpec } from "./fonts";
@@ -15,9 +16,18 @@ export function brandOf(c: Pick<ClientCompany, "name" | "portal">): FirmBrand {
   return { name: p?.displayName || c.name, logoUrl: logoSrc(p), color, color2: safeColor(p?.secondaryColor, color), supportEmail: p?.supportEmail, font: fontSpec(p) };
 }
 
-/** The CSS variables a firm's pages use: main color (buttons), its text color, second color (links, highlights). */
+/**
+ * The CSS variables a firm's pages use, from the ink match (web/lib/design/ink.ts): every --firm-* token for
+ * rebuilt pages, and the older --accent names for pages not yet rebuilt. The button fill and its text always
+ * reach 4.5:1 whatever color the firm picks; links use the firm's color deepened where needed.
+ */
 export function brandStyle(b: Pick<FirmBrand, "color" | "color2"> & { font?: BrandFontSpec | null }): Record<string, string> {
-  return { "--accent": b.color, "--accent-text": textOn(b.color), "--accent-2": b.color2, ...(b.font ? { "--brand-font": b.font.stack } : {}) };
+  const ink = inkMatch(b.color, b.color2);
+  return {
+    ...firmVars(ink),
+    "--accent": ink.fill, "--accent-text": ink.on, "--accent-2": ink.ink,
+    ...(b.font ? { "--brand-font": b.font.stack, "--font-firm": b.font.stack } : {}),
+  };
 }
 
 /** Filings this firm's portal offers: all of them unless the firm's settings list some. */

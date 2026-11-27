@@ -1,0 +1,141 @@
+/* The shell CoFile's desk and dashboard share (merged spec 10B.3, 10C.2), in CoFile's look (.reg-cofile), or a
+   platform's white label (.reg-white, .is-white). Reads semantic tokens only. */
+@layer components {
+.shell2 { --shell-pad: 48px; --shell-bar: var(--page); min-height: 100vh; display: flex; flex-direction: column; background: var(--page); color: var(--text); }
+@media (max-width: 1023px) { .shell2 { --shell-pad: 40px; } }
+@media (max-width: 599px) { .shell2 { --shell-pad: 20px; } }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .reg-cofile .shell2, :root:not([data-theme="light"]) .shell2.reg-cofile { --shell-bar: var(--night-card); } }
+:root[data-theme="dark"] .reg-cofile .shell2, :root[data-theme="dark"] .shell2.reg-cofile { --shell-bar: var(--night-card); }
+.shell2-in { box-sizing: content-box; max-width: 1200px; margin-inline: auto; padding-inline: var(--shell-pad); }
+.shell2-top { display: contents; }
+
+/* Skip link: first to take focus, shown only then */
+.shell2-skip { position: absolute; left: 16px; top: -200px; z-index: 50; padding: 12px 16px; background: var(--surface); color: var(--text); border: 2px solid var(--focus); font: 500 1rem/1.25rem var(--font-sans); }
+.shell2-skip:focus { top: 12px; }
+
+/* The letterhead row: 76 px, not sticky; CoFile's 1 px Plate Ink rule under it, the full window */
+.shell2-head { background: var(--shell-bar); border-bottom: 1px solid var(--text); }
+.shell2-head > .shell2-in { display: flex; align-items: center; gap: 16px; min-height: 76px; }
+.shell2-home { flex: none; display: inline-flex; align-items: center; color: var(--text); text-decoration: none; border-radius: 2px; }
+.shell2-home:focus-visible { outline: 2px solid var(--focus); outline-offset: 4px; }
+.shell2-divider { flex: none; width: 1px; height: 24px; background: var(--line); }
+.shell2-spacer { flex: 1 1 0; min-width: 0; }
+.shell2-user { display: inline-flex; align-items: center; gap: 16px; flex: none; }
+.shell2-user form { margin: 0; }
+.shell2-email { font: 400 0.9375rem/1.4375rem var(--font-sans); color: var(--link); text-decoration: underline; text-decoration-color: var(--link-line); text-decoration-thickness: 1px; text-underline-offset: 3px; overflow-wrap: anywhere; }
+@media (hover: hover) { a.shell2-email:hover { text-decoration-thickness: 2px; text-decoration-color: var(--link); } }
+.shell2-email.is-plain { color: var(--text-2); text-decoration: none; }
+
+/* The lockup (3.3): the drawn artwork, the Display master at 28 px and up, the Small master below */
+.lockup2 { --lockup-h: 28px; flex: none; display: inline-flex; align-items: center; color: var(--text); line-height: 0; }
+.lockup2 img { display: block; height: var(--lockup-h); width: auto; }
+.lockup2-s { display: none; }
+.lockup2.is-small .lockup2-d { display: none; }
+.lockup2.is-small .lockup2-s { display: block; }
+/* A deployment's own platform name in place of the lockup: Founders Grotesk Medium 20/24, no plate (10C.1) */
+.shell2-platform { font: 500 1.25rem/1.5rem var(--font-sans-display); color: var(--text); white-space: nowrap; }
+
+/* The account label: whose desk it is (3.5): logo 24 px tall (at most 160 wide), then the name, never wrapping */
+.acct2 { display: inline-flex; align-items: center; gap: 8px; min-width: 0; flex: 0 1 auto; }
+.acct2-logo { flex: none; display: inline-flex; align-items: center; }
+.acct2-logo img { display: block; height: 24px; width: auto; max-width: 160px; object-fit: contain; }
+.acct2-name { font: 500 1.0625rem/1.5rem var(--font-sans); color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
+/* On the dark desk the logo sits on a small white plate, the Name Plate's chamfered corners (10B.3.3) */
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .reg-cofile .acct2-logo { background: #fff; padding: 4px 6px; color-scheme: only light; clip-path: polygon(4px 0, calc(100% - 4px) 0, 100% 4px, 100% calc(100% - 4px), calc(100% - 4px) 100%, 4px 100%, 0 calc(100% - 4px), 0 4px); } }
+:root[data-theme="dark"] .reg-cofile .acct2-logo { background: #fff; padding: 4px 6px; color-scheme: only light; clip-path: polygon(4px 0, calc(100% - 4px) 0, 100% 4px, 100% calc(100% - 4px), calc(100% - 4px) 100%, 4px 100%, 0 calc(100% - 4px), 0 4px); }
+
+/* The navigation row: 52 px, sticky once the letterhead row has gone; current page underlined 2 px in Brass Line */
+.shell2-nav { position: sticky; top: 0; z-index: 20; background: var(--shell-bar); border-bottom: 1px solid var(--line); }
+.shell2-nav > .shell2-in { position: relative; display: flex; align-items: stretch; gap: 32px; min-height: 52px; white-space: nowrap; }
+@media (max-width: 1279px) { .shell2-nav > .shell2-in { gap: 24px; } }
+.shell2-link { position: relative; display: inline-flex; align-items: center; gap: 8px; font: 400 1.0625rem/1.5rem var(--font-sans); color: var(--text); text-decoration: none; }
+.shell2-link .shell2-label { position: relative; }
+.shell2-link .shell2-label::after { content: ""; position: absolute; left: 0; right: 0; bottom: -6px; height: 1px; background: transparent; transition: background-color var(--t-quick) var(--ease-settle); }
+@media (hover: hover) { .shell2-link:hover .shell2-label::after { background: var(--line-strong); } }
+.shell2-link[aria-current="page"] .shell2-label::after { height: 2px; background: var(--brass-line); }
+.shell2-link:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; border-radius: 2px; }
+.shell2-nav-divider { align-self: center; width: 1px; height: 20px; background: var(--line); margin-left: auto; }
+.shell2-measure { position: absolute; left: 0; top: 0; display: flex; gap: inherit; width: max-content; padding-inline: var(--shell-pad); visibility: hidden; pointer-events: none; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .reg-cofile .shell2-link[aria-current="page"] .shell2-label::after { background: var(--brass); } }
+:root[data-theme="dark"] .reg-cofile .shell2-link[aria-current="page"] .shell2-label::after { background: var(--brass); }
+
+/* The "Ready to pay" count: 20 px Ochre Tint chip, tabular; a number, never animated */
+.shell2-count { display: inline-grid; place-items: center; min-width: 22px; height: 22px; padding: 0 6px; font: 500 0.875rem/1 var(--font-sans); font-variant-numeric: tabular-nums; color: var(--ochre); background: var(--ochre-tint); border-radius: 3px; corner-shape: bevel; }
+
+/* The menu button (phones only) */
+.shell2-menu { display: none; flex: none; flex-direction: column; align-items: center; justify-content: center; gap: 3px; width: 48px; height: 48px; margin-right: -8px; padding: 0; color: var(--text); background: none; border: 0; cursor: pointer; font: 500 0.75rem/1 var(--font-sans); }
+.shell2-menu:focus-visible { outline: 2px solid var(--focus); outline-offset: 0; border-radius: 2px; }
+.shell2-burger { display: grid; gap: 4px; width: 20px; }
+.shell2-burger i, .shell2-close i { display: block; height: 1.5px; background: currentColor; }
+.shell2-close { position: relative; width: 20px; height: 13px; }
+.shell2-close i { position: absolute; left: 0; right: 0; top: 6px; }
+.shell2-close i:first-child { transform: rotate(45deg); }
+.shell2-close i:last-child { transform: rotate(-45deg); }
+
+/* Phones, or wherever the links don't fit (measured): one sticky 64 px row, the lockup at 24 px, a menu sheet */
+.shell2-top.is-compact .shell2-head { position: sticky; top: 0; z-index: 20; }
+.shell2-top.is-compact .shell2-head > .shell2-in { min-height: 64px; gap: 12px; }
+.shell2-top.is-compact .lockup2 { --lockup-h: 24px; }
+.shell2-top.is-compact .lockup2 .lockup2-d, .shell2-head.is-sheet .lockup2 .lockup2-d { display: none; }
+.shell2-top.is-compact .lockup2 .lockup2-s, .shell2-head.is-sheet .lockup2 .lockup2-s { display: block; }
+.shell2-top.is-compact .shell2-user { display: none; }
+.shell2-top.is-compact .shell2-menu { display: inline-flex; }
+.shell2-top.is-compact .shell2-nav { height: 0; min-height: 0; border: 0; overflow: hidden; visibility: hidden; }
+.shell2-top.is-compact .shell2-divider { height: 20px; }
+@media (max-width: 759px) {
+  .shell2-head { position: sticky; top: 0; z-index: 20; }
+  .shell2-head > .shell2-in { min-height: 64px; gap: 12px; }
+  .lockup2 { --lockup-h: 24px; }
+  .lockup2 .lockup2-d { display: none; }
+  .lockup2 .lockup2-s { display: block; }
+  .shell2-user { display: none; }
+  .shell2-menu { display: inline-flex; }
+  .shell2-nav { height: 0; min-height: 0; border: 0; overflow: hidden; visibility: hidden; }
+}
+
+/* The menu sheet: full height, Cotton, slides down from under the header; Escape or Close shuts it */
+.shell2-sheet { position: fixed; inset: 0; width: 100%; max-width: none; height: 100dvh; max-height: none; margin: 0; padding: 0; border: 0; background: var(--shell-bar); color: var(--text); overflow-y: auto; }
+.shell2-sheet::backdrop { background: transparent; }
+.shell2-sheet[open] { animation: sheet2-in 240ms var(--ease-settle) both; }
+.shell2-sheet.is-closing { animation: sheet2-out 160ms var(--ease-exit) both; }
+@keyframes sheet2-in { from { transform: translateY(-12px); opacity: 0; } }
+@keyframes sheet2-out { to { transform: translateY(-12px); opacity: 0; } }
+@media (prefers-reduced-motion: reduce) { .shell2-sheet[open], .shell2-sheet.is-closing { animation: none; } }
+.shell2-head.is-sheet { position: static; }
+.shell2-head.is-sheet > .shell2-in { min-height: 64px; gap: 12px; }
+.shell2-head.is-sheet .lockup2 { --lockup-h: 24px; }
+.shell2-head.is-sheet .shell2-menu { display: inline-flex; }
+.shell2-sheet-links { list-style: none; margin: 0; padding: 0; }
+.shell2-sheet-links li { border-bottom: 1px solid var(--line); }
+.shell2-sheet-links a { position: relative; display: flex; align-items: center; justify-content: space-between; min-height: 64px; padding-inline: var(--shell-pad); font: 500 1.25rem/1.75rem var(--font-sans-display); color: var(--text); text-decoration: none; }
+.shell2-sheet-links a[aria-current="page"]::before { content: ""; position: absolute; left: 0; top: 12px; bottom: 12px; width: 2px; background: var(--brass-line); }
+.shell2-sheet-links a:focus-visible { outline: 2px solid var(--focus); outline-offset: -4px; }
+.shell2-sheet-user { display: grid; gap: 12px; justify-items: start; padding: 24px var(--shell-pad) 40px; }
+.shell2-sheet-user form { width: 100%; }
+.shell2-sheet-user .btn2 { --h: 56px; }
+.shell2-link-text { font: 400 1rem/1.5rem var(--font-sans); color: var(--link); text-decoration: underline; text-decoration-color: var(--link-line); text-underline-offset: 3px; }
+
+/* The beta strip: Cotton 2, under the navigation, left-aligned on the grid (10B.1.8) */
+body:has(.shell2) > .beta-banner { display: none; }
+.shell2-beta { background: var(--page-2); border-bottom: 1px solid var(--line); }
+.shell2-beta > .shell2-in { display: flex; gap: 12px; align-items: baseline; padding-block: 10px; font: 400 0.9375rem/1.4375rem var(--font-sans); color: var(--text-2); }
+.shell2-beta .chip2 { flex: none; position: relative; top: -1px; }
+@media (max-width: 599px) { .shell2-beta > .shell2-in { flex-direction: column; gap: 6px; } }
+
+/* Content and footer */
+.shell2-main { flex: 1 0 auto; outline: none; }
+.shell2-foot { padding: 48px var(--shell-pad) 96px; text-align: center; font: 400 0.9375rem/1.4375rem var(--font-sans); color: var(--text-2); }
+.shell2-foot a { color: var(--link); text-decoration: underline; text-decoration-color: var(--link-line); text-underline-offset: 3px; }
+
+/* A platform's white-label desk (10B.3.3): its letterhead on white rows, its Firm Rule, its ink in Brass's place */
+.shell2.is-white { --shell-bar: #fff; }
+.shell2.is-white .shell2-head { border-bottom: 0; }
+.shell2.is-white .shell2-head::after { content: ""; display: block; height: 6px; background: linear-gradient(var(--firm) 0 3px, transparent 3px 5px, var(--firm-2) 5px 6px); }
+.shell2-brand { display: inline-flex; align-items: center; min-width: 0; }
+.shell2-brand-logo { display: block; height: auto; max-height: 44px; min-height: 24px; max-width: 200px; object-fit: contain; }
+.shell2-brand-logo { box-sizing: content-box; padding: 4px 6px; margin: -4px -6px; background: #fff; color-scheme: only light; clip-path: polygon(4px 0, calc(100% - 4px) 0, 100% 4px, 100% calc(100% - 4px), calc(100% - 4px) 100%, 4px 100%, 0 calc(100% - 4px), 0 4px); }
+.shell2-brand-name { font: 600 1.375rem/1.75rem var(--font-firm, var(--font-sans-display)); color: #1D2130; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.shell2.is-white .shell2-link[aria-current="page"] .shell2-label::after { height: 3px; background: var(--firm-ink); }
+.shell2.is-white .shell2-sheet-links a[aria-current="page"]::before { background: var(--firm); }
+.shell2.is-white .shell2-email { text-decoration-color: var(--firm-ink); }
+}

@@ -241,10 +241,21 @@ function siblingFilled(v: Visible, all: Visible[], raw: Raw): boolean {
   return all.some((o) => o !== v && o.name.startsWith(`${parent}.`) && o.field.type !== "checkbox" && !isEmpty(o.field, raw[o.name]) && o.field.defaultValue !== raw[o.name]?.trim());
 }
 
+/**
+ * Optional objects (those holding a "withSiblings" field, such as New York's registered agent) that nobody started.
+ * A preset default alone (the agent address's state, "NY") doesn't start one, so it isn't sent: the engine would
+ * otherwise get an agent with a state and no name, and refuse the whole filing.
+ */
+function untouchedOptional(vis: Visible[], raw: Raw): string[] {
+  const parents = new Set(vis.filter((v) => v.field.required === "withSiblings").map((v) => v.name.slice(0, v.name.lastIndexOf("."))));
+  return [...parents].filter((p) => !vis.some((o) => o.name.startsWith(`${p}.`) && o.field.type !== "checkbox" && !isEmpty(o.field, raw[o.name]) && o.field.defaultValue !== raw[o.name]?.trim()));
+}
+
 export function buildRequest(kind: FilingKind, raw: Raw, ctx: BuildContext): BuildResult {
   const issues: BuildIssue[] = [];
   const request: Record<string, unknown> = {};
   const vis = visibleFields(kind, raw, issues);
+  const untouched = untouchedOptional(vis, raw);
 
   for (const v of vis) {
     const value = raw[v.name];
@@ -254,6 +265,7 @@ export function buildRequest(kind: FilingKind, raw: Raw, ctx: BuildContext): Bui
       continue;
     }
     if (value === undefined) continue;
+    if (v.field.required !== true && untouched.some((p) => v.name.startsWith(`${p}.`))) continue;
     const c = coerce(v.field, value, v.name, issues);
     if (c === undefined) continue;
     setPath(request, v.target ?? v.name, c);

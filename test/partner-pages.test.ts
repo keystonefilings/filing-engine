@@ -55,8 +55,8 @@ describe("partner addresses (V19)", () => {
   });
 });
 
-describe("approval page in the firm's brand (V20)", () => {
-  it("shows the partner firm's name, logo and color, co-branded with the platform", async () => {
+describe("a partner firm's proof is in CoFile's look (decision 2)", () => {
+  it("names the firm as text, keeps its support email, and carries no logo, firm color or \"with CoFile\"", async () => {
     const { key, firm } = await partner("Rivera Tax", "ana@rivera-tax.test");
     await profile(key, firm, { displayName: "Rivera Tax & Books", logoUrl: "https://rivera-tax.test/logo.png", primaryColor: "#7a1f5c", supportEmail: "help@rivera-tax.test" });
     const { njFormationRequest } = await import("./helpers.js");
@@ -64,11 +64,13 @@ describe("approval page in the firm's brand (V20)", () => {
     const link = r.json().approvalLink as string;
     const page = await app.inject({ method: "GET", url: new URL(link).pathname });
     expect(page.statusCode).toBe(200);
-    expect(page.body).toContain("Rivera Tax &amp; Books");
-    expect(page.body).toContain('src="https://rivera-tax.test/logo.png"');
-    expect(page.body).toContain("#7a1f5c");
+    expect(page.body).toContain('<p class="named">Rivera Tax &amp; Books · ');
     expect(page.body).toContain("help@rivera-tax.test");
-    expect(page.body).toMatch(/with CoFile/);
+    expect(page.body).not.toContain("rivera-tax.test/logo.png");
+    expect(page.body).not.toContain("#7a1f5c");
+    expect(page.body).not.toMatch(/with CoFile/);
+    // The one Brass button: CoFile's look.
+    expect(page.body).toContain("--action:#D9A84A");
   });
 });
 
@@ -90,12 +92,11 @@ describe("the firm's font (V21)", () => {
     // Another firm's key can't change it.
     const other = await partner("Not Font Firm", "nf@not-font.test");
     expect((await app.inject({ method: "PUT", url: `/v1/client-companies/${firm}/font`, headers: { "x-api-key": other.key }, payload: { data: WOFF2.toString("base64") } })).statusCode).toBe(404);
-    // The approval page loads it.
+    // The firm's font is for its client pages; its proof is in CoFile's look and doesn't load it (decision 2).
     const { njFormationRequest } = await import("./helpers.js");
     const link = (await app.inject({ method: "POST", url: "/v1/filings", headers: { "x-api-key": key }, payload: njFormationRequest({ clientCompanyId: firm }) })).json().approvalLink as string;
     const page = (await app.inject({ method: "GET", url: new URL(link).pathname })).body;
-    expect(page).toContain(`/v1/brand-fonts/${up.json().fontArtifactId}`);
-    expect(page).toContain('font-family:"FirmFont"');
+    expect(page).not.toContain(`/v1/brand-fonts/${up.json().fontArtifactId}`);
   });
 });
 

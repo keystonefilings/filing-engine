@@ -1,12 +1,9 @@
 "use client";
 
 import { useKeptForm } from "./useKeptForm";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import type { SetupState } from "@/app/p/[slug]/(portal)/setup/actions";
 import type { PaymentMethodRef, PaymentRouting } from "@/lib/engine";
-import { textOn } from "@/lib/brand";
-import { ColorField, LogoField } from "./BrandFields";
-import { FONT_PRESETS } from "@/lib/fonts";
 
 type Action = (prev: SetupState, fd: FormData) => Promise<SetupState>;
 
@@ -66,93 +63,6 @@ export function DetailsForm({ action, v }: { action: Action; v: DetailsValues })
       ) : null}
       <button className="btn primary" type="submit" disabled={pending}>{pending ? "Saving…" : "Save and continue"}</button>
     </form>
-  );
-}
-
-export interface BrandValues { slug?: string; siteUrl?: string; font?: string; hasCustomFont?: boolean; displayName?: string; logoSrc?: string; logoUrl?: string; primaryColor?: string; secondaryColor?: string; supportEmail?: string }
-
-export function BrandingForm({ action, v, platform }: { action: Action; v: BrandValues; platform: string }) {
-  const { state: s, pending, formProps } = useKeptForm(action, null);
-  const [name, setName] = useState(v.displayName ?? "");
-  const [logo, setLogo] = useState<string | undefined>(v.logoSrc);
-  const [color, setColor] = useState(v.primaryColor ?? "#1f4fd1");
-  const [color2, setColor2] = useState(v.secondaryColor ?? v.primaryColor ?? "#0f766e");
-  const [font, setFont] = useState(v.font ?? "system");
-  const [fontData, setFontData] = useState("");
-  const [fontError, setFontError] = useState("");
-  // The preview shows the chosen font: a preset from Google Fonts, or the file just picked.
-  useEffect(() => {
-    const p = FONT_PRESETS[font];
-    if (p?.family && !document.querySelector(`link[data-font="${font}"]`)) {
-      const l = document.createElement("link");
-      l.rel = "stylesheet"; l.dataset.font = font;
-      l.href = `https://fonts.googleapis.com/css2?family=${encodeURIComponent(p.family).replace(/%20/g, "+")}:wght@400;600&display=swap`;
-      document.head.appendChild(l);
-    }
-    if (font === "custom" && fontData) void new FontFace("FirmFontPreview", `url(${fontData})`).load().then((f) => document.fonts.add(f)).catch(() => setFontError("That file isn't a font we can use."));
-  }, [font, fontData]);
-  const previewStack = font === "custom" ? (fontData ? `"FirmFontPreview", system-ui` : v.hasCustomFont ? `"FirmFont", system-ui` : "system-ui") : FONT_PRESETS[font]?.stack ?? "system-ui";
-  const pickFont = (file: File | undefined) => {
-    setFontError("");
-    if (!file) return;
-    if (file.size > 600 * 1024) { setFontError("The font file must be 600 KB or smaller."); return; }
-    const r = new FileReader();
-    r.onload = () => { setFontData(String(r.result)); setFont("custom"); };
-    r.readAsDataURL(file);
-  };
-  return (
-    <div className="stack">
-      <form {...formProps} className="card">
-        <Top s={s} />
-        <div className="field">
-          <label htmlFor="b-slug">Your web address</label>
-          <div className="row" style={{ gap: 4, flexWrap: "nowrap" }}><span className="small muted" style={{ whiteSpace: "nowrap" }}>{(v.siteUrl ?? "").replace(/^https?:\/\//, "")}/</span><input id="b-slug" name="slug" type="text" defaultValue={v.slug} pattern="[a-z0-9](?:[a-z0-9-]{0,38}[a-z0-9])?" maxLength={40} aria-describedby="b-slug-help" /></div>
-          <p className="help" id="b-slug-help">Your pages for clients live here, one per service. Lowercase letters, digits and dashes. Changing it changes those links.</p>
-          <Issue s={s} k="slug" />
-        </div>
-        <div className="field"><label htmlFor="b-name">Name your clients see</label><input id="b-name" name="displayName" type="text" value={name} onChange={(e) => setName(e.target.value)} maxLength={80} /></div>
-        <LogoField current={v.logoSrc} currentLink={v.logoUrl} onPreview={setLogo} />
-        <Issue s={s} k="logoUrl" /><Issue s={s} k="data" />
-        <div className="field-row n2">
-          <ColorField id="b-color" name="primaryColor" label="Main color" value={color} onChange={setColor} help="Buttons and the top of the page. Button text is white, so choose a dark color." />
-          <ColorField id="b-color2" name="secondaryColor" label="Second color" value={color2} onChange={setColor2} help="Links and highlights. Choose a color that's easy to read on white." />
-        </div>
-        <div className="field">
-          <label htmlFor="b-font">Font</label>
-          <select id="b-font" name="font" value={font} onChange={(e) => setFont(e.target.value)}>
-            {Object.entries(FONT_PRESETS).map(([id, p]) => <option key={id} value={id}>{p.label}</option>)}
-            {v.hasCustomFont || fontData ? <option value="custom">Your own font (uploaded)</option> : null}
-          </select>
-          <label className="small" style={{ display: "block", marginTop: 8 }}>Or upload your own (WOFF2, WOFF, TTF or OTF, up to 600 KB)
-            <input type="file" accept=".woff2,.woff,.ttf,.otf,font/woff2,font/woff,font/ttf,font/otf" onChange={(e) => pickFont(e.target.files?.[0])} />
-          </label>
-          <input type="hidden" name="fontData" value={fontData} />
-          {fontError ? <span className="err">{fontError}</span> : null}
-          <Issue s={s} k="font" />
-        </div>
-        <div className="field"><label htmlFor="b-sup">Support email shown to clients</label><input id="b-sup" name="supportEmail" type="email" defaultValue={v.supportEmail} /><Issue s={s} k="supportEmail" /></div>
-        <button className="btn primary" type="submit" disabled={pending}>{pending ? "Saving…" : "Save and continue"}</button>
-      </form>
-      <div style={{ fontFamily: previewStack }}><BrandPreview name={name} logo={logo} color={color} color2={color2} platform={platform} /></div>
-    </div>
-  );
-}
-
-/** How a client's page will look with these choices. */
-export function BrandPreview({ name, logo, color, color2, platform }: { name: string; logo?: string; color: string; color2: string; platform?: string }) {
-  return (
-    <div className="card" style={{ ["--accent" as string]: color, ["--accent-text" as string]: textOn(color), ["--accent-2" as string]: color2, borderTop: `4px solid ${color2}` }}>
-      <p className="small muted" style={{ marginTop: 0 }}>Preview of a client&apos;s page</p>
-      <div className="row">
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        {logo ? <img src={logo} alt="" style={{ height: 28, width: "auto" }} /> : null}
-        <strong>{name || "Your firm"}</strong>
-        <span className="spacer" />
-        {platform ? <span className="small muted">with {platform}</span> : null}
-      </div>
-      <p className="small" style={{ marginBottom: 8 }}>Please fill in your LLC formation details. <a href="#" onClick={(e) => e.preventDefault()}>What you&apos;ll need</a></p>
-      <button type="button" className="btn primary small">Send for approval</button>
-    </div>
   );
 }
 

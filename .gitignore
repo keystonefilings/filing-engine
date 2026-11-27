@@ -12,3 +12,8 @@ web/tsconfig.tsbuildinfo
 
 # Temporary git worktrees for background agents
 .claude/worktrees/
+
+# Licensed font files (Miller, Founders Grotesk): never committed, this repository is public.
+# Put them in web/public/fonts on the machine that builds or serves the site (web/design/README.md).
+web/public/fonts/*
+!web/public/fonts/README.md

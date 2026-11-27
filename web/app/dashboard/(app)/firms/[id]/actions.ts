@@ -53,7 +53,7 @@ export async function savePortal(id: string, _prev: PortalResult, fd: FormData):
     if (problem) { revalidatePath(`/dashboard/firms/${id}`); return { ok: false, message: `The rest was saved. ${problem}` }; }
   }
   revalidatePath(`/dashboard/firms/${id}`);
-  return { ok: true, message: portal ? `Saved. The filing desk is at /p/${slug ?? old?.slug}.` : "Saved. This firm has no filing deskal now." };
+  return { ok: true, message: portal ? `Saved. The filing desk is at /p/${slug ?? old?.slug}.` : "Saved. This firm has no filing desk now." };
 }
 
 /**

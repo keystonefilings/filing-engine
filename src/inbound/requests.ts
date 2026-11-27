@@ -9,7 +9,7 @@ import type { InboundMessageRecord, Store, UserRecord } from "../store/types.js"
  */
 export type RequestChannel = InboundMessageRecord["channel"];
 export type RequestOutcome =
-  | { status: "stored" | "duplicate"; id: string; link: string; reply: string }
+  | { status: "stored" | "duplicate"; id: string; link: string; reply: string; /** The firm, named above the reply's headline (merged spec 10D.12). */ firmName?: string }
   | { status: "not_a_firm_user"; reply: string }
   | { status: "unknown_sender" | "ignored" };
 
@@ -41,9 +41,11 @@ export class RequestIntake {
     };
     await store.createInbound(rec);
     const cut = input.text.length > MAX_TEXT ? " Your message was long, so we read only the first part of it." : "";
+    // A partner firm approves its own proofs (Nov 26); a firm a subscriber set up may have other approvers.
+    const approval = firm.partner ? "you approve the proof" : "the proof is approved";
     return {
-      status: "stored", id: rec.id, link: this.linkFor(slug, rec.id),
-      reply: `We got your request. Open the link to see the form filled in from your message, check every answer, add what's missing, and send it. Nothing is filed until you send it and your client approves.${cut}`,
+      status: "stored", id: rec.id, link: this.linkFor(slug, rec.id), firmName: firm.portal?.displayName ?? firm.name,
+      reply: `We got your request. Open the link to see the form filled in from your message, check every answer, add what's missing, and send it. Nothing is filed until you send it and ${approval}.${cut}`,
     };
   }
 }

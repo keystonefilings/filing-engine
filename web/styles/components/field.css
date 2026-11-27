@@ -1,0 +1,91 @@
+/* Fields and forms (merged spec 11.3). Fields are paper: square-cut corners, always a visible label above. */
+@layer components {
+.field2 { display: grid; gap: 8px; min-width: 0; }
+.field2-label { font-family: var(--font-sans); font-size: 1rem; line-height: 1.375rem; font-weight: 500; color: var(--text); }
+.field2-label .opt { font-weight: 400; color: var(--text-2); }
+.field2-label .req { color: var(--link); margin-left: 2px; }
+.field2-help { font-size: 0.9375rem; line-height: 1.375rem; color: var(--text-2); max-width: 64ch; }
+.field2-error { display: flex; align-items: center; gap: 8px; font-size: 0.9375rem; line-height: 1.375rem; font-weight: 500; color: var(--madder); }
+.field2-error::before { content: ""; flex: none; width: 12px; height: 4px; background: currentColor; }
+
+.input2, .select2, .textarea2 {
+  width: 100%; min-height: 56px; padding: 0 16px;
+  font-family: var(--font-sans); font-size: 1.125rem; line-height: 1.5rem; color: var(--field-ink, #1D2130);
+  background-color: var(--field-bg, #fff); border: 1px solid var(--line-strong); border-radius: var(--r-sheet);
+  transition: border-color var(--t-quick) var(--ease-press);
+}
+.textarea2 { min-height: 120px; padding: 14px 16px; resize: vertical; }
+.select2 {
+  appearance: none; padding-right: 44px;
+  background-image: var(--chevron, url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1.5l5 5 5-5' fill='none' stroke='%231D2130' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E"));
+  background-repeat: no-repeat; background-position: right 16px center;
+}
+.is-dense .input2, .is-dense .select2 { min-height: 48px; }
+@media (hover: hover) { .input2:hover, .select2:hover, .textarea2:hover { border-color: var(--graphite); } }
+.input2:focus, .select2:focus, .textarea2:focus { border-color: var(--focus); }
+.input2[aria-invalid="true"], .select2[aria-invalid="true"], .textarea2[aria-invalid="true"] { border-color: var(--madder); box-shadow: inset 0 0 0 1px var(--madder); }
+.input2:disabled, .select2:disabled, .textarea2:disabled { background: var(--cotton-2); border-color: var(--rule); color: var(--graphite); cursor: not-allowed; }
+.input2::placeholder, .textarea2::placeholder { color: var(--graphite); opacity: 1; }
+/* Filled in for you: an edge and a wash until someone edits it (decision 38) */
+.input2.is-filled, .select2.is-filled, .textarea2.is-filled { box-shadow: inset 3px 0 0 var(--filled-edge, var(--brass-line)); background-color: var(--filled, var(--brass-tint)); }
+.reg-firm .input2.is-filled, .reg-firm .select2.is-filled, .reg-firm .textarea2.is-filled { --filled-edge: var(--firm); --filled: var(--firm-row); }
+
+/* Paired fields: labels share a row and the fields line up on one edge */
+.field2-row { display: grid; gap: 16px; align-items: end; }
+.field2-row.n2 { grid-template-columns: 2fr 1fr; }
+.field2-row.n3 { grid-template-columns: 2fr 1fr 1fr; }
+@media (max-width: 599px) {
+  .field2-row.n2 { grid-template-columns: 1fr; }
+  .field2-row.n3 { grid-template-columns: 1fr 1fr; }
+  .field2-row.n3 > :first-child { grid-column: 1 / -1; }
+}
+@media (max-width: 359px) { .field2-row.n3 { grid-template-columns: 1fr; } }
+
+/* Checkbox and radio: the box and its whole label are one target, at least 48 px tall */
+.check2 { display: grid; grid-template-columns: 24px 1fr; gap: 12px; align-items: start; min-height: 48px; padding-block: 12px; cursor: pointer; }
+.check2 input { appearance: none; width: 24px; height: 24px; margin: 0; border: 1px solid var(--line-strong); border-radius: var(--r-sheet); background: var(--field-bg, #fff); display: grid; place-content: center; cursor: pointer; }
+.check2 input[type="radio"] { border-radius: 50%; }
+.check2 input[type="checkbox"]:checked { background: var(--select); border-color: var(--select-line); }
+.check2 input[type="checkbox"]:checked::after { content: ""; width: 12px; height: 7px; border: solid var(--select-on); border-width: 0 0 2px 2px; transform: translateY(-2px) rotate(-45deg); }
+.check2 input[type="radio"]:checked { border-color: var(--select-line); }
+.check2 input[type="radio"]:checked::after { content: ""; width: 10px; height: 10px; border-radius: 50%; background: var(--select-line); }
+.check2 input:focus { outline: 2px solid var(--focus); outline-offset: 2px; }
+
+/* Choice card: radios and checkboxes with real choices */
+.choice2 { display: grid; grid-template-columns: 24px 1fr; gap: 12px; align-items: start; min-height: 56px; padding: 16px 20px; background: var(--field-bg, #fff); color: var(--field-ink, #1D2130); border: 1px solid var(--rule); border-radius: var(--r-sheet); cursor: pointer; }
+@media (hover: hover) { .choice2:hover { border-color: var(--line-strong); } }
+.choice2:has(input:checked) { box-shadow: inset 0 0 0 2px var(--select-line); background: var(--select-fill); border-color: var(--select-line); }
+.choice2 input { appearance: none; width: 24px; height: 24px; margin: 0; border: 1px solid var(--line-strong); border-radius: 50%; background: var(--field-bg, #fff); display: grid; place-content: center; }
+.choice2 input:checked { border-color: var(--select-line); }
+.choice2 input:checked::after { content: ""; width: 10px; height: 10px; border-radius: 50%; background: var(--select-line); }
+.choice2-title { font-weight: 500; }
+.choice2-note { display: block; color: var(--text-2); font-size: 0.9375rem; line-height: 1.375rem; margin-top: 2px; }
+
+/* Folded optional section: a native details/summary */
+.fold2 { border-top: 1px solid var(--line); }
+.fold2 > summary { list-style: none; display: flex; align-items: center; justify-content: space-between; gap: 16px; min-height: 64px; cursor: pointer; }
+.fold2 > summary::-webkit-details-marker { display: none; }
+.fold2 > summary::after { content: ""; flex: none; width: 16px; height: 10px; background: currentColor; mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='10' viewBox='0 0 16 10'%3E%3Cpath d='M1.5 1.5l6.5 6.5 6.5-6.5' fill='none' stroke='black' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center / contain no-repeat; transition: transform 240ms var(--ease-settle); }
+.fold2[open] > summary::after { transform: rotate(180deg); }
+.fold2[open] { border-bottom: 1px solid var(--line); padding-bottom: 24px; }
+.fold2-title { font-family: var(--font-firm, var(--font-sans-display)); font-size: 1.375rem; line-height: 1.75rem; font-weight: 600; }
+.reg-cofile .fold2-title { font-family: var(--font-sans-display); font-weight: 500; }
+.fold2-title .opt { font-family: var(--font-sans); font-weight: 400; color: var(--text-2); }
+
+/* "Same as": earlier entries as one-tap copies */
+.sameas2 { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+.sameas2-lead { color: var(--text-2); font-size: 0.9375rem; line-height: 1.375rem; }
+
+/* Code field: one input, a hairline per expected character */
+.code2 { font-family: var(--font-mono); font-size: 1.5rem; line-height: 2rem; letter-spacing: 0.3em; text-align: center; min-height: 56px; padding: 0 16px; background: var(--field-bg, #fff); color: var(--field-ink, #1D2130); border: 1px solid var(--line-strong); border-radius: var(--r-sheet); }
+
+/* Plate field: a value to copy */
+.plate2 { display: flex; align-items: center; gap: 12px; min-height: 48px; padding: 4px 4px 4px 16px; background: var(--cotton-2); border-radius: var(--r-sheet); }
+.plate2-value { flex: 1; min-width: 0; font-family: var(--font-mono); font-size: 0.9375rem; line-height: 1.5rem; color: var(--text); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; user-select: all; }
+
+/* Form layout */
+.form2 { display: grid; gap: 24px; max-width: var(--form-max); }
+.form2 fieldset { border: 0; padding: 0; margin: 0; display: grid; gap: 24px; }
+.form2 legend { padding: 0; margin-bottom: 8px; }
+@media (max-width: 599px) { .form2, .form2 fieldset { gap: 20px; } }
+}

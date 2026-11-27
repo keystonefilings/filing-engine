@@ -1,0 +1,57 @@
+/* Buttons (merged spec 11.1). Struck, not cut: the plate's chamfer. Read only semantic tokens. */
+@layer components {
+.btn2 {
+  --h: 56px; --px: 28px;
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+  min-height: var(--h); min-width: min(120px, 100%); max-width: 100%; padding: 16px var(--px);
+  font-family: var(--font-sans-display); font-size: 1.125rem; line-height: 1.5rem; font-weight: 500; letter-spacing: 0.002em;
+  text-align: center; text-wrap: balance; text-decoration: none;
+  border: 1px solid transparent; border-radius: 6px; corner-shape: bevel;
+  cursor: pointer; user-select: none; -webkit-tap-highlight-color: transparent;
+  transition: background-color var(--t-quick) var(--ease-press), border-color var(--t-quick) var(--ease-press), box-shadow 160ms var(--ease-settle), transform 160ms var(--ease-settle);
+}
+@supports not (corner-shape: bevel) { .btn2 { border-radius: 3px; } }
+.btn2:active { transform: translateY(1px); box-shadow: inset 0 1px 0 rgba(29,33,48,.18); transition-duration: 80ms; }
+
+/* Sizes */
+.btn2.is-proof { --h: 60px; --px: 32px; }
+.btn2.is-medium { --h: 48px; --px: 24px; padding-block: 12px; }
+.btn2.is-header { --h: 44px; --px: 20px; padding-block: 12px; font-family: var(--font-sans); font-size: 1rem; line-height: 1.25rem; }
+.btn2.is-small { --h: 40px; --px: 16px; padding-block: 10px; min-width: 0; font-family: var(--font-sans); font-size: 1rem; line-height: 1.25rem; position: relative; }
+.btn2.is-small::after { content: ""; position: absolute; inset: -4px 0; } /* 48 px hit area */
+.btn2.is-block { width: 100%; }
+
+/* Kinds */
+.btn2.is-action { background: var(--action); color: var(--action-on); border-color: var(--action-border); box-shadow: inset 4px 0 0 var(--action-edge); }
+.btn2.is-ink { background: var(--ink); color: var(--cotton); }
+.btn2.is-outline { background: transparent; color: var(--text); border-color: var(--line-strong); }
+.btn2.is-danger { background: transparent; color: var(--madder); border-color: var(--madder); }
+.btn2.is-quiet { background: none; border: 0; min-width: 0; padding-inline: 0; color: var(--link); text-decoration: underline 1px var(--link-line); text-underline-offset: 3px; }
+@media (hover: hover) {
+  .btn2.is-action:hover { background: var(--action-hover); }
+  .btn2.is-ink:hover { background: color-mix(in srgb, var(--ink), #fff 8%); }
+  .btn2.is-outline:hover { background: var(--row); border-color: var(--text); }
+  .btn2.is-danger:hover { background: var(--madder-tint); }
+  .btn2.is-quiet:hover { text-decoration-thickness: 2px; text-decoration-color: var(--link); }
+}
+
+/* Disabled: the blind impression, never an opacity fade */
+.btn2[aria-disabled="true"]:not([aria-busy="true"]), .btn2:disabled {
+  background: var(--cotton-2); color: var(--graphite); border-color: var(--rule); box-shadow: none; cursor: not-allowed; transform: none;
+}
+.btn2.is-quiet[aria-disabled="true"], .btn2.is-quiet:disabled { background: none; text-decoration: none; }
+
+/* Loading: the pressed look held; after 3 s a rule draws along the inside bottom edge */
+.btn2[aria-busy="true"] { transform: translateY(1px); box-shadow: inset 0 1px 0 rgba(29,33,48,.18); cursor: progress; position: relative; overflow: hidden; }
+.btn2[aria-busy="true"]::before {
+  content: ""; position: absolute; left: 0; bottom: 0; height: 2px; width: 100%; background: currentColor;
+  transform-origin: left; transform: scaleX(0); animation: btn2-rule 1.2s var(--ease-sweep) 3s infinite;
+}
+@keyframes btn2-rule { to { transform: scaleX(1); } }
+@media (prefers-reduced-motion: reduce) { .btn2[aria-busy="true"]::before { animation: none; transform: none; } }
+
+/* Inside a picture: the same look, inert */
+.btn2.is-picture { cursor: default; pointer-events: none; }
+
+@media (max-width: 599px) { .btn2.is-phone-block { width: 100%; } }
+}

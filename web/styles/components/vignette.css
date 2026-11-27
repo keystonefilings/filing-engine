@@ -1,0 +1,13 @@
+/* Engraved vignettes and CoFile's identity images: the light export, or the dark one on Night (4.6). */
+@layer components {
+.vignette2 { display: inline-block; width: var(--v-w); max-width: 100%; line-height: 0; }
+.vignette2 img { display: block; width: 100%; height: auto; }
+@media (max-width: 599px) { .vignette2 { width: var(--v-w-phone); } }
+.vignette2-dark, .ident-dark { display: none !important; }
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) :is(.reg-cofile, .site2) .vignette2-light, :root:not([data-theme="light"]) :is(.reg-cofile, .site2) .ident-light { display: none !important; }
+  :root:not([data-theme="light"]) :is(.reg-cofile, .site2) .vignette2-dark, :root:not([data-theme="light"]) :is(.reg-cofile, .site2) .ident-dark { display: block !important; }
+}
+:root[data-theme="dark"] :is(.reg-cofile, .site2) .vignette2-light, :root[data-theme="dark"] :is(.reg-cofile, .site2) .ident-light { display: none !important; }
+:root[data-theme="dark"] :is(.reg-cofile, .site2) .vignette2-dark, :root[data-theme="dark"] :is(.reg-cofile, .site2) .ident-dark { display: block !important; }
+}

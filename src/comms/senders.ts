@@ -1,3 +1,5 @@
+import type { Letter } from "./letter.js";
+
 export type Channel = "email" | "slack" | "whatsapp" | "sms" | "webhook";
 
 export interface OutboundMessage {
@@ -7,8 +9,18 @@ export interface OutboundMessage {
   /** The email button's text; "Open" when not set. */
   linkLabel?: string;
   screenshotUrl?: string;
-  /** Files sent with the message (email only): the filing's documents. */
-  attachments?: { filename: string; contentType: string; content: Buffer }[];
+  /** Files sent with the message (email only): the filing's documents. contentId: shown inline in the email
+   *  (the state's review page beside its paragraph), referenced as cid:<contentId>. */
+  attachments?: { filename: string; contentType: string; content: Buffer; contentId?: string }[];
+  /** Email only: how the message is laid out, and on whose letterhead (merged spec 10D). Absent: CoFile's
+   *  letterhead, the subject as the headline and the body's paragraphs as written. */
+  letter?: Letter;
+  /** Email only: who it is from. Absent: the sender's configured From ("CoFile <filings@cofile.app>").
+   *  An email to a firm's client is sent under the firm's name (decision 37); address is the firm's own
+   *  sending address once its domain is verified, else the configured address is kept under the firm's name. */
+  from?: { name: string; address?: string };
+  /** Email only: where replies go. Absent: the sender's configured Reply-To. */
+  replyTo?: string[];
 }
 
 /**

@@ -1,40 +1,42 @@
 import { brandStyle, firmContext } from "@/lib/firm";
-import { platformName } from "@/lib/brand";
-import Link from "next/link";
 import { personalSession } from "@/lib/session";
-import { TopBar } from "@/components/TopBar";
+import { waitingForCardCodes } from "@/lib/cards";
+import { AppShell, type ShellLink } from "@/components/shell/AppShell";
 import { BrandFont } from "@/components/BrandFont";
 
+/**
+ * The filing desk (merged spec 10B.3). A partner firm works in CoFile's look, the same for every firm, with its logo
+ * and name in the account label (decision 2); its own color and font appear only in previews of its clients' pages.
+ * A firm a platform invited keeps that platform's white label, as before.
+ */
 export default async function PortalLayout({ children, params }: { children: React.ReactNode; params: Promise<{ slug: string }> }) {
   const { slug } = await params;
   const { session, company, brand } = await firmContext(slug);
   const base = `/p/${encodeURIComponent(slug)}`;
-  // Partner firms (signed up themselves) get our dashboard, co-branded with their own name and logo.
-  // Firms an enterprise invited keep that enterprise's white-label look.
   const partner = Boolean(company.partner);
-  const cobrand = partner ? (
-    <span className="cobrand">
-      {/* eslint-disable-next-line @next/next/no-img-element */}
-      {brand.logoUrl ? <img src={brand.logoUrl} alt="" /> : null}<span>{brand.name}</span>
-    </span>
-  ) : null;
+  const waiting = (await waitingForCardCodes().catch(() => [])).reduce((n, c) => n + c.filings.length, 0);
+  const links: ShellLink[] = [
+    { href: base, label: "Filings", exact: true, also: [`${base}/filings`] },
+    { href: `${base}/new`, label: "New filing", also: [`${base}/from-email`] },
+    { href: `${base}/pay`, label: "Ready to pay", count: waiting },
+    { href: `${base}/client-links`, label: "Client links" },
+    { href: `${base}/signatures`, label: "Signatures" },
+    ...(partner ? [{ href: `${base}/setup`, label: "Setup" }, { href: `${base}/billing`, label: "Billing" }] : []),
+  ];
+  const user = { email: session.email, passwordHref: personalSession(session) ? `${base}/password` : undefined };
+  const footer = brand.supportEmail ? <>Questions? Email <a href={`mailto:${brand.supportEmail}`}>{brand.supportEmail}</a>.</> : null;
   return (
-    <div className="branded" style={brandStyle(brand)}>
+    <>
+      {/* The firm's font is loaded for the previews of its clients' pages, never for the desk itself. */}
       <BrandFont font={brand.font} />
-      <TopBar
-        brand={partner ? platformName() : brand.name} href={base} logoUrl={partner ? undefined : brand.logoUrl}
-        links={[
-          { href: base, label: "Filings" },
-          { href: `${base}/new`, label: "New filing" },
-          { href: `${base}/pay`, label: "Ready to pay" },
-          { href: `${base}/client-links`, label: "Client links" },
-          { href: `${base}/signatures`, label: "Signatures" },
-          ...(partner ? [{ href: `${base}/setup`, label: "Setup" }, { href: `${base}/billing`, label: "Billing" }] : []),
-        ]}
-        right={<form action="/logout" method="post" className="row">{cobrand}{personalSession(session) ? <Link className="small muted" href={`${base}/password`} title="Change password">{session.email}</Link> : <span className="small muted">{session.email}</span>}<button className="btn small" type="submit">Log out</button></form>}
-      />
-      <main className="wrap">{children}</main>
-      {brand.supportEmail ? <footer className="wrap small muted" style={{ paddingTop: 0 }}>Questions? Email <a href={`mailto:${brand.supportEmail}`}>{brand.supportEmail}</a>.</footer> : null}
-    </div>
+      <AppShell
+        home={base}
+        account={partner ? { name: brand.name, logoUrl: brand.logoUrl } : undefined}
+        white={partner ? undefined : { name: brand.name, logoUrl: brand.logoUrl, style: brandStyle(brand) }}
+        user={user} links={links} footer={footer}
+      >
+        {children}
+      </AppShell>
+    </>
   );
 }

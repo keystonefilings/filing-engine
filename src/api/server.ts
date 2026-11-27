@@ -1,5 +1,10 @@
 import Fastify, { type FastifyInstance, type FastifyReply } from "fastify";
+import { registerEmailDomains } from "./email-domains.js";
+import type { ResendDomains } from "../comms/resend-domains.js";
+import { readFile } from "node:fs/promises";
+import path from "node:path";
 import type { ChannelSender } from "../comms/senders.js";
+import { EMAIL_ASSETS } from "../comms/email.js";
 import { lookupKey } from "./keys.js";
 import { registerSelfService, tenantFromStoredKey } from "./self-service.js";
 import { registerSignatures } from "./signatures.js";
@@ -8,6 +13,7 @@ import type { FilingService } from "../orchestrator/service.js";
 import { IdempotencyConflict, OutcomeError, ValidationFailed } from "../orchestrator/service.js";
 import type { ApprovalService } from "../approvals/service.js";
 import { renderReviewPage, renderDecisionPage, maskSensitive, type PageBrand } from "../approvals/render.js";
+import { businessName, filingTypeTitle } from "../approvals/titles.js";
 import { ClientCompanyOwnershipError, type Store, type FilingRecord } from "../store/types.js";
 import type { ArtifactStore } from "../artifacts/store.js";
 import { TenantSettings, ClientCompanySettings } from "../settings/schema.js";
@@ -56,6 +62,10 @@ export interface ApiDeps {
   partnerSignupMode?: PartnerSignupMode;
   /** Sends account emails (password reset). Absent: those emails are not sent. */
   email?: ChannelSender;
+  /** Decision 37: firms' own sending domains (Resend's domains API); absent without RESEND_API_KEY. */
+  emailDomains?: ResendDomains;
+  /** Our own sending domains, which a firm can't claim as its own. */
+  platformEmailDomains?: string[];
   /** The web front end, for links in account emails. */
   webBaseUrl?: string;
   /** V29: where connected portal logins are sealed. */
@@ -154,6 +164,17 @@ export function buildServer(deps: ApiDeps): FastifyInstance {
   app.addHook("preHandler", partnerGuard({ store: deps.store, artifacts: deps.artifacts, authOf }));
 
   app.get("/healthz", async () => ({ ok: true }));
+
+  // The email's own images (merged spec 10D): the Name Plate, the ghost light and the document card, cut by
+  // tools/render-email-assets.ts. Public, like a firm's logo: mail apps fetch them without a key.
+  const emailAssets = new Set<string>(Object.values(EMAIL_ASSETS));
+  app.get("/email-assets/:name", async (req, reply) => {
+    const name = (req.params as { name: string }).name;
+    if (!emailAssets.has(name)) return reply.code(404).send({ error: "not found" });
+    const body = await readFile(path.resolve(process.env.EMAIL_ASSETS_DIR ?? "assets/email", name)).catch(() => null);
+    if (!body) return reply.code(404).send({ error: "not found" });
+    return reply.header("content-type", "image/png").header("cache-control", "public, max-age=86400").header("x-content-type-options", "nosniff").send(body);
+  });
   app.get("/v1/events", async () => ({ events: EVENT_TYPES }));
 
   // ---- Filings (callers) ----
@@ -384,6 +405,7 @@ export function buildServer(deps: ApiDeps): FastifyInstance {
   });
 
   registerBrandLogos(app, { store: deps.store, artifacts: deps.artifacts, authOf });
+  registerEmailDomains(app, { store: deps.store, authOf, domains: deps.emailDomains, platformDomains: deps.platformEmailDomains ?? [] });
   registerDocuments(app, { store: deps.store, artifacts: deps.artifacts, authOf });
   registerSelfService(app, { store: deps.store, tenantOf, platformName: deps.platformName, agentOffer: deps.agentServices ? (t, c) => deps.agentServices!.offer(t, c) : undefined });
   registerSignatures(app, { store: deps.store, tenantOf });
@@ -409,25 +431,38 @@ export function buildServer(deps: ApiDeps): FastifyInstance {
     return reply.header("cache-control", "private, no-store").type(got.meta.contentType).send(got.body);
   });
 
-  // V20: the client sees the firm they work with. A firm with portal branding (a partner, or a
-  // firm a subscriber set up) brands the page; partners are co-branded with the platform. The
-  // page shown after the client decides carries the same look.
+  // Whose look the proof wears (decision 2, the Stripe model). A partner firm approves its own proof, so
+  // it's in CoFile's look, the same for every firm, with the firm and its client named as text; so is any
+  // proof on CoFile's own tenant. A proof a platform's own clients approve is white label: the platform's
+  // firm's look if it set one, else the platform's, and nothing of CoFile on it.
   async function approvalBrand(tenantId: string, f: FilingRecord | null): Promise<PageBrand> {
     const tenant = await deps.store.getTenant(tenantId);
     const client = f ? await deps.store.getClientCompany(f.clientCompanyId) : null;
     const portal = client?.portal;
-    const firmBrand = portal && (portal.displayName || portal.logoUrl || portal.logoArtifactId || client?.partner);
+    const ownTenant = tenantId === (deps.platformTenantId ?? "keystone");
+    if (client?.partner || ownTenant) {
+      return {
+        look: "cofile",
+        fontBase: deps.webBaseUrl,
+        firmName: portal?.displayName ?? client?.name,
+        clientName: f ? businessName(f.request) : undefined,
+        supportEmail: portal?.supportEmail ?? tenant?.branding.supportEmail,
+      };
+    }
+    const firmBrand = portal && (portal.displayName || portal.logoUrl || portal.logoArtifactId);
     const firmLogo = portal?.logoArtifactId ? `${deps.publicBaseUrl}/v1/brand-logos/${portal.logoArtifactId}` : portal?.logoUrl?.startsWith("https://") ? portal.logoUrl : undefined;
     return {
-      brandName: firmBrand ? (portal!.displayName ?? client!.name) : (tenantId === (deps.platformTenantId ?? "keystone") ? (deps.platformName ?? "CoFile") : (tenant?.branding.displayName ?? tenant?.name)),
+      look: "white",
+      brandName: firmBrand ? (portal!.displayName ?? client!.name) : (tenant?.branding.displayName ?? tenant?.name),
       supportEmail: (firmBrand ? portal!.supportEmail : undefined) ?? tenant?.branding.supportEmail,
-      logoUrl: firmBrand ? firmLogo : undefined, primaryColor: firmBrand ? portal!.primaryColor : undefined,
+      logoUrl: firmBrand ? firmLogo : undefined,
+      primaryColor: firmBrand ? portal!.primaryColor : undefined,
+      secondaryColor: firmBrand ? portal!.secondaryColor : undefined,
       font: firmBrand && portal!.font && portal!.font !== "system"
         ? portal!.font === "custom"
           ? (portal!.fontArtifactId ? { stack: FONT_PRESETS.system.stack, fileUrl: `${deps.publicBaseUrl}/v1/brand-fonts/${portal!.fontArtifactId}` } : undefined)
           : { stack: FONT_PRESETS[portal!.font as FontPreset]?.stack ?? FONT_PRESETS.system.stack, href: googleFontHref(portal!.font) ?? undefined }
         : undefined,
-      poweredBy: client?.partner ? (deps.platformName ?? "CoFile") : undefined,
     };
   }
 
@@ -437,14 +472,16 @@ export function buildServer(deps: ApiDeps): FastifyInstance {
       const text = found.reason === "already_decided" ? "A decision was already recorded with this link, so there's nothing more to do here."
         : found.reason === "expired" ? "This link to the proof has expired. Ask whoever sent it for a new one."
         : "This link to the proof isn't valid. Ask whoever sent it for a new one.";
-      return reply.code(410).type("text/html").send(`<p>${text}</p>`);
+      // Whose link it was isn't known here, so the page names nobody.
+      return reply.code(410).type("text/html").send(renderDecisionPage({ heading: "The proof", paragraphs: [text] }));
     }
     const a = found.approval;
     const f = await deps.store.getFiling(a.filingId);
     const html = renderReviewPage({
       ...(await approvalBrand(a.tenantId, f)),
       filingId: a.filingId,
-      filingTitle: f ? `${f.request.state} ${f.request.type.replace("_", " ")}${f.request.formation ? `: ${f.request.formation.name.baseName} ${f.request.formation.name.designator}` : ""}` : "Filing",
+      filingTitle: f ? (businessName(f.request) ?? filingTypeTitle(f.request)) : "Filing",
+      filingKind: f ? filingTypeTitle(f.request) : undefined,
       payload: a.shownPayload, fees: a.fees, feeCapUsd: a.feeCapUsd, expiresAt: a.expiresAt,
       einInRun: !!f?.request.ein && f.request.ein.mode === "in_run",
       einAfterAcceptance: !!f?.request.ein && f.request.ein.mode === "after_acceptance",
@@ -461,10 +498,17 @@ export function buildServer(deps: ApiDeps): FastifyInstance {
     const r = await deps.service.onApprovalDecision((req.params as { token: string }).token, decision, {
       ip: req.ip, userAgent: String(req.headers["user-agent"] ?? ""), comment: body.comment, code: body.code,
     });
-    if (!r.ok) return reply.code(r.reason === "bad_code" ? 400 : 410).type("text/html").send(r.reason === "bad_code"
-      ? "<p>That code didn't match. Go back, check the latest one-time code we sent you and try again.</p>"
-      : "<p>We couldn't record your decision because this link has expired or was already used. Ask whoever sent it for a new link.</p>");
-    if (decision !== "approve") return reply.type("text/html").send("<p>Thank you. Your change request is recorded, and nothing will be filed from this link. If the filing is corrected, you'll get a new link to approve.</p>");
+    if (!r.ok) return reply.code(r.reason === "bad_code" ? 400 : 410).type("text/html").send(renderDecisionPage({ heading: "The proof", paragraphs: [r.reason === "bad_code"
+      ? "That code didn't match. Go back, check the latest one-time code we sent you and try again."
+      : "We couldn't record your decision because this link has expired or was already used. Ask whoever sent it for a new link."] }));
+    if (decision !== "approve") {
+      const fc = await deps.store.getFiling(r.approval.filingId);
+      return reply.type("text/html").send(renderDecisionPage({
+        ...(await approvalBrand(r.approval.tenantId, fc)),
+        heading: "Changes requested",
+        paragraphs: ["Thank you. Your change request is recorded, and nothing will be filed from this link. If the filing is corrected, you'll get a new link to approve."],
+      }));
+    }
     // A practice filing is never filed or paid; a live one still stops before paying if the state's page changed.
     const f = await deps.store.getFiling(r.approval.filingId);
     return reply.type("text/html").send(renderDecisionPage({

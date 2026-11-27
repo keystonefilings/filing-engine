@@ -31,7 +31,8 @@ describe("Resend email sender (V1)", () => {
       from: "Keystone Filings <filings@keystonefilings.com>", to: ["Pat Rivera <pat@rivera-cpa.test>"],
       subject: "Approve: NJ formation", reply_to: "help@cofile.app",
     });
-    expect(f.calls[0]!.body.text).toBe("Please review.\n\nhttps://api.test/approve/tok");
+    // The plain-text part (merged spec 10D.17): the letterhead's name, the headline, the words, the button's label and link, CoFile's foot.
+    expect(f.calls[0]!.body.text).toBe("CoFile\n\nApprove: NJ formation\n\nPlease review.\n\nOpen\nhttps://api.test/approve/tok\n\nCoFile · the filing desk behind your firm");
     expect(f.calls[0]!.body.html).toContain('href="https://api.test/approve/tok"');
   });
 

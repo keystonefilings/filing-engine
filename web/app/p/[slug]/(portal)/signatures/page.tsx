@@ -1,3 +1,5 @@
+import { Vignette } from "@/components/Vignette";
+import "@/styles/components/desk.css";
 import { firmContext } from "@/lib/firm";
 import { listSignatures } from "@/lib/signatures";
 import { SignatureForm } from "@/components/SignatureForm";
@@ -11,7 +13,7 @@ export default async function SignaturesPage({ params }: { params: Promise<{ slu
   const { signatures, consentText } = await listSignatures(session.apiKey, session.clientCompanyId);
   const active = signatures.filter((s) => s.active);
   return (
-    <div className="narrow stack">
+    <div className="narrow stack desk2-one">
       <h1>Saved signatures</h1>
       <p className="muted">Some New York filings are a state PDF form that has to be signed. A saved signature is kept encrypted and is placed on a form only after that filing is approved, never on a preview or test run. Nobody can download it.</p>
       {active.length ? (
@@ -30,7 +32,7 @@ export default async function SignaturesPage({ params }: { params: Promise<{ slu
             </tbody>
           </table>
         </div>
-      ) : <p className="notice">No saved signatures yet.</p>}
+      ) : <div className="desk2-quiet"><Vignette name="v06-fountain-pen" size={120} /><p>No saved signatures yet.</p></div>}
       <h2>Add a signature</h2>
       <SignatureForm action={addSignature.bind(null, slug)} consentText={consentText} />
     </div>

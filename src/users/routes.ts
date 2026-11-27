@@ -9,6 +9,7 @@ import { mintSessionKey, type SessionClaims } from "./session-token.js";
 import { PORTALS, portalDefaultsProblems } from "./portals.js";
 import { RateLimiter } from "./rate-limit.js";
 import type { ChannelSender, OutboundMessage } from "../comms/senders.js";
+import { proseLetter } from "../comms/letter.js";
 import { FONT_CHOICES } from "../settings/fonts.js";
 import { PORTAL_LOGIN_KEYS, type DbVault } from "../settings/db-vault.js";
 import type { GoogleIdTokens } from "./google.js";
@@ -405,11 +406,14 @@ export function registerUsers(app: FastifyInstance, deps: UsersDeps): void {
   });
 
   const sendVerification = (u: UserRecord, secret: string) => {
+    const subject = "Confirm your email for CoFile";
+    const body = `Confirm that ${u.email} is your email to finish setting up the partner account for ${u.signup?.companyName ?? "your firm"}. The link works for ${VERIFY_TTL_DAYS} days.\n\nIf you didn't sign up, ignore this email.`;
     sendAccountEmail({ address: u.email, name: u.name }, {
-      subject: "Confirm your email for CoFile",
-      body: `Confirm that ${u.email} is your email to finish setting up the partner account for ${u.signup?.companyName ?? "your firm"}. The link works for ${VERIFY_TTL_DAYS} days.\n\nIf you didn't sign up, ignore this email.`,
+      subject, body,
       link: `${deps.webBaseUrl}/verify-email?token=${encodeURIComponent(`${u.id}.${secret}`)}`,
       linkLabel: "Confirm my email",
+      // The firm's name as typed at sign-up, in 600 (merged spec 10D.13).
+      letter: proseLetter(subject, body, { strong: u.signup?.companyName ? [u.signup.companyName] : [] }),
     }, "confirmation");
   };
 
@@ -488,11 +492,16 @@ export function registerUsers(app: FastifyInstance, deps: UsersDeps): void {
     }
     const approved = await approvePartner(u, by);
     // The sign-up page told them we'd email once the account opens.
-    sendAccountEmail({ address: approved.email, name: approved.name }, {
+    const opened = {
       subject: "Your partner account is open",
       body: `Your account for ${u.signup!.companyName} is approved. Log in with the email and password you chose. Then set up your filing desk in three short steps: your firm, your branding and how state fees are paid. You can try a practice filing right away.${deps.supportEmail ? `\n\nQuestions? Email ${deps.supportEmail}.` : ""}`,
+    };
+    sendAccountEmail({ address: approved.email, name: approved.name }, {
+      ...opened,
       link: `${deps.webBaseUrl}/login`,
       linkLabel: "Log in",
+      // A welcome: the blank Name Plate's place under the letterhead (decision 35), empty until it is engraved.
+      letter: proseLetter(opened.subject, opened.body, { vignette: "blank-plate" }),
     }, "approval");
     return { user: publicUser(approved) };
   });
@@ -550,11 +559,15 @@ export function registerUsers(app: FastifyInstance, deps: UsersDeps): void {
     await deps.store.createUser(u);
     const secret = randomBytes(32).toString("base64url");
     await deps.store.updateUser(u.id, { passwordReset: { tokenHash: sha256(secret).toString("hex"), expiresAt: new Date(now().getTime() + 7 * 86_400_000).toISOString(), sessionGen: 0, requestedAt: at } });
-    sendAccountEmail({ address: u.email, name: u.name }, {
+    const ready = {
       subject: "Your CoFile account is ready",
       body: `Welcome, ${u.name}. The enterprise account for ${q.company} is set up. Open the link below to choose your password; it works for 7 days.\n\nAfter that you can add your team, API keys and webhooks from the dashboard.${deps.supportEmail ? `\n\nQuestions? Email ${deps.supportEmail}.` : ""}`,
+    };
+    sendAccountEmail({ address: u.email, name: u.name }, {
+      ...ready,
       link: `${deps.webBaseUrl}/reset-password?token=${encodeURIComponent(`${u.id}.${secret}`)}`,
       linkLabel: "Set my password",
+      letter: proseLetter(ready.subject, ready.body, { vignette: "blank-plate" }),
     }, "welcome");
     const inquiry = await deps.store.updateInquiry(q.id, { status: "approved", decidedAt: at, decidedBy: by, tenantId });
     return reply.code(201).send({ inquiry, tenantId, user: publicUser(u) });

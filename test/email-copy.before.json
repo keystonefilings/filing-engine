@@ -1,0 +1,200 @@
+[
+ {
+  "type": "filing.awaiting_approval",
+  "data": {
+   "approvalLink": "http://api.test/approve/tok"
+  },
+  "subject": "Your proof is ready to approve: NJ formation: Blue Harbor Consulting LLC",
+  "body": "Your proof is ready. Open the link to see every detail and every fee, exactly as they'll go to the state, then approve it or ask for changes. Nothing is filed or paid until you approve. The link expires, so please look soon. Don't forward this email: anyone with the link can open your proof.",
+  "link": "http://api.test/approve/tok",
+  "linkLabel": "Open your proof",
+  "audience": "client"
+ },
+ {
+  "type": "filing.awaiting_approval",
+  "data": {
+   "approvalLink": "http://api.test/approve/tok",
+   "dryRun": true
+  },
+  "subject": "Your proof is ready to approve: NJ formation: Blue Harbor Consulting LLC",
+  "body": "Rehearsal: nothing will be filed or paid, even if you approve.\n\nYour proof is ready. Open the link to see every detail and every fee, exactly as they'll go to the state, then approve it or ask for changes. Nothing is filed or paid until you approve. The link expires, so please look soon. Don't forward this email: anyone with the link can open your proof.",
+  "link": "http://api.test/approve/tok",
+  "linkLabel": "Open your proof",
+  "audience": "client"
+ },
+ {
+  "type": "filing.information_required",
+  "data": {
+   "missing": [
+    {
+     "path": "a",
+     "label": "business purpose"
+    },
+    {
+     "path": "b",
+     "label": "the registered agent's address"
+    }
+   ]
+  },
+  "subject": "More information needed: NJ formation: Blue Harbor Consulting LLC",
+  "body": "Before we can file, we still need: business purpose, the registered agent's address. Please send these details to whoever is preparing this filing for you. Nothing is filed or paid until then.",
+  "audience": "client"
+ },
+ {
+  "type": "filing.card_code_needed",
+  "data": {
+   "card": "Firm Visa ending 4242"
+  },
+  "subject": "Card security code needed: NJ formation: Blue Harbor Consulting LLC",
+  "body": "This filing is approved and ready to pay the state with Firm Visa ending 4242. A card's security code (the 3 or 4 digits on the card) isn't saved with the card, so we need you to enter it once: log in and open Ready to pay with the button below. Every filing waiting for this card then goes ahead. We keep the code for an hour at most, then delete it. Never reply to this email with the code.",
+  "linkLabel": "Enter security code",
+  "audience": "card_owner"
+ },
+ {
+  "type": "filing.card_code_needed",
+  "data": {},
+  "subject": "Card security code needed: NJ formation: Blue Harbor Consulting LLC",
+  "body": "This filing is approved and ready to pay the state with your saved card. A card's security code (the 3 or 4 digits on the card) isn't saved with the card, so we need you to enter it once: log in and open Ready to pay with the button below. Every filing waiting for this card then goes ahead. We keep the code for an hour at most, then delete it. Never reply to this email with the code.",
+  "linkLabel": "Enter security code",
+  "audience": "card_owner"
+ },
+ {
+  "type": "filing.changes_requested",
+  "data": {
+   "comment": "Use the Grove St address"
+  },
+  "subject": "Changes requested: NJ formation: Blue Harbor Consulting LLC",
+  "body": "We received your change request: \"Use the Grove St address\". Nothing has been filed. If the filing is corrected, you'll get a new link to approve.",
+  "audience": "client"
+ },
+ {
+  "type": "filing.changes_requested",
+  "data": {},
+  "subject": "Changes requested: NJ formation: Blue Harbor Consulting LLC",
+  "body": "We received your change request. Nothing has been filed. If the filing is corrected, you'll get a new link to approve.",
+  "audience": "client"
+ },
+ {
+  "type": "filing.completed",
+  "data": {
+   "reference": "0450123456"
+  },
+  "subject": "Completed: NJ formation: Blue Harbor Consulting LLC",
+  "body": "This filing is complete (state reference 0450123456).",
+  "audience": "client"
+ },
+ {
+  "type": "filing.completed",
+  "data": {},
+  "subject": "Completed: NJ formation: Blue Harbor Consulting LLC",
+  "body": "This filing is complete.",
+  "audience": "client"
+ },
+ {
+  "type": "filing.rejected",
+  "data": {
+   "reason": "The name is not distinguishable."
+  },
+  "subject": "Rejected by the state: NJ formation: Blue Harbor Consulting LLC",
+  "body": "The state rejected this filing: The name is not distinguishable. Nothing more will be filed until it's corrected and sent again. Contact whoever prepared this filing for you to fix it.",
+  "audience": "client"
+ },
+ {
+  "type": "filing.rejected",
+  "data": {},
+  "subject": "Rejected by the state: NJ formation: Blue Harbor Consulting LLC",
+  "body": "The state rejected this filing. Nothing more will be filed until it's corrected and sent again. Contact whoever prepared this filing for you to fix it.",
+  "audience": "client"
+ },
+ {
+  "type": "filing.name_options_ready",
+  "data": {
+   "adminLink": "http://api.test/admin/n/t"
+  },
+  "subject": "Choose a name: NJ formation: Blue Harbor Consulting LLC",
+  "body": "The requested name is unavailable. Open the link to pick an available alternative or enter one.",
+  "link": "http://api.test/admin/n/t",
+  "linkLabel": "Choose a name",
+  "audience": "admin"
+ },
+ {
+  "type": "filing.review_gate",
+  "data": {
+   "adminLink": "http://api.test/admin/r/t",
+   "screenshotArtifactId": "s1"
+  },
+  "subject": "Review before submit: NJ formation: Blue Harbor Consulting LLC",
+  "body": "The filing reached the review screen (beta). Review the captured screen and approve to submit.",
+  "link": "http://api.test/admin/r/t",
+  "linkLabel": "Review the filing",
+  "audience": "admin"
+ },
+ {
+  "type": "filing.drift_halted",
+  "data": {},
+  "subject": "Site changed — review needed: NJ formation: Blue Harbor Consulting LLC",
+  "body": "The state changed its website, so this filing stopped before it was submitted. Nothing was filed or paid. Our team is checking the change, and your client may be asked to approve again.",
+  "audience": "admin"
+ },
+ {
+  "type": "filing.failed",
+  "data": {
+   "stage": "bot_challenge",
+   "error": "bot challenge on MO"
+  },
+  "subject": "Portal bot check: NJ formation: Blue Harbor Consulting LLC",
+  "body": "The state portal showed a bot check that did not clear on its own (bot challenge on MO). Nothing was submitted. CoFile doesn't get around these checks, so please file this one by hand on the state's website.",
+  "audience": "admin"
+ },
+ {
+  "type": "filing.failed",
+  "data": {
+   "stage": "bot_challenge"
+  },
+  "subject": "Portal bot check: NJ formation: Blue Harbor Consulting LLC",
+  "body": "The state portal showed a bot check that did not clear on its own (bot challenge). Nothing was submitted. CoFile doesn't get around these checks, so please file this one by hand on the state's website.",
+  "audience": "admin"
+ },
+ {
+  "type": "filing.failed",
+  "data": {
+   "error": "card declined"
+  },
+  "subject": "Failed: NJ formation: Blue Harbor Consulting LLC",
+  "body": "The filing failed: card declined",
+  "audience": "admin"
+ },
+ {
+  "type": "filing.failed",
+  "data": {},
+  "subject": "Failed: NJ formation: Blue Harbor Consulting LLC",
+  "body": "The filing failed.",
+  "audience": "admin"
+ },
+ {
+  "type": "filing.blocked",
+  "data": {
+   "blockers": [
+    "no registered agent",
+    "no card"
+   ]
+  },
+  "subject": "Blocked: NJ formation: Blue Harbor Consulting LLC",
+  "body": "The filing is blocked: no registered agent; no card",
+  "audience": "admin"
+ },
+ {
+  "type": "filing.blocked",
+  "data": {},
+  "subject": "Blocked: NJ formation: Blue Harbor Consulting LLC",
+  "body": "The filing is blocked.",
+  "audience": "admin"
+ },
+ {
+  "type": "filing.needs_reconciliation",
+  "data": {},
+  "subject": "Checking whether the state received: NJ formation: Blue Harbor Consulting LLC",
+  "body": "We can't yet tell whether the state received this filing. Please don't file it again: our team is checking what the state received, and the filing won't be re-run until we know.",
+  "audience": "admin"
+ }
+]
