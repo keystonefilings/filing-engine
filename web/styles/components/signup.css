@@ -1,6 +1,6 @@
 /* Sign-up (merged spec 10A.9): the 560 px card on c1, and in c7–c12 the blank brass plate (the owner's photograph,
    day or dusk) with the typed name cut into it, and the head of the firm's client pages under it. On tablets and
-   phones the plate becomes a 16:9 strip inside the card, right above "Firm name". Nothing sticky. */
+   phones the plate becomes a 16:9 strip inside the card, below the form. Nothing sticky. */
 @layer components {
 .su2 { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); column-gap: 24px; align-items: start; }
 .su2-col { grid-column: 1 / span 6; min-width: 0; }
@@ -13,12 +13,11 @@
   .su2 { display: block; }
   .su2-col { max-width: 560px; margin-inline: auto; }
   .su2-panel { display: none; }
-  .su2-inline { display: block; margin: 24px -32px 0; }
-  .su2-inline-head { padding: 24px 32px 0; }
+  .su2-inline { display: block; margin: 28px 0 0; }
+  .su2-inline-head { padding: 16px 0 0; }
   .su2-card .acct2-body { margin-top: 24px; }
 }
 @media (max-width: 639px) {
-  .su2-inline { margin-inline: -20px; }
   .su2-inline-head { display: none; }
 }
 

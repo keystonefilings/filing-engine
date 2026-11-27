@@ -1,5 +1,5 @@
 import { SiteShell } from "@/components/site/SiteShell";
-import { Lines, PageHead } from "@/components/site-pages/PageHead";
+import { PageHead } from "@/components/site-pages/PageHead";
 import { PageClose } from "@/components/site-pages/PageClose";
 import { CoverageChip } from "@/components/site-pages/CoverageChip";
 import { PlateGlyph, plateStage, type PlateStage } from "@/components/site-pages/PlateGlyph";
@@ -41,7 +41,7 @@ export default function WhatWeFile() {
       <PageHead
         kicker="What we file"
         className="wwf2-head"
-        title={<Lines lines={["New York,", "New Jersey,", "Florida", "and the IRS."]} />}
+        title="New York, New Jersey, Florida and the IRS."
         aside={<p className="t-lede wwf2-lede">Every filing type carries a plain label, so you always know which ones are live today.</p>}
       />
 

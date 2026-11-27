@@ -5,9 +5,8 @@ import "@/styles/components/shell.css";
 import "@/styles/components/site.css";
 import "@/styles/components/account.css";
 import { platformName, supportEmail } from "@/lib/brand";
-import { betaOn } from "@/lib/beta";
-import { Chip } from "@/components/ui/Chip";
 import { Lockup } from "@/components/shell/Lockup";
+import { PublicBetaNotice } from "@/components/site/PublicBetaNotice";
 import { ThemeSwitch } from "@/components/site/ThemeSwitch";
 
 /**
@@ -22,14 +21,7 @@ export function AccountShell({ link, children }: { link: { href: string; label: 
   return (
     <div className="site2 reg-cofile">
       <a className="shell2-skip" href="#content">Skip to content</a>
-      {betaOn() ? (
-        <div className="site2-beta" role="note">
-          <div className="site2-in">
-            <Chip tone="rehearsal" compact>Beta</Chip>
-            <span>{name} is in beta. Any filing can run as a free rehearsal on the state&apos;s real website. It stops before the last button, so nothing is filed or paid. Filing types go live one at a time. Questions or problems? <a href={`mailto:${email}`}>{email}</a></span>
-          </div>
-        </div>
-      ) : null}
+      <PublicBetaNotice />
       <header className="acct2-head">
         <div className="site2-in acct2-head-row">
           <Link className="site2-home" href="/" aria-label={`${name} home`}><Lockup height={28} name={name} /></Link>

@@ -95,9 +95,6 @@
 .pdesk-top .btn2 { --h: 48px; flex: none; }
 .pdesk-ledger { width: 100%; border-collapse: collapse; table-layout: fixed; font-family: var(--font-sans); color: #1D2130; }
 .pdesk-ledger thead th { height: 44px; padding: 0 16px 12px; vertical-align: bottom; text-align: left; font: 500 0.875rem/1.125rem var(--font-sans); color: #555867; border-bottom: 1px solid #1D2130; }
-.pdesk.is-hero .pdesk-ledger thead th:nth-child(1) { width: 33%; }
-.pdesk.is-hero .pdesk-ledger thead th:nth-child(2) { width: 31%; }
-.pdesk.is-hero .pdesk-status .chip2 { white-space: nowrap; }
 .pdesk.is-full .pdesk-ledger thead th:nth-child(1) { width: 27%; }
 .pdesk.is-full .pdesk-ledger thead th:nth-child(2) { width: 28%; }
 .pdesk.is-full .pdesk-ledger thead th:nth-child(3) { width: 19%; }
@@ -125,62 +122,61 @@
 .pdesk-track .stage2 { margin-top: 6px; }
 .pdesk-track .stage2-dots i { position: relative; }
 .pdesk-chev { position: absolute; top: 24px; right: 16px; width: 8px; height: 8px; border-top: 1.5px solid #555867; border-right: 1.5px solid #555867; transform: rotate(45deg); transition: transform var(--t-quick) var(--ease-settle); }
-.pdesk.is-hero .pdesk-status { padding-right: 36px; }
 .pdesk.is-full .pdesk-chrome, .pdesk.is-full .pdesk-nav { background: #FBFAF6; }
 
-/* The hero: the desk, and the client page lying in front of its lower right (9.1) */
-.phero { display: grid; }
-.phero > * { grid-area: 1 / 1; }
-.phero .pdesk { align-self: start; }
-.phero-client { justify-self: end; align-self: start; margin: 362px 24px 0 0; box-shadow: var(--e-lift); }
-.pic-hero .pic-cap { position: absolute; left: 0; top: calc(var(--desk-h, 602px) + 12px); width: calc(100% - 372px); margin: 0; }
-.pic-hero .pic-replay-apart { position: absolute; right: 24px; bottom: -48px; }
-.pic-hero .pdesk { min-height: 602px; }
-
-/* M1, 2.2 s: the rows set, the waiting chip presses in, its track inks, the client page's Firm Rule draws and its name inks in */
-@media (prefers-reduced-motion: no-preference) {
-  :is(.pic[data-motion="before"], :root[data-pre] .pic[data-prepaint]) .pdesk-track.is-turn .stage2-dots i.on { background: #DDD7CB; }
-  :is(.pic[data-motion="before"], :root[data-pre] .pic[data-prepaint]) .pdesk-track.is-turn .stage2-text { opacity: 0; }
-  :is(.pic[data-motion="before"], :root[data-pre] .pic[data-prepaint]) .phero-client :is(.cpp-rule i) { transform: scaleX(0); }
-  :is(.pic[data-motion="before"], :root[data-pre] .pic[data-prepaint]) .phero-client .cpp-lh { clip-path: inset(0 100% 0 0); }
-  .pic-hero[data-motion="play"] .pdesk-track.is-turn .stage2-dots i.on { background: #DDD7CB; }
-  .pic-hero[data-motion="play"] .pdesk-track.is-turn .stage2-dots i.on::after { content: ""; position: absolute; inset: 0; border-radius: 50%; background: #1D2130; animation: m-fade var(--t-ink) var(--ease-settle) 1100ms both; }
-  .pic-hero[data-motion="play"] .pdesk-track.is-turn .stage2-dots i.on + i.on::after { animation-delay: 1190ms; }
-  .pic-hero[data-motion="play"] .pdesk-track.is-turn .stage2-text { animation: m-set var(--t-set) var(--ease-settle) 1190ms both; }
-  .pic-hero[data-motion="play"] .phero-client .cpp-rule i { transform-origin: left; animation: m-draw var(--t-draw) var(--ease-sweep) 1300ms both; }
-  .pic-hero[data-motion="play"] .phero-client .cpp-rule i + i { animation-delay: 1420ms; }
-  .pic-hero[data-motion="play"] .phero-client .cpp-lh { animation: pic-reveal 700ms var(--ease-sweep) 1450ms both; }
+/* The first screen's proof and client page, on one dark mounting board. */
+.pic-hero {
+  container-type: inline-size;
+  padding: clamp(12px, 2.35vw, 34px);
+  background: var(--stage) url("/cofile/textures/cofile-texture-black-card-512.webp");
+  background-blend-mode: multiply;
+  border: 1px solid color-mix(in srgb, var(--night-ink) 15%, var(--stage));
+  border-radius: 4px;
+  box-shadow: var(--e-lift);
 }
-@keyframes pic-reveal { from { clip-path: inset(0 100% 0 0); } to { clip-path: inset(0 0 0 0); } }
-
-/* The desk's phone layout (below 810 px the 730 px sheet no longer fits): each row stacked, the client page over its foot */
-@media (max-width: 809px) {
-  .pdesk.is-hero { --rows-top: 199px; --row-h: 166px; }
-  .pdesk.is-hero .pdesk-nav { display: none; }
-  .pdesk .pdh { min-height: 64px; padding-inline: 20px; gap: 12px; justify-content: space-between; }
-  .pdesk .pdh .lockup2 { --lockup-h: 24px; }
-  .pdesk .pdh-div { display: none; }
-  .pdesk .pdh-acct { font-size: 0.9375rem; line-height: 1.25rem; }
-  .pdesk.is-hero .pdesk-body { padding: 20px; }
-  .pdesk.is-hero .pdesk-top { flex-direction: column; align-items: flex-start; gap: 12px; margin-bottom: 20px; }
-  .pdesk.is-hero .pdesk-title { font-size: 1.75rem; line-height: 2.125rem; }
-  .pdesk.is-hero .pdesk-ledger, .pdesk.is-hero .pdesk-ledger tbody, .pdesk.is-hero .pdesk-ledger tr, .pdesk.is-hero .pdesk-ledger :is(th, td) { display: block; }
-  .pdesk.is-hero .pdesk-ledger thead { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
-  .pdesk.is-hero .pdesk-ledger tbody tr { height: var(--row-h); padding: 14px 16px; margin-inline: -20px; border-top: 1px solid #DDD7CB; }
-  .pdesk.is-hero .pdesk-ledger tbody tr + tr > * { border-top: 0; }
-  .pdesk.is-hero .pdesk-ledger tbody :is(th, td) { height: auto; padding: 0; }
-  .pdesk.is-hero .pdesk-ledger tbody tr.is-turn { box-shadow: inset 3px 0 0 #855A0C; }
-  .pdesk.is-hero .pdesk-ledger tbody tr.is-turn > :first-child { box-shadow: none; }
-  .pdesk.is-hero .pdesk-by { margin-top: 4px; }
-  .pdesk.is-hero .pdesk-status { margin-top: 8px; padding-right: 0; }
-  .pdesk.is-hero .pdesk-chev { top: 20px; }
-  .phero-client { width: 310px; margin: calc(199px + 2 * 166px + 18px) 0 0; }
-  .phero-client .cpp-sheet { width: 286px; }
-  .pic-hero .pic-cap { position: static; width: auto; margin-top: 12px; }
-  .pic-hero .pic-replay-apart { position: static; margin-top: -36px; }
-  .pic-hero .pdesk { min-height: 0; }
+.phero { display: grid; gap: 12px; }
+.pic-hero .pic-cap { margin: 12px 0 0; min-height: 0; }
+.pic-hero .pic-label { color: var(--night-ink); }
+.pdesk.is-hero .pdh { min-height: 60px; padding-inline: 20px; gap: 12px; }
+.pdesk.is-hero .pdesk-body { padding: 18px 20px 10px; }
+.pdesk.is-hero .pdesk-top { min-height: 0; margin-bottom: 6px; }
+.pdesk.is-hero .pdesk-title { font-size: 1.625rem; line-height: 1.18; }
+.pdesk.is-hero .pdesk-ledger thead th { height: auto; padding: 8px 10px; }
+.pdesk.is-hero .pdesk-ledger thead th:nth-child(1) { width: 42%; }
+.pdesk.is-hero .pdesk-ledger thead th:nth-child(2) { width: 19%; }
+.pdesk.is-hero .pdesk-ledger tbody :is(th, td) { height: auto; padding: 12px 10px; }
+.pdesk.is-hero .pdesk-ledger .is-turn { background: #F8F4EB; }
+.pdesk.is-hero .pdesk-ledger .pdesk-status { padding-right: 24px; }
+.pdesk.is-hero .pdesk-ledger .pdesk-status .chip2 { white-space: normal; }
+.pdesk.is-hero .pdesk-chev { right: 7px; }
+.phero-client.sheet {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 12px;
+  padding: 13px 18px;
+  border-left: 3px solid var(--firm, #1D4E63);
 }
-@media (min-width: 600px) and (max-width: 809px) { .pic-hero { max-width: 480px; } }
+.phero-client-firm { font: 500 0.875rem/1.2 var(--font-sans); color: #555867; }
+.phero-client-title { font: 400 1.25rem/1.22 var(--font-display); color: #1D2130; }
+.phero-client-label { font: 500 0.875rem/1.2 var(--font-sans); color: #555867; }
+@container (max-width: 470px) {
+  .pdesk.is-hero .pdesk-ledger :is(th, td):nth-child(2) { display: none; }
+  .pdesk.is-hero .pdesk-ledger thead th:first-child { width: 55%; }
+}
+@container (max-width: 350px) {
+  .pdesk.is-hero .pdh { padding-inline: 12px; justify-content: start; }
+  .pdesk.is-hero .pdh .lockup2 img { height: 18px; width: auto; }
+  .pdesk.is-hero .pdh-acct { font-size: 0.875rem; }
+  .pdesk.is-hero .pdesk-body { padding-inline: 10px; }
+  .pdesk.is-hero .pdesk-ledger :is(th, td) { padding-inline: 7px; }
+  .pdesk.is-hero .pdesk-ledger .pdesk-status { padding-right: 7px; }
+  .pdesk.is-hero .pdesk-chev { display: none; }
+  .pdesk.is-hero .pdesk-status .chip2 { padding-inline: 6px; }
+  .pdesk.is-hero .pdesk-track .stage2-text { display: none; }
+  .phero-client.sheet { grid-template-columns: auto minmax(0, 1fr); padding-inline: 12px; }
+  .phero-client-label { grid-column: 2; }
+}
 
 /* For firms' desk: wider, complete, with the Type column (10A.2.2) */
 .pic-fulldesk .pdesk { width: 100%; }

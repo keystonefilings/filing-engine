@@ -1,0 +1,33 @@
+@layer components {
+.public2-beta {
+  background: var(--page-2);
+  border-bottom: 1px solid var(--line);
+  color: var(--text-2);
+}
+.public2-beta-in {
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  max-width: 1440px;
+  min-height: 40px;
+  margin-inline: auto;
+  padding: 6px var(--site-pad, 20px);
+}
+.public2-beta-in .chip2 { flex: none; }
+.public2-beta-in p {
+  margin: 0;
+  font: 400 0.875rem/1.35 var(--font-sans);
+}
+.public2-beta-in a {
+  margin-inline-start: 0.5em;
+  color: var(--link);
+  text-decoration: underline 1px var(--link-line);
+  text-underline-offset: 3px;
+}
+@media (max-width: 639px) {
+  .public2-beta-in { justify-content: flex-start; }
+}
+@media print { .public2-beta { display: none; } }
+}

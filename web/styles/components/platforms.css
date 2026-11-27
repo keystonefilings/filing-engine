@@ -1,36 +1,35 @@
-/* For platforms (merged spec 10A.7, decision 24): paper like every other page, the platform's brand on top and CoFile
-   literally underneath, ending in the one dark object, the "dryRun": true code panel on the rehearsal's Night.
-   Then the list and CoFile's own order form. Reads semantic tokens; the pictured sheets pin their own light inks. */
+/* The platform page shows a request alongside the intake and approval it powers.
+   The sample documents keep their paper background in either theme. */
 @layer components {
 
-/* ── Title page: underneath (10A.7.1) ─────────────────────────────────────────────────────────────────────── */
+/* The product illustration stays inside the same grid as the copy. */
 .plat2-head .pg2-head-words { grid-column: 1 / -1; }
-.plat2-row { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); column-gap: 24px; margin-top: 24px; align-items: start; }
-.plat2-lede { grid-column: 1 / span 5; margin-top: 0; }
-.plat2-pic { grid-column: 7 / span 6; margin: 0 calc(-1 * min(120px, var(--site-pad))) 0 -24px; padding: 6px 0 0 24px; min-width: 0; overflow-x: clip; }
-@media (max-width: 1023px) {
-  .plat2-row { grid-template-columns: minmax(0, 1fr); row-gap: 48px; }
-  .plat2-lede, .plat2-pic { grid-column: 1; }
-  .plat2-pic { margin: 0 calc(-1 * var(--site-pad)) 0 -24px; }
+.plat2-row { display: grid; grid-template-columns: minmax(0, 4fr) minmax(0, 8fr); gap: 32px; margin-top: 22px; align-items: start; }
+.plat2-copy, .plat2-pic { min-width: 0; }
+.plat2-lede { margin-top: 0; }
+.plat2-ctas { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 20px; }
+.und2 { margin: 0; }
+.und2-stack {
+  display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px;
+  padding: clamp(12px, 1.8vw, 24px); background: var(--page-2); border: 1px solid var(--line);
+}
+.und2-kind { margin-bottom: 12px; font: 500 0.875rem/1.25 var(--font-sans); }
+.und2-proof, .und2-widget, .und2-code { min-width: 0; padding: 16px; }
+.und2-proof, .und2-widget { color: #1D2130; }
+.und2-code {
+  grid-column: 1 / -1; background: var(--night); color: var(--night-ink);
+  border: 1px solid #323646; border-radius: var(--r-sheet);
+}
+@media (max-width: 1059px) {
+  .plat2-row { grid-template-columns: minmax(0, 1fr); }
+  .plat2-copy { max-width: 42rem; }
 }
 @media (max-width: 639px) {
-  .plat2-row { row-gap: 40px; margin-top: 16px; }
-  .plat2-pic { margin: 0; padding: 0; overflow: visible; }
-  .plat2-head .pg2-line { display: block; text-wrap: balance; }
+  .plat2-row { gap: 22px; }
+  .und2-stack { grid-template-columns: minmax(0, 1fr); }
 }
 
-/* The stack: proof 440 (cropped at 520), the widget 360 at +120/+88, the code panel 480 at +200/+300 */
-.und2 { margin: 0; }
-.und2-stack { position: relative; width: 784px; max-width: none; height: 748px; }
-.und2-proof, .und2-widget { position: absolute; color: #1D2130; box-shadow: var(--e-sheet); }
-.und2-proof { left: 0; top: 0; width: 440px; height: 520px; overflow: hidden; padding: 28px; }
-.und2-widget { left: 424px; top: 72px; width: 360px; padding: 20px; z-index: 1; }
-.und2-proof { z-index: 2; }
-.und2-code { position: absolute; left: 200px; top: 500px; width: 480px; z-index: 0; padding: 28px; background: var(--night); color: var(--night-ink); border: 1px solid #323646; border-radius: var(--r-sheet); }
-.und2 > .pic-cap { display: block; min-height: 0; margin-top: 12px; font: inherit; letter-spacing: normal; color: inherit; }
-
-/* The white-label proof: a Rule block where the platform's logo goes, its Firm Rule in Iron */
-.und2-logo { width: 120px; height: 28px; background: #DDD7CB; }
+/* The white-label proof carries the same name as the client intake. */
 .und2-firmrule { display: grid; gap: 2px; margin-top: 12px; }
 .und2-firmrule::before { content: ""; height: 3px; background: #3F434F; }
 .und2-firmrule::after { content: ""; height: 1px; background: rgba(63,67,79,.35); }
@@ -39,54 +38,30 @@
 .und2-turn { display: inline-flex; align-items: center; gap: 6px; min-height: 30px; padding: 4px 12px; font: 500 0.875rem/1.125rem var(--font-sans); color: #3F434F; background: #fff; border: 1px solid #3F434F; border-radius: 4px; corner-shape: bevel; }
 .und2-turn > svg { width: 12px; height: 12px; }
 .und2-rows, .und2-fees { margin: 14px 0 0; display: grid; gap: 0; }
-.und2-rows > div, .und2-fees > div { display: flex; justify-content: space-between; gap: 16px; padding-block: 6px; border-bottom: 1px solid #DDD7CB; }
+.und2-rows > div, .und2-fees > div { display: flex; justify-content: space-between; gap: 8px; padding-block: 6px; border-bottom: 1px solid #DDD7CB; }
 .und2-rows dt, .und2-fees dt { flex: none; font: 500 0.875rem/1.25rem var(--font-sans); color: #555867; }
-.und2-rows dd { margin: 0; font: 400 0.875rem/1.25rem var(--font-mono); text-align: right; }
+.und2-rows dd { margin: 0; font: 400 0.875rem/1.25rem var(--font-mono); text-align: right; overflow-wrap: anywhere; }
 .und2-fees dd { margin: 0; font: 400 0.9375rem/1.25rem var(--font-sans); font-variant-numeric: tabular-nums; }
 .und2-fees .is-total { border-bottom: 3px double #1D2130; }
 .und2-fees .is-total dt, .und2-fees .is-total dd { font: 500 1.0625rem/1.5rem var(--font-sans-display); color: #1D2130; font-variant-numeric: tabular-nums; }
 .und2-approve { display: inline-flex; align-items: center; margin-top: 20px; min-height: 44px; padding: 12px 24px; font: 600 1rem/1.25rem var(--font-sans-display); color: #fff; background: #3F434F; border-radius: 6px; corner-shape: bevel; }
-.und2-bar { display: block; width: 260px; height: 8px; margin-top: 16px; background: #DDD7CB; }
 
 /* The embed widget in Best Accounting's brand: its own font, its blue; nothing of CoFile's at its foot */
 .und2-best { font: 700 1.0625rem/1.25rem Inter, "Helvetica Neue", Arial, sans-serif; letter-spacing: 0.06em; color: #1F4FD1; }
 .und2-w-title { margin-top: 16px; font: 600 1.5rem/1.875rem Inter, "Helvetica Neue", Arial, sans-serif; color: #1D2130; }
 .und2-w-field { display: grid; gap: 6px; margin-top: 16px; font: 500 0.9375rem/1.375rem var(--font-sans); color: #1D2130; }
 .und2-w-field i { display: block; height: 48px; border: 1px solid #8A8578; border-radius: 2px; font: normal 400 1.0625rem/46px var(--font-sans); padding-inline: 14px; }
-.und2-w-field i.is-select { width: 140px; background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1.5l5 5 5-5' fill='none' stroke='%231D2130' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") no-repeat right 14px center; }
+.und2-w-field i.is-select { width: min(140px, 100%); background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1.5l5 5 5-5' fill='none' stroke='%231D2130' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") no-repeat right 14px center; }
 
 /* The code panel: weight only, no syntax color (decision 36); the dry run marked as a rehearsal */
-.und2-pre { margin: 0; padding: 0; background: none; border: 0; border-radius: 0; overflow: visible; color: inherit; font: 400 0.9375rem/1.5rem var(--font-mono); white-space: pre; }
+.und2-pre { margin: 0; padding: 0; background: none; border: 0; border-radius: 0; color: inherit; font: 400 0.875rem/1.4 var(--font-mono); white-space: pre-wrap; overflow-wrap: anywhere; }
 .und2-pre code { font: inherit; background: none; padding: 0; color: inherit; }
 .und2-pre .k { font-weight: 600; }
 .und2-dry { position: relative; display: inline-block; padding: 0 6px; margin-left: -6px; }
-.und2-dry > svg.ghost { position: absolute; left: -24px; top: 5px; width: 14px; height: 14px; color: var(--night-ink); }
+.und2-dry > svg.ghost { position: absolute; left: -13px; top: 4px; width: 12px; height: 12px; color: var(--night-ink); }
 .und2-dry-mark { position: absolute; inset: -2px 0; }
 .und2-dry-mark .dash { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
 .und2-dry-mark .dash rect { fill: none; stroke: var(--night-ink); stroke-width: 1.5; stroke-dasharray: 4 3; vector-effect: non-scaling-stroke; }
-
-/* Motion: once, the three press in back to front, then the dashed mark draws round its line (under 1.6 s) */
-.und2[data-motion="before"] :is(.und2-code, .und2-widget, .und2-proof) { opacity: 0; transform: translateY(-6px); }
-.und2[data-motion="before"] .und2-dry-mark { clip-path: inset(0 100% 0 0); }
-.und2[data-motion="play"] :is(.und2-code, .und2-widget, .und2-proof) { animation: und2-press var(--t-set) var(--ease-settle) both; }
-.und2[data-motion="play"] .und2-widget { animation-delay: 120ms; }
-.und2[data-motion="play"] .und2-proof { animation-delay: 240ms; }
-.und2[data-motion="play"] .und2-dry-mark { animation: und2-draw var(--t-draw) var(--ease-sweep) 700ms both; }
-@keyframes und2-press { from { opacity: 0; transform: translateY(-6px); } to { opacity: 1; transform: none; } }
-@keyframes und2-draw { from { clip-path: inset(0 100% 0 0); } to { clip-path: inset(0); } }
-
-@media (max-width: 1023px) and (min-width: 640px) {
-  .und2 > .pic-cap { padding-right: var(--site-pad); }
-}
-/* Phone: restacked vertically; the code panel scrolls sideways inside itself, never the page */
-@media (max-width: 639px) {
-  .und2-stack { width: auto; height: auto; display: flex; flex-direction: column; }
-  .und2-proof, .und2-widget, .und2-code { position: relative; left: auto; top: auto; width: auto; }
-  .und2-proof { order: 1; height: 360px; padding: 20px; }
-  .und2-widget { order: 2; margin: -40px 24px 0 0; z-index: 3; }
-  .und2-code { order: 3; margin-top: 16px; padding: 20px 20px 20px 36px; overflow-x: auto; }
-  .und2-dry > svg.ghost { left: -22px; }
-}
 
 /* ── The list and the order form (10A.7.2) ────────────────────────────────────────────────────────────────── */
 .plat2-list { gap: 16px; }

@@ -71,10 +71,16 @@ export default function Reference() {
       <p className="muted">Send your key in <code>x-api-key</code>. Also available as <a href="/openapi.json">OpenAPI 3.1</a>.</p>
       <nav className="docs2-index" aria-label="Endpoints">
         {GROUPS.map((g) => (
-          <div key={g}>
-            <strong>{g}:</strong>{" "}
-            {ENDPOINTS.filter((e) => e.group === g).map((e, i) => <span key={e.id}>{i ? <span className="docs2-sep"> · </span> : ""}<a href={`#${e.id}`}>{e.summary}</a></span>)}
-          </div>
+          <details key={g}>
+            <summary>{g}</summary>
+            <ul>
+              {ENDPOINTS.filter((e) => e.group === g).map((e) => (
+                <li key={e.id}>
+                  <a href={`#${e.id}`}><span className="docs2-index-method">{e.method}</span><code>{e.path}</code><span className="docs2-index-label">{e.summary}</span></a>
+                </li>
+              ))}
+            </ul>
+          </details>
         ))}
       </nav>
       {GROUPS.map((g) => (

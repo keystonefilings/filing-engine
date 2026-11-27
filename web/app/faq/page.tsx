@@ -6,6 +6,12 @@ import { platformName, supportEmail } from "@/lib/brand";
 import { PRICING, usd } from "@/lib/pricing";
 import "@/styles/components/support-pages.css";
 
+const TOPICS = [
+  { id: "getting-started", title: "Rehearsals and availability", questions: ["beta", "rehearsal", "live"] },
+  { id: "filing-process", title: "How filings work", questions: ["approves", "people", "proof", "texts", "ein", "timing", "publication"] },
+  { id: "fees-and-services", title: "Fees and services", questions: ["fees", "cost", "agent", "law"] },
+];
+
 export function generateMetadata() {
   return {
     title: "Questions",
@@ -39,12 +45,19 @@ export default function Faq() {
       </PageHead>
       <section className="pg2-band is-support">
         <div className="site2-in">
-          <div className="faq2">
-            {qa.map(([id, q, a]) => (
-              <details key={id} id={id} className="faq2-row">
-                <summary><span className="t-display-s faq2-q">{q}</span><span className="faq2-mark" aria-hidden="true" /></summary>
-                <div className="faq2-a"><p className="t-body">{a}</p></div>
-              </details>
+          <div className="faq2-topics">
+            {TOPICS.map((topic) => (
+              <section key={topic.id} aria-labelledby={topic.id} className="faq2-topic">
+                <h2 id={topic.id} className="t-display-s">{topic.title}</h2>
+                <div className="faq2">
+                  {qa.filter(([id]) => topic.questions.includes(id)).map(([id, q, a]) => (
+                    <details key={id} id={id} className="faq2-row">
+                      <summary><span className="faq2-q">{q}</span><span className="faq2-mark" aria-hidden="true" /></summary>
+                      <div className="faq2-a"><p className="t-body">{a}</p></div>
+                    </details>
+                  ))}
+                </div>
+              </section>
             ))}
           </div>
           <FaqAnchors />

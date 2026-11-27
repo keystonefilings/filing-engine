@@ -16,9 +16,6 @@ import { ClosePlate } from "@/components/pictures/ClosePlate";
 import { platformName, supportEmail } from "@/lib/brand";
 import { PRICING, usd } from "@/lib/pricing";
 
-// The home page in the merged design (Plate & Proof, merged spec 9.0 to 9.10): nine spreads, each a few words and one
-// picture, the pictures telling one story about one example firm. The words are round 3's, unchanged.
-
 export function generateMetadata() {
   const name = platformName();
   return {
@@ -44,20 +41,18 @@ export default function Home() {
       <ExampleFonts />
       <div className="hm" id="top">
         <section className="hm-hero" aria-labelledby="hm-h1">
-          <div className="site2-in">
-            <p className="hm-kicker t-kicker">For CPA, payroll, fractional CFO and title firms</p>
-            <h1 id="hm-h1" className="hm-h1 t-display-xl"><span>Your client needs an LLC.</span> <span>Say yes, under your own name.</span></h1>
-            <div className="hm-hero-grid">
-              <div className="hm-hero-words">
-                <p className="hm-sub t-lede">{name} files your clients&apos; formations, EINs and payroll registrations on the official state and IRS websites, once you approve.</p>
-                <div className="hm-ctas">
-                  <Link className="btn2 is-action" href="/signup" data-brass-cta="">Run a free rehearsal</Link>
-                  <ArrowLink href="/pricing">See pricing</ArrowLink>
-                </div>
-                <p className="hm-note t-body">Built and run by filing professionals. When a filing needs a person, one of them takes over.</p>
+          <div className="site2-in hm-hero-grid">
+            <div className="hm-hero-words">
+              <p className="hm-kicker t-kicker">For CPA, payroll, fractional CFO and title firms</p>
+              <h1 id="hm-h1" className="hm-h1 t-display-xl"><span>Your client needs an LLC.</span> <span>Say yes, under your own name.</span></h1>
+              <p className="hm-sub t-lede">{name} files your clients&apos; formations, EINs and payroll registrations on the official state and IRS websites, once you approve.</p>
+              <div className="hm-ctas">
+                <Link className="btn2 is-action" href="/signup" data-brass-cta="">Run a free rehearsal</Link>
+                <Link className="hm-price-link" href="/pricing">See pricing</Link>
               </div>
-              <div className="hm-hero-pic"><HeroDesk /></div>
+              <p className="hm-note t-body">Built and run by filing professionals who take over when a filing needs a person.</p>
             </div>
+            <div className="hm-hero-pic"><HeroDesk /></div>
           </div>
         </section>
 
@@ -125,7 +120,7 @@ export default function Home() {
         <section className="hm-band hm-stage" id="rehearsals" aria-labelledby="hm-rehearsals">
           <div className="site2-in hm-grid">
             <div className="hm-words">
-              <h2 id="hm-rehearsals" className="hm-colon t-display-l"><span>In beta:</span> rehearse a filing, free.</h2>
+            <h2 id="hm-rehearsals" className="t-display-l">Rehearse a filing for free.</h2>
               <p className="hm-lede t-lede">{name} fills in every screen of the state&apos;s real website and stops before the last button: nothing is filed or paid. Filing types go live one at a time.</p>
             </div>
             <div className="hm-pic is-bleed-right"><RunSheet /></div>

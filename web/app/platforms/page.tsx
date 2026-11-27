@@ -1,7 +1,6 @@
 import Link from "next/link";
 import { SiteShell } from "@/components/site/SiteShell";
 import { Lines, PageHead } from "@/components/site-pages/PageHead";
-import { MotionFigure } from "@/components/pictures/MotionFigure";
 import { DashedOutline, Glyph } from "@/components/ui/glyphs";
 import { Lockup } from "@/components/shell/Lockup";
 import { InquiryForm } from "@/components/AuthForms";
@@ -22,17 +21,12 @@ function DryRun() {
   return <code className="plat2-dry"><DashedOutline />&quot;dryRun&quot;: true</code>;
 }
 
-/**
- * "Underneath" (merged spec 10A.7.1): three sheets on the desk, front to back, a platform's white-label proof (its logo
- * a Rule block: it is whoever's brand), the embed widget in Best Accounting's brand, and at the back the one piece of
- * code the copy names, on the rehearsal's Night. Nothing of CoFile's on the first two. A picture: the list beside it
- * says the same in words, so its drawing is hidden from screen readers; its labels are read.
- */
 function Underneath() {
   return (
-    <MotionFigure pic="L13" ms={1600} className="und2" replay={false} label={<>Sample proof · test details · not a real business<br />Example · test details · not a real firm</>}>
-      <div className="und2-stack" aria-hidden="true">
+    <figure className="und2">
+      <div className="und2-stack">
         <div className="und2-code">
+          <p className="und2-kind">API request</p>
           <pre className="und2-pre"><code>
             <span className="k">curl</span> …/v1/filings \{"\n"}
             {"  "}<span className="k">-H</span> &quot;x-api-key: $COFILE_API_KEY&quot; \{"\n"}
@@ -45,13 +39,15 @@ function Underneath() {
           </code></pre>
         </div>
         <div className="und2-widget sheet">
+          <p className="und2-kind">Embedded intake</p>
           <p className="und2-best">Best Accounting</p>
           <p className="und2-w-title">New Jersey LLC formation</p>
           <div className="und2-w-field"><span>LLC name, without the ending</span><i /></div>
           <div className="und2-w-field"><span>Ending</span><i className="is-select">LLC</i></div>
         </div>
         <div className="und2-proof sheet">
-          <div className="und2-logo" />
+          <p className="und2-kind">Branded approval</p>
+          <p className="und2-best">Best Accounting</p>
           <div className="und2-firmrule" />
           <div className="und2-p-head"><p className="und2-p-title">Two Sisters Bakery LLC</p><span className="und2-turn"><Glyph kind="turn" />Ready to approve</span></div>
           <dl className="und2-rows">
@@ -65,10 +61,10 @@ function Underneath() {
             <div className="is-total"><dt>Total to the state</dt><dd>$103.50</dd></div>
           </dl>
           <span className="und2-approve">Approve for filing</span>
-          <span className="und2-bar" />
         </div>
       </div>
-    </MotionFigure>
+      <figcaption className="pg2-caption">Example with test details</figcaption>
+    </figure>
   );
 }
 
@@ -78,7 +74,13 @@ export default function Platforms() {
     <SiteShell>
       <PageHead kicker="For platforms" className="plat2-head" title={<Lines lines={["Building a filing product?", `Put ${name} underneath it.`]} />}>
         <div className="plat2-row">
-          <p className="t-lede pg2-lede plat2-lede">Filing companies, and platforms that sign up new businesses, can offer state filings inside their own product under their own brand. Tell us what you file and roughly how many, and we&apos;ll set up your account with you.</p>
+          <div className="plat2-copy">
+            <p className="t-lede pg2-lede plat2-lede">Offer state filings inside your product under your own brand. Tell us what you file and roughly how many, and we&apos;ll help you get set up.</p>
+            <div className="plat2-ctas">
+              <Link className="btn2 is-action" href="#enterprise" data-brass-cta="">Talk to us</Link>
+              <Link className="btn2 is-outline" href="/docs">Read the API docs</Link>
+            </div>
+          </div>
           <div className="plat2-pic"><Underneath /></div>
         </div>
       </PageHead>

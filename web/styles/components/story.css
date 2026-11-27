@@ -22,31 +22,24 @@
 .st .st-list { margin-top: 48px; }
 @media (max-width: 599px) { .st .st-list { margin-top: 32px; } }
 
-/* 10A.1.2 The steps: numeral, photograph, lead and paragraph on one row grid; the firm's step on a white sheet */
-.st-steps-list { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 24px; align-items: start; margin: 0; padding: 0; list-style: none; }
-.st-step { position: relative; display: grid; grid-template-rows: auto auto auto 1fr; padding: 32px; min-width: 0; }
-.st-step.sheet { border-radius: var(--r-sheet); }
-.st-num { display: block; margin-left: -4px; font: 400 clamp(4.5rem, 3.75rem + 3vw, 7.5rem)/1 var(--font-display); font-variant-numeric: lining-nums; color: var(--text); }
-.st-photo { margin-top: 24px; }
-.st-photo img { aspect-ratio: 4 / 5; object-fit: cover; }
+/* A step title and its image read together before the explanatory text. */
+.st-steps-list { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 20px; margin: 0; padding: 0; list-style: none; }
+.st-step { display: grid; grid-template-rows: auto auto 1fr; min-width: 0; padding: 20px; border: 1px solid var(--line); background: var(--surface); }
+.st-step.is-approval { border-top: 3px solid var(--brass-line); padding-top: 18px; }
+.st-step-head { display: flex; align-items: baseline; gap: 12px; min-width: 0; }
+.st-num { flex: none; font: 400 1.75rem/1.2 var(--font-display); font-variant-numeric: lining-nums; color: var(--text-2); }
+.st-lead { color: var(--text); }
+.st-photo { margin-top: 16px; }
+.st-photo img { width: 100%; aspect-ratio: 16 / 10; object-fit: cover; }
 .st-photo.is-files img { object-position: 52% 50%; }
-.st-lead { margin-top: 24px; color: var(--text); }
-.st-body { margin-top: 12px; color: var(--text); }
-@media (max-width: 1023px) {
-  .st-steps-list { grid-template-columns: 1fr; gap: 32px; }
-  .st-step { grid-template-columns: 240px minmax(0, 1fr); grid-template-rows: auto 1fr; column-gap: 32px; }
-  .st-num { grid-column: 1; grid-row: 1; }
-  .st-photo { grid-column: 1; grid-row: 2; margin-top: 16px; }
-  .st-lead { grid-column: 2; grid-row: 1; align-self: end; margin-top: 0; }
-  .st-body { grid-column: 2; grid-row: 2; }
+.st-body { margin-top: 18px; color: var(--text); }
+@media (max-width: 799px) {
+  .st-steps-list { grid-template-columns: minmax(0, 1fr); }
+  .st-step { max-width: 42rem; }
 }
 @media (max-width: 599px) {
-  .st-steps-list { gap: 48px; }
-  .st-step { display: flex; flex-direction: column; padding: 0; }
-  .st-step.sheet { margin-inline: calc(-1 * var(--site-pad, 20px)); padding: 24px var(--site-pad, 20px); box-shadow: none; border-radius: 0; }
-  .st-photo { order: 4; margin-top: 24px; }
-  .st-photo img { aspect-ratio: 4 / 3; }
-  .st-lead { margin-top: 12px; align-self: auto; }
+  .st-step { padding: 16px; }
+  .st-step.is-approval { padding-top: 14px; }
 }
 
 /* 10A.1.3 The proof band: the printer's proof under the lede, the points, the closing remark */
@@ -67,17 +60,18 @@
 .st-checks > li + li { margin-top: 8px; }
 .st-num-fig { font-variant-numeric: tabular-nums lining-nums; }
 
-/* 10A.2.1 For firms' title page: the lede as a letter under a three-line initial; the engraver as its frontispiece */
-.ff-head .pg2-head-words { grid-column: 1 / span 7; }
-.ff-front { grid-column: 9 / span 4; margin: 38px calc(-1 * min(120px, var(--site-pad))) 0 0; min-width: 0; }
-.pfront img { aspect-ratio: 4 / 5; object-fit: cover; }
+/* The firms' letter sits beside the engraving film. */
+.ff-head .pg2-head-in { align-items: center; }
+.ff-head .pg2-head-words { grid-column: 1 / span 6; }
+.ff-front { grid-column: 8 / span 5; min-width: 0; }
+.pfront img { aspect-ratio: 5 / 4; object-fit: cover; }
 @media (max-width: 1023px) {
   .ff-head .pg2-head-words { grid-column: 1 / -1; }
   .ff-front { grid-column: 1 / span 6; margin: 40px 0 0; }
 }
 @media (max-width: 599px) { .ff-front { grid-column: 1 / -1; margin-top: 32px; } }
 @supports (initial-letter: 3) {
-  @media (min-width: 600px) { .ff-letter::first-letter { initial-letter: 3; font-family: var(--font-display); color: var(--text); margin-right: 8px; } }
+  @media (min-width: 600px) { .ff-letter::first-letter { initial-letter: 2; font-family: var(--font-display); color: var(--text); margin-right: 8px; } }
 }
 /* 10A.2.2 The desk and the studio */
 .ff-desk-pic .pdesk { max-height: 700px; }

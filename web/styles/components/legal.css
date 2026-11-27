@@ -3,7 +3,7 @@
    rule; narrower, the contents sit at the top between two rules, numbers hung. Miller Text carries the reading.
    No pictures, no motion. Reads semantic tokens. */
 @layer components {
-.legal2 { padding-block: 96px 112px; background: var(--page); color: var(--text); }
+.legal2 { padding-block: 60px 88px; background: var(--page); color: var(--text); }
 .legal2-grid { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); column-gap: 24px; align-items: start; }
 .legal2-head, .legal2-contents, .legal2-text { grid-column: 3 / span 8; min-width: 0; }
 .legal2-h1 { color: var(--text); text-wrap: balance; }
@@ -11,6 +11,7 @@
 
 /* The contents: the headings as links, the number in tabular Graphite, a wrapped title hanging under the title */
 .legal2-contents { margin-top: 48px; padding-block: 48px; border-block: 1px solid var(--line); }
+.legal2-toggle { display: none; }
 .legal2-contents ol { list-style: none; margin: 0; padding: 0; columns: 2; column-gap: 48px; }
 .legal2-contents li { break-inside: avoid; padding-bottom: 8px; }
 .legal2-contents a { display: grid; grid-template-columns: minmax(0, 1fr); font: 400 1.0625rem/1.5rem var(--font-sans); color: var(--text); }
@@ -55,10 +56,17 @@
   .legal2-head, .legal2-contents, .legal2-text { grid-column: 2; }
 }
 @media (max-width: 639px) {
-  .legal2 { padding-block: 56px 64px; }
+  .legal2 { padding-block: 36px 52px; }
   .legal2-grid { grid-template-columns: minmax(0, 1fr); }
   .legal2-head, .legal2-contents, .legal2-text { grid-column: 1; }
-  .legal2-contents { margin-top: 32px; padding-block: 32px; }
+  .legal2-contents { margin-top: 24px; padding-block: 8px; }
+  .legal2-contents.has-disclosure .legal2-toggle {
+    display: flex; justify-content: space-between; align-items: center; width: 100%; min-height: 44px;
+    padding: 0; border: 0; background: none; color: var(--text); cursor: pointer;
+    font: 500 1rem/1.4 var(--font-sans);
+  }
+  .legal2-contents.has-disclosure:not(.is-expanded) ol { display: none; }
+  .legal2-contents ol { padding-top: 8px; }
   .legal2-contents ol { columns: 1; }
   .legal2-text { margin-top: 32px; font-size: 1.125rem; line-height: 1.8125rem; }
   .legal2-text ul { padding-left: 20px; }
@@ -69,11 +77,12 @@
 
 /* Print: US Letter, 1 in margins, the contents first as a list, no rail, no header, notice or footer (10A.15) */
 @media print {
-  body:has(.legal2) :is(.site2-foot, .site2-beta, .site2-head, .site2-bar, .shell2-skip, .beta-banner) { display: none !important; }
+  body:has(.legal2) :is(.site2-foot, .public2-beta, .site2-head, .site2-bar, .shell2-skip, .beta-banner) { display: none !important; }
   .legal2 { padding: 0; }
   .legal2-grid { display: block; padding: 0; }
   .legal2-contents { position: static; max-width: none; margin: 18pt 0; padding: 12pt 0; border-block: 0.5pt solid #8A8578; }
-  .legal2-contents ol { columns: 2; }
+  .legal2-contents ol { display: block !important; columns: 2; }
+  .legal2-contents .legal2-toggle { display: none !important; }
   .legal2-contents a::before { display: none; }
   .legal2-contents a { font-size: 10pt; line-height: 14pt; }
   .legal2-text { max-width: none; margin: 0; font-size: 11pt; line-height: 15pt; color: #000; }
