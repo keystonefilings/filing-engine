@@ -634,12 +634,9 @@
 .pcov-card li { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; padding: 10px 0; font: 400 1.0625rem/1.5rem var(--font-sans); }
 .pcov-card li + li { border-top: 1px solid var(--line); }
 .pcov-mark { position: relative; flex: none; display: inline-flex; margin-top: 7px; }
-.pglyph { display: block; flex: none; overflow: visible; }
-.pglyph path { fill: none; }
-.pglyph.is-live path:first-child { fill: var(--done); stroke: var(--done); stroke-width: 1; }
-.pglyph.is-live .pglyph-line { stroke: var(--cotton); stroke-width: 1; }
-.pglyph.is-rehearsed path { stroke: var(--text); stroke-width: 1.5; stroke-dasharray: 3 2; }
-.pglyph.is-plain path { stroke: var(--text-2); stroke-width: 1; }
+/* The plate glyphs (components/site-pages/PlateGlyph.tsx): inked in Done, the rehearsal's dashes in Plate Ink */
+.pic-coverage .plate2-glyph.is-live { color: var(--done); }
+.pic-coverage .plate2-glyph.is-rehearsed { color: var(--text); }
 .pcov-tip { position: absolute; bottom: calc(100% + 8px); right: -8px; z-index: 2; padding: 6px 10px; font: 400 0.875rem/1.25rem var(--font-sans); white-space: nowrap; color: var(--page); background: var(--text); border-radius: 2px; box-shadow: var(--e-menu); opacity: 0; visibility: hidden; transition: opacity 120ms var(--ease-settle), visibility 0s 120ms; pointer-events: none; }
 @media (hover: hover) and (pointer: fine) {
   .pcov-card li:hover .pcov-tip { opacity: 1; visibility: visible; transition-delay: 400ms, 400ms; }

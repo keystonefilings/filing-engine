@@ -3,8 +3,8 @@ import { Lines, PageHead } from "@/components/site-pages/PageHead";
 import { PageClose } from "@/components/site-pages/PageClose";
 import { CoverageChip } from "@/components/site-pages/CoverageChip";
 import { PlateGlyph, plateStage, type PlateStage } from "@/components/site-pages/PlateGlyph";
-import { RunSheet } from "@/components/site-pages/RunSheet";
-import { PlayOnce } from "@/components/site-pages/PlayOnce";
+import { RunSheetPaper } from "@/components/pictures/RunSheet";
+import { MotionFigure } from "@/components/pictures/MotionFigure";
 import { platformName, supportEmail } from "@/lib/brand";
 import { COVERAGE, STAGES, statusOf } from "@/lib/coverage";
 import { PHOTOS } from "@/lib/photography";
@@ -79,14 +79,14 @@ export default function WhatWeFile() {
               <h2 className="t-display-m pg2-h2">How a filing type goes live.</h2>
               <p className="t-lede pg2-band-lede">Any filing can run as a rehearsal: the whole filing, performed on the state&apos;s real website with no audience. {name} fills in every screen with your details and stops before the last button. Nothing is filed, nothing is paid, and rehearsals are free. Rehearsals are also how each filing type earns its way to live: we switch types on one at a time, each only after it has been verified on the state&apos;s website.</p>
             </div>
-            <PlayOnce className="stage2" duration={2400} label="Example rehearsal log" caption="Rehearsal · nothing filed, nothing paid" replayLabel="Play again">
+            <MotionFigure pic="L7-what-we-file" ms={2400} className="stage2" ariaLabel="Example rehearsal log" label="Rehearsal · nothing filed, nothing paid">
               <div className="stage2-photo">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img src={stage.src} width={stage.width} height={stage.height} alt="" loading="lazy" decoding="async" />
                 <span className="stage2-shade" aria-hidden="true" />
               </div>
-              <RunSheet name={name} />
-            </PlayOnce>
+              <RunSheetPaper />
+            </MotionFigure>
           </div>
           <ol className="road2" aria-hidden="true">
             {ROAD.map(([s, label]) => (

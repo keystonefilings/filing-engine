@@ -1,0 +1,13 @@
+/* The plate glyphs (merged spec 4.5): the Name Plate's outline without screws, cut, then marked out, then inked, so the
+   scale reads in grayscale and in print. components/site-pages/PlateGlyph.tsx draws them; a page sets their color. */
+@layer components {
+.plate2-glyph { display: block; flex: none; overflow: visible; }
+.plate2-glyph .plate2-fill { fill: currentColor; }
+.plate2-glyph .plate2-line { stroke: var(--cotton); stroke-width: 1; fill: none; }
+.plate2-glyph .plate2-edge { fill: none; stroke: currentColor; stroke-linejoin: miter; }
+.plate2-glyph.is-rehearsed .plate2-edge { stroke-dasharray: 4 3; }
+.plate2-glyph.is-recorded, .plate2-glyph.is-offered { color: var(--text-2); }
+.plate2-glyph.is-planned { color: var(--line-strong); }
+.plate2-glyph.is-planned .plate2-edge { stroke-dasharray: 1 2; }
+.plate2-glyph .plate2-rule { stroke: currentColor; stroke-width: 1; }
+}

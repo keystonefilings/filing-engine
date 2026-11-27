@@ -19,7 +19,7 @@ export function ClientPage({ brand, embed, children }: { brand: FirmBrand; embed
       {/* A red-family firm's errors never rely on hue, so they never look like its button (3.6) */}
       <main className={["client2", embed && "is-embed", inkMatch(brand.color, brand.color2).flags.redFamily && "is-red"].filter(Boolean).join(" ")}>
         <Sheet size="page" className="client2-sheet">
-          {embed ? null : <Letterhead name={brand.name} logoUrl={brand.logoUrl} />}
+          {embed ? null : <Letterhead name={brand.name} logoUrl={brand.logoUrl} logo={brand.logo} />}
           {embed || !betaOn() ? null : <p className="client2-beta" role="note"><Chip tone="rehearsal" compact>Beta</Chip><span>{BETA_CLIENT_TEXT}</span></p>}
           {children}
         </Sheet>

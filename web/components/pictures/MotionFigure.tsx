@@ -25,7 +25,7 @@ export const REPLAY_NAME = "Play again";
  * 24 px replay control in its caption row. CSS in styles/components/pictures.css holds each picture's timeline.
  * `ms` is the timeline's length; `msPhone` its length on phones, where some timelines run differently.
  */
-export function MotionFigure({ pic, ms, msPhone, label, ariaLabel, id, className, prepaint, replayApart, onState, as = "figure", children }: {
+export function MotionFigure({ pic, ms, msPhone, label, ariaLabel, id, className, prepaint, replayApart, replay: offerReplay = true, onState, as = "figure", children }: {
   pic: string; ms: number; msPhone?: number; label?: ReactNode; ariaLabel?: string; id?: string; className?: string;
   /** "div" for real data that moves but isn't an example (the coverage cards, 9.6). */
   as?: "figure" | "div";
@@ -33,6 +33,8 @@ export function MotionFigure({ pic, ms, msPhone, label, ariaLabel, id, className
   prepaint?: boolean;
   /** Draw the replay control outside the caption, for pictures that place it apart from their label. */
   replayApart?: boolean;
+  /** False for a picture that plays once and offers no replay (For platforms' picture, 10A.7). */
+  replay?: boolean;
   onState?: (s: MotionState) => void;
   children: ReactNode;
 }) {
@@ -110,7 +112,7 @@ export function MotionFigure({ pic, ms, msPhone, label, ariaLabel, id, className
     // Two frames so the "before" state is painted before the timeline starts again.
     requestAnimationFrame(() => requestAnimationFrame(() => start()));
   };
-  const button = replay ? (
+  const button = replay && offerReplay ? (
     <button type="button" className="pic-replay" aria-label={REPLAY_NAME} disabled={state === "play"} onClick={again}><ReplayGlyph /></button>
   ) : null;
 

@@ -24,6 +24,23 @@
 .letterhead2-name { font-family: var(--font-firm, var(--font-sans-display)); font-weight: 600; font-size: 1.5rem; line-height: 1.875rem; color: #1D2130; }
 @media (max-width: 599px) { .letterhead2-name { font-size: 1.25rem; line-height: 1.625rem; } .letterhead2-logo { max-height: 40px; } }
 .letterhead2.is-centred .letterhead2-row { justify-content: center; }
+/* Sized by area once the logo's shape is known (3.5.1, step 4; components/ui/LogoImage.tsx sets the sizes): sheets on
+   desktop, then phones; every preview of a client page takes the phone size. With no logo the name is set larger (3.5.2). */
+.letterhead2 .letterhead2-logo.is-sized { width: var(--lw); height: var(--lh); max-width: none; max-height: none; }
+@media (max-width: 599px) { .letterhead2 .letterhead2-logo.is-sized { width: var(--lw-s); height: var(--lh-s); } }
+.letterhead2.is-preview .letterhead2-logo.is-sized { width: var(--lw-s); height: var(--lh-s); }
+/* Branding's previews draw the client's pages at the phone layout (components/desk/BrandingStudio.tsx, 10B.7.5) */
+:is(.pv2-sheet, .brand2-strip-page) .letterhead2 .letterhead2-logo.is-sized { width: var(--lw-s); height: var(--lh-s); }
+.letterhead2-name.is-alone { font-size: 1.875rem; line-height: 2.25rem; }
+@media (max-width: 599px) { .letterhead2-name.is-alone { font-size: 1.5rem; line-height: 1.875rem; } }
+.letterhead2.is-preview .letterhead2-name { font-size: 1.25rem; line-height: 1.625rem; }
+.letterhead2.is-preview .letterhead2-name.is-alone { font-size: 1.5rem; line-height: 1.875rem; }
+.letterhead2.is-centred .letterhead2-row { flex-direction: column; gap: 8px; }
+/* A logo of light marks (drawn for a dark website) on its plate (10B.2.3): the firm's fill where the marks read at 3:1 on
+   it, else Plate Ink (--logo-plate, from the ink match); the chamfered corners, 8 × 12 px. Seen on the white sheet, by design. */
+/* A photograph or busy picture: as uploaded, inside a 1 px Rule hairline, with no chip (it has no transparency) (3.5.1) */
+.letterhead2-logo[data-logo="busy"] { padding: 0; margin: 0; clip-path: none; box-shadow: 0 0 0 1px #DDD7CB; }
+.letterhead2-logo.is-plate { padding: 8px 12px; margin: 0; background: var(--logo-plate, #1D2130); clip-path: polygon(6px 0, calc(100% - 6px) 0, 100% 6px, 100% calc(100% - 6px), calc(100% - 6px) 100%, 6px 100%, 0 calc(100% - 6px), 0 6px); }
 
 /* The Firm Rule: 3 px main, 2 px gap, 1 px second; client-facing only */
 .firmrule2 { display: grid; gap: 2px; width: 100%; }
@@ -39,6 +56,10 @@
 .firmlogo2 img { height: 24px; width: auto; max-width: 120px; object-fit: contain; }
 @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .reg-cofile .firmlogo2 img { box-sizing: content-box; padding: 4px 6px; background: #fff; color-scheme: only light; clip-path: polygon(4px 0, calc(100% - 4px) 0, 100% 4px, 100% calc(100% - 4px), calc(100% - 4px) 100%, 4px 100%, 0 calc(100% - 4px), 0 4px); } }
 :root[data-theme="dark"] .reg-cofile .firmlogo2 img { box-sizing: content-box; padding: 4px 6px; background: #fff; color-scheme: only light; clip-path: polygon(4px 0, calc(100% - 4px) 0, 100% 4px, 100% calc(100% - 4px), calc(100% - 4px) 100%, 4px 100%, 0 calc(100% - 4px), 0 4px); }
+/* Light marks: a small Plate Ink plate on Cotton; on the dark page, straight on Night, never the white chip (10B.2.3) */
+.firmlogo2 img[data-logo="light"] { box-sizing: content-box; padding: 4px 6px; background: #1D2130; clip-path: polygon(4px 0, calc(100% - 4px) 0, 100% 4px, 100% calc(100% - 4px), calc(100% - 4px) 100%, 4px 100%, 0 calc(100% - 4px), 0 4px); }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .reg-cofile .firmlogo2 img[data-logo="light"] { padding: 0; background: none; clip-path: none; } }
+:root[data-theme="dark"] .reg-cofile .firmlogo2 img[data-logo="light"] { padding: 0; background: none; clip-path: none; }
 .monogram2 { display: inline-grid; place-content: center; width: 24px; height: 24px; background: var(--ink); color: var(--cotton); font-size: 0.75rem; font-weight: 600; border-radius: 4px; corner-shape: bevel; }
 
 /* Notices (11.11): a quiet band with a glyph and words; never color alone */

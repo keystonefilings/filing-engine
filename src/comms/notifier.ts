@@ -10,6 +10,9 @@ import { renderEinIssued, renderMessage, type RenderedMessage } from "./render.j
 import { headlineOf, letterBody, type Block, type FirmLetterhead, type Letter } from "./letter.js";
 import { imageSize } from "./image-size.js";
 import { needsPlate } from "../brand/logo-plate.js";
+import { analyzeLogo, currentLogoInfo } from "../brand/logo-analysis.js";
+import { logoPlate } from "../design/logo.js";
+import { inkMatch, PLATE_INK } from "../design/ink.js";
 import type { Channel, ChannelSender, OutboundMessage } from "./senders.js";
 
 export interface NotifierDeps {
@@ -228,10 +231,22 @@ export class Notifier {
       const url = `${this.deps.publicBaseUrl}/v1/brand-logos/${portal.logoArtifactId}`;
       const got = await this.deps.artifacts?.get(portal.logoArtifactId).catch(() => null);
       const size = got ? imageSize(got.body) : null;
-      // A logo with transparent pixels goes out on its baked white plate, so it stays on white when a mail app
-      // forces dark mode (owner's decision, Nov 26).
-      if (got && size && (await needsPlate(got.body))) return { url: `${url}/plate`, ...size, plate: true };
-      return size ? { url, ...size } : { url };
+      if (got && size && (await needsPlate(got.body))) {
+        // Light marks (a logo drawn for a dark website) go out on their dark plate, the one the pages use: the firm's
+        // fill when the logo reads at 3:1 on it, else Plate Ink (10B.2.3). Seen on the white sheet, by design.
+        const info = currentLogoInfo(portal) ?? await analyzeLogo(got.body);
+        const fill = portal.primaryColor && /^#[0-9a-fA-F]{6}$/.test(portal.primaryColor)
+          ? inkMatch(portal.primaryColor, portal.secondaryColor && /^#[0-9a-fA-F]{6}$/.test(portal.secondaryColor) ? portal.secondaryColor : null).fill
+          : PLATE_INK;
+        const plateColor = logoPlate(info, fill);
+        if (plateColor) return { url: `${url}/plate?bg=${plateColor.slice(1).toUpperCase()}`, ...size, plate: true, plateColor };
+        // Any other logo with transparent pixels goes out on its baked white plate, so it stays on white when a mail
+        // app forces dark mode (owner's decision, Nov 26).
+        return { url: `${url}/plate`, ...size, plate: true };
+      }
+      // A photograph or a busy picture is shown as uploaded inside a 1 px Rule hairline (3.5.1).
+      const busy = got ? (currentLogoInfo(portal) ?? await analyzeLogo(got.body))?.background === "busy" : false;
+      return size ? { url, ...size, ...(busy ? { busy } : {}) } : { url };
     }
     return portal?.logoUrl?.startsWith("https://") ? { url: portal.logoUrl } : undefined;
   }

@@ -6,6 +6,7 @@ import type { Store } from "../store/types.js";
 import { portalSlugFor, type Auth } from "../users/routes.js";
 import { fontType, MAX_FONT_BYTES } from "../settings/fonts.js";
 import { needsPlate, platedLogoCached } from "../brand/logo-plate.js";
+import { analyzeLogo, trimLogo } from "../brand/logo-analysis.js";
 
 /** Largest logo we keep, in bytes. The front end shrinks big pictures before sending. */
 export const MAX_LOGO_BYTES = 512 * 1024;
@@ -61,10 +62,18 @@ export function registerBrandLogos(app: FastifyInstance, deps: Deps): void {
     const type = logoType(bytes);
     if (!type) return reply.code(422).send({ error: "validation failed", issues: [{ path: "data", message: "the logo must be a PNG, JPEG or WebP picture" }] });
     const c = own.company;
-    const meta = await deps.artifacts.put({ filingId: `brand-${c.clientCompanyId}`, kind: "brand_logo", label: "Logo", contentType: type }, bytes);
+    // Processed at upload (3.5.1): its empty margin trimmed, as Branding does in the browser, for a logo sent by the API.
+    const trimmed = await trimLogo(bytes);
+    const logo = trimmed && trimmed.body.length <= MAX_LOGO_BYTES ? trimmed : { body: bytes, type };
+    const meta = await deps.artifacts.put({ filingId: `brand-${c.clientCompanyId}`, kind: "brand_logo", label: "Logo", contentType: logo.type }, logo.body);
+    // Read at upload (3.5.1): its shape, its edge, and whether its marks are light, so every page shows it right.
+    const info = await analyzeLogo(logo.body);
     const next = ClientCompanySettings.parse({
       ...c,
-      portal: { ...c.portal, slug: await portalSlugFor(deps.store, c.tenantId, c), logoArtifactId: meta.id, logoUrl: undefined },
+      portal: {
+        ...c.portal, slug: await portalSlugFor(deps.store, c.tenantId, c), logoArtifactId: meta.id, logoUrl: undefined,
+        logoInfo: info ? { ...info, artifactId: meta.id } : undefined,
+      },
     });
     await deps.store.putClientCompany(next);
     return { clientCompany: next, logoArtifactId: meta.id };
@@ -75,7 +84,7 @@ export function registerBrandLogos(app: FastifyInstance, deps: Deps): void {
     if (own.status !== 200) return reply.code(own.status).send({ error: own.status === 401 ? "invalid api key" : "not found" });
     const c = own.company;
     if (!c.portal) return { clientCompany: c };
-    const next = ClientCompanySettings.parse({ ...c, portal: { ...c.portal, logoArtifactId: undefined, logoUrl: undefined } });
+    const next = ClientCompanySettings.parse({ ...c, portal: { ...c.portal, logoArtifactId: undefined, logoUrl: undefined, logoInfo: undefined } });
     await deps.store.putClientCompany(next);
     return { clientCompany: next };
   });
@@ -108,13 +117,16 @@ export function registerBrandLogos(app: FastifyInstance, deps: Deps): void {
       .send(a.body);
   });
 
-  // The logo on its baked white plate, for email (src/brand/logo-plate.ts). A logo that needs no plate, or can't
-  // be plated, is served as uploaded, so the address always shows the logo.
+  // The logo on its baked plate, for email (src/brand/logo-plate.ts): white, or with ?bg=RRGGBB the dark plate a logo
+  // of light marks sits on (10B.2.3). A logo that needs no plate, or can't be plated, is served as uploaded, so the
+  // address always shows the logo.
   app.get("/v1/brand-logos/:id/plate", async (req, reply) => {
     const id = (req.params as { id: string }).id;
+    const bg = (req.query as { bg?: unknown }).bg;
+    if (bg !== undefined && (typeof bg !== "string" || !/^[0-9a-fA-F]{6}$/.test(bg))) return reply.code(404).send({ error: "not found" });
     const a = await deps.artifacts.get(id);
     if (!a || a.meta.kind !== "brand_logo" || !logoType(a.body)) return reply.code(404).send({ error: "not found" });
-    const plated = (await needsPlate(a.body)) ? await platedLogoCached(id, a.body) : null;
+    const plated = (await needsPlate(a.body)) ? await platedLogoCached(id, a.body, bg ? `#${bg.toUpperCase()}` : undefined) : null;
     return reply
       .header("content-type", plated ? "image/png" : a.meta.contentType)
       .header("cache-control", "public, max-age=31536000, immutable")
