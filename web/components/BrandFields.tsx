@@ -3,6 +3,8 @@
 import { useState } from "react";
 import "@/styles/components/brandfields.css";
 import { prepareLogoPixels } from "@/lib/logo-process";
+import { isWide } from "@/lib/design/logo";
+import { LogoImage } from "@/components/ui/LogoImage";
 
 /** Colors offered with one tap; any other comes from the picker or a typed hex code. */
 export const SWATCHES = ["#1f4fd1", "#0f766e", "#15803d", "#b45309", "#b91c1c", "#7e22ce", "#be185d", "#334155", "#111827"];
@@ -132,8 +134,8 @@ export function LogoField({ current, currentLink, onPreview, name }: { current?:
             </figure>
             <figure className="logof2-half is-page">
               <span className="logof2-sheet">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={shown} alt="" onLoad={(e) => setWide(e.currentTarget.naturalWidth >= 2.5 * e.currentTarget.naturalHeight)} />
+                {/* Read from its pixels as it loads (lib/design/logo.ts): light marks show on their plate, as on the pages. */}
+                <LogoImage src={shown} alt="" place="preview" className="logof2-logo" onInfo={(i) => setWide(!!i && isWide(i.ratio))} />
                 {name && !wide ? <span className="logof2-name">{name}</span> : null}
               </span>
               <figcaption>on your pages</figcaption>

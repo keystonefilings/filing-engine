@@ -1,6 +1,8 @@
 import "@/styles/components/sheet.css";
 import type { CSSProperties, ReactNode } from "react";
 import { DashedOutline, Glyph } from "./glyphs";
+import { LetterheadRow, LogoImage } from "./LogoImage";
+import type { LogoInfo } from "@/lib/design/logo";
 
 /**
  * A register: whose look a subtree wears (the Stripe model, decision 2). `cofile` is everything a firm uses;
@@ -29,26 +31,27 @@ export function FirmRule({ draw, cofile }: { draw?: boolean; cofile?: boolean })
   return <div className={["firmrule2", draw && "is-draw", cofile && "is-cofile"].filter(Boolean).join(" ")} aria-hidden="true" />;
 }
 
-/** The firm's Letterhead: its logo or typeset name, then the Firm Rule. Heads client pages only (11.4). */
-export function Letterhead({ name, logoUrl, centred, draw }: { name: string; logoUrl?: string; centred?: boolean; draw?: boolean }) {
+/**
+ * The firm's Letterhead: its logo or typeset name, then the Firm Rule. Heads client pages only (11.4). The logo is sized
+ * by area, the name typeset beside a square or mid logo, and a logo of light marks sits on its plate (3.5.1, 10B.2.3):
+ * `logo` is the engine's reading of it (FirmBrand.logo); without one, the logo is read in the browser once it loads.
+ * `preview` sizes it as a phone sheet, for every picture and preview of a client page.
+ */
+export function Letterhead({ name, logoUrl, logo, centred, draw, preview }: { name: string; logoUrl?: string; logo?: LogoInfo; centred?: boolean; draw?: boolean; preview?: boolean }) {
   return (
-    <div className={["letterhead2", centred && "is-centred"].filter(Boolean).join(" ")}>
-      <div className="letterhead2-row">
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        {logoUrl ? <img className="letterhead2-logo" src={logoUrl} alt={name} /> : <span className="letterhead2-name">{name}</span>}
-      </div>
+    <div className={["letterhead2", centred && "is-centred", preview && "is-preview"].filter(Boolean).join(" ")}>
+      <LetterheadRow name={name} logoUrl={logoUrl} logo={logo} preview={preview} />
       <FirmRule draw={draw} />
     </div>
   );
 }
 
-/** The firm on a page in CoFile's look: its logo small with its name, as content (11.4). */
-export function FirmLogo({ name, logoUrl }: { name: string; logoUrl?: string }) {
+/** The firm on a page in CoFile's look: its logo small with its name, as content (11.4). Light marks take a Plate Ink plate. */
+export function FirmLogo({ name, logoUrl, logo }: { name: string; logoUrl?: string; logo?: LogoInfo }) {
   const initials = name.split(/\s+/).filter((w) => /^[A-Za-zÀ-ÿ]/.test(w)).slice(0, 2).map((w) => w[0]!.toUpperCase()).join("");
   return (
     <span className="firmlogo2">
-      {/* eslint-disable-next-line @next/next/no-img-element */}
-      {logoUrl ? <img src={logoUrl} alt="" /> : <span className="monogram2" aria-hidden="true">{initials}</span>}
+      {logoUrl ? <LogoImage src={logoUrl} alt="" info={logo} place="mark" /> : <span className="monogram2" aria-hidden="true">{initials}</span>}
       <span>{name}</span>
     </span>
   );

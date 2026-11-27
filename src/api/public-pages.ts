@@ -6,6 +6,8 @@ import { SubscriptionRequired } from "../billing/service.js";
 import type { ClientCompanySettings } from "../settings/schema.js";
 import type { Store } from "../store/types.js";
 import { RateLimiter } from "../users/rate-limit.js";
+import type { ArtifactStore } from "../artifacts/store.js";
+import { currentLogoInfo, withLogoInfo } from "../brand/logo-analysis.js";
 
 /**
  * V19 / V39: a firm's public pages and its website widget, with no key. Open for partner firms of
@@ -13,7 +15,7 @@ import { RateLimiter } from "../users/rate-limit.js";
  * each submission is a new filing for that firm, which then goes through the same preview and
  * approval as any other. The submitter never gets the approval link.
  */
-export function registerPublicPages(app: FastifyInstance, deps: { store: Store; service: FilingService; platformTenantId: string; platformName?: string; agentOffer?: (t: import("../settings/schema.js").TenantSettings, c: import("../settings/schema.js").ClientCompanySettings) => import("../registered-agents/agent-services.js").AgentOffer | null }): void {
+export function registerPublicPages(app: FastifyInstance, deps: { store: Store; artifacts?: ArtifactStore; service: FilingService; platformTenantId: string; platformName?: string; agentOffer?: (t: import("../settings/schema.js").TenantSettings, c: import("../settings/schema.js").ClientCompanySettings) => import("../registered-agents/agent-services.js").AgentOffer | null }): void {
   const perFirm = new RateLimiter(30, 3_600_000);
   const overall = new RateLimiter(600, 3_600_000);
 
@@ -27,14 +29,15 @@ export function registerPublicPages(app: FastifyInstance, deps: { store: Store; 
 
   app.get("/v1/public/firms/:tenantId/:slug", async (req, reply) => {
     const { tenantId, slug } = req.params as { tenantId: string; slug: string };
-    const c = await findFirm(tenantId, slug);
-    if (!c) return reply.code(404).send({ error: "not found" });
+    const found = await findFirm(tenantId, slug);
+    if (!found) return reply.code(404).send({ error: "not found" });
+    const c = await withLogoInfo(deps, found);
     const p = c.portal!;
     // Only what a public page shows: brand, services offered, and the firm's saved agents (public record anyway).
     return reply.header("cache-control", "public, max-age=60").send({
       clientCompany: {
         clientCompanyId: c.clientCompanyId, tenantId: c.tenantId, name: c.name,
-        portal: { slug: p.slug, displayName: p.displayName, logoUrl: p.logoUrl, logoArtifactId: p.logoArtifactId, primaryColor: p.primaryColor, secondaryColor: p.secondaryColor, supportEmail: p.supportEmail, filingKinds: p.filingKinds, font: p.font, fontArtifactId: p.fontArtifactId },
+        portal: { slug: p.slug, displayName: p.displayName, logoUrl: p.logoUrl, logoArtifactId: p.logoArtifactId, logoInfo: currentLogoInfo(p), primaryColor: p.primaryColor, secondaryColor: p.secondaryColor, supportEmail: p.supportEmail, filingKinds: p.filingKinds, font: p.font, fontArtifactId: p.fontArtifactId },
         ...(c.partner ? { partner: { states: c.partner.states } } : {}),
         registeredAgentsByState: c.registeredAgentsByState,
       },

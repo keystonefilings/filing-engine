@@ -7,8 +7,10 @@ import "./globals.css";
 import "@/styles/type.css";
 import "@/styles/registers.css";
 import "@/styles/base.css";
+import "@/styles/components/texture.css";
 import { platformName, supportEmail } from "@/lib/brand";
 import { BetaBanner } from "@/components/BetaBanner";
+import { publicUrl } from "@/lib/session";
 
 // Every page reads this deployment's settings (PLATFORM_NAME, PARTNER_SIGNUP_MODE, SITE_INDEXABLE) when
 // it's served, not when the app was built (V38).
@@ -17,6 +19,8 @@ export const dynamic = "force-dynamic";
 export function generateMetadata(): Metadata {
   return {
     title: { default: platformName(), template: `%s · ${platformName()}` }, robots: { index: process.env.SITE_INDEXABLE === "true" },
+    // Link-preview cards (each page's opengraph-image) are linked by full address: this site's own (lib/session.ts).
+    metadataBase: new URL(publicUrl()),
     // CoFile's own icons (owner's identity package). Set as metadata, not as app/icon files, so the pages a firm's
     // clients see can replace them with the firm's monogram (lib/firm-icon.ts; decision 12).
     icons: {

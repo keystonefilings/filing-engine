@@ -1,0 +1,108 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="color-scheme" content="light dark"><meta name="robots" content="noindex">
+<title>Alder Street Tax: approve filing</title><style>:root{
+--cotton:#FBFAF6;--cotton-2:#F3F0E8;--bond:#F5F5F2;--ink:#1D2130;--graphite:#555867;--rule:#DDD7CB;--rule-strong:#8A8578;
+--brass:#D9A84A;--brass-deep:#C99A3F;--brass-line:#A87A1E;--brass-tint:#F6EBD0;
+--done:#2E6B57;--done-tint:#E4F0EA;--ochre:#855A0C;--ochre-tint:#F7EDD8;--madder:#9A2D2D;--madder-tint:#F8E6E3;
+--night:#14161E;--font-display:"Miller Display", "Miller Text", "Miller Text Fallback", Georgia, "Times New Roman", serif;--font-head:"Founders Grotesk", "Founders Grotesk Text", "Founders Grotesk Fallback", "Helvetica Neue", Arial, system-ui, sans-serif;--font-sans:"Founders Grotesk Text", "Founders Grotesk", "Founders Grotesk Fallback", "Helvetica Neue", Arial, system-ui, sans-serif;--font-sans-d:"Founders Grotesk", "Founders Grotesk Text", "Founders Grotesk Fallback", "Helvetica Neue", Arial, system-ui, sans-serif;--font-mono:"Founders Grotesk Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+--page:var(--firm-wash);--action:var(--firm-fill);--action-hover:var(--firm-fill-hover);--action-on:var(--firm-on);--action-border:var(--firm-fill-border);--action-edge:var(--firm-fill-edge);--link:var(--firm-ink);--link-line:var(--firm-ink);--focus:var(--firm-ink);--turn-ink:var(--firm-ink);--turn-glyph:var(--firm);--halo:color-mix(in srgb,var(--firm-tint) 50%,transparent);
+--firm:#1F4FD1;--firm-2:#B1C1EF;--firm-rule-under:transparent;--firm-fill:#1F4FD1;--firm-fill-hover:#1542C4;--firm-on:#FFFFFF;--firm-fill-border:transparent;--firm-fill-edge:transparent;--firm-select-line:#1F4FD1;--firm-ink:#1F4FD1;--firm-wash:#F4F7FE;--firm-row:#EDF5FF;--firm-tint:#DCECFF;--firm-ink-dark:#628AE2}
+@media (prefers-color-scheme:dark){:root{--page:#14161E}}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--page);color:var(--ink);font:400 1.125rem/1.75rem var(--font-sans);-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
+.page{padding:48px 24px 96px}
+.sheet{max-width:760px;margin:0 auto;background:#fff;color:var(--ink);padding:48px;border-radius:2px;box-shadow:0 1px 1px rgba(29,33,48,.05),0 10px 28px -10px rgba(29,33,48,.20)}
+@media (prefers-color-scheme:dark){.sheet{box-shadow:0 1px 0 rgba(0,0,0,.40),0 16px 40px -12px rgba(0,0,0,.55)}}
+h1,h2,p,dl,dd,figure{margin:0}
+a{color:var(--link);text-decoration:underline 1px var(--link-line);text-underline-offset:3px}
+a:hover{text-decoration-thickness:2px;text-decoration-color:var(--link)}
+a:focus-visible,button:focus-visible{outline:2px solid var(--focus);outline-offset:2px;box-shadow:0 0 0 2px #fff}
+.named{text-align:center;font:500 1.0625rem/1.5rem var(--font-sans-d);color:var(--ink);text-wrap:balance;padding-bottom:16px;border-bottom:1px solid var(--ink);margin-bottom:32px}
+.lh{display:grid;gap:16px;margin-bottom:32px}
+.lh-row{display:flex;justify-content:center;align-items:center;min-height:48px}
+.lh-logo{display:block;max-height:48px;max-width:240px;width:auto;object-fit:contain;box-sizing:content-box;padding:4px 6px;margin:-4px -6px;background:#fff;color-scheme:only light;clip-path:polygon(4px 0,calc(100% - 4px) 0,100% 4px,100% calc(100% - 4px),calc(100% - 4px) 100%,4px 100%,0 calc(100% - 4px),0 4px)}
+.lh-row.is-stacked{flex-direction:column;gap:12px}
+.lh-logo.is-sized{width:var(--lw);height:var(--lh);max-width:none;max-height:none}
+.lh-logo.is-busy{padding:0;margin:0;clip-path:none;box-shadow:0 0 0 1px #DDD7CB}
+.lh-logo.is-plate{padding:8px 12px;margin:0;background:var(--plate);clip-path:polygon(6px 0,calc(100% - 6px) 0,100% 6px,100% calc(100% - 6px),calc(100% - 6px) 100%,6px 100%,0 calc(100% - 6px),0 6px)}
+.lh-name{font:600 1.5rem/1.875rem var(--font-head);color:var(--ink)}
+.rule{display:grid;gap:2px}.rule::before{content:"";height:3px;background:var(--firm,var(--ink))}.rule::after{content:"";height:1px;background:var(--firm-2,var(--ink))}
+.rehearsal{position:relative;display:grid;grid-template-columns:16px 1fr;gap:12px;padding:16px 20px;margin-bottom:24px;font-weight:500}
+.rehearsal>svg.dash{position:absolute;inset:0;width:100%;height:100%;overflow:visible;pointer-events:none}
+.rehearsal>svg.dash rect{fill:none;stroke:currentColor;stroke-width:1.5;stroke-dasharray:4 3;vector-effect:non-scaling-stroke}
+.title-row{display:flex;flex-wrap:wrap;align-items:flex-start;justify-content:space-between;gap:12px 24px}
+.title{font:600 2.125rem/2.5rem var(--font-head);letter-spacing:0;text-wrap:balance;margin:0}
+.kind{margin-top:8px;font-size:1rem;line-height:1.5rem;color:var(--graphite)}
+.ref{margin-top:16px;font-size:1rem;line-height:1.5rem;color:var(--graphite)}
+.ref strong{font-weight:500;color:var(--ink)}
+.chip{display:inline-flex;align-items:flex-start;gap:6px;min-height:30px;padding:6px 12px;font:500 .875rem/1.125rem var(--font-sans);border:1px solid transparent;border-radius:6px;corner-shape:bevel;white-space:nowrap}
+@supports not (corner-shape:bevel){.chip{border-radius:3px}}
+.chip svg{width:12px;height:12px;margin-top:3px;flex:none}
+.chip.turn{background:#fff;color:var(--turn-ink);border-color:var(--turn-ink)}
+.chip.turn svg{color:var(--turn-glyph)}
+.terms{margin-top:24px;background:var(--bond);border:1px solid var(--rule);border-radius:2px;padding:24px;font-size:1.0625rem;line-height:1.6875rem}
+.terms p+p{margin-top:12px}
+h2{margin-top:48px;margin-bottom:8px;font:500 1.375rem/1.75rem var(--font-sans-d);color:var(--ink)}
+.lead{font-size:1rem;line-height:1.5rem;color:var(--graphite);margin-bottom:16px;max-width:64ch}
+.review{display:block;border:1px solid var(--rule);border-radius:2px;overflow:hidden;background:#fff}
+.review img{display:block;width:100%;height:auto}
+.details{display:grid;grid-template-columns:38% 1fr;border-top:1px solid var(--rule)}
+.details dt,.details dd{padding:12px 0;border-bottom:1px solid var(--rule)}
+.details dt{font:500 1rem/1.375rem var(--font-sans);color:var(--graphite);padding-right:16px}
+.details dd{font:400 1rem/1.5rem var(--font-mono);color:var(--ink);overflow-wrap:anywhere}
+.details .group{grid-column:1/-1;padding:24px 0 4px;border-bottom:0;font:500 .9375rem/1.25rem var(--font-sans);color:var(--graphite)}
+.fees{display:grid;gap:10px;border-top:1px solid var(--rule);padding-top:14px}
+.fee{display:flex;align-items:baseline;gap:8px;font-size:1.125rem;line-height:1.625rem;font-variant-numeric:tabular-nums lining-nums}
+.fee .lead-dots{flex:1;min-width:24px;border-bottom:2px dotted var(--rule-strong);transform:translateY(-6px)}
+.fee .amt{white-space:nowrap;text-align:right}
+.total{margin-top:6px;padding-top:12px;border-top:1px solid var(--ink);font:500 1.375rem/1.75rem var(--font-sans-d)}
+.total .amt{padding-bottom:4px;border-bottom:4px double var(--ink)}
+.cap{font-size:1rem;line-height:1.5rem;color:var(--graphite)}
+form{margin-top:48px;display:grid;gap:24px}
+label{display:grid;gap:8px;font:500 1rem/1.375rem var(--font-sans)}
+label .opt{font-weight:400;color:var(--graphite)}
+textarea,input{font:400 1.125rem/1.5rem var(--font-sans);color:var(--ink);background:#fff;width:100%;border:1px solid var(--rule-strong);border-radius:2px;padding:14px 16px}
+textarea{min-height:120px;resize:vertical}
+input.code{font:400 1.5rem/2rem var(--font-mono);letter-spacing:.3em;text-align:center;max-width:280px;min-height:56px}
+textarea:focus,input:focus{outline:2px solid var(--focus);outline-offset:2px;border-color:var(--focus);box-shadow:inset 0 0 0 1px var(--focus),0 0 0 2px var(--halo)}
+.buttons{display:grid;gap:12px}
+button{font:500 1.125rem/1.5rem var(--font-sans-d);min-height:56px;padding:16px 28px;border-radius:6px;corner-shape:bevel;cursor:pointer;border:1px solid transparent;width:100%;text-wrap:balance;transition:background-color 120ms cubic-bezier(.3,0,.2,1)}
+@supports not (corner-shape:bevel){button{border-radius:3px}}
+button:active{transform:translateY(1px);box-shadow:inset 0 1px 0 rgba(29,33,48,.18)}
+button.approve{min-height:60px;padding:18px 32px;background:var(--action);color:var(--action-on);border-color:var(--action-border);box-shadow:inset 4px 0 0 var(--action-edge)}
+button.outline{background:transparent;color:var(--ink);border-color:var(--rule-strong)}
+@media (hover:hover){button.approve:hover{background:var(--action-hover)}button.outline:hover{background:var(--cotton-2);border-color:var(--ink)}}
+.questions{margin-top:32px;font-size:.9375rem;line-height:1.4375rem;color:var(--graphite)}
+.page-title{font:600 2rem/2.375rem var(--font-head);margin:0 0 16px}
+.sheet p.body+p.body{margin-top:12px}
+@media (max-width:599px){
+.page{padding:0}
+.sheet{padding:24px 20px 40px;box-shadow:none;border-radius:0;min-height:100vh}
+.title{font-size:1.75rem;line-height:2.125rem}
+.lh-logo.is-sized{width:var(--lw-s);height:var(--lh-s)}
+.lh-name{font-size:1.25rem;line-height:1.625rem}
+.details{grid-template-columns:1fr}
+.details dt{border-bottom:0;padding-bottom:2px;font-size:.9375rem}
+.details dd{padding-top:0;font-size:1.0625rem}
+}
+@media print{body{background:#fff}.page{padding:0}.sheet{box-shadow:none;max-width:none;padding:0}form{display:none}}</style></head>
+<body><main class="page"><article class="sheet"><div class="lh"><div class="lh-row"><img class="lh-logo is-sized" src="/cofile/qa-gallery/logos/ready-1f4fd1.png" width="263" height="28" alt="Alder Street Tax" style="--lw:262.5px;--lh:28px;--lw-s:220px;--lh-s:23.5px"></div><div class="rule" aria-hidden="true"></div></div>
+
+<div class="title-row"><h1 class="title">Two Sisters Bakery LLC</h1><span class="chip turn"><svg viewBox="0 0 12 12" aria-hidden="true"><path d="M6 .8 11.2 6 6 11.2.8 6Z" fill="currentColor"/></svg><span>Ready to approve</span></span></div>
+<p class="kind">New Jersey LLC formation</p>
+<p class="ref">Filing reference f-qa. Please decide by <strong>December 3, 2026, 5:00 PM Eastern</strong>. After that, this link stops working and you'll need a new one.</p>
+<div class="terms"><p>By approving, you confirm every detail below is correct and authorize its submission exactly as shown, and payment of the fees shown, up to the total shown ($103.50). Government fees generally can&#39;t be refunded once paid, even if the filing is rejected.</p>
+<p>Government sites don't save drafts, so once you approve, the whole filing is sent in one go. Please check everything now.</p></div>
+
+<h2>Filing details</h2><dl class="details"><dt class="group">Formation</dt><dt>Name › Base name</dt><dd>TWO SISTERS BAKERY</dd><dt>Name › Designator</dt><dd>LLC</dd></dl>
+<h2>State fees</h2><p class="lead">Nothing is charged on this page. These fees are paid to the state when the filing is submitted.</p>
+<div class="fees"><div class="fee"><span>Formation filing fee</span><span class="lead-dots" aria-hidden="true"></span><span class="amt">$100.00</span></div><div class="fee"><span>NJ portal fee, by card</span><span class="lead-dots" aria-hidden="true"></span><span class="amt">$3.50</span></div>
+<div class="fee total"><span>Total</span><span class="lead-dots" aria-hidden="true"></span><span class="amt">$103.50</span></div>
+</div>
+<form method="post" action="#">
+
+<label for="comment"><span>What should change? <span class="opt">(Needed only if you ask for changes)</span></span><textarea id="comment" name="comment" rows="3"></textarea></label>
+<div class="buttons"><button class="approve" name="decision" value="approve">Approve, and authorize submission and payment</button>
+<button class="outline" name="decision" value="request_changes">Request changes</button></div>
+</form></article></main></body></html>

@@ -1,0 +1,431 @@
+{
+ "hp-symbol": {
+  "src": "/cofile/qa-gallery/logos/hp-symbol.png",
+  "info": {
+   "v": 1,
+   "width": 386,
+   "height": 434,
+   "ratio": 0.889,
+   "background": "transparent",
+   "inkL": 0.4,
+   "ink": "#1D4E63",
+   "light": false
+  }
+ },
+ "hp-whitebox": {
+  "src": "/cofile/qa-gallery/logos/hp-whitebox.jpg",
+  "info": {
+   "v": 1,
+   "width": 372,
+   "height": 410,
+   "ratio": 0.907,
+   "background": "white",
+   "inkL": 0.423,
+   "ink": "#365A6C",
+   "light": false
+  }
+ },
+ "hp-whitebox-web": {
+  "src": "/cofile/qa-gallery/logos/hp-whitebox-web.png",
+  "info": {
+   "v": 1,
+   "width": 339,
+   "height": 380,
+   "ratio": 0.892,
+   "background": "transparent",
+   "inkL": 0.421,
+   "ink": "#33586B",
+   "light": false
+  }
+ },
+ "ng-wordmark": {
+  "src": "/cofile/qa-gallery/logos/ng-wordmark.png",
+  "info": {
+   "v": 1,
+   "width": 597,
+   "height": 75,
+   "ratio": 7.96,
+   "background": "transparent",
+   "inkL": 0.553,
+   "ink": "#C2410C",
+   "light": false
+  }
+ },
+ "best-wordmark": {
+  "src": "/cofile/qa-gallery/logos/best-wordmark.png",
+  "info": {
+   "v": 1,
+   "width": 598,
+   "height": 79,
+   "ratio": 7.57,
+   "background": "transparent",
+   "inkL": 0.484,
+   "ink": "#1F4FD1",
+   "light": false
+  }
+ },
+ "kitefold-light": {
+  "src": "/cofile/qa-gallery/logos/kitefold-light.png",
+  "info": {
+   "v": 1,
+   "width": 596,
+   "height": 71,
+   "ratio": 8.394,
+   "background": "transparent",
+   "inkL": 1,
+   "ink": "#FFFFFF",
+   "light": true
+  }
+ },
+ "merrow-mid": {
+  "src": "/cofile/qa-gallery/logos/merrow-mid.png",
+  "info": {
+   "v": 1,
+   "width": 472,
+   "height": 212,
+   "ratio": 2.226,
+   "background": "transparent",
+   "inkL": 0.442,
+   "ink": "#475C52",
+   "light": false
+  }
+ },
+ "merrow-whitebox": {
+  "src": "/cofile/qa-gallery/logos/merrow-whitebox.jpg",
+  "info": {
+   "v": 1,
+   "width": 454,
+   "height": 215,
+   "ratio": 2.112,
+   "background": "white",
+   "inkL": 0.53,
+   "ink": "#6F8079",
+   "light": false
+  }
+ },
+ "square-tile": {
+  "src": "/cofile/qa-gallery/logos/square-tile.png",
+  "info": {
+   "v": 1,
+   "width": 300,
+   "height": 300,
+   "ratio": 1,
+   "background": "tile",
+   "inkL": 0.338,
+   "ink": "#505662",
+   "light": false
+  }
+ },
+ "dark-site-jpeg": {
+  "src": "/cofile/qa-gallery/logos/dark-site-jpeg.jpg",
+  "info": {
+   "v": 1,
+   "width": 600,
+   "height": 140,
+   "ratio": 4.286,
+   "background": "tile",
+   "inkL": 0.262,
+   "ink": "#4B4E53",
+   "light": false
+  }
+ },
+ "tiny-text": {
+  "src": "/cofile/qa-gallery/logos/tiny-text.png",
+  "info": {
+   "v": 1,
+   "width": 138,
+   "height": 12,
+   "ratio": 11.5,
+   "background": "transparent",
+   "inkL": 0.411,
+   "ink": "#6B3F12",
+   "light": false
+  }
+ },
+ "small-64": {
+  "src": "/cofile/qa-gallery/logos/small-64.png",
+  "info": {
+   "v": 1,
+   "width": 56,
+   "height": 56,
+   "ratio": 1,
+   "background": "tile",
+   "inkL": 0.42,
+   "ink": "#59616E",
+   "light": false
+  }
+ },
+ "huge-4000": {
+  "src": "/cofile/qa-gallery/logos/huge-4000.png",
+  "info": {
+   "v": 1,
+   "width": 3960,
+   "height": 325,
+   "ratio": 12.185,
+   "background": "transparent",
+   "inkL": 0.487,
+   "ink": "#1F50D3",
+   "light": false
+  }
+ },
+ "padded-40": {
+  "src": "/cofile/qa-gallery/logos/padded-40.png",
+  "info": {
+   "v": 1,
+   "width": 370,
+   "height": 36,
+   "ratio": 10.278,
+   "background": "transparent",
+   "inkL": 0.511,
+   "ink": "#0F766E",
+   "light": false
+  }
+ },
+ "padded-40-web": {
+  "src": "/cofile/qa-gallery/logos/padded-40-web.png",
+  "info": {
+   "v": 1,
+   "width": 368,
+   "height": 34,
+   "ratio": 10.824,
+   "background": "transparent",
+   "inkL": 0.511,
+   "ink": "#0F766E",
+   "light": false
+  }
+ },
+ "photo": {
+  "src": "/cofile/qa-gallery/logos/photo.jpg",
+  "info": {
+   "v": 1,
+   "width": 480,
+   "height": 320,
+   "ratio": 1.5,
+   "background": "busy",
+   "inkL": 0.441,
+   "ink": "#6B5A4B",
+   "light": false
+  }
+ },
+ "light-pale": {
+  "src": "/cofile/qa-gallery/logos/light-pale.png",
+  "info": {
+   "v": 1,
+   "width": 600,
+   "height": 66,
+   "ratio": 9.091,
+   "background": "transparent",
+   "inkL": 0.881,
+   "ink": "#D8D8D4",
+   "light": true
+  }
+ },
+ "light-yellow": {
+  "src": "/cofile/qa-gallery/logos/light-yellow.png",
+  "info": {
+   "v": 1,
+   "width": 600,
+   "height": 119,
+   "ratio": 5.042,
+   "background": "transparent",
+   "inkL": 0.835,
+   "ink": "#F3C300",
+   "light": true
+  }
+ },
+ "white-accent": {
+  "src": "/cofile/qa-gallery/logos/white-accent.png",
+  "info": {
+   "v": 1,
+   "width": 600,
+   "height": 112,
+   "ratio": 5.357,
+   "background": "transparent",
+   "inkL": 0.984,
+   "ink": "#FFFAF9",
+   "light": true
+  }
+ },
+ "two-tone": {
+  "src": "/cofile/qa-gallery/logos/two-tone.png",
+  "info": {
+   "v": 1,
+   "width": 553,
+   "height": 120,
+   "ratio": 4.608,
+   "background": "transparent",
+   "inkL": 0.643,
+   "ink": "#BDBEC0",
+   "light": false
+  }
+ },
+ "very-wide": {
+  "src": "/cofile/qa-gallery/logos/very-wide.png",
+  "info": {
+   "v": 1,
+   "width": 600,
+   "height": 43,
+   "ratio": 13.953,
+   "background": "transparent",
+   "inkL": 0.515,
+   "ink": "#0F776F",
+   "light": false
+  }
+ },
+ "tall": {
+  "src": "/cofile/qa-gallery/logos/tall.png",
+  "info": {
+   "v": 1,
+   "width": 202,
+   "height": 353,
+   "ratio": 0.572,
+   "background": "transparent",
+   "inkL": 0.21,
+   "ink": "#111827",
+   "light": false
+  }
+ },
+ "shadow": {
+  "src": "/cofile/qa-gallery/logos/shadow.png",
+  "info": {
+   "v": 1,
+   "width": 413,
+   "height": 112,
+   "ratio": 3.688,
+   "background": "transparent",
+   "inkL": 0.523,
+   "ink": "#BE165D",
+   "light": false
+  }
+ },
+ "long-wordmark": {
+  "src": "/cofile/qa-gallery/logos/long-wordmark.png",
+  "info": {
+   "v": 1,
+   "width": 600,
+   "height": 78,
+   "ratio": 7.692,
+   "background": "transparent",
+   "inkL": 0.419,
+   "ink": "#445267",
+   "light": false
+  }
+ },
+ "ready-1f4fd1": {
+  "src": "/cofile/qa-gallery/logos/ready-1f4fd1.png",
+  "info": {
+   "v": 1,
+   "width": 600,
+   "height": 64,
+   "ratio": 9.375,
+   "background": "transparent",
+   "inkL": 0.486,
+   "ink": "#1F4FD3",
+   "light": false
+  }
+ },
+ "ready-0f766e": {
+  "src": "/cofile/qa-gallery/logos/ready-0f766e.png",
+  "info": {
+   "v": 1,
+   "width": 600,
+   "height": 60,
+   "ratio": 10,
+   "background": "transparent",
+   "inkL": 0.513,
+   "ink": "#0F776F",
+   "light": false
+  }
+ },
+ "ready-15803d": {
+  "src": "/cofile/qa-gallery/logos/ready-15803d.png",
+  "info": {
+   "v": 1,
+   "width": 600,
+   "height": 67,
+   "ratio": 8.955,
+   "background": "transparent",
+   "inkL": 0.529,
+   "ink": "#15813D",
+   "light": false
+  }
+ },
+ "ready-b45309": {
+  "src": "/cofile/qa-gallery/logos/ready-b45309.png",
+  "info": {
+   "v": 1,
+   "width": 600,
+   "height": 71,
+   "ratio": 8.451,
+   "background": "transparent",
+   "inkL": 0.558,
+   "ink": "#B55309",
+   "light": false
+  }
+ },
+ "ready-b91c1c": {
+  "src": "/cofile/qa-gallery/logos/ready-b91c1c.png",
+  "info": {
+   "v": 1,
+   "width": 600,
+   "height": 62,
+   "ratio": 9.677,
+   "background": "transparent",
+   "inkL": 0.509,
+   "ink": "#BB1C1C",
+   "light": false
+  }
+ },
+ "ready-7e22ce": {
+  "src": "/cofile/qa-gallery/logos/ready-7e22ce.png",
+  "info": {
+   "v": 1,
+   "width": 600,
+   "height": 64,
+   "ratio": 9.375,
+   "background": "transparent",
+   "inkL": 0.497,
+   "ink": "#7F22CF",
+   "light": false
+  }
+ },
+ "ready-be185d": {
+  "src": "/cofile/qa-gallery/logos/ready-be185d.png",
+  "info": {
+   "v": 1,
+   "width": 600,
+   "height": 45,
+   "ratio": 13.333,
+   "background": "transparent",
+   "inkL": 0.528,
+   "ink": "#C0185E",
+   "light": false
+  }
+ },
+ "ready-334155": {
+  "src": "/cofile/qa-gallery/logos/ready-334155.png",
+  "info": {
+   "v": 1,
+   "width": 600,
+   "height": 76,
+   "ratio": 7.895,
+   "background": "transparent",
+   "inkL": 0.373,
+   "ink": "#334156",
+   "light": false
+  }
+ },
+ "ready-111827": {
+  "src": "/cofile/qa-gallery/logos/ready-111827.png",
+  "info": {
+   "v": 1,
+   "width": 600,
+   "height": 63,
+   "ratio": 9.524,
+   "background": "transparent",
+   "inkL": 0.211,
+   "ink": "#111827",
+   "light": false
+  }
+ }
+}

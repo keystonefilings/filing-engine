@@ -24,6 +24,7 @@ import { renderNameResolutionPage } from "../name-resolution/render.js";
 import { renderReviewGatePage } from "../review-gate/render.js";
 import { registerUsers, portalSlugFor, type Auth, type PartnerSignupMode } from "../users/routes.js";
 import { registerBrandLogos } from "./brand-logos.js";
+import { currentLogoInfo, withLogoInfo } from "../brand/logo-analysis.js";
 import { registerDocuments } from "./documents.js";
 import { registerIntakeLinks } from "./intake-links.js";
 import { registerPublicPages } from "./public-pages.js";
@@ -391,6 +392,11 @@ export function buildServer(deps: ApiDeps): FastifyInstance {
     }
     const parsed = ClientCompanySettings.safeParse({ ...body, clientCompanyId: id, tenantId });
     if (!parsed.success) return reply.code(422).send({ error: parsed.error.issues });
+    // The logo's reading is the engine's own (src/brand/logo-analysis.ts): kept while the logo stays, never taken from the body.
+    if (parsed.data.portal) {
+      const kept = existing?.portal?.logoInfo;
+      parsed.data.portal.logoInfo = kept && kept.artifactId === parsed.data.portal.logoArtifactId ? kept : undefined;
+    }
     const slug = parsed.data.portal?.slug;
     if (slug && (await deps.store.listClientCompanies(tenantId)).some((c) => c.clientCompanyId !== id && c.portal?.slug === slug)) {
       return reply.code(409).send({ error: "portal slug already in use by another client company" });
@@ -407,14 +413,14 @@ export function buildServer(deps: ApiDeps): FastifyInstance {
   registerBrandLogos(app, { store: deps.store, artifacts: deps.artifacts, authOf });
   registerEmailDomains(app, { store: deps.store, authOf, domains: deps.emailDomains, platformDomains: deps.platformEmailDomains ?? [] });
   registerDocuments(app, { store: deps.store, artifacts: deps.artifacts, authOf });
-  registerSelfService(app, { store: deps.store, tenantOf, platformName: deps.platformName, agentOffer: deps.agentServices ? (t, c) => deps.agentServices!.offer(t, c) : undefined });
+  registerSelfService(app, { store: deps.store, artifacts: deps.artifacts, tenantOf, platformName: deps.platformName, agentOffer: deps.agentServices ? (t, c) => deps.agentServices!.offer(t, c) : undefined });
   registerSignatures(app, { store: deps.store, tenantOf });
   registerIntakeLinks(app, { store: deps.store, authOf });
   registerCardCodes(app, { store: deps.store, service: deps.service, authOf });
   if (deps.agentServices) registerAgentServices(app, { store: deps.store, agentServices: deps.agentServices, authOf });
   if (deps.billing) registerBilling(app, { store: deps.store, billing: deps.billing, authOf });
   if (deps.inbound || deps.twilio || deps.slack) registerInbound(app, { store: deps.store, inbound: deps.inbound, twilio: deps.twilio, slack: deps.slack, publicBaseUrl: deps.publicBaseUrl, authOf });
-  registerPublicPages(app, { store: deps.store, service: deps.service, platformTenantId: deps.platformTenantId ?? "keystone", platformName: deps.platformName, agentOffer: deps.agentServices ? (t, c) => deps.agentServices!.offer(t, c) : undefined });
+  registerPublicPages(app, { store: deps.store, artifacts: deps.artifacts, service: deps.service, platformTenantId: deps.platformTenantId ?? "keystone", platformName: deps.platformName, agentOffer: deps.agentServices ? (t, c) => deps.agentServices!.offer(t, c) : undefined });
   registerUsers(app, {
     store: deps.store, authOf, staffOf, sessionSecret,
     platformTenantId: deps.platformTenantId ?? "keystone", partnerSignupMode: deps.partnerSignupMode ?? "automatic",
@@ -451,11 +457,14 @@ export function buildServer(deps: ApiDeps): FastifyInstance {
     }
     const firmBrand = portal && (portal.displayName || portal.logoUrl || portal.logoArtifactId);
     const firmLogo = portal?.logoArtifactId ? `${deps.publicBaseUrl}/v1/brand-logos/${portal.logoArtifactId}` : portal?.logoUrl?.startsWith("https://") ? portal.logoUrl : undefined;
+    // The uploaded logo's reading, so the proof's head sizes it by area and puts light marks on their plate (3.5.1, 10B.2.3).
+    const logoInfo = firmBrand && client ? currentLogoInfo((await withLogoInfo({ store: deps.store, artifacts: deps.artifacts }, client)).portal) : undefined;
     return {
       look: "white",
       brandName: firmBrand ? (portal!.displayName ?? client!.name) : (tenant?.branding.displayName ?? tenant?.name),
       supportEmail: (firmBrand ? portal!.supportEmail : undefined) ?? tenant?.branding.supportEmail,
       logoUrl: firmBrand ? firmLogo : undefined,
+      logo: firmBrand && portal!.logoArtifactId && logoInfo ? logoInfo : undefined,
       primaryColor: firmBrand ? portal!.primaryColor : undefined,
       secondaryColor: firmBrand ? portal!.secondaryColor : undefined,
       font: firmBrand && portal!.font && portal!.font !== "system"

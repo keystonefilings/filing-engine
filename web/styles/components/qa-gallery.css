@@ -1,0 +1,34 @@
+/* The QA gallery (merged spec 10B.2.5): an internal page of cases, each drawn on every surface. In CoFile's look. */
+@layer components {
+body:has(.qa-frame) > .beta-banner, body:has(.qa-gallery) > .beta-banner { display: none; }
+
+.qa-gallery { min-height: 100vh; padding: 32px 24px 96px; background: var(--page); color: var(--text); font: 400 1rem/1.5rem var(--font-sans); }
+.qa-head { max-width: 1200px; margin: 0 auto 32px; }
+.qa-head h1 { margin: 0 0 8px; font: 400 2rem/2.375rem var(--font-display); }
+.qa-head p { margin: 0 0 16px; max-width: 80ch; color: var(--text-2); }
+.qa-head nav { display: flex; flex-wrap: wrap; gap: 8px 24px; }
+.qa-head nav a { color: var(--link); text-decoration: underline; text-decoration-color: var(--link-line); text-underline-offset: 3px; }
+.qa-head nav a[aria-current="page"] { font-weight: 600; text-decoration-thickness: 2px; text-decoration-color: var(--brass-line); }
+
+.qa-case { max-width: 1600px; margin: 0 auto 48px; padding-top: 24px; border-top: 1px solid var(--text); }
+.qa-case h2 { margin: 0 0 8px; font: 500 1.375rem/1.75rem var(--font-sans-display); }
+.qa-case h2 a { color: var(--text); text-decoration: none; }
+.qa-case h2 span { display: block; font: 400 1rem/1.5rem var(--font-sans); color: var(--text-2); }
+.qa-reading { display: grid; gap: 4px; margin: 0 0 16px; font-size: 0.9375rem; line-height: 1.375rem; }
+.qa-reading > div { display: grid; grid-template-columns: 64px 1fr; gap: 12px; }
+.qa-reading dt { color: var(--text-2); }
+.qa-reading dd { margin: 0; display: flex; flex-wrap: wrap; gap: 4px 16px; }
+.qa-reading dd { display: block; }
+.qa-sw { display: inline-flex; align-items: center; gap: 6px; margin-right: 16px; }
+.qa-sw i { width: 14px; height: 14px; border: 1px solid var(--line-strong); }
+.qa-reading code, .qa-head code { font: 400 0.875rem/1.25rem var(--font-mono); }
+
+.qa-grid { display: flex; flex-wrap: wrap; gap: 24px; align-items: flex-start; }
+.qa-cell { margin: 0; display: grid; gap: 8px; }
+.qa-cell figcaption { font: 500 0.875rem/1.25rem var(--font-sans); color: var(--text-2); }
+.qa-frame-box { position: relative; overflow: hidden; border: 1px solid var(--line); background: var(--surface); }
+.qa-frame-box iframe { position: absolute; left: 0; top: 0; border: 0; transform-origin: 0 0; }
+.qa-mini { width: 252px; height: 308px; overflow: hidden; }
+.qa-mini > .preview2 { transform: scale(0.7); transform-origin: 0 0; }
+@media (max-width: 599px) { .qa-gallery { padding-inline: 16px; } .qa-frame-box { max-width: calc(100vw - 32px); } }
+}

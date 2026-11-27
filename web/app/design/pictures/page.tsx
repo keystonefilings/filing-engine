@@ -14,7 +14,8 @@ import { RunSheet } from "@/components/pictures/RunSheet";
 import { PriceCard } from "@/components/pictures/PriceCard";
 import { StillPlate } from "@/components/pictures/ClosePlate";
 import { BrandStudio } from "@/components/pictures/BrandStudio";
-import { EngraverStill, SavedAgent } from "@/components/pictures/ForFirms";
+import { SavedAgent } from "@/components/pictures/ForFirms";
+import { EngraverFilm } from "@/components/pictures/EngraverFilm";
 import { ClientPagePicture } from "@/components/pictures/ClientPagePicture";
 
 export const metadata = { title: "Pictures", robots: { index: false } };
@@ -60,7 +61,7 @@ export default function PicturesGallery() {
         <Item id="L9" title="The plate, with the name typed at the Close if any" where="For firms' close"><div style={{ maxWidth: 486 }}><StillPlate /></div></Item>
         <Item id="L11" title="Your brand, everywhere at once" where="For firms"><BrandStudio /></Item>
         <Item id="L12" title="The saved agent" where="For firms"><div className="gpic-half"><SavedAgent /></div></Item>
-        <Item id="C11" title="The engraver, as a still" where="For firms' title page"><div style={{ maxWidth: 504 }}><EngraverStill /></div></Item>
+        <Item id="C11" title="The engraver film" where="For firms' title page"><div style={{ maxWidth: 504 }}><EngraverFilm /></div></Item>
       </div>
     </SiteShell>
   );

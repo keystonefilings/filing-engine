@@ -12,7 +12,7 @@ export function ClientPagePreview({ brand, title, label, width = 360, crop = 440
     <div className="preview2" role="img" aria-label={label} style={{ width, maxWidth: "100%", height: crop }}>
       <Register value="firm" firmStyle={brandStyle(brand)} className="preview2-page">
         <Sheet size="page" className="preview2-sheet">
-          <Letterhead name={brand.name} logoUrl={brand.logoUrl} />
+          <Letterhead name={brand.name} logoUrl={brand.logoUrl} logo={brand.logo} preview />
           <p className="preview2-title">{title}</p>
           <span className="preview2-bar" style={{ width: "86%" }} />
           <span className="preview2-bar" style={{ width: "64%" }} />

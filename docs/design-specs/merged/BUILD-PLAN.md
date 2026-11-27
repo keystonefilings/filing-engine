@@ -95,10 +95,10 @@ asset, with no layout work at that point.
 | What | Built now with | Finished when this arrives |
 |---|---|---|
 | The photographs in the pictures (two doors, the blank plate, Ana, the papers, the stage, the team) | Exact crops, compositing and loading, on labeled placeholders | The photo shoot (C.4) |
-| The engraver film on For firms | Player, poster frame, text description, controls | The film (C.5) |
+| The engraver film on For firms | Player, poster frame, text description, controls | Done: the owner's film (Nov 27) |
 | A photoreal brass engraving (WebGL) | The pipeline and shader; the SVG version on list A ships first | The engraved test plates and plate photographs (C.3, C.4) |
 | The final wordmark and Name Plate | Interim marks (A.16) | The lettering artist (C.2) |
-| Paper and card textures | A light generated texture | The scanned paper (C.7) |
+| Paper and card textures | A light generated texture | Done: the owner's tiles (Nov 27) |
 | The engraved vignettes (empty desk, returned envelope and the rest) | Placeholder line drawings in the right sizes | The illustrator (C.6) |
 | Miller and Founders Grotesk | Free stand-ins with matched metrics (A.3) | The licenses (C.1) |
 | Engraving with Miller letters | Built on the stand-in | Miller license plus the foundry's written OK for this use |
@@ -121,9 +121,11 @@ asset, with no layout work at that point.
 4. **A photographer and crew**: on hold. The owner supplied the photography for every frame except
    the team (Nov 26), and photographs of CoFile's people are deferred. The brief stays ready in case
    real shoots replace the supplied scenes later.
-5. **A small film crew**: the 12-second film of the engraver at the bench.
+5. **A small film crew**: on hold. The owner supplied the 12-second film in its desktop, phone and
+   landscape cuts (Nov 27).
 6. **A steel-engraving illustrator**: on hold. The owner supplied the eleven vignettes (Nov 26).
-7. **A scanning studio**: cotton paper and card scanned into seamless textures.
+7. **A scanning studio**: on hold. The owner supplied the cotton-paper and black-card tiles (Nov 27).
+   Real scans can replace them later without other changes.
 8. **A letterpress shop**: on hold. The photographs are supplied, and the owner's package has the
    press-ready proofs if real prints are ever wanted (Nov 26).
 9. **An email-testing service** (subscription): on hold. The owner chose free test sends to real

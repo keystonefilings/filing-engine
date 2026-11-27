@@ -1,5 +1,7 @@
 # Brief: reprographic scanning studio
 
+> **On hold (owner, Nov 27).** The owner supplied seamless cotton-paper and black-card tiles; real scans can replace them later.
+
 **The job:** flat scans of cotton letter paper, heavy cotton card and black card at 1,200 dpi,
 made into small seamless texture tiles for our website.
 **For:** a reprographic studio that makes flat scans of art and paper (not on a flatbed).

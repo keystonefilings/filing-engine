@@ -1,0 +1,6 @@
+# What the site checks write when they run (web/design/BUILDING.md, "The automated checks"); the baselines in
+# visual/linux are the only output that is committed.
+test-results/
+report/
+perf/node_modules/
+perf/report.json

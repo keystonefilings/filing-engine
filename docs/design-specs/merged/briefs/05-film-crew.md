@@ -1,5 +1,7 @@
 # Brief: film crew
 
+> **On hold (owner, Nov 27).** The owner supplied the 12-second film in desktop, phone and landscape cuts.
+
 **For:** a small craft-film crew (a director who also operates camera, an editor, a colorist, and
 the people the work needs around them), ideally the same production as the photographer's.
 **What:** the 12-second film of a hand engraver cutting a firm's name into a brass plate and fitting

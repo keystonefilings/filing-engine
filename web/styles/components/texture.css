@@ -1,0 +1,37 @@
+/* Paper (merged spec 4.8; the owner's C12 tiles, Nov 27): cotton paper at 3% in multiply on CoFile's Cotton grounds,
+   black card at 4% in screen on Night and on the rehearsal ground, tiled at 512 px. Sheets, cards, Cotton 2 bands and
+   the firm's pages carry none: a client's details sit on clean white, and the firm's pages wear only the firm's brand.
+
+   Each ground draws the tile under a veil of its own color at 97% (96%): the tile blends with the ground in multiply
+   (screen), and the veil leaves 3% (4%) of that showing, which is the same arithmetic as the package's 3% (4%) layer
+   above the ground, without an extra element. Off with reduced transparency, in forced colors and in print. */
+@layer components {
+.reg-cofile {
+  --paper-tile: url("/cofile/textures/cofile-texture-cotton-512.webp");
+  --paper-mode: multiply;
+  --paper-veil: 97%;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .reg-cofile { --paper-tile: url("/cofile/textures/cofile-texture-black-card-512.webp"); --paper-mode: screen; --paper-veil: 96%; }
+}
+:root[data-theme="dark"] .reg-cofile { --paper-tile: url("/cofile/textures/cofile-texture-black-card-512.webp"); --paper-mode: screen; --paper-veil: 96%; }
+
+/* CoFile's grounds: the public site and its bands, the account and legal pages, the desk and dashboard, the docs, the
+   error and signed-out pages. Cotton 2 bands (.is-alt) stay plain; the rehearsal bands (.is-stage) take the card below. */
+:is(.site2, .site2-head, .pg2-head, .pg2-band, .legal2, .acct2-head, .shell2, .docs2, .docs2-head, .docs2-side, .err2, .dashlogin2, .signed2):where(.reg-cofile, .reg-cofile *):not(.is-alt, .is-stage) {
+  background-image: linear-gradient(color-mix(in srgb, var(--page) var(--paper-veil), transparent), color-mix(in srgb, var(--page) var(--paper-veil), transparent)), var(--paper-tile);
+  background-size: auto, 512px 512px;
+  background-blend-mode: normal, var(--paper-mode);
+}
+
+/* The rehearsal ground (the stage bands): black card, in both modes */
+.reg-cofile :is(.hm-stage, .pg2-band.is-stage) {
+  background-image: linear-gradient(color-mix(in srgb, var(--stage) 96%, transparent), color-mix(in srgb, var(--stage) 96%, transparent)), url("/cofile/textures/cofile-texture-black-card-512.webp");
+  background-size: auto, 512px 512px;
+  background-blend-mode: normal, screen;
+}
+
+@media (prefers-reduced-transparency: reduce), (forced-colors: active), print {
+  :is(.site2, .site2-head, .pg2-head, .pg2-band, .legal2, .acct2-head, .shell2, .docs2, .docs2-head, .docs2-side, .err2, .dashlogin2, .signed2, .hm-stage):where(.reg-cofile, .reg-cofile *) { background-image: none !important; }
+}
+}

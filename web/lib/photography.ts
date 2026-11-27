@@ -31,8 +31,6 @@ export const PHOTOS = {
   "c08-approval-mobile": { src: "/cofile/photography/c08-approval-mobile.webp", width: 800, height: 1000 },
   "c08-approval": { src: "/cofile/photography/c08-approval.webp", width: 1440, height: 960 },
   "c09-printers-proof": { src: "/cofile/photography/c09-printers-proof.webp", width: 960, height: 1200 },
-  "c11-engravers-bench-mobile": { src: "/cofile/photography/c11-engravers-bench-mobile.webp", width: 800, height: 1000 },
-  "c11-engravers-bench": { src: "/cofile/photography/c11-engravers-bench.webp", width: 1440, height: 960 },
 } as const satisfies Record<string, Photo>;
 
 export type PhotoName = keyof typeof PHOTOS;

@@ -65,6 +65,9 @@ one string in the code. The owner chose to ship with them as they are for now (N
 | Docs: each code block's accessible name | the language: "bash", "http", "javascript", "json", "python" | 10C |
 | Dashboard: the hidden heads of the action columns | "Approve" (Partners), "Revoke" (API keys) | 10C |
 | The EIN email to a client, when the IRS letter isn't among the papers | subject "EIN issued: {filing}"; sentence "The IRS has issued the EIN for this filing." | 10D.18 |
+| Client links: the accessible name of the preview of the page a link opens (10B.14) | "Preview: the page this link opens" | 10B.14 |
+| For firms: the engraver film's control (10A.2.1) | "Pause", "Play", and "Play again" once it has ended. The film's description is the owner's (C11 package); it carries no credit line, being generated | 10A.2.1 |
+| Examples: the two spare example firms (their logos in `web/public/cofile/example-firm/`) | "Kitefold" (the awkward brand: yellow `#F2C200`, a very wide wordmark of white letters, an uploaded wide face); "Merrow & Vale Bookkeeping" (teal `#0F766E` with amber `#B45309`, a stacked mid logo, Source Serif) | 3.8, 10B.2.3 |
 
 ## Part 1: the foundation
 

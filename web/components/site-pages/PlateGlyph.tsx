@@ -1,3 +1,4 @@
+import "@/styles/components/plate-glyph.css";
 import type { CoverageRow } from "@/lib/coverage";
 import { isLive } from "@/lib/coverage";
 
@@ -17,14 +18,16 @@ function plate(w: number, h: number, i: number, c: number) {
 /**
  * The plate glyph (4.5): the Name Plate's outline without screws, cut, then marked out, then inked, so the scale reads
  * in grayscale and in print. 16 × 10 in a chip; 40 × 25 on the road to live, where "Screens recorded" carries three
- * short rules inside (its screens mapped). Always aria-hidden: the label beside it carries the meaning.
+ * short rules inside (its screens mapped). Hidden from screen readers where a label beside it carries the meaning;
+ * with `label`, it carries its status as its own accessible name (the home page's coverage cards, 9.6).
  */
-export function PlateGlyph({ stage, large }: { stage: PlateStage; large?: boolean }) {
+export function PlateGlyph({ stage, large, label }: { stage: PlateStage; large?: boolean; label?: string }) {
   const [w, h, c] = large ? [40, 25, 5] : [16, 10, 2.5];
   const cls = `plate2-glyph is-${stage}${large ? " is-large" : ""}`;
+  const a11y = label ? { role: "img" as const, "aria-label": label } : { "aria-hidden": true as const };
   if (stage === "live") {
     return (
-      <svg className={cls} width={w} height={h} viewBox={`0 0 ${w} ${h}`} aria-hidden="true" focusable="false">
+      <svg className={cls} width={w} height={h} viewBox={`0 0 ${w} ${h}`} {...a11y} focusable="false">
         <path d={plate(w, h, 0, c)} className="plate2-fill" />
         <path d={`M${large ? 6 : 2.5} ${h / 2}H${w - (large ? 6 : 2.5)}`} className="plate2-line" />
       </svg>
@@ -32,7 +35,7 @@ export function PlateGlyph({ stage, large }: { stage: PlateStage; large?: boolea
   }
   const sw = stage === "rehearsed" ? 1.5 : 1;
   return (
-    <svg className={cls} width={w} height={h} viewBox={`0 0 ${w} ${h}`} aria-hidden="true" focusable="false">
+    <svg className={cls} width={w} height={h} viewBox={`0 0 ${w} ${h}`} {...a11y} focusable="false">
       <path d={plate(w, h, sw / 2, c)} className="plate2-edge" strokeWidth={sw} />
       {large && stage === "recorded"
         ? [8.5, 12.5, 16.5].map((y) => <path key={y} d={`M11 ${y}H29`} className="plate2-rule" />)

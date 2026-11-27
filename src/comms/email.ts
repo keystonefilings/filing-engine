@@ -145,8 +145,9 @@ function firmNameHtml(name: string): string {
   return m ? `${txt(m[1]!)} <span style="font-size:88%;letter-spacing:0.04em;">${txt(m[2]!)}</span>` : txt(name);
 }
 
-/** The white plate baked around a transparent logo (src/brand/logo-plate.ts): its white margin and corner cut, in px. */
-export const PLATE_PAD = 12, PLATE_CUT = 6;
+/** The white plate baked around a transparent logo (src/brand/logo-plate.ts): its white margin and corner cut, in px.
+ *  A light-marks logo's dark plate keeps the 12 px across and takes 8 px above and below (10B.2.3). */
+export const PLATE_PAD = 12, PLATE_CUT = 6, LIGHT_PLATE_PAD_Y = 8;
 
 /** The logo sized by area: 5,000 px², 28 to 56 px tall, at most 260 px wide, never past half its pixels (3.5). */
 export function logoBox(w?: number, h?: number): { width: number; height: number; wide: boolean } | null {
@@ -165,15 +166,18 @@ function letterheadFirm(f: FirmLetterhead, look: Look): string {
   // it, so its alt text carries the name, styled so a client with images off still sees it (3.5, 10D.3).
   const showName = !f.logo || !box || !box.wide;
   // A plated logo carries 12 px of white on every side, invisible on the sheet; the box grows by it and the
-  // plate's own margin stands in for the gap above the name.
+  // plate's own margin stands in for the gap above the name. A light logo's plate is seen (10B.2.3): 12 × 8 px, and
+  // the name keeps its gap below it.
   const plated = !!(f.logo?.plate && box);
-  const shown = box ? (plated ? { width: box.width + 2 * PLATE_PAD, height: box.height + 2 * PLATE_PAD } : box) : null;
+  const seen = plated && !!f.logo?.plateColor;
+  const padY = seen ? LIGHT_PLATE_PAD_Y : PLATE_PAD;
+  const shown = box ? (plated ? { width: box.width + 2 * PLATE_PAD, height: box.height + 2 * padY } : box) : null;
   const logo = f.logo
-    ? `<img src="${esc(f.logo.url)}"${shown ? ` width="${shown.width}" height="${shown.height}"` : ` height="40"`} alt="${showName ? "" : esc(f.name)}" style="display:block;margin:0 auto;border:0;outline:none;${shown ? `width:${shown.width}px;height:${shown.height}px;` : "height:40px;width:auto;max-width:260px;"}${type(SANS, 20, 26, 600, INK)}">`
+    ? `<img src="${esc(f.logo.url)}"${shown ? ` width="${shown.width}" height="${shown.height}"` : ` height="40"`} alt="${showName ? "" : esc(f.name)}" style="display:block;margin:0 auto;${f.logo.busy ? `border:1px solid ${RULE};` : "border:0;"}outline:none;${shown ? `width:${shown.width}px;height:${shown.height}px;` : "height:40px;width:auto;max-width:260px;"}${type(SANS, 20, 26, 600, INK)}">`
     : "";
   const alone = !f.logo;
   const name = showName
-    ? `<div class="x-i x-fh ${alone ? "x-name-l" : "x-name"}" style="${f.logo && !plated ? "padding-top:12px;" : ""}${type(look.head, alone ? 30 : 24, alone ? 36 : 30, 600, INK, "letter-spacing:-0.01em;")}">${firmNameHtml(f.name)}</div>`
+    ? `<div class="x-i x-fh ${alone ? "x-name-l" : "x-name"}" style="${f.logo && (!plated || seen) ? "padding-top:12px;" : ""}${type(look.head, alone ? 30 : 24, alone ? 36 : 30, 600, INK, "letter-spacing:-0.01em;")}">${firmNameHtml(f.name)}</div>`
     : "";
   const r = look.rule!;
   const rule = table(`${bar(3, r.firm)}${r.pale ? bar(1, PALE_RULE) : ""}${bar(2, WHITE)}${bar(1, r.firm2)}`, ` width="100%"`);

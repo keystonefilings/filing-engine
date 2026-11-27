@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { SiteShell } from "@/components/site/SiteShell";
 import { Lines, PageHead } from "@/components/site-pages/PageHead";
-import { PlayOnce } from "@/components/site-pages/PlayOnce";
+import { MotionFigure } from "@/components/pictures/MotionFigure";
 import { DashedOutline, Glyph } from "@/components/ui/glyphs";
 import { Lockup } from "@/components/shell/Lockup";
 import { InquiryForm } from "@/components/AuthForms";
@@ -30,7 +30,7 @@ function DryRun() {
  */
 function Underneath() {
   return (
-    <PlayOnce className="und2" duration={1600} caption={<>Sample proof · test details · not a real business<br />Example · test details · not a real firm</>}>
+    <MotionFigure pic="L13" ms={1600} className="und2" replay={false} label={<>Sample proof · test details · not a real business<br />Example · test details · not a real firm</>}>
       <div className="und2-stack" aria-hidden="true">
         <div className="und2-code">
           <pre className="und2-pre"><code>
@@ -68,7 +68,7 @@ function Underneath() {
           <span className="und2-bar" />
         </div>
       </div>
-    </PlayOnce>
+    </MotionFigure>
   );
 }
 
