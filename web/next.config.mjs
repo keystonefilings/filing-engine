@@ -1,6 +1,15 @@
+import { readdirSync } from "node:fs";
+
+// The licensed fonts present when the site is built (scripts/licensed-fonts.mjs puts them in public/fonts). Read
+// here, at build time, because the server functions a host runs the site in don't carry public/ with them.
+const licensedFontFiles = (() => {
+  try { return readdirSync(new URL("./public/fonts/", import.meta.url)).filter((f) => f.endsWith(".woff2")).sort(); } catch { return []; }
+})();
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   poweredByHeader: false,
+  env: { LICENSED_FONT_FILES: licensedFontFiles.join(",") },
   reactStrictMode: true,
   // Decision 19: intake forms carry PDF uploads (two of 10 MB at most), above the 1 MB default.
   experimental: { serverActions: { bodySizeLimit: "21mb" } },
