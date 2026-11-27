@@ -41,12 +41,15 @@ for (const { width, colorScheme } of RUNS) {
       test(p.path, async ({ page, baseURL }) => {
         await blockOtherHosts(page, baseURL!);
         await openAtRest(page, p.path);
+        // The paper grain (styles/components/texture.css) varies every ground pixel by a level or two: it would make the
+        // baselines several times larger and says nothing about layout, so it's taken off for the screenshots.
+        await page.addStyleTag({ content: ".reg-cofile { --paper-tile: none !important; } .reg-cofile :is(.hm-stage, .pg2-band.is-stage) { background-image: none !important; }" });
         // "No sideways page scroll at any width" (merged spec 12.2), said plainly before the picture is compared.
         const sideways = await page.evaluate(() => { scrollTo(100000, 0); const x = scrollX; scrollTo(0, 0); return x; });
         expect.soft(sideways, "the page scrolls sideways").toBe(0);
         await expect(page).toHaveScreenshot(`${p.name}-${width}-${colorScheme}.png`, {
           fullPage: true,
-          mask: [page.locator("picture.ph, img[src*=\"/cofile/photography/\"]")],
+          mask: [page.locator("picture.ph, img[src*=\"/cofile/photography/\"], .pfilm")],
           maskColor: "#9a9da6",
         });
       });
