@@ -15,6 +15,7 @@ The merged design spec (`docs/design-specs/merged/`) as code. Phase 0 of the bui
 | `styles/registers.css` | The semantic layer: `.reg-cofile` (CoFile's look), `.reg-firm` (a firm's client pages), `.reg-white` (white label), `.sheet` (paper that keeps its light inks) |
 | `styles/base.css` | Links, focus rings, selection, reduced motion, inside a register only |
 | `lib/design/ink.ts` | The ink match: any firm color made contrast-safe for buttons, links, washes and tints |
+| `lib/design/logo.ts` | The logo reading (what a logo's edge holds, how light its ink is), its plate and its size by area; copied to the engine with the ink match, which reads every uploaded logo with it |
 
 ## Rules
 

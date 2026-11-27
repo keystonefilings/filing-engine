@@ -35,7 +35,9 @@ How to build a page of the Plate & Proof redesign (`docs/design-specs/merged/`) 
 | Photographs with their sizes, and the plate's box for the typed name | `lib/photography.ts` (files in `public/cofile/photography/`) |
 | Type sizes as classes | `styles/type.css` (generated from `design/tokens.json`) |
 | Tokens and registers | `styles/tokens.css`, `styles/registers.css` (read semantic tokens: `--page`, `--surface`, `--text`, `--text-2`, `--line`, `--action`, `--link`, …) |
+| A firm's logo anywhere (sized by area, light marks on their plate, read in the browser when the engine hasn't) | `components/ui/LogoImage.tsx`, through `Letterhead`, `AccountLabel` and `FirmLogo`; the engine's reading is `FirmBrand.logo` |
 | The component gallery | `/design` and `/design/site` (with `DESIGN_GALLERY=true`) |
+| The QA gallery: every brand case on every surface its clients see (10B.2.5) | `/design/gallery` (with `DESIGN_GALLERY=true`); its cases in `lib/qa-gallery.ts`, regenerated with `scripts/qa-gallery.ts` and `tools/render-gallery-heads.ts` |
 
 Put a page's own styles in a new file under `styles/components/`, inside `@layer components { }`,
 and import it from the page. Don't edit shared files (`components/ui/*`, the shells, `tokens.css`,
