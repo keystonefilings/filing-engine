@@ -20,9 +20,12 @@ const nextConfig = {
       { key: "Permissions-Policy", value: "camera=(), microphone=(), geolocation=()" },
     ];
     return [
-      // Nothing may be framed except the website widget's pages (V39), which carry no session.
-      { source: "/:path((?!embed/).*)", headers: [...common, { key: "X-Frame-Options", value: "DENY" }] },
+      // Nothing may be framed except the website widget's pages (V39), which carry no session, and the internal QA
+      // gallery's own surfaces (app/design/gallery), which only the gallery itself may frame.
+      { source: "/:path((?!embed/|design/gallery/frame|cofile/qa-gallery/).*)", headers: [...common, { key: "X-Frame-Options", value: "DENY" }] },
       { source: "/embed/:path*", headers: [...common, { key: "Content-Security-Policy", value: "frame-ancestors *" }] },
+      { source: "/design/gallery/frame", headers: [...common, { key: "X-Frame-Options", value: "SAMEORIGIN" }] },
+      { source: "/cofile/qa-gallery/:path*", headers: [...common, { key: "X-Frame-Options", value: "SAMEORIGIN" }] },
       // The proof is served by the engine (ENGINE_PUBLIC_URL) and sets in the licensed fonts served here: only that
       // origin may load them across origins (the web license covers our own domains only).
       ...(process.env.ENGINE_PUBLIC_URL ? [{ source: "/fonts/:file*", headers: [
