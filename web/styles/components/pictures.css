@@ -128,8 +128,7 @@
 .pic-hero {
   container-type: inline-size;
   padding: clamp(12px, 2.35vw, 34px);
-  background: var(--stage) url("/cofile/textures/cofile-texture-black-card-512.webp");
-  background-blend-mode: multiply;
+  background: var(--stage);
   border: 1px solid color-mix(in srgb, var(--night-ink) 15%, var(--stage));
   border-radius: 4px;
   box-shadow: var(--e-lift);
