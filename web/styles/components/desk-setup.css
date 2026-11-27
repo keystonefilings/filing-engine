@@ -1,0 +1,155 @@
+/* Setup's own pages, Billing and Password on the filing desk (merged spec 10B.6, 10B.8, 10B.9, 10B.18, 10B.19), and a
+   filing's record in print (12.6). In CoFile's look inside the shell; reads semantic tokens only. Shared pieces these
+   pages carry from the dashboard (AddCard, AgentsForm, ChangePasswordForm, PhoneForm) keep their markup and are drawn
+   here, inside each page's own class. */
+@layer components {
+
+/* ---- What the pages share: the head, the flow of blocks, the white sheet ---- */
+.shell2-content .ds2 > * { margin-top: 0; margin-bottom: 0; }
+.shell2-content .ds2 > * + * { margin-top: 24px; }
+.shell2-content .ds2-kicker { font: 500 0.9375rem/1.375rem var(--font-sans); color: var(--text-2); }
+.shell2-content .ds2 > .ds2-kicker + h1 { margin-top: 8px; }
+.shell2-content .ds2-back { font-size: 0.9375rem; line-height: 1.375rem; }
+.shell2-content .ds2 > .ds2-back + h1 { margin-top: 16px; }
+.shell2-content .ds2 > h1 + .ds2-lede { margin-top: 16px; }
+.shell2-content .ds2 > .ds2-lede + * { margin-top: 32px; }
+.shell2-content .ds2-lede { max-width: 64ch; font: 400 1.0625rem/1.625rem var(--font-sans); color: var(--text-2); }
+.shell2-content .ds2-lede.is-ink { color: var(--text); }
+.shell2-content .ds2 > .ds2-h2 { margin-top: 48px; }
+.shell2-content .ds2 > .ds2-h2 + * { margin-top: 16px; }
+.shell2-content .ds2 .ds2-h2 { font: 400 1.625rem/2rem var(--font-serif); }
+@media (max-width: 599px) {
+  .shell2-content .ds2 > .ds2-h2 { margin-top: 40px; }
+  .shell2-content .ds2 .ds2-h2 { font-size: 1.375rem; line-height: 1.75rem; }
+}
+
+.ds2-sheet { padding: 32px; background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-sheet); }
+@media (max-width: 599px) { .ds2-sheet { padding: 20px; } }
+.shell2-content .ds2 .ds2-sheet-title { margin: 0; font: 400 1.625rem/2rem var(--font-serif); color: var(--text); }
+.shell2-content .ds2 .ds2-card-title { margin: 0; font: 500 1.25rem/1.625rem var(--font-sans-display); color: var(--text); }
+@media (max-width: 599px) { .shell2-content .ds2 .ds2-sheet-title { font-size: 1.375rem; line-height: 1.75rem; } }
+.shell2-content .ds2 .ds2-small { margin: 0; font: 400 0.9375rem/1.4375rem var(--font-sans); color: var(--text-2); }
+.ds2-measure { max-width: 64ch; }
+
+/* ---- Forms: one white sheet; label above, help between label and field, the message under it (11.3) ---- */
+.ds2-form { display: grid; gap: 24px; min-width: 0; }
+.shell2-content .ds2-form > * { margin: 0; }
+.shell2-content .ds2 .field2-label { margin: 0; }
+.shell2-content .ds2 .field2-help { margin: 0; }
+.shell2-content .ds2 :is(.input2, .select2) { min-height: 52px; }
+.shell2-content .ds2 .input2:focus, .shell2-content .ds2 .select2:focus { outline: 2px solid var(--focus); outline-offset: 2px; box-shadow: inset 0 0 0 1px var(--focus); }
+.shell2-content .ds2 .input2[aria-invalid="true"] { border-color: var(--madder); box-shadow: inset 0 0 0 1px var(--madder); }
+@media (max-width: 599px) { .shell2-content .ds2 :is(.input2, .select2) { min-height: 56px; } }
+.shell2-content .ds2 .opt { font-weight: 400; color: var(--text-2); }
+
+.ds2-pair { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 24px 16px; align-items: start; }
+.ds2-pair.is-end { align-items: end; }
+.ds2-trio { display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(0, 1.25fr) minmax(0, 1fr); gap: 24px 16px; align-items: start; }
+@media (max-width: 599px) { .ds2-pair, .ds2-trio { grid-template-columns: minmax(0, 1fr); } }
+
+/* A group of fields under a legend: the legend is laid out as the group's first row, not cut into a border */
+.shell2-content .ds2 fieldset:is(.ds2-group, .ds2-services) { display: grid; gap: 16px; min-width: 0; margin: 0; padding: 0; border: 0; background: none; }
+.shell2-content .ds2 .ds2-legend { float: left; width: 100%; margin: 0; padding: 0; font: 500 1.25rem/1.625rem var(--font-sans-display); color: var(--text); }
+.shell2-content .ds2 .ds2-legend.is-small { font: 500 1.0625rem/1.5rem var(--font-sans); }
+.shell2-content .ds2 .ds2-legend + .field2-help { margin-top: -8px; }
+
+/* Checkboxes and radios: the box and its whole label one 48 px target, the label Regular */
+.shell2-content .ds2 :is(.check2, .choice2) { margin: 0; font: 400 1.0625rem/1.5rem var(--font-sans); color: var(--text); }
+.shell2-content .ds2 .check2 { padding-block: 12px; }
+.ds2 .check2 > input, .ds2 .choice2 > input { margin-top: 0; }
+
+/* Choice cards (11.3): 72 px, the selected one a 2 px Plate Ink edge on Brass Tint */
+.ds2-choices { display: grid; gap: 12px; }
+.shell2-content .ds2 .choice2 { min-height: 72px; align-content: center; padding: 16px 20px; color: var(--field-ink, var(--text)); }
+.shell2-content .ds2 .choice2 strong, .shell2-content .ds2 .choice2 .choice2-title { font-weight: 500; }
+.shell2-content .ds2 .choice2:has(input:checked) { box-shadow: inset 0 0 0 1px var(--select-line); }
+.shell2-content .ds2 .choice2:has(input:focus-visible) { outline: 2px solid var(--focus); outline-offset: 2px; }
+.ds2 .choice2 input:focus { outline: none; }
+@media (max-width: 599px) { .shell2-content .ds2 .choice2 { padding: 16px; } }
+
+/* The form's save: 32 px after the last field; while it waits, its own fill at 85% and the product's pending word */
+.shell2-content .ds2-form > .ds2-actions { margin-top: 8px; }
+.shell2-content .ds2 .btn.primary.ds2-save[aria-busy="true"] { opacity: .85; cursor: progress; background: var(--ink); color: var(--cotton); border-color: transparent; }
+.shell2-content .ds2 .btn.primary.is-main.ds2-save[aria-busy="true"] { background: var(--action); color: var(--action-on); }
+@media (max-width: 599px) { .shell2-content .ds2 .ds2-actions .btn { width: 100%; min-height: 56px; } }
+
+/* The product's older slips inside shared forms, given the glyph the desk's slips carry (10B.1.6): never color alone */
+.shell2-content .ds2 .notice { position: relative; margin: 0; padding: 16px 20px 16px 48px; font-size: 1rem; line-height: 1.5rem; box-shadow: none; }
+.shell2-content .ds2 .notice.bad { box-shadow: inset 2px 0 0 var(--madder); }
+.shell2-content .ds2 :is(.notice.ok, .notice.warn, .notice.bad)::before { content: ""; position: absolute; left: 22px; top: 22px; width: 12px; height: 12px; }
+.shell2-content .ds2 .notice.ok::before { border-radius: 50%; background: var(--done); }
+.shell2-content .ds2 .notice.warn::before { box-sizing: border-box; border-radius: 50%; border: 1.5px solid var(--ochre); background: linear-gradient(90deg, transparent 50%, var(--ochre) 50%); }
+.shell2-content .ds2 .notice.bad::before { top: 26px; height: 4px; background: var(--madder); }
+
+/* ---- Your firm (10B.6): the services as a two-column set of state groups ---- */
+.shell2-content .ds2 .ds2-services { margin-top: 24px; }
+.ds2-states { columns: 2; column-gap: 32px; }
+.ds2-state { break-inside: avoid; display: grid; padding-bottom: 16px; }
+.shell2-content .ds2 .ds2-state-name { margin: 0 0 4px; font: 500 0.9375rem/1.375rem var(--font-sans); color: var(--text); }
+.shell2-content .ds2 .ds2-state .check2 { padding-block: 12px; min-height: 48px; }
+@media (max-width: 599px) { .ds2-states { columns: 1; } }
+
+/* ---- Payment (10B.8): the saved cards as card plates, "Add a card", how state fees are paid ---- */
+.ds2-cards { list-style: none; margin: 0; padding: 4px 24px; }
+.ds2-cards li { display: flex; align-items: center; gap: 16px; min-height: 64px; padding: 8px 0; }
+.ds2-cards li + li { border-top: 1px solid var(--line); }
+.ds2-cardglyph { flex: none; position: relative; box-sizing: border-box; width: 40px; height: 26px; border: 1.5px solid var(--text); border-radius: 3px; corner-shape: bevel; }
+.ds2-cardglyph::after { content: ""; position: absolute; left: 0; right: 0; top: 5px; height: 4px; background: var(--text); }
+.ds2-cardname { flex: 1 1 auto; min-width: 0; font: 400 1.0625rem/1.625rem var(--font-sans); overflow-wrap: anywhere; }
+.shell2-content .ds2-cards form { flex: none; margin: 0; }
+@media (max-width: 599px) { .ds2-cards { padding: 4px 16px; } .ds2-cards li { gap: 12px; } }
+
+/* AddCard (shared with the dashboard): one white sheet at the column's width, the card vault's frames drawn as fields */
+.shell2-content .ds2-addcard > .card { display: grid; gap: 24px; max-width: none !important; }
+.shell2-content .ds2-addcard > .card > * { margin: 0; }
+.shell2-content .ds2-addcard .card > strong { font: 500 1.25rem/1.625rem var(--font-sans-display); }
+.shell2-content .ds2-addcard .field { display: grid; gap: 8px; margin: 0; }
+.shell2-content .ds2-addcard :is(label, .label) { margin: 0; font: 500 1rem/1.375rem var(--font-sans); }
+.shell2-content .ds2-addcard .field-row.n2 { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 24px 16px; align-items: end; }
+.shell2-content .ds2-addcard .bt-field { box-sizing: border-box; height: 52px; padding: 14px 16px; background: var(--field-bg, #fff); border: 1px solid var(--line-strong); border-radius: var(--r-sheet); }
+.shell2-content .ds2-addcard .bt-field:focus-within { border-color: var(--focus); box-shadow: inset 0 0 0 1px var(--focus); outline: 2px solid var(--focus); outline-offset: 2px; }
+.shell2-content .ds2-addcard input { min-height: 52px; }
+.shell2-content .ds2-addcard .btn { justify-self: start; }
+.shell2-content .ds2-addcard .help { margin: 0; }
+.shell2-content .ds2-pay.is-nocards .ds2-addcard .btn.primary { background: var(--action); color: var(--action-on); }
+@media (hover: hover) { .shell2-content .ds2-pay.is-nocards .ds2-addcard .btn.primary:hover { background: var(--action-hover); } }
+@media (max-width: 599px) {
+  .shell2-content .ds2-addcard .field-row.n2 { grid-template-columns: minmax(0, 1fr); }
+  .shell2-content .ds2-addcard .btn { justify-self: stretch; min-height: 56px; }
+  .shell2-content .ds2-addcard input { min-height: 56px; }
+  .shell2-content .ds2-addcard .bt-field { height: 56px; padding-block: 16px; }
+}
+.ds2-kinds { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px 16px; align-items: end; }
+@media (max-width: 599px) { .ds2-kinds { grid-template-columns: minmax(0, 1fr); } }
+
+/* ---- Registered agents (10B.9) and Who's named on your filings: one white sheet per state, 24 px apart ---- */
+.shell2-content .ds2-own form.stack { display: grid; gap: 24px; }
+.shell2-content .ds2-own form.stack > * { margin: 0; }
+.shell2-content .ds2 .ds2-own fieldset.card { display: grid; gap: 20px; min-width: 0; margin: 0; padding: 32px; background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-sheet); }
+.shell2-content .ds2 .ds2-own fieldset.card > legend { float: left; width: 100%; margin: 0 0 4px; padding: 0; font: 500 1.25rem/1.625rem var(--font-sans-display); }
+.shell2-content .ds2 .ds2-own fieldset.card > legend strong { font-weight: 500; }
+.shell2-content .ds2 .ds2-own fieldset.card > legend .small { font: 400 0.9375rem/1.4375rem var(--font-sans); color: var(--text-2); }
+.shell2-content .ds2-own .field { display: grid; gap: 8px; margin: 0; min-width: 0; }
+.shell2-content .ds2-own label { margin: 0; font: 500 1rem/1.375rem var(--font-sans); }
+.shell2-content .ds2-own :is(input:not([type]), input[type=email]) { width: 100%; min-height: 52px; padding: 0 16px; font-size: 1.125rem; }
+.shell2-content .ds2-own .field-row.n3 { display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(0, 1.25fr) minmax(0, 1fr); gap: 20px 16px; }
+.shell2-content .ds2-own form.stack > .btn.primary { justify-self: start; margin-top: 8px; background: var(--action); color: var(--action-on); }
+@media (hover: hover) { .shell2-content .ds2-own form.stack > .btn.primary:hover { background: var(--action-hover); } }
+.shell2-content .ds2-own form.stack > .btn.primary[disabled] { opacity: .85; cursor: progress; }
+@media (max-width: 599px) {
+  .shell2-content .ds2 .ds2-own fieldset.card { padding: 20px; }
+  .shell2-content .ds2-own .field-row.n3 { grid-template-columns: minmax(0, 1fr); }
+  .shell2-content .ds2-own :is(input:not([type]), input[type=email]) { min-height: 56px; }
+  .shell2-content .ds2-own form.stack > .btn.primary { justify-self: stretch; min-height: 56px; }
+}
+
+/* Each state's roles: the firm in that state, who signs, then each role under a hairline */
+.shell2-content .ds2 fieldset.ds2-part { padding-top: 24px; border-top: 1px solid var(--line); }
+.shell2-content .ds2 .ds2-sheet-title + fieldset.ds2-part, .shell2-content .ds2 .ds2-sheet-title + .notice2 + fieldset.ds2-part { border-top: 0; padding-top: 0; }
+.ds2-offer { display: grid; }
+.shell2-content .ds2 .ds2-may { margin: 0 0 4px; font: 500 0.9375rem/1.375rem var(--font-sans); color: var(--text); }
+.ds2-answers { display: grid; gap: 4px; margin: 0 0 4px; padding: 0; list-style: none; }
+.ds2-answers li { position: relative; padding-left: 20px; font: 400 1rem/1.5rem var(--font-sans); color: var(--text); }
+.ds2-answers li::before { content: ""; position: absolute; left: 2px; top: 11px; width: 8px; height: 1.5px; background: var(--bullet); }
+.ds2-decide { display: grid; padding-left: 16px; border-left: 2px solid var(--line); }
+}
