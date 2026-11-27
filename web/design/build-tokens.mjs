@@ -119,12 +119,16 @@ export type ColorToken = keyof typeof color.light;
 const repo = join(web, "..");
 const copied = (from) => `// Copied by web/design/build-tokens.mjs from web/${from}. Don't edit: change the original and run \`npm run tokens\` in web/.\n`;
 const inkSrc = readFileSync(join(web, "lib", "design", "ink.ts"), "utf8");
+// The logo analysis too (lib/design/logo.ts): the engine reads uploaded logos with it. Its import of the ink match
+// takes the engine's .js form.
+const logoSrc = readFileSync(join(web, "lib", "design", "logo.ts"), "utf8").replace(/from "\.\/ink\.ts"/g, 'from "./ink.js"');
 const outputs = [
   [join(web, "styles", "tokens.css"), tokensCss],
   [join(web, "styles", "type.css"), typeCss],
   [join(web, "lib", "design", "tokens.ts"), tokensTs],
   [join(repo, "src", "design", "tokens.ts"), copied("lib/design/tokens.ts") + tokensTs.split("\n").slice(1).join("\n")],
   [join(repo, "src", "design", "ink.ts"), copied("lib/design/ink.ts") + inkSrc],
+  [join(repo, "src", "design", "logo.ts"), copied("lib/design/logo.ts") + logoSrc],
 ];
 if (process.argv.includes("--check")) {
   const stale = outputs.filter(([p, s]) => !existsSync(p) || readFileSync(p, "utf8") !== s).map(([p]) => p);

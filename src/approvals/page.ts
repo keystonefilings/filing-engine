@@ -1,5 +1,6 @@
 import { color, font } from "../design/tokens.js";
-import { firmVars, inkMatch } from "../design/ink.js";
+import { firmVars, inkMatch, PLATE_INK } from "../design/ink.js";
+import { isWide, logoPlate, logoSize, type LogoInfo } from "../design/logo.js";
 
 /**
  * The page shell for the proof and the pages around it (merged spec 11.5, 10B.22, decision 2).
@@ -17,6 +18,8 @@ export interface PageLook {
   /** White label: whose page it is. */
   brandName?: string;
   logoUrl?: string;
+  /** The uploaded logo's reading (src/brand/logo-analysis.ts): sized by area, light marks on their plate (3.5.1, 10B.2.3). */
+  logo?: LogoInfo;
   primaryColor?: string;
   secondaryColor?: string;
   font?: { stack: string; href?: string; fileUrl?: string };
@@ -83,6 +86,9 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--focus);outline-offs
 .lh{display:grid;gap:16px;margin-bottom:32px}
 .lh-row{display:flex;justify-content:center;align-items:center;min-height:48px}
 .lh-logo{display:block;max-height:48px;max-width:240px;width:auto;object-fit:contain;box-sizing:content-box;padding:4px 6px;margin:-4px -6px;background:#fff;color-scheme:only light;clip-path:polygon(4px 0,calc(100% - 4px) 0,100% 4px,100% calc(100% - 4px),calc(100% - 4px) 100%,4px 100%,0 calc(100% - 4px),0 4px)}
+.lh-row.is-stacked{flex-direction:column;gap:12px}
+.lh-logo.is-sized{width:var(--lw);height:var(--lh);max-width:none;max-height:none}
+.lh-logo.is-plate{padding:8px 12px;margin:0;background:var(--plate);clip-path:polygon(6px 0,calc(100% - 6px) 0,100% 6px,100% calc(100% - 6px),calc(100% - 6px) 100%,6px 100%,0 calc(100% - 6px),0 6px)}
 .lh-name{font:600 1.5rem/1.875rem var(--font-head);color:var(--ink)}
 .rule{display:grid;gap:2px}.rule::before{content:"";height:3px;background:var(--firm,var(--ink))}.rule::after{content:"";height:1px;background:var(--firm-2,var(--ink))}
 .rehearsal{position:relative;display:grid;grid-template-columns:16px 1fr;gap:12px;padding:16px 20px;margin-bottom:24px;font-weight:500}
@@ -137,6 +143,8 @@ button.outline{background:transparent;color:var(--ink);border-color:var(--rule-s
 .page{padding:0}
 .sheet{padding:24px 20px 40px;box-shadow:none;border-radius:0;min-height:100vh}
 .title{font-size:1.75rem;line-height:2.125rem}
+.lh-logo.is-sized{width:var(--lw-s);height:var(--lh-s)}
+.lh-name{font-size:1.25rem;line-height:1.625rem}
 .details{grid-template-columns:1fr}
 .details dt{border-bottom:0;padding-bottom:2px;font-size:.9375rem}
 .details dd{padding-top:0;font-size:1.0625rem}
@@ -149,6 +157,24 @@ export const GHOST = `<svg viewBox="0 0 14 14" width="14" height="14" aria-hidde
 export const LOZENGE = `<svg viewBox="0 0 12 12" aria-hidden="true"><path d="M6 .8 11.2 6 6 11.2.8 6Z" fill="currentColor"/></svg>`;
 export const DASH = `<svg class="dash" aria-hidden="true" preserveAspectRatio="none"><rect x="0" y="0" width="100%" height="100%" rx="3" ry="3"/></svg>`;
 
+/**
+ * A white-label proof's Letterhead row (3.5), centred: the logo, or the typeset name. With the logo's reading, the logo is
+ * sized by area, the name is typeset under a square or mid logo (a wide one spells it already), and light marks sit
+ * on their plate: the brand's fill when they read at 3:1 on it, else Plate Ink (10B.2.3).
+ */
+function letterheadRow(p: PageLook): string {
+  if (!p.logoUrl) return `<div class="lh-row"><span class="lh-name">${esc(p.brandName)}</span></div>`;
+  const info = p.logo;
+  if (!info) return `<div class="lh-row"><img class="lh-logo" src="${esc(p.logoUrl)}" alt="${esc(p.brandName ?? "")}"></div>`;
+  const fill = p.primaryColor && HEX.test(p.primaryColor) ? inkMatch(p.primaryColor, p.secondaryColor && HEX.test(p.secondaryColor) ? p.secondaryColor : null).fill : PLATE_INK;
+  const plate = logoPlate(info, fill);
+  const big = logoSize(info, "sheet"), small = logoSize(info, "phone");
+  const named = !isWide(info.ratio) && !!p.brandName;
+  const style = `--lw:${big.width}px;--lh:${big.height}px;--lw-s:${small.width}px;--lh-s:${small.height}px${plate ? `;--plate:${plate}` : ""}`;
+  const img = `<img class="lh-logo is-sized${plate ? " is-plate" : ""}" src="${esc(p.logoUrl)}" width="${Math.round(big.width)}" height="${Math.round(big.height)}" alt="${named ? "" : esc(p.brandName ?? "")}" style="${style}">`;
+  return `<div class="lh-row${named ? " is-stacked" : ""}">${img}${named ? `<span class="lh-name">${esc(p.brandName)}</span>` : ""}</div>`;
+}
+
 /** The page up to the sheet's first content: the document head, styles, and the sheet's head. */
 export function pageTop(p: PageLook, title: string): string {
   const fontLinks = p.look === "white" && p.font
@@ -159,7 +185,7 @@ export function pageTop(p: PageLook, title: string): string {
     const named = [p.firmName, p.clientName].filter(Boolean).map(esc).join(" · ");
     if (named) head = `<p class="named">${named}</p>`;
   } else if (p.brandName || p.logoUrl) {
-    head = `<div class="lh"><div class="lh-row">${p.logoUrl ? `<img class="lh-logo" src="${esc(p.logoUrl)}" alt="${esc(p.brandName ?? "")}">` : `<span class="lh-name">${esc(p.brandName)}</span>`}</div>${p.primaryColor ? `<div class="rule" aria-hidden="true"></div>` : ""}</div>`;
+    head = `<div class="lh">${letterheadRow(p)}${p.primaryColor ? `<div class="rule" aria-hidden="true"></div>` : ""}</div>`;
   }
   return `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="color-scheme" content="light dark"><meta name="robots" content="noindex">

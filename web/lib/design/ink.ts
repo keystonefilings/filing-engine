@@ -128,8 +128,12 @@ function stepL(base: OKLCH, dir: -1 | 1, ok: (hex: string) => boolean): string {
 export interface FirmInk {
   /** The Main color, exact: the Firm Rule's 3 px line, the "your turn" glyph, bullets. */
   firm: string;
-  /** The Second color, exact if set and distinct; else the Main at 35% over white. */
+  /** The Second color, exact if set and distinct; else the Main at 35% over white, or the link ink where that
+   *  would vanish on white (10B.2.3). The Firm Rule's thin line. */
   firm2: string;
+  /** A 1 px rgba(29,33,48,.10) line under the Firm Rule's 3 px line when the Main is very pale (under 1.5:1 on
+   *  white), so the rule still reads as a deliberate edge (3.5.3); else null. */
+  ruleUnder: string | null;
   /** Button and selected-choice fill, contrast-safe. */
   fill: string;
   fillHover: string;
@@ -175,7 +179,7 @@ export function inkMatch(main: string, second?: string | null): FirmInk {
   const secondHex = second ? toHex(parseHex(second)) : null;
   // "Distinct" is ΔE OK > 0.05. The spec writes 0.08, but its own reference firm (Harbor blue with Pine
   // green, ΔE 0.072) keeps its second color; 0.05 still catches a second color that is the main again.
-  const firm2 = secondHex && deltaE(secondHex, firm) > 0.05 ? secondHex : overWhite(firm, 0.35);
+  const ownSecond = !!secondHex && deltaE(secondHex, firm) > 0.05;
 
   const flags = {
     nearWhite: contrast(firm, WHITE) < 1.25,
@@ -193,6 +197,11 @@ export function inkMatch(main: string, second?: string | null): FirmInk {
   const ink = secondHex && contrast(secondHex, WHITE) >= 4.5 ? secondHex
     : contrast(firm, WHITE) >= 4.5 ? firm
     : stepL(m, -1, (h) => contrast(h, WHITE) >= 4.5);
+
+  // The Firm Rule's thin line: the second color as given, else the main at 35% over white; a derived line under
+  // 1.25:1 on white would vanish, so it is drawn in the link ink and the rule keeps its two lines (10B.2.3, rule 2).
+  const derived = overWhite(firm, 0.35);
+  const firm2 = ownSecond ? secondHex! : contrast(derived, WHITE) < 1.25 ? ink : derived;
 
   // The fill: rules (e), (d), (a), (b), (c), in that order.
   let fill: string, on: string, fillBorder: string | null = null, fillEdge: string | null = null;
@@ -222,7 +231,9 @@ export function inkMatch(main: string, second?: string | null): FirmInk {
 
   const selectLine = contrast(fill, WHITE) >= 3 ? fill : ink;
 
-  return { firm, firm2, fill, fillHover, on, fillBorder, fillEdge, selectLine, ink, wash, row, tint, inkDark, deepened: fill !== firm, flags };
+  const ruleUnder = contrast(firm, WHITE) < 1.5 ? "rgba(29,33,48,.10)" : null;
+
+  return { firm, firm2, ruleUnder, fill, fillHover, on, fillBorder, fillEdge, selectLine, ink, wash, row, tint, inkDark, deepened: fill !== firm, flags };
 }
 
 /** The custom properties a firm's client pages (and previews of them) carry, from one ink match. */
@@ -230,6 +241,7 @@ export function firmVars(k: FirmInk): Record<string, string> {
   return {
     "--firm": k.firm,
     "--firm-2": k.firm2,
+    "--firm-rule-under": k.ruleUnder ?? "transparent",
     "--firm-fill": k.fill,
     "--firm-fill-hover": k.fillHover,
     "--firm-on": k.on,

@@ -5,6 +5,8 @@ import type { FastifyInstance, FastifyReply, FastifyRequest } from "fastify";
 import { z } from "zod";
 import { EVENT_TYPES } from "../domain/events.js";
 import type { ApiKeyRecord, Store } from "../store/types.js";
+import type { ArtifactStore } from "../artifacts/store.js";
+import { withLogoInfo } from "../brand/logo-analysis.js";
 
 /**
  * Enterprise self-service: a tenant manages its own API keys and webhook endpoints and reads
@@ -80,6 +82,8 @@ export interface SelfServiceDeps {
   platformName?: string;
   /** Decision 9: our registered agent offer for a firm, if any. */
   agentOffer?: (tenant: import("../settings/schema.js").TenantSettings, client: import("../settings/schema.js").ClientCompanySettings) => import("../registered-agents/agent-services.js").AgentOffer | null;
+  /** Where uploaded logos are kept: a firm whose logo has no reading yet is read when it is loaded (3.5.1). */
+  artifacts?: ArtifactStore;
 }
 
 export function registerSelfService(app: FastifyInstance, deps: SelfServiceDeps): void {
@@ -201,13 +205,15 @@ export function registerSelfService(app: FastifyInstance, deps: SelfServiceDeps)
   app.get("/v1/client-companies", async (req, reply) => {
     const tenantId = await requireTenant(req, reply);
     if (!tenantId) return reply;
-    return { clientCompanies: await deps.store.listClientCompanies(tenantId) };
+    const list = await deps.store.listClientCompanies(tenantId);
+    return { clientCompanies: await Promise.all(list.map((c) => withLogoInfo(deps, c))) };
   });
   app.get("/v1/client-companies/:id", async (req, reply) => {
     const tenantId = await requireTenant(req, reply);
     if (!tenantId) return reply;
-    const c = await deps.store.getClientCompany((req.params as { id: string }).id);
-    if (!c || c.tenantId !== tenantId) return reply.code(404).send({ error: "not found" });
+    const found = await deps.store.getClientCompany((req.params as { id: string }).id);
+    if (!found || found.tenantId !== tenantId) return reply.code(404).send({ error: "not found" });
+    const c = await withLogoInfo(deps, found);
     const tenant = await deps.store.getTenant(c.tenantId);
     return { clientCompany: c, filerName: filerNameFor(c, tenant, deps.platformName ?? "CoFile"), ourAgent: tenant && deps.agentOffer ? deps.agentOffer(tenant, c) : null };
   });

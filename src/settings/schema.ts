@@ -253,6 +253,22 @@ export const ClientCompanySettings = z.object({
     logoUrl: z.string().url().startsWith("https://").optional(),
     /** A logo the firm uploaded (artifact kind brand_logo, served at /v1/brand-logos/:id). Shown ahead of logoUrl. */
     logoArtifactId: z.string().uuid().optional(),
+    /**
+     * The engine's reading of the uploaded logo (src/brand/logo-analysis.ts; merged spec 3.5.1, 10B.2.3): its size and
+     * shape, what its edge holds, and how light its ink is, so every page can size it by area and put light marks on a
+     * dark plate. Made by the engine at upload, or the first time an older logo is loaded; it describes `artifactId` only.
+     */
+    logoInfo: z.object({
+      artifactId: z.string().uuid(),
+      v: z.number().int().positive(),
+      width: z.number().int().positive(),
+      height: z.number().int().positive(),
+      ratio: z.number().positive(),
+      background: z.enum(["transparent", "white", "tile", "busy"]),
+      inkL: z.number().min(0).max(1),
+      ink: z.string().regex(/^#[0-9A-Fa-f]{6}$/),
+      light: z.boolean(),
+    }).optional(),
     /** V21: a preset font, or "custom" for the uploaded fontArtifactId. */
     font: z.enum(FONT_CHOICES).optional(),
     fontArtifactId: z.string().uuid().optional(),

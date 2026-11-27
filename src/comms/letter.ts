@@ -35,9 +35,10 @@ export interface FirmLetterhead {
   name: string;
   /**
    * The processed logo; width and height are its natural pixels when known, for sizing by area. `plate` when the
-   * url serves it on its baked white plate (src/brand/logo-plate.ts), so the email sizes it with the plate's margin.
+   * url serves it on its baked white plate (src/brand/logo-plate.ts), so the email sizes it with the plate's margin;
+   * `plateColor` when that plate is a light-marks logo's dark plate (10B.2.3), seen on the sheet by design.
    */
-  logo?: { url: string; width?: number; height?: number; plate?: boolean };
+  logo?: { url: string; width?: number; height?: number; plate?: boolean; plateColor?: string };
   primaryColor?: string;
   secondaryColor?: string;
   /** The firm's font when it is one of the Google presets (3.7). */
