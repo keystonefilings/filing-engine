@@ -7,7 +7,8 @@ import { ExampleFonts } from "@/components/pictures/examples";
 import { FullDesk } from "@/components/pictures/DeskPicture";
 import { BrandStudio } from "@/components/pictures/BrandStudio";
 import { TwoDoors } from "@/components/pictures/TwoDoors";
-import { EngraverStill, SavedAgent } from "@/components/pictures/ForFirms";
+import { SavedAgent } from "@/components/pictures/ForFirms";
+import { EngraverFilm } from "@/components/pictures/EngraverFilm";
 import { StillPlate } from "@/components/pictures/ClosePlate";
 import { platformName } from "@/lib/brand";
 
@@ -26,7 +27,7 @@ export default function ForFirms() {
       <ExampleFonts />
       <div className="st ff">
         <PageHead kicker="For CPA, payroll, fractional CFO and title firms" title={<Lines lines={["Form the business.", "Keep the client."]} />} className="ff-head"
-          aside={<div className="ff-front"><EngraverStill /></div>}>
+          aside={<div className="ff-front"><EngraverFilm /></div>}>
           <p className="t-lede pg2-lede ff-letter">Your client needs an LLC. Who do they call? You. They always have. Until now, saying yes meant someone on staff typing the same agent address into a state website again, or sending the client to an online formation site and getting back a filing you never saw. {name} lets you say yes and keep your name on it.</p>
         </PageHead>
 

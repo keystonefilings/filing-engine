@@ -1,0 +1,17 @@
+/* For firms' frontispiece, the engraver film (merged spec 10A.2.1): 4:5, square-cut, no shadow (it's a photograph);
+   its 40 px control inside the lower left corner, 16 px in, chamfered, on Sheet with a 1 px Rule border. */
+@layer components {
+.pfilm { position: relative; margin: 0; aspect-ratio: 4 / 5; overflow: hidden; background: #0E1016; }
+.pfilm-poster, .pfilm-poster img, .pfilm-video { position: absolute; inset: 0; display: block; width: 100%; height: 100%; object-fit: cover; }
+.pfilm-video { opacity: 0; }
+.pfilm-video.is-shown { opacity: 1; }
+.pfilm-control {
+  position: absolute; left: 16px; bottom: 16px; z-index: 1;
+  display: grid; place-items: center; width: 40px; height: 40px; padding: 0;
+  color: #1D2130; background: #fff; border: 1px solid #DDD7CB; border-radius: 4px; corner-shape: bevel;
+  cursor: pointer; color-scheme: light;
+}
+@media (hover: hover) { .pfilm-control:hover { border-color: #8A8578; } }
+.pfilm-control:focus-visible { outline: 2px solid #fff; outline-offset: 2px; box-shadow: 0 0 0 2px #1D2130, 0 0 0 6px #fff; }
+@media print { .pfilm-control, .pfilm-video { display: none; } }
+}
