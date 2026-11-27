@@ -27,7 +27,7 @@
 .und2-widget { left: 424px; top: 72px; width: 360px; padding: 20px; z-index: 1; }
 .und2-proof { z-index: 2; }
 .und2-code { position: absolute; left: 200px; top: 500px; width: 480px; z-index: 0; padding: 28px; background: var(--night); color: var(--night-ink); border: 1px solid #323646; border-radius: var(--r-sheet); }
-.und2 .play2-caption { display: block; margin-top: 12px; }
+.und2 > .pic-cap { display: block; min-height: 0; margin-top: 12px; font: inherit; letter-spacing: normal; color: inherit; }
 
 /* The white-label proof: a Rule block where the platform's logo goes, its Firm Rule in Iron */
 .und2-logo { width: 120px; height: 28px; background: #DDD7CB; }
@@ -66,8 +66,8 @@
 .und2-dry-mark .dash rect { fill: none; stroke: var(--night-ink); stroke-width: 1.5; stroke-dasharray: 4 3; vector-effect: non-scaling-stroke; }
 
 /* Motion: once, the three press in back to front, then the dashed mark draws round its line (under 1.6 s) */
-.und2[data-motion="ready"] :is(.und2-code, .und2-widget, .und2-proof) { opacity: 0; transform: translateY(-6px); }
-.und2[data-motion="ready"] .und2-dry-mark { clip-path: inset(0 100% 0 0); }
+.und2[data-motion="before"] :is(.und2-code, .und2-widget, .und2-proof) { opacity: 0; transform: translateY(-6px); }
+.und2[data-motion="before"] .und2-dry-mark { clip-path: inset(0 100% 0 0); }
 .und2[data-motion="play"] :is(.und2-code, .und2-widget, .und2-proof) { animation: und2-press var(--t-set) var(--ease-settle) both; }
 .und2[data-motion="play"] .und2-widget { animation-delay: 120ms; }
 .und2[data-motion="play"] .und2-proof { animation-delay: 240ms; }
@@ -76,7 +76,7 @@
 @keyframes und2-draw { from { clip-path: inset(0 100% 0 0); } to { clip-path: inset(0); } }
 
 @media (max-width: 1023px) and (min-width: 640px) {
-  .und2 .play2-caption { padding-right: var(--site-pad); }
+  .und2 > .pic-cap { padding-right: var(--site-pad); }
 }
 /* Phone: restacked vertically; the code panel scrolls sideways inside itself, never the page */
 @media (max-width: 639px) {
