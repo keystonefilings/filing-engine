@@ -2,8 +2,8 @@ import { existsSync } from "node:fs";
 import { join } from "node:path";
 
 /**
- * CoFile's licensed faces (merged spec 5.1, web/styles/fonts.css). The files live in public/fonts on the machine that
- * builds or serves the site and are never committed, because the repository is public (public/fonts/README.md).
+ * CoFile's licensed faces (merged spec 5.1, web/styles/fonts.css). The files are opened into public/fonts at build time
+ * from a sealed bundle (scripts/licensed-fonts.mjs) and never committed as they are: the repository is public.
  * Each face is declared only when its file is there, so a build without them makes no requests that 404 and uses
  * the metric-matched fallbacks instead.
  *
@@ -44,9 +44,18 @@ const FACES: { file: string; css: string }[] = [
 
 const DIR = join(process.cwd(), "public", "fonts");
 
+/**
+ * Whether a face's file is in the site. The build records the files it found (next.config.mjs, LICENSED_FONT_FILES),
+ * because a host's server functions don't carry public/ with them; outside a Next build, the folder is looked at.
+ */
+function presentFile(file: string): boolean {
+  const listed = process.env.LICENSED_FONT_FILES;
+  return listed !== undefined ? listed.split(",").includes(file) : existsSync(join(DIR, file));
+}
+
 /** The @font-face rules for the files present, and the file to preload (the working sans), if it is there. */
 export function licensedFonts(): { css: string; preload?: string } {
-  const present = FACES.filter((f) => existsSync(join(DIR, f.file)));
+  const present = FACES.filter((f) => presentFile(f.file));
   return {
     css: present.map((f) => f.css).join("\n"),
     preload: present.some((f) => f.file === "founders-grotesk-400.woff2") ? "/fonts/founders-grotesk-400.woff2" : undefined,

@@ -49,7 +49,7 @@ shared piece needs a change, prefer a local variant.
 3. Screenshot every page you touched at 390 and 1440 wide, light and dark, full page, with Playwright
    (`require('playwright')` works from any directory; `chromium.launch()`), and look at them. Check
    for horizontal overflow (`document.documentElement.scrollWidth > innerWidth`) and console errors.
-4. The licensed fonts are not in git (the repository is public). For true screenshots copy them in:
-   `cp /home/user/filing-engine/web/public/fonts/*.woff2 web/public/fonts/` (if present).
+4. The licensed fonts are in git only as a sealed bundle (the repository is public). For true screenshots, open it with
+   the key: `LICENSED_FONTS_KEY=<key> node scripts/licensed-fonts.mjs unpack` (see `public/fonts/README.md`).
 5. Pages that need data need the engine: `PORT=<port> API_KEYS=<24+ char key>:acme STAFF_API_KEYS=<key>:ops@acme APPROVAL_SIGNING_SECRET=<32+ chars> npx tsx src/index.ts`
    from the repo root (in-memory store); seed with the API (`x-api-key` header).
