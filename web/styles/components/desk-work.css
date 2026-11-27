@@ -1,0 +1,338 @@
+/* The desk's working pages (merged spec 10B.10 to 10B.17), in CoFile's look inside the shell: New filing (the state,
+   the filing type), the desk's own form page, Client links, a request from a text or email, Signatures and Ready to
+   pay. Reads semantic tokens only. Rules start at .shell2-content where the shell's adapter (app.css) styles the same
+   elements, so these win without !important. */
+@layer components {
+
+/* ---- Shared on these pages ---- */
+.shell2-content .dw-back { margin: 0 0 16px; font-size: 0.9375rem; line-height: 1.4375rem; }
+.shell2-content .dw-back a:not(.btn):not(.btn2) { display: inline-flex; align-items: center; gap: 6px; }
+.dw-arrow { flex: none; width: 20px; height: 20px; }
+.dw-back .dw-arrow { width: 16px; height: 16px; }
+.shell2-content .dw-lede { margin: -8px 0 32px; max-width: 68ch; font-size: 1.0625rem; line-height: 1.625rem; color: var(--text-2); }
+.dw-mono { font-family: var(--font-mono); font-size: 0.9375rem; line-height: 1.375rem; overflow-wrap: anywhere; }
+.dw-mono.is-number { white-space: nowrap; }
+.dw-quiet { color: var(--text-2); }
+.shell2-content .dw-date { font-size: 0.9375rem; color: var(--text-2); font-variant-numeric: tabular-nums; white-space: nowrap; }
+
+/* A plate field (10C.2): a value to copy, in mono on Cotton 2, the Copy button attached at its right (under it on phones) */
+.shell2-content .dw-plate { display: flex; align-items: flex-start; gap: 12px; margin: 0; padding: 12px 12px 12px 16px; background: var(--page-2); border: 1px solid var(--line-strong); border-radius: 4px; corner-shape: bevel; }
+@supports not (corner-shape: bevel) { .shell2-content .dw-plate { border-radius: 2px; } }
+.shell2-content .dw-plate.is-link { padding: 12px 16px; }
+.shell2-content .dw-plate-value { flex: 1 1 auto; align-self: center; min-width: 0; padding: 0; font: 400 0.9375rem/1.375rem var(--font-mono); color: var(--text); background: none; overflow-wrap: anywhere; word-break: break-all; }
+.shell2-content .dw-plate .btn.small, .shell2-content .dw-code .btn.small { flex: none; background: var(--surface); }
+/* A code block: paper like everything else on the desk, never a dark terminal (10B.11) */
+.shell2-content .dw-code { display: flex; align-items: flex-start; gap: 12px; margin: 0; padding: 16px; background: var(--page-2); border: 1px solid var(--line); border-radius: var(--r-sheet); }
+.shell2-content .dw-code pre { flex: 1 1 auto; min-width: 0; margin: 0; padding: 0; font: 400 0.875rem/1.375rem var(--font-mono); color: var(--text); background: none; white-space: pre-wrap; overflow-wrap: anywhere; word-break: break-all; }
+@media (max-width: 599px) {
+  .shell2-content :is(.dw-plate, .dw-code) { flex-direction: column; align-items: stretch; }
+  .shell2-content :is(.dw-plate, .dw-code) .btn.small { min-height: 48px; }
+}
+
+/* A disclosure row: 48 px, Medium, a chevron that turns as it opens */
+.dw-fold > summary { display: flex; align-items: center; gap: 10px; min-height: 48px; cursor: pointer; list-style: none; font: 500 1rem/1.375rem var(--font-sans); color: var(--text); }
+.dw-fold > summary::-webkit-details-marker { display: none; }
+.dw-fold > summary::before { content: ""; flex: none; width: 12px; height: 8px; background: currentColor; mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1.5l5 5 5-5' fill='none' stroke='black' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center / contain no-repeat; transform: rotate(-90deg); transition: transform 200ms var(--ease-settle); }
+.dw-fold[open] > summary::before { transform: none; }
+.dw-fold > summary:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+
+/* A ledger (10C.2's table): a white sheet, the table edge to edge, the head row on Cotton 2, hairlines between rows */
+.shell2-content .dw-ledger { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-sheet); overflow: hidden; }
+.shell2-content .dw-ledger-title { margin: 0; padding: 20px 16px 16px; font: 500 1.25rem/1.625rem var(--font-sans-display); color: var(--text); }
+.shell2-content .dw-ledger table { width: 100%; border-collapse: collapse; font: 400 1rem/1.375rem var(--font-sans); }
+.shell2-content .dw-ledger thead :is(th, td) { height: 44px; padding: 0 16px; vertical-align: middle; font: 500 0.875rem/1.125rem var(--font-sans); color: var(--text-2); text-align: left; background: var(--page-2); border-top: 0; border-bottom: 1px solid var(--line); }
+.shell2-content .dw-ledger-title + table thead :is(th, td) { border-top: 1px solid var(--line); }
+.shell2-content .dw-ledger tbody td { padding: 10px 16px; vertical-align: middle; border-bottom: 0; }
+.shell2-content .dw-ledger tbody tr + tr > td { border-top: 1px solid var(--line); }
+.dw-ledger form { margin: 0; }
+/* A state in words with its glyph: never color alone (4.3) */
+.dw-state { display: inline-flex; align-items: center; gap: 8px; }
+.dw-state > svg { flex: none; width: 12px; height: 12px; }
+.dw-state.is-inhand > svg { color: var(--iron); }
+.dw-state.is-done > svg { color: var(--done); }
+/* Phone: each row a card, 12 px apart; dates carry their column's head */
+@media (max-width: 759px) {
+  .shell2-content .dw-ledger { background: none; border: 0; overflow: visible; }
+  .shell2-content .dw-ledger-title { padding: 0 0 12px; }
+  .shell2-content .dw-ledger table, .shell2-content .dw-ledger tbody { display: block; }
+  .shell2-content .dw-ledger thead { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
+  .shell2-content .dw-ledger tbody tr { display: grid; gap: 4px; padding: 16px; background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-sheet); }
+  .shell2-content .dw-ledger tbody tr + tr { margin-top: 12px; }
+  .shell2-content .dw-ledger tbody td { display: block; height: auto; padding: 0; border: 0; background: none; }
+  .shell2-content .dw-ledger tbody tr + tr > td { border-top: 0; }
+  .shell2-content .dw-ledger td[data-label]::before { content: attr(data-label) " "; color: var(--text-2); }
+  .shell2-content .dw-ledger tbody td:last-child:not(:empty) { margin-top: 8px; }
+  .shell2-content .dw-ledger tbody td:last-child .btn { width: 100%; min-height: 48px; }
+}
+
+/* An empty page: the engraving above the product's sentence (D1.4) */
+.shell2-content .dw-empty { display: grid; justify-items: start; gap: 16px; }
+.shell2-content .dw-empty > .notice2 { justify-self: stretch; }
+.shell2-content .dw-empty > p { margin: 0; font-size: 1.0625rem; line-height: 1.625rem; color: var(--text); }
+
+/* ---- New filing, step one: the state (10B.10) ---- */
+.new2 { display: grid; grid-template-columns: minmax(0, 1fr); }
+.shell2-content .new2-head h1 { margin-bottom: 16px; }
+.shell2-content .new2-question { margin: 0 0 12px; font: 400 1.375rem/1.75rem var(--font-sans); color: var(--text); }
+.shell2-content .new2-note { margin: 0; max-width: 60ch; font-size: 0.9375rem; line-height: 1.4375rem; color: var(--text-2); }
+.shell2-content .new2-states { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 24px; margin: 32px 0 0; padding: 0; list-style: none; }
+/* A card that is a link: white, 1 px Rule, the whole card the target; hover lifts it */
+.shell2-content a.new2-card:not(.btn):not(.btn2) { position: relative; display: flex; flex-direction: column; height: 100%; box-sizing: border-box; padding: 32px; color: var(--text); text-decoration: none; background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-sheet); transition: box-shadow var(--t-quick) var(--ease-settle), border-color var(--t-quick) var(--ease-settle); }
+.shell2-content a.new2-card:not(.btn):not(.btn2):focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+.new2-card.is-state { gap: 8px; min-height: 168px; }
+.new2-state-name { font: 500 1.75rem/2.125rem var(--font-sans-display); }
+.new2-count { font-size: 0.9375rem; line-height: 1.4375rem; color: var(--text-2); }
+.new2-card .dw-arrow { margin-top: auto; align-self: flex-end; }
+/* Hover: lifted, with a 2 px Brass Line rule along the card's top edge (120 ms) */
+@media (hover: hover) {
+  .shell2-content a.new2-card:not(.btn):not(.btn2):hover { border-color: var(--line-strong); box-shadow: var(--e-lift); }
+  .shell2-content a.new2-card.is-state:not(.btn):not(.btn2):hover { box-shadow: var(--e-lift), inset 0 2px 0 var(--brass-line); }
+}
+/* The other ways in: a Cotton 2 panel beside the head, after the cards on narrower screens */
+.shell2-content .new2-ways { margin-top: 32px; padding: 24px; background: var(--page-2); border: 1px solid var(--line); border-radius: var(--r-sheet); font-size: 0.9375rem; line-height: 1.4375rem; }
+.shell2-content .new2-ways p { margin: 0 0 12px; }
+.shell2-content .new2-ways ul { display: grid; gap: 10px; margin: 0; padding: 0; list-style: none; }
+@media (min-width: 1024px) {
+  .new2:not(.is-kinds) { grid-template-columns: repeat(12, minmax(0, 1fr)); column-gap: 24px; }
+  .new2:not(.is-kinds) > .new2-head { grid-column: 1 / 9; grid-row: 1; }
+  .shell2-content .new2:not(.is-kinds) > .new2-ways { grid-column: 9 / 13; grid-row: 1; align-self: start; margin-top: 4px; }
+  .new2:not(.is-kinds) > .new2-states { grid-column: 1 / -1; grid-row: 2; }
+}
+@media (max-width: 759px) {
+  .shell2-content .new2-states { grid-template-columns: minmax(0, 1fr); gap: 12px; }
+  .shell2-content a.new2-card:not(.btn):not(.btn2) { padding: 24px; }
+  .new2-card.is-state { min-height: 120px; }
+  .new2-state-name { font-size: 1.5rem; line-height: 1.875rem; }
+  .shell2-content .new2-question { font-size: 1.25rem; line-height: 1.625rem; }
+}
+
+/* ---- New filing, step two: the filing type (10B.11) ---- */
+.shell2-content .new2-kinds { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 24px; margin: 0; padding: 0; list-style: none; }
+.new2-kind-title { font: 500 1.375rem/1.75rem var(--font-sans-display); }
+.new2-kind-chip { position: relative; align-self: flex-start; display: inline-flex; margin: 12px 0 16px; }
+.new2-kind-summary { font-size: 0.9375rem; line-height: 1.4375rem; color: var(--text-2); }
+.new2-kind-fee { margin-top: 12px; font-size: 0.9375rem; line-height: 1.4375rem; color: var(--text); font-variant-numeric: tabular-nums; }
+/* The rehearsal chip's explanation: its description, and on hover or focus a tooltip */
+.new2-tip { display: none; position: absolute; z-index: 5; left: 0; top: calc(100% + 8px); width: max-content; max-width: min(320px, 72vw); padding: 12px 16px; font: 400 0.9375rem/1.375rem var(--font-sans); color: var(--text); background: var(--surface); border-radius: var(--r-sheet); box-shadow: var(--e-menu); pointer-events: none; }
+.new2-kind-chip:hover .new2-tip, .new2-card:focus-visible .new2-tip { display: block; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .new2-tip { border: 1px solid var(--line-strong); } }
+:root[data-theme="dark"] .new2-tip { border: 1px solid var(--line-strong); }
+/* "Your pages for clients": a white sheet; each service its address on a plate, the widget code behind a disclosure */
+.shell2-content .new2-pages { margin-top: 48px; padding: 32px; background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-sheet); }
+.shell2-content .new2-pages h2 { margin: 0 0 8px; font: 500 1.25rem/1.625rem var(--font-sans-display); color: var(--text); }
+.shell2-content .new2-pages-line { margin: 0 0 24px; max-width: 72ch; font-size: 0.9375rem; line-height: 1.4375rem; color: var(--text-2); }
+.shell2-content .new2-pages > ul { margin: 0; padding: 0; list-style: none; }
+.shell2-content .new2-page { display: grid; grid-template-columns: minmax(0, 240px) minmax(0, 1fr); gap: 8px 24px; padding: 20px 0 12px; border-top: 1px solid var(--line); }
+.shell2-content .new2-page-title { grid-column: 1; margin: 0; padding-top: 13px; font: 500 1rem/1.375rem var(--font-sans); }
+.new2-page > .dw-plate, .new2-page > .new2-widget { grid-column: 2; min-width: 0; }
+.shell2-content .new2-widget > summary { font-weight: 400; font-size: 0.9375rem; color: var(--text-2); }
+.new2-widget[open] > .dw-code { margin-bottom: 8px; }
+@media (max-width: 899px) {
+  .shell2-content .new2-page { grid-template-columns: minmax(0, 1fr); }
+  .shell2-content .new2-page-title { padding-top: 0; }
+  .new2-page > .dw-plate, .new2-page > .new2-widget { grid-column: 1; }
+}
+@media (max-width: 759px) {
+  .shell2-content .new2-kinds { grid-template-columns: minmax(0, 1fr); gap: 12px; }
+  .shell2-content .new2-pages { margin-top: 32px; padding: 20px; }
+}
+
+/* ---- The desk's form page (10B.12.1): a 720 column, and from 1280 px the section rail beside it ---- */
+.kind2 { max-width: 720px; margin-inline: auto; }
+.kind2-main { min-width: 0; }
+.shell2-content .kind2-notices { display: grid; gap: 16px; margin: 0 0 32px; }
+.shell2-content .kind2-notices .notice2 a { font-weight: 500; }
+/* "Start from a client you filed for before": the label, a 52 px select and "Fill in" */
+.shell2-content .kind2-from { display: grid; gap: 8px; margin: 0 0 32px; }
+.shell2-content .kind2-from > label { margin: 0; font: 500 1rem/1.375rem var(--font-sans); color: var(--text); }
+.kind2-from-row { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; }
+.shell2-content .kind2-from select { flex: 1 1 280px; min-width: 0; min-height: 52px; font-size: 1.125rem; }
+/* The form: one white sheet, 40 px padding; the section numerals hang in its margin */
+.shell2-content .kind2-sheet { padding: 40px; background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-sheet); }
+.kind2-sheet form > :is(fieldset, details) { scroll-margin-top: 76px; }
+.shell2-content .kind2-footnote { margin: 0; font-size: 1.0625rem; line-height: 1.625rem; color: var(--text); }
+.kind2-rail { display: none; }
+@media (min-width: 1280px) {
+  .kind2 { max-width: 1088px; display: grid; grid-template-columns: minmax(0, 720px) 320px; gap: 48px; align-items: start; }
+  .kind2-rail { display: block; position: sticky; top: 76px; margin-top: 40px; }
+}
+.kind2-rail-list { margin: 0; padding: 16px 24px; list-style: none; background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-sheet); }
+.kind2-rail-list li { display: flex; align-items: center; gap: 12px; min-height: 36px; }
+.kind2-rail-dot { flex: none; box-sizing: border-box; width: 8px; height: 8px; border: 1px solid var(--line-strong); border-radius: 50%; transition: background-color var(--t-quick) var(--ease-settle), border-color var(--t-quick) var(--ease-settle); }
+.kind2-rail-list li.is-done .kind2-rail-dot { background: var(--text); border-color: var(--text); }
+.shell2-content .kind2-rail-list a:not(.btn):not(.btn2) { font-size: 0.9375rem; line-height: 1.375rem; color: var(--text); text-decoration: none; }
+@media (hover: hover) { .shell2-content .kind2-rail-list a:not(.btn):not(.btn2):hover { text-decoration: underline; text-decoration-color: var(--link-line); text-underline-offset: 3px; } }
+@media (max-width: 599px) {
+  .shell2-content .kind2-sheet { padding: 24px 20px; }
+  .shell2-content .kind2-from .btn.small { flex: 1 1 100%; min-height: 48px; }
+}
+
+/* ---- Client links (10B.14) ---- */
+.links2 { max-width: 720px; margin-inline: auto; }
+.links2-make { display: grid; gap: 24px; }
+.shell2-content .links2-form { display: grid; gap: 24px; padding: 32px; background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-sheet); }
+.shell2-content .links2-form .field { display: grid; gap: 8px; margin: 0; }
+.shell2-content .links2-form label { margin: 0; }
+.shell2-content .links2-form :is(select, input) { width: 100%; min-height: 52px; font-size: 1.125rem; }
+.shell2-content .links2-form .btn { justify-self: start; }
+/* The link once made: a white sheet that presses in once as it appears, the page it opens beside it */
+.shell2-content .links2-result { padding: 32px; background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-sheet); animation: links2-press 260ms var(--ease-settle) both; }
+@keyframes links2-press { from { transform: translateY(2px); box-shadow: inset 0 2px 0 var(--line); } to { transform: none; box-shadow: none; } }
+@media (prefers-reduced-motion: reduce) { .shell2-content .links2-result { animation: none; } }
+.links2-result.has-preview { display: grid; grid-template-columns: minmax(0, 1fr) 234px; gap: 32px; align-items: start; }
+.links2-result-text { min-width: 0; }
+.shell2-content .links2-result h2 { margin: 0 0 16px; font: 500 1.25rem/1.625rem var(--font-sans-display); color: var(--text); }
+.links2-actions { display: flex; flex-wrap: wrap; gap: 8px 12px; margin: 16px 0; }
+.shell2-content .links2-note { margin: 0; font-size: 0.9375rem; line-height: 1.4375rem; color: var(--text-2); }
+/* The page the link opens, in the firm's brand: drawn at the phone layout, 390 wide, set at 0.6 */
+.preview2.links2-preview { width: 234px; height: 300px; }
+.links2-preview-page { width: 390px; height: 500px; transform: scale(0.6); transform-origin: 0 0; }
+.links2-preview-for { font-weight: 400; color: #555867; }
+/* "Links you sent" */
+.shell2-content .links2-sent { margin-top: 32px; }
+.shell2-content .links2-sent tbody td { height: 56px; }
+@media (min-width: 760px) { .shell2-content .links2-sent :is(.links2-state, .dw-date) { white-space: nowrap; } }
+.shell2-content .links2-act { width: 1%; white-space: nowrap; text-align: right; }
+.links2-state .dw-state a { font-weight: 500; }
+@media (max-width: 759px) {
+  .shell2-content .links2-form { padding: 20px; }
+  .shell2-content .links2-result { padding: 20px; }
+  .links2-result.has-preview { grid-template-columns: minmax(0, 1fr); }
+  .preview2.links2-preview { justify-self: center; width: 280px; height: 359px; }
+  .links2-preview-page { transform: scale(0.718); }
+  .shell2-content .links2-actions .btn { flex: 1 1 100%; min-height: 48px; }
+  .shell2-content .links2-sent tbody td { height: auto; }
+  .shell2-content .links2-for { font-weight: 500; }
+  .shell2-content .links2-act { width: auto; text-align: left; }
+}
+
+/* ---- A request from a text or email (10B.15) ---- */
+.shell2-content .req2-head h1 { margin-bottom: 12px; }
+.shell2-content .req2-from { margin: 0 0 32px; font-size: 0.9375rem; line-height: 1.4375rem; color: var(--text-2); }
+.req2-from strong { font-weight: 500; color: var(--text); }
+.req2 > .notice2 { margin: 0 0 32px; }
+.req2 > .notice2 a { font-weight: 500; }
+.req2-body { display: grid; gap: 32px; }
+.req2-match { display: grid; gap: 16px; align-content: start; min-width: 0; }
+@media (min-width: 900px) {
+  .req2-body { grid-template-columns: repeat(12, minmax(0, 1fr)); column-gap: 24px; align-items: start; }
+  .req2-match { grid-column: 1 / 8; }
+  .req2-message { grid-column: 8 / 13; min-width: 0; }
+  .req2-body.is-purged .req2-message { grid-column: 1 / 8; }
+}
+/* The match: the hero card, a 1 px Plate Ink border and a 2 px Brass Line rule along its top, as "Your proof is ready" */
+.shell2-content .req2-card { padding: 32px; background: var(--surface); border: 1px solid var(--text); border-radius: var(--r-sheet); box-shadow: inset 0 2px 0 var(--brass-line); }
+.shell2-content .req2-what { margin: 0 0 12px; font: 400 1.125rem/1.75rem var(--font-sans); color: var(--text); }
+.req2-what strong { font-weight: 500; }
+.shell2-content .req2-count { margin: 0 0 24px; max-width: 60ch; font-size: 0.9375rem; line-height: 1.4375rem; color: var(--text-2); }
+.shell2-content .req2-go { margin: 0; }
+.shell2-content .req2-go .btn { min-height: 56px; }
+.req2-match > .notice2 { margin: 0; }
+.shell2-content .req2-kinds { margin: 0; padding: 0; list-style: none; border-top: 1px solid var(--line); }
+.req2-kinds li { border-bottom: 1px solid var(--line); }
+.shell2-content .req2-kinds a:not(.btn):not(.btn2) { display: flex; align-items: center; min-height: 48px; padding-block: 4px; }
+/* The message as it arrived: a text in a neutral bubble, an email as a letter card */
+.req2-message > summary { color: var(--text); }
+.shell2-content .req2-said { display: grid; justify-items: start; gap: 8px; margin: 8px 0 0; }
+.shell2-content .req2-bubble { box-sizing: border-box; max-width: 420px; margin: 0; padding: 14px 18px; font: 400 1.125rem/1.75rem var(--font-sans); color: var(--text); background: var(--page-2); border: 1px solid var(--line); border-radius: 20px 20px 20px 4px; white-space: pre-wrap; overflow-wrap: anywhere; }
+.req2-by { font-size: 0.875rem; line-height: 1.25rem; color: var(--text-2); font-variant-numeric: tabular-nums; }
+.shell2-content .req2-letter { margin-top: 8px; padding: 24px; background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-sheet); }
+.shell2-content .req2-letter-head { margin: 0 0 16px; padding-bottom: 12px; font-size: 0.9375rem; line-height: 1.4375rem; color: var(--text-2); border-bottom: 1px solid var(--line); overflow-wrap: anywhere; }
+.shell2-content .req2-letter-body { margin: 0; font-size: 1.0625rem; line-height: 1.625rem; color: var(--text); white-space: pre-wrap; overflow-wrap: anywhere; }
+/* An answer we filled in, where it appears word for word: Brass Tint behind it, a Brass Line underline (4.2) */
+.req2-mark { padding: 0 1px; color: inherit; background: var(--filled); text-decoration: underline; text-decoration-color: var(--brass-line); text-decoration-thickness: 1.5px; text-underline-offset: 3px; text-decoration-skip-ink: none; -webkit-box-decoration-break: clone; box-decoration-break: clone; }
+/* Deleted after 30 days: the message's own shape holds the product's sentence */
+.shell2-content .req2-bubble.is-gone, .shell2-content .req2-letter.is-gone { max-width: 520px; font-size: 1.0625rem; line-height: 1.625rem; color: var(--text-2); }
+.shell2-content :is(.req2-bubble, .req2-letter).is-gone p { margin: 0; }
+@media (max-width: 599px) {
+  .shell2-content .req2-card { padding: 20px; }
+  .shell2-content .req2-what { font-size: 1.0625rem; line-height: 1.6875rem; }
+  .shell2-content .req2-go .btn { width: 100%; }
+}
+
+/* ---- Signatures (10B.16): a narrow page ---- */
+.sigs2 { max-width: 720px; margin-inline: auto; }
+.shell2-content .sigs2-list tbody td { height: 64px; }
+.sigs2-list thead :is(th, td):nth-child(2), .sigs2-list thead :is(th, td):nth-child(3) { width: 20%; }
+.sigs2-name { display: block; font: 500 1.0625rem/1.5rem var(--font-sans); color: var(--text); }
+.sigs2-email { display: block; font-size: 0.9375rem; line-height: 1.4375rem; color: var(--text-2); overflow-wrap: anywhere; }
+.shell2-content .sigs2-act { width: 1%; white-space: nowrap; text-align: right; }
+.shell2-content .sigs2-add { margin: 48px 0 16px; }
+.shell2-content .sigs2-form { display: grid; gap: 24px; padding: 32px; background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-sheet); }
+.shell2-content .sigs2-form .field { display: grid; gap: 8px; margin: 0; }
+.shell2-content .sigs2-form :is(label, .label) { margin: 0; }
+.shell2-content .sigs2-form :is(input[type="text"], input[type="email"]) { width: 100%; min-height: 52px; font-size: 1.125rem; }
+.shell2-content .sigs2-form > .help { margin: -8px 0 0; max-width: 64ch; }
+.sigs2-form > .notice2 a { font-weight: 500; }
+.shell2-content .sigs2-form .btn.primary { justify-self: start; }
+/* The pad (10B.12.4): white in every mode, a Rule Strong baseline 48 px from the bottom with its "×" */
+.sigs2-form .sigpad { display: grid; gap: 8px; color-scheme: light; }
+.shell2-content .sigs2-form .sigpad canvas { display: block; width: 100%; max-width: none; height: 200px; background-color: #fff;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 10 10'%3E%3Cpath d='M1 1l8 8M9 1l-8 8' stroke='%23555867' stroke-width='1.4' stroke-linecap='round'/%3E%3C/svg%3E"), linear-gradient(#8A8578, #8A8578);
+  background-repeat: no-repeat; background-position: 20px calc(100% - 52px), 44px calc(100% - 48px); background-size: 10px 10px, calc(100% - 68px) 1px;
+  border: 1px solid #8A8578; border-radius: var(--r-sheet); cursor: crosshair; }
+.shell2-content .sigs2-form .sigpad canvas:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+.shell2-content .sigs2-form .sigpad .row { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px 16px; max-width: none; margin: 0; }
+.sigs2-form .sigpad .row .muted { color: var(--text-2); }
+/* The consent: a checkbox row, the whole row the target; checked, it washes in Brass Tint */
+.shell2-content .sigs2-form label.consent { display: grid; grid-template-columns: 24px 1fr; gap: 12px; align-items: start; margin: 0; padding: 16px; font: 400 1rem/1.5rem var(--font-sans); color: var(--text); background: none; border: 0; border-block: 1px solid var(--line); border-radius: 0; cursor: pointer; transition: background-color var(--t-quick) var(--ease-settle); }
+.shell2-content .sigs2-form label.consent:has(input:checked) { background: var(--select-fill); }
+.shell2-content .sigs2-form label.consent input { appearance: none; display: grid; place-content: center; width: 24px; height: 24px; margin: 0; background: var(--field-bg, #fff); border: 1.5px solid var(--line-strong); border-radius: var(--r-sheet); cursor: pointer; }
+.shell2-content .sigs2-form label.consent input:checked { background: var(--select); border-color: var(--select-line); }
+.shell2-content .sigs2-form label.consent input:checked::after { content: ""; width: 12px; height: 7px; border: solid var(--select-on); border-width: 0 0 2px 2px; transform: translateY(-2px) rotate(-45deg); }
+.shell2-content .sigs2-form label.consent input:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+@media (max-width: 599px) {
+  .shell2-content .sigs2-form { padding: 20px; }
+  .shell2-content .sigs2-form .sigpad canvas { height: 160px; }
+  .shell2-content .sigs2-add { margin-top: 32px; font-size: 1.375rem; line-height: 1.75rem; }
+}
+@media (max-width: 759px) {
+  .shell2-content .sigs2-list tbody td { height: auto; }
+  .shell2-content .sigs2-act { width: auto; text-align: left; }
+}
+@media (pointer: coarse) { .shell2-content :is(.sigs2-form, .dw-ledger, .links2-actions, .kind2-from) .btn.small { min-height: 48px; } }
+
+/* ---- Ready to pay (10B.17): a narrow page, one white sheet per card waiting ---- */
+.pay2 { max-width: 720px; margin-inline: auto; }
+.shell2-content .pay2-card { margin: 0 0 24px; background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-sheet); }
+/* The card plate: a card glyph (no network art) and "{card} ending {last4}" */
+.shell2-content .pay2-plate { display: flex; align-items: center; gap: 16px; margin: 0; padding: 24px 32px; font: 500 1.25rem/1.625rem var(--font-sans-display); color: var(--text); font-variant-numeric: tabular-nums; border-bottom: 1px solid var(--line); }
+.pay2-glyph { position: relative; flex: none; box-sizing: border-box; width: 40px; height: 26px; border: 1.5px solid var(--text); border-radius: 3px; corner-shape: bevel; }
+.pay2-glyph::after { content: ""; position: absolute; left: 0; right: 0; top: 5px; height: 4px; background: var(--text); }
+/* The filings waiting for it, each led by the Ochre lozenge: a list waiting on the reader */
+.shell2-content .pay2-filings { margin: 0; padding: 4px 32px; list-style: none; border-bottom: 1px solid var(--line); }
+.pay2-filings li { position: relative; display: flex; flex-wrap: wrap; align-items: baseline; gap: 2px 8px; min-height: 48px; box-sizing: border-box; padding: 12px 0 12px 20px; }
+.pay2-filings li + li { border-top: 1px solid var(--line); }
+.pay2-filings li::before { content: ""; position: absolute; left: 1px; top: 20px; width: 7px; height: 7px; background: var(--ochre); transform: rotate(45deg); }
+.pay2-filings a { font-weight: 500; }
+.pay2-since { font-size: 0.9375rem; line-height: 1.4375rem; color: var(--text-2); font-variant-numeric: tabular-nums; }
+/* The security code: a 160 x 56 field and "Pay and file" side by side (the card vault's own field inside) */
+.shell2-content .pay2-code { padding: 24px 32px 32px; }
+.shell2-content .pay2-code > .notice2 { margin: 0; }
+.shell2-content .pay2-code > .stack { display: grid; grid-template-columns: 160px auto; justify-content: start; align-items: end; gap: 8px 16px; max-width: none !important; }
+.shell2-content .pay2-code > .stack > * + * { margin-top: 0; }
+.pay2-code .field { display: contents; }
+.shell2-content .pay2-code .field > .label { grid-column: 1 / -1; margin: 0; }
+.shell2-content .pay2-code .bt-field { grid-column: 1; box-sizing: border-box; width: 160px; height: 56px; min-height: 0; padding: 14px 16px; background: var(--field-bg, #fff); border: 1px solid var(--line-strong); border-radius: var(--r-sheet); }
+.shell2-content .pay2-code .stack > .btn { grid-column: 2; min-height: 56px; padding-inline: 28px; }
+.shell2-content .pay2-code .stack > .btn[disabled] { opacity: 0.85; }
+.shell2-content .pay2.is-one .pay2-code .btn.primary { background: var(--action); color: var(--action-on); }
+@media (hover: hover) { .shell2-content .pay2.is-one .pay2-code .btn.primary:hover { background: var(--action-hover); } }
+/* The card's own messages as slips, glyph and words together */
+.shell2-content .pay2-code .notice { grid-column: 1 / -1; display: grid; grid-template-columns: 12px 1fr; gap: 12px; margin: 8px 0 0; }
+.shell2-content .pay2-code .notice::before { content: ""; width: 12px; height: 12px; margin-top: 6px; }
+.shell2-content .pay2-code .notice.ok::before { border-radius: 50%; background: var(--done); }
+.shell2-content .pay2-code .notice.bad::before { height: 4px; margin-top: 10px; background: var(--madder); }
+/* Once a code went through: the field and button fold away and each lozenge turns to an In hand ring */
+.pay2-card:has(.notice.ok) .pay2-code :is(.field, .bt-field, .label, .stack > .btn) { display: none; }
+.pay2-card:has(.notice.ok) .pay2-filings li::before { box-sizing: border-box; left: 0; top: 19px; width: 9px; height: 9px; background: none; border: 1.5px solid var(--iron); border-radius: 50%; transform: none; }
+.shell2-content .pay2-help { margin: 8px 0 0; max-width: 64ch; font-size: 0.9375rem; line-height: 1.4375rem; color: var(--text-2); }
+@media (max-width: 599px) {
+  .shell2-content .pay2-plate { padding: 20px; font-size: 1.125rem; line-height: 1.5rem; }
+  .shell2-content .pay2-filings { padding: 4px 20px; }
+  .shell2-content .pay2-code { padding: 20px; }
+  .shell2-content .pay2-code > .stack { grid-template-columns: minmax(0, 1fr); }
+  .shell2-content .pay2-code .bt-field { width: 100%; max-width: 200px; }
+  .shell2-content .pay2-code .stack > .btn { grid-column: 1; width: 100%; }
+}
+}
