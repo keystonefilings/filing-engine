@@ -41,8 +41,9 @@ const BUDGET = {
  */
 const OVER_TODAY = {
   siteScript: 132 * KB,
-  appScript: 136 * KB,
-  photos: { "c01-harbor-pine-door.webp": 280 * KB, "c01-harbor-pine-entrance.webp": 291 * KB, "c02-northgate-door.webp": 241 * KB, "c06-desk.webp": 245 * KB, "c11-engravers-bench.webp": 243 * KB },
+  appScript: 140 * KB, // the desk form page's section rail (10B.12.1) added 2 KB (Nov 27)
+  // Kept as supplied (Nov 27): at 220 KB the door's brick and brass soften; the entrance isn't shown on any page yet.
+  photos: { "c01-harbor-pine-door.webp": 280 * KB, "c01-harbor-pine-entrance.webp": 291 * KB },
 };
 
 /** The pages Lighthouse loads: the home page, the seven behind it, and sign-up. */
