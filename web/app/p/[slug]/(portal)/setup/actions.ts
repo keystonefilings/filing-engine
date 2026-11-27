@@ -107,6 +107,20 @@ export async function savePayments(slug: string, _prev: SetupState, fd: FormData
 }
 
 /** V22: saves the firm's registered agent per state (an empty name removes that state's agent). */
+/** Decided Nov 27: the firm chooses ours ($59 a year per business, billed to the firm) or its own saved agents as the answer its forms start with. */
+export async function saveAgentChoice(slug: string, _prev: AgentsState, fd: FormData): Promise<AgentsState> {
+  const { session } = await firmContext(slug);
+  const choice = String(fd.get("registeredAgentChoice") ?? "");
+  if (choice !== "filing_company" && choice !== "client_provided") return { error: "Pick one of the two." };
+  try {
+    await engine(session.apiKey, `/v1/client-companies/${encodeURIComponent(session.clientCompanyId)}/profile`, { method: "PUT", body: { registeredAgentChoice: choice } });
+  } catch {
+    return { error: "That didn't save. Try again in a minute." };
+  }
+  revalidatePath(`/p/${encodeURIComponent(slug)}`, "layout");
+  return { ok: true, message: choice === "filing_company" ? "Saved. New filings start with our registered agent; anyone can still name another." : "Saved. New filings start with your own agents." };
+}
+
 export async function saveAgents(slug: string, _prev: AgentsState, fd: FormData): Promise<AgentsState> {
   const { session } = await firmContext(slug);
   const agents: Record<string, unknown> = {};

@@ -1,5 +1,6 @@
 "use server";
 
+import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { engine } from "./engine";
 import { readSession } from "./session";
@@ -41,6 +42,23 @@ export async function startCheckout(choice?: { plan: string; annual: boolean }):
     return { error: "Billing isn't available right now. Try again in a few minutes." };
   }
   redirect(url);
+}
+
+/**
+ * Decided Nov 27: partners manage their plan from their account. Cancelling ends it when the paid period
+ * runs out; until then "Keep my plan" undoes it. Both go through the engine to Stripe.
+ */
+export async function setPlanCancelled(cancel: boolean): Promise<{ error?: string }> {
+  const s = await readSession();
+  if (!s) return { error: "Sign in again." };
+  try {
+    await engine(s.apiKey, `${base(s)}/${cancel ? "cancel" : "resume"}`, { method: "POST", body: {} });
+  } catch (e) {
+    const status = (e as { status?: number }).status;
+    return { error: status === 409 ? "There's no active plan to change." : "Billing isn't available right now. Try again in a few minutes." };
+  }
+  revalidatePath(s.kind === "firm" ? `/p/${encodeURIComponent(s.slug)}/billing` : "/dashboard/billing");
+  return {};
 }
 
 /** Stripe's own page to change the card, see invoices or cancel. */

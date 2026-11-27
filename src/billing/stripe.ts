@@ -47,6 +47,11 @@ export class StripeClient {
     return this.post(`/v1/subscriptions/${encodeURIComponent(subscriptionId)}`, { "items[0][id]": item, "items[0][price]": price, proration_behavior: "create_prorations" });
   }
 
+  /** Decided Nov 27: the firm cancels (or keeps) its plan from its own account; the paid period runs out first. */
+  async setCancelAtPeriodEnd(subscriptionId: string, cancel: boolean): Promise<{ id: string; cancel_at_period_end?: boolean; current_period_end?: number }> {
+    return this.post(`/v1/subscriptions/${encodeURIComponent(subscriptionId)}`, { cancel_at_period_end: cancel ? "true" : "false" });
+  }
+
   async createCustomer(c: { email: string; name: string; account: string }): Promise<{ id: string }> {
     return this.post("/v1/customers", { email: c.email, name: c.name, "metadata[account]": c.account });
   }

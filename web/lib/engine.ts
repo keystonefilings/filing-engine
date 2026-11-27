@@ -58,6 +58,8 @@ export interface ClientCompany {
   /** Set on firms that signed up themselves (partners of the platform). */
   partner?: PartnerProfile;
   payments?: PaymentSettings;
+  /** Decided Nov 27: which agent the firm's forms start with: ours (filing_company) or its own saved agents (client_provided). */
+  registeredAgentChoice?: "none" | "client_provided" | "filing_company";
   /** V22: the firm's saved registered agent per state. */
   registeredAgentsByState?: Record<string, { name: string; email?: string; address?: { street1: string; street2?: string; city: string; state: string; zip: string } } | undefined>;
   [k: string]: unknown;

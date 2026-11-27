@@ -186,6 +186,22 @@ export class BillingService {
     return s.url;
   }
 
+  /**
+   * Decided Nov 27: a partner firm manages its subscription from its own account. Cancelling ends the
+   * plan when the paid period runs out (Stripe's cancel_at_period_end); until then it can be kept again.
+   * Returns null when there is no subscription to change.
+   */
+  async setCancelAtPeriodEnd(ref: BillingAccountRef, cancel: boolean): Promise<BillingAccountRecord | null> {
+    const rec = await this.record(ref);
+    if (!this.o.stripe || !rec.subscriptionId || !GOOD.has(rec.status)) return null;
+    const sub = await this.o.stripe.setCancelAtPeriodEnd(rec.subscriptionId, cancel);
+    return this.o.store.putBillingAccount({
+      ...rec, cancelAtPeriodEnd: typeof sub.cancel_at_period_end === "boolean" ? sub.cancel_at_period_end : cancel,
+      ...(typeof sub.current_period_end === "number" ? { currentPeriodEnd: new Date(sub.current_period_end * 1000).toISOString() } : {}),
+      updatedAt: this.now().toISOString(),
+    });
+  }
+
   /** Stripe's customer portal: change card, see invoices, cancel. */
   async portal(ref: BillingAccountRef, returnPath: string): Promise<string | null> {
     const rec = await this.record(ref);

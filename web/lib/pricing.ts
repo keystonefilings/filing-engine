@@ -14,6 +14,8 @@ export interface PublicPlan {
 }
 
 export const PRICING = {
+  /** Decided Nov 27: our registered agent service, a year per business (the engine's REGISTERED_AGENT_ANNUAL_USD). */
+  registeredAgentAnnualUsd: 59,
   payAsYouGo: { filing: 45, ein_only: 25, record: 15 },
   units: { filing: 1, ein_only: 0.5, record: 1 / 3 },
   rolloverMonths: 1,

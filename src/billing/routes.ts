@@ -50,6 +50,16 @@ export function registerBilling(app: FastifyInstance, deps: { store: Store; bill
         return reply.code(503).send({ error: "billing isn't available right now" });
       }
     });
+    // Decided Nov 27: cancel the plan (it ends with the paid period) or keep it after all, from the account itself.
+    for (const [action, cancel] of [["cancel", true], ["resume", false]] as const) {
+      app.post(`${base}/${action}`, async (req, reply) => {
+        const o = await find(req);
+        if (!o?.ref) return reply.code(404).send({ error: "not found" });
+        const rec = await billing.setCancelAtPeriodEnd(o.ref as BillingAccountRef, cancel).catch((e: Error) => { req.log.warn({ err: e.message }, `stripe ${action} failed`); throw e; });
+        if (!rec) return reply.code(409).send({ error: "no subscription to change" });
+        return { billed: true, ...(await billing.summary(o.ref as BillingAccountRef)) };
+      });
+    }
     app.post(`${base}/portal`, async (req, reply) => {
       const o = await find(req);
       if (!o?.ref) return reply.code(404).send({ error: "not found" });
