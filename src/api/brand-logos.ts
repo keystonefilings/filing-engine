@@ -5,6 +5,7 @@ import { ClientCompanySettings } from "../settings/schema.js";
 import type { Store } from "../store/types.js";
 import { portalSlugFor, type Auth } from "../users/routes.js";
 import { fontType, MAX_FONT_BYTES } from "../settings/fonts.js";
+import { needsPlate, platedLogoCached } from "../brand/logo-plate.js";
 
 /** Largest logo we keep, in bytes. The front end shrinks big pictures before sending. */
 export const MAX_LOGO_BYTES = 512 * 1024;
@@ -105,6 +106,21 @@ export function registerBrandLogos(app: FastifyInstance, deps: Deps): void {
       .header("x-content-type-options", "nosniff")
       .header("access-control-allow-origin", "*")
       .send(a.body);
+  });
+
+  // The logo on its baked white plate, for email (src/brand/logo-plate.ts). A logo that needs no plate, or can't
+  // be plated, is served as uploaded, so the address always shows the logo.
+  app.get("/v1/brand-logos/:id/plate", async (req, reply) => {
+    const id = (req.params as { id: string }).id;
+    const a = await deps.artifacts.get(id);
+    if (!a || a.meta.kind !== "brand_logo" || !logoType(a.body)) return reply.code(404).send({ error: "not found" });
+    const plated = (await needsPlate(a.body)) ? await platedLogoCached(id, a.body) : null;
+    return reply
+      .header("content-type", plated ? "image/png" : a.meta.contentType)
+      .header("cache-control", "public, max-age=31536000, immutable")
+      .header("x-content-type-options", "nosniff")
+      .header("content-security-policy", "default-src 'none'; sandbox")
+      .send(plated ?? a.body);
   });
 
   app.get("/v1/brand-logos/:id", async (req, reply) => {

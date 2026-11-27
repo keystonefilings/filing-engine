@@ -145,6 +145,9 @@ function firmNameHtml(name: string): string {
   return m ? `${txt(m[1]!)} <span style="font-size:88%;letter-spacing:0.04em;">${txt(m[2]!)}</span>` : txt(name);
 }
 
+/** The white plate baked around a transparent logo (src/brand/logo-plate.ts): its white margin and corner cut, in px. */
+export const PLATE_PAD = 12, PLATE_CUT = 6;
+
 /** The logo sized by area: 5,000 px², 28 to 56 px tall, at most 260 px wide, never past half its pixels (3.5). */
 export function logoBox(w?: number, h?: number): { width: number; height: number; wide: boolean } | null {
   if (!w || !h) return null;
@@ -161,12 +164,16 @@ function letterheadFirm(f: FirmLetterhead, look: Look): string {
   // The name is typeset beside a square or mid logo and when there is none; a wide logo almost always contains
   // it, so its alt text carries the name, styled so a client with images off still sees it (3.5, 10D.3).
   const showName = !f.logo || !box || !box.wide;
+  // A plated logo carries 12 px of white on every side, invisible on the sheet; the box grows by it and the
+  // plate's own margin stands in for the gap above the name.
+  const plated = !!(f.logo?.plate && box);
+  const shown = box ? (plated ? { width: box.width + 2 * PLATE_PAD, height: box.height + 2 * PLATE_PAD } : box) : null;
   const logo = f.logo
-    ? `<img src="${esc(f.logo.url)}"${box ? ` width="${box.width}" height="${box.height}"` : ` height="40"`} alt="${showName ? "" : esc(f.name)}" style="display:block;margin:0 auto;border:0;outline:none;${box ? `width:${box.width}px;height:${box.height}px;` : "height:40px;width:auto;max-width:260px;"}${type(SANS, 20, 26, 600, INK)}">`
+    ? `<img src="${esc(f.logo.url)}"${shown ? ` width="${shown.width}" height="${shown.height}"` : ` height="40"`} alt="${showName ? "" : esc(f.name)}" style="display:block;margin:0 auto;border:0;outline:none;${shown ? `width:${shown.width}px;height:${shown.height}px;` : "height:40px;width:auto;max-width:260px;"}${type(SANS, 20, 26, 600, INK)}">`
     : "";
   const alone = !f.logo;
   const name = showName
-    ? `<div class="x-i x-fh ${alone ? "x-name-l" : "x-name"}" style="${f.logo ? "padding-top:12px;" : ""}${type(look.head, alone ? 30 : 24, alone ? 36 : 30, 600, INK, "letter-spacing:-0.01em;")}">${firmNameHtml(f.name)}</div>`
+    ? `<div class="x-i x-fh ${alone ? "x-name-l" : "x-name"}" style="${f.logo && !plated ? "padding-top:12px;" : ""}${type(look.head, alone ? 30 : 24, alone ? 36 : 30, 600, INK, "letter-spacing:-0.01em;")}">${firmNameHtml(f.name)}</div>`
     : "";
   const r = look.rule!;
   const rule = table(`${bar(3, r.firm)}${r.pale ? bar(1, PALE_RULE) : ""}${bar(2, WHITE)}${bar(1, r.firm2)}`, ` width="100%"`);

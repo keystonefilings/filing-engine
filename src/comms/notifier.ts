@@ -9,6 +9,7 @@ import { isIssuedEin } from "../adapters/types.js";
 import { renderEinIssued, renderMessage, type RenderedMessage } from "./render.js";
 import { headlineOf, letterBody, type Block, type FirmLetterhead, type Letter } from "./letter.js";
 import { imageSize } from "./image-size.js";
+import { needsPlate } from "../brand/logo-plate.js";
 import type { Channel, ChannelSender, OutboundMessage } from "./senders.js";
 
 export interface NotifierDeps {
@@ -227,6 +228,9 @@ export class Notifier {
       const url = `${this.deps.publicBaseUrl}/v1/brand-logos/${portal.logoArtifactId}`;
       const got = await this.deps.artifacts?.get(portal.logoArtifactId).catch(() => null);
       const size = got ? imageSize(got.body) : null;
+      // A logo with transparent pixels goes out on its baked white plate, so it stays on white when a mail app
+      // forces dark mode (owner's decision, Nov 26).
+      if (got && size && (await needsPlate(got.body))) return { url: `${url}/plate`, ...size, plate: true };
       return size ? { url, ...size } : { url };
     }
     return portal?.logoUrl?.startsWith("https://") ? { url: portal.logoUrl } : undefined;

@@ -33,8 +33,11 @@ export type Block =
 export interface FirmLetterhead {
   /** The name its desk shows ("Name shown on the filing desk", else its name). */
   name: string;
-  /** The processed logo; width and height are its natural pixels when known, for sizing by area. */
-  logo?: { url: string; width?: number; height?: number };
+  /**
+   * The processed logo; width and height are its natural pixels when known, for sizing by area. `plate` when the
+   * url serves it on its baked white plate (src/brand/logo-plate.ts), so the email sizes it with the plate's margin.
+   */
+  logo?: { url: string; width?: number; height?: number; plate?: boolean };
   primaryColor?: string;
   secondaryColor?: string;
   /** The firm's font when it is one of the Google presets (3.7). */
