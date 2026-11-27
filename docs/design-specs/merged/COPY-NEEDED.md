@@ -65,6 +65,7 @@ one string in the code. The owner chose to ship with them as they are for now (N
 | Docs: each code block's accessible name | the language: "bash", "http", "javascript", "json", "python" | 10C |
 | Dashboard: the hidden heads of the action columns | "Approve" (Partners), "Revoke" (API keys) | 10C |
 | The EIN email to a client, when the IRS letter isn't among the papers | subject "EIN issued: {filing}"; sentence "The IRS has issued the EIN for this filing." | 10D.18 |
+| For firms: the engraver film's control (10A.2.1) | "Pause", "Play", and "Play again" once it has ended. The film's description is the owner's (C11 package); it carries no credit line, being generated | 10A.2.1 |
 
 ## Part 1: the foundation
 

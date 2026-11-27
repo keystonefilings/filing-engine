@@ -7,6 +7,7 @@ import "./globals.css";
 import "@/styles/type.css";
 import "@/styles/registers.css";
 import "@/styles/base.css";
+import "@/styles/components/texture.css";
 import { platformName, supportEmail } from "@/lib/brand";
 import { BetaBanner } from "@/components/BetaBanner";
 
