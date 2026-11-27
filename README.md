@@ -28,8 +28,8 @@ Point the NJ adapter at the replica with `NJ_FORMATION_URL=http://127.0.0.1:4310
 
 ## Front end (web/)
 A Next.js app for Vercel, separate from the engine. It talks to the engine only through the public API. See `web/.env.example`.
-- `/`: the landing page (adapted from `site/landing.html`) with the enterprise contact form; `/login` email sign-in for everyone; `/signup` partner sign-up for CPA, payroll and CFO firms (waits for approval unless `PARTNER_SIGNUP_MODE=automatic`).
-- `/p/<slug>`: a firm's dashboard. Partner firms get ours, co-branded with their logo, plus a setup guide (details, branding, payment routing). New filings go state, then filing type, then a short form (paired fields, optional questions folded, "Same as" for addresses). Client intake links at `/i/<token>`.
+- `/`: the landing page (adapted from `site/landing.html`) with the enterprise contact form; `/login` email or Google sign-in for everyone; `/signup` partner sign-up for CPA, payroll and CFO firms, by email and password or with "Continue with Google" (`/signup/google` finishes a Google sign-up). Decided Nov 27: the account opens at once, signed in, with no approval step and nothing to wait for; `PARTNER_SIGNUP_MODE=approval` restores the older confirm-then-review flow.
+- `/p/<slug>`: a firm's dashboard. Partner firms get ours, co-branded with their logo, plus a setup guide (details, branding, payment routing, registered agents: ours at $59 a year per business or their own, decided Nov 27) and a Billing page where the firm sees, changes and cancels its plan and reaches its card, billing details and invoices (Stripe's portal). New filings go state, then filing type, then a short form (paired fields, optional questions folded, "Same as" for addresses). Client intake links at `/i/<token>`.
 - `/dashboard`: enterprise (API keys, webhooks, usage, firms, filings, setup for payment routing, portal logins and portal defaults, team). The platform tenant also sees partner sign-ups and enterprise requests.
 - `/docs`, `/openapi.json`: API docs.
 

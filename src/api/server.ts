@@ -417,7 +417,7 @@ export function buildServer(deps: ApiDeps): FastifyInstance {
   registerPublicPages(app, { store: deps.store, service: deps.service, platformTenantId: deps.platformTenantId ?? "keystone", platformName: deps.platformName, agentOffer: deps.agentServices ? (t, c) => deps.agentServices!.offer(t, c) : undefined });
   registerUsers(app, {
     store: deps.store, authOf, staffOf, sessionSecret,
-    platformTenantId: deps.platformTenantId ?? "keystone", partnerSignupMode: deps.partnerSignupMode ?? "approval",
+    platformTenantId: deps.platformTenantId ?? "keystone", partnerSignupMode: deps.partnerSignupMode ?? "automatic",
     email: deps.email, webBaseUrl: deps.webBaseUrl ?? "http://localhost:3000", secrets: deps.secrets, google: deps.google, supportEmail: deps.supportEmail,
   });
 

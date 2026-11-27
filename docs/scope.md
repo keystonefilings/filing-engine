@@ -54,7 +54,7 @@ changes a form, the platform reviews the drift once for every subscriber.
 | Questionnaires as settings, defaults, locks, provenance | yes | uses it |
 | Channel delivery (email, Slack, WhatsApp, SMS) | settings only; delivery module not built | |
 | Subscriber self-service: API keys, webhooks, usage, firm portals, payment routing, portal defaults, team (web/dashboard) | yes (draft); accounts created by staff after the contact form; card and login vault, roles and billing not built | |
-| Landing page, email log-in, partner sign-up and setup guide (web/, web/signup, web/p/<slug>/setup) | | yes (draft); approval required unless PARTNER_SIGNUP_MODE=automatic; cards connect once the vault is chosen |
+| Landing page, email log-in, partner sign-up and setup guide (web/, web/signup, web/p/<slug>/setup) | | yes (draft); the account opens at once, by email or with Google (decided Nov 27; PARTNER_SIGNUP_MODE=approval restores the review); cards connect once the vault is chosen |
 | API docs site (web/docs, OpenAPI) | yes (draft) | uses it |
 | White-label firm portal for CPAs / title / payroll companies (web/p) | | yes (draft); filings are dry runs unless PORTAL_LIVE_FILINGS=true |
 | NY PDF upload filings (DOS-1335-f, DOS-1338-f) with saved signatures | yes (dry run) | uses it |

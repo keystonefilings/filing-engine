@@ -85,10 +85,8 @@ describe("uploaded logos", () => {
 
   it("lets a partner change only its own firm's logo", async () => {
     const r = await app.inject({ method: "POST", url: "/v1/signups/partner", payload: { companyName: "Logo Test CPA", companyType: "cpa", name: "Lee Park", email: "lee@logo-test.test", password: PW, states: ["NY"] } });
-    expect(r.statusCode).toBeLessThan(300);
-    const token = new URL(mail.find((m) => m.subject === "Confirm your email for CoFile")!.link!).searchParams.get("token");
-    expect((await app.inject({ method: "POST", url: "/v1/auth/verify-email", payload: { token } })).statusCode).toBe(200);
-    const key = (await app.inject({ method: "POST", url: "/v1/auth/sign-in", payload: { email: "lee@logo-test.test", password: PW } })).json().sessionKey as string;
+    expect(r.statusCode).toBe(201); // automatic mode: open and signed in at once
+    const key = r.json().sessionKey as string;
     const firm = "firm-logo-test-cpa";
     expect((await app.inject({ method: "PUT", url: `/v1/client-companies/${firm}/logo`, headers: as(key), payload: { data: PNG.toString("base64") } })).statusCode).toBe(200);
     expect((await app.inject({ method: "PUT", url: "/v1/client-companies/acme-cpa/logo", headers: as(key), payload: { data: PNG.toString("base64") } })).statusCode).toBe(404);
@@ -105,10 +103,8 @@ describe("uploaded logos", () => {
 describe("the firm approves its own clients' filings from its filing desk (Nov 26)", () => {
   it("lets a partner approve its own filing, gets the proof itself, and can't touch another firm's", async () => {
     const r = await app.inject({ method: "POST", url: "/v1/signups/partner", payload: { companyName: "Approve Test CPA", companyType: "cpa", name: "Kim Lee", email: "kim@approve-test.test", password: PW, states: ["NJ"] } });
-    expect(r.statusCode).toBeLessThan(300);
-    const token = new URL(mail.filter((m) => m.subject === "Confirm your email for CoFile").at(-1)!.link!).searchParams.get("token");
-    expect((await app.inject({ method: "POST", url: "/v1/auth/verify-email", payload: { token } })).statusCode).toBe(200);
-    const key = (await app.inject({ method: "POST", url: "/v1/auth/sign-in", payload: { email: "kim@approve-test.test", password: PW } })).json().sessionKey as string;
+    expect(r.statusCode).toBe(201);
+    const key = r.json().sessionKey as string;
     const firm = "firm-approve-test-cpa";
     const created = await app.inject({ method: "POST", url: "/v1/filings", headers: as(key), payload: { ...njFormationRequest(), tenantId: "keystone", clientCompanyId: firm, contact: { firstName: "Ana", lastName: "Ortiz", phone: "2015550100", email: "ana@bakery.test" }, dryRun: true } });
     expect(created.statusCode).toBeLessThan(300);

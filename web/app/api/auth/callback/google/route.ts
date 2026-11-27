@@ -1,24 +1,29 @@
 import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
-import { GOOGLE_CALLBACK_PATH, GOOGLE_COOKIE, googleDocsToken, googleIdToken } from "@/lib/google";
+import { GOOGLE_CALLBACK_PATH, GOOGLE_COOKIE, GOOGLE_SIGNUP_COOKIE, GOOGLE_SIGNUP_PATH, GOOGLE_SIGNUP_TTL, googleDocsToken, googleIdToken, type GooglePurpose, type GoogleSignup } from "@/lib/google";
 import { createGoogleDoc, filingDocContent } from "@/lib/google-docs";
 import { firmContext } from "@/lib/firm";
 import { filingTitle, type Filing } from "@/lib/engine";
 import { filingKind } from "@/lib/intake/forms";
 import { statusLabel } from "@/lib/status";
 import { publicUrl } from "@/lib/session";
-import { unseal } from "@/lib/seal";
+import { seal, unseal } from "@/lib/seal";
 import { engine, EngineError, type SignInResult } from "@/lib/engine";
 import { finishSignIn } from "@/lib/sign-in";
 
-/** V37: back from Google. Checks the state, gets the ID token, and lets the engine check it. */
+/**
+ * V37: back from Google. Checks the state, gets the ID token, and lets the engine check it. An account signs in
+ * whether the person came from "Log in" or "Sign up"; a Google account with no account yet goes on to the short
+ * sign-up page (Nov 27), its verified identity sealed in a 15-minute cookie, so the firm's details are all that's left.
+ */
 export async function GET(req: Request) {
   const url = new URL(req.url);
   const jar = await cookies();
-  const saved = unseal<{ purpose?: "signin" | "docs"; state: string; nonce: string; verifier: string; slug?: string; filingId?: string }>("google-oauth", jar.get(GOOGLE_COOKIE)?.value);
+  const saved = unseal<{ purpose?: GooglePurpose | "docs"; state: string; nonce: string; verifier: string; slug?: string; filingId?: string }>("google-oauth", jar.get(GOOGLE_COOKIE)?.value);
   jar.delete({ name: GOOGLE_COOKIE, path: GOOGLE_CALLBACK_PATH });
   if (saved?.purpose === "docs" && saved.slug && saved.filingId) return saveToDocs(req, url, saved as Required<Pick<typeof saved, "state" | "verifier" | "slug" | "filingId">>);
-  const back = (why: string) => NextResponse.redirect(new URL(`/login?google=${why}`, req.url), 303);
+  const from: GooglePurpose = saved?.purpose === "signup" ? "signup" : "signin";
+  const back = (why: string) => NextResponse.redirect(new URL(`/${from === "signup" ? "signup" : "login"}?google=${why}`, req.url), 303);
   if (url.searchParams.get("error")) return back("cancelled");
   const code = url.searchParams.get("code");
   if (!saved || !code || url.searchParams.get("state") !== saved.state) return back("expired");
@@ -28,11 +33,17 @@ export async function GET(req: Request) {
   try {
     r = await engine<SignInResult>(null, "/v1/auth/google", { method: "POST", body: { idToken, nonce: saved.nonce } });
   } catch (e) {
-    const status = e instanceof EngineError ? (e.body as { status?: string } | null)?.status : undefined;
-    return back(status === "no_account" ? "no-account" : status === "pending" ? "pending" : e instanceof EngineError && e.status === 403 ? "blocked" : "failed");
+    const body = e instanceof EngineError ? (e.body as { status?: string; email?: string; name?: string } | null) : null;
+    if (body?.status === "no_account" && body.email) {
+      const who: GoogleSignup = { idToken, nonce: saved.nonce, email: body.email, name: body.name, from };
+      const res = NextResponse.redirect(new URL(GOOGLE_SIGNUP_PATH, req.url), 303);
+      res.cookies.set(GOOGLE_SIGNUP_COOKIE, seal("google-signup", { ...who }, GOOGLE_SIGNUP_TTL), { httpOnly: true, secure: process.env.NODE_ENV === "production", sameSite: "lax", path: "/signup", maxAge: GOOGLE_SIGNUP_TTL });
+      return res;
+    }
+    return back(body?.status === "pending" ? "pending" : e instanceof EngineError && e.status === 403 ? "blocked" : "failed");
   }
   const problem = await finishSignIn(r, "google"); // redirects on success
-  return NextResponse.redirect(new URL(`/login?google=${problem.includes("approval") ? "pending" : "failed"}`, req.url), 303);
+  return back(problem.includes("approval") ? "pending" : "failed");
 }
 
 /** Portal only: back from Google with Docs access; writes the filing's record and returns to its page. */

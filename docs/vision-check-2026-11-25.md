@@ -63,7 +63,7 @@ dry-run only; **Missing** has no implementation.
 
 | # | Memo asks for | Status | Where / what's missing |
 |---|---|---|---|
-| 19 | Sign up, log in, setup guide | Done | Accounts wait for approval unless `PARTNER_SIGNUP_MODE=automatic`. The "states you file in" answer is collected and never used. |
+| 19 | Sign up, log in, setup guide | Done | Nov 27: accounts open at once, by email or with Google (`PARTNER_SIGNUP_MODE=approval` restores the review). The "states you file in" answer is collected and never used. |
 | 20 | Name, logo, colors, **fonts** (presets and upload) | Partial | Name, logo and two colors exist. Fonts are missing entirely: `globals.css` hard-codes system fonts. |
 | 21 | Pay Keystone (subscription) and filing payment methods | Partial | Only a card-routing preference saves, with no card able to be added. There is no subscription for partners. The payments step is marked done with zero cards. |
 | 22 | Portal lists filings by state, then filing type | Done (dry run) | **NY:** LLC, corporation, NYS-100, Application for Authority, Assumed Name. **NJ:** LLC, NJ-REG. **FL:** LLC, profit corporation, LP. The EIN is offered under every state. All are dry runs. Partners can't choose which filings they offer. |

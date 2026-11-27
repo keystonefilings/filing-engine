@@ -35,7 +35,7 @@ describe("the filing company", () => {
 describe("terms at sign-up", () => {
   it("records the version the person agreed to, and when", async () => {
     const r = await app.inject({ method: "POST", url: "/v1/signups/partner", payload: { companyName: "Terms Firm", companyType: "cpa", name: "Ana Lee", email: "ana@terms.test", password: "correct horse battery staple", states: ["NY"], termsVersion: "2026-11-26" } });
-    expect(r.statusCode).toBe(202);
+    expect(r.statusCode).toBe(201);
     const u = (await store.findUserByEmail("ana@terms.test"))!;
     expect(u.termsAccepted?.version).toBe("2026-11-26");
     expect(u.termsAccepted?.at).toBeTruthy();
